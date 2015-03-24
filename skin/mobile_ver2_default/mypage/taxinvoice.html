@@ -1,0 +1,109 @@
+<!-- 타이틀 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td><img src="../images/design/tit_taxinvoice.gif" /></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td><span class="desc">세금계산서 신청</span></td></tr>
+</table>
+<div style="height:8px;"></div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+	<thead >
+	<tr>
+		<th>번호</th>
+		<th>주문일자</th>
+		<th>주문번호</th>
+		<th>주문상품</th>
+		<th>주문금액</th>
+		<th>상태</th>
+	</tr>
+	</thead>
+	<tbody  >
+{? loop }
+	{@ loop }
+	<tr >
+		<td align="center" class="cell">{.number}</td>
+		<td align="center" class="cell">{.regist_date}</td>
+		<td align="center" class="cell">{.order_seq}</td>
+		<td align="center" class="cell">{.goods_name}</td>
+		<td align="center" class="cell right"> <b>{=number_format(.settleprice)}</b> </td>
+		<td class="cell">
+		{? .tax_seq }
+			{? .tstep ==2 }
+				발급완료
+			{:}
+				<img src="../images/design/btn_taxinvoice_del.gif" tax_seq="{.tax_seq}"  order_seq="{.order_seq}"  alt="삭제하기" class="hand taxDellBtn" >
+				<img src="../images/design/btn_taxinvoice_modify.gif" tax_seq="{.tax_seq}"  order_seq="{.order_seq}"  alt="신청하기" class="hand taxBtn" >
+			{/}
+		{:}
+			{? .taxwriteuse }
+				<img src="../images/design/btn_taxinvoice.gif" title="신청하기" order_seq="{.order_seq}" alt="신청하기" class="hand taxBtn" >
+			{/}
+		{/}
+		</td>
+	</tr>
+	{ / }
+{ : }
+	<tr  >
+		<td align="center" colspan="4"  class="cell">세금계산서  내역이 없습니다.</td>
+	</tr>
+{ / }
+	</tbody>
+</table>
+
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin}</div>
+	</td>
+</tr>
+</table>
+
+<div id="taxlay" class="hide" >
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+	$(".taxBtn").click(function(){
+		var tax_seq = $(this).attr("tax_seq");
+		var order_seq = $(this).attr("order_seq");
+		$.ajax({
+			url: '../mypage/taxwrite',
+			type : 'post',
+			dataType: 'json',
+			data : {'order_seq':order_seq, 'tax_seq':tax_seq},
+			success: function(data) {
+				$('#taxlay').html(data.taxwrite);
+				openDialog("세금계산서 <span class='desc'>세금계산서를 신청합니다.</span>", "taxlay", {"width":"700","height":550});
+			}
+		});
+	});
+
+	$(".taxDellBtn").click(function(){
+		var tax_seq = $(this).attr("tax_seq");
+		var order_seq = $(this).attr("order_seq");
+		if(confirm("정말로 삭제하시겠습니까? ")) {
+			$.ajax({
+				url: '../sales_process/taxdelete',
+				type : 'post',
+				dataType: 'json',
+				data : {'order_seq':order_seq, 'tax_seq':tax_seq},
+				success: function(data) {
+					if(data) {
+						if(data.result == true){
+							openDialogAlert(data.msg,'400','140',function(){document.location.reload();});
+						}else{
+							openDialogAlert(data.msg,'400','140',function(){});
+						}
+					}else{
+						openDialogAlert("잘못된 접근입니다.",'400','140',function(){});
+					}
+				}
+			});
+		}
+	});
+});
+function taxlayerclose(){
+	$('#taxlay').dialog('close');
+}
+</script>

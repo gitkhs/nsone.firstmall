@@ -1,0 +1,58 @@
+<style>
+#{categoryPageNavigationKey} .cpn-table	{border:2px solid #4a4a4a; border-collapse:collapse;}
+#{categoryPageNavigationKey} .cpn-table th {width:160px; line-height:30px; background-color:#dfdfdf; vertical-align:top}
+#{categoryPageNavigationKey} .cpn-table .cpnt-th {padding:5px 10px; line-height:25px; height:25px; text-align:left; font-family:tahoma,dotum; font-size:11px; font-weight:bold; color:#000;}
+#{categoryPageNavigationKey} .cpn-table .cpnt-td {padding:5px; border:1px solid #c3c3c3;}
+#{categoryPageNavigationKey} .cpn-table .cpnt-th,
+#{categoryPageNavigationKey} .cpn-table .cpnt-td {border:1px solid #c3c3c3;}
+#{categoryPageNavigationKey} .cpn-sub-table td {line-height:25px; height:25px;}
+#{categoryPageNavigationKey} .cpn-sub-table td a {font-family:tahoma,dotum; font-size:11px; color:#000;}
+#{categoryPageNavigationKey} .cpn-sub-table td a:hover {color:#fff; background-color:#999}
+
+#{categoryPageNavigationKey} .cpbn-title {padding-top:20px; padding-bottom:7px;}
+#{categoryPageNavigationKey} .cpbn-container	{padding:10px; border:2px solid #4a4a4a; background-color:#f5f5f5}
+#{categoryPageNavigationKey} .cpbn-table td {height:25px;}
+#{categoryPageNavigationKey} .cpbn-table a {font-family:tahoma,dotum; font-size:11px; color:#000000;}
+#{categoryPageNavigationKey} .cpbn-table a:hover {color:#565656}
+</style>
+
+<table class="cpn-table" width="100%" align="center" cellpadding="0" cellspacing="0" border="0">
+<!--{ @ getChildCategory(_GET.code) }-->
+<tr>
+	<th class="cpnt-th">
+		<a href="/goods/catalog?code={.category_code}">{.title}</a>
+	</th>
+	<td class="cpnt-td">
+		<table class="cpn-sub-table" width="100%" align="center" cellpadding="0" cellspacing="0" border="0" >
+		<tr>{@ range(1, count_w) }<td width="{=(100/count_w)}%" style="height:0px;"></td>{/}</tr>
+		<tr>
+			<!--{ @ getChildCategory(.category_code,true) }-->
+			<!--{ ? ..index_ && ..index_%count_w==0}--></tr><tr><!--{ / }-->
+			<td>
+				<img src="../../images/common/icon_sub_category.gif" align="absmiddle" hspace="5" /><a href="/goods/catalog?code={..category_code}">{..title}</a>
+			</td>
+			<!--{ / }-->
+		</tr>
+		</table>
+	</td>
+</tr>
+<!--{ / }-->
+</table>
+
+<!--[ 카테고리에 속한 브랜드 네비게이션 ]-->
+<!--{ ? categoryData.brand_navigation_use=='y' && goodsBrands }-->
+	<div class="cpbn-title"><img src="../../images/common/list_tit_brand.gif" /></div>
+	<div class="cpbn-container">
+		<table class="cpbn-table" width="100%" align="center" cellpadding="0" cellspacing="0" border="0">
+		<tr>{@ range(1, category_navigation_brand_count_w) }<td width="{=(100/category_navigation_brand_count_w)}%" style="height:0px;"></td>{/}</tr>
+		<tr>
+			<!--{ @ goodsBrands }-->
+				<!--{ ? .index_ && .index_%category_navigation_brand_count_w==0}--></tr><tr><!--{ / }-->
+				<td>
+					<img src="../../images/common/icon_sub_category.gif" align="absmiddle" hspace="5" /><a href="/goods/catalog?code={_GET.code}&brand_code={.category_code}" {?.category_code==_GET.brand_code}style="font-weight:bold"{/}>{.title}</a>
+				</td>
+			<!--{ / }-->
+		</tr>
+		</table>
+	</div>
+<!--{ / }-->

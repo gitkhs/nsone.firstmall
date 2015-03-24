@@ -1,0 +1,152 @@
+{?!mobileAjaxCall}
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".btn_important_large").click(function() {
+		$(location).attr('href', '/board/write?id=store_reservation&calllink=mypage' );
+	});
+});
+
+</script>
+<div class="sub_title_bar">
+	<h2>예약문의 &amp; 답변</h2>
+	<a href="javascript:history.back();" class="stb_back_btn">
+		<img src="../images/design/btn_back.png" class="hand" width="22" height="22" />
+	</a>
+</div>
+{/}
+
+{#catalog_top}
+
+<div id="boardlayout" >
+
+	<!-- 본문내용 시작 -->
+	<link type="text/css" rel="stylesheet" charset="utf-8" href="../css/mypage_board.css" />
+	<script type="text/javascript">
+	//<![CDATA[
+	var board_id = '{manager.id}';
+	var boardlistsurl = '{boardurl->lists}';
+	var boardwriteurl = '{boardurl->write}';
+	var boardviewurl = '{boardurl->view}';
+	var boardmodifyurl = '{boardurl->modify}';
+	//]]>
+	</script>
+	<script type="text/javascript" src="/app/javascript/js/board.js?v=7"></script>
+		<script type="text/javascript" src="/app/javascript/js/board_mobile.js?v=1"  charset="utf-8"></script>
+	<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" charset="euc-kr"></script>
+
+	<div id="bbslist">
+		<!-- 예약하기 -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td align="center" style="padding: 10px 6px;">
+				<input type="button" value="예약하기" class="btn_important_large" style="width:95%" />
+			</td>
+		</tr>
+		</table>
+
+		<!--   테이블 : 시작 -->
+		<table class="list_table_style" width="100%" border="0" cellpadding="0" cellspacing="0" summary="[{manager.name}] 게시물리스트 입니다.">
+			<!-- 테이블 헤더 : 시작 -->
+			<colgroup>
+			<col width="70" />
+			<col width="90" />
+			<col />
+			</colgroup>
+			<thead >
+			<tr>
+				<th>작성일</th>
+				<th>예약일</th>
+				<th>내용</th>
+			</tr>
+			</thead>
+			<!-- 테이블 헤더 : 끝 -->
+			<!-- 리스트 : 시작 -->
+			<tbody >
+				<!-- 공지리스트데이터 : 시작 -->
+				{? noticeloop }
+					{@ noticeloop }
+					<tr class=" {? .display == 1}gray{/} datalist">
+						<td align="center" class="date cell">{=date('Y.m.d',strtotime(.date))}</td>
+						<td align="center"  class="cell" >{.reply_title}</td>
+						<td align="left" class="sbj cell left">
+							<span class="hand boad_view_btn{.isperm_read}" >
+								{.iconmobile}{.blank}{.category} {.contents} {? .comment >0 }
+								<span class="comment">
+								({=number_format(.comment)}){/}{.iconimage}{.iconfile}{.iconnew}{.iconhot}{.iconhidden}
+								</span>
+							</span>
+						</td>
+					</tr>
+					{/}
+				{/}
+				<!--공지 리스트 : 끝 -->
+
+				<!-- 리스트데이터 : 시작 -->
+				{? loop }
+					{@ loop }
+					<tr class=" {? .display == 1}gray{/} datalist">
+						<td align="center" class="date cell">{=date('Y.m.d',strtotime(.date))}</td>
+						<td align="center"  class="cell" >{=date('Y.m.d H:i',strtotime(.reserve_date))}</td>
+						<td align="left" class="sbj cell left">
+							<span>
+								{.iconmobile}{.blank}{.category} {.contents} {? .comment >0 }
+								<span class="comment">
+								({=number_format(.comment)}){/}{.iconimage}{.iconfile}{.iconnew}{.iconhot}{.iconhidden}
+								</span>
+							</span>
+						</td>
+					</tr>
+					{/}
+				{:}
+					<tr >
+						<td colspan="9" align="center" style="height:50px;" class="cell">
+							{ ? search_text }
+								'{search_text}' 검색된 게시글이 없습니다.
+							{:}
+								등록된 게시글이 없습니다.
+							{/}
+						</td>
+					<tr>
+				{/}
+
+			</tbody>
+			<!-- 리스트 : 끝 -->
+		</table>
+		<!-- 테이블 : 끝 -->
+
+		<div id="BoardPwCk" class="hide BoardPwCk">
+			<div class="msg">
+				<h3> 비밀번호 확인</h3>
+				<div>게시물 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+			</div>
+			<form name="BoardPwcheckForm" id="BoardPwcheckForm" method="post" action="{=sslAction('../board_process')}" target="actionFrame " >
+			<input type="hidden" name="seq" id="pwck_seq" value="" />
+			<input type="hidden" name="returnurl" id="pwck_returnurl" value="" />
+			<div class="ibox">
+				<input type="password" name="pw" id="pwck_pw" class="input" />
+				<input type="submit" id="BoardPwcheckBtn" value=" 확인 " class="btnblue" />
+				<input type="button" value=" 취소 " class="bbs_btn" onclick="$('#BoardPwCk').dialog('close');" />
+			</div>
+			</form>
+		</div>
+
+	</div>
+	<!-- 본문내용 끝 -->
+</div>
+
+<div style="margin-bottom:20px;">
+	{? pagin }<!-- 페이징 --><div class="paging_navigation">{pagin}</div><!-- 페이징 --> {/}
+</div>
+
+{? _GET.iframe }
+<script type="text/javascript">
+$(document).ready(function(){
+	$(document).resize(function(){
+	  $('#'+board_id+'_frame',parent.document).height($('#boardlayout').height()+50);
+	 }).resize();
+});
+function iframeset(){
+	  $('#'+board_id+'_frame',parent.document).height($('#boardlayout').height()+50);
+}
+</script>
+{/}

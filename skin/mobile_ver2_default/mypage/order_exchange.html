@@ -1,0 +1,427 @@
+<script>
+$(function(){
+
+	$(".sub_page_tab td").click(function(){
+		$("input[type='radio'],input[type='checkbox']",this).attr('checked',true);
+	});
+	$(".sub_page_tab").each(function(){
+		$("td:first-child",this).click();
+	});
+
+	$("#order_return_container select[name='reason[]']").change(function(){
+		var row = $(this).closest(".goods-info-lay");
+		var reason_desc = row.find("select[name='reason[]'] option:selected").text();
+		row.find("input[name='reason_desc[]']").val(reason_desc);
+	});
+
+	$("#order_return_container input[name='chk_seq[]']").change(function(){
+		var row = $(this).closest(".goods-info-lay");
+		var idx = $("#order_return_container select[name='chk_ea[]']").index(this);
+		var chk_item_seq = row.find("input[name='chk_item_seq[]']").val();
+		var chk_option_seq = row.find("input[name='chk_option_seq[]']").val();
+		var chk_shipping_seq = row.find("input[name='chk_shipping_seq[]']").val();
+		var chk_individual_return = row.find("input[name='chk_individual_return[]']").val();
+		row.find("select[name='reason[]']").change();
+
+		// 추가옵션 선택할때
+		if(row.find("input[name='chk_suboption_seq[]']").val()!='' && $(this).is(":checked")){
+			if(chk_individual_return!='1'){ // 개별취소 안되도록 설정했을때
+				// 필수옵션이 선택되어있지 않으면 에러
+				var result = true;
+				$("#order_return_container input[name='chk_item_seq[]'][value='"+chk_item_seq+"'][item_option_seq='"+chk_option_seq+"'][shipping_seq='"+chk_shipping_seq+"']").each(function(){
+					if($(this).closest(".goods-info-lay").find("input[name='chk_suboption_seq[]']").val()==''){
+						if(!$(this).closest(".goods-info-lay").find("input[name='chk_seq[]']").is(":checked")){
+							openDialogAlert("이 상품의 추가옵션은 개별반품할 수 없습니다.",400,140);
+							result = false;
+						}
+					}
+				});
+				if(!result) return false;
+			}
+		}
+
+		// 추가옵션 해제할때
+		if(row.find("input[name='chk_suboption_seq[]']").val()!='' && !$(this).is(":checked")){
+			if(chk_individual_return!='1'){
+				var result = true;
+				$("#order_return_container input[name='chk_item_seq[]'][value='"+chk_item_seq+"'][item_option_seq='"+chk_option_seq+"'][shipping_seq='"+chk_shipping_seq+"']").each(function(){
+					if($(this).closest(".goods-info-lay").find("input[name='chk_suboption_seq[]']").val()==''){
+						if($(this).closest(".goods-info-lay").find("select[name='chk_ea[]'] option").length>1 && $(this).closest(".goods-info-lay").find("select[name='chk_ea[]'] option:last-child").is(":selected")){
+							openDialogAlert("이 상품의 추가옵션은 개별반품할 수 없습니다.",400,140);
+							result = false;
+						}
+					}
+				});
+				if(!result) return false;
+			}
+		}
+
+		// 필수옵션 해제할때
+		if(row.find("input[name='chk_suboption_seq[]']").val()=='' && !$(this).is(":checked")){
+			if(chk_individual_return!='1'){ // 개별취소 안되도록 설정했을때
+				// 추가옵션 해제
+				$("#order_return_container input[name='chk_item_seq[]'][value='"+chk_item_seq+"'][item_option_seq='"+chk_option_seq+"'][shipping_seq='"+chk_shipping_seq+"']").each(function(){
+					if($(this).closest(".goods-info-lay").find("input[name='chk_suboption_seq[]']").val()!=''){
+						$(this).closest(".goods-info-lay").find("input[name='chk_seq[]']").removeAttr("checked").each(function(){
+							$(this).closest(".goods-info-lay").find("input,select,textarea").not(this).attr("disabled",true);
+						});
+						$(this).closest(".goods-info-lay").find("select[name='chk_ea[]']").val('').attr("disabled",true);
+					}
+				});
+			}
+		}
+
+		if($(this).is(":checked")){
+			row.find("input,select,textarea").not(this).removeAttr("disabled");
+			row.find("select[name='chk_ea[]'] option:last-child").attr("selected",true).parent().change();
+		}
+		else{
+			row.find("input,select,textarea").not(this).attr("disabled",true);
+			row.find("select[name='chk_ea[]']").val('').change();
+			if($(this).attr('cancel_type') ==  1 ){
+				$(this).attr("disabled",true);
+			}
+		}
+
+		refund_method_layer_view();
+	}).change();
+
+	$("#order_return_container select[name='chk_ea[]']").change(function(){
+		var row = $(this).closest(".goods-info-lay");
+		var idx = $("#order_return_container select[name='chk_ea[]']").index(this);
+		var chk_item_seq = row.find("input[name='chk_item_seq[]']").val();
+		var chk_option_seq = row.find("input[name='chk_option_seq[]']").val();
+		var chk_shipping_seq = row.find("input[name='chk_shipping_seq[]']").val();
+		var chk_individual_return = row.find("input[name='chk_individual_return[]']").val();
+
+		if($(this).val()=='0'){
+			$(this).closest(".goods-info-lay").find("input[name='chk_seq[]']").removeAttr("checked").change();
+		}
+
+		// 필수옵션일때
+		if(row.find("input[name='chk_suboption_seq[]']").val()==''){
+			if(chk_individual_return!='1'){
+				if(row.find("select[name='chk_ea[]'] option").length>1 && row.find("select[name='chk_ea[]'] option:last-child").is(":selected")){
+					$("#order_return_container input[name='chk_item_seq[]'][value='"+chk_item_seq+"'][item_option_seq='"+chk_option_seq+"'][shipping_seq='"+chk_shipping_seq+"']").each(function(){
+						if($(this).parent().find("input[name='chk_suboption_seq[]']").val()!=''){
+							$(this).parent().find("input[name='chk_seq[]']").not(":disabled").attr("checked",true).change();
+							$(this).closest(".goods-info-lay").find("select[name='chk_ea[]'] option").not(":last-child").attr("disabled",true);
+						}
+					});
+				}else{
+					$("#order_return_container input[name='chk_item_seq[]'][value='"+chk_item_seq+"'][item_option_seq='"+chk_option_seq+"'][shipping_seq='"+chk_shipping_seq+"']").each(function(){
+						if($(this).parent().find("input[name='chk_suboption_seq[]']").val()!=''){
+							$(this).closest(".goods-info-lay").find("select[name='chk_ea[]'] option").not(":last-child").removeAttr("disabled");
+						}
+					});
+				}
+			}
+		}
+
+		refund_method_layer_view();
+	});
+/*
+	$("#order_return_container .chk_all").click(function(){
+		var tableObj = $(this).closest('table');
+		if($("input[name='chk_seq[]']",tableObj).not(":disabled").not(":checked").length==0){
+			$("input[name='chk_seq[]']",tableObj).removeAttr("checked").change();
+		}else{
+			$("input[name='chk_seq[]']",tableObj).not(":disabled").attr("checked",true).change();
+		}
+	});
+
+	$("input[name='refund_method']").change(function(){
+		$(".refund_method_cash").hide();
+		$(".refund_method_bank").hide();
+		if($(this).is(":checked")){
+			$(".refund_method_"+$(this).val()).show();
+		}
+	}).change();
+*/
+
+	$("input[name='submitButton']").bind('click',function(){
+		var frm = this;
+		openDialogConfirm("교환신청을 하기 위해 상품수령을 확인해주세요. 상품을 수령하셨습니까?",450,140,function(){
+			$("form[name='refundForm']").submit();
+		});
+		return false;
+	});
+
+	// 우편번호 찾기
+	$("#return_recipient_zipcode_button").live("click",function(){
+		openDialogZipcode('return_recipient_');
+    });
+
+	$("tr[disabledScript=1]").find("input,select").attr("disabled",true);
+
+});
+
+function refund_method_layer_view(){
+	var chk_ea_sum = 0;
+
+	$("#order_return_container select[name='chk_ea[]']").not(":disabled").each(function(){
+		chk_ea_sum += num($(this).val());
+	});
+
+	if("{orders.payment}" == "card" && "{items_tot.ea}" == chk_ea_sum.toString()){
+		$("#refund_method_layer").hide();
+	}else{
+		$("#refund_method_layer").show();
+	}
+
+}
+
+
+</script>
+<style>
+.goods_name {display:inline-block;white-space:nowrap;overflow:hidden;width:350px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+</style>
+
+<div class="sub_title_bar">
+	<h2>교환신청</a></h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" /></a>
+</div>
+
+<div id="order_return_container">
+
+	<form name="refundForm" method="post" action="../mypage_process/order_return" target="actionFrame">
+	<input type="hidden" name="order_seq" value="{orders.order_seq}" />
+	<input type="hidden" name="mode" value="{_GET.mode}" />
+	<input type="hidden" name="use_layout" value="{_GET.use_layout}" />
+
+	<div class="order-date-info">
+		<span class="order-date">{=date('Y.m.d', strtotime(orders.regist_date))}</span>
+		<span class="order-seq">({orders.order_seq})</span>
+	</div>
+
+	<div class="refund-lay">
+	<!--{ @ loop }-->
+		<!--{ ? .export_item && count(loop)>1 }-->
+		<div class="shipping-info-lay">
+			↓ 출고번호 : {.export.export_code}<br />
+			배송지 : {.shipping.recipient_user_name} / {.shipping.recipient_address} {.shipping.recipient_address_detail}
+		</div>
+		<!--{ / }-->
+		<!--{ ? .export_item }--><div class="refund-list-lay"><!--{ / }-->
+		<!--{ @ .export_item }-->
+			<!--{ ? ..rt_ea }-->
+			<div class="goods-info-lay">
+			<!--{ : }-->
+			<div class="goods-info-lay" disabled='disabled' disabledScript=1>
+			<!--{ / }-->
+				<div class="goods-name">
+					{? ..cancel_type == '1' }
+						<label><input type="checkbox" name="chk_seq[]"  readonly="readonly" disabled="disabled"  cancel_type="{..cancel_type}" /></label>
+					{:}
+						<label><input type="checkbox" name="chk_seq[]" value="1"  cancel_type="{..cancel_type}" /></label>
+					{/}
+					{? ..cancel_type == '1' }<span class="order-item-cancel-type " >[청약철회불가]</span><br/>{/}{..goods_name}
+					<input type="hidden" name="chk_item_seq[]" value="{..item_seq}" item_option_seq="{..item_option_seq}" shipping_seq="{.shipping.shipping_seq}" />
+					<input type="hidden" name="chk_option_seq[]" value="{..item_option_seq}" />
+					<input type="hidden" name="chk_suboption_seq[]" value="{?..opt_type=='sub'}{..option_seq}{:}{/}" />
+					<input type="hidden" name="chk_export_code[]" value="{..export_code}" />
+
+					<input type="hidden" name="chk_shipping_seq[]" value="{.shipping.shipping_seq}" />
+					<input type="hidden" name="chk_individual_return[]" value="{..individual_return}" />
+				</div>
+
+				<table width="100%" border="0" cellpadding="5" cellspacing="0" class="goods-info-table">
+				<tr>
+					<td class="left" width="80" valign="top"><img src="{..image}" align="absmiddle" hspace="5" width="60" height="60" style="border:1px solid #ddd;" onerror="this.src='../images/common/noimage_list.gif'" /></td>
+					<td valign="top" class="goods-info">
+							<div class="goods-price">
+							<!-- { ? ..consumer_price } -->
+											<strike>{=number_format(..consumer_price)}</strike>
+							<!-- { / } -->
+											<span class="goods-price">{=number_format(..price)}</span>원
+							</div>
+							<!--{ ? ..option1 || ..option2 || ..option3 || ..option4 || ..option5 }-->
+								[옵션]
+								<!--{ ? ..option1 }-->{..title1} : {..option1}<!--{ / }-->
+								<!--{ ? ..option2 }-->, {..title2} : {..option2}<!--{ / }-->
+								<!--{ ? ..option3 }-->, {..title3} : {..option3}<!--{ / }-->
+								<!--{ ? ..option4 }-->, {..title4} : {..option4}<!--{ / }-->
+								<!--{ ? ..option5 }-->, {..title5} : {..option5}<!--{ / }-->
+							<!--{ / }-->
+						</div>
+						<!--{ ? ..inputs }-->
+							<!--{ @ ..inputs }-->
+								<!--{ ? ..value }-->
+								<div class="desc" style="margin:1px;">
+									<!--{?..title}-->{..title}:<!--{ / }-->
+									<!--{?..type=='file'}-->
+									<a href="../order_process/filedown?file={..value}" target="actionFrame" style="color:#848484;">{..value}</a>
+									<!--{:}-->{..value}<!--{ / }-->
+								</div>
+								<!--{ / }-->
+							<!--{ / }-->
+						<!--{ / }-->
+					</td>
+				</tr>
+				</table>
+
+
+				<div class="sum-price-lay">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" class="sum-price-table">
+					<tr>
+						<td class="price-info">
+							합계
+							<span class="goods-price">{=number_format(..out_price)}</span>원
+						</td>
+						<td width="94" class="step-info">{..mstep}</td>
+					</tr>
+					</table>
+				</div>
+
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="ea-info-table">
+				<tr>
+					<td><span class="fleft">반품가능수량</span> <span class="fright red"><b>{=number_format(..rt_ea)}</b>개</span></td>
+					<td><span class="fleft">주문수량</span> <span class="fright"><b>{=number_format(..ea)}</b>개</span></td>
+				</tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="ea-input-table" style="background-color:#fff;border-top:1px solid #ddd;border-bottom:1px solid #ddd;">
+				<tr>
+					<td class="left bold">반품수량</td>
+					<td class="right">
+						<!--{ ? ..rt_ea > 0 }-->
+							<select name="chk_ea[]"  class="common-select styled" >
+							<option value="" selected>= 선택 =</option>
+							<!--{ @ range(0,..rt_ea) }-->
+							<!--{ ? ...index_ > 0 }-->
+							<option value="{...index_}">{...index_}</option>
+							<!--{ / }-->
+							<!--{ / }-->
+							</select>
+						<!--{ : }-->
+							-
+							<select name="chk_ea[]" class="hide"><option></option></select>
+						<!--{ / }-->
+					</td>
+				</tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="ea-input-table">
+				<tr>
+					<td class="left bold">사유</td>
+					<td class="right">
+						<select name="reason[]"  class="common-select styled">
+						<!--{? ..reasonLoop }-->
+							<!--{@ ..reasonLoop }-->
+								<option value="{...codecd}">{...reason}</option>
+							<!--{ / }-->
+						<!--{ : }-->
+							<!--{ @ ..reasons }-->
+							<!--{ ? ...codecd!='110'}-->
+							<option value="{...codecd}">{...value}</option>
+							<!--{ / }-->
+							<!--{ / }-->
+						<!--{ / }-->
+						</select>
+					<input type="hidden" name="reason_desc[]" value="">
+					</td>
+				</tr>
+				</table>
+
+
+			</div>
+		<!--{ / }-->
+		<!--{ ? .export_item }--></div><!--{ / }-->
+	<!--{ / }-->
+	</div>
+
+	<div class="sub_division_title">상세사유<div class="sub_division_arw"></div></div>
+	<div class="sub_division_contents" style="padding:10px">
+		<textarea name="reason_detail" style="width:97%;" rows="2"></textarea>
+	</div>
+
+	<div class="sub_division_title">연락처<div class="sub_division_arw"></div></div>
+	<div class="sub_division_contents">
+		<table width="100%" border="0" cellpadding="2">
+		<tr>
+			<td class="left fx11 pdl10">구매자</td><td class="its_td">{orders.order_user_name}</td>
+		</tr>
+		<tr>
+			<td class="left fx11 pdl10">전화번호</td><td class="its_td"><input type="text" name="cellphone" value="{=implode('-',orders.order_cellphone)}" class="inputbox_large" style="width:94%" /></td>
+		</tr>
+		<tr>
+			<td class="left fx11 pdl10">휴대폰</td><td class="its_td"><input type="text" name="phone" value="{=implode('-',orders.order_phone)}" class="inputbox_large" style="width:94%" /></td>
+		</tr>
+		</table>
+	</div>
+
+	<div class="sub_division_title">반품방법<div class="sub_division_arw"></div></div>
+	<div class="sub_division_contents sub_page_tab_wrap">
+		<table width="100%" class="sub_page_tab" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td><label><input type="radio" name="return_method" value="user" checked="checked" /> 직접물품발송</label></td>
+			<td><label><input type="radio" name="return_method" value="shop" /> 쇼핑몰반품택배이용</label></td>
+		</tr>
+		</table>
+
+		<div class="sub_page_tab_contents">
+			(반송주소)<br /> {config_basic.companyZipcode} {config_basic.companyAddress} {config_basic.companyAddressDetail}
+		</div>
+
+		<div class="sub_page_tab_contents">
+			<input type="text" name="return_recipient_zipcode[]" value="" size="3" class="inputbox_large" /> - <input type="text" name="return_recipient_zipcode[]" value="" size="3" class="inputbox_large" />
+			<button type="button" class="btn_style" id="return_recipient_zipcode_button">우편번호</button>
+			<div style="padding:1px 0"><input type="hidden" name="return_recipient_address_type" value="" /><input type="text" name="return_recipient_address" value="" style="width:95%" class="inputbox_large" /><input type="text" name="return_recipient_address_street" value="" style="width:95%" class="inputbox_large" style="display:none;"/></div>
+			<div style="padding:1px 0"><input type="text" name="return_recipient_address_detail" value="" style="width:95%" class="inputbox_large" /></div>
+		</div>
+	</div>
+
+
+	<div style="height:10px"></div>
+
+	<div class="center">
+		<input type="button" class="btn_cancel_large" value="취소" onclick="document.location.href='order_view?no={orders.order_seq}';"  style="width:45%" />
+		<input type="button" class="btn_important_large" name="submitButton" value="반품신청" style="width:45%" />
+	</div>
+
+	<div style="height:15px"></div>
+
+	<table width="96%" cellpadding="4" cellspacing="0" align="center" style="border:2px solid #ddd">
+	<tr>
+		<td class="left fx12" height="20" style="background-color:#ddd">※ 배송비 안내 및 주의사항</td>
+	</tr>
+	<tr>
+		<td style="padding:8px; font-size:11px; background-color:#f2f2f2; font-weight:bold">
+			반품->환불
+		</td>
+	</tr>
+	<tr>
+		<td style="padding:12px; font-size:11px; background-color:#fff; line-height:17px; color:#767575; font-size:11px; border-top:1px solid #d6d6d6">
+			구매자 부담 = 반품 배송비 + 최초 배송비 <br />
+			반품 시 배송비는 반품의 원인을 제공한 자가 부담합니다.<br/>구매자의 변심으로 반품을 원할 경우에는 구매자가 배송비를 지불
+		</td>
+	</tr>
+	<tr>
+		<td style="padding:12px; font-size:11px; background-color:#fff; line-height:17px; color:#767575; font-size:11px; border-top:1px solid #d6d6d6">
+			판매자 부담 = 반품 배송비 + 최초 배송비 <br />
+			반품 시 배송비는 반품의 원인을 제공한 자가 부담합니다.<br/>상품 하자나 제품 불일치로 인한 반품의 경우에는 판매자가 배송비를 지불
+		</td>
+	</tr>
+	<tr>
+		<td style="padding:8px; font-size:11px; background-color:#f2f2f2; font-weight:bold; border-top:1px solid #d6d6d6">
+			반품->교환
+		</td>
+	</tr>
+	<tr>
+		<td style="padding:12px; font-size:11px; background-color:#fff; line-height:17px; color:#767575; font-size:11px; border-top:1px solid #d6d6d6">
+			구매자 부담 = 반품 배송비 + 최초 배송비 <br />
+			상품 교환 시 배송비는 교환의 원인을 제공한 자가 부담합니다.<br/>구매자의 변심으로 교환을 원할 경우에는 구매자가 배송비를 지불
+		</td>
+	</tr>
+	<tr>
+		<td style="padding:12px; font-size:11px; background-color:#fff; line-height:17px; color:#767575; font-size:11px; border-top:1px solid #d6d6d6">
+			판매자 부담 = 반품 배송비 + 최초 배송비 <br />
+			상품 교환 시 배송비는 교환의 원인을 제공한 자가 부담합니다.<br/>상품 하자나 제품 불일치로 인한 교환의 경우에는 판매자가 배송비를 지불
+		</td>
+	</tr>
+	</table>
+
+	<div style="height:10px"></div>
+
+	</form>
+</div>

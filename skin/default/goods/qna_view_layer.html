@@ -1,0 +1,116 @@
+<script type="text/javascript">
+//<![CDATA[
+var board_id = '{manager.id}';
+var board_seq = '{_GET.seq}';
+var boardlistsurl = '{boardurl->lists}';
+var boardwriteurl = '{boardurl->write}';
+var boardviewurl = '{boardurl->view}';
+var boardmodifyurl = '{boardurl->modify}';
+var boardreplyurl = '{boardurl->reply}';
+//]]>
+</script>
+<div id="boardlayout" >
+	<div id="bbsview">
+		<div class="viewbox">
+			<form name="form1" id="form1" method="post" action="{=sslAction('../board_process')}"  target="boardactionFrame">
+			<input type="hidden" name="mode" id="mode" value="{mode}" />
+			<input type="hidden" name="board_id" id="board_id" value="{manager.id}" />
+			<input type="hidden" name="reply" id="reply" value="{_GET.reply}" />
+			{? seq }
+				<input type="hidden" name="seq" id="board_seq" value="{seq}" />
+			{/}
+			<input type="hidden" name="popup" value="{_GET.popup}" >
+			<input type="hidden" name="iframe" value="{_GET.iframe}" >
+			<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+
+			<table style="width:100%" cellpadding="0" cellspacing="0" border="0">
+			<tbody>
+			<tr>
+				<td class=" right" nowrap="nowrap" style="height:15px;">
+					<div>
+						<span >{=snslinkurl('board', subject)}</span>
+						{? managerview.viewtype=='layer'}
+							<button type="button" board_seq="{seq}"  class="viewerlay_close_btn bbs_btn">닫기 </button>
+						{:}
+							<button type="button" name="boardviewclose" class="bbs_btn {? managerview.viewtype=='layer'}hide{/}">목록</button></span>
+							{? managerview.isperm_write != "_no" }<button type="button"    id="goods_boad_write_btn{managerview.isperm_write}"   board_id="{boardid}"  class="bbs_btn">상품문의쓰기 </button>{/}
+						{/}
+						{? display == 0 && managerview.isperm_moddel != "_mbno" } <button type="button" name="goods_boad_modify_btn{managerview.isperm_moddel}"  board_seq="{seq}"  board_id="{boardid}"  class="bbs_btn">수정 </button>{/}
+
+						{? display == 0 && replylay == 'Y' && managerview.isperm_write != "_no" } <button type="button"  id="goods_boad_reply_btn" board_seq="{seq}"  board_id="{boardid}" class="bbs_btn" >답변 </button>{/}
+
+						{? ((display == 0 || (display == 1 && replyor == 0 && comment ==0) ) ) && managerview.isperm_moddel != "_mbno"  } <button type="button"  name="goods_boad_delete_btn{managerview.isperm_moddel}"  board_seq="{seq}"  board_id="{boardid}"  class="bbs_btn">삭제 </button> {/}
+					</div>
+				</td>
+				</tr>
+				<tr>
+				<td class=" left"  valign="top" ><div class="content left" >{contents}</div></td>
+				</tr>
+			</tbody>
+			</table>
+
+			{? re_contents }
+			<div class="left" >
+				<div class="re_contents">
+					<div style="padding:5px;"> <img src='../images/icon/icon_answer.png'  width="26" height="15"  /> <b>{re_subject} </b></div>
+					<div style="padding:5px;">{adminname} {reply_title}</div>
+					<div style="padding:5px;">{re_contents}</div>
+				</div>
+			</div>
+			{/}
+
+
+			{? filelist}
+			<table class="bbsview_table_style" style="width:100%" cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td class="left" >
+					<div class="attach">
+						<ul>
+								{@ filelist}
+								<li><span class="realfilelist hand highlight-link" realfiledir="{.realfiledir}" realfilename="{.orignfile}"  realfilename="{.orignfile}" board_id="goods_qna" filedown="../board_process?mode=board_file_down&board_id=goods_qna&realfiledir={.realfiledir}&realfilename={.orignfile}">{.orignfile} (<span class="size">{.realsizefile}</span>) <button type="button"  class="bbs_btn">down</button></span>
+								{? .is_image }<span class="hand" imgsrc="{.realfile}" onclick="board_file_review('{.realfile}','{.imagesize[0]}','{.imagesize[1]}');" ><img src="../images/icon/icon_zoom.gif" hspace="1" title="미리보기"/></span>{/}
+								</li>
+								{/}
+						</ul>
+					</div>
+				</td>
+			</tr>
+			</tbody>
+			</table>
+			{/}
+			</form>
+	
+			<!--{? managerview.auth_recommend_use == 'Y' }-->
+			<!-- 게시글평가 -->
+			<div class="scorelay"  style="margin: 15px 0 5px">{#scoreskin}</div>
+			<!-- 게시글평가 -->
+			<!--{/}-->  
+
+			<!--{? commentlay == 'Y' || comment > 0 // 댓글 사용여부, 댓글수 }-->
+			<!-- 코멘트부분 -->
+			<a name="cmtlist"></a>
+			<div class="comment"  id="comment_container" style="margin: 15px 0 5px">{#commentskin}</div>
+			<!-- 코멘트부분 -->
+			<!--{/}-->
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$(".content img").load(function() {
+	//이미지 가로가 큰경우	$(".content img").each(function() {
+		var default_width = '750';//(본문레이아웃사이즈-50) 또는 직접값변경
+		if( $(this).width() > default_width || $(this).height() > default_width ) {
+			imageResize(this,default_width);
+		}
+	});
+});
+</script>
+<iframe name="boardactionFrame" src="" frameborder="0" width="0" height="0"></iframe>
+<script type="text/javascript">
+$(document).ready(function(){
+	$(document).resize(function(){iframeset();}).resize();
+	setInterval(function(){iframeset();},1000);
+});
+</script>

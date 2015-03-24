@@ -1,0 +1,112 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td height="30"></td>
+</tr>
+<tr>
+	<td width="40"></td>
+	<td>
+		<!-- 본문내용 시작 -->
+
+		<form name="registFrm" id="registFrm" target="actionFrame" method="post" action="/member_process/withdrawal">
+
+			<!-- 타이틀 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td><img src="../images/design/tit_withdraw.gif" title="" alt="" /></td></tr>
+			<tr><td height="10"></td></tr>
+			<tr><td><span class="desc">회원 탈퇴를 하실 수 있습니다.</span></td></tr>
+			</table>
+
+			<div style="height:40px"></div>
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<table border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td valign="top" align="left" height="15"><img src="../images/design/stit_withdraw.gif"/></td>
+							<td width="8"></td>
+							<td valign="bottom" align="right"><span class="desc"> 회원님의 모든 정보는 즉시 삭제되어 탈퇴처리되어집니다.</span></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr><td height="6"></td></tr>
+				<tr><td height="2" bgcolor="545454"></td></tr>
+				<tr><td height="25"></td></tr>
+				<tr>
+					<td>
+
+						<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<colgroup>
+						<col width="150" />
+						<col width="30" />
+						<col />
+						</colgroup>
+						<tr>
+							<td align="right" class="small">탈퇴사유</td>
+							<td></td>
+							<td>
+								<!--{@ withdrawal_arr }-->
+								<!--{? .key_ == 0 }-->
+								<label><input type="radio" name="reason" value="{.codecd}" checked="checked" />{.value}</label>&nbsp;&nbsp;
+								<!--{ : }-->
+								<label><input type="radio" name="reason" value="{.codecd}"/>{.value}</label>&nbsp;&nbsp;
+								<!--{ / }-->
+								<!--{ / }-->
+							</td>
+						</tr>
+						<tr><td height="14"></td></tr>
+						<tr>
+							<td align="right" class="small">내용</td>
+							<td></td>
+							<td>
+								<textarea name="memo" rows="5" cols="100%"></textarea>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr><td height="20"></td></tr>
+				<tr><td height="1" bgcolor="cbcbcb"></td></tr>
+				<tr><td height="30"></td></tr>
+				<tr><td align="center">
+				<b>회원 탈퇴 시 회원님의 모든 정보가 바로 삭제되어집니다.!</b> <br />
+					<!--{? snslist }-->
+					회원님의 SNS계정(<!--{@ snslist }-->{.rute}<!--{? snslist[(.index_+1)] }-->, <!--{/}--><!--{/}-->) 정보가 쇼핑몰에서 삭제됩니다.<br>
+					<!--{/}-->
+					회원님의 개인정보, 주문내역, 적립금, 쿠폰 등 모든 정보가 쇼핑몰에서 삭제합니다. <br />
+					<label class="small">예, 정보 삭제에 동의합니다.<input type="checkbox" name="agree" value="Y" />  </label>
+
+				</td></tr>
+				<tr><td height="15"></td></tr>
+				<tr>
+					<td align="center">
+						<img src="../images/buttons/btn_ok.gif" class="hand" alt="회원탈퇴하기" id="btn_submit"/>
+						<a href='javascript:document.registFrm.reset();'><img src="../images/buttons/btn_cancel.gif" class="hand" /></a>
+					</td>
+				</tr>
+			</table>
+</form>
+
+		<!-- 본문내용 끝 -->
+	</td>
+	<td width="40"></td>
+</tr>
+</table>
+
+
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#btn_submit").click(function() {
+		if($("input[name='agree']:checked").val()!='Y'){
+			alert('정보 삭제에 동의해 주십시오.');
+			$("input[name='agree']").focus();
+			return false;
+		}
+
+		if(!confirm("정말로 회원 탈퇴하시겠습니까?")) return;
+		$("#registFrm").submit();
+	});
+});
+</script>

@@ -1,0 +1,81 @@
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/editor/css/popup.css" />
+<script type="text/javascript">
+$(function(){
+	$(".submit").click(function(){
+		{? ismobileagent }
+			if( $("#file_name").val() ) {
+				var fname = document.boardVideo;
+				fname.action = "http://{cfg_goods.ucc_domain}/upload/ucc_upload.php";
+				fname.target = "_self";
+				fname.submit();
+			}else{
+				alert("동영상 파일을 선택해 주세요.");
+			}
+		{:}
+			if( !$("#txtFileName").val() ) {
+				alert("동영상 파일을 선택해 주세요.");
+			}
+			doSubmit(event, document.boardVideo);
+		{/}
+	});
+	{? videook == true &&  videoerror == false && uccdomainembedsrc }
+		var videohtml = '';
+		videohtml +='<label ><input type="hidden" name="file_key_w" value="{file_key_w}" ><input type="hidden" name="file_key_i" value="{file_key_i}" ><input type="checkbox" name="video_del" value="1" >삭제</label>';
+		videohtml +='<div>';
+		{? ismobileagent }
+			videohtml +='	<iframe   width="{? manager.video_size_mobile0 }{manager.video_size_mobile0}{:}150{/}" height="{? manager.video_size_mobile1 }{manager.video_size_mobile1}{:}100{/}" src="{uccdomainembedsrc}&g=tag&width={manager.video_size_mobile0}&height={manager.video_size_mobile1}" frameborder="0" allowfullscreen></iframe>';
+		{:}
+			videohtml +='	<embed src="{uccdomainembedsrc}" width="150" height="100" allowfullscreen="true" wmode="transparent"></embed>';
+		{/}
+		videohtml +='</div>';
+		$("#boardVideolay",window.opener.document).html(videohtml);
+		window.self.close();
+	{:  videook == true &&  videoerror == true }
+		alert(' Error: {error}');
+	{/}
+});
+</script>
+
+</head>
+<div class="wrapper">
+	<div class="header">
+		<h1>동영상 첨부</h1>
+	</div>
+	<div class="body">
+	<form name="boardVideo" id="boardVideo" method="post" enctype="multipart/form-data" action="./popup_video?id={_GET.id}" >
+	<input type="hidden" name="encoding_speed" value="{? manager.video_type }{manager.video_type}{:}400{/}">
+	<input type="hidden" name="encoding_screen" value="{? manager.video_screen }{=str_replace('X','|',manager.video_screen)}{:}400X300{/}">
+	<input type="hidden" name="seq" value="{_GET.seq}">
+	<input type="hidden" name="id" value="{_GET.id}">
+
+
+	{? ismobileagent }
+		<input type="hidden" name="company_id" size=50 value="{cfg_goods.ucc_id}">
+		<input type="hidden" name="client_key" size=50 value="{cfg_goods.ucc_id}_{=date('YmdHis')}">
+		<input type="hidden" name="url_success1" size=50 value="http://{_SERVER.HTTP_HOST}/board/popup_video?success=1&id={_GET.id}">
+		<input type="hidden" name="url_error1" size=50 value="http://{_SERVER.HTTP_HOST}/board/popup_video?error=1&id={_GET.id}">
+		<input type="hidden" name="charset" size=50 value="utf-8">
+	{/}
+		<dl class="alert">
+		    <dt>동영상</dt>
+		    <dd>
+				{? ismobileagent }
+				<input type="file" name="file_name" id="file_name" size=50 >
+				{:}
+				<!-- API 추가 -->
+					<script type="text/javascript" src="{uccdomain}"></script>
+				<!-- API 완료 -->
+				{/}
+			</dd>
+		</dl>
+	</div>
+	<div class="footer">
+		<p><a onclick="window.self.close();" title="닫기" class="close">닫기</a></p>
+		<ul>
+			<li class="submit"><a title="등록" class="btnlink">등록</a> </li>
+			<li class="cancel"><a onclick="window.self.close();" title="취소" class="btnlink">취소</a></li>
+		</ul>
+	</div>
+	</form>
+
+</div>

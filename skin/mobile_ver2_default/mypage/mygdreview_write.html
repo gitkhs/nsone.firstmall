@@ -1,0 +1,603 @@
+{?!mobileAjaxCall}
+<div class="sub_title_bar">
+	<h2>상품 후기</h2>
+	<a href="javascript:history.back();" class="stb_back_btn">
+		<img src="../images/design/btn_back.png" class="hand" width="22" height="22" />
+	</a>
+</div>
+{/}
+
+{#catalog_top}
+
+
+<link type="text/css" rel="stylesheet" charset="utf-8" href="../css/mypage_board.css" />
+<script type="text/javascript">
+//<![CDATA[
+var board_id = '{manager.id}';
+var board_seq = '{_GET.seq}';
+var boardlistsurl = '{boardurl->lists}';
+var boardwriteurl = '{boardurl->write}';
+var boardviewurl = '{boardurl->view}';
+var boardmodifyurl = '{boardurl->modify}';
+var file_use = '{=manager.file_use}';
+//]]>
+</script>
+<script type="text/javascript" src="/app/javascript/js/board.js?v=7"  charset="utf-8"></script>
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" charset="utf-8"></script>
+<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"  charset="utf-8"></script>
+
+<iframe name="boardactionFrame" src="" frameborder="0" width="0" height="0"></iframe>
+<div id="openDialogLayer" style="display: none">
+	<div align="center" id="openDialogLayerMsg"></div>
+</div>
+<div id="boardlayout" >
+	<div id="bbswrite" >
+	<form name="writeform" id="writeform" method="post" action="{=sslAction('../board_process')}"  enctype="multipart/form-data" target="boardactionFrame">
+	<input type="hidden" name="mode" id="mode" value="{mode}" />
+	<input type="hidden" name="board_id" id="board_id" value="{manager.id}" />
+	<input type="hidden" name="reply" id="reply" value="{_GET.reply}" />
+	{? seq }
+		<input type="hidden" name="seq" id="seq" value="{seq}" />
+	{/}
+	<input type="hidden" name="returnurl" id="returnurl" value="{? backtype=='view' }{boardurl->view}{:}{boardurl->lists}{/}" />
+	<input type="hidden" name="popup" value="{_GET.popup}" >
+	<input type="hidden" name="iframe" value="{_GET.iframe}" >
+	<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+	<input type="hidden" name="backtype" value="list" >
+	<input type="hidden" name="review_reserve_ok"  class="review_reserve_ok" value="" >
+
+	<!-- 서브메뉴 바디 : 시작 -->
+	{? categorylist}
+	<div class="bbswrite_division"  >
+		<select  name="category" id="addcategory" class="required common-select styled" >
+		<option value="" selected="selected" >- 분류선택 -</option>
+		{@ categorylist}
+		<option value="{.value_}" {? datacategory == .value_} selected="selected"  {/}>{.value_}</option>
+		{/}
+		</select>
+		<div style="height:6px;"></div>
+	</div>
+	{/}
+
+	<div class="bbswrite_division"  >
+		<span class="input_round_style" style="width:100%;">
+			{? defined('__ISUSER__') && name //회원}
+				<input type="hidden" name="name" id="name" value="{name}" >
+				<input type="text" value="{name}"  readonly="readonly" disabled="disabled" class="required line" />
+			{:}
+				<input type="text" name="name" id="name" value="{name}"  title="작성자를 입력해 주세요" class="required line" />
+			{/}
+		</span>
+		<div style="height:6px;"></div>
+		{? pw }
+		<input type="hidden" name="oldpw" value="{pw}" >
+		{:}
+		비밀번호 : <span class="input_round_style" style="width:70%;"><input type="password" name="pw" id="pw" value=""  password="password"  title="비밀번호를 입력해 주세요"  class="required line" /></span>
+		{/}
+
+		<span class="input_round_style" style="width:99%;"><input type="text" name="subject" id="subject" value="{subject}" class="required line"  title="제목을 입력해 주세요"  size="50" /></span>
+
+		{? manager.sms_reply_user_yn == 'Y' }
+		<div style="height:6px;clear:both"></div>
+
+		<span class="input_round_style" style="width:75%;"><input type="text" name="tel1" id="tel1" value="{? tel2 }{tel2}{: tel1}{tel1}{/}" title="휴대폰번호를 입력하세요 (-포함)" /></span>
+		<span ><label for="board_sms"><input type="checkbox" name="board_sms" id="board_sms" value="1" {? (seq && rsms=='Y') || (!seq && (tel1 || tel2)) } checked="checked" {/} /> 답변받기</label></span>
+		{/}
+
+		<div style="height:6px;clear:both"></div>
+
+		<span class="input_round_style" style="width:75%;"><input type="text" name="email" id="email" value="{email}" title="이메일주소를 입력하세요" /></span> 
+		<span ><label for="board_email"><input type="checkbox" name="board_email" id="board_email" value="1"  {?(seq && remail=='Y') || (!seq && email)   } checked="checked" {/}/> 답변받기</label></span>
+
+		<div style="height:6px;"></div>
+		<div class="bbswrite_division" style="margin-top:6px; margin-bottom:6px; border-top:1px dashed #ddd; border-bottom:1px dashed #ddd;">
+			<span style="width:100%;">
+				{? !seq //수정시 }<button type="button" id="issueGoodsButton" class="btn_style">상품 선택 </button>{/}
+				<div class="clearbox" style="height:5px;"></div>
+				<div id="displayGoods" >
+					<!--{ @ displayGoods }-->
+						<div class='goods' style='float:left;'>
+							<div align='center' class='image'>
+								<img class="goodsThumbView small_goods_image" alt="" src="{.image}" width="50" height="50">
+							</div>
+							<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+							<div align='center' class='price'>{? .consumer_price > 0 && .consumer_price < .price }{=number_format(.consumer_price)} →{/} {=number_format(.price)}</div>
+							<input type='hidden' name='displayGoods[]' value='{.goods_seq}' />
+						</div>
+						<div style="height:6px;clear:both"></div>
+					<!--{ / }-->
+				</div>
+				<div id="displayGoodsSelect" class="hide"></div>
+			</span>
+		</div>
+	</div>
+
+	<div style="height:6px;clear:both"></div>
+
+	{? !isplusfreenot //무료몰경우 }
+		<span style="width:100%;">{scorelay}</span>
+	{:}
+		{? reviewcategorylist}
+		<div class="bbswrite_division">
+			{@ reviewcategorylist}
+				<span style="width:100%;">
+					{=getGoodsScore(.score, manager, 'm_v2_write', .index_)} <br/>
+				</span>
+			{/}
+		</div>
+		<div style="height:6px;"></div>
+		{/}
+	{/}
+
+
+	{? goodsreview_sub //평가정보처리 }
+	<div class="bbswrite_division">
+		{@ goodsreview_sub}
+			{? .used == 'Y' }
+				<span style="width:100%;">
+				{? .required=='Y' }<span  class="writerequired" /></span><input type="hidden" name="required[]" value="{.bulkorderform_seq}"> { / }{.label_title} :
+				{.label_view} {.label_desc}
+				<span>
+				<br/>
+			{/}
+		{/}
+		</div>
+		<div style="height:6px;"></div>
+	{/}
+
+	{? seq //수정시 }
+	<div class="bbswrite_division" >
+		{? order_seq }
+			<div style="height:6px;clear:both"></div>
+			<span style="width:100%;">
+				<b>{order_seq}</b> 해당 상품이 배송완료된 주문내역입니다.
+				<input type="hidden" name="order_seq" value="{order_seq}">
+			</span>
+		{/}
+	</div>
+	{:}
+	<div class="bbswrite_division" >
+		{? defined('__ISUSER__') //회원}
+			<span style="width:100%;">
+				<select id="ordergoodslist"  name="ordergoodslist" class="hide" >
+				<option value="">선택하세요!</option>
+				</select>
+				<span id="orderbtnlay" >{? !_GET.goods_seq && !seq //수정시}상품을 먼저 선택하세요.{/}</span>
+				<span class="desc">
+					<div style="margin-top:10px;">
+						<div style="margin-top:10px;">
+						{? reserves.autoemoney == 1 &&  reserves.autoemoneytype != 3 && reserves.autoemoneytitle }구매자(회원)가 작성한 {/}
+						</div>
+						<div style="margin-top:5px;">
+							{? reserves.autoemoney_photo > 0 ||  reserves.autopoint_photo > 0 }<b>포토상품후기</b>는
+								{? reserves.autoemoneytype != 1 && ( reserves.autoemoneystrcut1>0 || reserves.autoemoneystrcut2>0 ) }
+									<span >(
+									{? reserves.autoemoneytype == 2 && reserves.autoemoneystrcut1>0 }
+										{=number_format(reserves.autoemoneystrcut1)}
+									{: reserves.autoemoneytype == 3 && reserves.autoemoneystrcut2>0}
+										{=number_format(reserves.autoemoneystrcut2)}
+									{/}자 이상)</span>
+								{/}
+								{? reserves.autoemoney_photo > 0 }적립금 <span style="color:#c40000;" >{=number_format(reserves.autoemoney_photo)}</span>원 {/}
+								{? reserves.autopoint_photo > 0 } 포인트 <span style="color:#c40000;" >{=number_format(reserves.autopoint_photo)}</span>P {/}
+							지급 &nbsp;&nbsp;
+							{/}
+
+							{? reserves.autoemoney_video > 0 ||  reserves.autopoint_video > 0 }<b>동영상상품후기</b>는
+								{? reserves.autoemoneytype != 1 && ( reserves.autoemoneystrcut1>0 || reserves.autoemoneystrcut2>0 ) }
+									<span >(
+									{? reserves.autoemoneytype == 2 && reserves.autoemoneystrcut1>0 }
+										{=number_format(reserves.autoemoneystrcut1)}
+									{: reserves.autoemoneytype == 3 && reserves.autoemoneystrcut2>0}
+										{=number_format(reserves.autoemoneystrcut2)}
+									{/}자 이상)</span>
+								{/}
+								{? reserves.autoemoney_video > 0 }적립금 <span style="color:#c40000;" >{=number_format(reserves.autoemoney_video)}</span>원 {/}
+								{? reserves.autopoint_video > 0 } 포인트 <span style="color:#c40000;" >{=number_format(reserves.autopoint_video)}</span>P {/}
+							지급 &nbsp;&nbsp;
+							{/}
+
+							{? reserves.autoemoney_review > 0 ||  reserves.autopoint_review > 0 }
+								<b>일반 상품후기</b>는
+								{? reserves.autoemoneytype != 1 && ( reserves.autoemoneystrcut1>0 || reserves.autoemoneystrcut2>0 ) }
+									<span >(
+									{? reserves.autoemoneytype == 2 && reserves.autoemoneystrcut1>0 }
+										{=number_format(reserves.autoemoneystrcut1)}
+									{: reserves.autoemoneytype == 3 && reserves.autoemoneystrcut2>0}
+										{=number_format(reserves.autoemoneystrcut2)}
+									{/}자 이상)</span>
+								{/}
+								{? reserves.autoemoney_review > 0 }적립금 <span style="color:#c40000;">{=number_format(reserves.autoemoney_review)}</span>원 지급{/}
+								{? reserves.autopoint_review > 0 } 포인트 <span style="color:#c40000;">{=number_format(reserves.autopoint_review)}</span>P 지급{/}
+							{/}
+						</div>
+					</div>
+				</span>
+			</span>
+		{:}
+			<div style="height:6px;clear:both"></div>
+			<span style="width:100%;">
+				<div id="orderbtnlay" ><span class="btn small cyanblue"><button type="button" id="OrderauthButton" >주문조회하기</button></span></div>
+				<div class="hide" id="nonemblay" ><select id="ordergoodslist"  name="ordergoodslist" class="hide" >
+				<option value="">선택하세요!</option>
+				</select><span id="ordertxtlay" >{? !_GET.goods_seq && !seq //수정시}상품을 먼저 선택하세요.{/}</span>
+				</div>
+				<span class="desc">
+					<div style="margin-top:10px;">
+						<div style="margin-top:10px;">
+						{? reserves.autoemoney == 1 &&  reserves.autoemoneytype != 3 && reserves.autoemoneytitle }구매자(회원)가 작성한 {/}
+						</div>
+						<div style="margin-top:5px;">
+							{? reserves.autoemoney_photo > 0 ||  reserves.autopoint_photo > 0 }<b>포토상품후기</b>는
+								{? reserves.autoemoneytype != 1 && ( reserves.autoemoneystrcut1>0 || reserves.autoemoneystrcut2>0 ) }
+									<span >(
+									{? reserves.autoemoneytype == 2 && reserves.autoemoneystrcut1>0 }
+										{=number_format(reserves.autoemoneystrcut1)}
+									{: reserves.autoemoneytype == 3 && reserves.autoemoneystrcut2>0}
+										{=number_format(reserves.autoemoneystrcut2)}
+									{/}자 이상)</span>
+								{/}
+								{? reserves.autoemoney_photo > 0 }적립금 <span style="color:#c40000;" >{=number_format(reserves.autoemoney_photo)}</span>원 {/}
+								{? reserves.autopoint_photo > 0 } 포인트 <span style="color:#c40000;" >{=number_format(reserves.autopoint_photo)}</span>P {/}
+							지급 &nbsp;&nbsp;
+							{/}
+
+							{? reserves.autoemoney_video > 0 ||  reserves.autopoint_video > 0 }<b>동영상상품후기</b>는
+								{? reserves.autoemoneytype != 1 && ( reserves.autoemoneystrcut1>0 || reserves.autoemoneystrcut2>0 ) }
+									<span >(
+									{? reserves.autoemoneytype == 2 && reserves.autoemoneystrcut1>0 }
+										{=number_format(reserves.autoemoneystrcut1)}
+									{: reserves.autoemoneytype == 3 && reserves.autoemoneystrcut2>0}
+										{=number_format(reserves.autoemoneystrcut2)}
+									{/}자 이상)</span>
+								{/}
+								{? reserves.autoemoney_video > 0 }적립금 <span style="color:#c40000;" >{=number_format(reserves.autoemoney_video)}</span>원 {/}
+								{? reserves.autopoint_video > 0 } 포인트 <span style="color:#c40000;" >{=number_format(reserves.autopoint_video)}</span>P {/}
+							지급 &nbsp;&nbsp;
+							{/}
+
+							{? reserves.autoemoney_review > 0 ||  reserves.autopoint_review > 0 }
+								<b>일반 상품후기</b>는
+								{? reserves.autoemoneytype != 1 && ( reserves.autoemoneystrcut1>0 || reserves.autoemoneystrcut2>0 ) }
+									<span >(
+									{? reserves.autoemoneytype == 2 && reserves.autoemoneystrcut1>0 }
+										{=number_format(reserves.autoemoneystrcut1)}
+									{: reserves.autoemoneytype == 3 && reserves.autoemoneystrcut2>0}
+										{=number_format(reserves.autoemoneystrcut2)}
+									{/}자 이상)</span>
+								{/}
+								{? reserves.autoemoney_review > 0 }적립금 <span style="color:#c40000;">{=number_format(reserves.autoemoney_review)}</span>원 지급{/}
+								{? reserves.autopoint_review > 0 } 포인트 <span style="color:#c40000;">{=number_format(reserves.autopoint_review)}</span>P 지급{/}
+							{/}
+						</div>
+					</div>
+				</span>
+			</span>
+		{/}
+	</div>
+	{/}
+	<div style="height:6px;"></div>
+
+	<div class="bbswrite_division">
+		<span class="{hiddenlay}" ><input type="checkbox" name="hidden" id="hidden"  value="1" {hiddenckeck} /><label for="hidden" > 비밀글</label></span>
+		{displayckeck}
+	</div>
+
+
+	<!--{? manager.video_use == 'Y' //동영상사용인경우  && (file_key_w || file_key_i)}-->
+	<div class="bbswrite_division"  >
+		<table width="50%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+		<td align="center">
+			<div id="boardVideolay" >
+				<!--{? file_key_i && uccdomain_fileurl}-->
+					<label ><input type="checkbox" name="video_del" value="1" >삭제</label>
+					<div class="content" >
+						<iframe width="100" height="100" src="{uccdomain_fileurl}&g=tag&width={manager.video_size_mobile0}&height={manager.video_size_mobile1}" frameborder="0" allowfullscreen></iframe>
+					</div>
+				<!--{: file_key_w && uccdomain_fileurl}-->
+				<label ><input type="checkbox" name="video_del" value="1" >삭제</label>
+					<div class="content" >
+						<iframe width="100" height="100" src="{uccdomain_fileurl}&g=tag&width={manager.video_size_mobile0}&height={manager.video_size_mobile1}" frameborder="0" allowfullscreen></iframe>
+					</div>
+				<!--{/}-->
+			</div>
+		</td>
+		<td  ><button type="button" class="batchVideoRegist btn_style" board_seq="{seq}" >동영상등록</button></td>
+		</tr>
+		</table>
+	</div>
+	<div style="height:6px;"></div>
+	<!--{:  file_key_i && uccdomain_fileurl }-->
+	<div class="bbswrite_division"  >
+		<label ><input type="checkbox" name="video_del" value="1" >삭제</label>
+		<div>
+			<iframe   width="100" height="100" src="{uccdomain_fileurl}&g=tag&width={manager.video_size_mobile0}&height={manager.video_size_mobile1}" frameborder="0" allowfullscreen></iframe>
+		</div>
+	</div>
+	<div style="height:6px;"></div>
+	<!--{:  file_key_w && uccdomain_fileurl }-->
+	<div class="bbswrite_division"  >
+		<label ><input type="checkbox" name="video_del" value="1" >삭제</label>
+		<div>
+			<iframe   width="100" height="100" src="{uccdomain_fileurl}&g=tag&width={manager.video_size_mobile0}&height={manager.video_size_mobile1}" frameborder="0" allowfullscreen></iframe>
+		</div>
+	</div>
+	<div style="height:6px;"></div>
+	<!--{ / }-->
+	<div class="bbswrite_division"  >
+		<textarea name="contents" id="contents" style='border:1px solid #ccc; width:100%; height:250px;'  class="required line" title="내용을 입력하세요" >{contents}</textarea>
+	</div>
+
+	{? (manager.file_use == 'Y' || filelist) //첨부파일 사용중이거나 첨부파일이 있는 경우 }
+	 <div class="bbswrite_division">{#mobile_file}</div>
+	{/}
+
+	<div class="bbswrite_division clearbox" style="border-top:1px solid #ddd">
+			<div class="fleft">
+				<button type="button" class="btn_style" style="width:60px;" onclick="{? _GET.popup }self.close();{:}document.location.href='{boardurl->lists}';{/}">취소</button>
+			</div>
+			<div class="fright">
+				<button type="button" class="btn_style data_save_btn" style="width:60px;" name="data_save_btn">저장</button>
+			</div>
+		</div>
+	</div>
+	</form>
+	</div>
+</div>
+
+<!-- 주문검색 폼 선택상품정보 -->
+<div id="displayOrderlay" class="hide"></div>
+<input type="hidden"  id="order_goods_list" value="{? _GET.goods_seq }{_GET.goods_seq}{:}{goods_seq}{/}" >
+
+<script type="text/javascript">
+var totalScore = 5; //현재 점수
+var MaxScore = 5; //최대 점수
+var MinScore = 1; //최저점수 ps.최저 점수가 음수일 경우 에러 발생.
+var fullStar; //별로 보여질때 가득찬 별
+
+$(document).ready(function() {
+{? isplusfreenot //무료몰경우 }
+	{? reviewcategorylist}
+		{@ reviewcategorylist}
+			/* 별점 관련 */
+			{? .score }
+				showStar('{.index_}','{.score}');
+			{:}
+				showStar('{.index_}',totalScore);
+			{/}
+		{/}
+	{/}
+{/}
+
+	$(".review_scoreM").live("click",function(){ //마이너스 버튼 클릭시 이벤트
+		var idx = $(".review_scoreM").index(this);
+		totalScore = $('.review_score').eq(idx).val();
+		totalScore--;
+		showStar(idx,totalScore);
+	});
+
+	$(".review_scoreP").live("click",function () { //플러스 버튼 클릭시 이벤트
+		var idx = $(".review_scoreP").index(this);
+		totalScore = $('.review_score').eq(idx).val();
+		totalScore++;
+		showStar(idx,totalScore);
+	});
+
+	$('.review_score').bind("change keyup",function() {
+		if($(this).val() > MaxScore) { alert("최대점수는 "+MaxScore+" 입니다."); totalScore = MaxScore; $(this).val(MaxScore); }
+		else if($(this).val() < 1) { alert("최저점수는 "+MinScore+"점 입니다."); totalScore = MinScore; $(this).val(MinScore); }
+		else{ totalScore = $(this).val(); }
+		var idx = $(".review_score").index(this);
+		showStar(idx,totalScore);
+	});
+
+});
+
+function showStar(idx, totalScore) { //별모양 점수를 보여주기 위한 함수
+	$(".review_showScore").eq(idx).text(function () {
+		var printStar = ""; //출력할 별 문자형 초기화
+		fullStar = totalScore; //가득찬 별의 갯수를 구함
+
+		if (totalScore >= MinScore && totalScore <= MaxScore) { //점수가 최저와 최대 점수 사이일때
+			if (totalScore == MinScore) { showScore(idx); return "★" } //점수가 최저일때 "-"문자 출력
+			else { //점수가 0이 아닐때 별을 출력
+				for (i = 1; i <= fullStar; i++) { printStar += "★"; }
+				showScore(idx); //텍스트로 점수 출력
+				return printStar;
+			}
+		}
+		else { //점수가 0과 10사이가 아닐때
+			if (totalScore == MaxScore + 1) {
+				alert("최대점수는 "+MaxScore+"점 입니다."); totalScore = MaxScore; $('.review_score').eq(idx).val(MaxScore);
+			}
+			else if (totalScore == (MinScore-1)) {
+				alert ("최저점수는 "+MinScore+"점 입니다."); totalScore = MinScore; $('.review_score').eq(idx).val(MinScore);
+			}
+			//showStar(idx);
+		}
+	});
+	$('.review_score').eq(idx).val(totalScore);
+}
+
+function showScore(idx) { //텍스트로 점수 출력을 위한 함수
+	$(".review_score_number").eq(idx).val(totalScore);
+}
+
+</script>
+<script type="text/javascript">
+//<![CDATA[
+
+function set_goods_list(displayId,inputGoods) {
+	{? !defined('__ISUSER__') //비회원}
+		$("#orderbtnlay").show();
+		$("#nonemblay").hide();
+	{/}
+	$.ajax({
+		type: "get",
+		url: "/goods/user_select",
+		data: "page=1&goods_review=1&order_seq={_GET.order_seq}&inputGoods="+inputGoods+"&displayId="+displayId,
+		success: function(result){
+			$("div#"+displayId).html(result);
+		}
+	});
+
+	{? _GET.popup }
+	openDialog("상품 검색", displayId, {"width":"400","height":"700","show" : "fade","hide" : "fade"});
+	{:}
+	openDialog("상품 검색", displayId, {"width":"500","height":"700","show" : "fade","hide" : "fade"});
+	{/}
+}
+
+//비회원 상품조회 새창 >> 검색완료후 처리함부
+function goodslistclose(displayId, goods_seq) {
+	$("div#"+displayId).dialog('close');
+	$("#ordergoodslist").empty();//초기화
+	$("#order_goods_list").val(goods_seq);
+	{? defined('__ISUSER__') //회원}
+		goods_review_order_load(goods_seq, '', '');
+	{/}
+}
+
+//주문조회 새창 >> 검색완료후 처리함수
+function gdordersearch() {
+	var goods_seq = $("#order_goods_list").val();
+	if(!goods_seq){
+		alert('상품을 먼저 선택해 주세요.');
+		return false;
+	}
+	$("#orderbtnlay").hide();
+	$("#nonemblay").show();
+	goods_review_order_load(goods_seq, '', '');
+}
+
+
+$(document).ready(function() {
+
+	{? _GET.goods_seq }
+	gdordersearch();
+	{/}
+
+	$("#OrderauthButton").live("click", function(){
+		var goodsseq = $("#order_goods_list").val();
+		if(!goodsseq){
+			alert('상품을 먼저 선택해 주세요.');
+			return false;
+		}
+		window.open('../member/login?order_auth=1&goodsseq='+goodsseq+'&popup=1&return_url={=urlencode(_SERVER.REQUEST_URI)}{=urlencode('&goodsseq=')}'+goodsseq,'goodrevieworder','width=700px,height=900px,statusbar=no,scrollbars=auto,toolbar=no');
+	});
+
+
+	$("button#issueGoodsButton").live("click",function(){
+		set_goods_list("displayGoodsSelect","displayGoods");
+	});
+
+
+	EditorJSLoader.ready(function(Editor) {
+		DaumEditorLoader.init(".daumeditor");
+	});
+
+	$("#backtype2").click(function() {
+		$("#returnurl").val('{boardurl->view}');
+	});
+
+	$("#backtype1").click(function() {
+		$("#returnurl").val('{boardurl->lists}');
+	});
+
+	// 게시글저장
+	$('.data_save_btn').click(function() {
+		$("#writeform").submit();
+	});
+
+	$('#writeform').validate({
+		onkeyup: false,
+		rules: {
+			subject: {required:true},
+			contents: { required:true}
+		},
+		messages: {
+			name: { required:'<font color="red">작성자를 입력해 주세요.</font>'},
+			category: { required:'<font color="red">분류를 선택해 주세요.</font>'},
+			subject: { required:'<font color="red">제목을 입력해 주세요.</font>'}
+		},
+		errorPlacement: function(error, element) {
+			setDefaultText();
+			error.appendTo(element.parent());
+		},
+		submitHandler: function(f) {
+			//if(readyEditorForm(f)){
+				if($("#addcategory").val() == "newadd"){//신규분류
+					if(!$("#newcategory").val() ) {
+						setDefaultText();
+						alert('신규분류를 입력해 주세요.');
+						$("#newcategory").focus();
+						return false;
+					}
+				}
+
+				var bcontents = $("#writeform").find("#contents").val();
+				if(!bcontents || bcontents.toLowerCase() == "<p>&nbsp;</p>"  || bcontents.toLowerCase() == "<p><br></p>" ){
+					setDefaultText();
+					alert('내용을 입력해 주세요.');
+					$("#contents").focus();
+					return false;
+				}
+
+				loadingstartsubmit();
+				
+
+				if (submitFlag == true)
+				{
+				 alert('게시물을 등록하고 있습니다. 잠시만 기다려 주세요.');
+				 return false;
+				}   
+				submitFlag = true;
+				f.submit();
+			//}
+		}
+	});
+
+});
+
+
+{? (manager.file_use == 'Y' || filelist) && !ismobile //첨부파일 사용중이거나 첨부파일이 있는 경우  }
+function readfilelist(frm){
+	//Editor.getSidebar().getAttacher().image.boxonly = true;
+	//Editor.getSidebar().getAttacher().file.boxonly = true;
+		{? filelist}
+			{@ filelist}
+			var  filePath = '{.realfiledir}';//
+			var  realthumbfile = '{.realthumbfile}';//
+			var  filePathurl = '{.realfiledir}';//
+			var  orig_name = '{.orignfile}';
+			var  file_size = '{.sizefile}';
+			var  typefile = '{.typefile}';
+			var  realfileurl = '{.realfileurl}';
+
+			{? strstr(.typefile,'image/') || in_array(.typefile, array('image/jpg','image/jpeg','image/png','image/gif','image/bmp','image/tif','image/pic')) }
+				_mockdata = {
+					'imageurl': filePathurl,
+					'filename': orig_name,
+					'filesize': file_size,
+					'imagealign': 'C',
+					'originalurl': realfileurl,
+					'thumburl': realthumbfile
+				};
+			Editor.getSidebar().getAttacher("image").execAttach(_mockdata);
+			{:}
+				_mockdata = {
+				'filename': orig_name,
+				'filesize': file_size,
+				'filemime':typefile,
+				'attachurl': filePath
+				};
+			Editor.getSidebar().getAttacher("file").execAttach(_mockdata);
+			{/}
+			{/}
+		{/}
+}
+{/}
+
+//]]>
+</script>

@@ -1,0 +1,348 @@
+<style type="text/css">
+.fleft {float:left;}
+.fright {float:right;}
+div.bigdata-wrap {width:100%;text-align:center;}
+div.bigdata_top_img {width:100%;margin:0 auto;text-align:center;}
+div.goods-view {width:1000px;margin:0 auto;margin-bottom:60px;}
+#goods_thumbs { text-align:left; }
+#goods_thumbs .pagination {position:relative; width:90%; margin:auto; text-align:center; overflow:hidden; white-space:nowrap;}
+#goods_thumbs .pagination li {display:inline;}
+#goods_thumbs .pagination li img,#goods_thumbs .pagination li embed {border:1px solid #fff; margin:5px 2px;}
+#goods_thumbs .pagination li.current img {border:1px solid #333;}
+
+.total_goods_price {font-size:18px; font-family:"tahoma","dotum"; font-weight:Bold; color:#ed2b07;}
+.goods_name			{color:#000000; font-size:16px; letter-spacing:-1px; font-weight:bold; }
+.short_desc			{color:#858585; font-size:11px; letter-spacing:-1px; ;}
+.goods_description	{padding:10px 0 20px 0;}
+.exchange_guide		{padding:10px 0 20px 0; overflow:hidden;}
+.sale_price			{color:#ff5500;}
+
+.goods_spec_table {border-top:2px solid #ddd; border-bottom:0px solid #ddd;}
+.goods_spec_table th {text-align:left; color:#616161; min-height:30px; height:38px; font-weight:normal; border-bottom:1px dotted #ddd; letter-spacing:-1px}
+.goods_spec_table td {text-align:left; color:#616161; font-weight:bold; font-size:13px;border-bottom:1px dotted #ddd}
+.goods_spec_table .consumer	{color:#616161; font-weight:bold;}
+.goods_spec_table .price		{color:#ff5500; font-weight:bold; font-size:18px}
+.goods_spec_table select {min-width:120px;}
+.goods_spec_table .coupon_btn {position:relative; display:inline-block; width:71px; height:34px; background:url("../images/design/coupon_bg.gif"); vertical-align:middle;}
+.goods_spec_table .coupon_btn span.cb_percent {position:absolute; left:4px; top:14px; font-size:14px; font-family:tahoma; color:#c00c0b; font-weight:bold;}
+.goods_spec_table .coupon_btn span.cb_text {position:absolute; left:100%; top:20px; margin-left:3px; width:65px; color:#c00c0b; font-size:11px; font-family:dotum; font-weight:bold; text-decoration:underline;}
+
+</style>
+<script type="text/javascript">
+var gl_member_seq = "{sessionMember.member_seq}";
+$(document).ready(function(){
+
+	setSlideSwipe('.slides_wrap', '.main_tabs_contents', 'resimg_num');
+
+	{? eventEnd}
+	timeInterval{goodsinfo.goods_seq} = setInterval(function(){
+		var time{goodsinfo.goods_seq} = showClockTime('text', '{eventEnd.year}', '{eventEnd.month}', '{eventEnd.day}', '{eventEnd.hour}', '{eventEnd.min}', '{eventEnd.second}', 'soloday', 'solohour', 'solomin', 'solosecond', '{goodsinfo.goods_seq}');
+		if(time{goodsinfo.goods_seq} == 0){
+			clearInterval(timeInterval{goodsinfo.goods_seq});
+			alert("단독이벤트가 종료되었습니다.");
+			document.location.reload();
+		}
+	},1000);
+	{/}
+
+	$("button.btn-goods").click(function(){
+		location.href	= '../goods/view?no={goodsinfo.goods_seq}';
+	});
+
+	{? wish_seq}
+		$('#wishimg').attr('src','../images/design/i_wish_red.png');
+		$('#wishimg').attr('usewish','y');
+	{/}
+});
+
+function resimg_num(i){
+	var slide_current = $(".slides_wrap").data('slide_current');
+	$('.dot_paging').attr('src','../images/design/intro_dot.png');
+	$('#dot_'+i).attr('src','../images/design/intro_dot_on.png');
+	$('.main_tabs_contents').eq(slide_current).removeClass('active');
+	$('.main_tabs_contents').eq(i).addClass('active');
+	var k=0;
+	$('.main_tabs_contents').each(function(){
+		if(i == k) $(this).show();
+		else $(this).hide();
+
+		k = k + 1;
+	});
+	$(".slides_wrap").data('slide_current',i);
+}
+
+function openlayer(type){
+	$('#'+type).slideToggle(300);
+}
+
+function wish_chg(){
+	if(!gl_member_seq){
+		if(confirm('회원만 사용가능합니다.\n로그인하시겠습니까?')){
+			var url = "/member/login?return_url={_SERVER['REQUEST_URI']}";
+			top.document.location.href = url;
+			return;
+		}else{
+			return;
+		}
+	}
+	if($('#wishimg').attr('usewish') == 'n'){
+		$('#wishimg').attr('src','../images/design/i_wish_red.png');
+		$('#wishimg').attr('usewish','y');
+		$('iframe[name=actionFrame]').attr('src','../mypage/wish_add?seqs[]={goodsinfo.goods_seq}');
+	}else{
+		$('#wishimg').attr('src','../images/design/i_wish_white.png');
+		$('#wishimg').attr('usewish','n');
+		$('iframe[name=actionFrame]').attr('src','../mypage/wish_del?seqs={goodsinfo.goods_seq}');
+	}
+}
+</script>
+<div class="bigdata-wrap">
+	<div class="sub_title_bar">
+		<h2>상품상세</h2>
+		<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+	</div>
+
+	<div class="bigdata_top_img"><img src="../images/design/bigdata_top_img.gif" width="100%" /></div>
+
+	{? eventEnd}
+	<div class="event_datetime">
+	<table width="100%" height="100" border="0">
+		<tr>
+			<td height="100" bgcolor="{goodsinfo.event.bgcolor}" valign="top">
+				<div style="height:10px;"></div>
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td align="center" style="font-size:30px; font-face:Tahoma; font-wegiht:bold; color:#fff; letter_spacing:-1px;">{goodsinfo.event.title_contents}</td>
+					</tr>
+					<tr><td height="10"></td></tr>
+					<tr>
+						<td>
+							<table border="0" cellspacing="0" cellpadding="0" align="center">
+								<td width="10"></td>
+								<td>
+									<table border="0" cellspacing="0" cellpadding="0">
+										<tr>
+											<td><img src="../images/common/social_bg_dayl.png" width="6" height="40"></td>
+											<td style="background:url('../images/common/social_bg_daym.png'); background-size:100px 40px;" align="center"><span id="soloday" style="color:#000000; font-weight:bold; font-face:Tahoma; font-size:28px;">0</span></td>
+											<td><img src="../images/common/social_bg_dayr.png" width="6" height="40"></td>
+										</tr>
+									</table>
+								</td>
+								<td width="5"></td>
+								<td style="font-face:Dotum; font-size:12px; color:#000000; letter-spacing:-1px;">일</td>
+								<td width="20"></td>
+								<td>
+									<table border="0" cellspacing="0" cellpadding="0">
+										<tr>
+											<td><img src="../images/common/social_bg_timel.png" width="6" height="40"></td>
+											<td style="background: url(../images/common/social_bg_timem.png); background-size:100px 40px;" align="center"><span id="solohour" style="color:#000000; font-weight:bold; font-face:Tahoma; font-size:28px;">00</span></td>
+											<td><img src="../images/common/social_bg_timer.png" width="6" height="40"></td>
+										</tr>
+									</table>
+								</td>
+								<td width="15" style="color:#000000;" align="center">:</td>
+								<td>
+									<table border="0" cellspacing="0" cellpadding="0">
+										<tr>
+											<td><img src="../images/common/social_bg_timel.png" width="6" height="40"></td>
+											<td style="background: url(../images/common/social_bg_timem.png); background-size:100px 40px;" align="center"><span id="solomin" style="color:#000000; font-weight:bold; font-face:Tahoma; font-size:28px;">00</span></td>
+											<td><img src="../images/common/social_bg_timer.png" width="6" height="40"></td>
+										</tr>
+									</table>
+								</td>
+								<td width="15" style="color:#000000;" align="center">:</td>
+								<td>
+									<table border="0" cellspacing="0" cellpadding="0">
+										<tr>
+											<td><img src="../images/common/social_bg_timel.png" width="6" height="40"></td>
+											<td style="background: url(../images/common/social_bg_timem.png); background-size:100px 40px;" align="center" ><span id="solosecond" style="color:#000000; font-weight:bold; font-face:Tahoma; font-size:28px;">00</span></td>
+											<td><img src="../images/common/social_bg_timer.png" width="6" height="40"></td>
+										</tr>
+									</table>
+								</td>
+							</table>
+						</td>
+					</tr>
+					<tr><td height="10"></td></tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	</div>
+	{ / }
+	<div id="goods_view">
+		<!-- 상품 스펙 -->
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr><td height="10"></td></tr>
+		<tr>
+			<td>
+				<div class="center short_desc">{goodsinfo.summary}</div>
+			</td>
+		</tr>
+		<tr><td height="5"></td></tr>
+		<tr>
+			<td>
+				<div class="center goods_name">
+					{goodsinfo.goods_name}
+					<!--{ @ icons }-->
+						<img src="/data/icon/goods/{.codecd}.gif" border="0">
+					<!--{ / }-->
+				</div>
+			</td>
+		</tr>
+		<tr><td height="10"></td></tr>
+		</table>
+
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td valign="top">
+				<!-- 상품 이미지 -->
+				<table width="100%" cellpadding="0" cellspacing="0" align="center" >
+				<tr>
+					<td>
+						<div id="goods_thumbs">
+							<!--{ ? images && count(images) > 1 }-->
+							<div class="slide-wrap">
+								<div class="slides_wrap">
+								<!--{ @ images }-->
+									<div class="main_tabs_contents slide {? .index_ == 0}active{/}" id="slide{.index_}" style="text-align:center;{? .index_ != 0}display:none;{/}">
+										<a href="javascript:;" style="margin:auto;display:inline-block;width:100%;">
+									<!--{ ? .view.image_type == 'video' }-->
+											<iframe  width="{goodsinfo.video_size_mobile0}" height="{goodsinfo.video_size_mobile1}" src="{.view.image}" frameborder="0" allowfullscreen  ></iframe>
+									<!--{ : }-->
+											<img src="{.view.image}" width="100%" onerror="this.src='../images/common/noimage.gif'" title="{images[1].large.label}" />
+									<!--{ / }-->
+										</a>
+								</div>
+								<!--{ / }-->
+								</div>
+							</div>
+							<!--{ : }-->
+							<a href="javascript:;"><img src="{images[1].view.image}" width="100%" onerror="this.src='../images/common/noimage.gif'" title="{images[1].large.label}" /></a>
+							<!--{ / }-->
+							
+							<div style="margin:10px auto; text-align:center;">
+							<!--{ @ images }-->
+								<img src="../images/design/intro_dot{? .index_ == 0}_on{/}.png" class="dot_paging hand" id="dot_{.index_}" idx="{.index_}" {? .view.match_color } color="{.view.match_color}" {/}/>
+							<!--{ / }-->
+							</div>
+						</div>
+						<div class="cboth clearbox" style="margin:25px 0;">
+							<div class="fleft"><a href="javascript:popup('../goods/zoom?no={goodsinfo.goods_seq}&popup=1',{=(goodsImageSize.view.width+400)},{=(goodsImageSize.view.width+350)},'no')"><img src="../images/design/icon_zoom.png" width="30" height="30" hspace="1" /></a></div>
+							<div class="fright">{=snslinkurl('goods', goodsinfo.goods_name)}</div>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td height="5"></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td valign="top">
+				<!-- 상품 스펙 -->
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<td>
+						<table class="goods_spec_table" width="100%" cellpadding="0" cellspacing="0" border="0">
+						<col width="67" />
+						<tr>
+							<th>판매가격</th>
+							<td>
+							<!--{? goodsinfo.string_price_use }-->
+								<b class="price">{goodsinfo.string_price}</b>
+							<!--{ : }-->
+								<!--{ ? goodsinfo.org_price > goodsinfo.sale_price }-->
+								<b class="consumer"><s>{=number_format(goodsinfo.org_price)}원</s></b>
+								<!--{ / }-->
+
+								<span id="price_area" {?goodsinfo.sum_sale_price}class="hand"{/}>
+								<!--{ ? goodsinfo.org_price > goodsinfo.sale_price }-->
+								→
+								<!--{ / }-->
+								<!--{ ? goodsinfo.sum_sale_price }-->
+									<span class="hand" onclick="openDialog('','priceDetailDialog','')">
+								<!--{ / }-->
+										<b class="price">
+											{? goodsinfo.sale_price > 0 }{=number_format(goodsinfo.sale_price)}{:}0{/}원
+											{? goodsinfo.sale_rate }({=number_format(goodsinfo.sale_rate)}%){/}
+										</b>
+								<!--{ ? goodsinfo.sum_sale_price }-->
+										<img src="/admin/skin/default/images/common/icon/icon_sale.gif" alt="할인내역" />
+									</span>
+								<!--{ / }-->
+								</span>
+							<!--{ / }-->
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr><td height="20"></td></tr>
+				<tr>
+					<td align="center">
+						<table width="100%" border="0" cellpadding="0" cellspacing="2">
+						<col width="20%" /><col width="80%" />
+						<tr>
+							<td>
+								<button type="button" style="width:100%;" class="btn_normal_large hand" onclick="wish_chg();"><img id="wishimg" src="../images/design/i_wish_white.png" width="25" height="25" usewish="n" /></button>
+							</td>
+							<td>
+								<button type="button" style="width:100%;" class="btn_important_large btn-goods hand">상품상세정보</button>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td height="60"></td>
+		</tr>
+		</table>
+	</div>
+
+	<!--{ @ kinds }-->
+	<div class="bigdata-title-bar">
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td><img src="../images/design/ico_bd_{ .key_ }.png" /></td>
+			<td>{ .textStr }</td>
+		</tr>
+		</table>
+	</div>
+	<div class="bigdata-goods-list">
+		{ .display }
+	</div>
+	<!--{ / }-->
+
+</div>
+
+<div id="priceDetailDialog" style="display:none">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="#000000" >
+	<tr>
+		<td class="left pdl5" style="font-weight:bold; color:#fff; font-size:12px;" height="25">할인내역 </td>
+		<td class="right" height="25"></td>
+	</tr>
+	</table>
+	<div style="max-height:200px;overflow:auto;">
+		<table class="gilTable" width="100%" border="0" cellpadding="0" cellspacing="0" >
+		<col width="100" />
+		<!--{ @ sales.sale_list }-->
+			<!--{ ? .value_ > 0 }-->
+		<tr height="25">
+			<td class="left" style="height:25px;line-height:20px;">
+				<img src="/admin/skin/default/images/common/arrow_right.gif" />
+				{sales.title_list[.key_]}
+			</td>
+			<td class="right pdr5" style="height:25px;line-height:20px;">
+				{=number_format(.value_)} 원
+			</td>
+		</tr>
+			<!--{ / }-->
+		<!--{ / }-->
+		</table>
+	</div>
+</div>

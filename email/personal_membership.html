@@ -1,0 +1,67 @@
+<table width="696" border="0" cellspacing="0" cellpadding="0">
+	<tbody><tr><td height="20" style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;"></td></tr>
+	<tr>
+		<td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;"><img src="/data/mail/logo.gif"></td>
+	</tr>
+	<tr><td height="20" style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;"></td></tr>
+	<tr><td height="2" style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" bgcolor="#000000"></td></tr>
+	<tr><td height="60" style="height: 60px; color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;"></td></tr>
+	<!-- 내용시작 -->
+	<tr>
+		<td style="color: rgb(35, 35, 35); line-height: 40px; font-family: 돋움,Dotum; font-size: 34px; font-weight: bold;">{config_basic.shopName} 멤버쉽 서비스</td>
+	</tr> 
+	<tr><td height="20" style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;"></td></tr>
+	<tr><td class="texts" style="color: rgb(97, 106, 116); line-height: 22px; padding-left: 10px; font-family: 돋움, Dotum; font-size: 12px;">{username}님, 안녕하세요. {config_basic.shopName}쇼핑몰 입니다.</td></tr>
+	<tr><td class="texts" style="color: rgb(97, 106, 116); line-height: 18px; padding-top: 10px; padding-left: 10px; font-family: 돋움, Dotum; font-size: 12px;"><p>회원님을 위한 특별한 혜택 서비스<br>회원님의 등급을 확인하시고 다양한 할인 혜택을 받으세요!</p></td></tr>
+	<tr><td height="20" style="text-align: left; color: rgb(77, 77, 77); line-height: 18px; font-size: 12px;"></td></tr>
+	<tr>
+		<td align="center" style="color: rgb(77, 77, 77); line-height: 20px; font-family: 돋움,Dotum; font-size: 12px; border-top-color: rgb(105, 105, 105); border-bottom-color: rgb(105, 105, 105); border-top-width: 2px; border-bottom-width: 2px; border-top-style: solid; border-bottom-style: solid;">
+		<div style="margin: 15px; width: 100%; color: rgb(0, 0, 0); clear: both;">
+			<div style="padding: 10px; border-radius: 8px; border: 1px solid rgb(221, 221, 221); border-image: none; width: 60px; height: 60px; text-align: center; margin-bottom: 15px; float: left;">{grade_icon}</div>
+			<div style="text-align: left; margin-left: 15px; float: left;">
+				<div style="text-align: left; line-height: 40px; font-size: 20px;"><strong>회원님의 멤버쉽 등급은 {grade_name}입니다.</strong></div>
+				<div style="text-align: left;">등급 기간 : {grade_date}</div>
+				<div style="text-align: left;">산출 기간 : 최근 {grade_chkdt}개월간 구매 활동</div>
+			</div>
+		</div>
+		</td>
+	</tr>
+	<tr>
+		<td align="center" style="border-bottom-color: rgb(105, 105, 105); border-bottom-width: 2px; border-bottom-style: solid;">
+		<div style="margin: 0px; padding-bottom: 5px;">
+			<!--{@ grade_list }-->
+			<div style="margin: 0px; padding: 15px; height: 82px; border-top-color: rgb(221, 221, 221); border-top-width: 1px; border-top-style: solid;">
+			<div style="padding: 0px; width: 100%; height: 82px; text-align: left; color: rgb(0, 0, 0); clear: both; margin-top: 0px; margin-bottom: 0px; position: relative;">
+				<div style="width: 85px; height: 82px; text-align: center; margin-bottom: 0px; margin-left: 0px; float: left;">
+					<div style="padding: 10px; border-radius: 8px; border: 1px solid rgb(221, 221, 221); border-image: none; width: 60px; height: 60px;">{.grade_icon}</div>
+				</div>
+				<div style="width: 550px; text-align: left; font-family: 돋움,Dotum; font-size: 12px; margin-left: 15px; float: left;">
+					<div style="text-align: left; line-height: 28px; font-size: 13px;"><strong>{.grade_name}</strong></div>
+					<div style="text-align: left;">
+						{.sale_use}<br>회원등급 쿠폰<br>{?.sale_price}추가할인 : {.sale_price}{/}  {?.point_price}{?.sale_price}/ {/}추가 포인트 : {.point_price}{/} {?.reserve_price}{?.sale_price || .reserve_price}/ {/}추가 적립금 : {.reserve_price}{/}
+					</div>
+				</div>
+			</div>
+			</div>
+			<!--{ / }-->
+		</div>
+		</td>
+	</tr>
+	<tr><td height="40" style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;"></td></tr>
+	<tr>
+		<td align="center" style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;"><a style="padding: 12px 18px; border-radius: 5px; text-align: center; color: rgb(255, 255, 255); font-family: 돋움,Dotum; font-size: 14px; font-weight: bold; text-decoration: none; background-color: rgb(0, 0, 0);" href="{mypage_short_url}" target="_blank"><strong>나의 등급 보기 &gt;</strong></a></td>
+	</tr>
+	<tr><td height="30" style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;"></td></tr>
+	<tr><td height="2" style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" bgcolor="#000000"></td></tr>
+	<tr><td height="20" style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;"></td></tr>
+	<tr>
+		<td class="company" style="text-align: center; color: rgb(151, 158, 165); line-height: 22px; font-family: 돋움, Dotum; font-size: 11px;">
+			사업자등록번호 : {config_basic.businessLicense}&nbsp;&nbsp;&nbsp;&nbsp;통신판매업신고번호 : {config_basic.mailsellingLicense}&nbsp;&nbsp;&nbsp;&nbsp;대표이사 : {config_basic.ceo}
+		</td>
+	</tr>
+	<tr>
+		<td class="company" style="text-align: center; color: rgb(151, 158, 165); line-height: 22px; font-family: 돋움, Dotum; font-size: 11px;">
+			주소 : {config_basic.companyAddress} {config_basic.companyAddressDetail}&nbsp;&nbsp;&nbsp;&nbsp;대표전화 : {config_basic.companyPhone}&nbsp;&nbsp;&nbsp;&nbsp;팩스 : {config_basic.companyFax}
+		</td>
+	</tr>
+</tbody></table><p><br></p>

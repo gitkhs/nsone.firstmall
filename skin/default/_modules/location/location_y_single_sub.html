@@ -1,0 +1,55 @@
+<style>
+#{locationNavigationKey} .categoryDepth1		{position:relative; height:25px; padding-right:5px; text-align:right;}
+#{locationNavigationKey} .categorySub {position:absolute; padding:15px 17px; z-index:10; display:none; top:0px; left:100%; border-collapse:collapse; border:1px solid black; background-color:white; text-align:left;}
+#{locationNavigationKey} .categorySubItemsTitle {}
+#{locationNavigationKey} .categorySubItems {margin-top:10px; min-width:120px;}
+#{locationNavigationKey} .categorySubItems li.categorySubDepth {padding-left:15px; padding-top:3px; padding-bottom:3px; background:url("../../images/common/bullet_dot.gif") no-repeat left center;}
+#{locationNavigationKey} .categorySub .categorySubBar {padding-left:10px; border-right:1px solid #eee;}
+#{locationNavigationKey} .categoryDepth1:hover .categorySub {display:block;}
+#{locationNavigationKey} .categoryAllContainer {position:relative; z-index:100}
+</style>
+
+<script>
+setLocationAllBtnEvent("{locationNavigationKey}","/common/location_all_navigation?template_path={template_path}&locationNavigationKey={locationNavigationKey}&requesturi={=urlencode(_SERVER.REQUEST_URI)}");
+</script>
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+	<td class="categoryDepth1">
+		<a href="#" class="categoryAllBtn"><img src="../../images/common/left_all_location.gif" /></a>
+		<div class="categoryAllContainer"></div>
+	</td>
+</tr>
+<!--{ @ location }-->
+<tr><td height="1" bgcolor="#e5e5e5"></td></tr>
+<tr>
+	<td class="categoryDepth1">
+		<div class="relative">
+		<a href="/goods/location?code={.location_code}"><b>{.name}</b></a>
+		<!--{ ? .childs}-->
+		<div class="categorySub">
+			<table border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td valign="top">
+					<div class="categorySubItemsTitle"><img src="../../images/common/stit_items.gif" /></div>
+					<ul class="categorySubItems" cellpadding="0" cellspacing="0">
+					<!--{ @ .childs}-->
+						<li class="categorySubDepth"><a href="/goods/location?code={..location_code}">{..name}</a></li>
+					<!--{ / }-->
+					</ul>
+				</td>
+				<!--{ ? .node_banner }-->
+				<td class="categorySubBar"></td>
+				<td class="pdl10" valign="top">
+					{.node_banner}
+				</td>
+				<!--{ / }-->
+			</tr>
+			</table>
+		</div>
+		<!--{ / }-->
+		</div>
+	</td>
+</tr>
+<!--{ / }-->
+</table>

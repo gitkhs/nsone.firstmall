@@ -1,0 +1,341 @@
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/jquery.uploadify.v2.1.4.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery_selectbox/js/jquery.selectbox-0.2.js"></script>
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+<link href="/app/javascript/plugin/jquery_selectbox/css/jquery.selectbox.css" type="text/css" rel="stylesheet" />
+
+<style>
+.goods_option_table {margin:5px 0 0 0; border:1px solid #d0d0d0; background-color:#ececec}
+.goods_option_table th {text-align:left; color:#616161; font-weight:bold; padding-left:4px;}
+.goods_option_table td {text-align:left; color:#616161; padding-left:4px;}
+.goods_option_table .desc {font-size:11px; color:#9a9a9a;}
+.goods_option_table select {width:98%;}
+.goods_quantity_table_container {margin:0px 0 0 0; border:1px solid #d0d0d0; border-top:none;}
+.goods_quantity_table .quantity_cell {padding:3px 0; border-top:1px solid #d0d0d0; padding:5px 10px; font-size:12px; ; color:#676767; }
+.goods_quantity_table .quantity_cell_sub {padding:3px 0; padding:5px 10px; font-size:12px; ; color:#676767; }
+.goods_quantity_table .quantity_cell_sub_price {padding:5px 10px; font-size:12px; ; color:#676767; }
+.goods_quantity_table .quanity_row:first-child .quantity_cell {border-top:0px}
+.goods_quantity_table .option_text {letter-spacing:-1px; font-size:11px; ; color:#000000; }
+.total_price {color:#cc0000;}
+.viewOptionsspecialays {margin-top:3px;}
+#total_goods_price {color:#ed2b07;font-weight:bold;font-size:17px;font-family:Tahoma}
+input[name='viewInputs[]'] {height:25px; line-height:25px; text-indent:8px}
+</style>
+<script type="text/javascript">
+var gl_goods_price = 0;
+var gl_event_sale_unit = 0;
+var gl_cutting_sale_price = 0;
+var gl_cutting_sale_action = "{config_system.cutting_sale_action}";
+var gl_multi_discount_use 	= "{goods.multi_discount_use}";
+var gl_multi_discount_unit = "{goods.multi_discount_unit}";
+var gl_multi_discount 		= 0;
+var gl_multi_discount_ea 	= 0;
+var gl_option_view_type = "{goods.option_view_type}";
+var gl_options_count = {=count(options)};
+var gl_opttag = '<tr class="quanity_row">';
+var gl_min_purchase_limit = '{goods.min_purchase_limit}';
+var gl_min_purchase_ea = 0;
+var gl_max_purchase_limit = '{goods.max_purchase_limit}';
+var gl_max_purchase_ea = 0;
+var gl_member_seq = "{sessionMember.member_seq}";
+var gl_request_uri = "{=urlencode(_SERVER.REQUEST_URI)}";
+var gl_goods_seq = 0;
+var gl_option_divide_title_count = {=count(goods.option_divide_title)};
+var gl_skin = "{config_system.skin}";
+
+{ ? goods.price }
+gl_goods_price = {goods.price};
+{ / }
+{ ? goods.consumer_price > goods.sale_price &&  goods.sale_price > 0 }
+gl_goods_price = {goods.sale_price};
+{ / }
+{ ? goods.event.event_sale_unit }
+gl_event_sale_unit = {goods.event.event_sale_unit};
+{ / }
+{? config_system.cutting_sale_price }
+gl_cutting_sale_price = {config_system.cutting_sale_price};
+{ / }
+{ ? goods.multi_discount }
+gl_multi_discount 		= {goods.multi_discount};
+{ / }
+{ ? goods.multi_discount_ea }
+gl_multi_discount_ea 	= {goods.multi_discount_ea};
+{ / }
+{ ? goods.min_purchase_ea }
+gl_min_purchase_ea = {goods.min_purchase_ea};
+{ / }
+{ ? goods.max_purchase_ea }
+gl_max_purchase_ea = {goods.max_purchase_ea};
+{ / }
+{ ? goods.goods_seq }
+gl_goods_seq = {goods.goods_seq};
+{ / }
+
+function goods_thumbs_scroll(){
+	$("#goods_thumbs .pagination").hide().width('{=goodsImageSize.view.width-60}').show();
+	var setGoodsThumbsPaginationScroll = function(){
+		var paginationWidth = $("#goods_thumbs .pagination").width();
+		var currentWidth = $("#goods_thumbs .pagination>li.current").outerWidth();
+		var currentLeft = $("#goods_thumbs .pagination>li.current").position().left;
+
+		var gap = ($("#goods_thumbs .pagination").scrollLeft()+currentLeft+(currentWidth/2))-(paginationWidth/2);
+
+		$("#goods_thumbs .pagination").stop(true,true).animate({'scrollLeft':gap});
+	};
+	$("#goods_thumbs .slides_container>a:gt(0)").hide();
+	$("#goods_thumbs .pagination>li:eq(0)").addClass('current');
+	$("#goods_thumbs .slides_container").show();
+	$("#goods_thumbs .pagination>li").bind('click',function(){
+		var i = $("#goods_thumbs .pagination>li").index(this);
+		$("#goods_thumbs .slides_container>a").hide().eq(i).show();
+		$("#goods_thumbs .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+	$("#goods_thumbs .prev").bind('click',function(){
+		var i = $("#goods_thumbs .slides_container>a").index($("#goods_thumbs .slides_container>a:visible"));
+		if(i<=0) i = $("#goods_thumbs .slides_container>a").length-1;
+		else i--;
+		$("#goods_thumbs .slides_container>a").hide().eq(i).show();
+		$("#goods_thumbs .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+	$("#goods_thumbs .next").bind('click',function(){
+		var i = $("#goods_thumbs .slides_container>a").index($("#goods_thumbs .slides_container>a:visible"));
+		if(i>=$("#goods_thumbs .slides_container>a").length-1) i = 0;
+		else i++;
+		$("#goods_thumbs .slides_container>a").hide().eq(i).show();
+		$("#goods_thumbs .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+}
+
+$(document).ready(function(){
+	$("select[name='viewOptions[]']").last().bind("change",function(){
+		gl_opttag = '<tr class="quanity_row">';
+		gl_opttag += '<td class="quantity_cell option_text">';
+		<!--{ @options[0].option_divide_title }-->
+		var opt = $(this).find('option:selected').attr('opt{.key_+1}');
+		if(!opt) return false;
+		gl_opttag += '	{.value_} : '+opt+'<input type="hidden" name="option[{.key_}][]" value="'+opt+'" />';
+		gl_opttag += '<input type="hidden" name="optionTitle[{.key_}][]" value="{.value_}" />';
+		<!--{ ? .size_ != .key_+1 }-->
+		gl_opttag += '<br/>';
+		<!--{ / }-->
+		<!--{ / }-->
+	});
+
+});
+</script>
+
+<script type="text/javascript" src="/app/javascript/js/goods-view.js?dummp=20131217"></script>
+
+<script>
+$(function(){
+	// 2014-12-18 옵션 개편 후 (ocw)
+	try{
+		$("select[name='viewOptions[]']").selectbox();
+		$("select[name='viewSuboption[]']").selectbox();
+	}catch(e){};
+});
+</script>
+
+<form name="goodsForm" method="post" action="../order/add" enctype="multipart/form-data" target="actionFrame">
+<input type="hidden" name="goodsSeq" value="{goods.goods_seq}" />
+<!-- 
+<input type="hidden" name="option[0][]" value="" />
+<input type="hidden" name="optionTitle[0][]" value="" />
+<input type="hidden" name="optionEa[]" value="1" />
+ -->
+<div style="padding:15px; height:450px; overflow:auto;">
+	<div>
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td width="60"><a href="/goods/view?no={goods.goods_seq}" target="_blank"><img src="{goods.image}" width="60" onerror="this.src='../images/common/noimage.gif'" /></a></td>
+			<td valign="top" style="padding:10px 0 0 10px;">{goods.goods_name}</td>
+		</tr>
+		</table>
+	</div>
+
+	<!--{ ? !(count(options) > 0 && options[0].option_title) && !goods.string_price_use }-->
+	<table class="goods_spec_table" width="100%" cellpadding="0" cellspacing="3" border="0">
+	<col width="100" />
+	<tr>
+		<th>수량</th>
+		<td>
+		<input type="hidden" name="option[0][]" value="" />
+		<input type="hidden" name="optionTitle[0][]" value="" />
+		<table align="left" border="0" cellpadding="1" cellspacing="0">
+			<tr>
+				<td>
+					<input type="text" name="optionEa[]" value="1" style="width:25px; height:15px;" />
+				</td>
+				<td align="right" style="font-size:0px;">
+					<div><img src="../images/design/btn_num_plus.gif" class="hand eaPlus" /></div>
+					<div><img src="../images/design/btn_num_minus.gif" class="hand eaMinus" /></div>
+					<div style="display:none" class="optionPrice">{goods.sale_price}</div>
+				</td>
+				<td>개</td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+	</table>
+	<!--{ / }-->
+
+	<!--{ ? (count(options) > 0 && options[0].option_title) || suboptions || inputs }-->
+	<table class="goods_option_table" width="100%" cellpadding="0" cellspacing="5" border="0">
+	<col width="70" />
+	<tr><td colspan="2" style="height:2px"></td></tr>
+
+	<!-- 필수옵션 시작 -->
+	<!--{ ? count(options) > 0 && options[0].option_title }-->
+	<tr>
+		<th>상품옵션</th>
+		<td class="desc">(다시 선택하면 상품을 추가할 수 있습니다)</td>
+	</tr>
+	<!--{ ? goods.option_view_type == 'join' && options }-->
+	<tr>
+		<th class="optionTitle">{options[0].option_title}</th>
+		<td>
+			<select name="viewOptions[]">
+			<option value="">- {options[0].option_title} 선택 -</option>
+			<!--{ @ options }-->
+			<!--{ ? .chk_stock }-->
+			<option value="{=implode('/',.opts)}" price="{.price}" opt1="{.option1}" opt2="{.option2}" opt3="{.option3}" opt4="{.option4}" opt5="{.option5}" infomation="{.infomation}">{=implode('/',.opts)}</option>
+			<!--{ : }-->
+			<option value="{=implode('/',.opts)}" price="{.price}" opt1="{.option1}" opt2="{.option2}" opt3="{.option3}" opt4="{.option4}" opt5="{.option5}" disabled="disabled">{=implode('/',.opts)} (품절)</option>
+			<!--{ / }-->
+			<!--{ / }-->
+			</select>
+			{? options[0].newtype }
+			<div class="viewOptionsspecialays"></div>
+			{/}
+			<script type="text/javascript">set_option_join();</script>
+		</td>
+	</tr>
+	<!--{ / }-->
+	<!--{ ? goods.option_view_type == 'divide' && options }-->
+	<!--{ @ goods.option_divide_title }-->
+	<tr>
+		<th class="optionTitle">{.value_}</th>
+		<td>
+			<select name="viewOptions[]" id="{.key_}" opttype="{goods.divide_newtype[.index_]}" >
+			<option value="">- {.value_} 선택 -</option>
+			</select>
+			{? goods.divide_newtype[.index_] }
+			<div class="viewOptionsspecialays {goods.divide_newtype[.index_]}" style="padding-bottom:9px;"></div>
+			{/}
+		</td>
+	</tr>
+	<!--{ / }-->
+	<!--{ / }-->
+	<!--{ / }-->
+
+	<!-- 추가입력옵션 시작 -->
+	<!--{? inputs}-->
+	<!--{ @ inputs }-->
+	<tr>
+		<th class="inputsTitle">{.input_name}</th>
+		<td>
+		<!--{ ? .input_form == 'edit' }-->
+		<textarea name="viewInputs[]" rows="4" style="width:97%;overflow:auto;" limit="{.input_limit}" onkeyup="input_limits(this,'{.input_limit}')" onkeydown="input_limits(this,'{.input_limit}')" {?.input_require}required="y"{/}></textarea>
+		<!--{ : .input_form == 'text' }-->
+		<input type="text" name="viewInputs[]" style="width:100%;" limit="{.input_limit}" onkeyup="input_limits(this,'{.input_limit}')" onkeydown="input_limits(this,'{.input_limit}')" {?.input_require}required="y"{/} />
+		<!--{ : .input_form == 'file' }-->
+		<span class="webftpFormItem">
+		<img src="" class="webftpFormItemPreview hand" onerror="$(this).hide()" style="width:20px; height:20px;" onclick="window.open(this.src)" title="이미지 보기" />
+		<input type="text" class="webftpFormItemInput hide" name="viewInputs[]" {?.input_require}required="y"{/} />
+		<input type="text" class="webftpFormItemInputOriName hide" name="viewInputsOriName[]" />
+		<input class="inputsUploadButton" id="inputs{.index_}UploadButton" type="file" value="" class="uploadify" />
+		</span>
+		<!--{ / }-->
+		</td>
+	</tr>
+	<!--{ / }-->
+	<!--{ ? count(options) > 0 && options[0].option_title }-->
+	<tr>
+		<th class="optionTitle"></th>
+		<td>
+			<span class="btn small black"><button type="button" class="viewOptionsApply">위의 정보로 선택</button></span>
+		</td>
+	</tr>
+	<!--{ / }-->
+	<!--{ / }-->
+	<!-- 추가입력옵션 끝 -->
+	<!-- 추가옵션 시작 -->
+	<!--{ ? suboptions }-->
+	<tr><td colspan="2" style="height:5px"></td></tr>
+	<tr><td colspan="2" style="border-top:1px solid #ccc"></td></tr>
+	<tr><td colspan="2" style="height:5px"></td></tr>
+	<tr>
+		<th>추가구성</th>
+		<td class="desc">(추가 구매를 원하시면 선택하세요.)</td>
+	</tr>
+	<!--{ @ suboptions }-->
+	<tr>
+		<td class="suboptionTitle">{.value_[0].suboption_title}</td>
+		<td>
+			<select name="viewSuboption[]" {?.value_[0].sub_required=='y'}required="y"{/}>
+				<option value="">선택안함</option>
+				<!--{ @ .value_ }-->
+				<!--{ ? ..chk_stock }-->
+					<!--{ ? ..price > 0 }-->
+					<option value="{..suboption}" price="{..price}">{..suboption} (추가 {=number_format(..price)}원)</option>
+					<!--{ : }-->
+					<option value="{..suboption}" price="0">{..suboption}</option>
+					<!--{ / }-->
+				<!--{ : }-->
+					<option value="{..suboption}" price="0" disabled>{..suboption} (품절)</option>
+				<!--{ / }-->
+				<!--{ / }-->
+			</select>
+			<div class="viewSubOptionsspecialays">
+			<!--{ @ .value_ }-->
+				<!--{? ..newtype == 'color' }-->
+					<!--{ ? ..chk_stock }-->
+							<span  class='{..color}'  ><span name='viewSubOptionsspecialbtn' opspecialtype='color' class='viewSubOptionsspecialbtn hand bbs_btn {..color}'  style='width:30px; height:30px; margin-top:2px; margin-left:2px; border:0px solid #e8e8e8; color:{..color};size:25px;'  value=\"{..suboption}\"  suboptvalue="{..suboption}" price='{..price}' eqindex='{=(.index_-1)}' opspecial_location='1' ><font size='5'>■</font></span></span>
+					<!--{ : }-->
+							<span  class='{..color}'  ><span name='' opspecialtype='color' class=' hand bbs_btn {..color}'  style='width:30px; height:30px; margin-top:2px; margin-left:2px; border:0px solid #e8e8e8; color:{..color};size:25px;'  value=\"{..suboption}\"  suboptvalue="{..suboption}" price='{..price}' eqindex='{=(.index_-1)}' opspecial_location='1' ><font size='5'>■</font>(품절)</span></span>
+					<!--{/}-->
+				<!--{/}-->
+			<!--{ / }-->
+			</div>
+		</td>
+	</tr>
+	<!--{?.value_[0].sub_required=='y'}-->
+	<input type="hidden" name="suboption_title_required[]" value="{.value_[0].suboption_title}" />
+	<!--{ / }-->
+	<!--{ / }-->
+	<!--{ / }-->
+	<!-- 추가옵션 끝 -->
+	<tr id="viewoptionsInfoTr" class="hide">
+		<td></td>
+		<td id="viewOptionsInfo" style="word-break:break-all;"></td>
+	</tr>
+	</table>
+	<!--{ / }-->
+
+	<!-- 필수옵션 끝 -->
+	<!--{ ? !goods.string_price_use }-->
+	<div class="goods_quantity_table_container" style="display:none">
+		<table class="goods_quantity_table" width="100%" cellpadding="0" cellspacing="0" border="0">
+		<col /><col width="70"><col width="90" />
+		</table>
+	</div>
+	<!--{ / }-->
+</div>
+
+<div style="position:absolute;left:0px;bottom:0px;width:100%">
+<table width="100%" style="background-color:#ececec" cellpadding="0" cellspacing="12" border="0">
+<tr>
+	<td style="padding-left:10px;" class="fx12"><strong>총 상품금액 : </strong><span id="total_goods_price">{=number_format(goods.price)}</span> <strong class="fx13" style="color:#ff0000">원</strong></td>
+	<td align='right'><button class="black_btn large" id="addCart" type="button">장바구니담기</button></td>
+</tr>
+</table>
+
+</div>
+</form>
+<script>//calculate_goods_price();</script>

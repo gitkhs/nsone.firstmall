@@ -1,0 +1,160 @@
+<style type="text/css">
+.mshop_top_bar					{padding-bottom:20px; border-bottom:1px solid #eeeeee;}
+.mshop_top_tb td				{line-height:70px;}
+.mshop_top_tb td.home_icon		{padding:0 5px;}
+.mshop_top_tb td.shop_name		{font-size:16px;font-family:Dotum;color:#000;font-weight:bold;
+								letter-spaceing:-1px;padding:3px 5px 0 0;}
+.mshop_top_tb td.reg_btn		{padding-right:5px;}
+.mshop_top_tb td.my_sel			{padding-top:2px;}
+.mshop_top_tb td.my_sel	option	{font-size:11px;font-family:Dotum;color:#434343;}
+.mshop_visual					{width:100%;text-align:center;}
+.mshop_category					{margin-top:20px;}
+.mshop_category .locate_all		{line-height:24px;font-size:12px;font-family:Dotum;font-weight:bold;
+								color:#4c4c4c;}
+.mshop_category .locate			{font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;}
+.mshop_search					{margin-top:10px;border-bottom:1px solid #eeeeee;width:100%;}
+.mshop_search_tb td				{line-height:40px;}
+.mshop_search_tb td.search_str	{font-family:Dotum;font-size:14px;color:#000;}
+.mshop_goods_list				{padding:20px 0;width:100%;}
+.reg_minishop					{cursor:pointer;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+	$(".display_btn").each(function(){
+		$(this).css('cursor', 'pointer');
+		$(this).live('click', function(){
+			if	($(this).index() == 2)
+				location.replace('./?{page.querystring}&display_style=list');
+			else
+				location.replace('./?{page.querystring}&display_style=');
+		});
+	});
+
+	$("select[name='perpage'] , select[name='sort']").live('change', function(){
+		$("form[name='srcFrm']").submit();
+	});
+	$(".reg_minishop").live("click", function(){
+		{ ? !ss.member_seq}
+		location.href	= "/member/login?return_url={=urlencode(ss.return_url)}";
+		{ : thisshop == 'y' }
+		alert('이미 등록된 단골 미니샵입니다.');
+		{ : }
+		window.open('/popup/minishop_reg?m={pv.provider_seq}', 'minishop_reg', 'width=500,height=300');
+		{ / }
+	});
+	$("#fshop").live("change", function(){
+		location.href	= './?m=' + $("#fshop option:selected").val();
+	});
+	$("#srcFrm").live("submit", function(){
+		if	($("input[name='sprice']").val() && $("input[name='eprice']").val()){
+			if	($("input[name='sprice']").val() > $("input[name='eprice']").val()){
+				alert('최소가격은 최대가격 보다 작아야 합니다.');
+				return false;
+			}
+		}
+
+		return true;
+	});
+});
+</script>
+
+<!-- Mini Shop Top -->
+<div class="mshop_top_bar">
+	<table cellpadding="0" cellspacing="0" border="0" class="mshop_top_tb">
+	<tr>
+		<td class="home_icon"><img src="../images/icon/icon_mns.gif" /></td>
+		<td class="shop_name">{pv.provider_name}</td>
+		<td class="reg_btn"><img src="../images/common/btn_mns_reg.gif" class="reg_minishop" /></td>
+		<td class="my_sel">
+			<select id="fshop">
+				<option value="">나의 단골미니샵</option>
+				{ ? my }{ @ my }
+				<option value="{my.provider_seq}">{my.provider_name}</option>
+				{ / }{ / }
+			</select>
+		</td>
+	</tr>
+	</table>
+
+	<div class="mshop_visual"><img src="{pv.main_visual}" onerror="this.src='../images/common/mns_banner.gif';" /></div>
+</div>
+
+<div style="padding:0 0 20px 0">
+{=showGoodsSearchForm(sc)}
+</div>
+
+<div class="goods_list_summary">전체 상품 <b>{=number_format(page.totalcount)}</b> 개</div>
+<div class="goods_list_top">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td align="left">
+			{?sort}
+			<span class="sort_item">
+				<!--{ @ orders }-->
+					<!--{ ? .index_ }-->
+					&nbsp;&nbsp;|&nbsp;&nbsp;
+					<!--{ / }-->
+					<!--{ ? .key_ == sort }-->
+						<a href="?sort={.key_}&{=get_args_list(array('page','sort'))}"><b>{.value_}</b></a>
+					<!--{ : }-->
+						<a href="?sort={.key_}&{=get_args_list(array('page','sort'))}">{.value_}</a>
+					<!--{ / }-->
+				<!--{ / }-->
+			</span>
+			{/}
+		</td>
+		<td align="right">
+			<select name="perpage" onchange="document.location.href='?perpage='+this.value+'&{=get_args_list(array('page','perpage'))}'">
+				<option value="{=perpage_min}" {?_GET.perpage==perpage_min}selected{/}>{=number_format(perpage_min)}개씩 보기</option>
+				<option value="{=perpage_min*2}" {?_GET.perpage==perpage_min*2}selected{/}>{=number_format(perpage_min*2)}개씩 보기</option>
+				<option value="{=perpage_min*5}" {?_GET.perpage==perpage_min*5}selected{/}>{=number_format(perpage_min*5)}개씩 보기</option>
+				<option value="{=perpage_min*10}" {?_GET.perpage==perpage_min*10}selected{/}>{=number_format(perpage_min*10)}개씩 보기</option>
+			</select>
+			
+			<ul class="goods_list_style">
+				<li {?list_style=='lattice_a'}class="lattice_a_on"{:}class="lattice_a"{/}><a href="?display_style=lattice_a&{=get_args_list(array('page','display_style'))}" title="격자형A"></a></li>
+				<li {?list_style=='lattice_b'}class="lattice_b_on"{:}class="lattice_b"{/}><a href="?display_style=lattice_b&{=get_args_list(array('page','display_style'))}" title="격자형B"></a></li>
+				<li {?list_style=='list'}class="list_on"{:}class="list"{/}><a href="?display_style=list&{=get_args_list(array('page','display_style'))}" title="리스트형"></a></li>
+			</ul>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<div style="height:24px"></div>
+
+<!--{ ? page.totalcount==0 }-->
+<table align="center" cellpadding="0" cellspacing="0" border="0">
+<tr><td height="50"></td></tr>
+<tr>
+	<td>
+		<span class="small">이 분류에 상품이 없습니다.</span>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+<!--{ : }-->
+{goodsDisplayHTML}
+<!--{ / }-->
+
+<div style="height:30px"></div>
+
+<table align="center" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+		<div class="paging_navigation">
+			<!--{ ? page.first }--><a href="?page={page.first}&amp;{page.querystring}" class="first">◀ 처음</a><!--{ / }-->
+			<!--{ ? page.prev }--><a href="?page={page.prev}&amp;{page.querystring}" class="prev">◀ 이전</a><!--{ / }-->
+			<!--{ @ page.page }-->
+				<!--{ ? page.nowpage ==  .value_ }-->
+					<a href="?page={.value_}&amp;{page.querystring}" class="on">{.value_ }</a>
+				<!--{ : }-->
+					<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? page.next }--><a href="?page={page.next}&amp;{page.querystring}" class="next">다음 ▶</a><!--{ / }-->
+			<!--{ ? page.last }--><a href="?page={page.last}&amp;{page.querystring}" class="last">마지막 ▶</a><!--{ / }-->
+		</div>
+	</td>
+</tr>
+</table>

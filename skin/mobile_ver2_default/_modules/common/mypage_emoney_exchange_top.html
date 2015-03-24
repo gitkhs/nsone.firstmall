@@ -1,0 +1,20 @@
+<!--{?userInfo.member_seq}-->
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>적립금/포인트 교환</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+<!-- 상단 마이 리스트 버튼바 -->
+<div class="sub_title_button_bar">
+	<table class="sub_title_button_tb" border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed">
+	<tr>
+		<td onclick="location.href='emoney_exchange'" {?uri_string()=='mypage/emoney_exchange'}class="sel"{/} >
+			적립금 교환
+		</td>
+		<td onclick="location.href='point_exchange'" {?uri_string()=='mypage/point_exchange'}class="sel"{/}>
+			포인트 교환
+		</td>
+	</tr>
+	</table>
+</div>
+<!--{/}-->

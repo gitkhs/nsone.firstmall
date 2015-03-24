@@ -1,0 +1,20 @@
+<!--{?userInfo.member_seq}-->
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>쿠폰/코드</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+<!-- 상단 마이 리스트 버튼바 -->
+<div class="sub_title_button_bar">
+	<table class="sub_title_button_tb" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="50%" onclick="location.href='/mypage/coupon?tab=1'" {?!_GET.tab || _GET.tab=='1'}class="sel"{/} >
+			보유한<br />쿠폰
+		</td>
+		<td width="50%" onclick="location.href='/mypage/coupon?tab=2'" {?_GET.tab=='2'}class="sel"{/}>
+			다운로드<br/>가능쿠폰
+		</td>
+	</tr>
+	</table>
+</div>
+<!--{/}-->

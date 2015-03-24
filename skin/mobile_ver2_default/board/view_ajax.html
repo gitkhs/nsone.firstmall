@@ -1,0 +1,643 @@
+{? commentskinjsuse }
+	<div  id="boardlayout" >
+		<!-- 본문내용 시작 t//-->
+		<script type="text/javascript">
+		//<![CDATA[
+		var pagemode = 'ajax';
+		var board_id = '{_GET.id}';
+		var board_seq = '{_GET.seq}';
+		var boardlistsurl = '{boardurl->lists}';
+		var boardwriteurl = '{boardurl->write}';
+		var boardviewurl = '{boardurl->view}';
+		var boardmodifyurl = '{boardurl->modify}';
+		var boardreplyurl = '{boardurl->reply}';
+		var boardrpermurl = '{boardurl->perm}';
+		var gl_isuser = false;
+		{ ? defined('__ISUSER__') }
+		gl_isuser = '{=defined('__ISUSER__')}';
+		{ / }
+		var comment = '{comment}';
+		var commentlay = '{commentlay}';
+		var isperm_write = '{managerview.isperm_write}';
+		setDefaultText();
+		//]]>
+		</script>
+		<div id="bbsview">{#skin}</div>
+	</div>
+
+	<script type="text/javascript">
+	$(".content img").load(function() {
+		//이미지 가로가 큰경우
+		$(".content img").each(function() {
+			var default_width = $(window).width() - 50;
+			if( $(this).width() > default_width || $(this).height() > default_width ) {
+				imageResize(this,default_width);
+			}
+		});
+	});
+	</script>
+	<iframe name="boardactionFrame" src="" frameborder="0" width="0" height="0"></iframe>
+	<script type="text/javascript">
+	$(document).ready(function(){
+		$(document).resize(function(){miframeset();}).resize();
+		setInterval(function(){miframeset();},1000);
+	});
+
+	function miframeset(){
+		//이미지 가로가 큰경우
+		$(".content img").each(function() {
+			var default_width = $(window).width() - 50;
+			if( $(this).width() > default_width || $(this).height() > default_width ) {
+				imageResize(this,default_width);
+			}
+		});
+		$('#'+board_id+'_frame',parent.document).height($("#wrap").height()+50);
+	}
+	</script>
+{:}
+	<style type="text/css">
+	.bbsview_division { padding:10px 0 !important; border:none;}
+	.bbsview_top {padding:0 10px; height:30px; line-height:30px; }
+	.content { padding:10px; }
+	.cmt_division {border-top:1px solid #e6e6e6;}
+	.cmt_area { padding:10px; }
+	.cmt_reply { padding-left:20px; }
+	.cmt_contents { padding-top:0px; padding-bottom:10px; border-bottom:1px solid #e6e6e6; min-height:30px; }
+	.modify_contents { font-size:14px; color:#767575; cursor:pointer; }
+	.delete_contents { font-size:14px; color:#767575; cursor:pointer; }
+	.reply_stat td { height:25px; font-size:12px;}
+	.reply_stat td:first-child { border-right:1px solid #BDBDBD; }
+	</style>
+	<script type="text/javascript">
+	$(document).ready(function() {
+
+		if($.cookie("cmtlistlay")) {$("#cmtlistlay").show();}
+
+		$("#commentlayshow").bind("click",function() {
+			$.cookie( "cmtlistlay", '1' );
+			{? comment > 0  }
+				$("#cmtlistlay").toggle();
+			{/}
+
+			{? commentlay != 'N' && managerview.isperm_write_cmt != "_no" }
+				$('#cmtform1')[0].reset();//초기화
+			{/}
+			setDefaultText();
+		});
+
+		// 비회원 > 게시글 수정
+		$(".goods_boad_modify_btn_no").bind("click", function() {
+			$('#ModDelBoardPwcheckForm')[0].reset();//초기화
+			var seq = $(this).attr('board_seq');
+			var viewlink = $(this).attr('viewlink');
+			$("#moddel_pwck_seq").val(seq);
+			$("#moddel_pwck_returnurl").val(boardmodifyurl+seq);
+			$("#modetype").val('board_modify');
+			openDialog("게시글수정 <span class='desc'>비밀번호를 입력해 주세요.</span>", "ModDelBoardPwCk_m", {"width":"370","height":"200"});
+		});
+
+		// 비회원 > 게시글 삭제
+		$(".goods_boad_delete_btn_no").bind("click", function() {
+			$('#ModDelBoardPwcheckForm')[0].reset();//초기화
+			var seq = $(this).attr('board_seq');
+			var viewlink = $(this).attr('viewlink');
+			$("#moddel_pwck_seq").val(seq);
+			$("#moddel_pwck_returnurl").val(boardlistsurl);
+			$("#mode").val('board_delete');
+			openDialog("게시글삭제  <span class='desc'>비밀번호를 입력해 주세요.</span>", "ModDelBoardPwCk_m", {"width":"370","height":"200"});
+		});
+
+		//비밀글 > 비번체크
+		$("#ModDelBoardPwcheckForm").validate({
+			submitHandler: function(form) {
+				var seq = $("#moddel_pwck_seq").val();
+				var pw = $("#moddel_pwck_pw").val();
+				var modetype = $("#modetype").val();
+				var returnurl = $("#moddel_pwck_returnurl").val();
+				if(!pw){
+					alert('비밀번호를 입력해 주세요.');
+					$("#moddel_pwck_pw").focus();
+					return false;
+				}else{
+					$.ajax({
+						'url' : '../board_process',
+						'data' : {'mode':'board_modifydelete_pwckeck','modetype':modetype, 'seq':seq, 'pw':pw, 'board_id':board_id},
+						'type' : 'post',
+						'dataType': 'json',
+						'success' : function(res) {
+							if(res.result == true){
+								if(res.msg){
+									openDialogAlert(res.msg,'400','140',function(){document.location.href=returnurl;});
+								}else{
+									if(modetype == 'board_delete' ){
+										openDialogAlert('정상적으로 삭제되었습니다.','400','140',function(){document.location.href=returnurl;});
+									}else{
+										document.location.href=returnurl;
+									}
+								}
+							}else{
+								if(res.msg){
+									openDialogAlert(res.msg,'400','140',function(){});
+								}else{
+									openDialogAlert('잘못된 접근입니다.','400','140',function(){});
+								}
+							}
+						}
+					});
+				}//endif
+				return false;
+			}
+		});
+
+		// 게시글 수정
+		$(".goods_boad_modify_btn").bind("click", function() {
+			var seq = $(this).attr("board_seq");
+			boardmodifyurl +=seq;
+			//popup(boardmodifyurl, '750', '850');
+			document.location.href=boardmodifyurl;
+		});
+
+		// 게시글 삭제
+		$(".goods_boad_delete_btn").bind("click", function() {
+			//var board_id = $(this).attr('board_id');
+			var delseq = $(this).attr('board_seq');
+			if(confirm("삭제된 게시글은 복구할 수 없습니다.\n정말로 삭제하시겠습니까? ")) {
+				$.ajax({
+					'url' : '../board_process',
+					'data' : {'mode':'board_delete', 'delseq':delseq, 'board_id':board_id},
+					'type' : 'post',
+					'success' : function(res){
+						openDialogAlert('정상적으로 삭제되었습니다.','400','140',function(){document.location.href=boardlistsurl;});
+						//document.location.href=boardlistsurl;
+					}
+				});
+			}
+		});
+
+		//댓글 작성권한없음
+		$("#cwrite_no").bind("click",function() {
+			getboardLogin();
+		});
+
+		//댓글등록및 수정
+		$('#cmtform1').validate({
+			onkeyup: false,
+			rules: {
+				name: { required:true},
+				content: { required:true}
+			},
+			messages: {
+				name: { required:'입력해 주세요.'},
+				captcha_code: { required:'입력해 주세요.'},
+				pw: { required:''},
+				content: { required:'입력해 주세요.'}
+			},
+			errorPlacement: function(error, element) {
+				setDefaultText();
+			error.appendTo(element.parent());
+			},
+			submitHandler: function(f) {
+
+				if(!$("#cmtname").val() || $("#cmtname").val() == "이름을 입력해 주세요." ) {
+					setDefaultText();
+					alert('이름을 입력해 주세요.');
+					$("#cmtname").focus();
+					return false;
+				}
+
+				if(!$("#cmtcontent").val() || $("#cmtcontent").val() == "내용을 입력해 주세요.") {
+					setDefaultText();
+					alert('내용을 입력해 주세요.');
+					$("#cmtcontent").focus();
+					return false;
+				}
+				f.submit();
+			}
+		});
+
+
+		//비회원 댓글 수정
+		$("span[name=boad_cmt_modify_btn_no]").bind("click", function() {
+			var cmtseq = $(this).attr("board_cmt_seq");
+			var board_id = $('#board_id').val();
+			var seq = $('#board_seq').val();
+			var returnurl = $('#cmtreturnurl').val();
+			$.ajax({
+				'url' : '../board_comment_process',
+				'data' : {'mode':'board_comment_item', 'cmtseq':cmtseq, 'seq':seq, 'board_id':board_id},
+				'type' : 'post',
+				'dataType': 'json',
+				'success': function(data) {
+					$("#mod_contents_"+cmtseq).slideDown(500);
+				}
+			});
+		});
+
+		// 회원 댓글 수정
+		$("span[name=boad_cmt_modify_btn]").bind("click", function() {
+			var cmtseq = $(this).attr("board_cmt_seq");
+			var board_id = $('#board_id').val();
+			var seq = $('#board_seq').val();
+			var returnurl = $('#cmtreturnurl').val();
+			$.ajax({
+				'url' : '../board_comment_process',
+				'data' : {'mode':'board_comment_item', 'cmtseq':cmtseq, 'seq':seq, 'board_id':board_id},
+				'type' : 'post',
+				'dataType': 'json',
+				'success': function(data) {
+					$("#mod_contents_"+cmtseq).slideDown(500);
+				}
+			});
+		});
+
+		// 댓글 수정 닫기
+		$("#board_comment_cancel_mod").live("click",function(){
+			var cmtseq = $(this).attr("board_cmt_seq");
+			$('#cmtmode').val('board_comment_write');
+			$('#cmtpw').val('');
+			$('#cmtcontent').val('');
+			$("#mod_contents_"+cmtseq).slideUp(500);
+		});
+
+		//댓글 수정 : 회원글인 경우 로그인
+		$("span[name='boad_cmt_modify_btn_mbno']").bind("click", function() {
+			getboardLogin();
+		});
+
+		// 댓글 삭제
+		$("span[name='boad_cmt_delete_btn']").bind("click",function(){
+			var cmtseq = $(this).attr("board_cmt_seq");
+			var seq = $('#board_seq').val();
+			var returnurl = $('#cmtreturnurl').val();
+			if	(seq){
+				if(confirm("정말로 댓글을 삭제하시겠습니까? ")) {
+					$.ajax({
+						'url' : '../board_comment_process',
+						'data' : {'mode':'board_comment_delete', 'delcmtseq':cmtseq, 'seq':seq, 'board_id':board_id},
+						'type' : 'post',
+						'dataType': 'json',
+						'success' : function(res){
+							if(res) {
+								if(res.result == true){
+									openDialogAlert(res.msg,'400','140',function(){
+										var viewlink = "{boardurl->view}"+seq;
+										boardviewtype_m_only(viewlink,seq,"{manager.viewtype}","down");
+									});
+								}else{
+									openDialogAlert(res.msg,'400','140',function(){});
+								}
+							}else{
+								openDialogAlert("잘못된 접근입니다.",'400','140',function(){});
+							}
+						}
+					});
+				}
+			}
+		});
+
+		//비회원 > 댓글, 답글 비밀번호입력창
+		$("span[name=boad_cmt_delete_btn_no]").live("click",function(){
+			$('#CmtBoardPwcheckForm')[0].reset();//초기화
+			var seq = $('#board_seq').val();
+			var cmtseq = $(this).attr("board_cmt_seq");
+			$("#cmt_pwck_seq").val(seq);
+			$("#cmt_pwck_cmtseq").val(cmtseq);
+			openDialog("댓글 > 비밀글  <span class='desc'>비밀번호를 입력해 주세요.</span>", "CmtBoardPwCk", {"width":"370","height":"200"});
+		});
+
+		//비회원 > 댓글, 답글 삭제
+		$("#CmtBoardPwcheckForm").validate({
+			submitHandler: function(form) {
+				var seq = $("#cmt_pwck_seq").val();
+				var cmtseq = $("#cmt_pwck_cmtseq").val();
+				var pw = $("#cmt_pwck_pw").val();
+				if(!pw){
+					alert('비밀번호를 입력해 주세요.');
+					$("#cmt_pwck_pw").focus();
+					return false;
+				}else{
+					var returnurl = $('#cmtreturnurl').val();
+					$.ajax({
+						'url' : '../board_comment_process',
+						'data' : {'mode':'board_comment_delete_pwcheck', 'delcmtseq':cmtseq, 'seq':seq,  'pw':pw, 'board_id':board_id},
+						'type' : 'post',
+						'dataType': 'json',
+						'success' : function(res){
+							if(res) {
+								var viewlink = "{boardurl->view}"+seq;
+								if(res.result == true){
+									alert(res.msg);
+									$('#CmtBoardPwCk').dialog('close');
+									boardviewtype_m_only(viewlink,seq,"{manager.viewtype}","down");
+								}else{
+									alert(res.msg);
+									boardviewtype_m_only(viewlink,seq,"{manager.viewtype}","");
+								}
+								$('#CmtBoardPwCk').dialog('close');
+							}else{
+								openDialogAlert("잘못된 접근입니다.",'400','140',function(){});
+							}
+						}
+					});
+				}//endif
+			}
+		});
+
+		//댓글 > 덧글 : 회원글 삭제시 로그인
+		$("img[name=boad_cmt_delete_btn_mbno]").live("click",function(){
+			getboardLogin();
+		});
+
+		{? !user_name}$('#cmtname').val('');{/}
+
+		setDefaultText();
+	});
+
+	function getboardLogin(){
+		{? defined('__ISUSER__') === true }
+			openDialogAlert('해당 서비스를 이용하시려면 관리자에게 문의하여 주시길 바랍니다.','450','140');
+		{:}
+			openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){location.href="/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+		{/}
+	}
+
+	function getcmtMbLogin(){
+		{? defined('__ISUSER__') === true }
+			openDialogAlert('글작성자만 이용가능합니다.','400','140');
+		{:}
+			openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){location.href="/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+		{/}
+	}
+	</script>
+
+	<div class="bbsview_division">
+		<div class="bbsview_top clearbox">
+
+			<!-- 평점 정보 -->
+			{? reviewcategorylist && boardid == 'goods_review'}
+			<div class="fleft">
+				{@ reviewcategorylist}
+					{.title}:{? .score }{=getGoodsScore(.score, manager, 'view', .idx)} {:} 0 {/}
+				{/}
+			</div>
+			{/}
+
+			
+			<div class="fright">
+				<!--{? !_GET.iframe }-->
+						<!--{? display == 0 && replylay == 'Y' && managerview.isperm_write != "_no" }-->
+							<span class="hand round_btn boad_reply_btn" name="boad_reply_btn"  board_seq="{seq}" board_id="{boardid}" alt="본문답변">
+							<a>답변</a>
+						</span> 
+					<!--{/}-->
+				<!--{/}-->
+				{? display == 0 && managerview.isperm_moddel != "_mbno" }
+					<span class="hand round_btn goods_boad_modify_btn{managerview.isperm_moddel}" board_seq="{seq}" board_id="{boardid}" alt="본문수정">
+						<a>수정</a>
+					</span>
+						<span class="hand round_btn goods_boad_delete_btn{managerview.isperm_moddel}" board_seq="{seq}" board_id="{boardid}" alt="본문삭제">
+						<a>삭제</a>
+					</span>
+				{/}
+			</div>
+		</div>
+
+		<!-- ?? 정보 -->
+		{? goodsreview_sub}
+		<div class="content" >
+			{@ goodsreview_sub}
+				{? .used == 'Y' }
+					{.label_title} :  {.label_view}<br />
+				{/}
+			{/}
+		</div>
+		{/}
+
+		<!-- 파일 리스트 -->
+		{? file_key_i && uccdomain_fileurl}
+			<div class="content" >
+				<iframe   width="{? manager.video_size_mobile0 }{manager.video_size_mobile0}{:}200{/}" height="{? manager.video_size_mobile1 }{manager.video_size_mobile1}{:}150{/}" src="{uccdomain_fileurl}&g=tag&width={manager.video_size_mobile0}&height={manager.video_size_mobile1}" frameborder="0" allowfullscreen></iframe>
+			</div>
+		{: file_key_w && uccdomain_fileurl}
+			<div class="content" >
+				<iframe   width="{? manager.video_size_mobile0 }{manager.video_size_mobile0}{:}200{/}" height="{? manager.video_size_mobile1 }{manager.video_size_mobile1}{:}150{/}" src="{uccdomain_fileurl}&g=tag&width={manager.video_size_mobile0}&height={manager.video_size_mobile1}" frameborder="0" allowfullscreen></iframe>
+			</div>
+		{/}
+
+		{? filelist}
+		<div class="content">
+			{@ filelist}
+			<span class="realfilelist hand highlight-link" realfiledir="{.realfiledir}" realfilename="{.orignfile}"  realfilename="{.orignfile}" board_id="{boardid}" filedown="../board_process?mode=board_file_down&board_id={boardid}&realfiledir={.realfiledir}&realfilename={.orignfile}">{.orignfile} (<span class="size">{.realsizefile}</span>) <button type="button"  class="bbs_btn">down</button></span>
+			{/}
+		</div>
+		{/}
+
+		<!-- 후기 내용 -->
+		<div class="content" style="min-height:50px;">
+			{contents}
+		</div>
+
+		{? re_contents }
+		<div class="content">
+			<div style="color:red;padding-bottom:5px;">문의글에 대한 답변입니다.</div>
+			제목: {re_subject} <br />
+			내용: {re_contents}
+		</div>
+		{/}
+
+		<!-- 답변상태 및 조회수 -->
+		{? boardid == 'goods_qna' && false}
+		<div>
+			<table class="reply_stat" cellpadding="0" cellspacing="0" width="100%" border="0">
+			<tr>
+				<td width="50%">[상태] {reply_title}</td>
+				<td>[조회수] {hit}</td>
+			</tr>
+			</table>
+		</div>
+		{/}
+
+		<!-- 모바일등록시 첨부파일의 이미지노출 -->
+		{? filelist && iconmobile}
+		<div class="content" >
+		첨부파일: <br/>
+			{@ filelist}
+				{? .is_image }
+				<img src="{.realfile}" width="200"  onerror="this.src='../../../images/common/noimage.gif'" />
+				{/}
+			{/}
+		</div>
+		{/}
+
+		<!-- 댓글 영역 -->
+		{? commentlay == 'Y' || comment > 0}
+		<div class="cmt_division">
+			<div class="content">
+				덧글 <span>{=number_format(count(cmtloop))}</span> <input type="button" name="board_comment_btn" id="board_comment_btn_{seq}" seq="{seq}" value="쓰기" class="board_comment_btn round_btn hand" />
+			</div>
+		</div>
+		<div class="cmt_division">
+			<table class="cmt_tbl" cellpadding="0" cellspacing="0" border="0" width="100%">
+			{? cmtloop }
+				{@ cmtloop }
+				<tr>
+					<td class="cmt_area"><strong>{.name}</strong>{.iconnew} {? .date}<span class="desc"> | {.date}</span>{/}</td>
+				</tr>
+				<tr>
+					<td class="cmt_area cmt_contents">
+						{=nl2br(.content)}
+						<!-- 수정영역 -->
+						<div id="mod_contents_{.seq}" class="hide">
+							<form name="cmtform_mod_{.seq}" id="cmtform_mod_{.seq}" method="post"  action="../board_comment_process"  target="actionFrame">
+							<!--{? seq }-->
+							<input type="hidden" name="p_seq" value="{seq}" />
+							<input type="hidden" name="seq" id="board_seq" value="{seq}" />
+							<input type="hidden" name="cmtseq" id="board_cmtseq" value="{.seq}" />
+							<input type="hidden" name="board_id"  value="{_GET.id}" />
+							<input type="hidden" name="mode" id="cmtmode" value="board_comment_modify" />
+							<input type="hidden" name="viewtype" value="ajax" />
+							<input type="hidden" name="returnurl" id="cmtreturnurl" value="{boardurl->view}{seq}" />
+							<!--{/}-->
+							<!--{? managerview.isperm_write_cmt == "_no" }-->
+							<div class="box center hand"  style="width:100%;color:gray;margin:5px;">로그인 후 댓글권한이 있을 경우 등록하실 수 있습니다</div>
+							<!--{:}-->
+							<table class="box" style="width:100%" border="0">
+								<tbody>
+								<!--{? defined('__ISUSER__') === true  && user_name //회원}-->
+								<tr>
+									<td class="its-td" >
+										<input type="hidden" name="name" id="cmtname" class="required line" size="25" value="{.real_name}" />
+										<input type="hidden" name="pw" id="cmtpw" class="required line" size="25" title="비밀번호를 입력해 주세요." value="" />
+									</td>
+								</tr>
+								<!--{:}-->
+								<tr>
+									<td class="its-td" >
+										<input type="text" name="name" id="cmtname" class="required line" size="25" title="이름을 입력해 주세요." value="{.real_name}" />
+										<a class="its-td pwchecklay {? defined('__ISUSER__') === true }hide{/} "><input type="password" name="pw" id="cmtpw" class="required line " size="25" title="비밀번호를 입력해 주세요." value="" />
+									</td>
+								</tr>
+								<!--{/}-->
+								<tr>
+									<td class="its-td">
+										<textarea name="content" id="cmtcontent" class="required line" style='width:97%;height:50px;overflow:auto'>{.org_content}</textarea>
+									</td>
+								</tr>
+								<!--{? manager.autowrite_use == 'Y' && captcha_image}-->
+								<tr>
+									<td class="its-td"  >{#securimage}</td>
+								</tr>
+								<!--{/}-->
+								<tr>
+									<td align="center"  class="its-td">
+										<span class="btn small black">
+											<button type="button" name="board_commentsend_mod" id="board_commentsend_mod" board_cmt_seq="{.seq}" >댓글수정</button>
+										</span>
+										<span class="btn small black">
+											<button type="reset" name="board_comment_cancel_mod" id="board_comment_cancel_mod" board_cmt_seq="{.seq}" >댓글취소</button>
+										</span>
+									</td>
+								</tr>
+								</tbody>
+							</table>
+							<!--{/}-->
+							</form>
+						</div>
+						<!-- 수정영역 END -->
+
+						<div class="pdt10">
+							<span class="round_btn modify_contents hand {.isperm_hide}" name="boad_cmt_modify_btn{.isperm_moddel}" board_cmt_seq="{.seq}" alt="답글수정" title="답글수정">수정</span>
+							<span class="round_btn delete_contents hand {.isperm_hide}" name="boad_cmt_delete_btn{.isperm_moddel}" board_cmt_seq="{.seq}" alt="답글삭제" title="답글삭제" >삭제</span>
+						</div>
+					</td>
+				</tr>
+
+					<!-- 댓글의 댓글 -->
+					{? .cmtreplyloop }
+						{@ .cmtreplyloop }
+						<tr>
+							<td class="cmt_area cmt_reply"><strong>{..name}</strong>{..iconnew} {? ..date}<span class="desc"> | {..date}</span>{/}</td>
+							<td class="cmt_area cmt_reply" align="right">
+								<span class="modify_contents hand {..isperm_hide}" name="boad_cmt_modify_btn{..isperm_moddel}" board_cmt_seq="{..seq}" alt="답글수정" title="답글수정">수정</span>
+								<span class="delete_contents hand {..isperm_hide}" name="boad_cmt_delete_btn{..isperm_moddel}" board_cmt_seq="{..seq}" alt="답글삭제" title="답글삭제" >삭제</span>
+							</td>
+						</tr>
+						<tr>
+							<td class="cmt_area cmt_reply cmt_contents" colspan="2">┗RE:{=nl2br(..content)}</td>
+						</tr>
+						{/}
+					{/}
+				{/}
+			{:}
+			<div style="text-align:center; padding:15px;">등록된 댓글이 없습니다.</div>
+			{/}
+			</table>
+		</div>
+		{/}
+
+		<div id="cmt_insert_{seq}" class="cmt_contents">
+			<form name="cmtform_{seq}" id="cmtform_{seq}" method="post"  action="../board_comment_process"  target="actionFrame">
+			<!--{? seq }-->
+			<input type="hidden" name="seq" id="board_seq" value="{seq}" />
+			<input type="hidden" name="board_id"  value="{_GET.id}" />
+			<input type="hidden" name="mode" id="cmtmode" value="board_comment_write" />
+			<input type="hidden" name="viewtype" value="ajax" />
+			<input type="hidden" name="returnurl" id="cmtreturnurl" value="{boardurl->view}{seq}" />
+			<!--{/}-->
+			<!--{? managerview.isperm_write_cmt == "_no" }-->
+			<div class="box center hand"  style="width:100%;color:gray;margin:5px;">로그인 후 댓글권한이 있을 경우 등록하실 수 있습니다</div>
+			<!--{:}-->
+			<table class="box" style="width:100%" border="0" cellspacing="5">
+				<tbody>
+				<!--{? defined('__ISUSER__') === true  && user_name //회원}-->
+				<tr>
+					<td class="its-td" >
+						<input type="hidden" name="name" id="cmtname" class="required line" size="25" value="{user_name}" />
+						<input type="hidden" name="pw" id="cmtpw" class="required line" size="25" title="비밀번호를 입력해 주세요." value="" />
+					</td>
+				</tr>
+				<!--{:}-->
+				<tr>
+					<td class="its-td" >
+						<input type="text" name="name" id="cmtname" class="required line" size="15" title="이름" value="{user_name}" />
+						<a class="its-td pwchecklay {? defined('__ISUSER__') === true }hide{/} ">
+							<input type="password" name="pw" id="cmtpw" class="required line " size="15" title="비밀번호" value="" />
+						</a>
+					</td>
+				</tr>
+				<!--{/}-->
+				<tr>
+					<td class="its-td">
+						<textarea name="content" id="cmtcontent" class="required line" title="내용을 입력해 주세요." style='width:97%;height:50px;overflow:auto'></textarea>
+					</td>
+				</tr>
+				<!--{? manager.autowrite_use == 'Y' && captcha_image}-->
+				<tr>
+					<td class="its-td"  >{#securimage}</td>
+				</tr>
+				<!--{/}-->
+				<tr>
+					<td align="right" class="its-td">
+							<button type="button" class="round_btn" name="board_commentsend" id="board_commentsend" seq="{seq}" >댓글등록</button>
+							<!--
+							<button type="reset" class="round_btn" name="board_comment_cancel" id="board_comment_cancel" seq="{seq}" >댓글취소</button>
+							-->
+					</td>
+				</tr>
+				</tbody>
+			</table>
+			<!--{/}-->
+			</form>
+		</div>
+
+	</div>
+
+	<!-- 컨트롤 폼 : 시작 -->
+	<form name="writeform" id="writeform" method="post" action="{=sslAction('../board_process')}"  enctype="multipart/form-data" target="comentFrame">
+	<input type="hidden" name="board_id" id="board_id" value="{_GET.id}" />
+	<input type="hidden" name="iframe" value="{_GET.iframe}" >
+	<input type="hidden" name="delseq" id="seq" value="" />
+	<input type="hidden" name="real_name" id="real_name" value="" />
+	</form>
+	<!-- 컨트롤 폼 : 끝 -->
+{/}

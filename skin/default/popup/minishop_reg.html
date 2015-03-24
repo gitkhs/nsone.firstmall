@@ -1,0 +1,58 @@
+<style type="text/css">
+.mshop_reg_tb				{margin-top:10px;}
+.mshop_reg_tb th			{text-align:left;color:#000;line-height:40px;}
+.mshop_reg_tb td			{width:70px;padding-left:20px;}
+.mshop_reg_tb td.memotit	{vertical-align:top;padding-top:5px;}
+.mshop_reg_tb .memotextarea	{width:355px;height:70px;}
+.mshop_copyright			{padding-top:16px;font-size:11px;font-family:Dotum;
+							letter-spacing:-1px;color:#000;}
+.mshop_copyright_point		{font-weight:bold;}
+</style>
+<script type="text/javascript">
+function addok(){
+	opener.location.reload();
+	self.close();
+}
+</script>
+<table width="504" height="303" cellspacing="0" cellpadding="20" style="border:4px solid #000;">
+<tr>
+	<td valign="top">
+		<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+		<form name="regFrm" method="post" action="/mshop_process/add_myshop" target="actionFrame">
+		<input type="hidden" name="shop_no" value="{pv.provider_seq}" />
+		<input type="hidden" name="seq" value="{seq}" />
+		<tr>
+			<td>
+				<div class="fleft"><img src="../images/design/stit_mns_reg.gif" /></div>
+				<div class="fright"><img src="../images/design/btn_close.gif" class="hand" onclick="window.close();" /></div>
+			</td>
+		</tr>
+		<tr><td height="10"></td></tr>
+		<tr><td height="2" bgcolor="#545454"></td></tr>
+		<tr><td><table width="100%" border="0" cellspacing="0" cellpadding="0" class="mshop_reg_tb">
+			<tr>
+				<td>미니샵명</td>
+				<th>{pv.provider_name}</th>
+			</tr>
+			<tr>
+				<td class="memotit">메모</td>
+				<th><textarea name="memo" class="memotextarea" title="메모를 해두시면 나의 단골미니샵에서 확인 하실 수 있습니다.(50자 이내)"></textarea></th>
+			</tr>
+		</table></td></tr>
+		<tr><td height="15"></td></tr>
+		<tr><td align="center">
+			<span class="btn small black"><button type="submit">확인</button></span>
+		</td></tr>
+		<tr><td height="30"></td></tr>
+		<tr><td height="2" bgcolor="#dedede"></td></tr>
+		<tr><td class="mshop_copyright">
+			* 단골미니샵은 
+			<u class="mshop_copyright_point">마이페이지 > 나의쇼핑 > 나의 단골 미니샵</u>에서
+			확인할 수 있습니다.
+		</td></tr>
+		</form>
+		</table>
+
+	</td>
+</tr>
+</table>

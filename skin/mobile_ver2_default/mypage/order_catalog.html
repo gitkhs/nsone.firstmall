@@ -1,0 +1,80 @@
+<script type="text/javascript">
+$(function(){
+	$(".order_title").bind('click', function(){
+		location.href	= 'order_view?no='+$(this).attr('seq');
+	});
+});
+
+function set_date(start,end){
+	$("input[name='regist_date[]']").eq(0).val(start);
+	$("input[name='regist_date[]']").eq(1).val(end);
+}
+
+function goods_review_write(goodsseq,order_seq){
+	if(goodsseq){		
+		{ ? defined('__ISUSER__') }
+			location.href = '/mypage/mygdreview_write?goods_seq='+goodsseq+'&order_seq='+order_seq;
+		{:}
+			location.href = '/board/write?id=goods_review&goods_seq='+goodsseq+'&order_seq='+order_seq;
+		{/} 
+	}
+}
+
+</script>
+
+<!-- 타이틀 -->
+
+{?!mobileAjaxCall}
+	{#common_mypage_order_top}
+{/}
+
+<!-- List -->
+<!--{ ? page.totalcount==0 }-->
+	<table align="center" cellpadding="0" cellspacing="0" border="0">
+	<tr><td height="50"></td></tr>
+	<tr>
+		<td>
+			<span class="small">주문내역이 없습니다.</span>
+		</td>
+	</tr>
+	<tr><td height="50"></td></tr>
+	</table>
+<!--{ : }-->
+	<!--{ @ record }-->
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="order_list_table hand order_title" seq="{.order_seq}">
+	<col /><col width="80" />
+	<tr>
+		<th class="cell" colspan="2">{=date('Y.m.d',strtotime(.regist_date))} <b>({.order_seq})</b></th>
+	</tr>
+	<tr>
+		<td class="cell left">
+			{.goods_name}
+			<!--{ ? .item_cnt > 1 }--><span style="color:#999">외 {=.item_cnt-1}건</span><!--{ / }-->
+			<div class="pdt5"><b>{=number_format(.settleprice)}원</b></div>
+		</td>
+		<td class="cell center">
+			<span class="bold" style="color:#e68b00">{.mstep}</span>
+
+			<!-- <button class="black_btn" onclick="goods_review_write('{.goods_seq}','{.order_seq}');">상품평</button> -->
+			<a href="/mypage/mygdreview_write?goods_seq={.goods_seq}&order_seq={.order_seq}" target="_blank"><button class="black_btn"  >상품평</button></a>
+			<!--{ ? .exports }-->
+				<div>
+				<!--{ @ .exports }-->
+				<!--{ ? ..tracking_url }-->
+				<a href="{..tracking_url}" target="_blank"><img src="../images/design/mypage_btn_delivery.gif" class="hand" vspace="4"></a><br/>
+				<!--{ / }-->
+				<!--{ / }-->
+				</div>
+			<!--{ / }-->
+		</td>
+	</tr>
+	</table>
+	<!--{ / }-->
+
+	<div style="height:20px"></div>
+
+	{#paging}
+
+	<div style="height:30px"></div>
+
+<!--{ / }-->

@@ -1,0 +1,40 @@
+{?mobileAjaxCall}
+	<table align="center" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<div class="paging_navigation">
+				<!--{ ? page.totalpage > 1 && page.nowpage == 1 }--><a href="../{=uri_string()}?page={=page.totalpage}&amp;{page.querystring}" class="prev" {?mobileAjaxCall}mobileAjaxCall="{mobileAjaxCall}"{/}>◀ 이전</a>
+				<!--{ : page.nowpage > 1 }--><a href="../{=uri_string()}?page={=(page.nowpage-1)}&amp;{page.querystring}" class="prev" {?mobileAjaxCall}mobileAjaxCall="{mobileAjaxCall}"{/}>◀ 이전</a><!--{ / }-->
+				
+				{page.nowpage}
+				<!--{ ? page.totalpage > 1 }-->
+				/
+				<a href="../{=uri_string()}?page={page.totalpage}&amp;{page.querystring}" class="on" {?mobileAjaxCall}mobileAjaxCall="{mobileAjaxCall}"{/}>{page.totalpage}</a>
+				<!--{ / }-->
+				
+				<!--{ ? page.totalpage > 1 && page.nowpage == page.totalpage }--><a href="../{=uri_string()}?page=1&amp;{page.querystring}" class="next" {?mobileAjaxCall}mobileAjaxCall="{mobileAjaxCall}"{/}>다음 ▶</a>
+				<!--{ : page.nowpage < page.totalpage }--><a href="../{=uri_string()}?page={=(page.nowpage+1)}&amp;{page.querystring}" class="next" {?mobileAjaxCall}mobileAjaxCall="{mobileAjaxCall}"{/}>다음 ▶</a><!--{ / }-->
+			</div>
+		</td>
+	</tr>
+	</table>
+{:}
+	<table align="center" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<div class="paging_navigation" queryStr="{page.querystring}" total="{=page.totalpage}" now="{page.nowpage}">
+				<!--{ ? page.totalpage > 1 && page.nowpage == 1 }--><a href="../{=uri_string()}?page={=page.totalpage}&amp;{page.querystring}" class="prev">◀ 이전</a>
+				<!--{ : page.nowpage > 1 }--><a href="../{=uri_string()}?page={=(page.nowpage-1)}&amp;{page.querystring}" class="prev">◀ 이전</a><!--{ / }-->
+				
+				{page.nowpage}
+				<!--{ ? page.totalpage > 1 }-->
+				/
+				<a href="../{=uri_string()}?page={page.totalpage}&amp;{page.querystring}" class="on" {?mobileAjaxCall}mobileAjaxCall="{mobileAjaxCall}"{/}>{page.totalpage}</a>
+				<!--{ / }-->
+				<!--{ ? page.totalpage > 1 && page.nowpage == page.totalpage }--><a href="../{=uri_string()}?page=1&amp;{page.querystring}" class="next">다음 ▶</a>
+				<!--{ : page.nowpage < page.totalpage }--><a href="../{=uri_string()}?page={=(page.nowpage+1)}&amp;{page.querystring}" class="next">다음 ▶</a><!--{ / }-->
+			</div>
+		</td>
+	</tr>
+	</table>
+{/}

@@ -1,0 +1,56 @@
+<script>
+$(function(){
+	$(".sub_page_tab td").each(function(i){
+		$(this).click(function(){
+			$(".sub_page_tab td").removeClass("current");
+			$(this).addClass("current");
+			$(".sub_page_tab_contents").hide().eq(i).show();
+		});
+	}).eq(0).click();
+});
+</script>
+
+<style>
+.btn_sns {width:100%; height:60px; text-align:left; font-size:16px; color:#000; margin:5px 0; background:url('../images/design/btn_arw_r.png') no-repeat; background-position:98% center; background-size:15px 15px;}
+.sub_page_tab_contents li {clear:both;margin:5px auto;text-align:center;}
+.sub_page_tab_contents li img{width:202px;}
+</style>
+
+<div class="sub_title_bar">
+	<h2>회원가입</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+
+
+<table width="100%" class="sub_page_tab" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<!--{? joinform.join_type!='business_only'}-->
+	<td class="current">개인회원</td>
+	<!--{/}-->
+	<!--{? joinform.join_type!='member_only'}-->
+	<td>사업자회원</td>
+	<!--{/}-->
+</tr>
+</table>
+
+<!--{? joinform.join_type!='business_only'}-->
+<div class="sub_page_tab_contents">
+	<ul>
+		<li><img src="../images/design/sns_bt_idpw_join.gif" onclick="document.location.href='agreement?join_type=member'"></li>
+	<!--{@ joinform.use_sns }-->
+	{? .key_ }<li><img src="../images/design/sns_bt_{=.key_}_join.gif" onclick="document.location.href='agreement?join_type={=.value_['cd']}member'"></li>{/}
+	<!--{ / }-->
+	</ul>
+</div>
+<!--{/}-->
+
+<!--{? joinform.join_type!='member_only'}-->
+<div class="sub_page_tab_contents">
+	<ul>
+		<li><img src="../images/design/sns_bt_idpw_join.gif" onclick="document.location.href='agreement?join_type=business'"></li>
+
+	<!--{@ joinform.use_sns }-->
+	{? .key_ }<li><img src="../images/design/sns_bt_{=.key_}_join.gif" onclick="document.location.href='agreement?join_type={=.value_['cd']}business'"></li>{/}
+	<!--{ / }-->
+</div>
+<!--{/}-->

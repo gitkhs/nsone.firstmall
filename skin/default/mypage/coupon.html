@@ -1,0 +1,413 @@
+<style>
+/* 검색폼 양식 */
+div.search-form-container {background:#e6e9e9; padding:15px 0 10px 0;}
+div.search-form-container table.search-form-table	{margin:auto;}
+div.search-form-container table.sf-option-table th	{height:22px; text-align:left; padding-right:10px;}
+div.search-form-container table.sf-keyword-table {width:510px; border:2px solid #000; border-collapse:collapse; background-color:#fff; table-layout:fixed;}
+div.search-form-container table.sf-keyword-table .sfk-td-txt {padding-right:5px;}
+div.search-form-container table.sf-keyword-table .sfk-td-txt input {width:100%; height:22px; padding:0px; border:0px; margin:0px; background-color:#fff; line-height:22px; text-align:center;}
+div.search-form-container table.sf-keyword-table .sfk-td-btn {width:31px; text-align:center;}
+div.search-form-container table.sf-keyword-table .sfk-td-btn button {width:32px; height:26px; border:0px; background:url('../images/common/btn_search.gif') no-repeat center center; cursor:pointer}
+div.search-form-container table.sf-keyword-table .sfk-td-btn button span {display:none}
+
+.icon-check {padding-left:10px; background:url('../images/common/icon_check.gif') no-repeat 0 2px;}
+</style>
+{? _GET.tab != '2'}
+<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"></script>
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" ></script>
+{/}
+<script>
+$(document).ready(function() {
+	setDefaultText();
+	$(".all-check").toggle(function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',true);
+	},function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',false);
+	});
+
+	// 쿠폰사용가능한 상품 조회하기 (적용대상조회)
+	$('.coupongoodsreviewbtn').click(function() {
+		var coupon_type = $(this).attr("coupon_type");
+		var use_type = $(this).attr("use_type");
+		var issue_type = $(this).attr("issue_type");
+		{? _GET.tab == '1'  || !_GET.tab }
+			var download_seq = $(this).attr("download_seq");
+			var coupon_seq = $(this).attr("coupon_seq");
+			var coupongoodsreviewerurl = '../coupon/coupongoodsreviewer?no='+download_seq+'&coupon_type='+coupon_type+'&coupon_seq='+coupon_seq+'&download_seq='+download_seq;
+		{:}
+			var coupon_seq = $(this).attr("coupon_seq"); 
+			var coupongoodsreviewerurl = '../coupon/coupongoodsreviewer?no='+coupon_seq+'&coupon_type='+coupon_type;
+		{/}
+		var coupon_name = $(this).attr("coupon_name");   
+		if( use_type == 'offline' ) {
+			addFormDialog(coupongoodsreviewerurl, '650', '', '쿠폰정보','false');
+		}else{
+			addFormDialog(coupongoodsreviewerurl, '450', '', '쿠폰정보','false');
+		}
+	});
+	
+	//쿠폰상품 조회후 상품검색창
+	$("input:button[name=goodssearchbtn]").live("click",function(){
+		var goods_seq		= $("#coupongoods_goods_seq").val();
+		var coupon_seq	= $(this).attr("coupon_seq");
+
+		if(!goods_seq) {
+				openDialogAlert("상품번호를 정확히 입력해 주세요.",'260','140',function(){$("#coupongoods_goods_seq").focus();return;});
+		}else{ 
+			$.ajax({
+				'url' : '../coupon/coupongoodssearch',
+				'data' : {'coupon':coupon_seq,'goods':goods_seq},
+				'type' : 'post',
+				'dataType': 'json',
+				'success' : function(res){ 
+					$(".coupongoodsreviewerno").hide();//상품사용불가
+					$(".coupongoodsrevieweryes").hide();//쿠폰사용가능
+					if( res.result == 'goodsyes' ) {  
+						var imgsrc = (eval("res.goods.src"))?res.goods.src:"/admin/skin/default/images/common/noimage_list.gif";
+						$(".coupongoodsrevieweryes").show(); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".image").html("<img class=\"goodsThumbView\"  alt=\"\" src=\""+imgsrc+"\" width=\"50\" height=\"50\">"); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".name").html(res.goods.name);
+						$(".coupongoodsrevieweryes .issueGoods").find(".price").html(res.goods.price);
+						$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq",goods_seq); 
+						
+						openDialog('상품번호 찾기',"coupongoodsreviewerpopup",{"width":"480","height":"280"});
+					}else if( res.result == 'goodsno' ) {  						
+						var imgsrc = (eval("res.goods.src"))?res.goods.src:"/admin/skin/default/images/common/noimage_list.gif";
+						$(".coupongoodsreviewerno").show();
+						$(".coupongoodsrevieweryes .issueGoods").find(".image").html("<img class=\"goodsThumbView\"  alt=\"\" src=\""+imgsrc+"\" width=\"50\" height=\"50\">"); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".name").html(res.goods.name);
+						$(".coupongoodsrevieweryes .issueGoods").find(".price").html(res.goods.price);
+						$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq",goods_seq); 
+						
+						openDialog('상품번호 찾기',"coupongoodsreviewerpopup",{"width":"400","height":"250"});
+					}else{
+						openDialogAlert("상품을 찾을 수 없습니다.<br/>확인 후 다시 입력하시기 바랍니다.",'250','160'); 
+					}
+				}
+			});
+		}
+	});
+	
+	//상품상세보기
+	$('.coupongoodsdetail').live("click",function(){ 
+		window.open("/goods/view?no="+$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq"),'','');
+	});
+
+ 
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+	$(".offline_use").click(function (){
+		$("#download_seq").val($(this).attr('download_seq'));
+		openDialog("<span class='desc'>쿠폰사용하기</span>", "couponuse_area", {"width":"370","height":"200"});
+	});
+
+});
+
+function issue_list(coupon_seq){
+	window.open('/popup/issue_list?coupon_seq='+coupon_seq+'','issue_list','width=500,height=350');
+}
+
+
+</script>
+
+
+
+<!-- 타이틀 -->
+<div id="main-qna-summary">
+	<table width="100%" height="30">
+	<tr>
+		<td align="left"><img src="../images/design/tit_coupon.gif" title="" /></td>
+		<td align="right">
+			<table class="mqs-menu fl">
+			<tr>
+				<td {? _GET.tab == '1' || !_GET.tab}class="selected" {/} ><a href="./coupon?tab=1">보유한 쿠폰({unusedcount}/{totalcount}) </a></td>
+				<td {? _GET.tab == '2'}class="selected" {/} ><a href="./coupon?tab=2">다운로드 가능쿠폰({svcount}) </a></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<div class="main-summary-contents"></div>
+</div> 
+{? _GET.tab == '1'  || !_GET.tab}
+<!-- 리스트검색폼 : 시작 -->
+<div class="search-form-container">
+	<form name="couponsearch" id="couponsearch" >
+	<input type="hidden" name="perpage" id="perpage" value="{_GET.perpage}" >
+	<input type="hidden" name="page" id="page" value="{_GET.page}" >
+	<input type="hidden" name="orderby" id="orderby" value="{_GET.orderby}" >
+	<table class="search-form-table">
+	<tr>
+		<td width="600">
+			<table class="sf-keyword-table">
+			<tr>
+				<td class="sfk-td-txt"><input type="text" name="keyword" id="keyword" value="{_GET.keyword}" title="쿠폰명" />
+				
+				</td>
+				<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th>
+					<select name="check_date">
+					<option value="regist_date" {?_GET.check_date == 'regist_date'}selected{/}>발급일</option>
+					<option value="use_date" {?_GET.check_date == 'use_date'}selected{/}>사용일</option>
+					</select>
+				</th>
+				<td>
+					<input type="text" name="sdate" id="sdate" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" id="edate" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button" name="select_date" id="today" value="오늘" class="select_date" /></span>
+					<span class="btn small"><input type="button" name="select_date" id="3day" value="3일간" class="select_date" /></span>
+					<span class="btn small"><input type="button" name="select_date" id="1week" value="일주일" class="select_date" /></span>
+					<span class="btn small"><input type="button" name="select_date" id="1month" value="1개월" class="select_date" /></span>
+					<span class="btn small"><input type="button" name="select_date" id="3month" value="3개월" class="select_date" /></span>
+					<span class="btn small"><input type="button" name="select_date" id="select_date_all"  value="전체" class="select_date"  /></span>
+
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th><span class="icon-arrow-down"> 사용여부</span></th>
+				<td>
+				<input type="checkbox" name="couponUsed[]" id="couponUsed1" value="used" {?_GET.couponUsed && in_array('used', _GET.couponUsed)}checked{/}/><label for="couponUsed1" >사용</label>
+				<input type="checkbox" name="couponUsed[]"  id="couponUsed2" value="unused" {?_GET.couponUsed && in_array('unused', _GET.couponUsed)}checked{/} /><label for="couponUsed2" >미사용</label>
+				<span class="icon-check hand all-check"><b>전체</b></span>
+			</tr>
+			</table>
+			<table class="sf-option-table">
+			<tr>
+				<th><span class="icon-arrow-down">유효기간</span></th>
+				<td>
+				<input type="checkbox" name="couponDate[]"  id="couponDate1" value="available" {?_GET.couponDate && in_array('available', _GET.couponDate)}checked{/} /><label for="couponDate1" >유효</label>
+				<input type="checkbox" name="couponDate[]"  id="couponDate2" value="extinc" {?_GET.couponDate && in_array('extinc', _GET.couponDate)}checked{/} /><label for="couponDate2" >소멸</label>
+				<span class="icon-check hand all-check"><b>전체</b></span>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	</form>
+</div>
+<!-- 게시물리스트검색폼 : 끝 -->
+{/}
+<div style="height:4px;"></div>
+{? _GET.tab == '1'  || !_GET.tab}
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+	<thead style="height:36px; background:url('../images/design/tbl_th_bg.gif') repeat-x 0 100%; border-left:1px solid #e0e0e0; border-bottom:1px solid #bbbbbb; font-weight:normal;">
+		<tr >
+			<th width="50" >번호</th>
+			<th width="80" >발급일</th>
+			<th >쿠폰명 </th>
+			<th width="70" >혜택</th>
+			<th width="80" >유효기간</th>
+			<th width="80" >남은 일자</th>
+			<th width="100" >제한 금액</th>
+			<th width="60" >적용대상</th>
+			<th width="60" >상태</th>
+			<th width="80" >구매/<br/>적립쿠폰</th>
+		</tr>
+	</thead>
+	<tbody>
+	{? loop }
+		{@ loop }
+			{? .use_type=='offline' && .use_status == 'unused'}
+				<tr class="offline_use hand" coupon_seq="{.coupon_seq}" download_seq="{.download_seq}">
+			{:}
+				<tr>
+			{/} 
+				<td class="cell" >{.number}</td>
+				<td class="cell" >{.date}</td>
+				<td class="cell left" nowrap="nowrap">
+					<div class="bold">{.cp_name}{? .sale_agent == 'm' }<img src="../images/icon/icon_list_mobile.gif" >{/}</div>
+				</td>
+				<td class="cell left" >{.salepricetitle}</td>
+				<td class="cell" >{.issuedate}</td>
+				<td class="cell" >{.issuedaylimit}</td>
+				<td class="cell" >
+					{? (.type == 'offline_emoney' || .use_type == 'offline') }
+						-
+					{:}
+						{.limit_goods_price}원 이상<br/> 구매 시&nbsp;&nbsp;
+					{/}
+				</td>
+				<td class="cell" >
+						{? .type == 'offline_emoney' } 
+							-
+						{:}
+							<span class="btn small gray "><input type="button" class="coupongoodsreviewbtn" coupon_type="{? .type == 'offline_coupon' }offline{:}online{/}" coupon_seq="{.coupon_seq}" download_seq="{.download_seq}"  use_type="{.use_type}"  issue_type="{.issue_type}"   coupon_name="{.coupon_name}" value="조회" /></span> 
+						{/}  
+				</td>
+				<td class="cell" >{.use_status_title}</td>
+				<td class="cell" >{.goodsview}</td> 
+			<tr>
+		{/}
+	{:}
+		<tr >
+			<td colspan="10" align="center" class="cell">
+				보유한 쿠폰이 없습니다.
+			</td>
+		<tr>
+	{/} 
+	</tbody>
+	</table>
+{:}
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+	<thead>
+		<tr style="height:50px; background:#f5f5f5;">
+			<th  width="0" >쿠폰명 / 할인액(율) / 종류</th>
+			<th width="150" >제한금액</th>
+			<th width="150" >다운로드 가능기간<br/>or <br/>포인트 전환 조건</th>
+			<th width="150">유효기간</th>
+			<th width="60" >적용대상</th>
+			<th width="100">&nbsp;</th>
+		</tr>
+	</thead>
+	<tbody>
+	{? loop }
+		{@ loop }
+		<tr>
+			<td class="cell">
+				<div class="bold">{.coupon_name}</div>
+				<div >{.salepricetitle}</div>
+				<div >{.issuebtn}</div>
+			</td>
+			<td class="cell">{.limit_goods_price}원 이상 구매 시</td>
+			<td class="cell">{.downdate}</td>
+			<td class="cell">{.downloaddate}</td> 
+			<td class="cell" >
+					{? .type != 'offline_emoney' } 
+						<span class="btn small gray "><input type="button" class="coupongoodsreviewbtn" coupon_type="{? .type == 'offline_coupon' }offline{:}online{/}" coupon_seq="{.coupon_seq}" download_seq="{.download_seq}"  use_type="{.use_type}"  issue_type="{.issue_type}"   coupon_name="{.coupon_name}" value="조회" /></span> 
+					{/}  
+			</td>
+			<td class="cell">{? .downckbtn }<a href="#" ><img src="../images/design/btn_coupon_down.gif" class="downloadbtn hand" coupon_type="{.type}" coupon_seq="{.coupon_seq}" coupon_name="{.coupon_name}" coupon_point="{.coupon_point}" alt="쿠폰받기" title="쿠폰받기" /></a>{:} &nbsp;{/}</td>
+		</tr>
+		{/}
+	{:}
+		<tr >
+			<td colspan="6" align="center" class="cell">
+				다운가능한 쿠폰이 없습니다.
+			</td>
+		<tr>
+	{/}
+	</tbody>
+	</table>
+
+{/}
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin}</div>
+	</td>
+</tr>
+</table>
+
+<script type="text/javascript">
+/* input form style 적용*/
+function apply_input_style(){
+$('img.small_goods_image').each(function() {
+	if (!this.complete ) {// image was broken, replace with your new image
+		this.src = '/data/icon/error/noimage_list.gif';
+	}
+});
+}
+
+$(document).ready(function() {
+	/* 스타일적용 */
+	apply_input_style();
+
+	{? _GET.tab == '2'}
+		//쿠폰받기
+		$("img.downloadbtn").live("click",function(){
+			var mypoint = {? mypoint }{mypoint}{:}0{/};
+			var coupon_type = $(this).attr('coupon_type');
+			var coupon_seq = $(this).attr('coupon_seq');
+			var coupon_name = $(this).attr('coupon_name');
+			var coupon_point = $(this).attr('coupon_point');
+			if( coupon_type == 'point' && (mypoint < coupon_point || mypoint < 1) ){//전환포인트인경우
+				if(mypoint < 1){
+					openDialogAlert('보유포인트가 없습니다.','400','140',function(){});
+				}else{
+					openDialogAlert('전환포인트 금액이 보유포인트보다 작습니다.','400','140',function(){});
+				}
+				return false;
+			}else{
+				openDialogConfirm("["+coupon_name+"] 쿠폰을 다운받으시겠습니까?",400,140,function(){
+					$.ajax({
+						'url' : '../coupon/download_member',
+						'data' : {'coupon_seq':coupon_seq},
+						'type' : 'post',
+						'dataType': 'json',
+						'success': function(data) {
+							if(data.result){
+								openDialogAlert(data.msg,'400','140',function(){document.location.reload();});
+							}else{
+								openDialogAlert(data.msg,'400','140',function(){});
+							}
+						}
+					});
+				},function(){}); 
+			}
+		});
+	{:}
+
+	{/}
+});
+</script>
+
+<!-- 쿠폰 직원사용 -->
+<div id="couponuse_area" class="hide">
+	<div class="msg">		
+		<div style="padding-top:20px;">직원코드를 입력해 주세요.</div>
+	</div>
+	<form name="confirmuserForm" id="confirmuserForm" method="post" action="../mypage_process/usemycoupon" target="actionFrame" >
+	<input type="hidden" name="download_seq" id="download_seq" value="" />	
+	<div class="ibox">
+		<input type="text" name="manager_code" id="manager_code" class="use_input" title="직원코드를 입력해 주세요" />
+		<input type="submit" id="BoardPwcheckBtn" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#manager_code').val(''); $('#couponuse_area').dialog('close');" />
+	</div>
+	</form>
+</div>
+
+<div id="showList" class="hide"> </div>

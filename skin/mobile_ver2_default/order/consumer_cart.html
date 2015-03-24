@@ -1,0 +1,471 @@
+{is_file_facebook_tag}
+<script type="text/javascript">
+{?  APP_LIKE_TYPE == 'API' }
+try{ 
+	window.fbAsyncInit = function() {
+		FB.init({
+		appId      : plus_app_id, //App ID
+		status     : true, // check login status
+		cookie     : true, // enable cookies to allow the server to access the session
+		xfbml      : true,  // parse XFBML,
+		oauth      : true
+		});  
+		{? cfg.order.fblike_ordertype && fblikesale }
+			FB.getLoginStatus(function(response) {
+				$("#fbloginlay").hide();
+					{ ? !fbuser }
+						$.ajax({'url' : '../sns_process/facebooklogincknone', 'type' : 'post'});
+					{ / }
+				if (response.status === 'connected') {
+					var uid = response.authResponse.userID;
+					var accessToken = response.authResponse.accessToken;
+				} else if (response.status === 'not_authorized') {
+					$("#fbloginlay").show();
+				} else {
+					$("#fbloginlay").show();
+				}
+			});
+		{ / }
+		{? APP_USE == 'f' } 
+			// like 이벤트가 발생할때 호출된다.
+			FB.Event.subscribe('edge.create', function(response) {
+				$("#facebook_mgs").html("페이스북과 정보를 교환 중에 있습니다. 잠시만 기다려 주세요.");
+				{? ( _SERVER.HTTP_HOST==APP_DOMAIN ) }
+					$.ajax({'url' : '../sns_process/facebooklikeck', 'type' : 'post', 'data' : {'mode':'like', 'product_url':response}, 'dataType': 'json','success': function(result){$("#facebook_mgs").html("");order_price_calculate();}});
+				{:}
+					var url = 'http://{config_system.subDomain}/sns_process/facebooklikeck?mode=like&firstmallcartid={firstmallcartid}&product_url='+response;
+					$.getJSON(url + "&jsoncallback=?", function(res) {$("#facebook_mgs").html("");order_price_calculate();}); 
+				{/}
+			});
+
+			// unlike 이벤트가 발생할때 호출된다.
+			FB.Event.subscribe('edge.remove', function(response) {
+				$("#facebook_mgs").html("페이스북과 정보를 교환 중에 있습니다. 잠시만 기다려 주세요.");
+				{? ( _SERVER.HTTP_HOST==APP_DOMAIN ) }
+					$.ajax({'url' : '../sns_process/facebooklikeck', 'type' : 'post', 'data' : {'mode':'unlike', 'product_url':response}, 'dataType': 'json','success': function(result){$("#facebook_mgs").html("");order_price_calculate();}});
+				{:}
+					var url = 'http://{config_system.subDomain}/sns_process/facebooklikeck?mode=unlike&firstmallcartid={firstmallcartid}&product_url='+response;
+					$.getJSON(url + "&jsoncallback=?", function(res) {$("#facebook_mgs").html("");order_price_calculate();}); 
+				{/}
+			});//
+		{ / }
+	}
+} catch (facebookjsok) {
+}
+{ / }
+</script>
+<script type="text/javascript">
+$(document).ready(function() {
+	// 전체 선택
+	$("form#cart_form .btn_select_all").toggle(function() {
+		$("form#cart_form input[name='cart_option_seq[]']").each(function(){			
+			$(this).attr("checked",false);			
+			$(this).closest("div").addClass("ez-checkbox-on");
+		});
+		$(".cart_goods").css('outline','2px solid #000');
+		cnt = $("form#cart_form input[name='cart_option_seq[]']").length;		
+	}, function() {
+
+		$("form#cart_form input[name='cart_option_seq[]']").each(function(){
+			$(this).attr("checked",false);
+			$(this).closest("div").removeClass("ez-checkbox-on");
+		});
+		
+		$(".cart_goods").css('outline','');
+	});
+
+	// 선택삭제
+	$(".btn_select_del").click(function() {
+
+		var selected_order = $(this).val();
+		$("input[name='cart_option_seq[]']").attr("checked",false);
+		$("input[name='cart_option_seq[]'][value='"+selected_order+"']").attr("checked", true);
+
+		$("form#cart_form").attr("action","del");
+		$("form#cart_form").attr("target","actionFrame");
+		$("form#cart_form")[0].submit();
+	});
+
+	var old_id = "";
+	// 옵션/수량변경 클릭시
+	$("button.btn_option_modify").bind("click",function() {
+		var id	= $(this).attr("id");
+		var url = "optional_changes?no="+id;
+		var area_obj = $("div#optional_changes_area_"+id);
+
+		// 닫기 옵션
+		if(old_id == id){ $(".optional_area").slideUp(500); old_id = ""; return; }
+		else			{ $(".optional_area").slideUp(500); $(".optional_area").html(""); }
+
+		$.get(url, function(data) {
+			area_obj.html(data);
+			area_obj.slideDown(500);
+			old_id = id;
+		});
+	});
+
+	// 바로구매
+	$(".btn_important_small").bind("click",function() {
+		var selected_order = $(this).val();
+		$("input[name='cart_option_seq[]']").attr("checked",false);
+		$("input[name='cart_option_seq[]'][value='"+selected_order+"']").attr("checked", true);
+
+		$("form#cart_form").attr("action","settle?mode=choice");
+		$("form#cart_form").attr("target","");
+		$("form#cart_form")[0].submit();
+		$("form#cart_form").attr("target","actionFrame");
+	});
+
+	// 선택 주문
+	$(".btn_selected_order").bind("click",function() {
+		var selected_order = '';
+		$("input[name='cart_option_seq[]']").each(function(e, el) {
+			if( $(el).attr('checked') == 'checked' ){
+				selected_order += $(el).val() + ",";
+			}
+		});
+
+		if(!selected_order){
+			openDialogAlert('주문할 상품을 선택해 주세요.','400','140');
+			return false;
+		}
+
+		$("form#cart_form").attr("action","settle?mode=choice");
+		$("form#cart_form").attr("target","");
+		$("form#cart_form")[0].submit();
+		$("form#cart_form").attr("target","actionFrame");
+	});
+
+	// 전체 주문
+	$(".btn_all_order").bind("click",function() {
+		$("form#cart_form").attr("action","addsettle");
+		$("form#cart_form").attr("target","actionFrame");
+		$("form#cart_form")[0].submit();
+	});
+
+	// 선택 위시리스트 저장
+	$(".btn_select_wishlist").bind("click",function(){
+		$("form#cart_form").attr("action","../mypage/wish_add?mode=cart");
+		$("form#cart_form").attr("target","actionFrame");
+		$("form#cart_form")[0].submit();
+	});
+
+	// 비우기
+	$(".btn_select_all_del").bind("click",function(){
+		$("input[name='cart_option_seq[]']").attr("checked",true);
+
+		$("form#cart_form").attr("action","del");
+		$("form#cart_form").attr("target","actionFrame");
+		$("form#cart_form")[0].submit();
+	});
+
+	// 상품 선택시
+	$("input[name='cart_option_seq[]']").bind("click",function(){
+		var obj = eval("cart_goods_" + $(this).val());
+		if($(this).is(":checked")){
+			$(obj).css('outline','2px solid #000');
+			cnt = $("input[name='cart_option_seq[]']:checked").length;
+		}else{
+			$(obj).css('outline','');
+			cnt = $("input[name='cart_option_seq[]']:checked").length;
+		}
+	});
+
+	{? cart_promotioncode }
+		getPromotionckloding();
+	{/}
+
+//	order_price_calculate();
+});
+
+function getPromotionckloding() {
+	var cartpromotioncode = '{cart_promotioncode}';
+	if( cartpromotioncode  ) {
+		$.ajax({
+			'url' : '../promotion/getPromotionJson?mode=cart',
+			'data' : {'cartpromotioncode':cartpromotioncode},
+			'type' : 'post',
+			'dataType': 'json',
+			'success': function(data) {
+				order_price_calculate();
+			}
+		});
+	}
+}
+
+// facebook 라이크 할인 적용 및 오픈그라피
+function getfblikeopengraph(){
+	$.get('../order/fblike_opengraph', function(data) {
+		$("#facebook_mgs").html("");
+	});
+}
+
+function order_price_calculate()
+{
+	var f = $("form#orderFrm");
+
+	f.attr("action","calculate?mode=cart");
+	f.attr("target","actionFrame");
+	f[0].submit();
+}
+
+function toggleCartSaleDetailView(obj,key){
+	if($(key).is(":hidden")){
+		$(key).stop(true,true).show();
+		$(obj).removeClass('btn_arw_dn_gray').addClass('btn_arw_up_gray');
+		$('span',obj).removeClass('btn_arw_dn_icon').addClass('btn_arw_up_icon');
+	}else{
+		$(key).stop(true,true).hide();
+		$(obj).removeClass('btn_arw_up_gray').addClass('btn_arw_dn_gray');
+		$('span',obj).removeClass('btn_arw_up_icon').addClass('btn_arw_dn_icon');
+	}
+}
+</script>
+
+<style>
+	button.btn_select_all, button.btn_select_wishlist { border:0 }
+	button.btn_ea_modify { border:0 }
+	button.btn_select_del { cursor:pointer; }
+	.sub_bg {background-color:#f7f7f7}
+</style>
+<form name="orderFrm" id="orderFrm" method="post" action="cacluate" target="actionFrame"></form>
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>카트/위시</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+<!-- 상단 마이 리스트 버튼바 -->
+{#common_mycart_top}
+
+<!-- 본문내용 시작 -->
+<form name="cart_form" id="cart_form" method="post" target="actionFrame" action="order">
+<!-- List -->
+
+<!-- { ? list } -->
+<div class="cart_contents">
+	<table border="0" width="100%" cellpadding="0" cellspacing="0">
+	<tr>		
+		<td align="left">
+			<input type="button" style="cursor:pointer; width:100px; height:36px;" class="btn_normal_small btn_select_all" value="전체선택" />
+		</td>
+	</tr>
+	</table>
+
+	<div class="cart_list">
+		<!--{ ? shipping_cart_list }-->
+		<!--{ @ shipping_cart_list }-->
+		<!--{ @ .value_ }-->
+		<!-- Cart list view -->
+		<!--{ ?..index_ == 0 }-->
+		<div class="goods_delivery_info clearbox" rowspan="{=shipping_company_cnt[.shipping_group]}">
+			<div class="fleft">
+				<!--{ ? ..goods_kind == 'coupon' }-->
+				쿠폰
+				<!--{: ..shipping_policy == 'shop'}-->
+				기본배송비
+				<!--{ : }-->
+				개별배송비
+				<!--{ / }-->
+			</div>
+			<div class="fright">
+				<!--{? ..shipping_policy == 'shop'}-->
+				<div id="basic_delivery">{=number_format(shipping_price.shop)}원</div>
+				<!--{ : }-->
+				<div id="goods_each_delivery_{..goods_seq}">{=number_format(data_goods[..goods_seq].goods_shipping)}원</div>
+				<!--{ / }-->
+			</div>
+		</div>
+		<!--{ / }-->
+		<div class="cart_goods" id="cart_goods_{..cart_option_seq}">
+			<div class="cart_goods_detail">
+				<label>
+				<input type="checkbox" name="cart_option_seq[]" value="{..cart_option_seq}" />
+				<div class="goods_name">{..goods_name}
+				<!--{? ..eventEnd }-->
+						<span class="soloEventTd{..cart_option_seq}" style="font-face:Dotum; font-size:11px;">
+							<img src="../images/common/icon_clock.gif" style="padding-bottom:2px;">남은시간
+							<span style="background-color:#c61515; color:#ffffff; padding:2px; font-weight:bold;">
+							<span id="soloday{..cart_option_seq}" style="color:#ffffff; font-weight:bold;">0</span>일
+							<span id="solohour{..cart_option_seq}" style="color:#ffffff; font-weight:bold;">00</span>:
+							<span id="solomin{..cart_option_seq}" style="color:#ffffff; font-weight:bold;">00</span>:
+							<span id="solosecond{..cart_option_seq}" style="color:#ffffff; font-weight:bold;">00</span>
+							</span>
+						</span>
+					<script>
+					$(function() {
+						timeInterval{..cart_option_seq} = setInterval(function(){
+							var time{..cart_option_seq} = showClockTime('text', '{..eventEnd..year}', '{..eventEnd..month}', '{..eventEnd..day}', '{..eventEnd..hour}', '{..eventEnd..min}', '{..eventEnd..second}', 'soloday{..cart_option_seq}', 'solohour{..cart_option_seq}', 'solomin{..cart_option_seq}', 'solosecond{..cart_option_seq}', '{..cart_option_seq}');
+							if(time{..cart_option_seq} == 0){
+								clearInterval(timeInterval{..cart_option_seq});
+								$("..soloEventTd{..cart_option_seq}").html("단독 이벤트 종료");
+							}
+						},1000);
+					});
+					</script>
+				<!--{/}-->
+				</div>
+				</label>
+				<button type="button" class="btn_select_del" value="{..cart_option_seq}">삭제 </button>
+			</div>
+			<div class="cart_goods_detail">
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<td width="80">
+						<a href="../goods/view?no={..goods_seq}">
+							<img src="{..image}" width="80" height="80" align="absmiddle" hspace="5" onerror="this.src='../images/common/noimage_list.gif'" />
+						</a>
+					</td>
+					<td width="10"></td>
+					<td>
+						<!-- { ? ..option1 } -->
+						<div class="cart_option">
+							<img src="/admin/skin/default/images/common/icon_option.gif" align="absmiddle" />&nbsp;
+							{?..title1}{..title1}:{ / }{..option1}
+							{ ? ..option2 }{?..title2}{..title2}:{ / }{..option2} { / }
+							{ ? ..option3 }{?..title3}{..title3}:{ / }{..option3} { / }
+							{ ? ..option4 }{?..title4}{..title4}:{ / }{..option4} { / }
+							{ ? ..option5 }{?..title5}{..title5}:{ / }{..option5} { / }
+						</div>
+						<!-- { / } -->
+						<div style="color:#000; padding-bottom:7px;">수량 : {=number_format(..ea)}개</div>
+						<div class="cart_price"><span class="cart_price_num">{=number_format(..org_price*..ea)}</span>원</div>
+					</td>
+				</tr>
+				</table>
+			</div>
+			<!-- { ? ..cart_suboptions } -->
+				<!-- { @ ..cart_suboptions } -->
+				<div class="cart_goods_suboption">
+					<table width="100%" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td>
+							<div>
+							<img src="../images/design/icon_reply.png" width="10" height="10" />
+							{ ? ...suboption }
+							{ ? ...suboption_title }
+							<img src="/admin/skin/default/images/common/icon_add.gif" /> {...suboption_title}:{ / }{...suboption}
+							{ / }
+							</div>
+							<div style="padding-left:20px; color:#000;">수량 : {=number_format(...ea)}개</div>
+						</td>
+						<td align="right"><span class="cart_price_num">{=number_format(...org_price*...ea)}</span>원</td>
+					</tr>
+					</table>
+				</div>
+				<!-- { / } -->
+			<!-- { / } -->
+			<div id="optional_changes_area_{..cart_option_seq}" class="optional_area" style="position:relative;background-color:#ececec; display:none;"></div>
+			<div class="cart_goods_sum">
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<td align="left" height="25">상품금액</td>
+					<td align="right">{=number_format(..tot_org_price)}원</td>
+				</tr>
+				<tr id="mobile_cart_sale_tr_{..cart_option_seq}" { ? ..tot_sale_price > 0 }{ : }class="hide"{ / }>
+					<td align="left" height="25">
+						할인금액 
+						<button type="button" class="btn_show_detail_sale btn_arw_dn_gray" style="width:68px; height:20px;line-height:16px" onclick="toggleCartSaleDetailView(this,'#cart_sale_detail_{..cart_option_seq}');">상세<span class="btn_arw_dn_icon"></span></button>
+					</td>
+					<td align="right">
+						(-) <span id="mobile_cart_sale_{..cart_option_seq}">{=number_format(..tot_sale_price)}</span>원
+					</td>
+				</tr>
+				<tr id="cart_sale_detail_{..cart_option_seq}" class="hide">
+					<td colspan="2">
+						<div class="cart_sale_detail_table">
+						<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0">
+							<col /><col width="50" />
+							<!--{ @ ..sales.title_list }-->
+							<tr id="mobile_cart_option_{...key_}_saletr_{..cart_option_seq}"  { ? ..tsales.sale_list[...key_] > 0 }{ : }class="hide"{ / }>
+								<td class="left">{..sales.title_list[...key_]}</td>
+								<td class="right"><span id="mobile_cart_option_{...key_}_saleprice_{..cart_option_seq}">{=number_format(..tsales.sale_list[...key_])}</span>원</td>
+							</tr>
+							<!--{ / }-->
+						</table>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td align="left" height="25" style="color:#e75829;">주문금액</td>
+					<td align="right"><span id="option_suboption_price_sum_{..cart_option_seq}" style="color:#e75829;">{=number_format(..tot_result_price)}</span>원</td>
+				</tr>
+				<tr>
+					<td height="10"></td>
+				</tr>
+				<tr>
+					<td class="cart_goods_num">
+						<button type="button" class="btn_option_modify btn_arw_dn_gray" style="height:30px;" id="{..cart_option_seq}">옵션/수량변경<span class="btn_arw_dn_icon"></span></button>
+					</td>
+					<td align="right">
+						<button type="button" class="btn_important_small" style="cursor:pointer; width:110px; height:36px;" value="{..cart_option_seq}">바로구매</button>
+					</td>
+				</tr>
+				</table>
+			</div>
+		</div>
+		<!--{ / }-->
+		<!--{ / }-->
+		<!--{ / }-->
+	</div>
+</div>
+
+<!-- 총합계 Start -->
+<div class="total_sum_price">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td align="left">총 상품금액</td>
+		<td align="right">
+			<span class="sum_price">{=number_format(total)} 원</span>
+		</td>
+	</tr>
+	<tr>
+		<td align="left">배송비</td>
+		<td align="right">
+			<span class="sum_price">(+) <span id="total_shipping_price">{=number_format(array_sum(shipping_price))}</span> 원</span>
+		</td>
+	</tr>
+	<tr>
+		<td align="left">할인금액</td>
+		<td align="right">
+			<span class="sum_price">(-) <span id="mobile_total_sale">{=number_format(total_sale)}</span> 원</span>
+		</td>
+	</tr>
+	<tr><td colspan="2" height="15"></td></tr>
+	<tr><td colspan="2" height="1" bgcolor="white"></td></tr>
+	<tr><td colspan="2" height="10"></td></tr>
+	<tr>
+		<td align="left">결제금액</td>
+		<td align="right">
+			<span class="sum_price"><span class="settle_price">{=number_format(total_price)}</span> 원</span>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<div style="padding-top:5px;" align="center">
+	<input type="button" value="선택상품구매" class="btn_normal_large btn_selected_order" style="cursor:pointer; width:48%; height:50px;" />
+	<input type="button" value="전체상품구매" class="btn_important_large btn_all_order" style="cursor:pointer; width:48%; height:50px;"  />
+</div>
+
+<div style="padding-top:5px;" align="center">{navercheckout_tpl}</div>
+<!-- 총합계 End -->
+
+<!-- { : } -->
+<div class="center pd30">장바구니에 담긴 상품이 없습니다.</div>
+<!-- { / } -->
+</form>
+
+<div style="padding-top:10px;"></div>
+<div align="center" id="facebook_mgs">{? is_file_facebook_tag }페이스북과 정보를 교환 중에 있습니다. 잠시만 기다려 주세요.{/}.</div>
+
+<!-- 본문내용 끝 -->
+{? is_file_facebook_tag }
+	<!-- 좋아요할인 : 삭제하지 말아주세요 -->
+	{? !( strstr(_SERVER.HTTP_HOST,'.firstmall.kr') || _SERVER.HTTP_HOST==APP_DOMAIN ) //t }
+	<iframe name="snsiframe" src="http://{config_system.subDomain}/admin/sns/subdomainfacebookck" frameborder="0" width="0" height="0"></iframe>
+	<script language="JavaScript" src="http://{config_system.subDomain}/order/fblike_opengraph_firstmallplus?firstmallcartid={firstmallcartid}"></script>
+	<script language="JavaScript" src="http://{config_system.subDomain}/order/fbopengraph?firstmallcartid={firstmallcartid}"></script>
+	{/}
+	<script language="JavaScript" src="../order/fblike_opengraph"></script>
+	<!-- 좋아요할인 : 삭제하지 말아주세요 -->
+{/}

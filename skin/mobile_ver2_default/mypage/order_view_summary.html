@@ -1,0 +1,129 @@
+<style>
+/* 주문 내역 테이블 */
+
+table.order-info-table {border-bottom:2px solid #cacaca; font-size:11px; color:#444;}
+table.order-info-table thead th {height:30px; text-align:left; padding-left:10px; color:#000; background-color:#ebebeb; border-top:1px solid #cacaca; border-bottom:1px solid #cacaca;}
+table.order-info-table tbody th {padding-left:10px; color:#666; text-align:left; font-weight:normal;}
+table.order-info-table tbody td {}
+table.order-info-table tbody th,
+table.order-info-table tbody td {}
+.price {text-align:right}
+span.export_title { display:inline-block;width:50px;padding-left:5px; }
+</style>
+
+<!-- 타이틀 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+
+<tr><td height="34"> <span class="desc">세부 주문 내역에서는 개별 상품의 구매 확정 및 포인트를 지급 받으실 수 있습니다.</span></td></tr>
+</table>
+
+<!--{ ? exports }-->
+
+
+
+	<br class="table-gap" />
+
+	<table class="order-view-table" width="100%" border=0>
+		<colgroup>
+			<col />
+			<col />
+			<col />
+			<col />
+			<col />
+			<col />
+			<col />
+			<col />
+			<col />
+		</colgroup>
+		<thead class="oth">
+			<tr>
+				<th class="dark">배송 정보</th>
+				<th class="dark">주문상품</th>
+				<th class="dark">발송 / 주문</th>
+				<th class="dark">포인트</th>
+				<th class="dark">상태</th>
+				<th class="dark">구매결정</th>
+			</tr>
+		</thead>
+
+		<tbody class="otb">
+			<!--{ ? exports }-->
+			<!--{ @ exports }-->
+			<!--{ @ .item }-->
+			<tr class="order-item-row">
+				<!--{ ? ..key_ == 0 }-->
+				<td rowspan="{=count(.item)}">
+				<div style="padding-top:5px;">
+					<span class="export_title">출고일시</span>
+					<span class="export_val"> : {.export_date}</span>
+				</div>
+				</td>
+				<!--{ / }-->
+				<td class="info">
+					<div class="left">
+					<span class="order-item-image"><img src="{..image}" /></span>
+					<!--{ ? .option1 }-->
+					<span class="goods_name1">{..goods_name}</span>
+					<!--{ : }-->
+					<span class="goods_name2">{..goods_name}</span>
+					<!--{ / }-->
+					{? ..cancel_type == '1' }<span ><span class="canceltypetitle">청약철회불가</span></span>{/}
+					<!--{ ? .option1 }-->
+					<span class="option">{..title1} : {..option1}</span>
+					<!--{ / }-->
+					<!--{ ? .option2 }-->
+					<span class="option">{..title2} : {..option2}</span>
+					<!--{ / }-->
+					<!--{ ? .option3 }-->
+					<span class="option">{..title3} : {..option3}</span>
+					<!--{ / }-->
+					<!--{ ? .option4 }-->
+					<span class="option">{..title4} : {..option4}</span>
+					<!--{ / }-->
+					<!--{ ? .option5 }-->
+					<span class="option">{..title5} : {..option5}</span>
+					<!--{ / }-->
+					</div>
+				</td>
+				<td class="info" align="center" style="color:#c24400; font-weight:bold;">
+				{..ea}
+				/
+				{..opt_ea}
+				</td>
+				<td class="info center">P {=number_format(..out_point)}</td>
+				<td class="info center">
+					<div  style="padding-top:5px;">
+						<span class="export_val">{.mstatus}</span>
+					</div>
+					{? .tracking_url }
+					<div>
+						<span class="export_val">{.mdelivery} {.mdelivery_number} <a href="{.tracking_url}" target="_blank"><img src="../images/design/mypage_btn_delivery.gif" /></a></span>
+					</div>
+					{/}
+				</td>
+				<td class="info center">
+					{? .buy_confirm  != 'none'  }
+						구매확정
+						({.data_buy_confirm.regdate}{ ? .buy_confirm == 'admin' }판매자{ : .buy_confirm == 'user' }구매자{ : .buy_confirm == 'system' }자동{ / })
+					{:}
+						{? .status >= 55  }
+						<button class="black_btn exportbuyconfirm" export_code="{.export_code}" type="button" >구매확정</button>
+						{/}
+					{/}
+					<button class="black_btn" onclick="goods_review_write('{..goods_seq}','{orders.order_seq}');">상품평</button>
+				</td>
+			</tr>
+			<!--{ / }-->
+			<!--{ / }-->
+			<!--{ : }-->
+			<tr>
+				<td align="center" colspan="6" height="30">배송 정보가 없습니다.</td>
+			</tr>
+			<!--{ / }-->
+		</tbody>
+	</table>
+
+	<br class="table-gap" />
+
+<!--{ / }-->
+

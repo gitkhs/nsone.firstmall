@@ -1,0 +1,341 @@
+<script type="text/javascript" src="/app/javascript/plugin/jquery_selectbox/js/jquery.selectbox-0.2.js"></script>
+<link href="/app/javascript/plugin/jquery_selectbox/css/jquery.selectbox.mobile.css" type="text/css" rel="stylesheet" />
+
+<style>
+.goods_quantity_table_container {margin:5px 0 10px 0; border:1px solid #d0d0d0;}
+.goods_quantity_table .quanity_row:first-child .quantity_cell {border-top:0px}
+.goods_quantity_table .option_text {letter-spacing:-1px;}
+
+.option_area		{margin-bottom:3px;}
+.inputs_area		{margin-bottom:3px; padding:10px; background-color:#fff; border:1px solid #E6E6E6; }
+.inputs_area input[type='text'] {height:25px; line-height:25px; text-indent:8px}
+
+.option_ea {margin-bottom:3px; padding:10px; background-color:#fff; border:1px solid #E6E6E6; }
+.sub_option_ea {margin-bottom:3px; padding:10px; background-color:#fff; border:1px solid #E6E6E6; }
+
+.option_add_area {padding-top:3px; border-top:1px dashed #d0d0d0}
+
+.eaPlus { width:24px; height:20px; padding-top:3px; background-color:#ddd; text-align:center; float:left; }
+.eaMinus { width:24px; height:20px; padding-top:3px; background-color:#ddd; text-align:center; float:left; }
+.removeOption { width:24px; height:20px; padding-top:3px; background-color:#ddd; text-align:center; float:right; }
+
+.total_price {color:#cc0000;}
+#total_goods_price {color:#ed2b07;font-weight:bold;font-size:17px;font-family:Tahoma}
+
+.inputsFileWrap {display:block; border:1px solid #ddd; height:40px; line-height:40px; text-indent:8px;}
+</style>
+<script type="text/javascript">
+var gl_goods_price = 0;
+var gl_event_sale_unit = 0;
+var gl_cutting_sale_price = 0;
+var gl_cutting_sale_action = "{config_system.cutting_sale_action}";
+var gl_multi_discount_use 	= "{goods.multi_discount_use}";
+var gl_multi_discount_unit = "{goods.multi_discount_unit}";
+var gl_multi_discount 		= 0;
+var gl_multi_discount_ea 	= 0;
+var gl_option_view_type = "{goods.option_view_type}";
+var gl_options_count = {=count(options)};
+var gl_opttag = '';
+var gl_min_purchase_limit = '{goods.min_purchase_limit}';
+var gl_min_purchase_ea = 0;
+var gl_max_purchase_limit = '{goods.max_purchase_limit}';
+var gl_max_purchase_ea = 0;
+var gl_member_seq = "{sessionMember.member_seq}";
+var gl_request_uri = "{=urlencode(_SERVER.REQUEST_URI)}";
+var gl_goods_seq = 0;
+var gl_option_divide_title_count = {=count(goods.option_divide_title)};
+var gl_skin = "{config_system.skin}";
+
+
+{? goods.event.target_sale }
+	{ ? goods.consumer_price }
+		gl_goods_price = {goods.consumer_price};
+	{: goods.price}
+		gl_goods_price = {goods.price};
+	{/}
+{:}
+	{ ? goods.price }
+		gl_goods_price = {goods.price};
+	{/}
+{ / }
+
+{ ? goods.event.event_sale_unit }
+gl_event_sale_unit = {goods.event.event_sale_unit};
+{ / }
+{? config_system.cutting_sale_price }
+gl_cutting_sale_price = {config_system.cutting_sale_price};
+{ / }
+{ ? goods.multi_discount }
+gl_multi_discount 		= {goods.multi_discount};
+{ / }
+{ ? goods.multi_discount_ea }
+gl_multi_discount_ea 	= {goods.multi_discount_ea};
+{ / }
+{ ? goods.min_purchase_ea }
+gl_min_purchase_ea = {goods.min_purchase_ea};
+{ / }
+{ ? goods.max_purchase_ea }
+gl_max_purchase_ea = {goods.max_purchase_ea};
+{ / }
+{ ? goods.goods_seq }
+gl_goods_seq = {goods.goods_seq};
+{ / }
+
+$(document).ready(function(){
+	$("select[name='viewOptions[]']").last().bind("change",function(){
+		gl_opttag += '<td class="quantity_cell option_text">';
+		<!--{ @options[0].option_divide_title }-->
+		var opt = $(this).find('option:selected').attr('opt{.key_+1}');
+		if(!opt) return false;
+		gl_opttag += '	{.value_} : '+opt+'<input type="hidden" name="option[{.key_}][]" value="'+opt+'" />';
+		gl_opttag += '<input type="hidden" name="optionTitle[{.key_}][]" value="{.value_}" />';
+		<!--{ ? .size_ != .key_+1 }-->
+		gl_opttag += '<br/>';
+		<!--{ / }-->
+		<!--{ / }-->
+	});
+
+	$(".goods_quantity_table_container").closest(".ui-dialog-content").css({"padding":"0px"});
+
+	$("#optional_changes_form").submit(function(){
+		if($(".inputsUploadButton").length){
+			var formObj = document.optional_changes_form;
+			var formData = new FormData(formObj);
+
+			var exit = false;
+
+			$.ajax({
+				'url' : '/goods_process/upload_goods_inputs',
+				'mimeType' : 'multipart/form-data',
+				'type' : 'post',
+				'data' : formData,
+				'contentType' : false,
+				'cache' : false,
+				'processData' : false,
+				'dataType' : 'json',
+				'async' : false,
+				'success' : function(res){
+					if(typeof res.status != 'undefined'){
+						if(res.status=='1'){
+							if(typeof res['fileList'] != 'undefined'){
+								for(var i=0;i<res.fileList.length;i++){
+									$("input.webftpFormItemInput").eq(i).val(res.fileList[i].filePath);
+									$("img.webftpFormItemPreview").eq(i).attr('src','/'+res.fileList[i].filePath).show();
+								}
+							}
+						}else{
+							alert(res.msg);
+							exit = true;
+						}
+					}else{
+						alert('파일 업로드 실패');
+						exit = true;
+					}
+				}
+			});
+
+			if(exit) return false;
+		}
+
+		return true;
+	});
+
+	setDefaultText();
+
+	// 2014-12-18 옵션 개편 후 (ocw)
+	try{
+		$("select[name='viewOptions[]']").selectbox();
+		$("select[name='viewSuboption[]']").selectbox();
+	}catch(e){};
+});
+</script>
+
+<script type="text/javascript" src="/app/javascript/js/order-optional_changes.js?dummp=20131217"></script>
+
+<form name="optional_changes_form" id="optional_changes_form" method="post" enctype="multipart/form-data" action="optional_modify" target="actionFrame">
+<input type='hidden' name='cart_option_seq' value='{cart_options[0].cart_option_seq}'>
+<div style="padding:6px;">
+	<!-- 옵션 수량변경 영역 Start -->
+	<div class="option_ea_area">
+		<!-- 필수옵션 수량 영역 Start -->
+		<!--{ @ cart_options }-->
+		<div class="option_ea">
+			<table class="goods_quantity_table" width="100%" cellpadding="0" cellspacing="0" border="0">
+			<tr class='quanity_row'>
+				<td colspan="2">
+					<!--{ ? .option1 }-->
+					{.title1} : {.option1}
+					<input type='hidden' name='option[0][]' value='{.option1}'>
+					<input type='hidden' name='optionTitle[0][]' value='{.title1}'>
+					<!--{ / }-->
+					<!--{ ? .option2 }-->
+					<br/>
+					{.title2} : {.option2}
+					<input type='hidden' name='option[1][]' value='{.option2}'>
+					<input type='hidden' name='optionTitle[1][]' value='{.title2}'>
+					<!--{ / }-->
+					<!--{ ? .option3 }-->
+					<br/>
+					{.title3} : {.option3}
+					<input type='hidden' name='option[2][]' value='{.option3}'>
+					<input type='hidden' name='optionTitle[2][]' value='{.title3}'>
+					<!--{ / }-->
+					<!--{ ? .option4 }-->
+					<br/>
+					{.title4} : {.option4}
+					<input type='hidden' name='option[3][]' value='{.option4}'>
+					<input type='hidden' name='optionTitle[3][]' value='{.title4}'>
+					<!--{ / }-->
+					<!--{ ? .option5 }-->
+					<br/>
+					{.title5} : {.option5}
+					<input type='hidden' name='option[4][]' value='{.option5}'>
+					<input type='hidden' name='optionTitle[4][]' value='{.title5}'>
+					<!--{ / }-->
+				</td>
+			</tr>
+			<tr class='quanity_row'>
+				<td class='quantity_cell'>
+					<div class='hand eaMinus' viewType="store">-</div>
+					<input type='text' name='optionEa[]' value='{.ea}' class="onlynumber" style='border:1px solid #d0d0d0; width:23px; height:21px; float:left; text-align:center;' />
+					<div class='hand eaPlus' viewType="store">+</div>
+					<div class='both'></div>
+				</td>
+				<td class='quantity_cell' align="right">
+					<span class='optionPrice hide'>{.price}</span>
+					<strong class='out_option_price'>{=number_format(.price*.ea)}</strong>원
+				</td>
+			</tr>
+			</table>
+		</div>
+		<!--{ / }-->
+		<!-- 필수옵션 수량 영역 End -->
+
+		<!-- 추가옵션 수량 영역 Start -->
+		<!--{ @ cart_suboptions }-->
+		<div class="sub_option_ea">
+			<table class="goods_quantity_table" width="100%" cellpadding="0" cellspacing="0" border="0">
+			<input type='hidden' name='suboption_seq[]' value='{.cart_suboption_seq}' />
+			<!--input type='hidden' name='suboptionTitle' value='{.value_[0].suboption_title}' /-->
+			<tr class='quanity_row suboption_tr'>
+				<td colspan="2" class='option_text quantity_cell_sub'>{.suboption_title} : {.suboption}
+					<input type='hidden' name='suboption[]' value='{.suboption}'>
+					<input type='hidden' name='suboptionTitle[]' value='{.suboption_title}'>
+				</td>
+			</tr>
+			<tr class='quanity_row suboption_tr'>
+				<td class='quantity_cell_sub'>
+					<div class='hand eaMinus' viewType="store">-</div>
+					<input type='text' name='suboptionEa[]' value='{.ea}' class="onlynumber" style='border:1px solid #d0d0d0; width:23px; height:21px; float:left; text-align:center;' />
+					<div class='hand eaPlus' viewType="store">+</div>
+					<div class='both'></div>
+				</td>
+				<td class='quantity_cell_sub' align='right'>
+					<span class='suboptionPrice hide'>{.price}</span>
+					<div class='hand removeOption' viewType="store">×</div>
+					<div style="float:right; padding-top:3px;">
+						<strong class='out_suboption_price'>{=number_format(.price*.ea)}</strong>원&nbsp;
+					</div>
+					<div class='both'></div>
+				</td>
+			</tr>
+			</table>
+		</div>
+		<!--{ / }-->
+		<!-- 추가옵션 수량 영역 End -->
+	</div>
+	<!-- 옵션 수량변경 영역 End -->
+
+	<!-- 필수 옵션 영역 Start -->
+	<!--{ ? options && options[0].option_title }-->
+		<!--{ ? goods.option_view_type == 'join' && options }-->
+		<div class="option_area">
+			<input type="hidden" name="option_title" id="option_title" value="{options[0].option_title}" />
+			<select style="width:99%" name="viewOptions[]" viewType="store">
+			<option value="">[필수] {options[0].option_title} 선택</option>
+				<!--{ @ options }-->
+					<!--{ ? .chk_stock }-->
+					<option value="{=implode('/',.opts)}" price="{.price}" opt1="{.option1}" opt2="{.option2}" opt3="{.option3}" opt4="{.option4}" opt5="{.option5}" infomation="{.infomation}">{=implode('/',.opts)}</option>
+					<!--{ : }-->
+					<option value="{=implode('/',.opts)}" price="{.price}" opt1="{.option1}" opt2="{.option2}" opt3="{.option3}" opt4="{.option4}" opt5="{.option5}" disabled="disabled">{=implode('/',.opts)} (품절)</option>
+					<!--{ / }-->
+				<!--{ / }-->
+			</select>
+			{? options[0].newtype }&nbsp;&nbsp;&nbsp;
+			<div class="viewOptionsspecialays"></div>
+			{/}
+			<script type="text/javascript">set_option_join();</script>
+		</div>
+		<!--{ / }-->
+	<!--{ / }-->
+
+	<!--{ ? goods.option_view_type == 'divide' && options }-->
+		<!--{ @ goods.option_divide_title }-->
+		<div class="option_area">
+			<input type="hidden" name="option_title" id="option_title_{.key_}" value="{.value_}" />
+			<select style="width:99%" name="viewOptions[]" viewType="store" id="{.key_}"  opttype="{goods.divide_newtype[.index_]}">
+			<option value="">[필수] {.value_} 선택</option>
+			</select>
+			{? goods.divide_newtype[.index_] }&nbsp;&nbsp;&nbsp;
+			<div class="viewOptionsspecialays {goods.divide_newtype[.index_]}"></div>
+			{/}
+		</div>
+		<!--{ / }-->
+	<!--{ / }-->
+	<!-- 필수 옵션 영역 End -->
+
+	<!-- 추가입력옵션 시작 -->
+	<!--{? inputs}-->
+	<!--{ @ inputs }-->
+	<div class="inputs_area">
+		<input type="hidden" name="inputsTitle[{.index_}][]" value="{.input_name}" />
+		<!--{ ? .input_form == 'edit' }-->
+		<textarea name="inputsValue[{.index_}][]" rows="4" style="width:97%;overflow:auto;" limit="{.input_limit}" onkeyup="input_limits(this,'{.input_limit}')" onkeydown="input_limits(this,'{.input_limit}')" {?.input_require}required="y"{/} title="{.input_name}을 입력하세요{?.input_require} (필수){/}">{cart_inputs[.key_].input_value}</textarea>
+		<!--{ : .input_form == 'text' }-->
+		<input type="text" name="inputsValue[{.index_}][]" style="width:100%;" value="{cart_inputs[.key_].input_value}" limit="{.input_limit}" onkeyup="input_limits(this,'{.input_limit}')" onkeydown="input_limits(this,'{.input_limit}')" {?.input_require}required="y"{/} title="{.input_name}을 입력하세요{?.input_require} (필수){/}" />
+		<!--{ : .input_form == 'file' }-->
+		<div class="inputsFileWrap webftpFormItem">
+		{.input_name} &nbsp; 
+		<img src="/mypage_process/filedown?file={cart_inputs[.key_].input_value}" class="webftpFormItemPreview hand" onerror="$(this).hide()" style="width:20px; height:20px;" onclick="window.open(this.src)" title="이미지 보기" />
+		<input type="text" class="webftpFormItemInput hide" name="inputsValue[{.index_}][]" {?.input_require}required="y"{/} value="{cart_inputs[.key_].input_value}" />
+		<input class="inputsUploadButton" name="viewInputsUploader[]" type="file" value="" style="width:120px" />
+		</div>
+		<!--{ / }-->
+	</div>
+	<!--{ / }-->
+	<!--{ / }-->
+	<!-- 추가입력옵션 끝 -->
+
+	<!-- 추가 옵션 영역 Start -->
+	<!--{ ? suboptions }-->
+	<div class="option_add_area">
+		<!--{ @ suboptions }-->
+		<div class="option_area">
+			<input type="hidden" name="suboptionTitle" id="suboptionTitle_{.key_}" value="{.value_[0].suboption_title}" />
+			<!--{?.value_[0].sub_required=='y'}-->
+			<input type="hidden" name="suboption_title_required[]" value="{.value_[0].suboption_title}" />
+			<!--{ / }-->
+			<span class="suboptionTitle hide" >{.value_[0].suboption_title}</span>
+			<select style="width:99%" name="viewSuboption[]" viewType="store" {?.value_[0].sub_required=='y'}required="y"{/}>
+				<option value="">[추가] 선택안함({.value_[0].suboption_title})</option>
+				<!--{ @ .value_ }-->
+				<!--{ ? ..price > 0 }-->
+				<option value="{..suboption}" seq="{..suboption_seq}" price="{..price}">{..suboption} (추가 {=number_format(..price)}원)</option>
+				<!--{ : }-->
+				<option value="{..suboption}" seq="{..suboption_seq}" price="0">{..suboption}</option>
+				<!--{ / }-->
+				<!--{ / }-->
+			</select>
+		</div>
+		<!--{ / }-->
+	</div>
+	<!--{ / }-->
+	<!-- 추가 옵션 영역 End -->
+
+
+	<div style="margin-top:10px; margin-bottom:4px; margin-left:38%; ">
+		<input type="submit" id="change_cart" style="cursor:pointer; width:90px; height:36px;" class="btn_normal_small" value="변경" />
+	</div>
+</div>
+</form>
+<script>calculate_goods_price();</script>

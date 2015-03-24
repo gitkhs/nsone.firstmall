@@ -1,0 +1,150 @@
+<table border="0" cellSpacing="0" cellPadding="0" width="696">
+	<tbody><tr><td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" height="20"></td></tr>
+	<tr>
+		<td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;"><img src="/data/mail/logo.gif"></td>
+	</tr>
+	<tr><td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" height="20"></td></tr>
+	<tr><td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" bgColor="#000000" height="2"></td></tr>
+	<tr><td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" height="60"></td></tr>
+	<!-- 내용시작 -->
+	<tr>
+		<td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;"><img src="/data/mail/txt_coupon_export.gif"></td>
+	</tr>
+	<tr><td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" height="35"></td></tr>
+	<tr><td style="color: rgb(97, 106, 116); line-height: 22px; padding-left: 10px; font-family: 돋움, Dotum; font-size: 12px;" class="texts">고객님이 구매하신 쿠폰 정보입니다.</td></tr>
+	<tr><td style="color: rgb(97, 106, 116); line-height: 22px; padding-left: 10px; font-family: 돋움, Dotum; font-size: 12px;" class="texts">쿠폰 사용내역은 {config_basic.shopName} > 마이페이지에서 조회하실 수 있습니다.</td></tr>
+	<tr><td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" height="20"></td></tr>
+	<tr>
+		<td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" align="center">
+
+		<div style="width: 696px; text-align: left; line-height: 30px; padding-left: 30px; font-size: 14px; font-weight: bold; margin-top: 10px; vertical-align: middle;" class="item-title">쿠폰 정보 <span style="font-size:12px;font-weight:normal">(출고번호 {export.export_code})</span></div>
+		<table style="border-top-color: rgb(170, 170, 170); border-right-color: rgb(218, 218, 218); border-top-width: 1px; border-right-width: 1px; border-top-style: solid; border-right-style: solid; border-collapse: collapse;" class="info-table-style" width="676">
+		<colgroup><col width="15%"><col width="35%"><col width="15%"><col width="35%">
+		<tbody><tr>
+			<th rowspan="4" style="padding: 8px 0px 8px 28px; text-align: left; color: rgb(77, 77, 77); line-height: 14px; font-size: 12px; font-weight: normal; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);" class="its-th"><p>쿠폰번호	{?export.couponNum}({export.couponNum}){/}</p></th>
+			<td rowspan="4" valign="top" style="padding: 5px 0px 5px 15px; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid;" class="its-td">
+				<div style="font-size:12pt;font-weight:bold;">{export.coupon_serial}</div>
+				<!--{?export.exists_option>0}-->
+				<div><ul style="text-align:left;padding-left:10px;">
+						{?export.coupon_input_count}<li>사용가능횟수 : {=number_format(export.coupon_input_count)}회</li>{/}
+						{?export.coupon_input_price}<li>사용가능금액 : {=number_format(export.coupon_input_price)}원</li>{/}
+						{?export.optionlist}{@export.optionlist}
+						{?.value_}<li>{.value_}</li>{/}
+						{/}{/}
+				</ul></div>
+				<!--{/}-->
+				<div>※
+					<!--{?export.cancel_rule=='pay'}-->
+					결제 후 {=number_format(export.cancel_day)}일 이내 취소 가능
+					<!--{:}-->
+					쿠폰 유효기간 이내 취소 가능
+					<!--{/}-->
+				</div>
+				<div>※
+					<!--{?export.refund_rule}-->
+					미사용 쿠폰 환불 대상
+					<!--{:}-->
+					미사용 쿠폰 환불 미대상
+					<!--{/}-->
+				</div>
+			</td>
+			<th style="padding: 8px 0px 8px 28px; text-align: left; color: rgb(77, 77, 77); line-height: 14px; font-size: 12px; font-weight: normal; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);" class="its-th">받는분</th>
+			<td style="padding: 5px 0px 5px 15px; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid;" class="its-td">{order.recipient_user_name}</td>
+		</tr>
+		<tr>
+			<th style="padding: 8px 0px 8px 28px; text-align: left; color: rgb(77, 77, 77); line-height: 14px; font-size: 12px; font-weight: normal; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);" class="its-th">전화</th>
+			<td style="padding: 5px 0px 5px 15px; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid;" class="its-td">{order.recipient_phone}</td>
+		</tr>
+		<tr>
+			<th style="padding: 8px 0px 8px 28px; text-align: left; color: rgb(77, 77, 77); line-height: 14px; font-size: 12px; font-weight: normal; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);" class="its-th">휴대폰</th>
+			<td style="padding: 5px 0px 5px 15px; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid;" class="its-td">{order.recipient_cellphone}</td>
+		</tr>
+		<tr>
+			<th style="padding: 8px 0px 8px 28px; text-align: left; color: rgb(77, 77, 77); line-height: 14px; font-size: 12px; font-weight: normal; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);" class="its-th">이메일</th>
+			<td style="padding: 5px 0px 5px 15px; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid;" class="its-td">{order.recipient_email}</td>
+		</tr>
+		</tbody></table>
+
+		<div style="padding: 5px;"></div>
+
+		<div style="width: 696px; text-align: left; line-height: 30px; padding-left: 30px; font-size: 14px; font-weight: bold; margin-top: 10px; vertical-align: middle;" class="item-title">상품 정보</div>
+		<table style="border-top-color: rgb(170, 170, 170); border-right-color: rgb(218, 218, 218); border-top-width: 1px; border-right-width: 1px; border-top-style: solid; border-right-style: solid; border-collapse: collapse;" class="info-table-style" width="676">
+		<tbody><tr>
+			<th style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);" class="its-th-center">상품명</th>
+			<th style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);" class="its-th-center">수량</th>
+			<th style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);" class="its-th-center">쿠폰</th>
+			<th style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);" class="its-th-center">가격</th>
+		</tr>
+		<!--{ @ goods }-->
+		<tr>
+			<td class="its-td-align" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 10px; line-height:180%; letter-spacing:0px;">
+				{.goods_name}
+				<div style="margin-left:10px;color:#4D4D4D; font-size:12px; ">
+					<!--{ ? .options }-->
+					<img border="0" src="/data/mail/icon_option.gif" /> { .options }
+					<!--{ / }-->
+					<!--{ ? .options && .inputs }-->
+					<br/>
+					<!--{ / }-->
+					<!--{ ? .inputs }-->
+						<!--{ @ .inputs }-->
+							<!--{ ? ..key_ > 0 }--><br/><!--{ / }-->
+					<img border="0" src="/data/mail/icon_input.gif" />
+					<!--{ ? ..title }-->{ ..title }:<!--{ / }-->
+					{ ..value }
+						<!--{ / }-->
+					<!--{ / }-->
+					<!--{ ? .sub }-->
+					<img border="0" src="/data/mail/icon_add_arrow.gif" />
+					<img border="0" src="/data/mail/icon_add.gif" />
+					{.sub.sub_options}
+					<!--{ / }-->
+				</div>
+			</td>
+			<td class="its-td-center" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 0; line-height:180%; letter-spacing:0px;text-align:center;">{.ea}</td>
+			<td class="its-td-center" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 0; line-height:180%; letter-spacing:0px;text-align:center;">{export.couponNum}</td>
+			<td class="its-td-center" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 0; line-height:180%; letter-spacing:0px;text-align:center;">{=number_format(.price)}</td>
+		</tr>
+		<!--{ / }-->
+		</tbody></table>
+
+		<div style="padding: 5px;"></div>
+
+		<div class="item-title" style="width: 696px; text-align: left; line-height: 30px; padding-left: 30px; font-size: 14px; font-weight: bold; margin-top: 10px; vertical-align: middle;">주문정보</div>
+
+		<table width="676" class="info-table-style" style="border-top-color: rgb(170, 170, 170); border-right-color: rgb(218, 218, 218); border-top-width: 1px; border-right-width: 1px; border-top-style: solid; border-right-style: solid; border-collapse: collapse;">
+		<tbody><tr>
+			<th class="its-th-center" style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);">주문번호</th>
+			<th class="its-th-center" style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);">결제수단</th>
+			<th class="its-th-center" style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);">결제일시</th>
+			<th class="its-th-center" style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid; background-color: rgb(241, 241, 241);">상세</th>
+		</tr>
+		<tr>
+			<td class="its-td-center" style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid;">{order.order_seq}</td>
+			<td class="its-td-center" style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid;">{order.mpayment}</td>
+			<td class="its-td-center" style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid;">{order.deposit_date}</td>
+			<td class="its-td-center" style="padding: 5px 0px; text-align: center; color: rgb(77, 77, 77); line-height: 180%; letter-spacing: 0px; font-size: 12px; border-bottom-color: rgb(218, 218, 218); border-left-color: rgb(218, 218, 218); border-bottom-width: 1px; border-left-width: 1px; border-bottom-style: solid; border-left-style: solid;">{ ? !empty(order.pg_transaction_number) }거래번호 {order.pg_transaction_number}{/}</td>
+		</tr>
+		</tbody></table>
+
+
+		</td>
+	</tr>
+	<tr><td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" height="100"></td></tr>
+	<tr>
+		<td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" align="center"><a href="{basic.domain}" target="_blank"><img border="0" src="/data/mail/btn_go.gif"></a></td>
+	</tr>
+	<tr><td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" height="30"></td></tr>
+	<tr><td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" bgColor="#000000" height="2"></td></tr>
+	<tr><td style="color: rgb(77, 77, 77); line-height: 14px; font-size: 12px;" height="20"></td></tr>
+	<tr>
+		<td style="text-align: center; color: rgb(151, 158, 165); line-height: 22px; font-family: 돋움, Dotum; font-size: 11px;" class="company">
+			사업자등록번호 : {config_basic.businessLicense}&nbsp;&nbsp;&nbsp;&nbsp;통신판매업신고번호 : {config_basic.mailsellingLicense}&nbsp;&nbsp;&nbsp;&nbsp;대표이사 : {config_basic.ceo}
+		</td>
+	</tr>
+	<tr>
+		<td style="text-align: center; color: rgb(151, 158, 165); line-height: 22px; font-family: 돋움, Dotum; font-size: 11px;" class="company">
+			주소 : {config_basic.companyAddress} {config_basic.companyAddressDetail}&nbsp;&nbsp;&nbsp;&nbsp;대표전화 : {config_basic.companyPhone}&nbsp;&nbsp;&nbsp;&nbsp;팩스 : {config_basic.companyFax}
+		</td>
+	</tr>
+</tbody></table>

@@ -1,0 +1,26 @@
+<!--{?userInfo.member_seq}-->
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>적립금/포인트/이머니</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+<!-- 상단 마이 리스트 버튼바 -->
+<div class="sub_title_button_bar">
+	<table class="sub_title_button_tb" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="33.3%" onclick="location.href='emoney'" {?uri_string()=='mypage/emoney'}class="sel"{/} >
+			적립금<br/>
+			<span>{=number_format(showMypageTop('emoney'))}</span>
+		</td>
+		<td width="33.3%" onclick="location.href='point'" {?uri_string()=='mypage/point'}class="sel"{/}>
+			포인트<br/>
+			<span>{=number_format(showMypageTop('point'))}</span>
+		</td>
+		<td width="33.3%" onclick="location.href='cash'" {?uri_string()=='mypage/cash'}class="sel"{/}>
+			이머니<br/>
+			<span>{=number_format(showMypageTop('cash'))}</span>
+		</td>
+	</tr>
+	</table>
+</div>
+<!--{/}-->

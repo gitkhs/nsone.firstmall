@@ -1,0 +1,111 @@
+<!--[ 카테고리 뎁스 네비 ]-->
+<!--{=showLocationDepth(_GET.code)}-->
+
+<!--[ 카테고리별 상단 꾸미기 HTML ]-->
+<!--{?categoryData.top_html}-->
+{categoryData.top_html}
+<!--{/}-->
+
+<!--[ 메인 이미지 ]-->
+<div style="padding:0 0 20px 0">
+	<img src="../images/common/list_bnr.jpg" width="100%" />
+</div>
+
+<!--[ 카테고리별 추천상품 출력 ]-->
+<!--{ ? categoryData.recommend_display_seq }-->
+	<div style="padding:0 0 20px 0">
+		<img src="../images/design/tit_main_newarrival.gif" />
+		<div style="padding-top:10px">
+		{=showLocationRecommendDisplay(categoryCode)}
+		</div>
+	</div>
+<!--{ / }-->
+
+<!--[ 상품 검색 폼 ]-->
+<!--{ ? categoryData.search_use=='y' }-->
+	<div style="padding:0 0 20px 0">
+	{=showGoodsSearchForm(sc)}
+	</div>
+<!--{ / }-->
+
+<!--[ 상품 리스트 ]-->
+<!--{ ? categoryData.list_use == 'y' }-->
+<div class="goods_list_summary">전체 상품 <b>{=number_format(page.totalcount)}</b> 개</div>
+<div class="goods_list_top">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td align="left">
+			{?sort}
+			<span class="sort_item">
+				<!--{ @ orders }-->
+					<!--{ ? .index_ }-->
+					&nbsp;&nbsp;|&nbsp;&nbsp;
+					<!--{ / }-->
+					<!--{ ? .key_ == sort }-->
+						<a href="?sort={.key_}&{=get_args_list(array('page','sort'))}"><b>{.value_}</b></a>
+					<!--{ : }-->
+						<a href="?sort={.key_}&{=get_args_list(array('page','sort'))}">{.value_}</a>
+					<!--{ / }-->
+				<!--{ / }-->
+			</span>
+			{/}
+		</td>
+		<td align="right">
+			<!--{?categoryData.list_paging_use=='y'}-->
+			<select name="perpage" onchange="document.location.href='?perpage='+this.value+'&{=get_args_list(array('page','perpage'))}'">
+				<option value="{=perpage_min}" {?_GET.perpage==perpage_min}selected{/}>{=number_format(perpage_min)}개씩 보기</option>
+				<option value="{=perpage_min*2}" {?_GET.perpage==perpage_min*2}selected{/}>{=number_format(perpage_min*2)}개씩 보기</option>
+				<option value="{=perpage_min*5}" {?_GET.perpage==perpage_min*5}selected{/}>{=number_format(perpage_min*5)}개씩 보기</option>
+				<option value="{=perpage_min*10}" {?_GET.perpage==perpage_min*10}selected{/}>{=number_format(perpage_min*10)}개씩 보기</option>
+			</select>
+			<!--{/}-->
+			
+			<ul class="goods_list_style">
+				<li {?list_style=='lattice_a'}class="lattice_a_on"{:}class="lattice_a"{/}><a href="?display_style=lattice_a&{=get_args_list(array('page','display_style'))}" title="격자형A"></a></li>
+				<li {?list_style=='lattice_b'}class="lattice_b_on"{:}class="lattice_b"{/}><a href="?display_style=lattice_b&{=get_args_list(array('page','display_style'))}" title="격자형B"></a></li>
+				<li {?list_style=='list'}class="list_on"{:}class="list"{/}><a href="?display_style=list&{=get_args_list(array('page','display_style'))}" title="리스트형"></a></li>
+			</ul>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<div style="height:24px"></div>
+
+<!--{ ? page.totalcount==0 }-->
+<table align="center" cellpadding="0" cellspacing="0" border="0">
+<tr><td height="50"></td></tr>
+<tr>
+	<td>
+		<span class="small">이 분류에 상품이 없습니다.</span>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+<!--{ : }-->
+{goodsDisplayHTML}
+<!--{ / }-->
+
+<div style="height:30px"></div>
+
+<table align="center" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+		<div class="paging_navigation">
+			<!--{ ? page.first }--><a href="?page={page.first}&amp;{page.querystring}" class="first">◀ 처음</a><!--{ / }-->
+			<!--{ ? page.prev }--><a href="?page={page.prev}&amp;{page.querystring}" class="prev">◀ 이전</a><!--{ / }-->
+			<!--{ @ page.page }-->
+				<!--{ ? page.nowpage ==  .value_ }-->
+					<a href="?page={.value_}&amp;{page.querystring}" class="on">{.value_ }</a>
+				<!--{ : }-->
+					<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? page.next }--><a href="?page={page.next}&amp;{page.querystring}" class="next">다음 ▶</a><!--{ / }-->
+			<!--{ ? page.last }--><a href="?page={page.last}&amp;{page.querystring}" class="last">마지막 ▶</a><!--{ / }-->
+		</div>
+	</td>
+</tr>
+</table>
+
+<!--{ / }-->

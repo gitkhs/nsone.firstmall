@@ -1,0 +1,135 @@
+{#COMMON_HEADER}
+<style type="text/css">
+div.layer_title {width:100%;text-align:center;font-size:16px;color:#fff;background-color:#5d657a;font-weight:bold;line-height:50px;}
+div.coupon_info {padding-left:50%;height:130px;border-bottom:1px dashed #d7d7d7;}
+div.coupon_info div.coupon_img { position:absolute;z-index:1;margin-left:-114px; }
+div.coupon_info div.coupon_img img { width:228px; }
+div.coupon_info div.coupon_name { position:absolute;z-index:2;margin-top:20px;margin-left:-104px;width:170px;background:transparent;font-size:16px;font-weight:bold;word-break:break-all;}
+div.coupon_info div.coupon_option { position:absolute;z-index:2;width:170px;background:transparent;word-break:break-all;font-size:12px;margin-left:-84px;margin-top:50px;}
+div.coupon_info div.coupon_serial { position:absolute;z-index:2;width:170px;background:transparent;word-break:break-all;font-size:14px;margin-left:-104px;font-weight:bold;margin-top:85px;}
+div.coupon_form {margin-top:10px;}
+div.coupon_form table.coupon_form_table th {font-weight:normal;font-size:12px;color:#000;text-align:left;}
+div.coupon_form table.coupon_form_table th.isrowspan {vertical-align:top;padding-top:10px;}
+div.coupon_form table.coupon_form_table td {font-weight:bold;font-size:12px;color:#000;text-align:left;height:40px;}
+div.coupon_form table.coupon_form_table input[type="text"] {width:80%;height:30px;border:1px solid #d7d7d7;font-size:16px;color:#6c6c6c;}
+div.coupon_form table.coupon_form_table select {width:80%;height:30px;border:1px solid #d7d7d7;font-size:16px;color:#6c6c6c;}
+#use_coupon_area_direct_area {margin-top:3px;}
+.coupon_use_btn {width:100%;text-align:center;margin:10px 0;}
+</style>
+<script type="text/javascript">
+$(function(){
+	// 사용장소
+	$("#use_coupon_area").bind('change', function(){
+		$("#use_coupon_area_direct_area").hide();
+		if	($("#use_coupon_area option:selected").val() == 'direct'){
+			$("#use_coupon_area_direct").val('');
+			$("#use_coupon_area_direct_area").show();
+		}
+	});
+
+	$(".coupon_use_cancel").bind('click', function(){
+		self.close();
+	});
+});
+
+function focusCouponSerial(obj){
+	if	($(obj).val() == $(obj).attr('title'))
+		$(obj).val('');
+}
+
+function useCouponSubmit(fObj){
+
+	focusCouponSerial($("#use_coupon_memo"));
+
+	var coupon_value	= $("#use_coupon_value").val();
+	if	(!coupon_value || coupon_value == 0){
+		{ ? coupon.coupon_unit == '원' }
+		openDialogAlert("쿠폰 사용금액을 입력해 주세요.", 400, 150);
+		{ : }
+		openDialogAlert("쿠폰 사용횟수를 입력해 주세요.", 400, 150);
+		{ / }
+		return false;
+	}
+
+	if	(coupon_value.search(/[^0-9]/) != -1){
+		{ ? coupon.coupon_unit == '원' }
+		openDialogAlert("쿠폰 사용금액은 숫자로 입력해 주세요.", 400, 150);
+		{ : }
+		openDialogAlert("쿠폰 사용횟수는 숫자로 입력해 주세요.", 400, 150);
+		{ / }
+		return false;
+	}
+
+	if	(!$("#use_coupon_area option:selected").val() || ($("#use_coupon_area option:selected").val() == 'direct' && !$("#use_coupon_area_direct").val())){
+		openDialogAlert('사용장소를 선택(입력)해 주세요.', 400, 150);
+		return false;
+	}
+
+	if	(!$("#manager_code").val() || $("#manager_code").val().search(/[^0-9a-zA-Z]/) != -1){
+		openDialogAlert('확인코드를 정확히 입력해 주세요.', 400, 150);
+		return false;
+	}
+
+	return true;
+}
+
+{ ? err_msg }
+alert("{ err_msg }");
+self.close();
+{ / }
+</script>
+<div class="layer_title">쿠폰 사용하기</div>
+<div style="padding:10px;">
+	<form name="frmCoupon" method="post" action="../mypage_process/usecoupon" target="actionFrame" onsubmit="return useCouponSubmit(this);">
+	<input type="hidden" name="export_code" value="{coupon.export_code}" />
+	<input type="hidden" name="coupon_serial" value="{coupon.coupon_serial}" />
+	<div class="coupon_info">
+		<div class="coupon_img"><img src="../images/common/cpn_bg_cnf.png" /></div>
+		<div class="coupon_name">{item.goods_name}</div>
+		<div class="coupon_option">{coupon.coupon_start_date} ~ {coupon.coupon_end_date}</div>
+		<div class="coupon_serial">{coupon.coupon_serial}</div>
+	</div>
+
+	<div class="coupon_form">
+		<table width="100%" cellpadding="0" cellspacing="0" class="coupon_form_table">
+		<tr>
+			<th>현재상태</th>
+			<td>총 {=number_format(coupon.coupon_value)}{coupon.coupon_unit} 중
+			<span style="color:#ec5f00;">
+			{=number_format(coupon.coupon_remain_value)}{coupon.coupon_unit}</span>
+			사용가능</td>
+		</tr>
+		<tr>
+			<th rowspan="3" class="isrowspan">쿠폰사용</th>
+			<td><input type="text" name="use_coupon_value" id="use_coupon_value" class="use_input" style="width:60%;" />{coupon.coupon_unit}</td>
+		</tr>
+		<tr>
+			<td>
+				<select name="use_coupon_area" id="use_coupon_area" class="use_select">
+					<option value="">사용장소(매장)</option>
+					{ ? address }{ @ address }
+					<option value="{.value_}">{.value_}</option>
+					{ / }{ / }
+					<option value="direct">직접입력</option>
+				</select>
+				<div id="use_coupon_area_direct_area" style="display:none;"><input type="text" name="use_coupon_area_direct" id="use_coupon_area_direct" class="use_input" title="사용처를 직접입력해 주세요" /></div>
+			</td>
+		</tr>
+		<tr>
+			<td><input type="text" name="use_coupon_memo" id="use_coupon_memo" class="use_input" title="메모를 남겨주세요" /></td>
+		</tr>
+		<tr>
+			<th>확인코드</th>
+			<td><input type="text" name="manager_code" id="manager_code" class="use_input" title="확인코드를 입력해 주세요" /></td>
+		</tr>
+		</table>
+	</div>
+
+	<div class="coupon_use_btn">
+		<input type="button" value="취소" class="btn_cancel_large hand coupon_use_cancel" style="width:35%;" />
+		<input type="submit" value="매장확인" class="btn_important_large hand" style="width:60%;" />
+	</div>
+</form>
+</div>
+
+<iframe name="actionFrame" src="/main/blank" frameborder="1" width="100%" height="0" class="hide" ></iframe>

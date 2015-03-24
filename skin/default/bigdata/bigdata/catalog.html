@@ -1,0 +1,286 @@
+<style type="text/css">
+.fleft {float:left;}
+.fright {float:right;}
+div.bigdata-wrap {width:100%;text-align:center;}
+div.bigdata_top_img {width:1000px;margin:0 auto;text-align:center;margin-bottom:40px;}
+div.goods-view {width:1000px;margin:0 auto;margin-bottom:60px;}
+
+#goods_thumbs .pagination {position:relative; width:90%; margin:auto; text-align:center; overflow:hidden; white-space:nowrap;}
+#goods_thumbs .pagination li {display:inline;}
+#goods_thumbs .pagination li img,#goods_thumbs .pagination li embed {border:1px solid #fff; margin:5px 2px;}
+#goods_thumbs .pagination li.current img {border:1px solid #333;}
+
+.total_goods_price {font-size:18px; font-family:"tahoma","dotum"; font-weight:Bold; color:#ed2b07;}
+.goods_name			{color:#000000; font-size:16px; letter-spacing:-1px; font-weight:bold; }
+.short_desc			{color:#858585; font-size:11px; letter-spacing:-1px; ;}
+.goods_description	{padding:10px 0 20px 0;}
+.exchange_guide		{padding:10px 0 20px 0; overflow:hidden;}
+.sale_price			{color:#ff5500;}
+
+.goods_spec_table th {text-align:left; color:#000000; font-weight:normal;letter-spacing:-1px;}
+.goods_spec_table td {text-align:left; color:#858585; font-size:11px;letter-spacing:-1px; }
+.goods_spec_table td strong {text-align:left; color:#858585; font-size:11px;letter-spacing:0px; }
+.goods_spec_table .price {font-size:24px; font-family:"tahoma"; color:#ff3528; font-weight:bold}
+.goods_spec_table .consumer {font-size:11px; ; color:#858585; letter-spacing:0px;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+
+	$("img.btn-goods").click(function(){
+		location.href	= '../goods/view?no={goodsinfo.goods_seq}';
+	});
+
+	$("img.btn-wish").click(function(){
+		actionFrame.location.href	= '../mypage/wish_add?seqs[]={goodsinfo.goods_seq}';
+	});
+
+	$("#price_area").bind("mouseover",function(){
+		$(this).closest("td").find("div").removeClass("hide");
+		$(".goods_spec_table").find(".fb-like").hide();
+	}).bind("mouseout",function(){
+		$(this).closest("td").find("div").addClass("hide");
+		$(".goods_spec_table").find(".fb-like").show();
+	});
+
+	{? eventEnd}
+	timeInterval{goodsinfo.goods_seq} = setInterval(function(){
+		var time_tmp = showClockTime('text', '{eventEnd.year}', '{eventEnd.month}', '{eventEnd.day}', '{eventEnd.hour}', '{eventEnd.min}', '{eventEnd.second}', 'soloday{goodsinfo.goods_seq}', 'solohour{goodsinfo.goods_seq}', 'solomin{goodsinfo.goods_seq}', 'solosecond{goodsinfo.goods_seq}', '{goodsinfo.goods_seq}');
+		if(time{goodsinfo.goods_seq} == 0){
+			clearInterval(timeInterval{goodsinfo.goods_seq});
+			alert("단독이벤트가 종료되었습니다.");
+			document.location.reload();
+		}
+	},1000);
+	{/}
+});
+
+function goods_thumbs_scroll(){
+	$("#goods_thumbs .pagination").hide().width('{=goodsImageSize.view.width-60}').show();
+	var setGoodsThumbsPaginationScroll = function(){
+		var paginationWidth = $("#goods_thumbs .pagination").width();
+		var currentWidth = $("#goods_thumbs .pagination>li.current").outerWidth();
+		var currentLeft = $("#goods_thumbs .pagination>li.current").position().left;
+
+		var gap = ($("#goods_thumbs .pagination").scrollLeft()+currentLeft+(currentWidth/2))-(paginationWidth/2);
+
+		$("#goods_thumbs .pagination").stop(true,true).animate({'scrollLeft':gap});
+	};
+	$("#goods_thumbs .slides_container>a:gt(0)").hide();
+	$("#goods_thumbs .pagination>li:eq(0)").addClass('current');
+	$("#goods_thumbs .slides_container").show();
+	$("#goods_thumbs .pagination>li").bind('click',function(){
+		var i = $("#goods_thumbs .pagination>li").index(this);
+		$("#goods_thumbs .slides_container>a").hide().eq(i).show();
+		$("#goods_thumbs .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+	$("#goods_thumbs .prev").bind('click',function(){
+		var i = $("#goods_thumbs .slides_container>a").index($("#goods_thumbs .slides_container>a:visible"));
+		if(i<=0) i = $("#goods_thumbs .slides_container>a").length-1;
+		else i--;
+		$("#goods_thumbs .slides_container>a").hide().eq(i).show();
+		$("#goods_thumbs .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+	$("#goods_thumbs .next").bind('click',function(){
+		var i = $("#goods_thumbs .slides_container>a").index($("#goods_thumbs .slides_container>a:visible"));
+		if(i>=$("#goods_thumbs .slides_container>a").length-1) i = 0;
+		else i++;
+		$("#goods_thumbs .slides_container>a").hide().eq(i).show();
+		$("#goods_thumbs .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+}
+</script>
+<div class="bigdata-wrap">
+	<div class="bigdata_top_img"><img src="../images/design/bigdata_top_img.gif" /></div>
+	<div class="goods-view">
+		<table width="95%" cellpadding="0" cellspacing="0" border="0" style="margin:auto;">
+		<tr>
+			<td height="20"></td>
+		</tr>
+		<tr>
+			<td width="{goodsImageSize.view.width+50}" valign="top">
+				<!-- 상품 이미지 -->
+				<div id="goods_thumbs">
+					<table cellpadding="0" cellspacing="0" style="width:{goodsImageSize.view.width}px;">
+					<tr>
+						<td>
+							<div class="slides_container hide" style="margin:auto; width:{goodsImageSize.view.width}px;">
+								<!--{ @ images }-->
+									<!--{ ?.view.image }-->
+								<a href="#" style="width:100%;display:inline-block;">
+										<!--{? .view.image_type == 'video'}-->
+									<div style="margin:auto;text-align:Center;"><embed src="{.view.image}" width="{? goodsinfo.video_size0 }{goodsinfo.video_size0}{:}100%{/}" height="{? goodsinfo.video_size1 }{goodsinfo.video_size1}{:}300{/}" allowfullscreen="true" wmode="transparent"></embed></div>
+										<!--{ : }-->
+									<img src="{.view.image}" width="{goodsImageSize.view.width}" onerror="this.src='../images/common/noimage.gif'" title="{images.large.label}"/>
+										<!--{ / }-->
+								</a>
+									<!--{ / }-->
+								<!--{ / }-->
+							</div>
+							<div class="clearbox" style="margin:5px auto 0 auto; width:{goodsImageSize.view.width}px;">
+								<div class="fleft"><a href="javascript:popup('../goods/zoom?no={goodsinfo.goods_seq}&popup=1',{=(goodsImageSize.view.width+400)},{=(goodsImageSize.large.height+ goodsImageSize.thumbCart.height + 100)},'no')"><img src="../images/icon/icon_zoom.gif" hspace="1" /></a></div>
+								<div class="fright">{=snslinkurl('goods', goodsinfo.goods_name)//SNS전체}</div>
+							</div>
+						</td>
+					</tr>
+					</table>
+				</div>
+				<!-- 상품 썸네일 이미지 스크롤 -->
+				<script type="text/javascript">goods_thumbs_scroll();</script>
+				<!-- 상품 썸네일 이미지 스크롤 -->
+			</td>
+			<td valign="top">
+				<!-- 상품 스펙 -->
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr><td height="1" bgcolor="cccccc"></td></tr>
+				<tr>
+					<td height="0">
+					<!--할인율 표기 시작-->
+						<!--{ ? goodsinfo.sale_rate }-->
+						<div style="float:right;" class="relative">
+							<div style="position:absolute;left:-70px;text-align:center;height:41px;width:73px;"><img src='../images/common/bg_spec_dc.png' /></div>
+							<div style="position:absolute;left:-70px;text-align:center;height:41px;width:73px;float:right;font-size:20px;font-family:tahoma;font-weight:bold;color:#ffffff">
+							{goodsinfo.sale_rate}%
+							</div>
+						</div>
+						<!--{ / }-->
+					<!--할인율 표기 끝-->
+					</td>
+				</tr>
+				<tr><td height="10"></td></tr>
+				<!-- 상품 짧은 설명 시작 -->
+				<tr>
+					<td align="left">
+						<span class="short_desc">{goodsinfo.summary}</span>
+					</td>
+				</tr>
+				<!-- 상품 짧은 설명 끝 -->
+				<tr><td height="5"></td></tr>
+				<!-- 상품명 시작 -->
+				<tr>
+					<td align="left">
+						<span class="goods_name">{goodsinfo.goods_name}</span>
+					</td>
+				</tr>
+				<!--{? eventEnd}-->
+				<tr>
+					<td height="10"></td>
+				</tr>
+				<tr>
+					<td height="44" style="border-top:1px solid #eaeaea;  border-bottom:1px solid #eaeaea; background:#fafafa">
+						<table width="97%" cellspacing="0" cellpadding="0" border="0" width="100%" align="center">
+							<tr>
+								<td width="30%" align="left" style="font-size:12px; color:#666666;">현재 <span style="font-size:18px; font-family:Verdana; color:#000000; font-weight:bold; letter-spacing:-1px">{=number_format(goodsinfo.event.event_order_ea)}</span>개 구매</td>
+								<td width="70%" align="right" >
+									<table cellspacing="0" cellpadding="0" border="0">
+										<td style="font-size:11px; color:#666666; padding-right:4px; letter-spacing:-1px; line-height:0.8">남은시간</td>
+										<td>
+											<table cellspacing="0" cellpadding="0" border="0" style="border:1px solid #858585;" bgcolor="#7b7b7b">
+												<td height="25" style="padding:0px 10px 0px 10px; font-size:16px; font-family:Tahoma; font-weight:bold; color:#ffffff;"><span id="soloday{goodsinfo.goods_seq}">0</span><span style="font-size:12px">일</span></td>
+												<td height="25" style="padding:0px 10px 0px 0px; font-size:16px; font-family:Tahoma; font-weight:bold; color:#ffffff;"><span id="solohour{goodsinfo.goods_seq}">00</span> : <span id="solomin{goodsinfo.goods_seq}">00</span> : <span id="solosecond{goodsinfo.goods_seq}">00</span></td>
+											</table>
+										</td>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td height="10"></td>
+				</tr>
+				<!--{ / }-->
+				<!-- 상품명 끝 -->
+				<tr><td height="10"></td></tr>
+				<tr><td height="10"></td></tr>
+				<tr>
+					<td>
+						<table class="goods_spec_table" width="100%" cellpadding="0" cellspacing="3" border="0">
+						<col width="100" />
+						<!-- 판매가격 시작-->
+						<tr>
+							<th>판매가</th>
+							<td>
+							<!--{? goodsinfo.string_price_use }-->
+								<b>{goodsinfo.string_price}</b>
+							<!--{ : }-->
+								<!--{ ? goodsinfo.org_price > goodsinfo.sale_price }-->
+								<span class="consumer">{=number_format(goodsinfo.org_price)}원</span>
+								&nbsp;<img src="../images/common/icon_dc_list.gif" alt="할인내역" id="price_area" {?goodsinfo.sum_sale_price}class="hand"{/} /><br/>
+								<!--{ / }-->
+
+								<!-- 할인내역 시작 -->
+								<!--{ ? goodsinfo.sum_sale_price }-->
+								<div class="absolute hide">
+									<div class="sale_price_layer" style="width:200px;">
+										<div class="title_line">할인내역</div>
+										<br style="line-height:10px;" />
+										<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+										<col width="78" />
+										<tr>
+											<th>구분</th>
+											<th class="bolds ends">할인</th>
+										</tr>
+										<!--{ @ sales.sale_list }-->
+											<!--{ ? .value_ > 0 }-->
+										<tr>
+											<td class="gr">
+												{sales.title_list[.key_]}
+											</td>
+											<td class="bolds ends prices">
+												{=number_format(.value_)}원
+											</td>
+										</tr>
+											<!--{ / }-->
+										<!--{ / }-->
+										</table>
+									</div>
+								</div>
+								<!--{ / }-->
+								<!-- 할인내역 끝 -->
+
+								<b class="price">{? goodsinfo.sale_price > 0 }{=number_format(goodsinfo.sale_price)}{:}0{/}</b><b style="font-size:12px;  color:#ff3528">원</b>
+							<!--{ / }-->
+							</td>
+						</tr>
+						<!-- 판매가격 끝 -->
+						</table>
+					</td>
+				</tr>
+				<!-- 총 상품 금액 표기 시작-->
+				<tr><td height="20"></td></tr>
+				<tr><td height="1" bgcolor="cccccc"></td></tr>
+				<tr><td height="30"></td></tr>
+				<!-- 구매하기,장바구니 버튼 시작-->
+				<tr>
+					<td align="right" class="btn-goods-lay">
+						<img src="../images/design/btn_detail.gif" class="btn-goods hand" />
+
+						<!--{ ? goodsinfo.goods_status != 'unsold'}-->
+						<img src="../images/buttons/btn_wish.gif" class="btn-wish hand" />
+						<!--{ / }-->
+					</td>
+				</tr>
+				<!-- 구매하기,장바구니 버튼 끝 -->
+				</table>
+			</td>
+		</tr>
+		</table>
+	</div>
+
+	<!--{ @ kinds }-->
+	<div class="bigdata-title-bar">
+		<img src="../images/design/ico_bd_{ .key_ }.gif" />
+		{ .textStr }
+	</div>
+	<div class="bigdata-goods-list">
+		{ .display }
+	</div>
+	<!--{ / }-->
+
+</div>

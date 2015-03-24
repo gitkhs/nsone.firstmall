@@ -1,0 +1,46 @@
+<style>
+#{brandPageNavigationKey} .cpn-container	{padding:10px; border:2px solid #4a4a4a; background-color:#f5f5f5}
+#{brandPageNavigationKey} .cpn-table td {height:25px;}
+#{brandPageNavigationKey} .cpn-table a {font-family:tahoma,dotum; font-size:11px; color:#000000;}
+#{brandPageNavigationKey} .cpn-table a:hover {color:#565656}
+
+#{brandPageNavigationKey} .cpbn-title {padding-top:20px; padding-bottom:7px;}
+#{brandPageNavigationKey} .cpbn-container	{padding:10px; border:2px solid #4a4a4a; background-color:#f5f5f5}
+#{brandPageNavigationKey} .cpbn-table td {height:25px;}
+#{brandPageNavigationKey} .cpbn-table a {font-family:tahoma,dotum; font-size:11px; color:#000000;}
+#{brandPageNavigationKey} .cpbn-table a:hover {color:#565656}
+</style>
+
+<!--{ ? getChildBrand(_GET.code) }-->
+<div class="cpn-container">
+	<table class="cpn-table" width="100%" align="center" cellpadding="0" cellspacing="0" border="0">
+	<tr>{@ range(1, count_w) }<td width="{=(100/count_w)}%" style="height:0px;"></td>{/}</tr>
+	<tr>
+		<!--{ @ getChildBrand(_GET.code) }-->
+			<!--{ ? .index_ && .index_%count_w==0}--></tr><tr><!--{ / }-->
+			<td>
+				<img src="../../images/common/icon_sub_category.gif" align="absmiddle" hspace="5" /><a href="/goods/brand?code={.category_code}">{.title}</a>
+			</td>
+		<!--{ / }-->
+	</tr>
+	</table>
+</div>
+<!--{ / }-->
+
+<!--[ 브랜드에 속한 카테고리 네비게이션 ]-->
+<!--{ ? categoryData.category_navigation_use=='y' && goodsCategories }-->
+	<div class="cpbn-title"><img src="../../images/common/list_tit_category.gif" /></div>
+	<div class="cpbn-container">
+		<table class="cpbn-table" width="100%" align="center" cellpadding="0" cellspacing="0" border="0">
+		<tr>{@ range(1, brand_navigation_count_w) }<td width="{=(100/brand_navigation_count_w)}%" style="height:0px;"></td>{/}</tr>
+		<tr>
+			<!--{ @ goodsCategories }-->
+				<!--{ ? .index_ && .index_%brand_navigation_count_w==0}--></tr><tr><!--{ / }-->
+				<td>
+					<img src="../../images/common/icon_sub_category.gif" align="absmiddle" hspace="5" /><a href="/goods/brand?code={_GET.code}&category_code={.category_code}" {?.category_code==_GET.category_code}style="font-weight:bold"{/}>{.title}</a>
+				</td>
+			<!--{ / }-->
+		</tr>
+		</table>
+	</div>
+<!--{ / }-->

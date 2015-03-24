@@ -1,0 +1,143 @@
+<style>
+/* 주문 내역 테이블 */
+table.order-view-table {width:100%; border-collapse:collapse; border-top:2px solid #666; border-bottom:1px solid #ddd;}
+table.order-view-table.summary-mode {border-top:0px;}
+table.order-view-table th {padding:0px; height:30px; font-weight:normal; background-color:#dfdfdf !important; border:1px solid #bcbfc1;}
+table.order-view-table th.dark {background-color:#efefef !important; border:1px solid #bcbfc1}
+/*table.order-view-table tbody.otb tr:hover {background-color:#dfeaff;}*/
+table.order-view-table tbody.otb tr.order-item-row td {padding:3px 3px; letter-spacing:0px;height:50px;border:1px solid #bcbfc1;}
+table.order-view-table tbody.otb tr.order-item-row td.info {}
+table.order-view-table tbody.otb tr.order-item-row td.title {}
+table.order-view-table tbody.otb tr.order-item-row {}
+table.order-view-table tbody.otb tr.order-item-option-row {}
+table.order-view-table tbody.otb tr.order-item-row div.order-item-name-wrap {position:relative; height:32px; overflow:hidden;}
+table.order-view-table tbody.otb tr.order-item-row div.order-item-name-place {position:absolute;}
+table.order-view-table tbody.otb tr.order-item-option-row div.order-item-name-wrap {position:relative; height:15px; overflow:hidden;}
+table.order-view-table tbody.otb tr.order-item-option-row div.order-item-name-place {position:absolute;}
+table.order-view-table tbody.otb span.order-item-image {display:inline-block;}
+table.order-view-table tbody.otb span.order-item-image img {border:1px solid #ccc; width:30px; height:30px; vertical-align:middle;}
+
+.price {text-align:right}
+span.export_title { display:inline-block;width:50px;padding-left:5px; }
+</style>
+
+<!-- 타이틀 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+
+<tr><td height="34"> <span class="desc">세부 주문 내역에서는 개별 상품의 구매 확정 및 포인트를 지급 받으실 수 있습니다.</span></td></tr>
+</table>
+
+<!--{ ? exports }-->
+
+
+
+	<br class="table-gap" />
+
+	<table class="order-view-table" width="100%" border=0>
+		<colgroup>
+			<col />
+			<col />
+			<col />
+			<col />
+			<col />
+			<col />
+			<col />
+			<col />
+			<col />
+		</colgroup>
+		<thead class="oth">
+			<tr>
+				<th class="dark">배송 정보</th>
+				<th class="dark">주문상품</th>
+				<th class="dark">발송 / 주문</th>
+				<th class="dark">적립금<br/>포인트</th>
+				<th class="dark">상태</th>
+				<th class="dark">구매결정</th>
+			</tr>
+		</thead>
+
+		<tbody class="otb">
+			<!--{ ? exports }-->
+			<!--{ @ exports }-->
+			<!--{ @ .item }-->
+			<tr class="order-item-row">
+				<!--{ ? ..key_ == 0 }-->
+				<td rowspan="{=count(.item)}">
+				<div style="padding-top:5px;">
+					<span class="export_title">출고일시</span>
+					<span class="export_val"> : {.export_date}</span>
+				</div>
+				</td>
+				<!--{ / }-->
+				<td class="info">
+					<div class="left">
+					<span class="order-item-image"><img src="{..image}" /></span>
+					{? ..cancel_type == '1' }<span ><span class="canceltypetitle">청약철회불가</span></span>{/}
+					<!--{ ? ..option1 }-->
+					<span class="goods_name1">{..goods_name}</span>
+					<!--{ : }-->
+					<span class="goods_name2">{..goods_name}</span>
+					<!--{ / }-->
+					<!--{ ? ..option1 }-->
+					<span class="option">{..title1} : {..option1}</span>
+					<!--{ / }-->
+					<!--{ ? ..option2 }-->
+					<span class="option">{..title2} : {..option2}</span>
+					<!--{ / }-->
+					<!--{ ? ..option3 }-->
+					<span class="option">{..title3} : {..option3}</span>
+					<!--{ / }-->
+					<!--{ ? ..option4 }-->
+					<span class="option">{..title4} : {..option4}</span>
+					<!--{ / }-->
+					<!--{ ? ..option5 }-->
+					<span class="option">{..title5} : {..option5}</span>
+					<!--{ / }-->
+					</div>
+				</td>
+				<td class="info" align="center" style="color:#c24400; font-weight:bold;">
+				{..ea}
+				/
+				{..opt_ea}
+				</td>
+				<td class="info center">{=number_format(..out_reserve)}<br/>P {=number_format(..out_point)}</td>
+				<td class="info center">
+					<div  style="padding-top:5px;">
+						<span class="export_val">{.mstatus}</span>
+					</div>
+					{?.tracking_url}
+					<div>											
+						<span class="export_val">{.mdelivery} {.mdelivery_number} <a href="{.tracking_url}" target="_blank"><img src="../images/design/mypage_btn_delivery.gif" /></a></span>
+					</div>
+					{/}
+				</td>
+				<td class="info center">
+					{? ..goods_kind != 'coupon' }
+						<!--{ ? cfg_order.buy_confirm_use }-->
+						{? .buy_confirm  != 'none'  }
+							구매확정
+							({.data_buy_confirm.regdate}{ ? .buy_confirm == 'admin' }판매자{ : .buy_confirm == 'user' }구매자{ : .buy_confirm == 'system' }자동{ / })
+						{:}
+							{? in_array(.status,array(55,60,65,70,75)) }
+							<button class="black_btn exportbuyconfirm" status="{.status}" export_code="{.export_code}" type="button" >구매확정</button>
+							{/}
+						{/}
+						<!--{ / }-->
+					{/}
+					<button class="black_btn" onclick="goods_review_write('{..goods_seq}','{orders.order_seq}');">상품평</button>
+				</td>
+			</tr>
+			<!--{ / }-->
+			<!--{ / }-->
+			<!--{ : }-->
+			<tr>
+				<td align="center" colspan="6" height="30">배송 정보가 없습니다.</td>
+			</tr>
+			<!--{ / }-->
+		</tbody>
+	</table>
+
+	<br class="table-gap" />
+
+<!--{ / }-->
+

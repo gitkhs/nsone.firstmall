@@ -1,0 +1,153 @@
+<!--{? couponloop }-->
+<script type="text/javascript" src="/app/javascript/plugin/jquery_swipe/swipe.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	var elem = document.getElementById('mySwipe');
+	window.mySwipe = Swipe(elem, {
+	  startSlide: 0,
+	  // auto: 3000,
+	  // continuous: true,
+	  // disableScroll: true,
+	  // stopPropagation: true,
+	  // callback: function(index, element) {},
+	  // transitionEnd: function(index, element) {}
+	});
+
+	$(".btn_prev").bind("click",function(){
+		mySwipe.prev();
+	});
+
+	$(".btn_next").bind("click",function(){
+		mySwipe.next();
+	});
+
+
+	{? !goods_view }
+	$('.couponDownload').bind("click",function() {
+		var memberSeq = "{=userInfo}";
+		var gl_request_uri = "{=urlencode(_SERVER.REQUEST_URI)}";
+
+		if( !memberSeq ){
+			location.href="/member/login?return_url="+gl_request_uri;
+			return false;
+		} 
+		var gl_goods_seq = "{_GET.no}";
+		coupondownlist(gl_goods_seq,gl_request_uri);
+	});
+	$("button[name='couponDownloadButton']").live('click',function(){
+		var url = '../coupon/download?goods='+$(this).attr('goods')+'&coupon='+$(this).attr('coupon');
+		actionFrame.location.href = url;
+	});
+	{/}
+});
+function getCouponDownlayerclose(){
+	$('#couponDownloadDialog').dialog('close');
+}
+</script>
+<style type="text/css">
+/* 기존 쿠폰 */
+.limit_txt { padding-left:7px; color:#999999; font-size:11px; text-align:left; }
+.benefit_txt { padding-left:7px; margin-top:-10px; color:#999999; font-size:11px; text-align:left; }
+
+.rb { position:absolute; right:0; bottom:0; width:100%; height:100%; background:url() no-repeat right bottom;}
+.lb { position:absolute; left:0; bottom:0; width:52px; height:100%; margin-right:52px; background:url() no-repeat left bottom;}
+.rt { position:absolute; right:0; top:0; height:52px; width:100%; background:url() no-repeat right top;}
+.lt { position:absolute; left:0; top:0; height:52px; width:52px; background:url() no-repeat left top;}
+
+/* 쿠폰 */
+.obj_slide div.offline_coupon { background:url('../../images/design/cpn_bg.gif') no-repeat;margin-top:5px;margin-left:5px;width:200px; height:95px; padding:15px; font-weight:bold; color:#000; font-size:12px; letter-spacing:-1px; word-break:break-all; }
+.obj_slide div.offline_coupon .item_text_content { width:160px; padding-top:8px; font-size:16px; color:#c00900;}
+.obj_slide div.online_coupon { width:255px; height:120px;margin-top:5px; }
+.obj_slide div.online_coupon .discount_price { padding-top:50px;padding-left:60px; }
+.obj_slide div.use_limit_txt { overflow-x:hidden; margin-top:-1px; }
+.couponDownload {cursor:pointer;}
+{? view_cnt < 2}
+.w_size { width:200px; }
+{:}
+.w_size { width:140px; }
+{/}
+
+/* 슬라이드 */
+.swipe {
+  overflow: hidden;
+  visibility: hidden;
+  position: relative;
+}
+.swipe-wrap {
+  overflow: hidden;
+  position: relative;
+}
+.swipe-wrap > div {
+  float:left;
+  width:50%;
+  position: relative;
+}
+</style>
+<table cellpadding="0" cellspacing="0" border="0" width="100%">
+<tr>
+	<td><a href="javascript:void(0);" class="btn_prev"><img src="../../images/design/arw_prev.gif" /></a></td>
+	<td>
+		<div id='mySwipe' class='swipe' style="width:250px;">
+			<div class='swipe-wrap'>
+				<!--{@ couponloop }-->
+				<div class="obj_slide">
+					<table border="0" cellpadding="0" cellspacing="0" align="center">
+					<tr>
+						<td class="couponDownload">
+							{? .use_type == 'offline'}
+							<div class="offline_coupon">
+								{.coupon_name}<br />
+								<div class="item_text_content">{.view_coupon_html}</div>
+							</div>
+							{ : }
+							<div class="online_coupon" style="{? .coupon_img == '4'}background:url('/data/coupon/{.coupon_image4}'){:}background:url('/data/coupon/coupon{.couponsametimeimg}_skin_0{.coupon_img}.gif'){/} no-repeat;">
+								<div class="discount_price">{.view_coupon_html}</div>
+							</div>
+							{ / }
+						</td>
+					</tr>
+					<tr>
+						<td style="padding-left:10px;">
+							{? .issue_enddatetitle }
+							<div class="black">- {.issue_enddatetitle}</div>
+							{ / }
+							{? .categoryhtml }
+							<div class="black">- {.categoryhtml}</div>
+							{ / }
+							{? .download_enddatetitle }
+							<div class="black">- {.download_enddatetitle}</div>
+							{ / }
+							{? .download_enddatetitle_time }
+							<div class="black">- {.download_enddatetitle_time}</div>
+							{ / }
+							{? .download_enddatetitle_week }
+							<div class="black">- {.download_enddatetitle_week}</div>
+							{ / }
+							<div class="use_limit_txt w_size">
+								<pre>{.limit_txt}</pre>
+							</div>
+						</td>
+						<!--{? ( ( .index_ + 1 ) % view_cnt ) == 0 }-->
+					</tr>
+					</table>
+				</div>
+							<!--{? count(couponloop) > ( .index_ + 1 ) }-->
+				<div class="obj_slide">
+					<table border="0" cellpadding="0" cellspacing="0"  align="center">
+					<tr>
+						<!--{ / }-->
+					<!--{ / }-->
+				<!--{ / }-->
+				<!--{? view_cnt != 1 && count(couponloop) % 2 != 0 }-->
+					</tr>
+					</table>
+				</div>
+				<!--{ / }-->
+			</div>
+		</div>
+	</td>
+	<td><a href="javascript:void(0);" class="btn_next"><img src="../../images/design/arw_next.gif" /></a></td>
+</tr>
+</table>
+<!--{ / }-->
+<div id="couponDownloadDialog" style="display:none"></div>

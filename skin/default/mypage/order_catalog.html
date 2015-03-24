@@ -1,0 +1,289 @@
+<script>
+function set_date(start,end){
+	$("input[name='regist_date[]']").eq(0).val(start);
+	$("input[name='regist_date[]']").eq(1).val(end);
+}
+</script>
+<style>
+/* 검색폼 양식 */
+div.search-form-container {background:#e6e9e9; padding:15px 0 10px 0;}
+div.search-form-container table.search-form-table	{margin:auto;}
+div.search-form-container table.sf-option-table th	{height:22px; text-align:left; padding-right:10px;}
+div.search-form-container table.sf-keyword-table {width:100%; border:2px solid #000; border-collapse:collapse; background-color:#fff; table-layout:fixed;}
+div.search-form-container table.sf-keyword-table .sfk-td-txt {padding-right:5px;}
+div.search-form-container table.sf-keyword-table .sfk-td-txt input {width:100%; height:22px; padding:0px; border:0px; margin:0px; background-color:#fff; line-height:22px; text-align:center;}
+div.search-form-container table.sf-keyword-table .sfk-td-btn {width:31px; text-align:center;}
+div.search-form-container table.sf-keyword-table .sfk-td-btn button {width:32px; height:26px; border:0px; background:url('../images/common/btn_search.gif') no-repeat center center; cursor:pointer}
+div.search-form-container table.sf-keyword-table .sfk-td-btn button span {display:none}
+</style>
+<!-- 타이틀 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td><img src="../images/design/tit_orderlist.gif" alt="" title="" /></td></tr>
+<tr><td height="10"></td></tr>
+<tr><td><span class="desc">-주문번호를 클릭하시면 개별 주문건의 세부내역 확인이 가능합니다.</span></td></tr>
+<tr><td><span class="desc">-구매확정 이후에는 교환/ 반품이 불가능 하니 상품을 꼼꼼히 확인후 구매확정 부탁드립니다.</span></td></tr>
+</table>
+
+<div style="height:30px;"></div>
+
+<!-- 주문리스트 검색폼 : 시작 -->
+<div class="search-form-container">
+	<form name="search-form" method="get">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table>
+			<tr>
+				<td width="500">
+					<table class="sf-keyword-table">
+					<tr>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{_GET.keyword}" title="주문번호, 상품명" /></td>
+						<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<table class="search-form-table" id="search_detail_table">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th><span class="icon-arrow-down">주문일</span></th>
+				<td>
+					<input type="text" name="regist_date[]" value="{_GET.regist_date[0]}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="regist_date[]" value="{_GET.regist_date[1]}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button" value="오늘" onclick="set_date('{=date('Y-m-d')}','{=date('Y-m-d')}')" /></span>
+					<span class="btn small"><input type="button" value="3일간" onclick="set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}')" /></span>
+					<span class="btn small"><input type="button" value="일주일" onclick="set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}')"/></span>
+					<span class="btn small"><input type="button" value="1개월" onclick="set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}')"/></span>
+					<span class="btn small"><input type="button" value="3개월" onclick="set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}')" /></span>
+					<span class="btn small"><input type="button" value="전체" onclick="set_date('','')" /></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	</form>
+</div>
+<!-- 주문리스트 검색폼 : 끝 -->
+<div style="height:30px"></div>
+<!-- List -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td align="right">
+		total <strong>{=number_format(page.totalcount)}</strong>
+	</td>
+</tr>
+</table>
+<div style="height:8px;"></div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+<thead>
+<tr>
+	<th width="96">주문번호</th>
+	<th width="50"></th>
+	<th>상품명</th>
+	<th width="80">주문일</th>
+	<th width="90">주문금액</th>
+	<th width="70">적립금/포인트</th>
+	<th width="120" class="cell_left_line">주문상태</th>
+</tr>
+</thead>
+<tbody>
+<!--{ @ record }-->
+<tr>
+	<td class="cell"><a href="order_view?no={.order_seq}"><strong><u>{.order_seq}</u></strong></a></td>
+	<td class="cell center">
+		<img src='{.image}' width='60' height='60'>
+	</td>
+	<td class="cell left">
+		<div style="line-height:16px;">
+		{? .gift_cnt==.opt_cnt }
+			<span style="color:red;">[사은품]</span> {.goods_name}
+		{ : }
+			{?.provider_name}<span style="color:#999;">[{.provider_name}]</span><br />{/}
+			{.goods_name} <!--{ ? .item_cnt > 1 }--> 외 {=.item_cnt-1}건<!--{ / }-->
+		{ / }
+		</div>
+		{? .gift_cnt>0 && .opt_cnt>.gift_cnt }<span style="color:red;">[사은품]</span> {.gift_nm}{ / }
+	</td>
+	<td class="cell">{=date('Y-m-d',strtotime(.regist_date))}</td>
+	<td class="cell">{? .gift_cnt==.opt_cnt }<div>적립금 교환</div><b>{=number_format(.emoney)}P</b>{:}<b>{=number_format(.settleprice)}</b>{ / }</td>
+	<td class="cell">
+		{=number_format(.reserve)}원 / 
+		P {=number_format(.point)}
+		<!--
+		<div><img src="../images/design/btn_s_get_point.gif" /></div>
+		-->
+	</td>
+	<td class="cell cell_left_line">
+	<div>{.mstep}</div>
+
+	<!--{ ?.goodscnt > 0  }-->
+	<span style="display:inline-block;padding-left:3px;">
+	<!--{ ? cfg_order.buy_confirm_use }-->
+		<!--{ ? .step > 45  && .step <= 75 }--><span class="btn small black"><button class="orderexportsbtn" order_seq="{.order_seq}">구매확정 / 배송추적</button></span><!--{ / }-->
+	<!--{ : }-->
+		<!--{ ? .step > 45  && .step <= 75 }--><span class="btn small black"><button class="orderexportsbtn" order_seq="{.order_seq}">배송추적</button></span><!--{ / }-->
+	<!--{ / }-->
+	</span>
+	<!--{ / }-->
+	{ ? .cancel_list_ea || .return_list_ea  || .refund_list_ea }
+	<div class='pdt5'>
+	<a href="/mypage/refund_catalog?order_seq={.order_seq}" target="_blank"><img src='../images/icon/icon_list_cancel.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{.cancel_list_ea}</span></a>
+	<a href="/mypage/return_catalog?order_seq={.order_seq}" target="_blank"><img src='../images/icon/icon_list_return.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{.return_list_ea}</span></a>
+	<a href="/mypage/refund_catalog?order_seq={.order_seq}" target="_blank"><img src='../images/icon/icon_list_refund.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{.refund_list_ea}</span></a>
+	</div>
+	{ / }
+	</td>
+</tr>
+<!--{ / }-->
+</tbody>
+</table>
+
+<div style="height:30px"></div>
+
+<table align="center" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+		<div class="paging_navigation">
+			<!--{ ? page.first }--><a href="?page={page.first}&amp;{page.querystring}" class="first">◀ 처음</a><!--{ / }-->
+			<!--{ ? page.prev }--><a href="?page={page.prev}&amp;{page.querystring}" class="prev">◀ 이전</a><!--{ / }-->
+			<!--{ @ page.page }-->
+				<!--{ ? page.nowpage ==  .value_ }-->
+					<a href="?page={.value_}&amp;{page.querystring}" class="on">{.value_ }</a>
+				<!--{ : }-->
+					<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? page.next }--><a href="?page={page.next}&amp;{page.querystring}" class="next">다음 ▶</a><!--{ / }-->
+			<!--{ ? page.last }--><a href="?page={page.last}&amp;{page.querystring}" class="last">마지막 ▶</a><!--{ / }-->
+		</div>
+	</td>
+</tr>
+</table>
+<div style="height:50px"></div>
+<div align="center">
+<img src="../images/design/img_order_step.gif" title="" alt="" />
+</div>
+
+<div id="orderexportlay" class="hide">
+	<div id="orderexportcontent"></div>
+</div>
+
+<div id="export_buy_confirm_msg" class="hide">
+	<input type="hidden" name="export_code" value="" />
+	<input type="hidden" name="status" value="" />
+	<div class="left">
+		<div>구매 확정 및 적립금/포인트 지급을 받으시기 전에 반드시 아래사항을 확인하여 주세요.</div>
+		<div> 확인 버튼 클릭 시 구매 확정 및 적립금/포인트가 지급됩니다.</div>
+		<div class="desc" style="padding-top:10px;">* 주문 상품을 수령하셨고, 고객 변심 및 착오에 의한  교환 또는 환불의 의사가 없으실 경우 확인해주세요. 확인 후 즉시 포인트가 지급됩니다.</div>
+		<div class="desc" style="padding-top:3px;">* 동일 주문건의 상품 중 일부 만 교환 또는 반품을 원하실 경우 주문 번호 클릭 후 세부 주문내역에서  개별 상품에  대한 구매확정을 해주셔야 합니다.</div>
+		<div class="desc" style="padding-top:3px;">* 구매 확정으로 포인트가 지급된 이후 또는 제품 착용 시  교환 또는 환불이 불가합니다.</div>
+		{? cfg_order.save_type == 'exist' }
+			<div class="desc" style="padding-top:3px;">* 구매 확정을 하시지 않으시면 출고 완료 후  {cfg_order.save_term}일 후에는  자동으로 구매 확정 처리되지만 적립금/포인트는 소멸됩니다.</div>
+		{: }
+			<div class="desc" style="padding-top:3px;">* 구매 확정을 하시지 않으시더라도 출고 완료 후  {cfg_order.save_term}일 후에는  자동으로 구매 확정 및 적립금/포인트가 지급됩니다.</div>
+		{/}
+	</div>
+
+	<div class="export_buy_confirm_agree_container center" style="padding-top:25px;">
+		구매를 확정하기 위해 상품수령을 확인해 주세요. 상품을 수령하셨습니까? &nbsp;
+		<label><input type="radio" name="export_buy_confirm_agree" value="y" />예&nbsp;&nbsp;</label>
+		<label><input type="radio" name="export_buy_confirm_agree" value="n" checked />아니오</label>
+	</div>
+
+	<div class="center" style="padding-top:15px;">
+		<span class="btn large black"><input type="button" value="구매확정" id="export_buy_confirm_btn"  /></span>
+		<span class="btn large"><input type="button" value="취소" onclick="closeDialog('#export_buy_confirm_msg');" /></span>
+	</div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".orderexportsbtn").bind("click",function(){
+		$("#orderexportcontent").html('');
+		var order_seq = $(this).attr("order_seq");
+
+		$.get('../mypage/order_view?mode=summary&no='+order_seq, function(data) {
+		 $("#orderexportcontent").html(data);
+
+		if( $("#orderexportlay").height() == 0 ){
+			var tableheight = 450;
+		}else{
+			var tableheight =$("#orderexportlay").height()+130;
+		}
+
+		openDialog('<table width="100%" border="0" cellpadding="0" cellspacing="0" ><tr><td class="left pdl5" style="font-weight:bold; color:#fff; font-size:12px;">배송추적/구매확정 <span class="desc">주문번호 <span style=\"color:#0083a9\" >'+order_seq+'</span>의 배송 내역입니다.</span></td> </tr></table>', "orderexportlay", {"width":"950","height":tableheight});
+
+		});
+	});
+
+	$(".exportbuyconfirm").live('click',function(){
+		var ret = false;
+		var export_code = $(this).attr('export_code');
+		var status = $(this).attr('status');
+		$("#export_buy_confirm_msg input[name='export_code']").val(export_code);
+		$("#export_buy_confirm_msg input[name='status']").val(status);
+
+		if(status!='75'){
+			$(".export_buy_confirm_agree_container").show();
+		}else{
+			$(".export_buy_confirm_agree_container").hide();
+		}
+
+		// 배송완료 전이면 수령확인 메시지
+		openDialog("구매 확정 및 적립금/포인트 지급", "#export_buy_confirm_msg",{"width":550});
+
+	});
+	$("#export_buy_confirm_btn").live("click",function(){
+		var ret = false;
+		var export_code = $("#export_buy_confirm_msg input[name='export_code']").val();
+		var status = $("#export_buy_confirm_msg input[name='status']").val();
+
+		if(status!='75'){
+			if(!$("input[name='export_buy_confirm_agree'][value='y']").is(":checked")){
+				openDialogAlert("상품수령여부에 체크해주세요.",'450','140',function(){
+					$("input[name='export_buy_confirm_agree']").eq(0).focus();
+				});
+				return;
+			}
+		}
+
+		closeDialog("#export_buy_confirm_msg");
+		export_buy_confirm(export_code);
+	});
+
+});
+
+//구매확정처리
+function export_buy_confirm(export_code){
+	$.ajax({
+		'url' : '../mypage_process/buy_confirm',
+		'data' : {'export_code':export_code},
+		'type' : 'get',
+		'dataType' : 'json',
+		'success' : function(data) {
+			if(data.result) {
+				openDialogAlert(data.msg,'450','200',function(){document.location.reload();},{'hideButton':true});
+			}
+		}
+	});
+}
+
+function goods_review_write(goodsseq,order_seq){
+	if(goodsseq){
+		{ ? defined('__ISUSER__') }
+			window.open('/mypage/mygdreview_write?goods_seq='+goodsseq+'&order_seq='+order_seq,'goodsreview');
+		{:}
+			window.open('/board/write?id=goods_review&goods_seq='+goodsseq+'&order_seq='+order_seq,'goodsreview'); 
+		{/}  
+	}
+}
+</script>

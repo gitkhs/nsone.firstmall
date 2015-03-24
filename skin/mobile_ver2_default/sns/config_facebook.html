@@ -1,0 +1,166 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".facebookpageconnect").click(function() {
+		loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+		var pageidar = $("#page_id_f option:selected").val();
+		pageidar = pageidar.split("^^");
+		var pageid		= pageidar[0];
+		var pagename = pageidar[2];
+		var pageurl		= pageidar[3];
+		var pageapplink		= pageidar[4];
+
+		$.ajax({
+		'url' : '../sns_process/config_facebook_page',
+		'type' : 'post',
+		'data': {"method":"connect", "pageid":pageid, "pagename":pagename, "pageurl":pageurl, "pageapplink":pageapplink},
+		'dataType': 'json',
+		'success': function(res) {
+		 if(res.result == true) {
+			openDialogAlert("성공적으로 설정되었습니다. <br> 이제부터 쇼핑몰의 상품을 facebook에서도 판매할 수 있게 되었습니다.",'450','140',function(){opener.location.reload();self.close();});
+		 }else{
+			openDialogAlert(res.msg,'400','140',function(){});
+		 }
+		}
+	   });
+	});
+
+	$(".facebookpageconnectdel").click(function() {
+		if(confirm("정말로 페이지를 해지 하시겠습니까?") ) {
+			loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+			var pageidar = $("#page_id_f option:selected").val();
+			pageidar = pageidar.split("^^");
+			var pageid		= pageidar[0];
+			var pagename = pageidar[2];
+			var pageurl		= pageidar[3];
+			var pageapplink		= pageidar[4];
+
+			$.ajax({
+			'url' : '../sns_process/config_facebook_page',
+			'type' : 'post',
+			'data': {"method":"delete","pageid":pageid, "pagename":pagename, "pageurl":pageurl, "pageapplink":pageapplink},
+			'dataType': 'json',
+			'success': function(res) {
+			 if(res.result == true){
+				openDialogAlert("페이지를 해지하였습니다.",'400','140',function(){opener.location.reload();self.close();});
+			 }else{
+				openDialogAlert(res.msg,'400','140',function(){});
+			 }
+			}
+		   });
+		}
+	});
+
+	$("#page_id_f").change(function() {
+		var pageidar = $("#page_id_f option:selected").val();
+		pageidar = pageidar.split("^^");
+		var pageuse = pageidar[1];
+		if(pageuse == 'N'){
+			$(".facebookpagelay").show();
+			$(".facebookpagedellay").hide();
+		}else{
+			$(".facebookpagedellay").show();
+			$(".facebookpagelay").hide();
+		}
+	});
+
+	 {? appuseck == 'Y' }
+		$(".facebookpagedellay").show();
+		$(".facebookpagelay").hide();
+	{:}
+		$(".facebookpagelay").show();
+		$(".facebookpagedellay").hide();
+	{/}
+});
+
+
+var facebookLoginWindow;
+var loginWindowTimer;
+function facebookLogin(loginUrl) {
+	var popupWidth=500;
+	var popupHeight=300;
+	var xPosition=($(window).width()-popupWidth)/2;
+	var yPosition=($(window).height()-popupHeight)/2;
+	//var loginUrl="{loginUrl}";
+	facebookLoginWindow=window.open(loginUrl, "settingForm",
+		"location=1,scrollbars=1,"+
+		"width="+popupWidth+",height="+popupHeight+","+
+		"left="+xPosition+",top="+yPosition);
+
+	loginWindowTimer=setInterval(onTimerCallbackToCheckLoginWindowClosure, 1000);
+	document.location.reload();
+}
+function onTimerCallbackToCheckLoginWindowClosure() {
+	if (facebookLoginWindow.closed) {
+		clearInterval(loginWindowTimer);
+	}
+}
+
+{? !fbuser }
+document.location.href='{loginUrl}';
+{/}
+
+{? fbuser &&  permissionloginUrl }
+	document.location.href='{permissionloginUrl}';
+{/}
+
+</script>
+<form name="settingForm" method="post" enctype="multipart/form-data" action="../sns_process/config_facebook_popup" target="actionFrame">
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2><span class="darkgray">Fammerce (facebook쇼핑몰) 설정 </span></h2>
+		</div>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<div align="center" >
+	<!-- 서브메뉴 바디 : 시작-->
+	<div >
+			<table width="580" class="info-table-style" >
+			<tbody>
+			<tr><td align="center">
+				<img src="../images/design/img_setting_fbpage.gif">
+				<br>
+				<div align="left">
+				Facebook의 페이지는 회사, 브랜드 및 유명인이 Facebook의 사용자들과 연결할 수 있게 해 주는 곳입니다.<br />
+				Facebook페이지 선택만으로 Facebook의 쇼핑몰 설정이 너무 쉽게 끝납니다.<br />
+				<b>아래에서 쇼핑몰을 탑재할 귀사의 Facebook페이지를 선택 하십시오!</b><br />
+				<br />
+				만약, Facebook페이지가 없거나 새로 만들려면  <span class="btn small black" style=""><button type="button" onclick="window.open('http://www.facebook.com/pages/create.php');">여기</button></span>에서 페이지를 만들 수 있습니다.
+				</div>
+			</td></tr>
+			</tbody>
+			</table>
+			<br>
+			<table width="100%" class="info-table-style" >
+			<tbody>
+			<tr><td class="its-td">쇼핑몰 앱이 탑재되는 Facebook 페이지 선택</td></tr>
+			<tr>
+			<td class="its-td">
+				<select name="page_id_f" id="page_id_f" >
+				<option value="">Facebook 페이지 선택</option>
+				{@ pageloop }
+					{? .appuse == 'Y'  }
+						<option value="{.page_id}^^{.appuse}^^{.name}^^{.page_url}^^{.page_app_link}" selected >{.name} (연결성공)</option>
+					{:}
+						<option value="{.page_id}^^{.appuse}^^{.name}^^{.page_url}^^{.page_app_link}" {? page_id_f == .page_id} selected {/}>{.name}</option>
+					{/}
+				{/}
+				</select>
+				<span class="btn small black facebookpagelay facebookpageconnect"><button type="button">페이지 연결하기▶</button></span></span>
+				<span class="btn small black facebookpagedellay facebookpageconnectdel"><button type="button">페이지 해지하기▶</button></span>
+				<span class="btn small black facebookpagedellay facebookpageconnect"><button type="button">페이지 다시연결하기▶</button></span>
+			</td>
+			</tr>
+			</tbody>
+			</table>
+	</div>
+	<!-- 서브메뉴 바디 : 끝 -->
+</div>
+<!-- 서브 레이아웃 영역 : 끝 -->
+</form>

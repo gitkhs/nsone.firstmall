@@ -1,0 +1,87 @@
+{#HTML_HEADER}
+
+<!--[ 디자인모드 호출 스크립트]-->
+<!--{ ? designMode }-->
+<script type="text/javascript">
+/* 디자인매니저 세팅 */
+$(function(){
+	if(parent.document==document){
+		DM_init('{template_path}');
+	}
+});
+</script>
+<!--{ / }-->
+
+<!--[ 모바일쇼핑몰 디자인모드시 화면 구성 ]-->
+<!--{ ? (mobileMode || storemobileMode) && designMode }-->
+<style>
+/*
+body {background-color:#999}
+#wrap {background-color:#fff; margin:60px auto 0 auto; width:320px; height:480px; overflow:auto;}
+*/
+</style>
+<script>
+$(function(){
+	//$("#wrap").resizable();
+});
+</script>
+<!--{ / }-->
+
+<style>
+#layout_body {
+	{?layout_config.backgroundColor}background-color:{layout_config.backgroundColor};{/}
+	{?layout_config.backgroundImage}background:url('{layout_config.backgroundImage}');{/}
+	{?layout_config.backgroundRepeat}background-repeat:{layout_config.backgroundRepeat};{/}
+	{?layout_config.backgroundPosition}background-position:{layout_config.backgroundPosition};{/}
+}
+#layer_pay {position:absolute;top:0px;width:100%;height:100%;background-color:#ffffff;text-align:center;z-index:999999;}
+#payprocessing {text-align:center;position:absolute;width:100%;top:150px;z-index:99999999px;}
+</style>
+<div id="wrap">
+	<div id="layout_side">
+		{#common_layout_side}
+	</div>
+	<div id="layout_wrap">
+		{?  !_GET.popup && !_GET.iframe }
+		<!--{ ? layout_config.layoutHeader != 'hidden' }-->
+		{#LAYOUT_HEADER}
+		<!--{ / }-->
+		<!--{ ? layout_config.layoutMainTopBar != 'hidden' && strpos(uri_string(), "main") !== false && layout_config.layoutMainTopBar != '' }-->
+		{#LAYOUT_MAIN_TOPBAR}
+		<!--{ / }-->
+		{/}
+
+		<div id="layout_body">
+		<!--{ ? !(layout_config.layoutMainTopBar != 'hidden' && strpos(uri_string(), "main") !== false && layout_config.layoutMainTopBar != '') }-->
+		{#LAYOUT_BODY}
+		<!--{ / }-->
+		</div>
+
+		{?  !_GET.popup && !_GET.iframe }
+		<!--{ ? layout_config.layoutFooter != 'hidden' }-->
+		{#LAYOUT_FOOTER}
+		<!--{ / }-->
+		{/}
+
+		{? !_GET.iframe }
+		{ ? !_GET.debug }
+		<iframe name="actionFrame" src="/main/blank" frameborder="0" width="0" height="0" class="hide" ></iframe>
+		{ : }
+		<iframe name="actionFrame" src="/main/blank" frameborder="0" width="100%" height="500"></iframe>
+		{ / }
+		<div id="openDialogLayer" style="display: none">
+			<div align="center" id="openDialogLayerMsg"></div>
+		</div>
+		{/}
+		<div id="ajaxLoadingLayer" style="display: none"></div>
+	</div>
+</div>
+<div id="mobileZipcodeLayer" style="display: none"></div>
+<!-- 결제창을 레이어 형태로 구현-->
+<div id="layer_pay" class="hide">
+</div>
+<div id="payprocessing" class="pay_layer hide">
+	<div style="margin:auto;"><img src="../images/design/img_paying.gif" /></div>
+	<div style="margin:auto;padding-top:20px;"><img src="../images/design/progress_bar.gif" /></div>
+</div>
+{#HTML_FOOTER}

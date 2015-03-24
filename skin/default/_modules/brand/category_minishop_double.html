@@ -1,0 +1,34 @@
+<style>
+#{brandPageNavigationKey} .cpn-table	{border:4px solid #f1f1f1; border-collapse:collapse;}
+#{brandPageNavigationKey} .cpn-table th {width:160px; line-height:30px; vertical-align:top}
+#{brandPageNavigationKey} .cpn-table .cpnt-th {padding:5px 10px; line-height:25px; height:25px; text-align:left; font-family:tahoma,dotum; font-size:11px; font-weight:bold; color:#000;}
+#{brandPageNavigationKey} .cpn-table .cpnt-td {padding:5px; border:1px solid #c3c3c3;}
+#{brandPageNavigationKey} .cpn-table .cpnt-th,
+#{brandPageNavigationKey} .cpn-table .cpnt-td {border:1px solid #c3c3c3;}
+#{brandPageNavigationKey} .cpn-sub-table td {line-height:25px; height:25px;}
+#{brandPageNavigationKey} .cpn-sub-table td a {font-family:tahoma,dotum; font-size:11px; color:#000;}
+#{brandPageNavigationKey} .cpn-sub-table td a:hover {color:#fff;}
+</style>
+
+<table class="cpn-table" width="100%" align="center" cellpadding="0" cellspacing="0" border="0">
+<!--{ @ getChildBrand(_GET.brand) }-->
+<tr>
+	<th class="cpnt-th">
+		<a href="/goods/brand?code={.category_code}">{.title}</a>
+	</th>
+	<td class="cpnt-td">
+		<table class="cpn-sub-table" width="100%" align="center" cellpadding="0" cellspacing="0" border="0" >
+		<tr>{@ range(1, count_w) }<td width="{=(100/count_w)}%" style="height:0px;"></td>{/}</tr>
+		<tr>
+			<!--{ @ getChildBrand(.category_code,true) }-->
+			<!--{ ? ..index_ && ..index_%count_w==0}--></tr><tr><!--{ / }-->
+			<td>
+				<img src="../../images/common/bullet_dot.gif" align="absmiddle" hspace="5" /><a href="?{page.querystring}&brand={..category_code}">{..title}</a>
+			</td>
+			<!--{ / }-->
+		</tr>
+		</table>
+	</td>
+</tr>
+<!--{ / }-->
+</table>

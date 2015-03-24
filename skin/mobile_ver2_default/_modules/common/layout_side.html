@@ -1,0 +1,51 @@
+<ul class="top_navigation">
+	<li><a href="/main/index"><img src="../../images/design/t_i_home.png" width="25" height="24" vspace="4" /><br />홈</a></li>
+	<li><a href="/order/cart"><img src="../../images/design/t_i_cart.png" width="25" height="24" vspace="4" /><br />장바구니{?push_count_cart}<span class="pushCount" style="position:absolute;top:0px;right:-4px;">{push_count_cart}</span>{/}</a></li>
+	<li><a href="/goods/recently"><img src="../../images/design/t_i_lately.png" width="25" height="24" vspace="4" /><br />최근 본 상품{?push_count_today}<span class="pushCount" style="position:absolute;top:0px;right:0px;">{push_count_today}</span>{/}</a></li>
+</ul>
+
+<div class="top_userinformation">
+	<!--{? userInfo.member_seq }-->
+	<div class="welcome"><b>{?userInfo.user_name}{userInfo.user_name}{:}{userInfo.userid}{/}</b>님 반갑습니다.</div>
+	<div class="logoutbtn"><a href="../login_process/logout" target= "actionFrame"><input type="button" value="로그아웃" /></a></div>
+	<!--{:}-->
+	<div class="welcome">고객님 반갑습니다.</div>
+	<div class="loginbtn"><a href="../member/login"><input type="button" value="로그인" /></a></div>
+	<div class="joinbtn"><a href="../member/agreement"><input type="button" value="회원가입" /></a></div>
+	<!--{/}-->
+</div>
+
+<div class="menu_navigation_wrap">
+	<ul class="menu">
+		<li class="mitem mitemicon1">
+			<a href="#"><img src="../../images/design/l_i_cate.png" width="25" height="25" /> 카테고리</a>
+			<ul class="submenu">
+				<!--{@getChildCategory('',true,'')}-->
+				<li class="submitem"><a href="/goods/catalog?code={.category_code}">{.ori_title}</a></li>
+				<!--{/}-->
+			</ul>
+		</li>
+		<li class="mitem mitemicon1">
+			<a href="#"><img src="../../images/design/l_i_brand.png" width="25" height="25" /> 브랜드</a>
+			<ul class="submenu">
+				<!--{@getChildBrand('',true,'')}-->
+				<li class="submitem"><a href="/goods/brand?code={.category_code}">{.ori_title}</a></li>
+				<!--{/}-->
+			</ul>
+		</li>
+		<li class="mitem mitemicon1">
+			<a href="#"><img src="../../images/design/l_i_location.png" width="25" height="25" /> 지역</a>
+			<ul class="submenu">
+				<!--{@getChildLocation('',true,'')}-->
+				<li class="submitem"><a href="/goods/location?code={.location_code}">{.ori_title}</a></li>
+				<!--{/}-->
+			</ul>
+		</li>
+		<li class="mitem mitemicon2"><a href="/goods/search"><img src="../../images/design/l_i_search.png" width="25" height="25" /> 검색</a></li>
+		<li class="mitem mitemicon2"><a href="/order/cart"><img src="../../images/design/l_i_cart.png" width="25" height="25" /> 장바구니</a>{?push_count_cart}<span class="pushCount" style="position:absolute;top:12px;right:27px;">{push_count_cart}</span>{/}</li>
+		<li class="mitem mitemicon2"><a href="/goods/recently"><img src="../../images/design/l_i_lately.png" width="25" height="25" /> 최근 본 상품</a>{?push_count_today}<span class="pushCount" style="position:absolute;top:12px;right:27px;">{push_count_today}</span>{/}</li>
+		<li class="mitem mitemicon2"><a href="/mypage/wish"><img src="../../images/design/l_i_wish.png" width="25" height="25" /> 위시리스트</a>{?push_count_wish}<span class="pushCount" style="position:absolute;top:12px;right:27px;">{push_count_wish}</span>{/}</li>
+		<li class="mitem mitemicon2"><a href="/mypage/index"><img src="../../images/design/l_i_mypage.png" width="25" height="25" /> 마이페이지</a></li>
+		<li class="mitem mitemicon2"><a href="/service/cs"><img src="../../images/design/l_i_cs.png" width="25" height="25" /> 고객센터</a></li>
+	</ul>
+</div>

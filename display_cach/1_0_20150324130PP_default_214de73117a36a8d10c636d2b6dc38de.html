@@ -1,0 +1,65 @@
+<div id='designDisplay_5510e60cb39c8' class='designDisplay' designElement='display' templatePath='main/index.html' displaySeq='1' perpage='' displayStyle='rolling_h'><style>
+#designDisplay_5510e60cb39c8 .goodsDisplayImageWrap {position:relative;}
+#designDisplay_5510e60cb39c8 .goodsDisplayImageSlide {position:absolute;right:0px;top:50%;margin-top:-14px;}
+#designDisplay_5510e60cb39c8 .goodsDisplayImageOveray1 {display:none; position:absolute;left:0px;top:100%;margin-top:-20px;width:100%;height:20px;}
+#designDisplay_5510e60cb39c8 .goodsDisplayImageOveray1Bg {background-color:#000000;color:#fff;opacity:0.3;position:absolute;left:0;top:0;width:100%;height:20px}
+#designDisplay_5510e60cb39c8 .goodsDisplayImageOveray1Text {color:#fff;font-size:11px;font-weight:bold;text-align:center;position:absolute;overflow:hidden;white-space:nowrap;line-height:20px;left:0;top:0;width:100%}
+#designDisplay_5510e60cb39c8 .goodsDisplayQuickShopping {}
+#designDisplay_5510e60cb39c8 table.quick_shopping_container {border-collapse:collapse;table-layout:fixed}
+#designDisplay_5510e60cb39c8 table.quick_shopping_container td {height:14px;text-align:center;border:1px solid #e5e5e5;background-color:#fff;font-size:11px;letter-spacing:-1px}
+
+#designDisplay_5510e60cb39c8_slide .fb-like[layout='box_count'] span, #designDisplay_5510e60cb39c8_slide .fb-like[layout='box_count'] iframe {min-width:60px !important;min-height:95px !important;}
+#designDisplay_5510e60cb39c8_slide .fb-like[layout='button_count'] span, #designDisplay_5510e60cb39c8_slide .fb-like[layout='button_count'] iframe {min-width:90px !important;min-height:51px !important;}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$('#designDisplay_5510e60cb39c8_slide').slides({
+		container: 'slides_container',
+		play: 3000,
+		pause: 2500,
+		next: 'next',
+		prev: 'prev',
+		hoverPause: true,
+		autoHeight:false,
+		generatePagination: false,
+		effect: 'slide',
+		slidesLoaded: function() {
+			$('#designDisplay_5510e60cb39c8_slide .slide').width($('#designDisplay_5510e60cb39c8_slide .slides_container').width());
+			$('#designDisplay_5510e60cb39c8_slide .slide').css('min-height','180');
+			$('#designDisplay_5510e60cb39c8_slide .slides_container').css('min-height',$('#designDisplay_5510e60cb39c8_slide .slide').height()+45);
+
+			$('#designDisplay_5510e60cb39c8_slide img').each(function(){
+				if(parseInt($('#designDisplay_5510e60cb39c8_slide .slides_container').css('min-height'))<$(this).closest('.slide').height()){
+					$('#designDisplay_5510e60cb39c8_slide .slides_container').css('min-height',$(this).closest('.slide').height()+45);
+				}
+			});
+
+		}
+	});
+});
+</script>
+
+<div><font face="arial black, 돋움" size="2"><b></b></font></div>
+
+<br style="line-height:10px;" />
+
+<div id="designDisplay_5510e60cb39c8_slide"  class="">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed">
+	<tr>
+		<td width="30" align="left"><a href="#" class="prev"><img src="/data/skin/default/images/design/slide-arrow-prev.png" /></a></td>
+		<td>
+			<div class="slides_container">
+				<div class="slide slidefirst" >
+					<table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;">
+					<tr>
+					</tr>
+					</table>
+				</div>
+			</div>
+		</td>
+		<td width="30" align="right"><a href="#" class="next"><img src="/data/skin/default/images/design/slide-arrow-next.png" /></a></td>
+	</tr>
+	<tr><td height="10"></td></tr>
+	</table>
+</div></div>

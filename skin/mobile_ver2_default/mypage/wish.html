@@ -1,0 +1,163 @@
+<style>
+	button.btn_select_all, button.btn_select_wishlist { border:0 }
+	button.btn_ea_modify, button.btn_selected_order { border:0 }	
+	.goods_name {display:inline-block; line-height:35px;white-space:nowrap;overflow:hidden;width:95%;text-overflow:ellipsis;-o-text-overflow:ellipsis}	
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	// 전체 선택
+	$("form#wish_form button.btn_select_all").toggle(function() {		
+		$("input[name='wish_seq[]']").attr("checked",true);
+	}, function() {		
+		$("input[name='wish_seq[]']").attr("checked",false);
+	});
+
+	// 선택삭제
+	$(".btn_select_del").bind("click",function(){			
+		$("input[name='wish_seq[]']").val($(this).attr('value'));
+		$("form#wish_form").attr("action","wish_del");
+		$("form#wish_form").attr("target","actionFrame");
+		$("form#wish_form")[0].submit();
+	});
+
+	// 옵션/수량변경 클릭시	
+	$("button.btn_option_modify").bind("click",function() {
+		var id	= $(this).attr("id");		
+		option_open(id);
+	});
+
+	// 장바구니 클릭시
+	$("button.wishcart").bind("click",function() {		
+		var id	= $(this).attr("id");
+		var seq	= $(this).attr("seq");
+		id = id.replace("wishcart_","");
+
+		if($("div#optional_changes_area_"+id).html() == "" || $("div#optional_changes_area_"+id).html() == null){
+			alert('옵션을 선택해주세요.');
+			option_open(id);
+		}else{
+			if( check_option() ){
+				$("#optional_changes_form_"+seq).submit();
+			}
+		}
+	});
+
+	// 바로구매 클릭시
+	$(".btn_important_small").bind("click",function() {
+		var id	= $(this).attr("id");
+		var seq	= $(this).attr("seq");
+		id = id.replace("ordercart_","");
+
+		if($("div#optional_changes_area_"+id).html() == "" || $("div#optional_changes_area_"+id).html() == null){
+			alert('옵션을 선택해주세요.');
+			option_open(id);
+		}else{
+			if( check_option() ){ // 옵션 체크
+
+				var f = $("form#optional_changes_form_"+seq);
+				f.attr("action","../order/add?mode=direct");
+				f.submit();
+				f.attr("action","../order/add");				
+			}
+		}		
+	});
+});
+
+var old_id = "";
+function option_open(id){
+	var url = "wish2cart?no="+id;
+	var area_obj = $("div#optional_changes_area_"+id);
+
+	// 닫기 옵션
+	if(old_id == id){ $(".optional_area").slideUp(500); old_id = ""; $(".optional_area").html(""); return; }
+	else			{ $(".optional_area").slideUp(500); $(".optional_area").html(""); }
+	
+	$.get(url, function(data) {			
+		area_obj.html(data);						
+		area_obj.slideDown(500);
+		old_id = id;
+	});
+}
+</script>
+
+<form name="wish_form" id="wish_form" method="post">
+<input type="hidden" name="wish_seq[]" value="" />
+</form>
+
+{?!mobileAjaxCall}
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>카트/위시</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+<!-- 상단 마이 리스트 버튼바 -->
+{#common_mycart_top}
+{/}
+
+
+<!-- List -->
+<!-- { ? page.totalcount==0 } -->
+<table align="center" cellpadding="0" cellspacing="0" border="0">
+<tr><td height="50"></td></tr>
+<tr>
+	<td>
+		<span class="small">위시리스트 내역이 없습니다.</span>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+<!-- { : } -->
+<div class="cart_contents">
+	<div class="cart_list">
+	<!-- { @ record } -->
+		<div class="cart_goods" id="wish_goods_{.wish_seq}">
+			<div class="cart_goods_detail"><span class="goods_name">{.goods_name}</span></div>
+			<div class="cart_goods_detail">
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<td width="80">
+						<a href="../goods/view?no={.goods_seq}">
+							<img src="{.image}" width="80" height="80" align="absmiddle" hspace="5" onerror="this.src='../images/common/noimage_list.gif'" />
+						</a>
+					</td>
+					<td width="12"></td>
+					<td>
+						<div class="cart_price">
+							<!-- { ? .org_price > .sale_price  } -->
+							{=number_format(.org_price)} →
+							<!-- { / } -->
+							<span class="cart_price_num">{=number_format(.sale_price)}</span>원
+							<!-- { ? .reserve } -->
+							<div style="margin:5px 0;">{=number_format(.reserve)}원 적립</div>
+							<!-- { / } -->
+						</div>
+						<div>
+							<button type="button" class="btn_style btn_select_del" style="width:55px;height:30px;" value="{.wish_seq}">삭제</button>
+							<button type="button" class="btn_arw_dn_gray btn_option_modify" style="cursor:pointer;width:120px;height:30px;" id="{.wish_seq}">옵션/수량변경<span class="btn_arw_dn_icon"></span></button>
+						</div>
+					</td>
+				</tr>
+				</table>
+			</div>
+			
+			<!-- 옵션 변경 영역 -->
+			<div id="optional_changes_area_{.wish_seq}" class="optional_area" style="position:relative;background-color:#ececec; display:none;"></div>
+
+			<div class="cart_goods_sum" height="40"><br/>
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr>					
+					<td align="center">
+						<button type="button" name="cart" class="wishcart btn_normal_small hand" seq="{.goods_seq}" id="wishcart_{.wish_seq}" style="width:110px; height:36px;">장바구니</button>
+						<button type="button" class="wishorder btn_important_small hand" id="ordercart_{.wish_seq}" style="width:120px; height:36px;" seq="{.goods_seq}" value="{.cart_option_seq}">바로구매</button>
+					</td>
+				</tr>
+				</table>
+			</div>			
+		</div>
+	<!-- { / } -->
+	</div>
+</div>
+<!-- { / } -->
+
+<div id="cart_dialog" style="display:none;"></div>

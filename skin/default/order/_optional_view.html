@@ -1,0 +1,88 @@
+<style>
+.goods_quantity_table_container {margin:5px 0 10px 0; padding:5px 10px; border:1px solid #d0d0d0;}
+.goods_quantity_table .quantity_cell {padding:3px 0; border-top:1px solid #d0d0d0}
+.goods_quantity_table .quanity_row:first-child .quantity_cell {border-top:0px}
+.goods_quantity_table .option_text {letter-spacing:-1px;}
+.total_price {color:#cc0000;}
+</style>
+<div class="goods_quantity_table_container">
+	<table class="goods_quantity_table" width="100%" cellpadding="0" cellspacing="0" border="0">
+	<col /><col width="70"><col width="90" />
+	<!--{ @ cart_options }-->
+	<tr class='quanity_row'>
+		<td class='quantity_cell option_text'>			
+			<div style="float:left;padding-right:15px">{ ? .title1 }<strong>{.title1}</strong> : { / }{.option1}</div>			
+			<!--{ ? .option2 }-->			
+			<div style="float:left;padding-right:15px">{ ? .title2 }<strong>{.title2}</strong> : { / }{.option2}</div>			
+			<!--{ / }-->
+			<!--{ ? .option3 }-->
+			<div style="float:left;padding-right:15px">{ ? .title3 }<strong>{.title3}</strong> : { / }{.option3}</div>
+			<!--{ / }-->
+			<!--{ ? .option4 }-->			
+			<div style="float:left;padding-right:15px">{ ? .title4 }<strong>{.title4}</strong> : { / }{.option4}</div>
+			<!--{ / }-->
+			<!--{ ? .option5 }-->			
+			<div style="float:left;padding-right:15px">{ ? .title5 }<strong>{.title5}</strong> : { / }{.option5}</div>
+			<!--{ / }-->
+		</td>
+		<td class='quantity_cell'>
+			<table align='center' border='0' cellpadding='1' cellspacing='0'>
+			<tr>
+				<td>
+					{.ea}
+				</td>				
+				<td>개</td>
+			</tr>
+			</table>
+		</td>
+		<td class='quantity_cell' align='right'>
+			<strong>{=number_format(.price)}</strong>원
+		</td>
+	</tr>						
+	<!--{ / }-->
+	<!--{ @ cart_suboptions }-->
+	<tr class='quanity_row'>
+		<td class='quantity_cell option_text'>
+			<div style="float:left;padding-right:15px"><strong>{.suboption_title}</strong> : {.suboption}</div>			
+		</td>
+		<td class='quantity_cell'>
+			<table align='center' border='0' cellpadding='1' cellspacing='0'>
+			<tr>
+				<td>{.ea}</td>				
+				<td>개</td>
+			</tr>
+			</table>
+		</td>
+		<td class='quantity_cell' align='right'>
+			<strong>{=number_format(.price)}</strong>원
+		</td>
+		
+	</tr>
+	<!--{ / }-->
+	<!--{ @ cart_inputs }-->
+	<tr class='quanity_row'>
+		<td class='quantity_cell option_text' colspan="3">
+			{?.type=='text'}
+				<table border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td valign="top"><strong>{.input_title} : </strong></td>
+					<td width="10"></td>
+					<td>{=nl2br(htmlspecialchars(.input_value))}</td>
+				</tr>
+				</table>
+			{/}
+			{?.type=='file'}
+				<table border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td valign="top"><strong>{.input_title} : </strong></td>
+					<td width="10"></td>
+					<td><a href="/data/order/{.input_value}" target="_blank"><img src="/data/order/{.input_value}" width="60" /></a></td>
+				</tr>
+				</table>
+			{/}
+		</td>
+	</tr>
+	<!--{ / }-->
+
+	</table>						
+</div>

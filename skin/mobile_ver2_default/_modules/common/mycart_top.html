@@ -1,0 +1,18 @@
+<div class="sub_title_button_bar">
+	<table class="sub_title_button_tb" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="33.3%" onclick="location.href='/order/cart'" {?uri_string()=='order/cart'}class="sel"{/} >
+			장바구니<br/>
+			<span>{=showMycartTop('cart')}</span>
+		</td>
+		<td width="33.3%" onclick="location.href='/mypage/wish'" {?uri_string()=='mypage/wish'}class="sel"{/}>
+			위시리스트<br/>
+			<span>{=showMycartTop('wish')}</span>
+		</td>
+		<td width="33.3%" onclick="location.href='/goods/recently'" {?uri_string()=='goods/recently'}class="sel"{/}>
+			최근 본 상품<br/>
+			<span>{=showMycartTop('recently')}</span>
+		</td>
+	</tr>
+	</table>
+</div>

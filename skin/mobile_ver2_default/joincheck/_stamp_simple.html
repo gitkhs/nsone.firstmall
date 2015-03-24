@@ -1,0 +1,137 @@
+<script type="text/javascript">
+
+function sub_wrt_btn(){
+	var setform = document.jcwrite;
+	var minfo_seq = setform.member_seq.value;
+
+	if(!minfo_seq){
+		alert('로그인 후 참여 가능합니다.');
+		opener.location.href="http://m.{config_system.subDomain}/member/login";
+		self.close();
+
+	}else{
+		setform.action="../joincheck_process";
+		setform.target="actionFrame";
+	}
+
+}
+
+function lgn_btn(){
+		opener.location.href="http://m.{config_system.subDomain}/member/login";
+		self.close();
+
+}
+
+function join_btn(){
+	opener.location.href="/member/agreement";
+	self.close();
+
+}
+
+
+</script>
+<style>
+.stamp-list-table {border:1px solid #dfdfdf;}
+.stamp-list-table .stl-week,
+.stamp-list-table .stl-sun,
+.stamp-list-table .stl-sat		{border:1px solid #dfdfdf;}
+.stamp-list-table .stl-week {font-size:11px; font-family:dotum;  color:#6e6e6e; padding-right:10px;}
+.stamp-list-table .stl-sun {font-size:11px; font-family:dotum; color:#cb0000; padding-right:10px;}
+.stamp-list-table .stl-sat {font-size:11px; font-family:dotum; color:#9a9a9a; padding-right:10px;}
+</style>
+
+<div style="padding-left:26px; padding-right:26px;">
+
+	<table width=100% height='140' style="margin-top:14px;margin-bottom:14px">
+	<tr>
+		<td style="padding-bottom:14px;">
+		<img src='/data/joincheck/stamp_simple/tit_check.gif'>
+		</td>
+		<td rowspan='3' align="right" valign="bottom">
+		<img src='/data/joincheck/stamp_simple/img_stamp.gif'>
+		</td>
+	</tr>
+	<tr>
+		<td style="padding-bottom:10px;">
+		<span style="font-size:12px; font-family:dotum; color:#000000; font-weight:Bold; text-decoration:underline">{joincheck.title}</span>
+		</td>
+	</tr>
+	<tr>
+		<td style="font-size:11px; font-family:dotum; color:#5d81a9; line-height:15px; letter-spacing:-1px;">
+		진행기간 : <span style="font-weight:bold;"">{joincheck.start_date} ~ {joincheck.end_date}</span><br/>
+		이벤트 조건 : 이벤트 기간 중 총 <span style="font-weight:bold;">{joincheck.check_clear_count}회 {joincheck.mclear_type} 출석</span> 하는 경우<br/>
+		이벤트 혜택 : 적립금 <b>{=number_format(joincheck.emoney)}원</b> 지급<br/>
+		참여 방법 : <span style="font-weight:bold;">{mdata.type_ment}</span> 1일 1회 자동 참여
+		</td>
+	</tr>
+	</table>
+
+
+
+	 {? minfo.user_name}
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:18px;">
+	<tr>
+		<td><span style="font-size:12px; font-family:dotum; color:#717171; letter-spacing:-1px;"><b>{minfo.user_name}</b>님께서는 현재 총 <b>{mdata.acount}일</b> 출석하였습니다.
+		{?mdata.chage==0}(목표를 달성하셨습니다.){:}(<b>{mdata.chage}번</b> 더 연속으로 출석을 하셔야 합니다.){/}</span></td>
+	</tr>
+	</table>
+	{:}
+	{/}
+
+
+	<table width="100%" height="50" border="0" cellpadding="10" cellspacing="0" style="border:2px solid #dadada;">
+	<tr>
+		<td align="center" valign="middle">
+		{joincheck.prev_day}
+		<span style="font-size:12px; font-famliy:Gulim; font-weight:Bold; color:#000000">{joincheck.tdate}</span>
+		{joincheck.next_day}</td>
+	</tr>
+	<tr>
+		<td >
+		<table width="100%" cellspacing="0" bordercolor="black" align='center' class="stamp-list-table">
+			<tr align='center' >
+		        <td width='65' height='22' class="stl-sun">일</td>
+		        <td width='65' height='22' class="stl-week">월</td>
+		        <td width='65' height='22' class="stl-week">화</td>
+		        <td width='65' height='22' class="stl-week">수</td>
+		        <td width='65' height='22' class="stl-week">목</td>
+		        <td width='65' height='22' class="stl-week">금</td>
+		        <td width='65' height='22' class="stl-sat">토</td>
+		    </tr>
+
+		    {cl}
+
+
+		</table>
+		</td>
+	</tr>
+	</table>
+
+	<table width="100%" style ="margin-top:10px;">
+	<tr><td align="center">
+	<!--{? joincheck.check_type == 'stamp'}-->
+		<form name="jcwrite" id="jcwrite" method="post" enctype="multipart/form-data" onsubmit="return sub_wrt_btn()" >
+		<input type='hidden' name='mode' value='comment_wrt'>
+		<input type="hidden" name="joincheck_seq" value="{joincheck.joincheck_seq}" />
+		<input type="hidden" name="member_seq" value="{minfo.member_seq}" />
+		<span ><button style="border:0px;"><img src='/data/joincheck/stamp_simple/btn_attendance_check.gif' onclick="sub_wrt_btn()" align="center"></button></span>
+		</form>
+	<!--{:}-->
+	<!--{/}-->
+	<!--{? !minfo.user_name }-->
+		<table width="100%" style="margin-top:10px;">
+		<tr>
+		<td rowspan=2 align="center">로그인을 하시면 출석체크 이벤트에 참여할 수 있습니다.</td>
+		<td ><span class="btn small black" ><button  onclick="lgn_btn()">로  그  인 </button></span></td>
+		</tr>
+		<tr><td><span class="btn small black" ><button onclick="join_btn()">회원가입</button></span></td>
+		</tr>
+		</table>
+		<!--{:}-->
+		<!--{/}-->
+	</td></tr>
+	</table>
+
+</div>
+
+<iframe name="actionFrame" src="/data/index.php" frameborder="0" width="100%" height="0"></iframe>

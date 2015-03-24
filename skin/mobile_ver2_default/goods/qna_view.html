@@ -1,0 +1,202 @@
+<link type="text/css" rel="stylesheet" charset="utf-8" href="../css/goods_board.css" />
+<script type="text/javascript">
+//<![CDATA[
+var pagemode = '';
+var board_id = '{manager.id}';
+var boardlistsurl = '{boardurl->lists}';
+var boardwriteurl = '{boardurl->write}';
+var boardviewurl = '{boardurl->view}';
+var boardmodifyurl = '{boardurl->modify}';
+var boardreplyurl = '{boardurl->reply}';
+var gl_isuser = false;
+{ ? defined('__ISUSER__') }
+gl_isuser = '{=defined('__ISUSER__')}';
+{ / }
+
+var comment = '{comment}';
+var commentlay = '{commentlay}';
+var isperm_write = '{managerview.isperm_write}';
+
+//]]>
+</script>
+<script type="text/javascript" src="/app/javascript/js/board.js?v=7"></script>
+		<script type="text/javascript" src="/app/javascript/js/board_mobile.js?v=1"  charset="utf-8"></script>
+{? commentskinjsuse }
+<script type="text/javascript" src="/app/javascript/js/board_comment_mobile.js?v=2"  charset="utf-8"></script>
+{/}
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" charset="euc-kr"></script>
+<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"  charset="utf-8"></script>
+
+<div class="bbsview_style">
+
+	<form name="form1" id="form1" method="post" action="{=sslAction('../board_process')}"  target="boardactionFrame">
+			<input type="hidden" name="mode" id="mode" value="{mode}" />
+			<input type="hidden" name="board_id" id="board_id" value="{manager.id}" />
+			<input type="hidden" name="reply" id="reply" value="{_GET.reply}" />
+			{? seq }
+				<input type="hidden" name="seq" id="board_seq" value="{seq}" />
+			{/}
+			<input type="hidden" name="popup" value="{_GET.popup}" >
+			<input type="hidden" name="iframe" value="{_GET.iframe}" >
+			<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+
+	<div class="bbsview_division">
+		<div class="bvs_subject">
+			{iconmobile} {subject} {iconnew} {iconhot} {iconhidden}
+		</div>
+		<div class="bvs_record_info">
+			{? datacategory }<span class="cell_bar">|</span><span class="cell" >분류</span> : {datacategory}</span>{/}
+			{? strstr(manager.list_show,'[writer]') }<span class="cell_bar">|</span><span class="cell" >{name}</span>{/}
+			{? strstr(manager.list_show,'[date]') }<span class="cell_bar">|</span><span class="cell">{=date('Y.m.d',strtotime(m_date))}</span>{/}
+			{? strstr(manager.list_show,'[hit]') }<span class="cell_bar">|</span><span class="cell">조회 {hit}</span>{/}
+			<span class="cell_bar">|</span><span class="cell">구매여부: {buyertitle}</span>
+		</div>
+	</div>
+
+	<div class="bbsview_division">
+
+		{? filelist}
+		<div class="attach">
+			<ul>
+					{@ filelist}
+					<li><span class="realfilelist hand highlight-link" realfiledir="{.realfiledir}" realfilename="{.orignfile}"  realfilename="{.orignfile}" board_id="{boardid}" filedown="../board_process?mode=board_file_down&board_id={boardid}&realfiledir={.realfiledir}&realfilename={.orignfile}">{.orignfile} (<span class="size">{.realsizefile}</span>) <button type="button"  class="bbs_btn">down</button></span></li>
+					{/}
+			</ul>
+		</div>
+		{/}
+
+		<div class="content" style="min-height:100px; margin:10px auto;word-wrap:break-word;"  >
+			{contents}
+			{? re_contents }
+				<div class="reply">
+					<div class="sbj">문의글에 대한 답변입니다.</div>
+					{re_contents}
+				</div>
+			{/}
+		</div>
+
+		{? filelist && editor == 0 //모바일등록시 첨부파일의 이미지노출 }
+		<div class="attach">
+			<ul>
+					{@ filelist}
+						{? .is_image }
+						<li><img src="{.realfile}" width="200"   onerror="this.src='../images/common/noimage.gif'" /></li>
+						{/}
+					{/}
+			</ul>
+		</div>
+		{/}
+
+		<div class="center">
+			{=snslinkurl('board', subject)}
+		</div>
+	</div>
+
+	</form>
+
+	<div class="bbsview_division">	
+		<!--{? managerview.auth_recommend_use == 'Y' }-->
+		<!-- 게시글평가 -->
+		<div class="scorelay"  style="margin: 15px 0 5px">{#scoreskin}</div>
+		<!-- 게시글평가 -->
+		<!--{/}-->  
+
+		{? commentlay == 'Y' || comment > 0 // 댓글 사용여부, 댓글수 }
+		<!-- 코멘트부분 -->
+		<a name="cmtlist"></a>
+		<div class="comment"  id="comment_container" style="margin: 15px 0 5px">{#commentskin}</div>
+		<!-- 코멘트부분 -->
+		{/}
+
+	</div>
+
+	<div class="bbsview_division center">
+			<button type="button" name="boardviewclose" class="bbs_button_style" style="width:50px;">목록</button></span>
+			{? managerview.isperm_write != "_no" }<button type="button"    id="goods_boad_write_btn{managerview.isperm_write}" board_id="{boardid}"class="bbs_button_style" style="width:50px;">상품문의쓰기 </button>{/}
+			{? display == 0 && managerview.isperm_moddel != "_mbno" } <button type="button"  name="goods_boad_modify_btn{managerview.isperm_moddel}" board_seq="{seq}"  board_id="{boardid}" class="bbs_button_style" style="width:50px;">수정 </button>{/}
+			{? display == 0 && replylay == 'Y' && managerview.isperm_write != "_no" } <button type="button"  id="goods_boad_reply_btn" board_seq="{seq}"  board_id="{boardid}" class="bbs_button_style" style="width:50px;">답변 </button>{/}
+			{? ((display == 0 || (display == 1 && replyor == 0 && comment ==0) ) ) && managerview.isperm_moddel != "_mbno"  } <button type="button" name="goods_boad_delete_btn{managerview.isperm_moddel}" board_seq="{seq}"  board_id="{boardid}" class="bbs_button_style" style="width:50px;">삭제 </button> {/}
+	</div>
+
+</div>
+
+	<!-- 이전/다음 -->
+	<div id="prenextlist"  style="margin: 15px 0 5px">{#prenextskin}</div>
+	<!-- 이전/다음 -->
+
+<div id="CmtBoardPwCk" class="hide BoardPwCk">
+	<div class="msg">
+		<h3> 비밀번호 확인</h3>
+		<div>댓글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="CmtBoardPwcheckForm" id="CmtBoardPwcheckForm" method="post"  target="actionFrame" >
+	<input type="hidden" name="seq" id="cmt_pwck_seq" value="" />
+	<input type="hidden" name="cmtseq" id="cmt_pwck_cmtseq" value="" />
+	<div class="ibox">
+		<input type="password" name="pw" id="cmt_pwck_pw" class="input" />
+		<input type="submit" id="CmtBoardPwcheckBtn" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#CmtBoardPwCk').dialog('close');" />
+	</div>
+	</form>
+</div>
+
+<div id="ModDelBoardPwCk" class="hide BoardPwCk">
+	<div class="msg">
+		<h3> 비밀번호 확인</h3>
+		<div>게시글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="ModDelBoardPwcheckForm" id="ModDelBoardPwcheckForm" method="post" action="{=sslAction('../board_process')}" target="boardactionFrame" >
+	<input type="hidden" name="modetype" id="modetype" value="" />
+	<input type="hidden" name="seq" id="moddel_pwck_seq" value="" />
+	<input type="hidden" name="returnurl" id="moddel_pwck_returnurl" value="" />
+	<div class="ibox">
+		<input type="password" name="pw" id="moddel_pwck_pw" class="input" />
+		<input type="submit" id="BoardPwcheckBtn" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#ModDelBoardPwCk').dialog('close');" />
+	</div>
+	</form>
+</div>
+
+<div id="BoardPwCk" class="hide BoardPwCk">
+	<div class="msg">
+		<h3> 비밀번호 확인</h3>
+		<div>게시글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="BoardPwcheckForm" id="BoardPwcheckForm" method="post" action="{=sslAction('../board_process')}" target="boardactionFrame" >
+	<input type="hidden" name="seq" id="pwck_seq" value="" />
+	<input type="hidden" name="returnurl" id="pwck_returnurl" value="" />
+	<div class="ibox">
+		<input type="password" name="pw" id="pwck_pw" class="input" />
+		<input type="submit" id="BoardPwcheckBtn" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#BoardPwCk').dialog('close');" />
+	</div>
+	</form>
+</div>
+
+<div id="openDialogLayer" style="display: none">
+	<div align="center" id="openDialogLayerMsg"></div>
+</div>
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$(document).resize(function(){
+	  $('#'+board_id+'_frame',parent.document).height($("#wrap").height()+50);
+	 }).resize();
+});
+function iframeset(){
+	  $('#'+board_id+'_frame',parent.document).height($("#wrap").height()+50);
+}
+</script>
+
+<script type="text/javascript">
+$(".content img").load(function() {
+	//이미지 가로가 큰경우
+	$(".content img").each(function() {
+		var default_width = '290';
+		if( $(this).width() > default_width || $(this).height() > default_width ) {
+			imageResize(this,default_width);
+		}
+	});
+});
+</script>

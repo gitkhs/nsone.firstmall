@@ -1,0 +1,372 @@
+<style type="text/css">
+
+div.cart-lay {background-color:#f5f7f7;padding:5px;}
+div.cart-lay div.cart-list-lay {border:3px solid #d6d6d6;}
+
+/* 배송 현황 */
+div.export-lay div.shipping-title {font-weight:bold;background-color:#f5f7f7;color:#4a4a4a;border-bottom:1px solid #d7d7d7;text-align:left;padding:10px 0 10px 10px;font-size:12px;border-top:2px solid #d7d7d7;}
+div.export-lay div.export-title-lay {background-color:#b9bcbd;border-top:1px solid #a9abac;}
+div.export-lay div.export-title-lay table.export-title-table td {height:36px;color:#444444;font-size:12px;}
+div.export-lay div.export-title-lay table.export-title-table td.export-date {padding-left:8px;}
+div.export-lay div.export-title-lay table.export-title-table td.export-btn {text-align:right;padding-right:8px;}
+div.export-lay div.export-shipping-address-title { padding-left:8px;line-height:36px;background-color:#d6d6d6; font-size:12px;font-weight:bold;color:#4a4a4a;}
+div.export-lay div.export-shipping-address-title.is-modify { border-top:1px solid #c2c6c8;border-bottom:1px solid #c2c6c8;}
+div.export-lay div.export-shipping-address {background-color:#fff;color:#000;padding:10px 0 10px 8px;font-size:12px;}
+div.export-lay div.export-shipping-address.multiShippingItem {padding:10px;margin-bottom:20px;border-bottom:3px solid #c2c6c8;background-color:#f5f7f7;}
+div.export-lay div.export-ea-lay {border-bottom:1px solid #d7d7d7;}
+div.export-lay div.export-shipping-address div.shipping-address-btn {padding-bottom:10px;padding-right:3px;text-align:right;}
+div.export-lay div.export-shipping-address table.export-shipping-address-table th {font-size:12px;color:#4a4a4a;text-align:left;}
+div.export-lay div.export-shipping-address table.export-shipping-address-table td {text-align:left;padding:2px 0;padding-left:15px;}
+div.export-lay div.export-shipping-address table.export-shipping-address-table td input[type="text"] {height:29px;text-align:left;padding-left:5px;}
+div.export-lay div.export-shipping-address table.export-shipping-address-table td textarea {font-family:Dotum;font-size:11px;color:#b1b1b1;}
+div.export-lay div.export-ea-lay table.export-ea-table td {height:43px;font-size:12px;}
+div.export-lay div.export-ea-lay table.export-ea-table td.title {text-align:left;padding-left:8px;}
+div.export-lay div.export-ea-lay table.export-ea-table td.ea { text-align:right;padding-right:8px;}
+div.export-lay div.export-ea-lay table.export-ea-table td.ea.rgtbd {border-right:1px solid #d7d7d7;}
+</style>
+<script type="text/javascript">
+function multi_zipcode_popup(obj){
+	var idx = $(".multiShippingItem").index($(obj).closest('.multiShippingItem'));
+	//window.open('../popup/zipcode?mtype=order_multi_view&multiIdx='+idx,'popup_zipcode','width=500,height=350');
+	openDialogZipcode('order_multi',idx);
+	//window.open('../popup/zipcode?popup=1&mtype=order_multi_view&multiIdx='+idx+'&zipcode=multi_recipient_address[]&address=multi_recipient_address&address_detail=multi_recipient_address_detail','popup_zipcode','width=900,height=480');
+}
+
+function reset_ship(flag){
+	if(flag)	$(".shipaddr").val("");
+}
+</script>
+<div class="sub_title_bar">
+	<h2>배송상세내역</a></h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" /></a>
+</div>
+<div class="order-date-info">
+	<span class="order-date">{orders.order_seq}</span>
+	<span class="order-seq">({orders.mstep})</span>
+</div>
+
+<!-- 출고 정보 -->
+<div class="export-lay">
+<!-- { ? count(order_shippings) >= 1 } -->
+	<!-- { @ order_shippings } -->
+		<!-- { ? count(order_shippings) > 1 } -->
+	<div class="shipping-title">
+		{=(.index_+1)}. {.recipient_user_name}님에게 보낸 상품 및 배송지 정보
+	</div>
+		<!-- { / } -->
+
+		<!-- { ? orders.step > 25 } -->
+			<!-- { ? .exports } -->
+				<!-- { @ .exports } -->
+	<div class="export-title-lay">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="export-title-table">
+		<tr>
+			<td width="120" class="export-date">출고일:{..export_date}</td>
+			<td class="export-btn">
+					<!-- { ? ..tracking_url } -->
+				<span class="btn large"><button type="button"  onclick="window.open('{..tracking_url}');">배송추적</button></span>
+					<!-- { / } -->
+					<!-- { ? cfg_order.buy_confirm_use } -->
+						<!-- {? ..buy_confirm == 'none' } -->
+							<!-- {? ..return_able_term && ..rt_ea && in_array(..status,array(55,60,65,70,75)) } -->
+				<span class="btn large exportbuyconfirm" status="{..status}" export_code="{..export_code}" ><button type="button">구매확정</button></span>
+							<!-- { / } -->
+						<!-- { / } -->
+					<!-- { / } -->
+			</td>
+		</tr>
+		</table>
+	</div>
+
+	<div class="cart-lay">
+		<div class="cart-list-lay">
+					<!-- { @ ..item } -->
+						<!-- { ? ...opt_type == 'opt' } -->
+			<div class="goods-info-lay">
+				<div class="goods-name">
+					<a href="../goods/view?no={...goods_seq}">{...goods_name}</a>
+							<!-- { ? ...cancel_type == 1 } -->
+					<span class="canceltypetitle">청약철회불가</span>
+							<!-- { / } -->
+				</div>
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="goods-info-table">
+				<tr>
+					<td width="80">
+						<a href="../goods/view?no={.goods_seq}"><img src="{=viewImg(...goods_seq, 'thumbCart')}" align="absmiddle" hspace="5" style="border:1px solid #ddd;" onerror="this.src='../images/common/noimage_list.gif'" /></a>
+					</td>
+					<td valign="top" class="goods-info">
+						<div class="goods-price">
+							<!-- { ? ...consumer_price } -->
+							<strike>{=number_format(...consumer_price)}</strike>
+							<!-- { / } -->
+							<span class="goods-price">{=number_format(...price)}</span>원
+						</div>
+							<!-- { ? ...option1 } -->
+						<div class="goods-option">[옵션] { ? ...title1 }{ ...title1 }:{ / }{ ...option1 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option2 } -->
+						<div class="goods-option">[옵션] { ? ...title2 }{ ...title2 }:{ / }{ ...option2 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option3 } -->
+						<div class="goods-option">[옵션] { ? ...title3 }{ ...title3 }:{ / }{ ...option3 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option4 } -->
+						<div class="goods-option">[옵션] { ? ...title4 }{ ...title4 }:{ / }{ ...option4 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option5 } -->
+						<div class="goods-option">[옵션] { ? ...title5 }{ ...title5 }:{ / }{ ...option5 }</div>
+							<!-- { / } -->
+						<div class="goods-etc">수량 : {=number_format(...ea)}개</div>
+					</td>
+				</tr>
+				</table>
+			</div>
+						<!-- { : } -->
+			<div class="suboption-lay">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="suboption-table">
+				<tr>
+					<td class="suboption-name">
+							<!-- { ? ...option1 } -->
+						<div>
+							<img src="../images/design/icon_reply.png" width="10" />
+							[추가] { ? ...title1 }{ ...title1 }:{ / }{ ...option1 }
+						</div>
+							<!-- { / } -->
+						<div class="suboption-etc">수량 {=number_format(...ea)}개</div>
+					</td>
+					<td width="94" class="suboption-price">
+							<!-- { ? ...consumer_price } -->
+						<strike>{=number_format(...consumer_price)}</strike>
+							<!-- { / } -->
+						{=number_format(...price)}원
+					</td>
+				</tr>
+				</table>
+			</div>
+						<!-- { / } -->
+			<div class="sum-price-lay">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="sum-price-table">
+				<tr>
+					<td class="price-info">
+						합계
+							<!-- { ? ...consumer_price } -->
+						<strike>{=number_format(...consumer_price*...ea)}</strike>
+							<!-- { / } -->
+						<span class="goods-price">{=number_format(...price*...ea)}</span>원
+					</td>
+					<td width="94" class="step-info">{..mstatus}</td>
+				</tr>
+				</table>
+			</div>
+			<div class="export-ea-lay">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="export-ea-table">
+				<tr>
+					<td class="title" width="100">출고수량</td>
+					<td class="ea rgtbd" style="color:#bc0700;"><span class="bold">{...ea}</span>개</td>
+					<td class="title" width="100">주문수량</td>
+					<td class="ea"><span class="bold">{...shipping_ea}</span>개</td>
+				</tr>
+				</table>
+			</div>
+					<!-- { / } -->
+			<div class="export-shipping-address-title">배송지정보</div>
+			<div class="export-shipping-address">
+				<div >
+					{.recipient_user_name}
+					/ {=implode("-",.recipient_phone)}
+					/ {=implode("-",.recipient_cellphone)}
+				</div>
+				<div >
+					({=implode("-",.recipient_zipcode)})
+					(지번) {.recipient_address}<br>
+					(도로명) {.recipient_address_street}<br>
+					(공통상세) {.recipient_address_detail}
+				</div>
+			</div>
+		</div>
+	</div>
+				<!-- { / } -->
+			<!-- { / } -->
+		<!-- { : } -->
+	<div class="export-title-lay">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="export-title-table">
+		<tr>
+			<td width="120" class="export-date">배송상품</td>
+			<td class="export-btn"></td>
+		</tr>
+		</table>
+	</div>
+
+	<div class="cart-lay">
+		<div class="cart-list-lay">
+					<!-- { @ .shipping_items } -->
+						<!-- { @ ..shipping_item_option } -->
+			<div class="goods-info-lay">
+				<div class="goods-name">
+					<a href="../goods/view?no={..goods_seq}">{..goods_name}</a>
+							<!-- { ? ..cancel_type == 1 } -->
+					<span class="canceltypetitle">청약철회불가</span>
+							<!-- { / } -->
+				</div>
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="goods-info-table">
+				<tr>
+					<td width="80">
+						<a href="../goods/view?no={..goods_seq}"><img src="{=viewImg(..goods_seq, 'thumbCart')}" align="absmiddle" hspace="5" style="border:1px solid #ddd;" onerror="this.src='../images/common/noimage_list.gif'" /></a>
+					</td>
+					<td valign="top" class="goods-info">
+						<div class="goods-price">
+							<!-- { ? ...consumer_price } -->
+							<strike>{=number_format(...consumer_price)}</strike>
+							<!-- { / } -->
+							<span class="goods-price">{=number_format(...price)}</span>원
+						</div>
+							<!-- { ? ...option1 } -->
+						<div class="goods-option">[옵션] { ? ...title1 }{ ...title1 }:{ / }{ ...option1 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option2 } -->
+						<div class="goods-option">[옵션] { ? ...title2 }{ ...title2 }:{ / }{ ...option2 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option3 } -->
+						<div class="goods-option">[옵션] { ? ...title3 }{ ...title3 }:{ / }{ ...option3 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option4 } -->
+						<div class="goods-option">[옵션] { ? ...title4 }{ ...title4 }:{ / }{ ...option4 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option5 } -->
+						<div class="goods-option">[옵션] { ? ...title5 }{ ...title5 }:{ / }{ ...option5 }</div>
+							<!-- { / } -->
+						<div class="goods-etc">수량 : {=number_format(...ea)}개</div>
+					</td>
+				</tr>
+				</table>
+			</div>
+			<div class="sum-price-lay">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="sum-price-table">
+				<tr>
+					<td class="price-info">
+						합계
+							<!-- { ? ...consumer_price } -->
+						<strike>{=number_format(...consumer_price*...ea)}</strike>
+							<!-- { / } -->
+						<span class="goods-price">{=number_format(...price*...ea)}</span>원
+					</td>
+					<td width="94" class="step-info">{orders.mstep}</td>
+				</tr>
+				</table>
+			</div>
+							<!-- { @ ...shipping_item_suboption } -->
+			<div class="suboption-lay">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="suboption-table">
+				<tr>
+					<td class="suboption-name">
+								<!-- { ? ....suboption } -->
+						<div>
+							<img src="../images/design/icon_reply.png" width="10" />
+							[추가] { ? ....title }{ ....title }:{ / }{ ....suboption }
+						</div>
+								<!-- { / } -->
+						<div class="suboption-etc">수량 {=number_format(....ea)}개</div>
+					</td>
+					<td width="94" class="suboption-price">
+								<!-- { ? ...consumer_price } -->
+						<strike>{=number_format(....consumer_price)}</strike>
+								<!-- { / } -->
+						{=number_format(....price)}원
+					</td>
+				</tr>
+				</table>
+			</div>
+			<div class="sum-price-lay">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="sum-price-table">
+				<tr>
+					<td class="price-info">
+						합계
+							<!-- { ? ....consumer_price } -->
+						<strike>{=number_format(....consumer_price*....ea)}</strike>
+							<!-- { / } -->
+						<span class="goods-price">{=number_format(....price*....ea)}</span>원
+					</td>
+					<td width="94" class="step-info">{orders.mstep}</td>
+				</tr>
+				</table>
+			</div>
+							<!-- { / } -->
+						<!-- { / } -->
+					<!-- { / } -->
+		</div>
+	</div>
+	<div class="export-shipping-address-title is-modify">배송지정보</div>
+	<div class="export-shipping-address multiShippingItem">
+		<form name="recipient" method="post" action="../mypage_process/recipient" target="actionFrame">
+		<input type="hidden" name="order_seq" value="{orders.order_seq}" />
+		<input type="hidden" name="shipping_seq" value="{.shipping_seq}" />
+					<!-- {? members } -->
+		<div class="shipping-address-btn">
+			<span class="fleft">
+				<label><input type="checkbox" name="ship_addr" value="1" onclick="reset_ship(this.checked);" /> 신규 배송지 입력</label>
+			</span>
+			<span class="cboth"></span>
+			<span class="btn large"><button class="hand" type="button" onclick="window.open('../mypage/delivery_address?tab=1&popup=1&multiIdx={.index_}','delivery_address','width=800,height=600,scrollbars=yes')">자주쓰는 배송지</button></span>
+			<span class="btn large"><button class="hand" type="button" onclick="window.open('../mypage/delivery_address?tab=2&popup=1&multiIdx={.index_}','delivery_address','width=800,height=600,scrollbars=yes')">최근 배송지</button></span>
+		</div>
+					<!-- { / } -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="export-shipping-address-table">
+		<tr>
+			<th>받는 분</th>
+			<td><input type="text" name="recipient_user_name" value="{.recipient_user_name}" class="line shipaddr" style="width:133px;"/></td>
+		</tr>
+		<tr>
+			<th rowspan="3">주소</th>
+			<td>
+				<input type="text" name="recipient_zipcode[]" value="{.recipient_zipcode[0]}" style="width:60px;" maxlength="3" class="line shipaddr" readonly />
+				-
+				<input type="text" name="recipient_zipcode[]" value="{.recipient_zipcode[1]}" style="width:60px;" maxlength="3" class="line shipaddr" readonly />
+				<span class="btn large"><button class="hand" type="button" onclick="openDialogZipcode('order');">우편번호찾기</button></span>
+			</td>
+		</tr>
+		<tr>
+			<td><input type="text" name="recipient_address" value="{.recipient_address}" style="width:214px;" class="line shipaddr {? .recipient_address_type == "street"}hide{/}" readonly /><input type="text" name="recipient_address_street" value="{.recipient_address_street}" style="width:214px;" class="line shipaddr {? .recipient_address_type != "street"}hide{/}" readonly /><input type="hidden" name="recipient_address_type" value="{.recipient_address_type}" style="width:214px;" class="hide" readonly /></td>
+		</tr>
+		<tr>
+			<td><input type="text" name="recipient_address_detail" value="{.recipient_address_detail}" style="width:214px;" class="line shipaddr" /></td>
+		</tr>
+		<tr>
+			<th>유선전화</th>
+			<td>
+				<input type="text" name="recipient_phone[]" value="{.recipient_phone[0]}" style="width:60px;" maxlength="3" class="line shipaddr" />
+				-
+				<input type="text" name="recipient_phone[]" value="{.recipient_phone[1]}" style="width:60px;" maxlength="4" class="line shipaddr" />
+				-
+				<input type="text" name="recipient_phone[]" value="{.recipient_phone[2]}" style="width:60px;" maxlength="4" class="line shipaddr" />
+			</td>
+		</tr>
+		<tr>
+			<th>휴대폰</th>
+			<td>
+				<input type="text" name="recipient_cellphone[]" value="{.recipient_cellphone[0]}" style="width:60px;" maxlength="3" class="line shipaddr" />
+				-
+				<input type="text" name="recipient_cellphone[]" value="{.recipient_cellphone[1]}" style="width:60px;" maxlength="4" class="line shipaddr" />
+				-
+				<input type="text" name="recipient_cellphone[]" value="{.recipient_cellphone[2]}" style="width:60px;" maxlength="4" class="line shipaddr" />
+			</td>
+		</tr>
+		<tr>
+			<th>이메일</th>
+			<td><input type="text" name="recipient_email" value="{.recipient_email}" style="width:214px;" class="line shipaddr" /></td>
+		</tr>
+		<tr>
+			<th>배송메모</th>
+			<td class="fx12"><textarea name="memo" rows="5" style="width:212px;" class="line" title="이 곳은 집배원님이 보시는 메시지란입니다. 전달사항이 있으신 분들은 게시판을 이용해 주세요.">{=htmlspecialchars(.memo)}</textarea></td>
+		</tr>
+		</table>
+
+		<div style="text-align:center;margin:10px 0;">
+			<input type="submit" value="수정완료" class="btn_important_large hand go-list-btn" style="width:95%;" />
+		</div>
+		</form>
+	</div>
+		<!-- { / } -->
+	<!-- { / } -->
+<!-- { / } -->
+</div>
+<!-- /출고 정보 -->

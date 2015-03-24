@@ -1,0 +1,548 @@
+<style>
+.goods_quantity_table_container {margin:5px 0 10px 0; border:1px solid #d0d0d0;}
+.goods_quantity_table .quanity_row:first-child .quantity_cell {border-top:0px}
+.goods_quantity_table .option_text {letter-spacing:-1px;}
+
+.option_required { padding-left:6px; padding-bottom:2px; border-bottom:1px dashed #c4c4c4; }
+.option_add { padding:2px 0; padding-left:6px; border-bottom:1px dashed #c4c4c4; }
+.option_ea { margin:0 6px; margin-bottom:3px; padding:10px; background-color:#fff; border:1px solid #E6E6E6; }
+.sub_option_ea { margin:0 6px; margin-bottom:3px; padding:10px; background-color:#fff; border:1px solid #E6E6E6; }
+
+.eaPlus_s { width:24px; height:20px; padding-top:3px; background-color:#ddd; text-align:center; float:left; }
+.eaMinus_s { width:24px; height:20px; padding-top:3px; background-color:#ddd; text-align:center; float:left; }
+.removeOption { width:24px; height:20px; padding-top:3px; background-color:#ddd; text-align:center; float:right; }
+
+
+.total_goods_price_s {font-size:18px; font-family:"tahoma","dotum"; font-weight:Bold; color:#ed2b07;}
+.goods_option_table {margin:5px 0 10px 0; border:1px solid #d0d0d0; background-color:#ececec}
+.goods_option_table th {text-align:left; color:#616161; min-height:20px; font-weight:bold; padding-left:4px;}
+.goods_option_table td {text-align:left; color:#616161; min-height:20px; padding-left:4px;}
+.goods_option_table .desc {font-size:11px; font-family:dotum; color:#9a9a9a;}
+.goods_option_table select {width:98%;}
+.total_price {color:#cc0000;}
+</style>
+<script type="text/javascript">
+function set_option(n){
+	var gdata = "no={goods.goods_seq}";
+	alert(gdata);
+	$("select[name='viewOptions_recently[]']").each(function(i){
+		if(i < n){
+			gdata += '&options[]='+encodeURIComponent($(this).val());
+		}
+	});
+	$.ajax({
+		type: "get",
+		url: "../goods/option",
+		data: gdata,
+		success: function(result){
+			var data = eval(result);
+			$("select[name='viewOptions_recently[]']").eq(n).find("option").each(function(i){
+				if(i!=0)$(this).remove();
+			});
+			var add_price = 0;
+			var goods_price  = "{goods.price}";
+			for(var i=0;i<data.length;i++){
+				var obj = data[i];
+				add_price = obj.price - goods_price;
+				if( obj.chk_stock ){
+					if( ({=count(goods.option_divide_title)} - n) == 1 ){
+						if( add_price == 0){
+							$("select[name='viewOptions_recently[]']").eq(n).append("<option value='"+obj.opt+"' price='"+obj.price+"'>"+obj.opt+"</option>");
+						}else if(add_price > 0) {
+							$("select[name='viewOptions_recently[]']").eq(n).append("<option value='"+obj.opt+"' price='"+obj.price+"'>"+obj.opt+" (+"+ comma(add_price)+")</option>");
+						}else if(add_price < 0){
+							$("select[name='viewOptions_recently[]']").eq(n).append("<option value='"+obj.opt+"' price='"+obj.price+"'>"+obj.opt+" (-"+ comma(add_price*-1)+")</option>");
+						}
+					}else{
+						$("select[name='viewOptions_recently[]']").eq(n).append("<option value='"+obj.opt+"' price='"+obj.price+"'>"+obj.opt+"</option>");
+					}
+				}else{
+					$("select[name='viewOptions_recently[]']").eq(n).append("<option value='"+obj.opt+"' price='"+obj.price+"' disabled='disabled'>"+obj.opt+" 품절</option>");
+				}
+			}
+		}
+	});
+}
+
+function cutting_sale_price(price){
+	var cutting_sale_action	= '{cfg_cutting.action}';
+	var cutting_sale_price	= 0;
+	{ ? cfg_cutting.price > 0}
+	cutting_sale_price 		= {cfg_cutting.price};
+	{ / }
+
+	if(cutting_sale_price > 0){
+		price = Math.floor(price / cutting_sale_price) * cutting_sale_price;
+		if(cutting_sale_action == 'rounding'){
+			price = Math.round(price / cutting_sale_price) * cutting_sale_price;
+		}
+		if(cutting_sale_action == 'ascending'){
+			price = Math.ceil(price / cutting_sale_price) * cutting_sale_price;
+		}
+	}
+	return price;
+}
+
+function get_multi_sale_price(ea,price){
+	var multi_discount 		= 0;
+	var multi_discount_ea	= 0;
+	var multi_discount_use 	= "{goods.multi_discount_use}";
+	var multi_discount_unit = "{goods.multi_discount_unit}";
+	{ ? goods.multi_discount }
+	multi_discount 		= {goods.multi_discount};
+	{ / }
+	{ ? goods.multi_discount_ea }
+	multi_discount_ea 	= {goods.multi_discount_ea};
+	{ / }
+	if(!multi_discount_use
+		||!multi_discount_ea
+		||!multi_discount
+		||!multi_discount_unit) return price;
+	if(ea < multi_discount_ea) return price;
+
+	if( multi_discount_unit == 'percent' && multi_discount < 100 ){
+		price -= cutting_sale_price( price * multi_discount / 100 );
+	}else if(price > multi_discount ) {
+		price -= cutting_sale_price(multi_discount);
+	}
+
+	return price;
+}
+
+function calculate_goods_price_s(){
+	var ea = 0;
+	var tot = 0;
+	var price = 0;
+	var tot_ea = 0;
+	var goods_price  = {goods.price};
+
+	$(".optionPrice_s").each(function(){
+		tot_ea += parseInt($(this).parent().prev().find("input").val());
+	});
+
+	$(".optionPrice_s").each(function(i){
+		ea = parseInt($(this).parent().prev().find("input").val());
+		price = uncomma($(this).html());
+		price = Math.floor(get_multi_sale_price(tot_ea,price));
+		$(".out_option_price_s").eq(i).html(comma(price * ea));
+		tot += price * ea;
+	});
+
+	$(".suboptionPrice_s").each(function(i){
+		ea = parseInt($(this).parent().prev().find("input").val());
+		price = uncomma($(this).html());
+		$(".out_suboption_price_s").eq(i).html(comma(price * ea));
+		tot += price * ea;
+//		$(this).html(comma(price * ea));
+	});
+
+	if(tot < goods_price) tot = goods_price;
+	$("#total_goods_price_s").html(comma(tot));
+}
+
+function check_option(){
+
+	var len = parseInt($(".out_option_price_s").length)+parseInt($(".out_suboption_price_s").length);//$(".optionPrice_s").length;
+	if ( $("select[name='viewOptions_recently[]']").length > 1
+		&& $("select[name='viewOptions_recently[]']").first().find("option:selected").val()
+		&& !$("select[name='viewOptions_recently[]']").last().find("option:selected").val()
+	){
+		openDialogAlert("옵션을 선택해 주세요.",400,140,'');
+		return false;
+	}
+
+	if( $("select[name='viewOptions_recently[]']").length > 0 && len < 1 ){
+		openDialogAlert("옵션을 선택해 주세요.",400,140,'');
+		return false;
+	}
+
+	var subOptionOk = true;
+	$("select[name='viewSuboption[]'][required='y']").each(function(){
+		//var subOptionTitle = $(this).parent().parent().find(".suboptionTitle").text();
+		var subOptionTitle = $(this).parent().find(".suboptionTitle").text();
+		if(!$("input[name='suboptionTitle[]'][value='"+subOptionTitle+"']").length){
+			openDialogAlert(subOptionTitle + " 옵션을 선택해 주세요.",400,140,'');
+			subOptionOk = false;
+			return false;
+		}
+
+	});
+	if(!subOptionOk) return false;
+
+	return true;
+}
+
+$(document).ready(function(){
+
+	{ ? goods.option_view_type == 'divide' && options }
+	$("select[name='viewOptions_recently[]']").bind("change",function(){
+		var n = parseInt($(this).attr('id')) + 1;
+		set_option(n);
+	});
+	set_option(0);
+	{ / }
+
+	{ ? goods.option_view_type == 'divide' }
+	$("select[name='viewOptions_recently[]']").last().bind("change",function(){
+		var msg = '';
+		var optTag = '';
+		var price = 0;
+		var optTitle = '';
+
+		// 이미 선택된 옵션 인지  체크
+		var join_option = "";
+		var join_options = new Array();
+		$("select[name='viewOptions_recently[]']").each(function(idx){
+			join_option += "|" + $(this).find("option:selected").val();
+		});
+//		$("input[name='option[0][]']").each(function(i){
+//			join_options[i] = "";
+//			$("select[name='viewOptions_recently[]']").each(function(idx){
+//				join_options[i] += "|"+ $("input[name='option["+idx+"][]").eq(i).val();
+//			});
+//		});
+		for(var i=0;i<join_options.length;i++){
+			if(join_option == join_options[i]) return false;
+		}
+		if(!$(this).find("option:selected").val()) return false;
+		$("select[name='viewOptions_recently[]']").each(function(idx){
+			optTitle = $("#option_title_"+idx).val();
+			msg += optTitle;
+			msg += " : " + $(this).find("option:selected").val();
+			msg += "&nbsp;&nbsp;";
+			msg += "<input type='hidden' name='option["+idx+"][]' value='"+ $(this).find("option:selected").val()+"'>";
+			msg += "<input type='hidden' name='optionTitle["+idx+"][]' value='" + optTitle + "'>";
+			price = $(this).find("option:selected").attr('price');
+		});
+
+
+		optTag += "<div class='option_ea'>";
+		optTag += "<table class='goods_quantity_table' width='100%' cellpadding='0' cellspacing='0' border='0'>";
+		optTag += "	<tr class='quanity_row'>";
+		optTag += "		<td colspan='2'>" + msg + "</td>";
+		optTag += "	</tr>";
+		optTag += "	<tr class='quanity_row'>";
+		optTag += "		<td class='quantity_cell'>";
+		optTag += "			<div class='hand eaMinus_s' viewType='store'>-</div>";
+		optTag += "			<input type='text' name='optionEa[]' value='1' class='onlynumber' style='border:1px solid #d0d0d0; width:23px; height:21px; float:left; text-align:center;' />";
+		optTag += "			<div class='hand eaPlus_s' viewType='store'>+</div>";
+		optTag += "			<div class='both'></div>";
+		optTag += "		</td>";
+		optTag += "		<td class='quantity_cell' align='right'>";
+		optTag += "			<span class='optionPrice_s hide'>"+price+"</span>";
+		optTag += "			<strong class='out_option_price_s'>"+comma(price)+"</strong>원";
+		optTag += "		</td>";
+		optTag += "</tr>";
+		optTag += "</table>";
+		optTag += "</div>";
+
+		$(".option_ea_area").append(optTag);
+		$("div.goods_quantity_table_container").show();
+
+		calculate_goods_price_s();
+	});
+
+	{ : }
+
+	$("select[name='viewOptions_recently[]']").last().bind("change",function(){
+		var optTag = "";
+		var price = $(this).find("option:selected").attr("price");
+
+		// 이미 선택된 옵션 인지  체크
+		var join_option = "";
+		var join_options = new Array();
+		var titles = $("#option_title").val();
+		titles = titles.split(',');
+		for(var idx=0;idx<titles.length;idx++){
+			var key = idx+1;
+			join_option += "|" + $(this).find('option:selected').attr('opt'+key);
+		}
+		$("input[name='option[0][]']").each(function(i){
+			join_options[i] = "";
+			for(var idx=0;idx<titles.length;idx++){
+				join_options[i] += "|"+ $("input[name='option["+idx+"][]']").eq(i).val();
+			}
+		});
+		for(var i=0;i<join_options.length;i++){
+			if(join_option == join_options[i]) return false;
+		}
+
+		var msg = '';
+		for(var idx=0;idx<titles.length;idx++){
+			var key = idx+1;
+			var optTitle = titles[idx];
+			msg += optTitle;
+			msg += " : " + $(this).find('option:selected').attr('opt'+key);
+			msg += "&nbsp;&nbsp;";
+			msg += "<input type='hidden' name='option["+idx+"][]' value='"+ $(this).find('option:selected').attr('opt'+key)+"'>";
+			msg += "<input type='hidden' name='optionTitle["+idx+"][]' value='" + optTitle + "'>";
+			price = $(this).find("option:selected").attr('price');
+		}
+
+		optTag += "<div class='option_ea'>";
+		optTag += "<table class='goods_quantity_table' width='100%' cellpadding='0' cellspacing='0' border='0'>";
+		optTag += "	<tr class='quanity_row'>";
+		optTag += "		<td colspan='2'>" + msg + "</td>";
+		optTag += "	</tr>";
+		optTag += "	<tr class='quanity_row'>";
+		optTag += "		<td class='quantity_cell'>";
+		optTag += "			<div class='hand eaMinus_s' viewType='store'>-</div>";
+		optTag += "			<input type='text' name='optionEa[]' value='1' class='onlynumber' style='border:1px solid #d0d0d0; width:23px; height:21px; float:left; text-align:center;' />";
+		optTag += "			<div class='hand eaPlus_s' viewType='store'>+</div>";
+		optTag += "			<div class='both'></div>";
+		optTag += "		</td>";
+		optTag += "		<td class='quantity_cell' align='right'>";
+		optTag += "			<span class='optionPrice_s hide'>"+price+"</span>";
+		optTag += "			<strong class='out_option_price_s'>"+comma(price)+"</strong>원";
+		optTag += "		</td>";
+		optTag += "</tr>";
+		optTag += "</table>";
+		optTag += "</div>";
+
+		$(".option_ea_area").append(optTag);
+		$("div.goods_quantity_table_container").show();
+		calculate_goods_price_s();
+	});
+	{ / }
+
+	$(".viewSubOptionsspecialbtn").live('click',function(){
+		var eqindex = $(this).attr("eqindex");
+		$("select[name='viewSuboption[]']").eq(eqindex).val($(this).attr("suboptvalue")).change();
+	});
+
+
+	// 서브 옵션 변경시
+	$("select[name='viewSuboption[]']").bind("change",function(){
+		var msg = '';
+		var optTag = '';
+		var price = 0;
+		var idx = $(this).parent().parent().index()-1;
+		var title = $(".suboptionTitle").eq(idx).html();
+		var suboption = $(this).find("option:selected").val();
+
+		// 필수 선택체크
+		{ ? count(options) > 0 && options[0].option_title }
+		if($(".option_ea").html() == null){
+			alert('필수 옵션 먼저 선택해 주세요.');
+			$("select[name='viewSuboption[]']").each(function(idx){
+				$(this).children("option:eq(0)").attr("selected",true);
+			});
+			return;
+		}
+		{ / }
+
+		// 이미 선택된 옵션 인지  체크
+		var result = true;
+		$("input[name='suboption[]']").each(function(key){
+			if(suboption == $("input[name='suboption[]']").eq(key).val() && title == $("input[name='suboptionTitle[]']").eq(key).val()){
+				result = false;
+			}
+		});
+		if(!result) return false;
+
+		if(!suboption) return false;
+
+
+		/*
+		var sub_idx = $(this).parent().index();
+		{ ? count(options) > 0  && options[0].option_title }
+			sub_idx = sub_idx -1;
+		{ / }
+		optTitle = $("#suboptionTitle_"+sub_idx).val();
+		*/
+		optTitle = $(this).closest('div').find("input[name='suboptionTitle']").val();
+		msg = optTitle + " : " + $(this).find("option:selected").val();
+		msg += "<input type='hidden' name='suboption[]' value='"+ suboption +"'>";
+		msg += "<input type='hidden' name='suboptionTitle[]' value='"+ optTitle +"'>";
+		price = $(this).find("option:selected").attr('price');
+		seq	= $(this).find("option:selected").attr('seq');
+
+		optTag += "<div class='sub_option_ea'>";
+		optTag += "<table class='goods_quantity_table' width='100%' cellpadding='0' cellspacing='0' border='0'>";
+		optTag += "<input type='hidden' name='suboption_seq[]' value='" + seq + "' />";
+		optTag += "	<tr class='quanity_row suboption_tr'>";
+		optTag += "		<td colspan='2' class='option_text quantity_cell_sub'>" + msg + "</td>";
+		optTag += "	</tr>";
+		optTag += "	<tr class='quanity_row suboption_tr'>";
+		optTag += "		<td class='quantity_cell_sub'>";
+		optTag += "			<div class='hand eaMinus_s' viewType='store'>-</div>";
+		optTag += "			<input type='text' name='suboptionEa[]' value='1' class='onlynumber' style='border:1px solid #d0d0d0; width:23px; height:21px; float:left; text-align:center;' />";
+		optTag += "			<div class='hand eaPlus_s' viewType='store'>+</div>";
+		optTag += "			<div class='both'></div>";
+		optTag += "		</td>";
+		optTag += "		<td class='quantity_cell_sub' align='right'>";
+		optTag += "			<span class='suboptionPrice_s hide'>"+price+"</span>";
+		optTag += "			<div class='hand removeOption' viewType='store'>×</div>";
+		optTag += "			<div style='float:right; padding-top:3px;'>";
+		optTag += "				<strong class='out_suboption_price_s'>"+comma(price)+"</strong>원&nbsp;";
+		optTag += "			</div>";
+		optTag += "			<div class='both'></div>";
+		optTag += "		</td>";
+		optTag += "</tr>";
+		optTag += "</table>";
+		optTag += "</div>";
+
+		$(".option_ea_area").append(optTag);
+		$("div.goods_quantity_table_container").show();
+		calculate_goods_price_s();
+	});
+
+	$(".eaPlus_s").die().live("click",function(e){
+		var eaObj = $(this).closest('.quanity_row').find("input");
+		var val = parseInt(eaObj.val())+1;
+		if(val > 0) eaObj.val(parseInt(eaObj.val())+1);
+		calculate_goods_price_s();
+		e.preventDefault();
+		return false;
+	});
+	$(".eaMinus_s").die().live("click",function(e){
+		var eaObj = $(this).closest('.quanity_row').find("input");
+		var val = parseInt(eaObj.val())-1;
+		if(val > 0) eaObj.val(parseInt(eaObj.val())-1);
+		calculate_goods_price_s();
+		e.preventDefault();
+		return false;
+	});
+
+	$(".removeOption").die().live("click",function(e){
+
+		var trObj = $(this).closest("tr.quanity_row");
+		var idx = $("table.goods_quantity_table tr.quanity_row").index(trObj);
+
+		if( idx == 0 ){
+			if($("table.goods_quantity_table tr.suboption_tr").length > 0){
+				openDialogAlert("추가구성을 먼저 삭제해주세요.",400,140,'');
+				return false;
+			}
+		}
+
+		if($(this).attr('viewType') == 'store'){
+			$(this).closest("div.sub_option_ea").remove();
+		}else{
+			$(this).parent().parent().remove();
+		}
+
+		if($("table.goods_quantity_table").find("tr").length == 0){
+			$("div.goods_quantity_table_container").hide();
+		}
+		calculate_goods_price_s();
+
+		return false;
+	});
+
+
+	$("input[name='optionEa[]']").die().live("keyup",function(e){
+		calculate_goods_price_s();
+		e.preventDefault();
+		return false;
+	});
+	$("input[name='suboptionEa[]']").die().live("keyup",function(e){
+		calculate_goods_price_s();
+		e.preventDefault();
+		return false;
+	});
+
+	 calculate_goods_price_s();
+
+	$("#optional_changes_form").bind("submit",function(){
+		if( check_option() ) return true;
+		return false;
+	});
+});
+</script>
+
+<div style="padding:8px 0; overflow:auto;">
+<!-- 필수 옵션 영역 Start -->
+<!--{ ? count(options) > 0 && options[0].option_title }-->
+	<!--{? goods.multi_discount_use && goods.multi_discount_ea && goods.multi_discount && goods.multi_discount_unit }-->
+	<div>
+		<table  width="100%" cellpadding="0" cellspacing="5" border="0">
+		<tr>
+			<th>복수구매할인</th>
+			<td>
+				{goods.multi_discount_ea}개 이상 구매시 개당 {=number_format(goods.multi_discount)}{? goods.multi_discount_unit == 'percent'}%{ : }원{ / } 할인
+			</td>
+		</tr>
+		</table>
+	</div>
+	<!--{ / }-->
+
+
+	<!--{ ? goods.option_view_type == 'join' && options }-->
+	<div class="option_required">
+		<input type="hidden" name="option_title" id="option_title" value="{options[0].option_title}" />
+		<select name="viewOptions_recently[]" class="common-select styled">
+			<option value="">[필수] {options[0].option_title} 선택</option>
+		<!--{ @ options }-->
+			<!--{ ? .chk_stock }-->
+			<option value="{=implode('/',.opts)}" price="{.price}" opt1="{.option1}" opt2="{.option2}" opt3="{.option3}" opt4="{.option4}" opt5="{.option5}" >{=implode('/',.opts)}</option>
+			<!--{ : }-->
+			<option value="{=implode('/',.opts)}" price="{.price}" opt1="{.option1}" opt2="{.option2}" opt3="{.option3}" opt4="{.option4}" opt5="{.option5}" disabled="disabled">{=implode('/',.opts)} (품절)</option>
+			<!--{ / }-->
+		<!--{ / }-->
+		</select>
+	</div>
+	<!--{ :  goods.option_view_type == 'divide' && options }-->
+		<!--{ @ goods.option_divide_title }-->
+	<div class="option_required">
+		<input type="hidden" name="option_title" id="option_title_{.key_}" value="{.value_}" />
+		<select style="width:99%" name="viewOptions_recently[]" viewType="store" id="{.key_}" class="common-select styled">
+		<option value="">[필수] {.value_} 선택</option>
+		</select>
+	</div>
+		<!--{ / }-->
+	<!--{ / }-->
+<!--{ / }-->
+<!-- 필수 옵션 영역 End -->
+
+<!-- 추가 옵션 영역 Start -->
+<!--{ ? suboptions }-->
+	<!--{ @ suboptions }-->
+	<div class="option_add ">
+		<input type="hidden" class="subOpTitle" name="suboptionTitle" id="suboptionTitle_{.key_}" value="{.value_[0].suboption_title}" />
+		<span class="suboptionTitle hide" >{.value_[0].suboption_title}</span>
+		<select style="width:99%" name="viewSuboption[]" viewType="store" {?.value_[0].sub_required=='y'}required="y"{/} class="common-select styled">
+			<option value="">[추가] 선택안함({.value_[0].suboption_title})</option>
+			<!--{ @ .value_ }-->
+				<!--{ ? ..chk_stock }-->
+					<!--{ ? ..price > 0 }-->
+					<option value="{..suboption}" seq="{..suboption_seq}" price="{..price}">{..suboption} (추가 {=number_format(..price)}원)</option>
+					<!--{ : }-->
+					<option value="{..suboption}" seq="{..suboption_seq}" price="0">{..suboption}</option>
+					<!--{ / }-->
+				<!--{ : }-->
+					<option value="{..suboption}" seq="{..suboption_seq}" price="0" disabled>{..suboption} (품절)</option>
+				<!--{ / }-->
+			<!--{ / }-->
+		</select>
+	</div>
+	<!--{ / }-->
+<!--{ / }-->
+<!-- 추가 옵션 영역 End -->
+
+	<form name="optional_changes_form_{goods.goods_seq}" id="optional_changes_form_{goods.goods_seq}" method="post" action="../order/add" target="actionFrame">
+	<input type="hidden" name="goodsSeq" value="{goods.goods_seq}" />
+	<div class="option_ea_area">
+		<!--{ ? count(options) > 0 && options[0].option_title }-->
+		<!--{ : }-->
+		<div class='option_ea'>
+			<table class='goods_quantity_table' width='100%' cellpadding='0' cellspacing='0' border='0'>
+			<tr class='quanity_row'>
+				<td class='quantity_cell'>
+					<div class='hand eaMinus_s' viewType='store'>-</div>
+					<input type='text' name='optionEa[]' value='1' class='onlynumber' style='border:1px solid #d0d0d0; width:23px; height:21px; float:left; text-align:center;' />
+					<div class='hand eaPlus_s' viewType='store'>+</div>
+					<div class='both'></div>
+				</td>
+				<td class='quantity_cell' align='right'>
+					<span class='optionPrice_s hide'>{options[0].price}</span>
+					<strong class='out_option_price_s'>{options[0].price}</strong>원
+				</td>
+			</tr>
+			</table>
+		</div>
+		<!--{ / }-->
+	</div>
+	</form>
+
+</div>

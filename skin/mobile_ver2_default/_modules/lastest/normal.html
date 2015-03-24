@@ -1,0 +1,62 @@
+<style type="text/css">
+.{lastest_key} .tit {font-size:12px; font-weight:bold;}
+.{lastest_key} .normal_bbslist .cat {font-size:12px;font-family:gothic,gulim;color:#888;letter-spacing:-1px;}
+.{lastest_key} .normal_bbslist .sbj {text-align:left;letter-spacing:0px;}
+.{lastest_key} .normal_bbslist .sbj a {font-size:12px;font-family:gothic,gulim;color:#222222;text-decoration:none;line-height:150%;}
+.{lastest_key} .normal_bbslist .sbj a:hover {text-decoration:underline;}
+.{lastest_key} .normal_bbslist .comment {font:normal 11px arial;color:#FC6138;}
+</style>
+
+<!-- 최근글 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td valign="bottom" align="left" height="25"><span class="tit">{recent.title}</span></td>
+				<td valign="bottom" align="right"><b><a href="/board/?id={recent.boardId}"><img
+					src="../../images/design/cscenter_btn_more.gif" /></a></b></td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+	<tr>
+		<td height="8"></td>
+	</tr>
+	<tr>
+		<td height="2" bgcolor="545454"></td>
+	</tr>
+	<!-- 리스트데이터 : 시작 -->
+	<!--{@ getBoardData(recent.boardId,recent.lineCnt,null,null,recent.strcut) }-->
+	<tr class="normal_bbslist">
+		<td height="30" class="sbj">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<!--{@ recent.options }-->
+				<!--{? ..value_ == 'showNumber'}--><td width="40" align="center">{=number_format((.index_+1))}</td><!--{/}-->
+				<!--{? ..value_ == 'showTitle'}-->
+				<td>
+					{.subject}
+					{.iconnew} {.iconhot} {.iconfile} {.iconhidden}
+				</td>
+				<!--{/}-->
+				<!--{? ..value_ == 'showName'}--><td width="80" align="center">{.name}</td><!--{/}-->
+				<!--{? ..value_ == 'showDate'}--><td align="center" width="75">{=substr(.r_date,0,10)}</td><!--{/}-->
+				<!--{? ..value_ == 'showView'}--><td align="center" width="40">{=number_format(.hit)}</td><!--{/}-->
+				<!--{? ..value_ == 'showScore'}--><td align="center" width="40">{=number_format(.score)}</td><!--{/}-->
+			<!--{/}-->
+
+
+		</tr>
+		</table>
+		</td>
+	</tr>
+	<tr>
+		<td height="1" bgcolor="e8e8e8"></td>
+	</tr>
+	<!--{/}-->
+	<!-- 리스트 : 끝 -->
+	<tr>
+		<td height="1" bgcolor="545454"></td>
+	</tr>
+</table>

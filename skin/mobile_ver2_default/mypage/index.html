@@ -1,0 +1,103 @@
+<div style="background-color:#f9f9f9;">
+	<!-- 타이틀 -->
+	<div class="sub_title_bar">
+		<h2>마이페이지</h2>
+		<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+	</div>
+
+	<div class="mypage_userinfo">
+		<span class="icon"><img src="../images/design/icon_mem.png" width="24" height="24" /></span>
+		<b class="username">{user_name}({userid})</b>님은 <span class="usergroup">{userInfo.group_name}</span>등급입니다.
+	</div>
+
+	<table class="mypage_list_table1" width="100%" border="0" cellspacing="4" cellpadding="0">
+	<tr>
+		<td colspan="2">
+			<div onclick="document.location.href='../mypage/order_catalog?step_type=order'">
+				<span class="icon"><img src="../images/design/icon_m_order.png" width="36" height="29" /></span>
+				<span class="count">{=summary.order_ing_cnt}</span>
+				<span class="title">
+					주문/배송
+				<!--{ ? extinction.buyconfirm }-->
+					<span class="desc" style="font-weight:normal;">(구매확정대기 <b>{=number_format(extinction.buyconfirm)}</b>개)</span>
+				<!--{ / }-->
+				</span>
+			</div>
+		</td>
+		<td width="31%">
+			<div onclick="document.location.href='../mypage/refund_catalog?step_type=cancel'">
+				<span class="icon"><img src="../images/design/icon_m_cancel.png" width="28" height="29" /></span>
+				<span class="count">{=summary.return_ing_cnt+summary.refund_ing_cnt}</span>
+				<span class="title">취소/환불</span>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%">
+			<div onclick="document.location.href='../mypage/coupon'">
+				<span class="icon"><img src="../images/design/icon_m_cpn.png" width="36" height="29" /></span>
+				<span class="count">{=summary.coupondownloadtotal}</span>
+				<span class="title">
+					쿠폰/코드
+					<span class="desc" style="font-weight:normal;">(이번주 소멸 <b>{=number_format(extinction.coupon)}</b>개)</span>
+				</span>
+			</div>
+		</td>
+		<td width="50%" colspan="2">
+			<div onclick="document.location.href='../order/cart'">
+				<span class="icon"><img src="../images/design/icon_m_cart.png" width="34" height="29" /></span>
+				<span class="count">{=(showMycartTop('cart')+showMycartTop('wish'))}</span>
+				<span class="title">카트/위시</span>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%">
+			<div onclick="document.location.href='../mypage/emoney'">
+				<span class="icon"><img src="../images/design/icon_m_money.png" width="24" height="29" /></span>
+				<span class="count">{=number_format(emoney)}</span>
+				<span class="title">
+					적립금
+					<span class="desc" style="font-weight:normal;">(이번달 소멸 <b>{=number_format(extinction.reserve)}</b>원)</span>
+				</span>
+			</div>
+		</td>
+		<td width="50%" colspan="2">
+			<div onclick="document.location.href='../mypage/emoney_exchange'">
+				<span class="icon"><img src="../images/design/icon_m_change.png" width="34" height="29" /></span>
+				<span class="title">포인트교환<br />적립금교환</span>
+			</div>
+		</td>
+	</tr>
+	</table>
+
+	<table class="mypage_list_table2" width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td onclick="document.location.href='../mypage/personal'">개인결제</td>
+		<td onclick="document.location.href='../mypage/delivery_address?tab=1'">자주쓰는<br />배송지</td>
+		<!--{? joinform.use_f  && APP_VER != "2.0" }-->
+			<!--{? empty(myinfo_sns_f) }-->
+			<td  id="facebookmbconnectalert">페이스북<br />초대</td>
+			<!--{:}-->
+			<td onclick="document.location.href='../mypage/myfbrecommend'">페이스북<br />초대</td>
+			<!--{/}-->
+		<!--{/}-->
+	</tr>
+	<tr>
+		<td onclick="document.location.href='../mypage/myqna_catalog'">1:1 상담</td>
+		<td onclick="document.location.href='../mypage/mygdqna_catalog'">상품문의<br />상품후기</td>
+		<td onclick="document.location.href='../mypage/myinfo'">회원수정<br />/탈퇴</td>
+	</tr>
+	</table>
+
+	<div style="height:20px;"></div>
+
+</div>
+<script type="text/javascript">
+$(document).ready(function() {
+	//기존멤버-통합하기
+	$("#facebookmbconnectalert").click(function(){
+		openDialogConfirm('facebook 친구들을 쇼핑몰에 초대하기 위해서는 facebook계정으로 쇼핑몰을 이용해 주셔야 합니다.<br>회원정보수정에서 "SNS계정사용"을 수락해 주세요. <br>친구들을 초대하시면 다양한 혜택을 받으실 수 있습니다.<br>지금 회원정보수정 화면으로 이동하시겠습니까?','650','200',function(){document.location.href='../mypage/myinfo'},function(){});
+	});
+});
+</script>

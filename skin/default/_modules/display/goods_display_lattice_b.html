@@ -1,0 +1,446 @@
+<style>
+#{display_key} .goodsDisplayImageWrap {position:relative;}
+{?decorations.image_border1_width}
+#{display_key} .goodsDisplayImageWrap {border:{decorations.image_border1_width}px solid {decorations.image_border1}; margin:-{decorations.image_border1_width}px;}
+{/}
+{?decorations.image_icon && decorations.image_icon_location=='right'}
+#{display_key} .goodsDisplayImageIcon {position:absolute; right:0px; top:0px; {?decorations.image_icon_over=='y'}display:none;{/}}
+{/}
+{?decorations.image_icon && decorations.image_icon_location=='left'}
+#{display_key} .goodsDisplayImageIcon {position:absolute; left:0px; top:0px; {?decorations.image_icon_over=='y'}display:none;{/}}
+{/}
+{?decorations.image_icon && preg_match("/^icon_best_no/",decorations.image_icon)}
+#{display_key} .goodsDisplayImageIconText {position:absolute;font-size:16px;font-family:tahoma;font-weight:bold;text-align:center;color:#ffffff;letter-spacing:-1px;width:48px;top:25px;left:0px;}
+{/}
+{?decorations.image_icon && preg_match("/^icon_number/",decorations.image_icon)}
+#{display_key} .goodsDisplayImageIconText {position:absolute;font-size:18px;font-family:tahoma;font-weight:bold;text-align:right;color:#ffffff;letter-spacing:-1px;width:28px;top:10px;left:0px;}
+{/}
+{?decorations.image_icon && preg_match("/^icon_sale/",decorations.image_icon)}
+#{display_key} .goodsDisplayImageIconText {position:absolute;font-size:16px;font-family:tahoma;font-weight:bold;text-align:center;color:#ffffff;letter-spacing:-1px;width:48px;top:0px;left:0px;}
+{/}
+{?(decorations.image_send || decorations.image_zzim) && decorations.image_send_location=='right'}
+#{display_key} .goodsDisplayImageSend {position:absolute;right:0px;top:2px; {?decorations.image_send_over=='y'}display:none;{/}}}
+{/}
+{?(decorations.image_send || decorations.image_zzim) && decorations.image_send_location=='left'}
+#{display_key} .goodsDisplayImageSend {position:absolute;left:0px;top:2px; {?decorations.image_send_over=='y'}display:none;{/}}
+{/}
+#{display_key} .goodsDisplayImageSlide {position:absolute;right:0px;top:50%;margin-top:-14px;}
+#{display_key} .goodsDisplayImageOveray1 {display:none; position:absolute;left:0px;top:100%;margin-top:-20px;width:100%;height:20px;}
+#{display_key} .goodsDisplayImageOveray1Bg {background-color:#000000;color:#fff;opacity:0.3;position:absolute;left:0;top:0;width:100%;height:20px}
+#{display_key} .goodsDisplayImageOveray1Text {color:#fff;font-size:11px;font-weight:bold;text-align:center;position:absolute;overflow:hidden;white-space:nowrap;line-height:20px;left:0;top:0;width:100%}
+#{display_key} .goodsDisplayQuickShopping {}
+#{display_key} table.quick_shopping_container {border-collapse:collapse;table-layout:fixed}
+#{display_key} table.quick_shopping_container td {height:14px;text-align:center;border:1px solid #e5e5e5;background-color:#fff;font-size:11px;letter-spacing:-1px}
+</style>
+
+<div><font face="arial black, 돋움" size="2"><b>{title}</b></font></div>
+
+<!--{ ? perpage }-->
+<br style="line-height:10px;" />
+
+<!--[ 상품 검색 폼 ]-->
+<div style="padding:0 0 20px 0">
+{=showGoodsSearchForm(sc)}
+</div>
+
+<div class="goods_list_summary">전체 상품 <b>{=number_format(page.totalcount)}</b> 개</div>
+<div class="goods_list_top">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td align="left">
+			{?sort}
+			<span class="sort_item">
+				<!--{ @ orders }-->
+					<!--{ ? .index_ }-->
+					&nbsp;&nbsp;|&nbsp;&nbsp;
+					<!--{ / }-->
+					<!--{ ? .key_ == sort }-->
+						<a href="?sort={.key_}&{=get_args_list(array('page','sort'))}"><b>{.value_}</b></a>
+					<!--{ : }-->
+						<a href="?sort={.key_}&{=get_args_list(array('page','sort'))}">{.value_}</a>
+					<!--{ / }-->
+				<!--{ / }-->
+			</span>
+			{/}
+		</td>
+		<td align="right">
+			<select name="perpage" onchange="document.location.href='?perpage='+this.value+'&{=get_args_list(array('page','perpage'))}'">
+				<option value="{=perpage_min}" {?_GET.perpage==perpage_min}selected{/}>{=number_format(perpage_min)}개씩 보기</option>
+				<option value="{=perpage_min*2}" {?_GET.perpage==perpage_min*2}selected{/}>{=number_format(perpage_min*2)}개씩 보기</option>
+				<option value="{=perpage_min*5}" {?_GET.perpage==perpage_min*5}selected{/}>{=number_format(perpage_min*5)}개씩 보기</option>
+				<option value="{=perpage_min*10}" {?_GET.perpage==perpage_min*10}selected{/}>{=number_format(perpage_min*10)}개씩 보기</option>
+			</select>
+			<ul class="goods_list_style">
+				<li {?list_style=='lattice_a'}class="lattice_a_on"{:}class="lattice_a"{/}><a href="?display_style=lattice_a&{=get_args_list(array('page','display_style'))}" title="격자형A"></a></li>
+				<li {?list_style=='lattice_b'}class="lattice_b_on"{:}class="lattice_b"{/}><a href="?display_style=lattice_b&{=get_args_list(array('page','display_style'))}" title="격자형B"></a></li>
+				<li {?list_style=='list'}class="list_on"{:}class="list"{/}><a href="?display_style=list&{=get_args_list(array('page','display_style'))}" title="리스트형"></a></li>
+			</ul>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<br style="line-height:10px;" />
+<!--{ / }-->
+
+<!--{ ? count(displayTabsList)>1 }-->
+<ul class="displayTabContainer {tab_design_type}">
+	<!--{ @ displayTabsList }-->
+		<li {?.index_==0}class="current"{/}>{.tab_title}</li>
+	<!--{ / }-->
+</ul>
+<!--{ / }-->
+
+<!--{ @ displayTabsList }-->
+<table class="displayTabContentsContainer {?count(displayTabsList)>1}displayTabContentsContainerBox{/}" width="100%" cellpadding="0" cellspacing="0" border="0">
+	<!--{ ? .contents_type == 'text' }-->
+	<tr>
+		<td>
+			{?mobileMode || storemobileMode}{.tab_contents_mobile}{:}{.tab_contents}{/}
+		</td>
+	</tr>
+	<!--{ : }-->
+		<tr>
+		<!--{ @ .record }-->
+			<!--{ ? ..index_ && ..index_ % count_w == 0 }--></tr><tr><td height="30"></td></tr><tr><!--{ / }-->
+			<td width="50%">
+				<table class="goodsDisplayItemWrap" width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<td  width="{goodsImageSize.width}" height="{goodsImageSize.height}">
+					<span class="goodsDisplayImageWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(..value_))}" style="max-width:{goodsImageSize.width}px;max-height:{goodsImageSize.height}px;overflow:hidden;" version="20141110">
+						<a href="/goods/view?no={..goods_seq}" target="{target}">
+							{ ? ..image_size && ..image_size[0]/..image_size[1] <  goodsImageSize.width/goodsImageSize.height}
+								<img src="{..image}" height="{goodsImageSize.height}" onerror="this.src='../../images/common/noimage.gif';this.style.width='{goodsImageSize.width}px';" />
+							{ : }
+								<img src="{..image}" width="{goodsImageSize.width}" onerror="this.src='../../images/common/noimage.gif';this.style.height='{goodsImageSize.height}px';" />
+							{ / }
+							{?decorations.image_icon && preg_match("/^icon_sale/",decorations.image_icon)}
+								{?..sale_per>0}
+								<div class='goodsDisplayImageIcon'>
+									<img src='/data/icon/goodsdisplay/{decorations.image_icon}' />
+									<span class='goodsDisplayImageIconText'>{..sale_per}%</span>
+								</div>
+								{/}
+							{:decorations.image_icon}
+								<div class='goodsDisplayImageIcon'>
+									<img src='/data/icon/goodsdisplay/{decorations.image_icon}' />
+									{?preg_match("/^(icon_best_no|icon_number)/",decorations.image_icon)}
+									<span class='goodsDisplayImageIconText'>{..index_+1}</span>
+									{/}
+								</div>
+							{/}
+							{?decorations.image_send || decorations.image_zzim}
+								<div class='goodsDisplayImageSend'>
+								{?decorations.image_send}
+									<img class='goodsSendBtn' src='/data/icon/goodsdisplay/send/{decorations.image_send}' />
+								{/}
+								{?decorations.image_zzim}
+									<span class='goodsZzimBtn'><img src='/data/icon/goodsdisplay/zzim/{decorations.image_zzim}' class='zzimOffImg' {?..wish=='1'}style="display:none"{/} /><img src='/data/icon/goodsdisplay/zzim_on/{decorations.image_zzim_on}' class='zzimOnImg' {?..wish!='1'}style="display:none"{/} /></span>
+								{/}
+								</div>
+							{/}
+							{?decorations.image_slide && ..image_cnt>1}
+								<div class='goodsDisplayImageSlide'><img src='/data/icon/goodsdisplay/slide/{decorations.image_slide}' /></div>
+							{/}
+							{?decorations.image_overay1 || decorations.image_overay1_text}
+								<div class='goodsDisplayImageOveray1'>
+									<div class='goodsDisplayImageOveray1Bg'></div>
+									<div class='goodsDisplayImageOveray1Text'>
+										{?decorations.image_overay1=='goods_name'}{..goods_name}{/}
+										{?decorations.image_overay1=='price'}￦{=number_format(..price)}{/}
+										{?decorations.image_overay1=='sale_price'}￦{=number_format(..sale_price)}{/}
+										{?decorations.image_overay1=='consumer_price'}￦{=number_format(..consumer_price)}{/}
+										{?decorations.image_overay1=='discount'}
+											{?..string_price}
+												{..string_price}
+											{:..consumer_price>..price}
+												{=number_format(..consumer_price)} → {=number_format(..price)}
+											{:}
+												{=number_format(..price)}
+											{/}
+										{/}
+										{?decorations.image_overay1=='sale_discount'}
+											{?..string_price}
+												{..string_price}
+											{:..consumer_price>..sale_price}
+												{=number_format(..consumer_price)} → {=number_format(..sale_price)}
+											{:}
+												{=number_format(..sale_price)}
+											{/}
+										{/}
+										{?decorations.image_overay1=='brand_title'}{..brand_title}{/}
+										{?decorations.image_overay1=='related_goods'}<span class='hand' onclick="return show_display_related_goods(this,'{..goods_seq}')" style='display:block;'>관련상품보기</span>{/}
+										{?!decorations.image_overay1 && image_overay1_text}{..image_overay1_text}{/}
+									</div>
+								</div>
+							{/}
+						</a>
+					</span>
+
+					{?decorations.quick_shopping && decorations.quick_shopping_data}
+						<div class='goodsDisplayQuickShopping'>
+							<table class='quick_shopping_container' width='100%' border='0' cellpadding='0' cellspacing='0'>
+							<tr>
+							{@(decorations.quick_shopping_data)}
+								{?...value_=='newwin'}
+								<td class='goodsNewwinBtn hand' onclick="window.open('/goods/view?no={..goods_seq}')"><img src='/data/icon/goodsdisplay/quick_shopping/thumb_newwin.gif' /></td>
+								{/}
+								{?...value_=='quickview'}
+								<td class='goodsQuickviewBtn hand' onclick="display_goods_quickview(this,'{..goods_seq}')"><img src='/data/icon/goodsdisplay/quick_shopping/thumb_quickview.gif' /></td>
+								{/}
+								{?...value_=='send'}
+								<td class='goodsSendBtn hand' onclick="display_goods_send(this,'bottom')"><img src='/data/icon/goodsdisplay/quick_shopping/thumb_send.gif' /></td>
+								{/}
+								{?...value_=='zzim'}
+								<td class='goodsZzimBtn hand' width='16' onclick="display_goods_zzim(this,'{..goods_seq}')">
+								<img src='/data/icon/goodsdisplay/quick_shopping/thumb_zzim.gif' class='zzimOffImg' {?..wish=='1'}style="display:none"{/} />
+								<img src='/data/icon/goodsdisplay/quick_shopping/thumb_zzim_on.gif' class='zzimOnImg' {?..wish!='1'}style="display:none"{/} />
+								</td>
+								{/}
+							{/}
+							</tr>
+							</table>
+						</div>
+					{/}
+					</td>
+					<td width="10"></td>
+					<td>
+						<table width="95%" cellpadding="0" cellspacing="0" border="0">
+						<!--{ @ info_settings.list }-->
+						
+							<!--{? ...value_->kind == 'brand_title' && ..brand_title }-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}">
+								<a href="/goods/brand?code={..brand_code}">
+									<span {...value_->name_css}>
+									{?...value_->wrapper}{=htmlspecialchars(substr(...value_->wrapper,0,1))}{/}{..brand_title}{?...value_->wrapper}{=htmlspecialchars(substr(...value_->wrapper,1,1))}{/}
+									</span>
+								</a>
+								</td>
+							</tr>
+							<!--{/}-->
+							
+							<!--{? ...value_->kind == 'goods_name' }-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}"><a href="/goods/view?no={..goods_seq}" target="{target}"><span {...value_->name_css}>{..goods_name}</span></a></td>
+							</tr>
+							<!--{/}-->
+
+							<!--{? ...value_->kind == 'summary' && ..summary}-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}"><span {...value_->name_css}>{..summary}</span></td>
+							</tr>
+							<!--{/}-->
+
+							<!--{? ...value_->kind == 'icon' }-->
+							<tr>
+								<td align="{text_align}">
+									<!--{ @ ..icons }-->
+									<img src="/data/icon/goods/{....value_}.gif" border="0">
+									<!--{ / }-->
+									<!--{ ? ...value_->list_icon_cpn && 0 }-->
+									<img src="/data/icon/goods_status/icon_list_cpn.gif" />
+									<!--{ / }-->
+									<!--{ ? ...value_->list_icon_freedlv && 0 }-->
+									<img src="/data/icon/goods_status/icon_list_freedlv.gif" />
+									<!--{ / }-->
+									<!--{ ? ...value_->list_icon_video && ..videousetotal }-->
+									<img src="/data/icon/goods_status/icon_list_video.gif" />
+									<!--{ / }-->
+								</td>
+							</tr>
+							<!--{/}-->
+
+							<!--{? ...value_->kind == 'consumer_price' && ..consumer_price > ..sale_price }-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}">
+									<span {...value_->name_css}>
+										{?..string_price}
+											{..string_price}
+										{:}
+											{=number_format(..consumer_price)}
+											{?...value_->postfix}{...value_->postfix}{/}
+										{/}
+									</span>
+								</td>
+							</tr>
+							<!--{/}-->
+
+							<!--{? ...value_->kind == 'price' }-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}">
+									<span {...value_->name_css}>
+										{?..string_price}
+											{..string_price}
+										{:}
+											{=number_format(..price)}
+											{?...value_->postfix}{...value_->postfix}{/}
+										{/}
+									</span>
+								</td>
+							</tr>
+							<!--{/}-->
+
+							<!--{? ...value_->kind == 'sale_price' }-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}">
+									<span {...value_->name_css}>
+										{? ..string_price}
+											{..string_price}
+										{:}
+											{=number_format(..sale_price)}
+											{?...value_->postfix}{...value_->postfix}{/}
+										{/}
+									</span>
+								</td>
+							</tr>
+							<!--{/}-->
+
+							<!--{? ...value_->kind == 'count' && ..eventEnd && (...value_->time_count || ...value_->buy_count) }-->
+								<tr ><td height="6"></td></tr>
+								<tr><td>
+								<table width="100%" height="42" cellspacing="0" cellpadding="0" style="border:1px solid #e9e9e9;" bgcolor="#f8f8f8" align="center">
+								<!--{? ...value_->time_count }-->
+								<!--{? ..eventEnd }-->
+								<tr ><td height="5"></td></tr>
+								<tr >
+									<td class="soloEventTd_{display_key}_{..goods_seq}" align="{text_align}" style="font-face:Dotum; font-size:11px;"><img src="../../images/common/icon_clock.gif" style="padding-bottom:2px;">남은시간 <span style="background-color:#c61515; color:#ffffff; padding:2px; font-weight:bold;"><span id="soloday_{display_key}_{..goods_seq}" style="color:#ffffff; font-weight:bold;"></span>일 <span id="solohour_{display_key}_{..goods_seq}" style="color:#ffffff; font-weight:bold;"></span>:<span id="solomin_{display_key}_{..goods_seq}" style="color:#ffffff; font-weight:bold;"></span>:<span id="solosecond_{display_key}_{..goods_seq}" style="color:#ffffff; font-weight:bold;"></span></span></td>
+								</tr>
+								<script>
+								$(function() {
+									timeInterval_{display_key}_{..goods_seq} = setInterval(function(){
+										var time_{display_key}_{..goods_seq} = showClockTime('text', '{..eventEnd.year}', '{..eventEnd.month}', '{..eventEnd.day}', '{..eventEnd.hour}', '{..eventEnd.min}', '{..eventEnd.second}', 'soloday_{display_key}_{..goods_seq}', 'solohour_{display_key}_{..goods_seq}', 'solomin_{display_key}_{..goods_seq}', 'solosecond_{display_key}_{..goods_seq}', '_{display_key}_{..goods_seq}');
+										if(time_{display_key}_{..goods_seq} == 0){
+											clearInterval(timeInterval_{display_key}_{..goods_seq});
+											$(".soloEventTd_{display_key}_{..goods_seq}").html("단독 이벤트 종료");
+										}
+									},1000);
+								});
+								</script>
+								<!--{/}-->
+								<!--{/}-->
+								<!--{? ...value_->buy_count }-->
+								<tr ><td height="6"></td></tr>
+								<tr>
+									<td align="{text_align}" style="font-face:Dotum; font-size:11px;">현재 <font color="#c61515"><u><b>{=number_format(..event_order_ea)}</b></u></font>개 구매</td>
+								</tr>
+								<!--{/}-->
+								</td></tr>
+								<tr ><td height="5"></td></tr>
+								</table>
+							<!--{/}-->
+
+							<!--{? ...value_->kind == 'event_text' }-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}">
+									<span {...value_->name_css}>
+										{?is_numeric(..event_text)}
+											{=number_format(..event_text)}
+											{?...value_->postfix}{...value_->postfix}{/}
+										{:}
+											{..event_text}
+										{/}
+									</span>
+								</td>
+							</tr>
+							<!--{/}-->
+
+							<!--{? ...value_->kind == 'fblike' && APP_USE == 'f'  && APP_LIKE_TYPE != 'NO'}-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}">{=snsLikeButton(..goods_seq,...value_->fblike)}</td>
+							</tr>
+							<!--{/}-->
+
+							<!--{? ...value_->kind == 'status_icon' }-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}">
+									<!--{ ? ...value_->status_icon_runout && ..goods_status == 'runout' }-->
+									<img src="/data/icon/goods_status/icon_list_soldout.gif" />
+									<!--{ / }-->
+									<!--{ ? ...value_->status_icon_purchasing && ..goods_status == 'purchasing' }-->
+									<img src="/data/icon/goods_status/icon_list_warehousing.gif" />
+									<!--{ / }-->
+									<!--{ ? ...value_->status_icon_unsold && ..goods_status == 'unsold' }-->
+									<img src="/data/icon/goods_status/icon_list_stop.gif" />
+									<!--{ / }-->
+								</td>
+							</tr>
+							<!--{/}-->
+							
+							<!--{? ...value_->kind == 'score' }-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}">
+									<font style="font-weight:bold; color:#fff; background-color:#ee6600; padding:0 3px; font-family:tahoma">{=round(..review_sum/..review_count)}</font>
+									<span class="orange">{=str_repeat('★',round(..review_sum/..review_count))}</span>
+									<span class="gray">{=str_repeat('★',5-round(..review_sum/..review_count))}</span>
+									상품평 (<span class="red">{=number_format(..review_count)}</span>)
+								</td>
+							</tr>
+							<!--{/}-->
+							
+							<!--{? ...value_->kind == 'color' }-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}">
+									{@(..colors)}
+									<span style="color:{....value_};">■</span>
+									{/}
+								</td>
+							</tr>
+							<!--{/}-->
+
+						<!--{ / }-->
+
+						<!--{? is_bigdata_display == 'y' }-->
+							<tr><td height="6"></td></tr>
+							<tr>
+								<td align="{text_align}">
+									<a href="/bigdata/catalog?no={.goods_seq}"><u style="font-size:11px;color:#0094e1;">다른 사람은 뭘살까?</u></a>
+								</td>
+							</tr>
+						<!--{ / }-->
+						</table>
+					</td>
+				</tr>
+				</table>
+			</td>
+		<!--{ / }-->
+		</tr>
+		<tr><td height="10"></td></tr>
+	<!--{ / }-->
+</table>
+<!--{ / }-->
+
+<!--{ ? perpage }-->
+<div style="height:30px"></div>
+
+<table align="center" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+		<div class="paging_navigation">
+			<!--{ ? page.first }--><a href="?page={page.first}&amp;{page.querystring}" class="first">◀ 처음</a><!--{ / }-->
+			<!--{ ? page.prev }--><a href="?page={page.prev}&amp;{page.querystring}" class="prev">◀ 이전</a><!--{ / }-->
+			<!--{ @ page.page }-->
+				<!--{ ? page.nowpage ==  .value_ }-->
+					<a href="?page={.value_}&amp;{page.querystring}" class="on">{.value_ }</a>
+				<!--{ : }-->
+					<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? page.next }--><a href="?page={page.next}&amp;{page.querystring}" class="next">다음 ▶</a><!--{ / }-->
+			<!--{ ? page.last }--><a href="?page={page.last}&amp;{page.querystring}" class="last">마지막 ▶</a><!--{ / }-->
+		</div>
+	</td>
+</tr>
+</table>
+<!--{ / }-->

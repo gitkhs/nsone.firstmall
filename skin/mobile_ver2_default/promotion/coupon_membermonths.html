@@ -1,0 +1,99 @@
+<script type="text/javascript" src="/app/javascript/js/promotion.js" ></script>
+<link type="text/css" rel="stylesheet" charset="utf-8" href="../css/coupon.css" />
+<!--{=getCouponCode('membermonths')}-->
+<div class="{? _GET.popup }designPopup{/}" popupStyle="layer" popupSeq="coupon_{_GET.type}"  >
+	<div id="promo{? _GET.popup }_popup{/}"  class="designPopupBody" >
+		<!--상단 이미지 -->
+		<div style="width:100%;"><img src="../images/promotion/main_img_thismonth.jpg" width="100%"></div>
+
+		<!--회원 정보 -->
+		 {? defined('__ISUSER__')  ||  defined('__ISADMIN__') }
+			<div style="width:90%; border-top:1px solid #e6e6e6; border-bottom:1px solid #e6e6e6; margin:0 auto 10px; font-size:16px; color:#000; text-align:center; padding:10px 0; letter-spacing:-1px; line-height:1.7em"><b>{user_name}</b>고객님은 <span style="color:#f24400">{group_name}</span>등급입니다</p>
+			<a href="/coupon?type=membermonths&return_url={=urlencode(_SERVER.REQUEST_URI)}" target="actionFrame"><input class="btn_important_large" id="" style="width: 100%;" type="button" value="이달의 쿠폰 한 번에 다운받기"></a>
+			</div>
+		{:}
+			<div style="width:{? _GET.popup }88%{:}700px{/}; margin:0 auto; padding:20px 0; border-bottom:1px solid #000; text-align:center">
+			<a href="../member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}"><b>로그인</b></a> 하시면 구매등급 확인과<br />
+			받으실 수 있는 혜택을 확인할 수 있습니다.
+			</div>
+		{/}
+
+		<!--등급별 쿠폰혜택 테이블  -->
+		<style>
+		.promo_cpn_benefit {border:2px solid #d4d4d4; border-bottom:1px solid #d4d4d4; margin:20px auto}
+		.promo_cpn_benefit th {font-size:13px; width:126px; border-bottom:1px solid #d4d4d4; border-right:1px solid #d4d4d4; color:#f24400}
+		.promo_cpn_benefit td {border-bottom:1px solid #d4d4d4; padding:16px}
+		.promo_cpn_benefit th.tit {font-size:12px; color:#000; background:#F7F7F7; height:38px; padding:0}
+		.promo_cpn_benefit td.tit {font-size:12px; color:#000; background:#F7F7F7; height:38px; padding:0; text-align:center; font-weight:bold}
+		.promo_cpn_benefit td.notice {font-size:11px; background:#f7f7f7; padding-left:20px; line-height:1.6em}
+		.promo_cpn_benefit td ul{}
+		.promo_cpn_benefit td li{float:left; list-style:none; margin-right:10px}
+		.promo_cpn_benefit td dd{height:20px; text-align:center; color:#000}
+		</style>
+		<!--{? getCouponCodedatacnt }--> 
+		<!--{ @ (getCouponCodedata) }-->
+			<!--{ ?.loop }-->
+			<div style="width:90%; margin:20px auto 0; border:2px solid #d9d9d9; background:#f7f7f7; font-size:16px; color:#f14400; font-weight:bold; padding:10px 0; text-align:center">
+				{? .group_myicon }
+				<img src="../../data/icon/mypage/{.group_myicon}" style="margin-bottom:5px" />
+				{:}<img src="../../data/icon/common/{.group_icon}" style="margin-bottom:5px" />{ / } 
+				<br>{.group_name}
+			</div>   
+				<!--{ @.loop }-->
+					<table width="254" cellpadding="0" cellspacing="0" border="0" align="center" style="padding-top:15px;" class="designCouponlist" designElement='couponlayer' templatePath="promotion/{=getcouponpagepopup(_GET,'url')}.html" >
+						<tr>
+							<td align="center">
+								<div class="left">
+									{? ..type=='shipping' || strstr(..type,'_shipping') }
+										{? ..shipping_type == 'free' }<div class="online_coupon" style="{? ..coupon_img == '4'}background:url('/data/coupon/{..coupon_image4}'){:}background:url('/data/coupon/coupon{..sametime_shipping_img}_skin_0{..coupon_img}.gif'){/} no-repeat;" ></div>
+										{: ..shipping_type == 'won' }
+											<div class="online_coupon_{..shipping_type}_{..couponsametimeimg}" style="{? ..coupon_img == '4'}background:url('/data/coupon/{..coupon_image4}'){:}background:url('/data/coupon/coupon{..sametime_shipping_img}_skin_0{..coupon_img}.gif'){/} no-repeat;">
+												<div class="discount_price">{..view_coupon_html}</div>
+											</div> 
+										{/}
+									{:}
+										<div class="online_coupon_{..sale_type}_{..couponsametimeimg}" style="{? ..coupon_img == '4'}background:url('/data/coupon/{..coupon_image4}'){:}background:url('/data/coupon/coupon{..sametime_shipping_img}_skin_0{..coupon_img}.gif'){/} no-repeat;">
+											<div class="discount_price">{..view_coupon_html}</div>
+										</div> 
+									{/}
+								</div> 
+							</td>
+						</tr>
+						<tr>
+							<td height="3"></td>
+						</tr>
+						<tr>
+							<td align="center" style="font-size:16px; color:#000">
+								{? ..categoryonehtml }<a href="/goods/catalog?code={..categorycodeone}" target="{? _GET.popup }_blank{:}_self{/}" >{..categoryonehtml} </a>카테고리 {/} <b>{=number_format(..limit_goods_price)}</b>원 이상
+							</td>
+						</tr>
+					</table> 
+				<!--{ / }-->  
+			<!--{ / }-->
+		<!--{ / }-->  
+		<!--{ / }-->
+		<!--/이달의 등급쿠폰 리스트 -->
+
+		<!--쿠폰 사용 주의사항 -->
+		<table width="90%" cellpadding="0" cellspacing="0" border="0" align="center" style="padding:10px 10px; font-size:12px; background:#eaeaea; color:#7e7e7e; line-height:1.5em; margin-bottom:30px">
+		<tr>
+				<td><img src="../images/promotion/cpn_notice.gif" width="91" height="28" alt="쿠폰 사용 주의사항!" /></td>
+		</tr>
+		<tr><td height="5"></td></tr>
+		<tr>
+			<td>
+			<img src="../images/promotion/dot_black.gif" />이벤트 기간은 {=date("m월")} 1일~{=date("m월")} {= date("t",time())}일까지 입니다.<br>
+			<img src="../images/promotion/dot_black.gif" />쿠폰 다운 후 마이페이지에서 확인까지 시간이 소요될 수 있습니다.<br>
+			<img src="../images/promotion/dot_black.gif" />일부 상품은 사용이 제한될 수 있습니다.
+			</td>
+		</tr>
+		</table>
+	</div>
+
+	{? _GET.popup } 
+	<div id="promo_popup_close" >
+	<span class='designPopupTodaymsg'  ><label><input type='checkbox' /> 오늘 하루 이 창을 열지 않음</label></span>&nbsp;&nbsp;&nbsp; <span style="color:#c0c0c0">|</span> &nbsp;&nbsp;&nbsp;<span class='designPopupClose hand'  >닫기</span><span style="font-size:12px">×</span>
+	</div> 
+	{/} 
+
+</div>

@@ -1,0 +1,169 @@
+<style>
+#{display_key}_slide .fb-like[layout='box_count'] span, #{display_key}_slide .fb-like[layout='box_count'] iframe {min-width:60px !important;min-height:95px !important;}
+#{display_key}_slide .fb-like[layout='button_count'] span, #{display_key}_slide .fb-like[layout='button_count'] iframe {min-width:90px !important;min-height:51px !important;}
+</style>
+<script type="text/javascript">
+$(function(){
+	$('#{display_key}_slide').slides({
+			container: 'slides_container',
+			play: 3000,
+			pause: 2500,
+			next: 'next',
+			prev: 'prev',
+			hoverPause: true,
+			autoHeight:false,
+			generatePagination: false,
+			effect: 'slide',
+			slidesLoaded: function() {
+				$('#{display_key}_slide .slide').width($('#{display_key}_slide .slides_container').width());
+				$('#{display_key}_slide .slide').css('min-height','{goodsImageSize.height}');
+				$('#{display_key}_slide .slides_container').css('min-height',$('#{display_key}_slide .slide').height()+50);
+
+				$('#{display_key}_slide img').each(function(){
+					if(parseInt($('#{display_key}_slide .slides_container').css('min-height'))<$(this).closest('.slide').height()){
+						$('#{display_key}_slide .slides_container').css('min-height',$(this).closest('.slide').height()+50);
+					}
+				});
+
+			}
+		});
+	});
+</script>
+
+<div><font face="arial black, 돋움" size="2"><b>{title}</b></font></div>
+
+<br style="line-height:10px;" />
+
+<div id="{display_key}_slide"  class="">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed">
+	<tr>
+		<td width="30" align="left"><a href="#" class="prev"><img src="../../images/design/slide-arrow-prev.png" /></a></td>
+		<td>
+			<div class="slides_container">
+				<div class="slide slidefirst" >
+					<table width="100%" border="0" style="table-layout:fixed;">
+					<tr>
+					<!--{ @ displayGoodsList }-->
+						<!--{ ? .index_ && .index_ % count_w == 0 }--></tr></table></div><div class="slide"><table width="100%" border="0"><tr><!--{ / }-->
+						<td valign="top">
+							<table width="100%" cellpadding="0" cellspacing="0" border="0">
+							<tr>
+								<td align="{text_align}" width="{goodsImageSize.width}">
+									<span class="goodsDisplayImageWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(.value_))}"><a href="/goods/view?no={.goods_seq}" target="{target}"><img src="{.image}" width="{goodsImageSize.width}" onerror="this.src='../../images/common/noimage.gif'" /></a></span>
+								</td>
+							</tr>
+							<!--{ @ info_settings.list }-->
+								<!--{? ..value_->kind == 'goods_name' }-->
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td align="{text_align}"><a href="/goods/view?no={.goods_seq}" target="{target}"><span {..value_->name_css}>{.goods_name}</span></a></td>
+								</tr>
+								<!--{/}-->
+
+								<!--{? ..value_->kind == 'summary' && .summary}-->
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td align="{text_align}"><span {..value_->name_css}>{.summary}</span></td>
+								</tr>
+								<!--{/}-->
+
+								<!--{? ..value_->kind == 'icon' && .icons}-->
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td height="18" align="{text_align}">
+										<!--{ @ .icons }-->
+										<img src="/data/icon/goods/{...value_}.gif" border="0">
+										<!--{ / }-->
+									</td>
+								</tr>
+								<!--{/}-->
+
+								<!--{? ..value_->kind == 'consumer_price' && .consumer_price > .price }-->
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td align="{text_align}">
+										<span {..value_->name_css}>
+											{=number_format(.consumer_price)}
+											{?..value_->postfix}{..value_->postfix}{/}
+										</span>
+									</td>
+								</tr>
+								<!--{/}-->
+
+								<!--{? ..value_->kind == 'price' }-->
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td align="{text_align}">
+										<span {..value_->name_css}>
+											{?.string_price}
+												{.string_price}
+											{:}
+												{=number_format(.price)}
+												{?..value_->postfix}{..value_->postfix}{/}
+											{/}
+										</span>
+									</td>
+								</tr>
+								<!--{/}-->
+
+								<!--{? ..value_->kind == 'event_text' }-->
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td align="{text_align}">
+										<span {..value_->name_css}>
+											{?is_numeric(.event_text)}
+												{=number_format(.event_text)}
+												{?..value_->postfix}{..value_->postfix}{/}
+											{:}
+												{.event_text}
+											{/}
+										</span>
+									</td>
+								</tr>
+								<!--{/}-->
+
+								<!--{? ..value_->kind == 'fblike' && APP_USE == 'f'  && APP_LIKE_TYPE != 'NO'}-->
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td align="{text_align}">{=snsLikeButton(.goods_seq,..value_->fblike)}</td>
+								</tr>
+								<!--{/}-->
+
+								<!--{? ..value_->kind == 'status_icon' }-->
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td align="{text_align}">
+										<!--{ ? ..value_->status_icon_runout && .goods_status == 'runout' }-->
+										<img src="/data/icon/goods_status/{goodsStatusImage.icon_runout}" />
+										<!--{ / }-->
+										<!--{ ? ..value_->status_icon_purchasing && .goods_status == 'purchasing' }-->
+										<img src="/data/icon/goods_status/{goodsStatusImage.icon_purchasing}" />
+										<!--{ / }-->
+										<!--{ ? ..value_->status_icon_unsold && .goods_status == 'unsold' }-->
+										<img src="/data/icon/goods_status/{goodsStatusImage.icon_unsold}" />
+										<!--{ / }-->
+									</td>
+								</tr>
+								<!--{/}-->
+							<!--{ / }-->
+							<!--{? is_bigdata_display == 'y' }-->
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td align="{text_align}">
+										<a href="/bigdata/catalog?no={.goods_seq}"><u style="font-size:11px;color:#0094e1;">다른 사람은 뭘살까?</u></a>
+									</td>
+								</tr>
+							<!--{ / }-->
+							</table>
+						</td>
+					<!--{ / }-->
+					</tr>
+					</table>
+				</div>
+			</div>
+		</td>
+		<td width="30" align="right"><a href="#" class="next"><img src="../../images/design/slide-arrow-next.png" /></a></td>
+	</tr>
+	<tr><td height="10"></td></tr>
+	</table>
+</div>

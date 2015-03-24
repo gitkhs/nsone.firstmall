@@ -1,0 +1,49 @@
+<div id='designDisplay_5510e6100dfbe' class='designDisplay' designElement='display' templatePath='main/index.html' displaySeq='1' perpage='' displayStyle='rolling_h'><style>
+#designDisplay_5510e6100dfbe .goods_list {margin:4px; text-align:center; font-size:0px; *zoom:1; }
+#designDisplay_5510e6100dfbe .goods_list:after {clear:both; display:block; content:"";}
+#designDisplay_5510e6100dfbe .goods_list li.gl_item {display:inline-block; padding:0px 4px; vertical-align:top; overflow:hidden; width:33.333333333333%; box-sizing:border-box; font-size:12px;}
+#designDisplay_5510e6100dfbe .goods_list li.gl_item_small {width:16.666666666667%; box-sizing:border-box; padding:0 4px;}
+#designDisplay_5510e6100dfbe .goods_list li.gl_item>a {display:block; padding-top:5px; padding-bottom:5px;}
+#designDisplay_5510e6100dfbe .goods_list span.gli_image {width:100%;}
+#designDisplay_5510e6100dfbe .goods_list span.gli_image img {width:100%;}
+#designDisplay_5510e6100dfbe .goods_list ol.gli_contents {padding-left:10px; padding-top:10px; text-align:center;}
+#designDisplay_5510e6100dfbe .goods_list ol.gli_contents .goods_name {font-size:15px; font-weight:bold;}
+#designDisplay_5510e6100dfbe .goods_list ol.gli_contents .goods_summary {display:block; padding-top:5px; font-size:12px; color:gray; }
+#designDisplay_5510e6100dfbe .goods_list ol.gli_contents .goods_consumer_price {color:gray}
+#designDisplay_5510e6100dfbe .goods_list ol.gli_contents .goods_price {font-weight:bold; font-size:14px; font-family:tahoma; color:#ff3300}
+#designDisplay_5510e6100dfbe .goods_list ol.gli_contents .gli_goodsprice {display:block; padding-top:5px; padding-bottom:5px;}
+#designDisplay_5510e6100dfbe .fb-like {width:60px;}
+</style>
+
+<script>
+var gl_item_resize_designDisplay_5510e6100dfbe = function(){
+	if($(window).width()>=500 && $("#designDisplay_5510e6100dfbe .goods_list li.gl_item").length>=6){
+		$("#designDisplay_5510e6100dfbe .goods_list li.gl_item").not('.gl_item_small').addClass('gl_item_small');
+	}else{
+		$("#designDisplay_5510e6100dfbe .goods_list li.gl_item_small").removeClass('gl_item_small');
+	}
+};
+var gl_item_resize_timer_designDisplay_5510e6100dfbe = null;
+
+$(function(){
+	$(window).bind('resize',function(){
+		gl_item_resize_designDisplay_5510e6100dfbe();
+	}).trigger('resize');
+
+	$(".goodsDisplayImageWrap>img").load(function(){
+		gl_item_resize_timer_designDisplay_5510e6100dfbe = setInterval(function(){
+			clearInterval(gl_item_resize_timer_designDisplay_5510e6100dfbe);
+			gl_item_resize_designDisplay_5510e6100dfbe();
+		},500);
+	});
+});
+</script>
+
+
+
+<div class="displayTabContentsContainer ">
+		<ul class="goods_list">
+		</ul>
+</div>
+
+</div>

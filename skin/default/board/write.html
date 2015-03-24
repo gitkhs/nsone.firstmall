@@ -1,0 +1,38 @@
+<div  id="boardlayout" >
+		<!-- 본문내용 시작 -->
+		<link type="text/css" rel="stylesheet" charset="utf-8" href="{skindir}/board.css" />
+		<script type="text/javascript">
+		//<![CDATA[
+		var board_id = '{_GET.id}';
+		var board_seq = '{_GET.seq}';
+		var boardlistsurl = '{boardurl->lists}';
+		var boardwriteurl = '{boardurl->write}';
+		var boardviewurl = '{boardurl->view}';
+		var boardmodifyurl = '{boardurl->modify}';
+		var boardreplyurl = '{boardurl->reply}';
+		var boardrpermurl = '{boardurl->perm}';
+		var file_use = '{=manager.file_use}';
+		var video_use = '{=manager.video_use}';
+		var gl_isuser = false;
+		{ ? defined('__ISUSER__') }
+		gl_isuser = '{=defined('__ISUSER__')}';
+		{ / }
+		//]]>
+		</script>
+		<script type="text/javascript" src="/app/javascript/js/board.js?v=7"  charset="utf-8"></script>
+		<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" charset="utf-8"></script>
+		<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"  charset="utf-8"></script>
+		<div id="bbswrite">{#skin}</div>
+
+	<!-- 본문내용 끝 //-->
+</div>
+
+<script type="text/javascript">
+function getLogin(){
+	{? defined('__ISUSER__') === true }
+		openDialogAlert('해당 서비스를 이용하시려면 관리자에게 문의하여 주시길 바랍니다.','450','140');
+	{:}
+		openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){location.href="/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+	{/}
+}
+</script>

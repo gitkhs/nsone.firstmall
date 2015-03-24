@@ -1,0 +1,111 @@
+<div class="pdb30 pdt20 center fx14">
+	<ul>
+		<li>상품이 재입고될 경우 요청해 주신</li>
+		<li>휴대폰으로 SMS를 통해 알려드리겠습니다.</li>
+	</ul>
+</div>
+<script>
+$(function(){
+	if( gl_option_view_type == 'divide' && gl_options_count ){
+		$('#restock').find("select[name='viewOptionsReStock[]']").live("change",function(){
+			var n = parseInt($(this).attr('id')) + 1;
+			set_option_ReStock(n,true);
+		});
+		set_option_ReStock(0,true);
+	}
+});
+var submitCheck = function(){
+	{?!memberData.userid}
+	if(!$('#restock').find("input[name='agree']").is(":checked")){
+		openDialogAlert("개인정보 수집에 동의해주셔야 알림 신청이 가능합니다.",400,150,function(){
+			$('#restock').find("input[name='agree']").focus();
+		});
+		return false;
+	}
+	{/}
+	if ( $('#restock').find("select[name='viewOptionsReStock[]']").length > 1
+		&& $('#restock').find("select[name='viewOptionsReStock[]']").first().find("option:selected").val()
+		&& !$('#restock').find("select[name='viewOptionsReStock[]']").last().find("option:selected").val()
+	){
+		openDialogAlert("옵션을 선택해 주세요.",400,140,'');
+		return false;
+	}
+};
+</script>
+<form name="restockNofityApplyForm" method="post" target="actionFrame" action="{=sslAction('../goods_process/restock_notify_apply')}" onSubmit="return submitCheck();">
+<input type="hidden" name="isMobile" value="1" />
+<input type="hidden" name="goods_seq" value="{goods.goods_seq}" />
+	<table align="center" border="0" cellpadding="0" cellspacing="0">
+	<col />
+	<col width="10" />
+	<col />
+	<tr>
+		<th align="right" class="small">상품명</th>
+		<td></td>
+		<td>{goods.goods_name}</td>
+	</tr>
+	<tr><td height="14"></td></tr>
+	<input type="hidden" name="optionType" value="{goods.option_view_type}" />
+	<!--{ ? count(options) > 0 && options[0].option_title }-->
+	<!--{ ? goods.option_view_type == 'join' && options }-->
+	<input type="hidden" name="title[]" value="{options[0].option_title}" />
+	<tr>
+		<th align="right" class="small">{options[0].option_title}</th>
+		<td></td>
+		<td>
+			<select name="viewOptionsReStock[]" class="common-select styled">
+			<option value="">- {options[0].option_title} 선택 -</option>
+			<!--{ @ options }-->
+			<option value="{=implode('/',.opts)}" price="{.price}" opt1="{.option1}" opt2="{.option2}" opt3="{.option3}" opt4="{.option4}" opt5="{.option5}" infomation="{.infomation}">{=implode('/',.opts)}</option>
+			<!--{ / }-->
+			</select>
+			<script type="text/javascript">set_option_join();</script>
+		</td>
+	</tr>
+	<tr><td height="14"></td></tr>
+	<!--{ / }-->
+	<!--{ ? goods.option_view_type == 'divide' && options }-->
+	<!--{ @ goods.option_divide_title }-->
+	<input type="hidden" name="title[]" value="{.value_}" />
+	<tr>
+		<th align="right" class="small">{.value_}</th>
+		<td></td>
+		<td>
+			<select name="viewOptionsReStock[]" id="{.key_}" opttype="{goods.divide_newtype[.index_]}" class="common-select styled">
+			<option value="">- {.value_} 선택 -</option>
+			</select>
+		</td>
+	</tr>
+	<tr><td height="14"></td></tr>
+	<!--{ / }-->
+	<!--{ / }-->
+	<!--{ / }-->
+	{?memberData.userid}
+	<tr>
+		<th align="right" class="small">아이디</th>
+		<td></td>
+		<td>{memberData.userid}</td>
+	</tr>
+	<tr><td height="14"></td></tr>
+	{/}
+	<tr>
+		<th align="right" class="small">휴대폰번호</th>
+		<td></td>
+		<td><input type="text" name="cellphone[]" value="{=str_split_arr(memberData.cellphone,'-',0)}" size="6"  maxlength="4"/> - <input type="text" name="cellphone[]" value="{=str_split_arr(memberData.cellphone,'-',1)}" size="6"  maxlength="4"/> - <input type="text" name="cellphone[]" value="{=str_split_arr(memberData.cellphone,'-',2)}" size="6"  maxlength="4"/> </td>
+	</tr>
+	<tr><td height="14"></td></tr>
+	{?!memberData.userid}
+	<tr>
+		<th align="right" class="small">개인정보 수집</th>
+		<td></td>
+		<td><label><input type="checkbox" name="agree" value="1" /> 동의합니다.</label></td>
+	</tr>
+	<tr><td height="14"></td></tr>
+	{/}
+	</table>
+	
+	<div class="pdt10 center">
+		<input type="submit" value="알림등록" class="btn_important_large hand mr10 wx110"/>
+		<input type="button" value="취소" onclick="closeDialogAll('restock')" class="btn_cancel_large hand wx110"/>
+	</div>
+</form>

@@ -1,0 +1,221 @@
+<script type="text/javascript">
+$(document).ready(function(){
+	{ ? !is_goods }
+	$(".goods_delivery_info").hide();
+	{ / }
+});
+</script>
+
+<div class="sub_title_bar">
+	<!--{ ? orders.step == 99  || orders.step == 0}-->
+	<h2>결제실패</h2>
+	<!--{ : }-->
+	<h2>주문완료</h2>
+	<!--{ / }-->
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+
+<div class="pd10">
+	<!-- 본문내용 시작 -->
+
+	<!--{ ? orders.step == 99  || orders.step == 0}-->
+	<!-- 실패 이미지 -->
+	<div align="center" style="padding:50px 0 18px 0;"><img src="../images/design/img_sorry.gif" /></div>
+	<!-- List -->
+	<!--{ : }-->
+	<!-- Thank you 이미지 -->
+	<div align="center" style="padding:50px 0 18px 0;"><img src="../images/design/img_thankyou.gif" width="114" height="24"/></div>
+	<div align="center" style="padding:0px 0 30px 0;" class="desc">감사합니다. <br /><font color="black"><strong>{orders.order_user_name}</strong></font>님의 주문이 정상적으로 처리되었습니다.</div>
+	<!-- List -->
+	<!--{ / }-->
+
+	<!-- 결제정보/배송지정보 -->
+	<!-- 결제정보 -->
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td valign="bottom" align="left" height="25" style="font:16px Dotum; font-weight:bold; color:#000; letter-spacing:-1px">결제정보</td>
+		</tr>
+		<tr><td height="8"></td></tr>
+		<tr><td height="2" bgcolor="545454"></td></tr>
+		<tr><td height="23"></td></tr>
+	</table>
+
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<col width="90" />
+		<tr>
+			<td>주문번호</td>
+			<td class="fx12">{orders.order_seq}</td>
+		</tr>
+		<tr><td height="15"></td></tr>
+		<tr>
+			<td>결제방식</td>
+			<td class="fx12">{orders.payment}</td>
+		</tr>
+		<tr><td height="15"></td></tr>
+		<tr>
+			<td>결제금액</td>
+			<td class="fx12"><font color="black"><strong>{=number_format(orders.settleprice)}원</strong></font></td>
+		</tr>
+		{ ? orders.virtual_account }
+		<tr><td height="15"></td></tr>
+		<tr>
+			<td>입금계좌</td>
+			<td class="fx12">{orders.virtual_account}</td>
+		</tr>
+		{ / }
+		{ ? orders.bank_account }
+		<tr><td height="15"></td></tr>
+		<tr>
+			<td>입금계좌</td>
+			<td class="fx12">{orders.bank_account}</td>
+		</tr>
+		{ / }
+		<tr><td height="15"></td></tr>
+		<!--{ ? orders.step != 15 && orders.step != 25 }-->
+		<!--{ @ logs }-->
+		<tr>
+			<td>결과</td>
+			<td class="fx12">{.title}</td>
+		</tr>
+		<!--{ / }-->
+		<!--{ / }-->
+	</table>
+
+	<div style="height:20px"></div>
+
+	<!-- 배송지정보 -->
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td valign="bottom" align="left" height="25" style="font:16px Dotum; font-weight:bold; color:#000; letter-spacing:-1px">주문배송</td>
+		</tr>
+		<tr><td height="8"></td></tr>
+		<tr><td height="2" bgcolor="545454"></td></tr>
+		<tr><td height="23"></td></tr>
+	</table>
+
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<col width="90" />
+		<tr>
+			<td>받는사람</td>
+			<td class="fx12">{orders.recipient_user_name}</td>
+		</tr>
+		<tr><td height="15"></td></tr>
+		<tr>
+			<td>연락처</td>
+			<td class="fx12">전화번호 {orders.recipient_phone} / 휴대폰 {orders.recipient_cellphone}</td>
+		</tr>
+		<tr><td height="15"></td></tr>
+		<!--{ ? orders.international == 'domestic' }-->
+		<tr class="goods_delivery_info">
+			<td>주소</td>
+			<td class="fx12">
+				{? orders.recipient_address_street}
+					<span {? orders.recipient_address_type == "street"}style="font-weight:bold;"{/}>(도로명 주소)</span> {orders.recipient_address_street} {orders.recipient_address_detail}<br>
+				{/}
+				<span {? orders.recipient_address_type != "street"}style="font-weight:bold;"{/}>(지번 주소)</span> {orders.recipient_address} {orders.recipient_address_detail}
+			</td>
+		</tr>
+		<tr class="goods_delivery_info"><td height="15"></td></tr>
+		<!--{ : }-->
+		<tr class="goods_delivery_info">
+			<td>주소</td>
+			<td class="fx12">
+			{orders.international_address} {orders.international_town_city} {orders.international_county} {orders.international_country}
+			</td>
+		</tr>
+		<tr class="goods_delivery_info"><td height="15"></td></tr>
+		<!--{ / }-->
+		<tr class="goods_delivery_info">
+			<td>배송구분</td>
+			<td class="fx12">
+			{orders.mshipping}
+			</td>
+		</tr>
+		<tr class="goods_delivery_info"><td height="15"></td></tr>
+		<tr class="goods_delivery_info">
+			<td>배송메세지</td>
+			<td class="fx12">{orders.memo}</td>
+		</tr>
+	</table>
+
+	<div style="height:30px"></div>
+
+	<!-- 주의 -->
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:1px solid #ddd">
+		<tr>
+			<td height="20"></td>
+		</tr>
+		<tr>
+			<td valign="top">
+				<div style="padding-bottom:12px; font:14px Dotum; font-weight:bold; color:#000; letter-spacing:-1px">주의</div>
+				<table width="100%" border="0" cellpadding="0" cellspacing="3">
+				<col width="10" />
+				<tr>
+					<td valign="top"><span style="font-family:'arial black'; line-height:10px; ">·</span></td>
+					<td class="desc">
+						비회원 주문의 경우, 주문번호로 주문이 조회되오니 주문번호를 꼭 기억하세요.
+					</td>
+				</tr>
+				<tr>
+					<td valign="top"><span style="font-family:'arial black'; line-height:10px; ">·</span></td>
+					<td class="desc">
+						무통장입금의 경우, <font color="black">{order_config.cancelDuration}일 이내</font>로 입금 하셔야 하며 이후 입금되지 않은 주문은 자동으로 취소됩니다.
+					</td>
+				</tr>
+				<tr class="goods_delivery_info">
+					<td valign="top"><span style="font-family:'arial black'; line-height:10px; ">·</span></td>
+					<td class="desc">
+						배송은 결제완료 후 지역에 따라 1~7일 가량 소요 됩니다.
+					</td>
+				</tr>
+				<tr class="goods_delivery_info">
+					<td valign="top"><span style="font-family:'arial black'; line-height:10px; ">·</span></td>
+					<td class="desc">
+						상품별 자세한 배송과정은 주문조회를 통하여 조회하실 수 있습니다.
+					</td>
+				</tr>
+				<tr>
+					<td valign="top"><span style="font-family:'arial black'; line-height:10px; ">·</span></td>
+					<td class="desc">
+						주문의 취소 및 환불, 교환에 관한 사항은 이용안내의 내용을 참고해 주세요.
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+
+	</table>
+
+	<div style="height:20px"></div>
+
+	<div class="pdt20 center" style="border-top:1px solid #ddd"><button class="btn_normal_large" onclick="document.location.href='/'" style="width:100%">쇼핑계속하기</button></div>
+
+
+	<!-- 본문내용 끝 -->
+</div>
+
+<!--{ ? APP_USE == 'f'  && is_file_facebook  }-->
+	<!-- 구매 : 삭제하지 말아주세요 -->
+	{? !( strstr(_SERVER.HTTP_HOST,'.firstmall.kr') || _SERVER.HTTP_HOST==APP_DOMAIN ) // facebook 오픈그라피 }
+		<script>
+		<!--{ @ items }-->
+			<!--{?.goods_type != 'gift'}-->
+				getfbopengraph('{.goods_seq}', 'buy', '{config_system.subDomain}','');
+			<!--{ / }-->
+		<!--{ / }-->
+		</script>
+	{:}
+		<script>
+		<!--{ @ items }-->
+			<!--{?.goods_type != 'gift'}-->
+				getfbopengraph('{.goods_seq}', 'buy', '{_SERVER.HTTP_HOST}','');
+			<!--{ / }-->
+		<!--{ / }-->
+		</script>
+	{/}
+	<!-- 삭제하지 말아주세요 -->
+<!--{ / }-->
+
+{? !( strstr(_SERVER.HTTP_HOST,'.firstmall.kr') || _SERVER.HTTP_HOST==APP_DOMAIN ) }
+<iframe name="snsiframe" src="http://{config_system.subDomain}/admin/sns/subdomainfacebookck" frameborder="0" width="0" height="0"></iframe>
+{/}

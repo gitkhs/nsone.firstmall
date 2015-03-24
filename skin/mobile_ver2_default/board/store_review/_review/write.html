@@ -1,0 +1,189 @@
+<script type="text/javascript">
+var totalScore = 10; //현재 점수
+var MaxScore = 10; //최대 점수
+var MinScore = 0; //최저점수 ps.최저 점수가 음수일 경우 에러 발생.
+var fullStar; //별로 보여질때 가득찬 별
+var emptyStar; //별로 보여질때 빈 별
+
+$(function(){
+	$( "#datepicker" ).datepicker({
+		dateFormat: "yy-mm-dd",
+		showOn: "button",
+		buttonImage: "../../../images/board/icon/btn_calender_2020.png",
+		buttonImageOnly: true
+	});
+});
+
+$(document).ready(function() {
+
+	// 등록
+	$('#reserve_write_btn').click(function() {
+		$("#writeform").submit();
+	});
+
+	// 취소
+	$('#reserve_cancel_btn').click(function() {
+		$("#writeform").each(function(){
+			this.reset();
+		});
+		$("#score").val(10);
+		totalScore = 10;
+		showStar();
+	});
+
+
+	//수정시
+	var seq = "{seq}";
+	if(seq){
+		var phone_tmp = "{tel1}";
+		var arr_phone = phone_tmp.split("-");
+		$("#phone_num1").val(arr_phone[0]);
+		$("#phone_num2").val(arr_phone[1]);
+		$("#phone_num3").val(arr_phone[2]);
+
+		var date_tmp = "{reserve_date}";
+		var arr_date = date_tmp.split(" ");
+		var arr_time = arr_date[1].split(":");
+		$("#datepicker").val(arr_date[0]);
+		$("#reserve_time_h").val(arr_time[0]);
+		$("#reserve_time_m").val(arr_time[1]);
+	}
+
+
+	/* 별점 관련 */
+	showStar();
+	function showStar() { //별모양 점수를 보여주기 위한 함수
+		$("#showScore").text(function () {
+			var printStar = ""; //출력할 별 문자형 초기화
+			fullStar = totalScore / 2; //가득찬 별의 갯수를 구함
+			emptyStar = totalScore % 2; //빈 별의 갯수를 구함
+
+			if (totalScore >= MinScore && totalScore <= MaxScore) { //점수가 최저와 최대 점수 사이일때
+				if (totalScore == MinScore) { showScore(); return "-" } //점수가 최저일때 "-"문자 출력
+				else { //점수가 0이 아닐때 별을 출력
+					for (i = 1; i <= fullStar; i++) { printStar += "★"; }
+					for (i = 1; i <= emptyStar; i++) { printStar += "☆"; }
+					showScore(); //텍스트로 점수 출력
+					return printStar;
+				}
+			}
+			else { //점수가 0과 10사이가 아닐때
+				if (totalScore == MaxScore + 1) { alert("최대점수는 10점 입니다."); totalScore = 10; $('#score').val(10); }
+				else if (totalScore == MinScore-1) {alert ("최저점수는 0점 입니다."); totalScore = 0; $('#score').val(0); }
+				showStar();
+			}
+		});
+	}
+
+	function showScore() { //텍스트로 점수 출력을 위한 함수
+		$("#score").val(totalScore);
+	}
+
+
+	$("#scoreM").click(function () { //마이너스 버튼 클릭시 이벤트
+		totalScore--;
+		showStar();
+	});
+	$("#scoreP").click(function () { //플러스 버튼 클릭시 이벤트
+		totalScore++;
+		showStar();
+	});
+
+	$('#score').bind("change keyup",function() {
+		if($(this).val() > 10) { alert("최대점수는 10점 입니다."); totalScore = 10; $(this).val(10); }
+		else if($(this).val() < 0) { alert("최저점수는 0점 입니다."); totalScore = 0; $(this).val(0); }
+		else{ totalScore = $(this).val(); }
+
+		showStar();
+	});
+
+});
+
+</script>
+<link type="text/css" rel="stylesheet" charset="utf-8" href="./board.css" />
+<div class="main_tabs_contents_title">
+	<table border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<td width="10%">
+			<img src="../../../images/board/icon/btn_back.png" onclick="history.back(-1);" class="hand" width="22" height="22" />
+		</td>
+		<td align="center" style="font-size:14px; font-weight:bold; color:#373737;">평가하기</td>
+		<td width="10%">&nbsp;</td>
+	</tr>
+	</table>
+</div>
+
+<form name="writeform" id="writeform" method="post" action="{=sslAction('../board_process')}"  enctype="multipart/form-data" target="comentFrame">
+{? seq}
+<input type="hidden" name="mode" id="mode" value="board_modify" />
+{ : }
+<input type="hidden" name="mode" id="mode" value="board_write" />
+{ / }
+<input type="hidden" name="delseq" id="seq" value="{_GET.seq}" />
+<input type="hidden" name="board_id" id="board_id" value="{_GET.id}" />
+<input type="hidden" name="subject" id="subject" value="offline" />
+<input type="hidden" name="iframe" value="{_GET.iframe}" >
+
+<div style="padding:20px 16px;" class="write_review_area">
+	<table border="0" cellpadding="3" cellspacing="0" width="100%">
+	<tr>
+		<td colspan="2" class="title">평가하기</td>
+	</tr>
+	<tr>
+		<td width="65">이름</td>
+		<td>
+			{? seq }
+			<input type="text" name="real_name" class="txt_name" value="{name}" />
+			{ : }
+			<input type="text" name="name" class="txt_name" value="{userInfo.user_name}" title="이름입력" />
+			{ / }
+		</td>
+	</tr>
+	{? !userInfo.member_seq && !userInfo.user_name && !seq }
+	<tr>
+		<td>비밀번호</td>
+		<td><input type="password" name="pw" value="" maxlength="20" title="비밀번호입력" class="txt_name" /></td>
+	</tr>
+	{ / }
+
+	<tr>
+		<td>평점</td>
+		<td>
+			<table border="0" cellspacing="0" cellspacing="0" width="100%">
+			<tr>
+				<td width="30"><div class="box" id="scoreM">-</div></td>
+				<td width="30%"><div id="showScore"></div></td>
+				<td width="30"><div class="box" id="scoreP">+</div></td>
+				<td>
+					<div id="nowScore">
+					<input type="text" class="onlynumber" name="score_avg" id="score" size="3" maxlength="2" value=""/>점
+					</div>
+				</td>
+			</tr>
+		</table>
+		</td>
+	</tr>
+
+	<tr><td height="20" colspan="2"></td></tr>
+
+	<tr>
+		<td colspan="2" class="title">의견남기기</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			{? seq}
+				<textarea name="modify_contents_{seq}" style="width:97%; height:70px;" title="평가와 관련 없는 글은 삭제됩니다.">{contents}</textarea>
+			{ : }
+				<textarea name="contents" style="width:97%; height:70px;" title="평가와 관련 없는 글은 삭제됩니다."></textarea>
+			{ / }
+		</td>
+	</tr>
+	</table>
+	<div align="center" style="padding-top:10px;">
+		<input type="button" name="reserve_cancel_btn" id="reserve_cancel_btn" value="취소" class="btn_cancel_large" style="width:40%; height:42px;" />
+		<input type="button" name="reserve_write_btn" id="reserve_write_btn" value="등록" class="btn_important_large" style="width:40%; height:42px;" />
+	</div>
+</div>
+</form>
+
+<iframe name="comentFrame" src="/main/blank" frameborder="0" width="0" height="0"></iframe>

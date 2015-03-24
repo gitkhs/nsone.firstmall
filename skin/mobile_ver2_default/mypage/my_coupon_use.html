@@ -1,0 +1,84 @@
+{#COMMON_HEADER}
+<style type="text/css">
+div.layer_title {width:100%;text-align:center;font-size:16px;color:#fff;background-color:#5d657a;font-weight:bold;line-height:50px;}
+div.coupon_info {padding-left:35%;height:130px;border-bottom:1px dashed #d7d7d7; }
+div.coupon_info div.coupon_img { position:absolute;z-index:1;margin-left:-114px; }
+div.coupon_info div.coupon_img img { width:228px; }
+div.coupon_info div.coupon_name { position:absolute;z-index:2;margin-top:20px;margin-left:-104px;width:170px;background:transparent;font-size:16px;font-weight:bold;word-break:break-all;}
+div.coupon_info div.coupon_limit {
+position:absolute;z-index:3;margin-top:20px;margin-left:130px;width:270px;
+}
+div.coupon_form {margin-top:10px;}
+div.coupon_form table.coupon_form_table th {font-weight:normal;font-size:12px;color:#000;text-align:left;}
+div.coupon_form table.coupon_form_table th.isrowspan {vertical-align:top;padding-top:10px;}
+div.coupon_form table.coupon_form_table td {font-weight:bold;font-size:12px;color:#000;text-align:left;height:40px;}
+div.coupon_form table.coupon_form_table input[type="text"] {width:80%;height:30px;border:1px solid #d7d7d7;font-size:16px;color:#6c6c6c;}
+div.coupon_form table.coupon_form_table select {width:80%;height:30px;border:1px solid #d7d7d7;font-size:16px;color:#6c6c6c;}
+#use_coupon_area_direct_area {margin-top:3px;}
+.coupon_use_btn {width:100%;text-align:center;margin:10px 0;}
+</style>
+<script type="text/javascript">
+$(function(){
+	// 사용장소
+	$("#use_coupon_area").bind('change', function(){
+		$("#use_coupon_area_direct_area").hide();
+		if	($("#use_coupon_area option:selected").val() == 'direct'){
+			$("#use_coupon_area_direct").val('');
+			$("#use_coupon_area_direct_area").show();
+		}
+	});
+
+	$(".coupon_use_cancel").bind('click', function(){
+		self.close();
+	});
+});
+
+function focusCouponSerial(obj){
+	if	($(obj).val() == $(obj).attr('title'))
+		$(obj).val('');
+}
+
+function useCouponSubmit(fObj){
+
+	if	(!$("#manager_code").val() || $("#manager_code").val().search(/[^0-9a-zA-Z]/) != -1){
+		openDialogAlert('직원코드를 정확히 입력해 주세요.', 400, 150);
+		return false;
+	}
+
+	return true;
+}
+
+{ ? err_msg }
+alert("{ err_msg }");
+self.close();
+{ / }
+</script>
+
+<div class="layer_title">쿠폰 사용하기</div>
+<div style="padding:10px;">
+	<form name="frmCoupon" method="post" action="../mypage_process/usemycoupon" target="actionFrame" onsubmit="return useCouponSubmit(this);">
+	<input type="hidden" name="download_seq" value="{_GET.download_seq}" />
+	<input type="hidden" name="popup" value="1" />
+	<div class="coupon_info">
+		<div class="coupon_img"><img src="../images/common/cpn_bg_cnf.png" /></div>
+		<div class="coupon_name">{coupon.coupon_name}</div>
+		<div class="coupon_limit"><pre>{coupon.limit_txt}</pre></div>
+	</div>
+
+	<div class="coupon_form">
+		<table width="100%" cellpadding="0" cellspacing="0" class="coupon_form_table">		
+		<tr>
+			<th>직원코드</th>
+			<td><input type="text" name="manager_code" id="manager_code" class="use_input" title="직원코드를 입력해 주세요" /></td>
+		</tr>
+		</table>
+	</div>
+
+	<div class="coupon_use_btn">
+		<input type="button" value="취소" class="btn_cancel_large hand coupon_use_cancel" style="width:35%;" />
+		<input type="submit" value="직원확인" class="btn_important_large hand" style="width:60%;" />
+	</div>
+</form>
+</div>
+
+<iframe name="actionFrame" src="/main/blank" frameborder="1" width="100%" height="0" class="hide" ></iframe>

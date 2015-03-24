@@ -1,0 +1,653 @@
+{is_file_kakao_tag}
+<style type="text/css">
+.adult_title {font-size:18px;font-weight:bold;color:#000;padding:15px 0px 14px 0px;font-family:dotum;}
+.adult_title_small {font-size:11px;color:#000;font-family:dotum;}
+.keyboard_guide {position:relative; padding:5px; min-height:10px; text-align:center;float:right;width:110px;}
+.keyboard_guide a[href='#keyboard_specialchars'] {position:absolute; left:5px; top:0px; display:none;}
+.keyboard_guide a[href='#keyboard_hangul'] {position:absolute; left:5px; top:0px; display:none;}
+.keyboard_guide a[href='#keyboard_open'] {position:absolute; right:5px; top:0px;}
+.keyboard_guide a[href='#keyboard_close'] {position:absolute; right:5px; top:0px; display:none;}
+.keyboard_guide_img {display:none;}
+.keyboard_guide_img .keyboard_hangul {margin:10px auto 0 auto; width:290px; height:80px; background:url('../images/common/keyboard.gif') no-repeat; background-size:100% auto}
+.keyboard_guide_img .keyboard_specialchars {margin:10px auto 0 auto; width:290px; height:60px; background:url('../images/common/keyboard.gif') no-repeat 0 -85px; background-size:100% auto; display:none;}
+.sns_login_ul {position:relative; width:100%; clear:both;margin:40px 0;height:50px;}
+.sns_login_ul li{float:left; padding-left:7px;padding-right:7px; margin:0px;border-left:1px solid #ccc;}
+.sns_login_ul li:first-child{ border:0px;padding-left:8px; }
+#userid, #password {width:100%;height:50px;line-height:50px;text-indent:15px;}
+</style>
+
+<script type="text/javascript">
+<!--
+$(function(){
+	$("a[href='#keyboard_specialchars'], a[href='#keyboard_hangul']").click(function(){
+		if($(this).attr('href')=='#keyboard_specialchars'){
+			$("a[href='#keyboard_specialchars']").hide();
+			$("a[href='#keyboard_hangul']").show();
+
+			$(".keyboard_hangul").hide();
+			$(".keyboard_specialchars").show();
+		}else{
+			$("a[href='#keyboard_specialchars']").show();
+			$("a[href='#keyboard_hangul']").hide();
+
+			$(".keyboard_hangul").show();
+			$(".keyboard_specialchars").hide();
+		}
+	});
+
+	$("a[href='#keyboard_open'], a[href='#keyboard_close']").click(function(){
+		if($(this).attr('href')=='#keyboard_open'){
+			$("a[href='#keyboard_hangul']").click();
+			$("a[href='#keyboard_open']").hide();
+			$("a[href='#keyboard_close']").show();
+			$(".keyboard_guide_img").show();
+		}else{
+			$("a[href='#keyboard_specialchars'], a[href='#keyboard_hangul']").hide();
+			$("a[href='#keyboard_open']").show();
+			$("a[href='#keyboard_close']").hide();
+			$(".keyboard_guide_img").hide();
+		}
+	});
+});
+//-->
+</script>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td height="10"></td>
+</tr>
+<tr>
+	<td>
+		<!-- 본문내용 시작 -->
+			<!--{ ? mode }-->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td><img src="../images/design/tit_order01.gif" /></td></tr>
+			<tr><td height="10"></td></tr>
+			<tr><td><span class="desc">회원으로 주문을 하시면 적립금,쿠폰,회원할인 등 다양한 혜택을 받으실 수 있습니다.</span></td></tr>
+			</table>
+
+			<!-- Welcome 이미지 -->
+			<div align="center" style="padding:10px 0 20px 0;"><img src="../images/design/img_memberlogin.gif" width="320" /></div>
+			<!--{ : }-->
+			<!-- 타이틀 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td><img src="../images/design/tit_login.gif" /></td></tr>
+			<tr><td height="10"></td></tr>
+			<tr><td><span class="desc">회원 로그인을 하시면 각종 혜택 및 정보를 제공 받으실 수 있습니다.</span></td></tr>
+			</table>
+
+			<!-- LOGO 이미지 -->
+			<div align="center" style="padding:15px 0 20px 0;">
+				<img src="../images/common/top_img_minor.gif" width="90px" height="90px" />
+				<p class="adult_title">19세 미만의 미성년자는 출입을 금합니다.</p>
+				<p class="adult_title_small">본 정보내용은 청소년유해매체물로서<br />
+				정보통신망이용촉진 및 정보보호 등에 관한 법률 및<br />
+				청소년 보호법의 규정에 의하여<br />
+				19세 미만의 청소년이 이용할 수 없습니다.
+				</p>
+			</div>
+			<!--{ / }-->
+
+
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td align="center">
+
+			<!-- 로그인 폼 -->
+			<form name="authForm" id="authForm" action="../member_process/auth_chk" target="actionFrame" method="post">
+			<input type="hidden" name="return_url" value="{return_url}"/>
+			<input type="hidden" name="intro" value="Y"/>
+
+			{? realnameinfo.useRealnamephone=='Y' ||  realnameinfo.realnameId }
+
+			<p style="width:310px;font-weight:bold;text-align:left;"><img src="../images/common/bullet_arrow_dv.gif" align="absmiddle"> 비회원 성인 인증</p>
+			<div style="width:310px;border:1px solid #e2e2e2;height:220px;">
+			<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0">
+			<tr><td height="10"></td></tr>
+			<tr>
+				<td align="center">
+					{? realnameinfo.useRealnamephone=='Y' //휴대폰본인인증}
+					<label><input type="radio" name="auth_type" value="phone" checked/> 휴대폰</label>
+					{/}
+					{? realnameinfo.realnameId }
+					<label><input type="radio" name="auth_type" value="ipin" {? realnameinfo.useRealnamephone!='Y'}checked{/}/> 아이핀(i-Pin)</label>
+					<label><input type="radio" name="auth_type" value="auth" /> 안심체크</label>
+					{/}
+				</td>
+
+			</tr>
+			<tr><td height="10">&nbsp;</td></tr>
+			<tr>
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" id="phone_tab"  {? realnameinfo.useRealnamephone !='Y'} class="hide" {/}>
+						<tr><td align="center"  height="65" ><img src="../images/common/icon_namecheck_phone.gif"></td></tr>
+						<tr><td height="10"></td></tr>
+						<tr><td height="1" bgcolor="#eaeaea"></td></tr>
+						<tr><td height="10"></td></tr>
+						<tr><td align="center">휴대폰번호와 이름을 사용하여 <br/>본인확인을 합니다.</td></tr>
+						<tr><td height="5"></td></tr>
+						<tr><td align="center"><a href="javascript:phonePopup();"><span class="btn_style">휴대폰 본인 인증</span></a></td></tr>
+					</table>
+
+					{? realnameinfo.realnameId }
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" id="ipin_tab" {? realnameinfo.useRealnamephone =='Y'} class="hide" {/} >
+						<tr><td align="center" height="65" ><img src="../images/common/icon_ipin.gif"></td></tr>
+						<tr><td height="10"></td></tr>
+						<tr><td height="1" bgcolor="#eaeaea"></td></tr>
+						<tr><td height="10"></td></tr>
+						<tr><td align="center">주민등록번호 대신 사용하는<br/> 사이버 신원확인번호입니다.</td></tr>
+						<tr><td height="5"></td></tr>
+						<tr><td align="center"><a href="javascript:ipinPopup();"><span class="btn_style">아이핀 인증</span></a></td></tr>
+					</table>
+
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" id="auth_tab" class="hide">
+						<tr><td align="center"  height="65" ><img src="../images/common/icon_namechek.gif"></td></tr>
+						<tr><td height="10"></td></tr>
+						<tr><td height="1" bgcolor="#eaeaea"></td></tr>
+						<tr><td height="10"></td></tr>
+						<tr><td align="center">주민등록번호 대신 이름, 생년월일, <br/>성별, 유선전화 또는 주소로 인증합니다.</td></tr>
+						<tr><td height="5"></td></tr>
+						<tr><td align="center"><a href="javascript:checkPopup();"><span class="btn_style">안심체크 인증</span></a></td></tr>
+					</table>
+					{/}
+
+				</td>
+			</tr>
+			<tr><td height="10">&nbsp;</td></tr>
+			</table>
+			</div>
+
+			</form>
+		</td>
+
+		</tr>
+		<tr>
+			<td width="30">&nbsp;</td>
+		</tr>
+		{/}
+		<tr>
+			<td align="center" >
+
+			<!-- 로그인 폼 -->
+			<form name="loginForm" target="actionFrame" method="post" action="{=sslAction('../login_process/login')}">
+			<input type="hidden" name="return_url" value="{return_url}"/>
+
+			<div style="width:310px;">
+				<p style="font-weight:bold;float:left;"><img src="../images/common/bullet_arrow_dv.gif" align="absmiddle"> 회원 성인 인증</p>
+				<div class="keyboard_guide">
+					<a href="#keyboard_open">PC 키보드 보기 ▼</a>
+					<a href="#keyboard_close">PC 키보드 닫기 ▲</a>
+				</div>
+				<div style="clear:both;"><div>
+				<div class="keyboard_guide_img">
+					<a href="#keyboard_specialchars">특수 기호 보기</a>
+					<a href="#keyboard_hangul">한글 보기</a>
+					<div class="keyboard_hangul"></div>
+					<div class="keyboard_specialchars"></div>
+				</div>
+			</div>
+			<div style="clear:both;"><div>
+			<div style="width:310px;border:0px solid #e2e2e2;height:180px;">
+			<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0">
+			<tr><td ></td></tr>
+			<tr>
+				<td>
+					<fieldset>
+						<input type="text" name="userid" id="userid" value="{? idsavechecked }{idsavechecked}{/}" title="{? !idsavechecked }아이디{/}" tabindex="1" required="required" />
+						<input type="password" password="password" name="password" id="password" title="비밀번호" tabindex="2" required="required" />
+						<input type="submit" value="로그인" class="login_btn btn_important_large hand" style="margin-top:10px;width:100%;" tabindex="3" />
+
+						<div class="pdt20 clearbox txt_spacing">
+							<div class="fleft"><input type="checkbox" name="idsave" id="idsave" value="checked" {? idsavechecked } checked="checked" {/} /> <label for="idsave"><span >아이디 저장</span></label></div>
+							<div class="fright"><a href="/member/agreement">회원가입</a> | <a href="../member/find?mode=findid">아이디</a>/<a href="../member/find?mode=findpw">비밀번호 찾기</a></div>
+						</div>
+					</fieldset> 
+				</td>
+			</tr>
+			</table>
+			</div>
+
+			<!-- //SNS 가입폼 : SNS이용할 경우시작 -->
+			<!--{? count(joinform.use_sns) > 0 }-->
+			<ul class="sns_login_ul">
+				<!--{@ joinform.use_sns }-->
+				{? .key_ }<li class="sns-login-button" snstype="{=.key_}"><img src="../images/design/sns_icon_{=.key_}.png" alt="sign in with {=.key_}" title="{=.value_['nm']}" width="28" height="28" hspace="3" vspace="3" /> <br />로그인</li>{/}
+				<!--{ / }-->
+			</ul>
+			<!--{/}-->
+			<!-- //SNS 가입폼 : SNS이용할 경우 끝 //-->
+
+			</form>
+
+		</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<tr>
+		<td align="center" >
+		<div style="padding:0px 5px;width:310px;text-align:left;" >
+		<p class="adult_title_small">입력하신 개인정보는 기록되지 않습니다.<br />
+		본 사이트는 미성년자 차단을 위하여 공신력 있는 기관(한국신용정보)의 실명 조회 서비스를 이용하여 성인여부를 판단합니다. <br />
+		아이핀/안심체크로 조회가 되지 않을 경우 한국신용정보 (http://www.idcheck.co.kr)로 문의하시기 바랍니다.</p>
+		</div>
+		</td>
+	</tr>
+	</table>
+
+
+		<!-- 본문내용 끝 -->
+	</td>
+</tr>
+</table>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("input:radio[name='auth_type']").live("click",function(){
+		if($(this).val()=='phone'){
+			$("#phone_tab").show();
+			$("#ipin_tab").hide();
+			$("#auth_tab").hide();
+		}else if($(this).val()=='ipin'){
+			$("#phone_tab").hide();
+			$("#ipin_tab").show();
+			$("#auth_tab").hide();
+		}else{
+			$("#phone_tab").hide();
+			$("#ipin_tab").hide();
+			$("#auth_tab").show();
+		}
+	});
+});
+
+//본인인증:휴대폰
+function phonePopup(){
+	var url = "../member_process/realnamecheck?intro=1&realnametype=phone";
+	window.open(url, 'popupChk', 'width=500, height=550, top=100, left=100, fullscreen=no, menubar=no, status=no, toolbar=no, titlebar=yes, location=no, scrollbar=no');
+}
+
+//아이핀 실명인증
+function ipinPopup(){
+	var url = "../member_process/realnamecheck?intro=1&realnametype=ipin";
+	window.open(url, 'popupIPIN2', 'width=450, height=550, top=100, left=100,fullscreen=no, menubar=no status=no, toolbar=no, titlebar=yes, location=no, scrollbar=no');
+}
+
+//안심체크 실명인증
+function checkPopup(){
+	var url = "../member_process/realnamecheck?intro=1&realnametype=check";
+	window.open(url, 'niceID_popup', 'width=500, height=550, toolbar=no,directories=no,scrollbars=no,resizable=no,status=no,menubar=no,top=0,left=0,location=no');
+}
+</script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	//기본 login
+	$(".sns-login-button").click(function(){
+		var snstype = $(this).attr('snstype');
+		loginwindowopen(snstype);
+	});
+});
+
+function loginwindowopen(sns) {
+	var w;var h;
+	switch(sns) {
+		case 'twitter':
+			w = 810;h = 550;
+			break;
+		case 'me2day':
+			w = 900;h = 500;
+			break;
+		case 'yozm':
+			w = 600;h = 450;
+			break;
+		case 'cyworld':
+			w = 430;h = 560;
+			break;
+		case 'naver':
+			w = 460;h = 517;
+			break;
+		case 'kakao':
+			loginWithKakao();
+			return false;
+		break;
+		case 'daum':
+			w = 650;h = 517;
+		break;
+		default:
+			w = 800;h=400;
+	}
+	{? _SERVER.HTTP_HOST == APP_DOMAIN  }
+		if(sns == 'facebook' ) {//경고문구창사이즈
+			loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+			FB.login(handelStatusChange,{scope:'{fbuserauth}'});
+		}else{
+			loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+			snsloginck(sns);
+		}
+	{:}
+		if(sns == 'me2day' || sns == 'cyworld' || sns == 'naver' || sns == 'daum') {//경고문구창사이즈
+			{? sns == 'cyworld' && TW_APP_ID == 'ifHWJYpPA2ZGYDrdc5wQ' }
+				window.open('http://m.{config_system.domain}/member/register_sns_form?popup=1&formtype=login&firstmallcartid={firstmallcartid}&return_url={return_url}&snstype='+sns+'&snsreferer={_SERVER.HTTP_HOST}','snspopup','width=410px,height=150px,statusbar=no,scrollbars=no,toolbar=no');
+			{:}
+				snsloginck(sns);
+			{/}
+		}else{
+			window.open('http://m.{config_system.subDomain}/member/register_sns_form?popup=1&formtype=login&firstmallcartid={firstmallcartid}&return_url={return_url}&snstype='+sns+'&snsreferer={_SERVER.HTTP_HOST}','snspopup','width='+w+'px,height='+h+'px,statusbar=no,scrollbars=no,toolbar=no');
+		}
+	{/}
+}
+
+//기본 facebook 로그인 //
+function handelStatusChange(response) {
+	if (response && response.status == 'connected') {
+	// 로그인
+	isLogin = true;
+	initializeFbTokenValues();
+	initializeFbUserValues();
+	if(response.authResponse){
+		fbId = response.authResponse.userID;
+		fbAccessToken = response.authResponse.accessToken;
+	}
+	FB.api('/me', function(response) {
+		 fbUid = response.email;
+		 fbName = response.name;
+		 if (fbName != "") {
+				$.ajax({
+				'url' : '../sns_process/facebookloginck',
+				'data' : {'facebooktype':'login'},
+				'type' : 'post',
+				'dataType': 'json',
+				'success': function(res) {
+					if(res.result == true){
+						{? return_url }
+							document.location.href='{return_url}';
+						{:}
+							document.location.href='../main/index';
+						{/}
+					}else{
+						loadingStop("body",true);
+						openDialogAlert(res.msg,'400','160',function(){});
+					}
+				}
+				});
+		}
+	});
+   } else if (response.status == 'not_authorized' || response.status == 'unknown') {
+		openDialogAlert('연결을 취소하셨습니다.','400','160',function(){});
+		// 로그아웃된 경우
+		isLogin = false;
+		{? defined('__ISUSER__')}
+			logoutajax('facebook');
+		{/}
+		if (fbId != "")  initializeFbTokenValues();
+		if (fbUid != "") initializeFbUserValues();
+		loadingStop("body",true);
+	}else{
+		openDialogAlert('연결을 취소하셨습니다.','400','160',function(){});
+		// 로그아웃된 경우
+		isLogin = false;
+		{? defined('__ISUSER__')}
+			logoutajax('facebook');
+		{/}
+		if (fbId != "")  initializeFbTokenValues();
+		if (fbUid != "") initializeFbUserValues();
+		loadingStop("body",true);
+	}
+}
+
+//feed 권한추가 -> 로그인시키지
+function handelStatusChangepublish_stream(response) {
+	if (response && response.status == 'connected') {
+		document.location.href='../mypage/myinfo';
+   }else{
+		loadingStop("body",true);
+		openDialogAlert('연결을 취소하셨습니다.','400','160',function(){});
+   }
+}
+
+
+//기본 SNS로그인//
+function snsloginck(sns) {
+	loadingStop("body",true);
+	var w;var h;
+	switch(sns) {
+		case 'twitter':
+			w = 810;h = 550;
+			break;
+		case 'me2day':
+			w = 900;h = 750;
+			break;
+		case 'cyworld':
+			w = 430;h = 560;
+			break;
+		case 'naver':
+			w = 460;h = 517;
+			break;
+		case 'daum':
+			w = 650;h = 517;
+		break;
+	}
+	var height_ = w;
+	var width_ = h;
+	var left_ = screen.width;
+	var top_ = screen.height;
+
+	left_ = left_/2 - (width_/2);
+	top_ = top_/2 - (height_/2);
+	var newWin  = window.open("../sns_process/snsredirecturl?snsloginstart=1","SnsFrmUp","height="+height_+",width="+width_+",status=yes,scrollbars=no,statusbar=no,resizable=no,left="+left_+",top="+top_+"");
+
+	$.ajax({
+	'url' : '../sns_process/' + sns + 'loginck',
+	'data' : {'mform':'login'},
+	'type' : 'post',
+	'dataType': 'json',
+	'success': function(res) {
+		if(res.result == true) {
+			newWin.location = res.loginurl;
+			newWin.focus();
+			//window.open('../sns_process/snsredirecturl?snsurl='+res.loginurl,'snsredirecturl','width='+w+'px,height='+h+'px,statusbar=no,scrollbars=no,toolbar=no');
+		}else{
+			newWin.close();
+			openDialogAlert(res.msg,'400','140',function(){});
+		}
+	}
+	});
+}
+
+
+//미투데이 login
+function me2dayjoginlogin() {
+	$.ajax({
+	'url' : '../sns_process/me2daylogin',
+	'type' : 'post',
+	'dataType': 'json',
+	'success': function(res) {
+		if(res.result == true){
+			{? return_url }
+				document.location.href='{return_url}';
+			{:}
+				document.location.href='../main/index';
+			{/}
+		}else{
+			loadingStop("body",true);
+			openDialogAlert(res.msg,'400','140',function(){});
+		}
+	}
+	});
+}
+
+
+//cyworld login
+function cyworldjoginlogin() {
+	$.ajax({
+	'url' : '../sns_process/cyworldlogin',
+	'type' : 'post',
+	'dataType': 'json',
+	'success': function(res) {
+		if(res.result == true){
+			{? return_url }
+				document.location.href='{return_url}';
+			{:}
+				document.location.href='../main/index';
+			{/}
+		}else{
+			loadingStop("body",true);
+			openDialogAlert(res.msg,'400','140',function(){});
+		}
+	}
+	});
+}
+
+
+//naver login
+function naverjoinlogin() {
+	$.ajax({
+	'url' : '../sns_process/naverlogin',
+	'type' : 'post',
+	'dataType': 'json',
+	'success': function(res) {
+		if(res.result == true){
+			{?_GET.return_url }
+				document.location.href='{_GET.return_url}';
+			{:}
+				document.location.href='../main/index';
+			{/}
+		}else{
+			loadingStop("body",true);
+			openDialogAlert(res.msg,'400','140',function(){});
+		}
+	}
+	});
+}
+
+//daum login
+function daumaccess(str){
+
+	loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+
+	str = encodeURIComponent(str);
+
+	$.ajax({
+	'url' : '../sns_process/daumuserinfo',
+	'type' : 'post',
+	'data' : {'str':str},
+	'dataType': 'json',
+	'success': function(res) {
+		if(res.result == true){
+			daumjoinlogin();
+		}else{
+			alert(res.message);
+		}
+	}});
+}
+
+function daumjoinlogin() {
+
+	$.ajax({
+	'url' : '../sns_process/daumlogin',
+	'type' : 'post',
+	'dataType': 'json',
+	'success': function(res) {
+		if(res.result == true){
+			document.location.href='../main/index';
+		}else{
+			loadingStop("body",true);
+			openDialogAlert(res.msg,'400','140',function(){});
+		}
+	},'error': function(res){
+		debug('error : ');
+		debug(res);
+	}
+	});
+}
+//daum login end 
+
+//kakao login start
+{? array_key_exists('kakao',joinform.use_sns) }
+	function loginWithKakao() {
+		
+		var IEIndex = navigator.appVersion.indexOf("MSIE");         // MSIE를 찾고 인덱스를 리턴
+		var IE8Over = navigator.userAgent.indexOf("Trident");		// MS IE 8이상 버전 체크
+
+		if( IEIndex > 0 && IE8Over < 0 )  {
+			alert("카카오 로그인을 지원하지 않는 브라우저 버전입니다.\nInternet Explorer 8 버전 이상 사용해 주세요.");
+		}else{
+
+			// 로그인 창을 띄웁니다.
+			Kakao.Auth.login({
+				success: function(authObj) {
+					var aaccess_token	= authObj.access_token;
+
+					if(authObj.access_token){
+						Kakao.API.request({
+							url: '/v1/user/me',
+							success: function(userObj) {
+								var kakaoObj		= $.extend(authObj,userObj);
+								kakaojoinlogin(kakaoObj);
+							}
+
+						});
+					}else{
+						alert("잘못된 접근입니다.");
+						return false;
+					}
+				},fail: function(res){
+					alert('잘못된 접근입니다.');
+					//JSON.stringify(res);
+				}
+			});
+		}
+	};
+
+	function kakaoAPI(kakaoKey){ Kakao.init(kakaoKey); }
+
+	$.ajax({
+		'url' : '../sns_process/kakaokeys',
+		'dataType': 'json',
+		'success': function(res) {
+			if(res.result == true){
+				kakaoAPI(res.keys);
+			}
+		}
+	});
+
+	function kakaojoinlogin(kakaoObj) {
+		$.ajax({
+		'url' : '../sns_process/kakaologin',
+		'type' : 'post',
+		'dataType': 'json',
+		'data': kakaoObj,
+		'success': function(res) {
+			if(res.result == true){
+				{?_GET.return_url }
+					document.location.href='{_GET.return_url}';
+				{:}
+					document.location.href='../main/index';
+				{/}
+			}else{
+				loadingStop("body",true);
+				openDialogAlert(res.msg,'400','140',function(){});
+			}
+		}
+		});
+	}
+{ / }
+//kakao login end
+
+//회원정보 초기화 시키기..
+function logoutajax(sns){
+	$.ajax({
+	'url' : '../sns_process/'+sns+'logout',
+	'dataType': 'json',
+	'success': function(res) {
+		if(res.result == true){
+			{? return_url }
+				document.location.href='{return_url}';
+			{:}
+				document.location.href='../main/index';
+			{/}
+		}else{
+			loadingStop("body",true);
+			openDialogAlert(res.msg,'400','140',function(){});
+		}
+	}
+	});
+}
+</script>

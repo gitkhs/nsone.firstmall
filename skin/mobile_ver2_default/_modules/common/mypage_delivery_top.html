@@ -1,0 +1,20 @@
+<!--{?userInfo.member_seq}-->
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>주소록</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+<!-- 상단 마이 리스트 버튼바 -->
+<div class="sub_title_button_bar">
+	<table class="sub_title_button_tb" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="33.3%" onclick="submitAddressBookFrm('tab','1')" {?uri_string()=='mypage/delivery_address' && _GET.tab!=2}class="sel"{/} >
+			자주쓰는 배송지
+		</td>
+		<td width="33.3%" onclick="submitAddressBookFrm('tab','2')" {?uri_string()=='mypage/delivery_address' && _GET.tab==2}class="sel"{/}>
+			최근 배송지
+		</td>
+	</tr>
+	</table>
+</div>
+<!--{/}-->

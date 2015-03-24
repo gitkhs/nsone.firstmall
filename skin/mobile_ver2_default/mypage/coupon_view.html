@@ -1,0 +1,188 @@
+<style type="text/css">
+
+div.cart-lay {background-color:#f5f7f7;padding:5px;}
+div.cart-lay div.cart-list-lay {border:3px solid #d6d6d6;}
+
+/* 배송 현황 */
+div.export-lay div.shipping-title {font-weight:bold;background-color:#f5f7f7;color:#4a4a4a;border-bottom:1px solid #d7d7d7;text-align:left;padding:10px 0 10px 10px;font-size:12px;border-top:2px solid #d7d7d7;}
+div.export-lay div.export-title-lay {background-color:#b9bcbd;border-top:1px solid #a9abac;}
+div.export-lay div.export-title-lay table.export-title-table td {height:36px;color:#444444;font-size:12px;}
+div.export-lay div.export-title-lay table.export-title-table td.export-date {padding-left:8px;}
+div.export-lay div.export-title-lay table.export-title-table td.export-btn {text-align:right;padding-right:8px;}
+div.export-lay div.export-shipping-address-title { padding-left:8px;line-height:36px;background-color:#d6d6d6; font-size:12px;font-weight:bold;color:#4a4a4a;}
+div.export-lay div.export-shipping-address-title.is-modify { border-top:1px solid #c2c6c8;border-bottom:1px solid #c2c6c8;}
+div.export-lay div.export-shipping-address {background-color:#fff;color:#000;padding:10px 0 10px 8px;font-size:12px;}
+div.export-lay div.export-shipping-address.multiShippingItem {padding:10px;margin-bottom:20px;border-bottom:3px solid #c2c6c8;background-color:#f5f7f7;}
+div.export-lay div.export-ea-lay {border-bottom:1px solid #d7d7d7;}
+div.export-lay div.export-shipping-address div.shipping-address-btn {padding-bottom:10px;padding-right:3px;text-align:right;}
+div.export-lay div.export-shipping-address table.export-shipping-address-table th {font-size:12px;color:#4a4a4a;text-align:left;}
+div.export-lay div.export-shipping-address table.export-shipping-address-table td {text-align:left;padding:2px 0;padding-left:15px;}
+div.export-lay div.export-shipping-address table.export-shipping-address-table td input[type="text"] {height:29px;text-align:left;padding-left:5px;}
+div.export-lay div.export-shipping-address table.export-shipping-address-table td textarea {font-family:Dotum;font-size:11px;color:#b1b1b1;}
+div.export-lay div.export-ea-lay table.export-ea-table td {height:43px;font-size:12px;}
+div.export-lay div.export-ea-lay table.export-ea-table td.title {text-align:left;padding-left:8px;}
+div.export-lay div.export-ea-lay table.export-ea-table td.ea { text-align:right;padding-right:8px;}
+div.export-lay div.export-ea-lay table.export-ea-table td.ea.rgtbd {border-right:1px solid #d7d7d7;}
+</style>
+<script type="text/javascript">
+$(function(){
+	$(".title-line-lay").each(function(){
+		var targetLay	= $(this).attr("targetLay");
+		var imgObj		= $(this).find("img.arrow-img");
+		$(this).find("td.line-title").click(function(){
+			set_onoff_layer(targetLay, imgObj);
+		});
+		$(this).find("span.arrow-btn").click(function(){
+			set_onoff_layer(targetLay, imgObj);
+		});
+	});
+
+	$(".btn-coupon-use").bind('click', function(){
+		window.open("./coupon_use?code={coupon.export_code}");
+/*
+		$.ajax({
+			type: "get",
+			url: "./coupon_use",
+			data: "code={coupon.export_code}",
+			success: function(result){
+				$("#coupon_use_lay").html(result);
+				openDialog("쿠폰 사용하기", "coupon_use_lay", {"width":"200","height":"600"});
+			}
+		});
+*/
+	});
+});
+
+function set_onoff_layer(lay, arrowImg){
+	var layName	= "."+lay+"-lay";
+	var imgSrc	= $(arrowImg).attr("src");
+	if	($(layName).css("display") != 'none'){
+		$(layName).hide();
+		$(arrowImg).attr("src", imgSrc.replace('_up_', '_dn_'));
+	}else{
+		$(layName).slideDown("slow");
+		$(arrowImg).attr("src", imgSrc.replace('_dn_', '_up_'));
+	}
+}
+</script>
+<div class="sub_title_bar">
+	<h2>사용상세내역</a></h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" /></a>
+</div>
+<div class="order-date-info">
+	<span class="order-date">{coupon.order_seq}</span>
+	<span class="order-seq">
+		(잔여 {=number_format(coupon.coupon_remain_value)}{coupon.coupon_unit})
+	</span>
+</div>
+
+<!-- 쿠폰 상세 정보 -->
+<div class="export-lay">
+	<div class="export-title-lay">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="export-title-table">
+		<tr>
+			<td class="export-date">
+				<!-- { ? use_history[0]['regist_date'] } -->
+				사용일시:{use_history[0]['regist_date']}
+				<!-- { : } -->
+				미사용
+				<!-- { / } -->
+			</td>
+			<td width="120" class="export-btn">
+				<!-- { ? chk.result == 'success' } -->
+				<span class="btn large"><button type="button" class="btn-coupon-use">사용하기</button></span>
+				<!-- { / } -->
+			</td>
+		</tr>
+		</table>
+	</div>
+
+	<div class="cart-lay">
+		<div class="cart-list-lay">
+			<div class="goods-info-lay">
+				<div class="goods-name">
+					<a href="../goods/view?no={item.goods_seq}">{item.goods_name}</a>
+					<!-- { ? item.cancel_type == 1 } -->
+					<span class="canceltypetitle">청약철회불가</span>
+					<!-- { / } -->
+				</div>
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="goods-info-table">
+				<tr>
+					<td width="80">
+						<a href="../goods/view?no={item.goods_seq}"><img src="{=viewImg(item.goods_seq, 'thumbCart')}" align="absmiddle" hspace="5" style="border:1px solid #ddd;" onerror="this.src='../images/common/noimage_list.gif'" /></a>
+					</td>
+					<td valign="top" class="goods-info">
+						<div class="goods-price">
+							<!-- { ? item.consumer_price } -->
+							<strike>{=number_format(item.consumer_price)}</strike> 
+							<!-- { / } -->
+							<span class="goods-price">{=number_format(item.price)}</span>원
+						</div>
+						<div class="goods-option">[쿠폰번호] {coupon.coupon_serial}</div>
+						<!-- { @ coupon.option } -->
+						<div class="goods-option">{ .value_ }</div>
+						<!-- { / } -->
+						<div class="goods-option">
+							쿠폰 값어치 : {=number_format(coupon.coupon_value)}{coupon.coupon_unit}
+						</div>
+						<div class="goods-option">쿠폰 잔여 값어치 : {=number_format(coupon.coupon_remain_value)}{coupon.coupon_unit}</div>
+					</td>
+				</tr>
+				</table>
+			</div>
+			<div class="sum-price-lay">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="sum-price-table">
+				<tr>
+					<td class="price-info">
+						합계
+						<span class="goods-price">{=number_format(item.price)}</span>원
+					</td>
+					<td width="150" class="step-info">잔여 {=number_format(coupon.coupon_remain_value)}{coupon.coupon_unit}</td>
+				</tr>
+				</table>
+			</div>
+			<div class="export-ea-lay">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="export-ea-table">
+				<tr>
+					<td class="title" width="100">사용횟수</td>
+					<td class="ea rgtbd" style="color:#bc0700;"><span class="bold"> {=number_format(coupon.coupon_value-coupon.coupon_remain_value)}</span>{coupon.coupon_unit}</td>
+					<td class="title" width="100">주문횟수</td>
+					<td class="ea"><span class="bold">{=number_format(coupon.coupon_value)}</span>{coupon.coupon_unit}</td>
+				</tr>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /쿠폰 상세 정보 -->
+
+<!-- 쿠폰 사용 내역 -->
+<div class="title-line-lay" targetLay="use-history">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="title-line-table">
+	<tr>
+		<td class="line-title hand">사용정보 (사용횟수 {=count(use_history)}회)</td>
+		<td class="line-btn">
+			<span class="arrow-btn hand"><img src="../images/design/btn_arw_dn_w.png" class="arrow-img" height="15" /></span>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<div class="use-history-lay hide">
+	<!-- { @ use_history } -->
+	<div class="line-lay white">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="line-table">
+		<tr>
+			<td width="80" class="line-title rgt-line bold black">사용정보{.index_+1}</td>
+			<td class="line-val left">
+				{=date("Y-m-d", strtotime(.regist_date))} / 
+				{=number_format(.coupon_use_value)}{coupon.coupon_unit} 사용 / 
+				{.coupon_use_area}
+			</td>
+		</tr>
+		</table>
+	</div>
+	<!-- { / } -->
+</div>
+
+<div id="coupon_use_lay"></div>

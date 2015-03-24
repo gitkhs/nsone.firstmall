@@ -1,0 +1,47 @@
+<table class="bbswrite_table_style"  width="100%" cellpadding="0" cellspacing="0" border="0" >
+<tr >
+	<th class="cell">첨부파일을
+		<select name="insert_image">
+		<option value="bottom" {? !insert_image || insert_image == 'bottom' } selected="selected" {/}>내용하단에 삽입</option>
+		<option value="top"  {? insert_image == 'top' } selected="selected" {/}>내용상단에 삽입</option>
+		<option value="" {? insert_image== 'none' } selected="selected" {/}>내용에 삽입하지 않음</option>
+		</select>
+		<img src="{templateskin}/images/board/btn/btn_file_plus.gif" id="boardfileadd" class="hand" /></th>
+</tr>
+<tr id="filelistlay">
+	<td class="cell" >
+		<div>
+			<table class="boardfileliststyle" id="BoardFileTable">
+			<tbody>
+			{? filelist}
+				{@ filelist}
+				<tr>
+					{? !ismobile //모바일접속시 첨부파일추가}<td align="center" class="hand">↕</td>{/}
+					<td align="left"> <input type="file" name="file_info[]" value=""/>
+					<input type="hidden" name="orignfile_info[]"  class="orignfile_info" value="{.realfile}^^{.orignfile}^^{.sizefile}^^{.typefile}"/>
+					<span class="realfilelist hand highlight-link" realfiledir="{.realfiledir}" realfilename="{.orignfile}" board_id="{boardid}" filedown="../board_process?mode=board_file_down&board_id={boardid}&realfiledir={.realfiledir}&realfilename={.orignfile}">{.orignfile}</span> </td>
+					<td align="center"><img src="{templateskin}/images/board/btn/btn_file_minus.gif" class="etcDel hand" /></td>
+				</tr>
+				{/}
+				{? manager.file_use == 'Y' //첨부파일사용인경우}
+				<tr>
+					{? !ismobile //모바일접속시 첨부파일추가}<td align="center" class="hand">↕</td>{/}
+					<td align="center"><input type="file" name="file_info[]"/></td>
+					<td align="center"><img src="{templateskin}/images/board/btn/btn_file_minus.gif" class="etcDel hand" /></td>
+				</tr>
+				{/}
+			{:}
+				{? manager.file_use == 'Y' //첨부파일사용인경우}
+				<tr>
+					{? !ismobile //모바일접속시 첨부파일추가}<td align="center" class="hand">↕</td>{/}
+					<td align="center"><input type="file" name="file_info[]" /></td>
+					<td align="center"><img src="{templateskin}/images/board/btn/btn_file_minus.gif" class="etcDel hand" /></td>
+				</tr>
+				{/}
+			{/}
+			</tbody>
+			</table>
+		</div>
+	</td>
+</tr>
+</table>

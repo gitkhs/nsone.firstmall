@@ -1,0 +1,337 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="10"></td></tr>
+<tr><td><img src="../images/design/mypage_tit_review.gif" /></td></tr>
+<tr><td height="8"></td></tr>
+<tr><td height="3" bgcolor="#dddddd"></td></tr>
+<tr><td height="8"></td></tr>
+<tr><td> <span class="desc">작성 완료 시 아래와같이 적립해드립니다.</span>
+<span class="desc">
+	<div style="margin-top:10px;">
+		<div style="margin-top:10px;">
+		{? reserves.autoemoney == 1 &&  reserves.autoemoneytype != 3 && reserves.autoemoneytitle }구매자(회원)가 작성한 {/}
+		</div>
+		<div style="margin-top:5px;">
+
+		{? reserves.autoemoney_video > 0 ||  reserves.autopoint_video > 0 }<b>동영상상품후기</b>는
+			{? reserves.autoemoneytype != 1 && ( reserves.autoemoneystrcut1>0 || reserves.autoemoneystrcut2>0 ) }
+				<span >(
+				{? reserves.autoemoneytype == 2 && reserves.autoemoneystrcut1>0 }
+					{=number_format(reserves.autoemoneystrcut1)}
+				{: reserves.autoemoneytype == 3 && reserves.autoemoneystrcut2>0}
+					{=number_format(reserves.autoemoneystrcut2)}
+				{/}자 이상)</span>
+			{/}
+			{? reserves.autoemoney_video > 0 }적립금 <span style="color:#c40000;" >{=number_format(reserves.autoemoney_video)}</span>원 {/}
+			{? reserves.autopoint_video > 0 } 포인트 <span style="color:#c40000;" >{=number_format(reserves.autopoint_video)}</span>P {/}
+		지급 &nbsp;&nbsp;
+		{/}
+		{? reserves.autoemoney_photo > 0 ||  reserves.autopoint_photo > 0 }<b>포토상품후기</b>는
+			{? reserves.autoemoneytype != 1 && ( reserves.autoemoneystrcut1>0 || reserves.autoemoneystrcut2>0 ) }
+				<span >(
+				{? reserves.autoemoneytype == 2 && reserves.autoemoneystrcut1>0 }
+					{=number_format(reserves.autoemoneystrcut1)}
+				{: reserves.autoemoneytype == 3 && reserves.autoemoneystrcut2>0}
+					{=number_format(reserves.autoemoneystrcut2)}
+				{/}자 이상)</span>
+			{/}
+			{? reserves.autoemoney_photo > 0 }적립금 <span style="color:#c40000;" >{=number_format(reserves.autoemoney_photo)}</span>원 {/}
+			{? reserves.autopoint_photo > 0 } 포인트 <span style="color:#c40000;" >{=number_format(reserves.autopoint_photo)}</span>P {/}
+		지급 &nbsp;&nbsp;
+		{/}
+
+		{? reserves.autoemoney_review > 0 ||  reserves.autopoint_review > 0 }
+			<b>일반 상품후기</b>는
+			{? reserves.autoemoneytype != 1 && ( reserves.autoemoneystrcut1>0 || reserves.autoemoneystrcut2>0 ) }
+				<span >(
+				{? reserves.autoemoneytype == 2 && reserves.autoemoneystrcut1>0 }
+					{=number_format(reserves.autoemoneystrcut1)}
+				{: reserves.autoemoneytype == 3 && reserves.autoemoneystrcut2>0}
+					{=number_format(reserves.autoemoneystrcut2)}
+				{/}자 이상)</span>
+			{/}
+			{? reserves.autoemoney_review > 0 }적립금 <span style="color:#c40000;">{=number_format(reserves.autoemoney_review)}</span>원 지급{/}
+			{? reserves.autopoint_review > 0 } 포인트 <span style="color:#c40000;">{=number_format(reserves.autopoint_review)}</span>P 지급{/}
+		{/}
+	</div>
+	</span>
+
+	</td></tr>
+<tr><td height="8"></td></tr>
+</table>
+<!-- 본문내용 시작 -->
+<link type="text/css" rel="stylesheet" charset="utf-8" href="../css/mypage_board.css" />
+<script type="text/javascript">
+//<![CDATA[
+var board_id = '{manager.id}';
+var board_seq = '{_GET.seq}';
+var boardlistsurl = '{boardurl->lists}';
+var boardwriteurl = '{boardurl->write}';
+var boardviewurl = '{boardurl->view}';
+var boardmodifyurl = '{boardurl->modify}';
+var boardreplyurl = '{boardurl->reply}';
+var gl_isuser = false;
+{ ? defined('__ISUSER__') }
+gl_isuser = '{=defined('__ISUSER__')}';
+{ / }
+
+var comment = '{comment}';
+var commentlay = '{commentlay}';
+var isperm_write = '{managerview.isperm_write}';
+
+//]]>
+</script>
+<script type="text/javascript" src="/app/javascript/js/board.js?v=7"></script>
+{? commentskinjsuse }
+<script type="text/javascript" src="/app/javascript/js/board_comment.js?v=4"  charset="utf-8"></script>
+{/}
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" ></script>
+<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"  charset="utf-8"></script>
+
+
+<div id="boardlayout" >
+	<div id="bbsview">
+		<div class="viewbox">
+			<div class="right" >
+				<button type="button" name="boardviewclose" class="bbs_btn">목록</button></span>
+				{? managerview.isperm_write != "_no" }<button type="button"    id="goods_boad_write_btn{managerview.isperm_write}" board_id="{boardid}"  class="bbs_btn">상품후기쓰기 </button>{/}
+				{? display == 0 && managerview.isperm_moddel != "_mbno" } <button type="button"  name="goods_boad_modify_btn{managerview.isperm_moddel}" board_seq="{seq}"  board_id="{boardid}"  class="bbs_btn">수정 </button>{/}
+				{? display == 0 && replylay == 'Y' && managerview.isperm_write != "_no" } <button type="button"  id="goods_boad_reply_btn" board_seq="{seq}"  board_id="{boardid}" class="bbs_btn" >답변 </button>{/}
+				{? ((display == 0 || (display == 1 && replyor == 0 && comment ==0) ) ) && managerview.isperm_moddel != "_mbno"  } <button type="button" name="goods_boad_delete_btn{managerview.isperm_moddel}" board_seq="{seq}"  board_id="{boardid}"  class="bbs_btn">삭제 </button> {/}
+			</div>
+			<br style="line-height:6px;" />
+			<form name="form1" id="form1" method="post" action="{=sslAction('../board_process')}"  target="actionFrame">
+			<input type="hidden" name="mode" id="mode" value="{mode}" />
+			<input type="hidden" name="board_id" id="board_id" value="{manager.id}" />
+			<input type="hidden" name="reply" id="reply" value="{_GET.reply}" />
+			{? seq }
+				<input type="hidden" name="seq" id="board_seq" value="{seq}" />
+			{/}
+			<input type="hidden" name="popup" value="{_GET.popup}" >
+			<input type="hidden" name="iframe" value="{_GET.iframe}" >
+			<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+			<table class="bbsview_table_style" style="width:100%" cellpadding="0" cellspacing="0" border="0">
+			<colgroup>
+				<col /><col width="120px"/>
+			</colgroup>
+			<thead>
+			<tr>
+				<th class="left pdl5  pdt5 pdb5"><b>{datacategory} {iconmobile}{iconaward} {subject} {iconnew} {iconhot} {iconhidden}</b></th>
+				<th class="right">
+				{=snslinkurl('board', subject)}
+				</th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<td class="cell" colspan="2" >
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td><span class="han" >평점</span> {scorelay}{? score_avg_lay }/100{/}
+						{? reviewcategorylist},&nbsp;&nbsp;
+							{@ reviewcategorylist}
+								{.title} {? .score }{=getGoodsScore(.score, manager, 'view', .idx)} {:} 0 {/}
+							{? count(reviewcategorylist)-1 > .index_ },&nbsp;&nbsp;{/}
+							{/}
+						{/}
+						</td>
+						<td width="5"></td>
+					</tr>
+					</table>
+					<div class="cboth"></div>
+				</td>
+			</tr>
+
+			{? goodsreview_sub }
+				<tr>
+				<td class="cell left"  colspan="2">
+				<div class="content" >
+				{@ goodsreview_sub}
+					{? .used == 'Y' }
+						{.label_title} :  {.label_view}<br />
+					{/}
+				{/}
+				</div>
+				</td>
+			</tr>
+			{/}
+			<tr>
+				<td class=" left"  valign="top" >
+						<div class="content" >{contents}</div>
+				</td>
+				<td class=" right" nowrap="nowrap" valign="top" >
+					<div style="margin:5px;line-height:140%;">
+						{? strstr(manager.list_show,'[writer]') }<span class="name">{name}</span>{/}
+						{? strstr(manager.list_show,'[date]') }<br/><span class="date">{r_date}</span>{/}
+						{? strstr(manager.list_show,'[hit]') }<br/><span class="hit">조회수 {=number_format(hit)}</span>{/}
+						{? strstr(manager.list_show,'[order_seq]') }<br/><span class="score">{buyertitle}</span>{/}
+					</div>
+				</td>
+			</tr>
+			</tbody>
+			</table>
+
+			<!--{? file_key_w && uccdomain_fileswf}-->
+			<table class="bbsview_table_style" style="width:100%" cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td class="cell center"   colspan="2">
+					<div class="content" >
+						<embed src="{uccdomain_fileswf}" width="{managerview.video_size0}" height="{managerview.video_size1}" allowfullscreen="true" wmode="transparent"></embed>
+					</div>
+				</td>
+			</tr>
+			</table>
+			<!--{/}-->
+
+
+			{? filelist}
+			<table class="bbsview_table_style" style="width:100%" cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td class="cell" colspan="2" >
+					<div class="attach">
+						<ul>
+								{@ filelist}
+								<li><span class="realfilelist hand highlight-link" realfiledir="{.realfiledir}" realfilename="{.orignfile}"  realfilename="{.orignfile}" board_id="goods_review" filedown="../board_process?mode=board_file_down&board_id=goods_review&realfiledir={.realfiledir}&realfilename={.orignfile}">{.orignfile} (<span class="size">{.realsizefile}</span>) <button type="button"  class="bbs_btn">down</button></span>
+								{? .is_image }<span class="hand" imgsrc="{.realfile}" onclick="board_file_review('{.realfile}','{.imagesize[0]}','{.imagesize[1]}');" ><img src="../images/icon/icon_zoom.gif" hspace="1" title="미리보기"/></span>{/}</li>
+								{/}
+						</ul>
+					</div>
+				</td>
+			</tr>
+			</table>
+			{/}
+
+			</form>
+	
+			<!--{? managerview.auth_recommend_use == 'Y' }-->
+			<!-- 게시글평가 -->
+			<div class="scorelay"  style="margin: 15px 0 5px">{#scoreskin}</div>
+			<!-- 게시글평가 -->
+			<!--{/}--> 
+
+			<!--{? commentlay == 'Y' || comment > 0 // 댓글 사용여부, 댓글수 }-->
+			<!-- 코멘트부분 -->
+			<a name="cmtlist"></a>
+					<div class="comment"  id="comment_container" style="margin: 15px 0 5px">{#commentskin}</div>
+			<!-- 코멘트부분 -->
+			<!--{/}-->
+
+			<!-- 이전/다음 -->
+			<div id="prenextlist"  style="margin: 15px 0 5px">{#prenextskin}</div>
+			<!-- 이전/다음 -->
+		</div>
+
+		<div id="CmtBoardPwCk" class="hide BoardPwCk">
+			<div class="msg">
+				<h3> 비밀번호 확인</h3>
+				<div>댓글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+			</div>
+			<form name="CmtBoardPwcheckForm" id="CmtBoardPwcheckForm" method="post"  target="actionFrame" >
+			<input type="hidden" name="seq" id="cmt_pwck_seq" value="" />
+			<input type="hidden" name="cmtseq" id="cmt_pwck_cmtseq" value="" />
+			<div class="ibox">
+				<input type="password" name="pw" id="cmt_pwck_pw" class="input" />
+				<input type="submit" id="CmtBoardPwcheckBtn" value=" 확인 " class="btnblue" />
+				<input type="button" value=" 취소 " class="btngray" onclick="$('#CmtBoardPwCk').dialog('close');" />
+			</div>
+			</form>
+		</div>
+
+
+		<div id="ModDelBoardPwCk" class="hide BoardPwCk">
+			<div class="msg">
+				<h3> 비밀번호 확인</h3>
+				<div>게시글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+			</div>
+			<form name="ModDelBoardPwcheckForm" id="ModDelBoardPwcheckForm" method="post" action="{=sslAction('../board_process')}" target="actionFrame" >
+			<input type="hidden" name="modetype" id="modetype" value="" />
+			<input type="hidden" name="seq" id="moddel_pwck_seq" value="" />
+			<input type="hidden" name="returnurl" id="moddel_pwck_returnurl" value="" />
+			<div class="ibox">
+				<input type="password" name="pw" id="moddel_pwck_pw" class="input" />
+				<input type="submit" id="BoardPwcheckBtn" value=" 확인 " class="btnblue" />
+				<input type="button" value=" 취소 " class="btngray" onclick="$('#ModDelBoardPwCk').dialog('close');" />
+			</div>
+			</form>
+		</div>
+
+		<div id="BoardPwCk" class="hide BoardPwCk">
+			<div class="msg">
+				<h3> 비밀번호 확인</h3>
+				<div>게시글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+			</div>
+			<form name="BoardPwcheckForm" id="BoardPwcheckForm" method="post" action="{=sslAction('../board_process')}" target="actionFrame" >
+			<input type="hidden" name="seq" id="pwck_seq" value="" />
+			<input type="hidden" name="returnurl" id="pwck_returnurl" value="" />
+			<div class="ibox">
+				<input type="password" name="pw" id="pwck_pw" class="input" />
+				<input type="submit" id="BoardPwcheckBtn" value=" 확인 " class="btnblue" />
+				<input type="button" value=" 취소 " class="btngray" onclick="$('#BoardPwCk').dialog('close');" />
+			</div>
+			</form>
+		</div>
+
+		<div id="CmtBoardPwCkNew" class="hide BoardPwCk">
+			<div class="msg">
+				<h3> 비밀번호 확인</h3>
+				<div>댓글/답글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+			</div>
+			<form name="BoardPwcheckFormNew" id="CmtBoardPwcheckFormNew" method="post" >
+			<input type="hidden" name="modetype" id="cmtmodetype_new" value="" />
+			<input type="hidden" name="seq" id="cmt_pwck_seq_new" value="" />
+			<input type="hidden" name="cmtseq" id="cmt_pwck_cmtseq_new" value="" />
+			<input type="hidden" name="cmtparentseq" id="cmt_pwck_cmtreplyseq_new" value="" />
+			<input type="hidden" name="cmtreplyidx" id="cmt_pwck_cmtreplyidx_new" value="" />
+			<div class="ibox">
+				<input type="password" name="pw" id="cmt_pwck_pw_new" class="input" />
+				<input type="button" id="CmtBoardPwcheckBtnNew" value=" 확인 " class="btnblue" />
+				<input type="button" value=" 취소 " class="btngray" onclick="$('#CmtBoardPwCkNew').dialog('close');" />
+			</div>
+			</form>
+		</div>
+
+	</div>
+</div>
+
+<script type="text/javascript">
+
+function getboardLogin(){
+	{? defined('__ISUSER__') === true }
+		openDialogAlert('해당 서비스를 이용하시려면 관리자에게 문의하여 주시길 바랍니다.','450','140');
+	{:}
+		var returnurl = encodeURIComponent('/goods/view?no={_GET.goods_seq}#goods_review');
+		openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){top.location.href="/member/login?return_url="+returnurl;},function(){});
+	{/}
+}
+
+function getcmtMbLogin(){
+	 {? defined('__ISUSER__') === true }
+	  openDialogAlert('글작성자만 이용가능합니다.','400','140');
+	 {:}
+	  var returnurl = encodeURIComponent('/goods/view?no={_GET.goods_seq}#goods_review');
+	  openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){top.location.href="/member/login?return_url="+returnurl;},function(){});
+	 {/}
+}
+
+$(".content img").load(function() {
+	//이미지 가로가 큰경우
+	$(".content img").each(function() {
+		<!--{ ? layout_config.layoutScrollLeft != 'hidden' || layout_config.layoutScrollRight != 'hidden'}-->
+			var default_width = '{layout_config.body_width-150}';//(본문레이아웃사이즈-100) 또는 직접값변경
+		<!--{:}-->
+			var default_width = '{layout_config.body_width-100}';//(본문레이아웃사이즈-50) 또는 직접값변경
+		<!--{/}-->
+		if( $(this).width() > default_width || $(this).height() > default_width ) {
+			imageResize(this,default_width);
+		}
+	});
+});
+</script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$(document).resize(function(){iframeset();}).resize();
+	setInterval(function(){iframeset();},1000);
+});
+function iframeset(){
+	  $('#'+board_id+'_frame',parent.document).height($('#boardlayout').height()+100);
+}
+</script>

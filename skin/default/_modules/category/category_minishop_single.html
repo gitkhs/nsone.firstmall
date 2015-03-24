@@ -1,0 +1,20 @@
+<style>
+#{categoryPageNavigationKey} .cpn-container	{padding:10px; border:4px solid #f1f1f1;}
+#{categoryPageNavigationKey} .cpn-table td {height:25px;}
+#{categoryPageNavigationKey} .cpn-table a {font-family:tahoma,dotum; font-size:11px; color:#000000;}
+#{categoryPageNavigationKey} .cpn-table a:hover {color:#565656}
+</style>
+
+<div class="cpn-container">
+	<table class="cpn-table" width="100%" align="center" cellpadding="0" cellspacing="0" border="0">
+	<tr>{@ range(1, count_w) }<td width="{=(100/count_w)}%" style="height:0px;"></td>{/}</tr>
+	<tr>
+		<!--{ @ getChildCategory(_GET.category) }-->
+			<!--{ ? .index_ && .index_%count_w==0}--></tr><tr><!--{ / }-->
+			<td>
+				<img src="../../images/common/bullet_dot.gif" align="absmiddle" hspace="5" /><a href="?{page.querystring}&category={.category_code}">{.title}</a>
+			</td>
+		<!--{ / }-->
+	</tr>
+	</table>
+</div>

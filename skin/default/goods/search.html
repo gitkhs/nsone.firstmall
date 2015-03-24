@@ -1,0 +1,180 @@
+<script type="text/javascript">
+$(function(){
+
+	/* 카테고리 불러오기 */
+	category_select_load('','category1','',function(){
+		<!--{?_GET.category1}-->
+		$("select[name='category1']").val('{_GET.category1}').change();
+		<!--{/}-->
+	});
+	$("select[name='category1']").bind("change",function(){
+		$("select[name='category2']").hide();
+		$("select[name='category3']").hide();
+		$("select[name='category4']").hide();
+		
+		category_select_load('category1','category2',$(this).val(),function(){
+			<!--{?_GET.category2}-->
+			$("select[name='category2']").val('{_GET.category2}');
+			<!--{/}-->
+			if($("input[name='insearch']").is(":checked")){
+				$("select[name='category2']").val($("input[name='old_category2']").val());
+				$("form[name='goodsSearchForm'] select option").not(":selected").attr("disabled",true);
+			}
+			$("select[name='category2']").change();
+		});
+		category_select_load('category2','category3',"");
+		category_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").bind("change",function(){
+		$("select[name='category3']").hide();
+		$("select[name='category4']").hide();
+		
+		category_select_load('category2','category3',$(this).val(),function(){
+			<!--{?_GET.category3}-->
+			$("select[name='category3']").val('{_GET.category3}');
+			<!--{/}-->
+			if($("input[name='insearch']").is(":checked")){
+				$("select[name='category3']").val($("input[name='old_category3']").val());
+				$("form[name='goodsSearchForm'] select option").not(":selected").attr("disabled",true);
+			}
+			$("select[name='category3']").change();
+		});
+		category_select_load('category3','category4',"");
+	});			
+	$("select[name='category3']").bind("change",function(){
+		$("select[name='category4']").hide();
+
+		category_select_load('category3','category4',$(this).val(),function(){
+			<!--{?_GET.category4}-->
+			$("select[name='category4']").val('{_GET.category4}');
+			<!--{/}-->
+			if($("input[name='insearch']").is(":checked")){
+				$("select[name='category4']").val($("input[name='old_category4']").val());
+				$("form[name='goodsSearchForm'] select option").not(":selected").attr("disabled",true);
+			}
+			$("select[name='category4']").change();
+		});
+	});
+	
+	$("input[name='insearch']").change(function(){
+		if($(this).is(":checked")){
+			$("select[name='category1']").val($("input[name='old_category1']").val()).change();
+			$("select[name='search_key']").val($("input[name='old_search_key']").val());
+			$("form[name='goodsSearchForm'] select option").not(":selected").attr("disabled",true);			
+		}else{
+			$("select[name='category1']").change();
+			$("form[name='goodsSearchForm'] select option").removeAttr("disabled");
+		}
+	}).change();
+
+	
+});
+</script>
+
+<!-- Search Form -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td><img src="../images/design/tit_search.gif" /></td>
+</tr>
+<tr><td height="8"></td></tr>
+<tr><td height="2" bgcolor="545454"></td></tr>
+<tr><td height="30"></td></tr>
+</table>
+
+<!--[ 상품 검색 폼 ]-->
+<div style="padding:0 0 20px 0">
+{=showGoodsSearchForm(sc)}
+</div>
+
+<!--{ ? _GET.search_text || _GET.category1 }-->
+	
+	<div class="goods_list_summary">검색어 <b>{=htmlspecialchars(implode(", ", explode("\n", _GET.old_search_text)))}</b> | <span class="desc">총 <b>{=number_format(page.totalcount)}</b>개의 상품이 검색되었습니다.</span></div>
+	<div class="goods_list_top">
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td align="left">
+				{?sort}
+				<span class="sort_item">
+					<!--{ @ orders }-->
+						<!--{ ? .index_ }-->
+						&nbsp;&nbsp;|&nbsp;&nbsp;
+						<!--{ / }-->
+						<!--{ ? .key_ == sort }-->
+							<a href="?sort={.key_}&{=get_args_list(array('page','sort'))}"><b>{.value_}</b></a>
+						<!--{ : }-->
+							<a href="?sort={.key_}&{=get_args_list(array('page','sort'))}">{.value_}</a>
+						<!--{ / }-->
+					<!--{ / }-->
+				</span>
+				{/}
+			</td>
+			<td align="right">
+				<select name="perpage" onchange="document.location.href='?perpage='+this.value+'&{=get_args_list(array('page','perpage'))}'">
+					<option value="{=perpage_min}" {?_GET.perpage==perpage_min}selected{/}>{=number_format(perpage_min)}개씩 보기</option>
+					<option value="{=perpage_min*2}" {?_GET.perpage==perpage_min*2}selected{/}>{=number_format(perpage_min*2)}개씩 보기</option>
+					<option value="{=perpage_min*5}" {?_GET.perpage==perpage_min*5}selected{/}>{=number_format(perpage_min*5)}개씩 보기</option>
+					<option value="{=perpage_min*10}" {?_GET.perpage==perpage_min*10}selected{/}>{=number_format(perpage_min*10)}개씩 보기</option>
+				</select>
+				
+				<ul class="goods_list_style">
+					<li {?list_style=='lattice_a'}class="lattice_a_on"{:}class="lattice_a"{/}><a href="?display_style=lattice_a&{=get_args_list(array('page','display_style'))}" title="격자형A"></a></li>
+					<li {?list_style=='lattice_b'}class="lattice_b_on"{:}class="lattice_b"{/}><a href="?display_style=lattice_b&{=get_args_list(array('page','display_style'))}" title="격자형B"></a></li>
+					<li {?list_style=='list'}class="list_on"{:}class="list"{/}><a href="?display_style=list&{=get_args_list(array('page','display_style'))}" title="리스트형"></a></li>
+				</ul>
+			</td>
+		</tr>
+		</table>
+	</div>
+		
+	<div style="height:24px"></div>
+	
+	<!--{ ? page.totalcount==0 }-->
+	<table align="center" cellpadding="0" cellspacing="0" border="0">
+	<tr><td height="50"></td></tr>
+	<tr>
+		<td>
+			<span class="small">죄송합니다. 검색내용이 없습니다.</span>
+		</td>
+	</tr>
+	<tr><td height="50"></td></tr>
+	</table>
+	<!--{ : }-->
+	{goodsDisplayHTML}
+	<!--{ / }-->
+	
+	<div style="height:30px"></div>
+	
+	<!-- 페이징 -->
+	<table align="center" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<div class="paging_navigation">
+				<!--{ ? page.first }--><a href="?page={page.first}&amp;{page.querystring}" class="first">◀ 처음</a><!--{ / }-->
+				<!--{ ? page.prev }--><a href="?page={page.prev}&amp;{page.querystring}" class="prev">◀ 이전</a><!--{ / }-->
+				<!--{ @ page.page }-->
+					<!--{ ? page.nowpage ==  .value_ }-->
+						<a href="?page={.value_}&amp;{page.querystring}" class="on">{.value_ }</a>
+					<!--{ : }-->
+						<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>
+					<!--{ / }-->
+				<!--{ / }-->
+				<!--{ ? page.next }--><a href="?page={page.next}&amp;{page.querystring}" class="next">다음 ▶</a><!--{ / }-->
+				<!--{ ? page.last }--><a href="?page={page.last}&amp;{page.querystring}" class="last">마지막 ▶</a><!--{ / }-->
+			</div>
+		</td>
+	</tr>
+	</table>
+<!--{ : }-->
+	
+	
+	<table align="center" cellpadding="0" cellspacing="0" border="0">
+	<tr><td height="50"></td></tr>
+	<tr>
+		<td>
+			<span class="small">카테고리를 선택하거나 검색어를 입력하여 주세요!</span>
+		</td>
+	</tr>
+	<tr><td height="50"></td></tr>
+	</table>
+
+<!--{ / }-->

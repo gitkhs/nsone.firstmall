@@ -1,0 +1,12 @@
+<style type="text/css">
+.{lastest_key} ul.gallery_list {text-align:center;}
+.{lastest_key} ul.gallery_list li {display:inline-block; width:45%; margin:5px 4px;} 
+</style>
+
+<div style="padding:6px;">
+	<ul class="gallery_list">
+		<!--{ @ getBoardData(recent.boardId,recent.lineCnt,null,null,recent.strcut) }-->
+			<!--{ ? .filelist }--><li><a href="/board/view?id={recent.boardId}&seq={.seq}"><img src="{.filelist}" width="100%" /></a></li><!--{ / }-->
+		<!--{ / }-->
+	</ul>
+</div>

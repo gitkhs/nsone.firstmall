@@ -1,0 +1,242 @@
+<style>
+#{display_key} .goods_list {padding-top:4px; padding-bottom:4px; text-align:{text_align}; *zoom:1;}
+#{display_key} .goods_list:after {clear:both; display:block; content:"";}
+#{display_key} .goods_list li.gl_item {float:left; padding:0px 4px; vertical-align:top; overflow:hidden; width:{=100/count_w}%; box-sizing:border-box;}
+#{display_key} .goods_list li.gl_item>a {display:block; padding-top:5px; padding-bottom:5px;}
+#{display_key} .goods_list span.gli_image {width:100%;}
+#{display_key} .goods_list span.gli_image img {width:100%;}
+#{display_key} .goods_list ol.gli_contents {padding-left:10px; padding-top:10px;}
+#{display_key} .goods_list ol.gli_contents .goods_name {font-size:15px; font-weight:bold;}
+#{display_key} .goods_list ol.gli_contents .goods_summary {display:block; padding-top:5px; font-size:12px; color:gray; }
+#{display_key} .goods_list ol.gli_contents .goods_consumer_price {color:gray}
+#{display_key} .goods_list ol.gli_contents .goods_price {font-weight:bold; font-size:14px; font-family:tahoma; color:#ff3300}
+#{display_key} .goods_list ol.gli_contents .gli_goodsprice {display:block; padding-top:5px; padding-bottom:5px;}
+#{display_key} .fb-like {width:60px;}
+#{display_key} .goods_display_more_btn {display:block; margin:5px auto;
+	width:-webkit-calc(100% - 6px);
+	width:   -moz-calc(100% - 6px);
+	width:        calc(100% - 6px);
+}
+
+#{display_key} .paging_btn {margin:auto;}
+#{display_key} .custom_mobile_pagination {margin:20px auto;}
+</style>
+
+<script>
+var gl_item_resize_{display_key} = function(){
+	if($(window).width()>=500 && $("#{display_key} .goods_list li.gl_item").length>={=count_w*2}){
+		$("#{display_key} .goods_list li.gl_item").not('.gl_item_small').addClass('gl_item_small');
+	}else{
+		$("#{display_key} .goods_list li.gl_item_small").removeClass('gl_item_small');
+	}
+
+	var max_gl_item_height = 0;
+	$("#{display_key} .goods_list li.gl_item").each(function(){
+		if(max_gl_item_height<$(this).css('height','auto').outerHeight()) max_gl_item_height = $(this).outerHeight();
+	}).css('min-height',max_gl_item_height?max_gl_item_height:'auto');
+};
+
+$(function(){
+	/* 상품디스플레이 스와이프형 탭 스크립트 */
+	$("#{display_key} .displaySwipeTabContainer").each(function(){
+		var tabContainerObj = $(this);
+		tabContainerObj.children('li').css('width',(100/tabContainerObj.children('li').length)+'%');
+		tabContainerObj.children('li').bind('mouseover click',function(){
+			tabContainerObj.children('li.current').removeClass('current');
+			$(this).addClass('current');
+			var tabIdx = tabContainerObj.children('li').index(this);
+			tabContainerObj.closest('.designDisplay, .designCategoryRecommendDisplay').find('.displayTabContentsContainer').hide().eq(tabIdx).show();
+		}).eq(0).trigger('mouseover');
+	});
+
+	$(window).bind('resize',function(){
+		gl_item_resize_{display_key}();
+	}).trigger('resize');
+
+	gl_item_resize_{display_key}();
+
+	setTimeout(function(){
+		gl_item_resize_{display_key}();
+	},500);
+});
+</script>
+
+<link rel="stylesheet" type="text/css" href="../../css/mobile_pagination.css" />
+
+<!--{ ? count(displayTabsList)>=1 }-->
+<ul class="displaySwipeTabContainer {tab_design_type} { ? count(displayTabsList)<2 }hide{/}">
+	<!--{ @ displayTabsList }-->
+		<li {?.index_==0}class="current"{/}>{.tab_title}</li>
+	<!--{ / }-->
+</ul>
+<!--{ / }-->
+
+<!--{ @ displayTabsList }-->
+	<!--{ ? .contents_type == 'text' }-->
+		<table class="displaySwipeTabContentsContainer" tabIdx="{.key_}" width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed">
+		<tr>
+			<td>
+				{?mobileMode || storemobileMode}{.tab_contents_mobile}{:}{.tab_contents}{/}
+			</td>
+		</tr>
+		</table>
+	<!--{ : .record }-->
+		<!--{ @ array_chunk(.record,count_w*count_h) }-->
+		<ul class="goods_list displaySwipeTabContentsContainer" tabIdx="{.key_}">
+		<!--{ @ ..value_ }-->
+		<li class="gl_item">
+			<a href="/goods/view?no={...goods_seq}">
+				<span class="gli_image goodsDisplayImageWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(...value_))}"><img src="{...image}" onerror="this.src='../../images/common/noimage.gif'" /></span>
+				<ol class="gli_contents">
+					<!--{ @ info_settings.list }-->
+
+						<!--{? ....value_->kind == 'brand_title' && ...brand_title }-->
+						<li>
+							<span {....value_->name_css}>
+							{?....value_->wrapper}{=substr(....value_->wrapper,0,1)}{/}{...brand_title}{?....value_->wrapper}{=substr(....value_->wrapper,1,1)}{/}
+							</span>
+						</li>
+						<!--{/}-->
+
+						<!--{? ....value_->kind == 'goods_name' }-->
+						<li><span class="goods_name" {....value_->name_css}>{...goods_name}</span> <!--{ @ ...icons }--><img src="/data/icon/goods/{.....value_}.gif" border="0"><!--{ / }--></li>
+						<!--{/}-->
+
+						<!--{? ....value_->kind == 'summary' && ...summary}-->
+						<li><span class="goods_summary" {....value_->name_css}>{...summary}</span></li>
+						<!--{/}-->
+
+						<!-- {? ....value_->kind == 'consumer_price' && ...consumer_price>...sale_price} -->
+						<li>
+							<span {....value_->name_css}>
+							<!--{?...string_price}-->
+								{...string_price}
+							<!--{:}-->
+								{=number_format(...consumer_price)}
+								{?....value_->postfix}{....value_->postfix}{/}
+							<!--{/}-->
+							</span>
+						</li>
+						<!-- {/} -->
+
+						<!--{? ....value_->kind == 'price' }-->
+						<li class="gli_goodsprice">
+							<div class="goods_price" {....value_->name_css}>
+							<!--{?...string_price}-->
+								{...string_price}
+							<!--{:}-->
+								{=number_format(...price)}
+								{?....value_->postfix}{....value_->postfix}{/}
+							<!--{/}-->
+							</div>
+						</li>
+						<!--{/}-->
+
+						<!--{? ....value_->kind == 'sale_price' }-->
+						<li>
+							<span {....value_->name_css}>
+								{?...string_price}
+									{...string_price}
+								{:}
+									{=number_format(...sale_price)}
+									{?....value_->postfix}{....value_->postfix}{/}
+								{/}
+							</span>
+						</li>
+						<!--{/}-->
+
+						<!--{? ....value_->kind == 'fblike' && APP_USE == 'f' && APP_LIKE_TYPE != 'NO'}-->
+						<li>{=snsLikeButton(...goods_seq,....value_->fblike)}</li>
+						<!--{/}-->
+
+						<!--{? ....value_->kind == 'status_icon' }-->
+						<li>
+							<!--{ ? ....value_->status_icon_runout && ...goods_status == 'runout' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_runout}" />
+							<!--{ / }-->
+							<!--{ ? ....value_->status_icon_purchasing && ...goods_status == 'purchasing' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_purchasing}" />
+							<!--{ / }-->
+							<!--{ ? ....value_->status_icon_unsold && ...goods_status == 'unsold' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_unsold}" />
+							<!--{ / }-->
+						</li>
+						<!--{/}-->
+
+						<!--{? ....value_->kind == 'score' }-->
+						<li>
+							<font style="font-weight:bold; color:#fff; background-color:#ee6600; padding:0 3px; font-family:tahoma">{=round(...review_sum/...review_count)}</font>
+							<span class="orange">{=str_repeat('★',round(...review_sum/...review_count))}</span>
+							<span class="gray">{=str_repeat('★',5-round(...review_sum/...review_count))}</span>
+							(<span class="red">{=number_format(...review_count)}</span>)
+						</li>
+						<!--{/}-->
+
+						<!--{? ....value_->kind == 'color' }-->
+						<li>
+							{@(...colors)}
+							<span style="color:{.....value_};">■</span>
+							{/}
+						</li>
+						<!--{/}-->
+
+						<!--{? ....value_->kind == 'count' && ...eventEnd }-->
+							<li class="soloEventTd{...goods_seq}" style="padding-top:5px; font-face:Dotum; font-size:11px;">
+								<img src="../../images/common/icon_clock.gif" style="padding-bottom:2px;"> <span style="background-color:#c61515; color:#ffffff; padding:2px; font-weight:bold;"><span id="soloday{...goods_seq}" style="color:#ffffff; font-weight:bold;"></span>일 <span id="solohour{...goods_seq}" style="color:#ffffff; font-weight:bold;"></span>:<span id="solomin{...goods_seq}" style="color:#ffffff; font-weight:bold;"></span>:<span id="solosecond{...goods_seq}" style="color:#ffffff; font-weight:bold;"></span></span>
+							<script>
+							$(function() {
+								timeInterval{...goods_seq} = setInterval(function(){
+									var time{...goods_seq} = showClockTime('text', '{...eventEnd.year}', '{...eventEnd.month}', '{...eventEnd.day}', '{...eventEnd.hour}', '{...eventEnd.min}', '{...eventEnd.second}', 'soloday{...goods_seq}', 'solohour{...goods_seq}', 'solomin{...goods_seq}', 'solosecond{...goods_seq}', '{...goods_seq}');
+									if(time{...goods_seq} == 0){
+										clearInterval(timeInterval{...goods_seq});
+										$("...soloEventTd{displayGoods.goods_seq}").html("단독 이벤트 종료");
+									}
+								},1000);
+							});
+							</script>
+							</li>
+						<!--{/}-->
+
+						<!--{? ....value_->kind == 'event_text' }-->
+						<li>
+							<span {....value_->name_css}>
+								{?is_numeric(...event_text)}
+									{=number_format(...event_text)}
+									{?....value_->postfix}{....value_->postfix}{/}
+								{:}
+									{...event_text}
+								{/}
+							</span>
+						</li>
+						<!--{/}-->
+					<!--{ / }-->
+					<!--{? is_bigdata_display == 'y' }-->
+						<li>
+							<span>
+								<a href="/bigdata/catalog?no={.goods_seq}"><u style="font-size:11px;color:#0094e1;">다른 사람은 뭘살까?</u></a>
+							</span>
+						</li>
+					<!--{ / }-->
+				</ol>
+			</a>
+		</li>
+		<!--{ / }-->
+		</ul>
+		<!--{ / }-->
+	<!--{ : }-->
+	<div class="displaySwipeTabContentsContainer" tabIdx="{.key_}">
+		<div style="width:90%; margin:auto; height:100px; background-color:red"></div>
+	</div>
+	<!--{ / }-->
+<!--{ / }-->
+
+{?navigation_paging_style}
+<table class="paging_btn" align="center">
+<tr>
+	<td>
+		<div class="custom_mobile_pagination" pagingStyle="{navigation_paging_style}">
+		</div>
+	</td>
+</tr>
+</table>
+{/}

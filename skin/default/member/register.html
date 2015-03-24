@@ -1,0 +1,162 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td height="30"></td>
+</tr>
+<tr>
+	<td width="40"></td>
+	<td>
+		<!-- 본문내용 시작 -->
+
+<form name="registFrm" id="registFrm" target="actionFrame" method="post" action="{=sslAction('../member_process/register_ok')}">
+	<input type="hidden" name="mtype" value="{mtype}"/>
+
+			<!-- 타이틀 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td><img src="../images/design/tit_join.gif" /></td></tr>
+			<tr><td height="10"></td></tr>
+			<tr><td><span class="desc">회원이 되셔서 회원등급할인/할인쿠폰/적립금 등 다양한 서비스를 받으세요.</span></td></tr>
+			</table>
+
+			<div style="height:40px"></div>
+
+			<!-- 가입폼 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<table border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td valign="top" align="left" height="15"><img src="../images/design/join_stit_inputmem.gif"/></td>
+							<td width="8"></td>
+							<td valign="bottom" align="right"><span class="desc">회원 가입 시 필요한 정보들을 입력하세요.</span></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr><td height="6"></td></tr>
+				<tr><td height="2" bgcolor="545454"></td></tr>
+				<tr><td height="25"></td></tr>
+				<tr>
+					<td>
+
+
+						{# form_member}
+
+
+					</td>
+				</tr>
+				<tr><td height="40"></td></tr>
+				<tr><td height="1" bgcolor="cbcbcb"></td></tr>
+				<tr><td height="70"></td></tr>
+				<tr>
+					<td align="center">
+						<input type="image" src="../images/design/btn_ok.gif" />&nbsp;&nbsp;&nbsp;
+						<img src="../images/design/btn_cancel.gif" class="hand" onclick="history.back();"/>
+					</td>
+				</tr>
+			</table>
+</form>
+
+		<!-- 본문내용 끝 -->
+	</td>
+	<td width="40"></td>
+</tr>
+</table>
+
+
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("input[name='userid']").blur(function() {
+		if($(this).val()){
+			$.post("../member_process/id_chk", { userid : $(this).val() }, function(response){
+				//debug(response);
+				var text = response.return_result;
+				var userid = response.userid;
+				$("#id_info").html(text);
+				$("input[name='userid']").val(userid);
+			},'json');
+		}
+    });
+
+	{? mtype=='business' && joinform.bno_use=='Y'}
+	$("input[name='bno']").blur(function() {
+		if($(this).val()){
+			$.post("../member_process/bno_chk", { bno : $(this).val() }, function(response){
+				//debug(response);
+				var text = response.return_result;
+				var bno = response.bno;
+				$("#bno_info").html(text);
+				//$("input[name='bno']").val(bno);
+			},'json');
+		}
+    });
+	{/}
+
+	$('#find_email').change(function() {
+		$("input[name='email[1]']").val($(this).val());
+		if(!$(this).val()){
+			$("input[name='email[1]']").attr("readonly",false);
+		}else{
+			$("input[name='email[1]']").attr("readonly",true);
+		}
+	});
+
+});
+
+
+function filterKey() {
+	var filter = "[0-9a-z]";
+   if(filter){
+      // fromCharCode : 매개 변수에서 ASCII 값이 나타내는 문자들로 구성된 문자열을 반환합니다
+      var sKey = String.fromCharCode(event.keyCode);
+
+      // RegExp
+      // 정규표현을 취급하는 객체로 new를 사용하지 않고 정규표현 문자열을 변수에 대입하는 것으로도 동일한 결과
+      var re = new RegExp(filter);
+
+      // test() : 일치하는 문자열이 있는 경우 true, 없으면 false
+      if(!re.test(sKey)) event.returnValue=false;
+   }
+}
+</script>
+
+
+
+{? joinform.user_icon=='Y' } 
+<script type="text/javascript">
+$(document).ready(function() { 
+		
+		$("button#membericonUpdate").live("click",function(){
+			$('#membericonRegist')[0].reset();
+			$("input[name=user_icon][value='99']").attr("checked",true);
+			openDialog("아이콘", "membericonUpdatePopup", {"width":"380","height":"150","show" : "fade","hide" : "fade"});
+		});
+});
+	function membericonFileUpload(str){
+		if(str > 0) {
+			alert('로고를 선택해 주세요.');
+			return false;
+		}
+		var frm = $('#membericonRegist');
+		frm.attr("action","../member_process/membericonsave");
+		frm.submit();
+	}
+
+	function membericonDisplay(filenm){
+		$("#membericon_img").attr("src",filenm);
+		$("#membericon_img").css("display","block"); 
+		$("#membericonDelete").css("display","block");
+		$('#membericonRegist')[0].reset();
+		$("#membericonUpdatePopup").dialog("close");
+	}
+</script>
+
+
+<div id="membericonUpdatePopup" class="hide">
+	<form name="membericonRegist" id="membericonRegist" method="post" action="" enctype="multipart/form-data"  target="actionFrame">
+	<div style="height:20px;padding-left:30px;"><span class='desc'>사이즈는 30 × 30 으로 등록해 주세요.</span></div>
+	<div style="height:30px;padding-left:30px;"><input type="file" name="membericonFile" class="line"  style="height:25px;"  id="membericonFile" onChange="membericonFileUpload();" /></div>
+	</form>
+</div>
+{/}

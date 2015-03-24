@@ -1,0 +1,167 @@
+<script type="text/javascript">
+$(function(){
+	$( "#datepicker" ).datepicker({
+		dateFormat: "yy-mm-dd",
+		showOn: "button",
+		buttonImage: "../../../images/board/icon/btn_calender_2020.png",
+		buttonImageOnly: true		
+	});
+});
+
+$(document).ready(function() {
+	
+	$('#usrinfo_chk').click(function() {
+		if ($("input[name='usrinfo_chk']").is(":checked")){
+			var phone_tmp = "{tel2}";
+			var arr_phone = phone_tmp.split("-");
+
+			$(".txt_name").val("{name}");
+			$("#phone_num1").val(arr_phone[0]);
+			$("#phone_num2").val(arr_phone[1]);
+			$("#phone_num3").val(arr_phone[2]);
+		}else{
+			$(".txt_name").val("");
+			$("#phone_num1").val("010");
+			$("#phone_num2").val("");
+			$("#phone_num3").val("");
+		}
+	});
+
+	$('#reserve_write_btn').click(function() {
+		$("#writeform").submit();
+	});
+	$('#reserve_back_btn').click(function() {
+		history.back(-1);
+	});	
+
+	var seq = "{seq}";
+	if(seq){		
+		var phone_tmp = "{tel1}";
+		var arr_phone = phone_tmp.split("-");
+		$("#phone_num1").val(arr_phone[0]);
+		$("#phone_num2").val(arr_phone[1]);
+		$("#phone_num3").val(arr_phone[2]);
+
+		var date_tmp = "{reserve_date}";
+		
+		var arr_date = date_tmp.split(" ");
+		var arr_time = arr_date[1].split(":");
+		$("#datepicker").val(arr_date[0]);
+		$("#reserve_time_h").val(Number(arr_time[0]));
+		$("#reserve_time_m").val(Number(arr_time[1]));
+	}
+	
+});
+
+</script>
+<link type="text/css" rel="stylesheet" charset="utf-8" href="./board.css" />
+{ ? !_GET.iframe }
+<div class="sub_title_bar">
+	<h2>예약하기</h2>
+	<a href="javascript:history.back();" class="stb_back_btn">
+		<img src="../../../images/design/btn_back.png" class="hand" width="22" height="22" />
+	</a>
+</div>
+{ / }
+
+<form name="writeform" id="writeform" method="post" action="{=sslAction('../board_process')}"  enctype="multipart/form-data" target="comentFrame">
+{? seq}
+<input type="hidden" name="mode" id="mode" value="board_modify" />
+{ : }
+<input type="hidden" name="mode" id="mode" value="board_write" />
+{ / }
+<input type="hidden" name="delseq" id="seq" value="{_GET.seq}" />
+<input type="hidden" name="board_id" id="board_id" value="{_GET.id}" />
+<input type="hidden" name="subject" id="subject" value="offline" />
+<input type="hidden" name="iframe" value="{_GET.iframe}" >
+<input type="hidden" name="calllink" value="{_GET.calllink}" >
+
+<div style="padding:20px 10px;" class="write_reserve_area">
+	<table border="0" cellpadding="3" cellspacing="0" width="100%">
+	<tr>
+		<td width="80" class="title">예약자정보</td>
+		<td align="right" style="font-size:11px; color:#767575;">
+			{? userInfo.member_seq && userInfo.user_name }
+			<label><input class="checkbox" type="checkbox" name="usrinfo_chk" id="usrinfo_chk" value="y" /> 로그인정보와동일</label>
+			{ / }
+		</td>
+	</tr>
+
+	<tr><td height="10" colspan="2"></td></tr>
+
+	<tr>
+		<td>이름</td>
+		<td>
+			{? seq }
+			<input type="text" name="real_name" class="txt_name" value="{name}" />			
+			{ : }
+			<input type="text" name="name" class="txt_name" value="" title="이름입력" />
+			{ / }
+		</td>
+	</tr>
+	{? !userInfo.member_seq && !userInfo.user_name && !seq }
+	<tr>
+		<td>비밀번호</td>
+		<td><input type="password" name="pw" value="" maxlength="20" class="txt_name" /></td>
+	</tr>
+	{ / }
+	<tr>
+		<td>휴대폰</td>
+		<td>
+			<select name="phone_num1" id="phone_num1" class="txt_input">
+				<option value="010">010</option>
+				<option value="011">011</option>
+				<option value="016">016</option>
+				<option value="017">017</option>
+				<option value="019">019</option>
+				<option value="070">070</option>
+			</select> 
+			- <input type="tel" name="phone_num2" id="phone_num2" value="" class="txt_input" maxlength="4" onkeyup="if(this.value.search(/[^0-9]/)!=-1)this.value=this.value.replace(/[^0-9]/g, '');"/> 
+			- <input type="tel" name="phone_num3" id="phone_num3" value="" class="txt_input" maxlength="4" onkeyup="if(this.value.search(/[^0-9]/)!=-1)this.value=this.value.replace(/[^0-9]/g, '');"/> 
+		</td>
+	</tr>
+
+	<tr><td height="20" colspan="2"></td></tr>
+
+	<tr>
+		<td colspan="2" class="title">예약날짜</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<input type="text" name="reserve_date" id="datepicker" value="{reserve_date}" maxlength="10" class="txt_date" readonly />&nbsp;			
+			<select name="reserve_time_h" id="reserve_time_h" class="txt_sel">
+				{@range(0,23)}
+				<option value="{.value_}">{.value_}시</option>
+				{/}
+			</select>
+			<select name="reserve_time_m" id="reserve_time_m" class="txt_sel">
+				{@range(0,59,15)}
+				<option value="{.value_}">{.value_}분</option>
+				{/}
+			</select>
+		</td>
+	</tr>
+
+	<tr><td height="10" colspan="2"></td></tr>
+
+	<tr>
+		<td colspan="2" class="title">문의사항</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			{? seq}
+				<textarea name="modify_contents_{seq}" style="width:97%; height:40px;" title="예약/문의와 관련 없는 글은 삭제됩니다.">{contents}</textarea>
+			{ : }
+				<textarea name="contents" style="width:97%; height:40px;" title="예약/문의와 관련 없는 글은 삭제됩니다."></textarea>
+			{ / }
+		</td>
+	</tr>
+	</table>
+	<div align="center" style="padding-top:10px;">
+		<input type="button" name="reserve_back_btn" id="reserve_back_btn" value="목록" class="btn_cancel_large hand" style="width:29%;" />
+		<input type="button" name="reserve_write_btn" id="reserve_write_btn" value="예약하기" class="btn_important_large hand" style="width:70%;" />
+	</div>
+</div>
+</form>
+
+<iframe name="comentFrame" src="/main/blank" frameborder="0" width="0" height="0"></iframe>

@@ -1,0 +1,50 @@
+<script type="text/javascript">
+// 쿠폰상품 지도변경 버튼
+function setMapajax(){
+	var option_seq	= $("#option_location option:selected").val();
+	var goods_seq	= $("#option_location option:selected").attr('goods_seq');
+
+	$.ajax({
+			type: "post",
+			url: "../goods/coupon_location_ajax",
+			data: {'option_seq':option_seq, 'goods_seq':goods_seq, 'width':'300'},
+			success: function(result){
+				$("#NaverMap").html('');
+				$("#map_area").html(result);
+			}
+		});
+}
+</script>
+<!-- 쿠폰상품 위치 안내 : 시작 -->
+<div class="goods_mapview" style="padding:10px;align-text:center;">
+	<div style="margin:-20px;padding-bottom:10px;">
+		{=showNaverMapApi('300', '300', mapArr[0]['address'], mapArr[0]['option'])}
+	</div>
+	<div id="map_area"></div>
+	<table cellpadding="0" cellspacing="0" border="0" width="100%" style="line-height:17px;">
+	<tr>
+		<td width="50px">업체명</td><td width="5px"> : </td>
+		<td>
+			<select name="option_location" id="option_location" >
+				<!--{@ mapArr }-->
+				<option value="{.o_seq}" goods_seq="{_GET.no}" >{.option}</option>
+				<!--{ / }-->
+			</select>
+			<span class="btn small cyanblue"><button type="button" onclick="setMapajax();">보기</button></span>
+		</td>
+	</tr>
+	<tr>
+		<td>주소</td><td> : </td>
+		<td id="address">{mapArr[0]['address']}</td>
+	</tr>
+	<tr>
+		<td></td><td></td>
+		<td id="street">{mapArr[0]['address_street']}</td>
+	</tr>
+	<tr>
+		<td>전화번호</td><td> : </td>
+		<td id="biztel">{mapArr[0]['biztel']}</td>
+	</tr>
+	</table>
+</div>
+<!-- 쿠폰상품 위치 안내 : 끝 -->

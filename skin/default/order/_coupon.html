@@ -1,0 +1,97 @@
+{ + cartlist }
+<!--{ ? cart_list }-->
+		<!--{ @ cart_list }-->
+		<tr>
+			<td width="450"  style="{? count(cart_list)-1 > index_ } border-bottom:1px solid #ddd;border-right:1px solid #ddd;{/}">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+				<tr>
+					<td class="left  cell" width="60" valign="top"><img src="{.image}" align="absmiddle" hspace="5" style="border:1px solid #ddd;" width="50"  onerror="this.src='../images/common/noimage_list.gif'"  /></td>
+					<td class="left cell"  >
+						<div>{.goods_name}</div>
+						<div>
+							<!--{ ? .option1 }-->
+							<div class="goods_option">
+							<img src="/admin/skin/default/images/common/icon_option.gif" />
+							{?.title1}{.title1}:{ / }{.option1}
+							{ ? .option2 }{?.title2}{.title2}:{ / }{.option2} { / }
+							{ ? .option3 }{?.title3}{.title3}:{ / }{.option3} { / }
+							{ ? .option4 }{?.title4}{.title4}:{ / }{.option4} { / }
+							{ ? .option5 }{?.title5}{.title5}:{ / }{.option5} { / }
+							</div>
+							<!--{ / }-->
+							<!--{ ? .cart_inputs }-->
+							<!--{ @ .cart_inputs }-->
+							<!--{ ? ..input_value }-->
+							<div class="goods_input">
+							<img src="/admin/skin/default/images/common/icon_input.gif" />
+							{?..input_title}{..input_title}:{ / }{..input_value}
+							</div>
+							<!--{ / }-->
+							<!--{ / }-->
+							<!--{ / }-->
+						</div>
+						<div >수량 : {=number_format(.ea)}개</div>
+					</td>
+				</tr>
+				</table>
+			</td>
+			<td style="{? count(cart_list)-1 > index_ } border-bottom:1px solid #ddd;{/}"> 
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+				<tr>
+					<td class="center "    valign="top" colspan="2" >
+					<select name="coupon[{.cart_seq}]" class="coupon_select" id="coupon_{.cart_seq}_{.cart_option_seq}"  onchange="getCouponselect(this)">
+						<option value="" selected="selected" >--쿠폰 선택--</option>
+						<!--{ @ .coupons }-->
+						<option value="{..download_seq}" couponsametime="{..coupon_same_time}"  duplication="{..duplication_use}" sale="{..goods_sale}"  {? ..download_seq == .download_seq } selected="selected" {/} >{..coupon_name}( 할인 {=number_format(..goods_sale)}원)</option>
+						<!--{ / }-->
+					</select>
+					</td>
+				</tr>
+				<tr>
+					<td class="left" style="padding:7px;" width="20"> 
+						<span class="btn small black"><button type="button" name="couponInfoButton" class="ordercoupongoodsreviewbtn"   download_seq="" >쿠폰정보</button></span>
+					</td>
+					<td class="left" style="padding:7px;"  >
+						<span class='sale coupon_sale_{.cart_seq}_{.cart_option_seq}'  >{=number_format(.coupon_sale/.ea)}</span>원
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+	<!--{ / }-->
+<!--{ / }-->
+<script>
+$.cookie( "couponsametimeuse", null );
+</script>
+{ + shippincoupon }
+<!--{ ? shippingcoupons }--> 
+	<tr>
+		<td width="450">우측의 배송쿠폰을 선택해 주세요.
+			<div class="desc" align="center"  style="padding:10px 0 0 0;">배송비 쿠폰은 개별배송 상품에는 반영되지 않습니다.</div></td>
+		<td class=" cell center" > 
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+			<tr>
+			<td class="center " valign="top" colspan="2" >
+				<select name="coupon_shipping[]" id="shipping_coupon_select" class="shipping_coupon_select" onchange="getShippingCouponselect(this)" width="250">
+				<option value="" selected>--배송비 쿠폰 선택--</option>
+					<!--{ @ shippingcoupons }-->
+					<option value="{.download_seq}"  couponsametime="{.coupon_same_time}"   sale="{.shipping_sale}" {? .download_seq == _POST.download_seq } selected="selected" {/} >{.coupon_name}( 할인 :{=number_format(.shipping_sale)}원)</option>
+					<!--{ / }-->
+				</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="left" style="padding:7px;" width="20"> 
+					<span class="btn small black"><button type="button" name="couponInfoButton"  class="shippingcoupongoodsreviewbtn"  download_seq="" >쿠폰정보</button></span>
+				</td>
+				<td class="left" >
+					<span class='sale shipping_coupon_sale'  >{=number_format(shipping_coupon_sale)}</span>원
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+<!--{ / }-->
+<script>
+$.cookie( "couponsametimeuse", null );
+</script>

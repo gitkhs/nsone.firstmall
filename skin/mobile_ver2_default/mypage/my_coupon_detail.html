@@ -1,0 +1,47 @@
+<script type="text/javascript">
+$(document).ready(function() {
+
+	{? _GET.download_seq == '' || _GET.coupon_seq == ''}
+		alert('잘못된 접근입니다.');
+		history.back(-1);
+	{/}
+
+	// 사용하기 클릭시
+	$('.btn_important_large').click(function() {
+		{? down_coupon.use_status == 'unused'}		
+			window.open("./my_coupon_use?coupon_seq={_GET.coupon_seq}&download_seq={_GET.download_seq}");
+		{:}
+			alert('사용한 쿠폰입니다.');
+		{/}
+	});
+
+});
+</script>
+<!-- 타이틀 -->
+{?!mobileAjaxCall}
+<div class="sub_title_bar">
+	<h2>쿠폰상세정보</h2>
+	<a href="javascript:history.back();" class="stb_back_btn">
+		<img src="../images/design/btn_back.png" class="hand" width="22" height="22" />
+	</a>
+</div>
+{/}
+
+<div class="coupon_title">{coupon.coupon_name}</div>
+<div class="coupon_body">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>		
+			<pre>{coupon.limit_txt}</pre>
+		</td>
+	</tr>
+	</table>
+
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="btn_use">
+	<tr>
+		<td align="center" >
+			<input type="button" value="사용하기" class="hand btn_important_large" style="width:100%" />
+		</td>
+	</tr>
+	</table>
+</div>

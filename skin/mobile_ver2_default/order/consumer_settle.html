@@ -1,0 +1,1020 @@
+{is_file_facebook_tag}
+<style>
+.coupon_goods_name {line-height:35px;white-space:nowrap;}
+.shipping_method {padding-right:10px;display:inline-block;}
+
+.coupon_btn {position:relative; display:inline-block; width:71px; height:34px; background:url("../images/design/coupon_bg.gif"); vertical-align:middle;}
+.coupon_btn span.cb_percent {position:absolute; left:4px; top:14px; font-size:14px; font-family:tahoma; color:#c00c0b; font-weight:bold;}
+.coupon_btn span.cb_text {position:absolute; right:100%; top:20px; margin-left:3px; width:65px; color:#c00c0b; font-size:11px; font-family:dotum; font-weight:bold; text-decoration:underline;}
+
+</style>
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" charset="utf8"></script>
+<script type="text/javascript">
+var gl_mode = '{mode}';
+var gl_region = new Array();
+<!--{ @ shipping_policy.policy[1] }-->
+gl_region[{.key_}] = new Array();
+<!--{ @ .value_.region }-->
+gl_region[{.key_}][{..key_}] = "{..value_}";
+<!--{ / }-->
+<!--{ / }-->
+var gl_skin = "{config_system.skin}";
+var gl_mobile = '{mobile}';
+var gl_ssl_action = '{=sslAction(implode('',array('../order/pay?mode=',mode)))}';
+var gl_pg_company = '{pg_company}';
+var gl_isuser = false;
+{ ? defined('__ISUSER__') }
+gl_isuser = {=defined('__ISUSER__')};
+{ / }
+
+gl_iscancellation = false;
+{ ? cancellation }
+gl_iscancellation = true;
+{ / }
+var gl_cashreceiptuse = '{cfg.order.cashreceiptuse}';
+var gl_taxuse = '{cfg.order.taxuse}';
+var gl_request_uri = '{=urlencode(_SERVER.REQUEST_URI)}';
+var gl_skin = "{config_system.skin}";
+var gl_http_host = '{_SERVER.HTTP_HOST}';
+var gl_sub_domain = '{config_system.subDomain}';
+</script>
+<script type="text/javascript">
+{ ? is_file_facebook_tag }
+	window.fbAsyncInit = function() {
+		FB.init({
+		appId      : plus_app_id, //App ID
+		status     : true, // check login status
+		cookie     : true, // enable cookies to allow the server to access the session
+		xfbml      : true,  // parse XFBML,
+		oauth      : true
+		});  
+		{ ? cfg.order.fblike_ordertype && fblikesale }
+		FB.getLoginStatus(function(response) {
+			$("#fbloginlay").hide();
+			{ ? !fbuser }
+			$.ajax({'url' : '../sns_process/facebooklogincknone', 'type' : 'post'});
+			{ / }
+			if (response.status === 'connected') {
+				var uid = response.authResponse.userID;
+				var accessToken = response.authResponse.accessToken;
+			}else if (response.status === 'not_authorized') {
+				$("#fbloginlay").show();
+			} else {
+				$("#fbloginlay").show();
+			}
+		});
+		{ / }
+		{ ? APP_USE == 'f' }
+		// like 이벤트가 발생할때 호출된다.
+		FB.Event.subscribe('edge.create', function(response) {
+			$("#facebook_mgs").html("페이스북과 정보를 교환 중에 있습니다. 잠시만 기다려 주세요.");
+			{? ( _SERVER.HTTP_HOST==APP_DOMAIN ) }
+				$.ajax({'url' : '../sns_process/facebooklikeck', 'type' : 'post', 'data' : {'mode':'like', 'product_url':response}, 'dataType': 'json','success': function(result){$("#facebook_mgs").html("");order_price_calculate();}});
+			{:}
+				var url = 'http://{config_system.subDomain}/sns_process/facebooklikeck?mode=like&firstmallcartid={firstmallcartid}&product_url='+response;
+				$.getJSON(url + "&jsoncallback=?", function(res) {$("#facebook_mgs").html("");order_price_calculate();}); 
+			{/}
+		});
+
+		// unlike 이벤트가 발생할때 호출된다.
+		FB.Event.subscribe('edge.remove', function(response) {
+			$("#facebook_mgs").html("페이스북과 정보를 교환 중에 있습니다. 잠시만 기다려 주세요.");
+			{? ( _SERVER.HTTP_HOST==APP_DOMAIN ) }
+				$.ajax({'url' : '../sns_process/facebooklikeck', 'type' : 'post', 'data' : {'mode':'unlike', 'product_url':response}, 'dataType': 'json','success': function(result){$("#facebook_mgs").html("");order_price_calculate();}});
+			{:}
+				var url = 'http://{config_system.subDomain}/sns_process/facebooklikeck?mode=unlike&firstmallcartid={firstmallcartid}&product_url='+response;
+				$.getJSON(url + "&jsoncallback=?", function(res) {$("#facebook_mgs").html("");order_price_calculate();}); 
+			{/}
+			
+		});//
+		{ / }
+	}
+{ / }
+</script>
+<script type="text/javascript" src="/app/javascript/js/order-settle.js?dummy=20140123" charset="utf8"></script>
+<script type="text/javascript">
+$(function() {
+	<!--{ ? shipping_policy.count && array_sum(shipping_policy.count) > 1 }-->
+	$("tr.shipping_tr").show();
+	<!--{ : }-->
+	$("tr.shipping_tr").hide();
+	<!--{ / }-->
+	<!--{ ? shipping_policy.count[0] && shipping_policy.count[1] }-->
+	$("div.international_layer").show();
+	<!--{ / }-->
+ 
+
+	{ ? isplusfreenot && isplusfreenot.ispromotioncode && _GET.person_seq == "" }
+		getPromotionckloding('{cart_promotioncode}');
+	{ / }
+});
+</script>
+<script type="text/javascript">
+$(window).load(function() { 
+
+	$("input[name='chkQuickAddress']").bind('click',function(){
+		if($(this).attr('type')=='radio' && !$(this).is(":checked")) return;
+
+		var val = $(this).val();
+
+		if($(this).attr('type')=='checkbox' && val=='copy'){
+			if(!$(this).is(":checked")){
+				val = 'new';
+			}
+		}
+
+		switch(val){
+			case "often":
+			case "lately":
+			case "member":
+				var data = {'type':$(this).val()};
+
+				$.ajax({
+					'url' : 'ajax_get_delivery_address',
+					'data' : data,
+					'dataType' : 'json',
+					'success' : function(res){
+						if(res){
+							
+							if (res.recipient_zipcode != null) {
+								$("input[name='recipient_zipcode[]']").each(function(idx){
+									$(this).val( res.recipient_zipcode.split('-')[idx] );
+								});
+							}
+
+							if(res.recipient_address_type == "street"){
+								$("input[name='recipient_address']").hide();
+								$("input[name='recipient_address_street']").show();
+							}else{
+								$("input[name='recipient_address']").show();
+								$("input[name='recipient_address_street']").hide();
+							}
+
+							$("input[name='recipient_address_type']").val( res.recipient_address_type );
+							$("input[name='recipient_address']").val( res.recipient_address );
+							$("input[name='recipient_address_street']").val( res.recipient_address_street );
+							$("input[name='recipient_address_detail']").val( res.recipient_address_detail );
+							if( res.recipient_address_street && res.recipient_address_street.length ) {
+								$("input[name='recipient_address']").hide();
+								$("input[name='recipient_address_street']").show();
+							}
+							$("input[name='recipient_user_name']").val( res.recipient_user_name );
+							$("input[name='recipient_email']").val( res.recipient_email );
+
+							$("input[name='recipient_phone[]']").each(function(idx){
+								$(this).val( res.recipient_phone.split('-')[idx] );
+							});
+
+							$("input[name='recipient_cellphone[]']").each(function(idx){
+								$(this).val( res.recipient_cellphone.split('-')[idx] );
+							});
+
+							$("input[name='recipient_zipcode[]']").first().blur();
+						}
+					}
+				});
+			break;
+			case "new":
+				$("input[name='order_zipcode[]']").each(function(idx){
+					$("input[name='recipient_zipcode[]']").eq(idx).val("");
+				});
+
+				$("input[name='recipient_address_type']").val("");
+				$("input[name='recipient_address']").val("");
+				$("input[name='recipient_address_street']").val("");
+				$("input[name='recipient_address_detail']").val("");
+				$("input[name='recipient_user_name']").val("");
+
+				$("input[name='international_address']").val("");
+				$("input[name='international_town_city']").val("");
+				$("input[name='international_county']").val("");
+				$("input[name='international_postcode']").val("");
+				$("input[name='international_country']").val("");
+
+				$("input[name='order_phone[]']").each(function(idx){
+					$("input[name='recipient_phone[]']").eq(idx).val("");
+				});
+
+				$("input[name='order_cellphone[]']").each(function(idx){
+					$("input[name='recipient_cellphone[]']").eq(idx).val("");
+				});
+
+				$("input[name='recipient_email']").val("");
+			break;
+		}
+	}).first().attr('checked',true).trigger('click').trigger('change');
+});
+
+function toggleCartSaleDetailView(obj,key){
+	if($(key).is(":hidden")){
+		$(key).stop(true,true).show();
+		$(obj).removeClass('btn_arw_dn_gray').addClass('btn_arw_up_gray');
+		$('span',obj).removeClass('btn_arw_dn_icon').addClass('btn_arw_up_icon');
+	}else{
+		$(key).stop(true,true).hide();
+		$(obj).removeClass('btn_arw_up_gray').addClass('btn_arw_dn_gray');
+		$('span',obj).removeClass('btn_arw_up_icon').addClass('btn_arw_dn_icon');
+	}
+}
+</script>
+
+<div id="PromotionDialog" class="hide"></div>
+
+<div id="couponDownloadDialog" style="display:none"></div>
+
+<div class="sub_title_bar">
+	<h2>주문/결제</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+
+<form name="orderFrm" id="orderFrm" method="post" action="cacluate" target="actionFrame">
+	<input type="hidden" name="delivery_coupon" value="" />
+	<input type="hidden" name="download_seq" id="download_seq" value="" />
+	<input type="hidden" name="coupon_sale" id="shipping_coupon_sale" value="" />
+	<input type="hidden" name="shipping_promotion_code_seq" id="shipping_promotion_code_seq" value="" />
+	<input type="hidden" name="shipping_promotion_code_sale" id="shipping_promotion_code_sale" value="" />
+	<input type="hidden" name="member_seq" id="member_seq" value="{_GET.member_seq}" />
+	<input type="hidden" name="person_seq" id="person_seq" value="{_GET.person_seq}" />
+	<input type="hidden" name="enuri" id="enuri" value="{enuri}" />
+	<input type="hidden" name="is_goods" value="{is_goods}" />
+	<input type="hidden" name="mobilenew" value="y" />
+
+	<div class="sub_division_title">주문상품내역<div class="sub_division_arw"></div></div>
+	<div class="sub_division_contents cart_contents">
+		<div class="settle_cart_list">
+		<!--{ ? shipping_cart_list }-->
+		<!--{ @ shipping_cart_list }-->
+		<!--{ @ .value_ }-->
+			<!--{ ?..index_ == 0 }-->
+			<div class="goods_delivery_info clearbox" rowspan="{=shipping_company_cnt[.shipping_group]}">
+				<div class="fleft">
+					<!--{ ? ..goods_kind == 'coupon' }-->
+					쿠폰
+					<!--{: ..shipping_policy == 'shop'}-->
+					기본배송비
+					<!--{ : }-->
+					개별배송비
+					<!--{ / }-->
+				</div>
+				<div class="fright">
+					<!--{? ..shipping_policy == 'shop'}-->
+					<div id="basic_delivery">{=number_format(shipping_price.shop)}원</div>
+					<!--{ : }-->
+					<div id="goods_each_delivery_{..goods_seq}">{=number_format(data_goods[..goods_seq].goods_shipping)}원</div>
+					<!--{ / }-->
+				</div>
+			</div>
+			<!--{ / }-->
+			<div class="cart_goods item_option">
+				<div class="cart_goods_detail">
+					<div class="goods_name">
+						<a href="../goods/view?no={..goods_seq}">{..goods_name}</a>
+						<!--{? ..eventEnd }-->
+						<span class="soloEventTd{..cart_option_seq}" style="font-face:Dotum; font-size:11px;">
+							<img src="../images/common/icon_clock.gif" style="padding-bottom:2px;">남은시간
+							<span style="background-color:#c61515; color:#ffffff; padding:2px; font-weight:bold;">
+							<span id="soloday{..cart_option_seq}" style="color:#ffffff; font-weight:bold;">0</span>일
+							<span id="solohour{..cart_option_seq}" style="color:#ffffff; font-weight:bold;">00</span>:
+							<span id="solomin{..cart_option_seq}" style="color:#ffffff; font-weight:bold;">00</span>:
+							<span id="solosecond{..cart_option_seq}" style="color:#ffffff; font-weight:bold;">00</span>
+							</span>
+						</span>
+						<script>
+						$(function() {
+							timeInterval{..cart_option_seq} = setInterval(function(){
+								var time{..cart_option_seq} = showClockTime('text', '{..eventEnd..year}', '{..eventEnd..month}', '{..eventEnd..day}', '{..eventEnd..hour}', '{..eventEnd..min}', '{..eventEnd..second}', 'soloday{..cart_option_seq}', 'solohour{..cart_option_seq }', 'solomin{..cart_option_seq}', 'solosecond{..cart_option_seq}', '{..cart_option_seq}');
+								if(time{..cart_option_seq} == 0){
+									clearInterval(timeInterval{..cart_option_seq});
+									$(".soloEventTd{..cart_option_seq}").html("단독 이벤트 종료");
+								}
+							},1000);
+						});
+						</script>
+						<!--{/}-->
+					</div>
+				</div>
+				<div class="cart_goods_detail">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td width="80">
+							<a href="../goods/view?no={..goods_seq}">
+								<img src="{..image}" width="80" height="80" align="absmiddle" hspace="5" onerror="this.src='../images/common/noimage_list.gif'" />
+							</a>
+						</td>
+						<td width="10"></td>
+						<td>
+
+							<!--{ ? ..option1 }-->
+							<div class="goods_option">
+								<img src="/admin/skin/default/images/common/icon_option.gif" align="absmiddle" />
+								{?..title1}{..title1}:{ / }{..option1}
+								{ ? ..option2 }{?..title2}{..title2}:{ / }{..option2} { / }
+								{ ? ..option3 }{?..title3}{..title3}:{ / }{..option3} { / }
+								{ ? ..option4 }{?..title4}{..title4}:{ / }{..option4} { / }
+								{ ? ..option5 }{?..title5}{..title5}:{ / }{..option5} { / }
+							</div>
+							<!--{ / }-->
+							<!--{ ? ..cart_inputs }-->
+							<!--{ @ ..cart_inputs }-->
+							<!--{ ? ...input_value }-->
+							<div class="goods_input">
+								<img src="/admin/skin/default/images/common/icon_input.gif" align="absmiddle" />
+								{?...input_title}{...input_title}:{ / }{...input_value}
+							</div>
+							<!--{ / }-->
+							<!--{ / }-->
+							<!--{ / }-->
+							<input type="hidden" name="coupon_download[{..cart_seq}][{..cart_option_seq}]" value="" />
+
+							<div style="color:#000; padding-bottom:7px;">수량 : {=number_format(..ea)}개</div>
+							<div class="sum_price"><span class="cart_price_num">{=number_format(..org_price*..ea)}</span>원</div>
+
+						</td>
+					</tr>
+					</table>
+
+				</div>
+
+				<!--{ @..cart_suboptions }-->
+				<div class="item_suboption">
+					<div>
+						<table width="100%" cellpadding="0" cellspacing="0" border="0">
+						<tr>
+							<td>
+								<div>
+								<img src="../images/design/icon_reply.png" width="10" height="10" />
+								{ ? ...suboption }
+								{ ? ...suboption_title }
+								<img src="/admin/skin/default/images/common/icon_add.gif" /> {...suboption_title}:{ / }{...suboption}
+								{ / }
+								</div>
+								<div style="padding-left:20px; color:#000;">수량 : {=number_format(...ea)}개</div>
+							</td>
+							<td align="right"><span class="cart_price_num">{=number_format(...org_price*...ea)}</span>원</td>
+						</tr>
+						</table>
+					</div>
+				</div>
+				<!--{ / }-->
+
+				<div class="cart_goods_sum">
+					<table width="100%" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td align="left" height="25">상품금액</td>
+						<td align="right">{=number_format(..tot_org_price)}원</td>
+					</tr>
+					<tr id="cart_sum_sale_tr_{..cart_option_seq}" { ? ..tot_sale_price > 0 }{ : }class="hide"{ / }>
+						<td align="left" height="25">
+							할인금액 
+							<button type="button" class="btn_show_detail_sale btn_arw_dn_gray" style="width:68px; height:20px;line-height:16px" onclick="toggleCartSaleDetailView(this,'#cart_sale_detail_{..cart_option_seq}');">상세<span class="btn_arw_dn_icon"></span></button>
+						</td>
+						<td align="right">
+							<span id="cart_sum_sale_{..cart_option_seq}">{=number_format(..tot_sale_price)}</span>원
+						</td>
+					</tr>
+					<tr id="cart_sale_detail_{..cart_option_seq}" class="hide">
+						<td colspan="2">
+							<div class="cart_sale_detail_table">
+							<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0">
+								<col /><col width="50" />
+								<!--{ @ ..sales.title_list }-->
+								<tr id="cart_sum_{...key_}_saletr_{..cart_option_seq}"  { ? ..tsales.sale_list[...key_] > 0 }{ : }class="hide"{ / }>
+									<td class="left">{..sales.title_list[...key_]}</td>
+									<td class="right"><span id="cart_sum_{...key_}_saleprice_{..cart_option_seq}">{=number_format(..tsales.sale_list[...key_])}</span>원</td>
+								</tr>
+								<!--{ / }-->
+							</table>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td align="left" height="25" style="color:#e75829;">주문금액</td>
+						<td align="right"><span id="option_suboption_price_sum_{..cart_option_seq}" style="color:#e75829; font-weight:bold">{=number_format(..tot_result_price)}</span>원</td>
+					</tr>
+					</table>
+				</div>
+			</div>
+			<!--{ / }-->
+		<!--{ : }-->
+			<div class="cart_goods center pd30">장바구니에 담긴 상품이 없습니다.</div>
+		<!--{ / }-->
+		<!--{ / }-->
+		</div>
+	</div>
+
+	<div class="sub_division_title">할인/혜택<div class="sub_division_arw"></div></div>
+	<div class="sub_division_contents">
+		<ul>
+			<!--{ @ total_sale_list }-->
+				<!--{ ? .key_ == 'coupon' }-->
+					<!--{ ? members && _GET.person_seq == "" }-->
+			<li id="total_x_sale_tr" class="sub_division_item">
+					<!--{ : }-->
+			<li id="total_x_sale_tr" class="sub_division_item hide">
+					<!--{ / }-->
+				<!--{ : .key_ == 'code' }-->
+					<!--{ ? isplusfreenot && isplusfreenot.ispromotioncode }-->
+			<li id="total_x_sale_tr" class="sub_division_item">
+					<!--{ : }-->
+			<li id="total_x_sale_tr" class="sub_division_item hide">
+					<!--{ / }-->
+				<!--{ : }-->
+			<li id="total_{.key_}_sale_tr" class="sub_division_item { ? .value_['price'] > 0 }{ : }hide{ / }">
+				<!--{ / }-->
+				<div class="fleft">
+					{.value_['title']}
+					<!--{ ? .key_ == 'coupon' }-->
+					&nbsp;&nbsp;
+					<button type="button" id="coupon_apply" style="border:0">
+						<span class="btn_arw_dn">사용<span class="btn_arw_dn_icon"></span></span>
+						<span class="btn_arw_up" style="display:none">닫기<span class="btn_arw_up_icon"></span></span>
+					</button>
+					<!--{ : .key_ == 'code' && isplusfreenot && isplusfreenot.ispromotioncode }-->
+					<input type="text"  name="cartpromotioncode" id="cartpromotioncode" value="{cart_promotioncode}" class="inputbox_large" style="width:50px" />
+					<a href="#" onclick="getPromotionck();return false;" class="cartpromotioncodeinputlay {? cart_promotioncode }hide{/}">
+						<span class="btn_style">입력</span>
+					</a>
+					<a href="#" onclick="getPromotionCartDel();return false;" class="cartpromotioncodedellay {? !cart_promotioncode } hide{/}">
+						<span class="btn_style">초기화</span>
+					</a>
+					<!--{ / }-->
+				</div>
+				<div class="fright">(-) <span id="total_{.key_}_sale" class="bold">{=number_format(.value_['price'])}</span>원</div>
+			</li>
+				<!--{ ? .key_ == 'coupon' }-->
+			<li id="coupon_apply_division" class="pd10 hide" style="border-top:1px dashed #ddd">
+				<div>
+					<div id="coupon_goods_lay"></div>
+					<div id="coupon_shipping_lay">
+						<div id="coupon_shipping_select"></div>
+					</div>
+					<div class="center pd10">
+						<button type="button" id="coupon_cancel" class="btn_cancel_large" style="width:120px">취소</button>
+						<button type="button" id="coupon_order" class="btn_normal_large" style="width:120px">적용하기</button>
+					</div>
+				</div>
+			</li>
+				<!--{ / }-->
+			<!--{ / }-->
+
+			<!--{ ? members && _GET.person_seq == ""}-->
+			<li class="sub_division_item">
+				<div class="fleft">적립금 (<span>{=number_format(members.emoney)}</span>원 보유)</div>
+				<div class="fright">
+					<input type="text" name="emoney_view" class="onlynumber inputbox_large" style="width:50px; text-align:right" value="0" />
+					<input type="hidden" name="emoney" class="onlynumber" style="text-align:right" value="0"/>
+					<a href="#" onclick="use_emoney();return false;" class="emoney_input_button"><span class="btn_style">입력</span></a>
+					<a href="#" onclick="cancel_emoney();return false;"  class="emoney_cancel_button hide"><span class="btn_style">초기화</span></a>
+				</div>
+			</li>
+			<!--{ ? isplusfreenot && isplusfreenot.iscash && _GET.person_seq == "" }-->
+			<li class="sub_division_item">
+				<div class="fleft">이머니 (<span>{=number_format(get_member_money('cash',userInfo.member_seq))}</span>원 보유)</div>
+				<div class="fright">
+					<input type="text" name="cash_view" class="onlynumber inputbox_large"  style="width:50px; text-align:right"  value="0"/>
+					<input type="hidden" name="cash" class="onlynumber" style="text-align:right" value="0"/>
+					<a href="#" onclick="use_cash();return false;"  class="cash_input_button"><span class="btn_style">입력</span></a>
+					<a href="#" onclick="cancel_cash();return false;"  class="cash_cancel_button hide"><span class="btn_style">초기화</span></a>
+				</div>
+			</li>
+			<!--{ / }-->
+			<!--{ / }-->
+		</ul>
+		<ul>
+			<li class="sub_division_item_sum">
+				<div class="fleft">적립 예정 적립금</div>
+				<div class="fright"><span id="total_reserve" class="bold">{=number_format(total_reserve)}</span>원</div>
+			</li>
+			<!--{ ? isplusfreenot && isplusfreenot.ispoint}-->
+			<li class="sub_division_item_sum">
+				<div class="fleft">적립 예정 포인트</div>
+				<div class="fright"><span id="total_point" class="bold">{=number_format(total_point)}</span> P</div>
+			</li>
+			<!--{ / }-->
+		</ul>
+
+		<div class="total_sum_price">
+			<table width="100%" cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td align="left">총 상품금액</td>
+				<td align="right">
+					<span class="sum_price"><span class="total_org_price">{=number_format(total)}</span> 원</span>
+				</td>
+			</tr>
+			<tr>
+				<td align="left">배송비</td>
+				<td align="right">
+					<span class="sum_price">(+) <span class="total_shipping_price">{=number_format(array_sum(shipping_price))}</span> 원</span>
+				</td>
+			</tr>
+			<tr>
+				<td align="left">할인금액</td>
+				<td align="right">
+					<span class="sum_price">(-) <span class="total_sales_price">{=number_format(total_sale)}</span> 원</span>
+				</td>
+			</tr>
+			<tr><td colspan="2" height="15"></td></tr>
+			<tr><td colspan="2" height="1" bgcolor="white"></td></tr>
+			<tr><td colspan="2" height="10"></td></tr>
+			<tr>
+				<td align="left">결제금액</td>
+				<td align="right">
+					<span class="sum_price"><span class="settle_price">{=number_format(total_price)}</span> 원</span>
+				</td>
+			</tr>
+			</table>
+		</div>
+	</div>
+
+		<!-- ### GIFT -->
+		<!--{? gift_cnt > 0 }-->
+		<div class="sub_division_title clearbox">
+			<div class="fleft">사은품 선택</div>
+			<div class="fright"><label><input type="checkbox" name="gift_use" value="Y" checked /> 사은품을 받겠습니다.</label></div>
+		</div>
+		<div class="sub_division_contents">
+			{@ gloop }
+			<input type="hidden" name="gifts[]" value="{.gift_seq}"/>
+			<table width="92%" align="center" border="0" cellpadding="0" cellspacing="0" class="giftTable">
+			<tr><td colspan="3" height="40"><b>{.title}</b></td></tr>
+			<tr><td colspan="3" height="5"></td></tr>
+			<tr>
+				{@ .goods }
+				{? ..index_!=0 && ..index_%3==0 }</tr><tr><td height="20"></td></tr><tr>{ / }
+				<td valign="top">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr><td><label><input type="{? .ea > 1 }checkbox{:}radio{/}" name="gift_{.gift_seq}[]" value="{..value_}"  {? .ea > 1 } onclick="limit_chk('{.gift_seq}', this)"{/} {?..index_ == 0}checked{/}> {=get_gift_name(..value_)}</label></td></tr>
+					{? get_gift_image(..value_,'list1') }<tr><td><img src="{=get_gift_image(..value_,'list1')}" width="90" height="90" /></td></tr>{/}
+					</table>
+				</td>
+				{ / }
+
+			</tr>
+			<tr><td colspan="3" height="10"><input type="hidden" name="gift_{.gift_seq}_limit" value="{.ea}"></td></tr>
+			</table>
+			{ / }
+		</div>
+		<!--{ / }-->
+	<!-- 본문내용 시작 -->
+
+		<!-- List -->
+		<div align="center" id="facebook_mgs"><div style="padding:10px">{? is_file_facebook_tag }페이스북과 정보를 교환 중에 있습니다. 잠시만 기다려 주세요.{/}.</div></div>
+		<!-- 주문정보/배송지정보 -->
+		<!-- 주문정보 -->
+		<div class="sub_division_title">주문자정보<div class="sub_division_arw"></div></div>
+		<div class="sub_division_contents">
+			<input type="hidden" name="order_zipcode[]" value="{members.zipcode1}" />
+			<input type="hidden" name="order_zipcode[]" value="{members.zipcode2}" />
+			<input type="hidden" name="order_address_type" value="{members.order_address_type}" />
+			<input type="hidden" name="order_address" value="{members.address}" />
+			<input type="hidden" name="order_address_street" value="{members.address_street}" />
+			<input type="hidden" name="order_address_detail" value="{members.address_detail}" />
+
+			<table class="default_table_style" width="100%" border="0" cellpadding="0" cellspacing="0">
+				<col width="90" />
+				<tr>
+					<th>이름</th>
+					<td class="fx12"><input type="text" name="order_user_name" value="{members.user_name}" size="15" class="inputbox_large" /></td>
+				</tr>
+				<tr>
+					<th>유선전화</th>
+					<td class="fx12"><input type="tel" name="order_phone[]" value="{members.phone1}" size="3" maxlength="4" class="inputbox_large" /> - <input type="tel" name="order_phone[]" value="{members.phone2}" size="3" maxlength="4" class="inputbox_large" /> - <input type="tel" name="order_phone[]" value="{members.phone3}" size="3" maxlength="4" class="inputbox_large" /></td>
+				</tr>
+				<tr>
+					<th>휴대폰</th>
+					<td class="fx12"><input type="tel" name="order_cellphone[]" value="{members.cellphone1}" size="3" maxlength="4" class="inputbox_large" /> - <input type="tel" name="order_cellphone[]" value="{members.cellphone2}" size="3" maxlength="4" class="inputbox_large" /> - <input type="tel" name="order_cellphone[]" value="{members.cellphone3}" size="3" maxlength="4" class="inputbox_large" /></td>
+				</tr>
+				<tr>
+					<th>이메일 <b style="color:red">*</b></th>
+					<td class="fx12">
+						<input type="text" name="order_email" value="{members.email}" size="25" class="inputbox_large" />
+					</td>
+				</tr>
+			</table>
+
+			<!--{ ? !userInfo.member_seq }-->
+			<!-- 설명 -->
+			<div class="pd7">
+				<table width="100%" border="0" cellpadding="0" cellspacing="3">
+				<col width="10" />
+				<tr>
+					<td valign="top"><span style="font-family:'arial black'; line-height:10px; ">·</span></td>
+					<td class="desc">
+						비회원은 주문번호와 이메일로 주문배송조회가 가능합니다.
+					</td>
+				</tr>
+				<tr>
+					<td valign="top"><span style="font-family:'arial black'; line-height:10px; ">·</span></td>
+					<td class="desc">
+						구매내역을 이메일과 SMS로 안내해 드립니다.
+					</td>
+				</tr>
+				<tr>
+					<td valign="top"><span style="font-family:'arial black'; line-height:10px; ">·</span></td>
+					<td class="desc">
+						정확한 이메일과 휴대폰번호를 입력해 주십시오.
+					</td>
+				</tr>
+				</table>
+			</div>
+			<!--{ / }-->
+
+		</div>
+
+		<!-- 배송지정보 -->
+		<!--{ ? shipping_policy.count }-->
+		<div class="sub_division_title">{?is_goods}배송지{:}수신자{/} 정보<div class="sub_division_arw"></div></div>
+		<div class="sub_division_contents">
+			<table class="default_table_style" width="100%" border="0" cellpadding="0" cellspacing="0">
+				<col width="90" />
+				<tr class="shipping_tr">
+					<th>배송방법 <b style="color:red">*</b></th>
+					<td class="fx12">
+						<div class="international_layer">
+							<select name="international">
+								<!--{ ? shipping_policy.count[0] }-->
+								<option value="0">국내</option>
+								<!--{ / }-->
+								<!--{ ? shipping_policy.count[1] }-->
+								<option value="1">해외</option>
+								<!--{ / }-->
+							</select>
+						</div>
+				
+						<div class="desc shipping_method_radio" style='display:none;'>
+							<!--{ ? shipping_policy.count[0] }-->
+							<select name="shipping_method">
+							<!--{ @ shipping_policy.policy[0]  }-->
+							<!--{ ? .key_ == 0 }-->
+							<option value="{.code}" selected="selected">{.method}</option>
+							<!--{ : }-->
+							<option value="{.code}">{.method}</option>
+							<!--{ / }-->
+							<!--{ / }-->
+							</select>
+							<!--{ / }-->
+						</div>
+						<div class="desc shipping_method_radio" style='display:none;'>
+							<!--{ ? shipping_policy.count[1] }-->
+							<select name="shipping_method_international">
+							<!--{ @ shipping_policy.policy[1]  }-->
+							<!--{ ? .key_ == 0 }-->
+							<option selected="selected">{.method}</option>
+							<!--{ : }-->
+							<option>{.method}</option>
+							<!--{ / }-->
+							<!--{ / }-->
+							</select>
+							<!--{ / }-->
+						</div>
+					</td>
+				</tr>
+				<tr class="domestic">
+					<th>
+						배송주소 <b style="color:red">*</b>
+						<!--{? members && is_goods }-->
+						<div class="pdt5"><button class="hand btn_style" style="letter-spacing:-1px" type="button" onclick="window.open('../mypage/delivery_address?tab=1&popup=1&view_international=domestic')">주소록</button></div>
+						<!--{/}-->
+					</th>
+					<td class="fx12">
+						<!--{? members && is_goods }-->
+						<div class="pdb5">
+							<label><input type="radio" name="chkQuickAddress" value="often" /> 자주쓰는 배송지</label><br />
+							<!--{ ? lately_delivery_address }-->
+							<label><input type="radio" name="chkQuickAddress" value="lately" /> 최근 배송지</label><br />
+							<!--{ / }-->
+							<label><input type="radio" name="chkQuickAddress" value="member" /> 회원정보주소</label><br />
+							<label><input type="radio" name="chkQuickAddress" value="new" /> 새로운 배송지</label><br />
+						</div>
+						<!--{/}-->
+						<input type="tel" name="recipient_zipcode[]" value="" size="4" class="inputbox_large" readonly /> -
+						<input type="tel" name="recipient_zipcode[]" value="" size="4" class="inputbox_large" readonly />
+						<button class="hand btn_style" style="letter-spacing:-1px" type="button" onclick="openDialogZipcode('order');">주소찾기</button>
+
+						<div class="pdt5">
+						<input type="hidden" name="recipient_address_type" value="" class="hide" />
+						<input type="text" name="recipient_address_street" value="" size="27" class="inputbox_large" style="display:none;" />
+						<input type="text" name="recipient_address" value="" size="27" readonly class="inputbox_large"/>
+						</div>
+
+						<div class="pdt5">
+						<input type="text" name="recipient_address_detail" value="" size="27" class="inputbox_large" />
+						</div>
+
+						<!--{? members && is_goods }-->
+						<div class="pdt5 small"><label><input type="checkbox" name="save_delivery_address" value="1" /> 기본 배송지로 저장</label></div>
+						<!--{/}-->
+					</td>
+				</tr>
+				<tr class="international">
+					<th></th>
+					<td class="fx12">
+						<span id="region">
+							<select name="region">
+								<!--{ @ shipping_policy.policy[1][0].region }-->
+								<option value="{.key_}">{.value_}</option>
+								<!--{ / }-->
+							</select>
+						</span>
+						<span class="desc">지역</span></td>
+				</tr>
+				<tr class="international">
+					<th></th>
+					<td class="fx12"><input type="text" name="international_address" value="" size="30" class="inputbox_large" /> <span class="desc">주소</span></td>
+				</tr>
+				<tr class="international">
+					<th></th>
+					<td class="fx12"><input type="text" name="international_town_city" value="" size="30" class="inputbox_large" /> <span class="desc">시도</span></td>
+				</tr>
+				<tr class="international">
+					<th></th>
+					<td class="fx12"><input type="text" name="international_county" value="" size="22" class="inputbox_large" /> <span class="desc">주</span></td>
+				</tr>
+				<tr class="international">
+					<th></th>
+					<td class="fx12"><input type="text" name="international_postcode" value="" size="15" class="inputbox_large" /> <span class="desc">우편번호</span></td>
+				</tr>
+				<tr class="international">
+					<th></th>
+					<td class="fx12"><input type="text" name="international_country" value="" size="30" class="inputbox_large" /> <span class="desc">국가</span></td>
+				</tr>
+				<tr>
+					<th>받는분 <b style="color:red">*</b></th>
+					<td class="fx12">
+						<div class="pdb5 small"><label class="small"><input type="checkbox" id="copy_order_info" /> 주문자 정보와 동일</label></div>
+						<input type="text" name="recipient_user_name" value="" size="15" class="inputbox_large" />
+					</td>
+				</tr>
+				<tr class="domestic">
+					<th>전화 <b style="color:red">*</b></th>
+					<td class="fx12"><input type="tel" name="recipient_phone[]" value="" size="3" maxlength="4" class="inputbox_large" /> - <input type="tel" name="recipient_phone[]" value="" size="3" maxlength="4" class="inputbox_large" /> - <input type="tel" name="recipient_phone[]" value="" size="3" maxlength="4" class="inputbox_large" /></td>
+				</tr>
+				<tr class="domestic">
+					<th>휴대폰 <b style="color:red">*</b></th>
+					<td class="fx12"><input type="tel" name="recipient_cellphone[]" value="" size="3" maxlength="4" class="inputbox_large" /> - <input type="tel" name="recipient_cellphone[]" value="" size="3" maxlength="4" class="inputbox_large" /> - <input type="tel" name="recipient_cellphone[]" value="" size="3" maxlength="4" class="inputbox_large" /></td>
+				</tr>
+				<tr class="international">
+					<th>유선전화 <b style="color:red">*</b></th>
+					<td class="fx12"><input type="tel" name="international_recipient_phone[]" value="" size="3" class="inputbox_large" /> - <input type="tel" name="international_recipient_phone[]" value="" size="3" class="inputbox_large" /> - <input type="tel" name="international_recipient_phone[]" value="" size="3" class="inputbox_large" /></td>
+				</tr>
+				<tr class="international">
+					<th>휴대폰 <b style="color:red">*</b></th>
+					<td class="fx12"><input type="tel" name="international_recipient_cellphone[]" value="" size="3" class="inputbox_large" /> - <input type="tel" name="international_recipient_cellphone[]" value="" size="3" class="inputbox_large" /> - <input type="tel" name="international_recipient_cellphone[]" value="" size="3" class="inputbox_large" /></td>
+				</tr>
+				{?is_coupon}
+				<tr>
+					<th>이메일 <b style="color:red">*</b></th>
+					<td class="fx12"><input type="text" name="recipient_email" value="{members.email}" size="30" class="line" /></td>
+				</tr>
+				{/}
+				<tr>
+					<th>배송<br />요청사항</th>
+					<td class="fx12"><div style="padding:5px; border:1px solid #ddd;"><textarea name="memo" style="padding:0px; width:100%;  overflow:auto; border:0px;" rows="2" title=""></textarea></div></td>
+				</tr>
+			</table>
+		</div>
+
+		<!--{ / }-->
+
+		<!-- 결제정보입력/결제하기 -->
+		<div class="sub_division_title">결제수단 선택<div class="sub_division_arw"></div></div>
+		<div class="sub_division_contents">
+			<ul class="payment_method_select" id="payment_type">
+				<!--{ @ payment }-->
+					<!--{ ? .key_=='bank' && .value_}-->
+					<li><label><input type="radio" name="payment" value="bank"  checked="checked" /> 무통장</label></li>
+					<!--{ / }-->
+					<!--{ ? .key_=='card' && .value_}-->
+					<li><label><input type="radio" name="payment" value="card" /> 카드결제</label></li>
+					<!--{ / }-->
+					<!--{ ? .key_=='account' && .value_}-->
+					<li><label><input type="radio" name="payment" value="account" /> 계좌이체</label></li>
+					<!--{ / }-->
+					<!--{ ? .key_=='cellphone' && .value_}-->
+					<li><label><input type="radio" name="payment" value="cellphone" /> 핸드폰결제</label></li>
+					<!--{ / }-->
+					<!--{ ? .key_=='virtual' && .value_}-->
+					<li><label><input type="radio" name="payment" value="virtual" /> 가상계좌</label></li>
+					<!--{ / }-->
+				<!--{ / }-->
+				<!--{ ? escrow_view }-->
+				<!--{ @ escrow }-->
+					<!--{ ? .key_=='account'  && .value_}-->
+					<li><label><input type="radio" name="payment" value="escrow_account" /> 계좌이체<span class="desc" style="font-weight:normal;">(에스크로)</span></label></li>
+					<!--{ / }-->
+					<!--{ ? .key_=='virtual' && .value_}-->
+					<li><label><input type="radio" name="payment" value="escrow_virtual" /> 가상계좌<span class="desc" style="font-weight:normal;">(에스크로)</span></label></li>
+					<!--{ / }-->
+				<!--{ / }-->
+				<!--{ / }-->
+			</ul>
+			<ul class="payment_method_select hide" id="payment_type_zero">
+				<li><strong style="color:#4b4b4b;">전액할인</strong></li>
+			</ul>
+			<table class="payment_detail_table" width="100%" border="0" cellpadding="0" cellspacing="0">
+				<col width="90" />
+				<!--{ ? payment.bank }-->
+				<!-- 무통장 정보 입력줄 시작 -->
+				<tbody class="bank">
+				<tr>
+					<th>
+						입금자명
+					</th>
+					<td><input type="text" name="depositor" value="" class="inputbox_large" /></td>
+				</tr>
+				<tr>
+					<th>
+						입금은행
+					</th>
+					<td>
+						<select name="bank" style="width:90%" class="inputbox_large">
+							<option value="">은행선택</option>
+							<!--{ @ bank }-->
+							<!--{ ? .accountUse == 'y' }-->
+							<option value="{.bank} {.account} 예금주:{.bankUser}">{.bank} {.account} 예금주:{.bankUser}</option>
+							<!--{ / }-->
+							<!--{ / }-->
+						</select>
+					</td>
+				</tr>
+				</tbody>
+				<!-- 무통장 정보 입력줄 끝 -->
+				<!--{ / }-->
+				<tbody id="typereceiptlay">
+					<tr class="{? !(cfg.order.cashreceiptuse > 0 || cfg.order.taxuse > 0) }hide{/}">
+						<th rowspan="{=1+cfg.order.cashreceiptuse+cfg.order.taxuse}">매출증빙</th>
+						<td class="fx12">
+							<div class="pdb5"><label for="typereceipt0"><input type="radio" name="typereceipt" id="typereceipt0" value="0" checked="checked"> 발급안함 </label></div>
+						</td>
+					</tr>
+					{ ? cfg.order.cashreceiptuse > 0 // 현금영수증 발행설정}
+					<tr>
+						<td>
+							<div class="pdb5"><label for="typereceipt2">	<input type="radio" name="typereceipt" id="typereceipt2" value="2"> 현금영수증 </label></div>
+						</td>
+					</tr>
+					{ / }
+					{ ? cfg.order.taxuse > 0 // 세금계산서 발행설정}
+					<tr>
+						<td>
+							<div class="pdb5"><label for="typereceipt1">	<input type="radio" name="typereceipt" id="typereceipt1" value="1"> 세금계산서 </label></div>
+						</td>
+					</tr>
+					{ / }
+				</tbody>
+				<tr id="typereceiptcardlay" class="hide">
+					<th>매출증빙</th>
+					<td class="fx12">
+						카드매출전표(또는 핸드폰결제전표)로 대체합니다.
+					</td>
+				</tr>
+			</table>
+			<table id="typereceipttablelay" class="payment_detail_table hide" width="100%" border="0" cellpadding="0" cellspacing="0">
+				<col width="90" />
+				<!-- ~~~~~~~ 현금영수증 신청 부분 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+				<tbody id="cash_container" class="hide typereceiptlay">
+				<tr>
+					<th align="center" style="border-top:none" rowspan="2">발행용도</th>
+					<td style="border-top:none">
+						<div class="pdb5"><label for="cuse0"><input type="radio" name="cuse"  id="cuse0"  value="0" checked="checked"/> 개인 소득공제용</label></div>
+					</td>
+				</tr>
+				<tr>
+					<td style="border-top:none">
+						<div class="pdb5"><label for="cuse1"><input type="radio" name="cuse"  id="cuse1"  value="1"/> 사업자지출 증빙용</label></div>
+					</td>
+				</tr>
+				<tr>
+					<th align="center">인증번호</th>
+					<td>
+						<div id="personallay"  >
+							<input type="text" name="creceipt_number[0]" class="inputbox_large number" size="15" maxlength="13"/>
+						</div>
+						<div id="businesslay" class="hide" >
+							<input type="text" name="creceipt_number[1]" class="inputbox_large number" size="15" maxlength="10"/>
+						</div>
+						<div style="padding-top:3px">(<span class="comment">"-" 없이 입력해주세요</span>)</div>
+					</td>
+				</tr>
+				<tr>
+					<td align="center" class="pdt5">이메일주소</td>
+					<td class="pdt5">
+						<div id="personallay"  >
+						  <input type="text" name="sales_email" class="line" style="width:90%;"/>
+						</div>
+					</td>
+				</tr>
+
+				</tbody>
+				<!-- ~~~~~~~ 세금계산서 신청 부분 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+				<tbody id="tax_container" class="hide typereceiptlay">
+
+				<tr>
+					<th align="center" style="border-top:none">상호명</th>
+					<td  class="fx12">
+						<input type="text" name="co_name" id="co_name" value="{business_info.bname}"  class="inputbox_large" />
+					</td>
+				</tr>
+				<tr>
+					<th align="center" style="border-top:none">대표자</th>
+					<td  class="fx12">
+						<input type="text" name="co_ceo" id="co_ceo" value="{business_info.bCEO}" class="inputbox_large" />
+					</td>
+				</tr>
+				<tr>
+					<th align="center" style="border-top:none">업태/업종</th>
+					<td  class="fx12">
+						<input type="text" name="co_status" id="co_status" value="{business_info.bstatus}" class="inputbox_large" /> -
+						<input type="text" name="co_type" id="co_type" value="{business_info.bitem}" class="inputbox_large" />
+					</td>
+				</tr>
+				<tr>
+					<th align="center" style="border-top:none">사업자번호</th>
+					<td  class="fx12">
+						<input type="text" name="busi_no" id="busi_no" value="{business_info.bno}" class="inputbox_large" /> ex)123-12-12345
+					</td>
+				</tr>
+				<tr>
+					<th align="center" style="border-top:none">주소</th>
+					<td class="fx12">
+						<input type="text" name="co_zipcode[]" value="{business_info.co_zipcode[0]}" size="4" class="inputbox_large"  /> -
+						<input type="text" name="co_zipcode[]" value="{business_info.co_zipcode[1]}" size="4" class="inputbox_large"  />
+						<img src="../images/design/btn_zipsearch.gif" hspace="1" alt="주소찾기" class="hand" onclick="openDialogZipcode('co_');"/> <br />
+						<input type="hidden" name="co_address_type" id="co_address_type" value="{business_info.baddress_type}" class="inputbox_large" />
+						<input type="text" name="co_address" id="co_address" size="30"  value="{business_info.baddress1}" {? business_info.baddress_type=='street' } class="hide" style="height:28px !important; line-height:30px !important; border:1px solid #ddd !important; padding-left:5px !important; padding-right:5px; !important" {:} class="inputbox_large"  {/} />
+						<input type="text" name="co_address_street" id="co_address_street" size="30" value="{business_info.baddress1}" {? business_info.baddress_type!='street' } class="hide " style="height:28px !important; line-height:30px !important; border:1px solid #ddd !important; padding-left:5px !important; padding-right:5px; !important" {:}  class="inputbox_large" {/}  />
+						<input type="text" name="co_address_detail" id="co_address_detail" size="30" value="{business_info.baddress2}" class="inputbox_large" />
+					</td>
+				</tr>
+				<tr>
+					<th align="center" style="border-top:none">담당자명</th>
+					<td  class="fx12">
+						<input type="text" name="person" id="person" value="{business_info.bperson}" class="inputbox_large" />
+					</td>
+				</tr>
+				<tr>
+					<th align="center" style="border-top:none">이메일</th>
+					<td  class="fx12">
+						<input type="text" name="email" id="email" value="{members.email}" class="inputbox_large" />
+					</td>
+				</tr>
+				<tr>
+					<th align="center" style="border-top:none">연락처</th>
+					<td  class="fx12">
+						<input type="text" name="phone" id="phone" value="{business_info.bphone}" class="inputbox_large" />(<span class="comment">"-" 없이 입력</span>)
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<table width="100%" border="0" cellpadding="0" cellspacing="10">
+		{? !defined('__ISUSER__') //비회원 개인정보 동의}
+		<tr>
+			<td align="left">
+				<label><input type="checkbox" name="agree" value="Y" /> 개인정보 수집 및 이용에 동의</label>
+			</td>
+			<td align="right">
+				<a href="/service/policy" target="_blank"><strong class="policy_show_btn">내용보기 &gt;</strong></a>
+			</td>
+		</tr>
+		{/}
+		{? cancellation //청약철회 관련 방침}
+		<tr>
+				<td align="left">
+					<label><input type="checkbox" name="agree" value="Y" /> 청약철회 관련방침에 동의</label>
+				</td>
+				<td align="right">
+					<a href="/service/cancellation" target="_blank"><strong class="policy_show_btn">내용보기 &gt;</strong></a>
+				</td>
+			</tr>
+		{/}
+		</table>
+		
+		<br class="table-gap" />
+
+		<div style="text-align:center" class="pay_layer" id="pay_layer1">
+			<table width="95%" align="center" border="0" cellpadding="0" cellspacing="2">
+			<tr>
+				<td width="30%"><button type="button" class="btn_normal_large" style="width:100%" onclick="document.location.href='cart';">장바구니로</button></td>
+				<td><button type="button" name="button_pay" id="pay" style="width:100%"  class="btn_important_large" >결제하기</button></td>
+			</tr>
+			</table>
+		</div>
+		<br class="table-gap" />
+
+	<!-- 본문내용 끝 -->
+
+</form>
+
+	{? is_file_facebook_tag }
+		<!-- 좋아요할인 : 삭제하지 말아주세요 -->
+		{? !( strstr(_SERVER.HTTP_HOST,'.firstmall.kr') || _SERVER.HTTP_HOST==APP_DOMAIN ) // facebook 라이크 할인 적용 및 오픈그라피 }
+		<iframe name="snsiframe" src="http://{config_system.subDomain}/admin/sns/subdomainfacebookck" frameborder="0" width="0" height="0"></iframe>
+		<script language="JavaScript" src="{? _GET.mode }http://{config_system.subDomain}/order/fblike_opengraph_firstmallplus?firstmallcartid={firstmallcartid}&files=settle&mode={_GET.mode}{:}http://{config_system.subDomain}/order/fblike_opengraph_firstmallplus?firstmallcartid={firstmallcartid}&files=settle{/}"></script>
+		<script language="JavaScript" src="http://{config_system.subDomain}/order/fbopengraph?firstmallcartid={firstmallcartid}"></script>
+		{/}
+		<script language="JavaScript" src="{? _GET.mode }../order/fblike_opengraph?files=settle&mode={_GET.mode}{:}../order/fblike_opengraph?files=settle{/}"></script>
+		<!-- 좋아요할인 : 삭제하지 말아주세요 -->
+	{/}
+

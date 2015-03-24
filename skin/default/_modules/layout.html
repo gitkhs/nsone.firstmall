@@ -1,0 +1,101 @@
+{#HTML_HEADER}
+
+<!--{ ? designMode }-->
+<script type="text/javascript">
+/* 디자인매니저 세팅 */
+$(function(){
+	if(parent.document==document){
+		DM_init('{template_path}');
+	}
+});
+</script>
+<!--{ / }-->
+
+<style>
+{? !_GET.popup && !_GET.iframe }
+body {
+	{?layout_config.backgroundColor}background-color:{layout_config.backgroundColor};{/}
+	{?layout_config.backgroundImage}background:url('{layout_config.backgroundImage}');{/}
+	{?layout_config.backgroundRepeat}background-repeat:{layout_config.backgroundRepeat};{/}
+	{?layout_config.backgroundPosition}background-position:{layout_config.backgroundPosition};{/}
+}
+{/}
+</style>
+
+{? !_GET.popup && !_GET.iframe }
+	<div id="layout_body" style="min-width:{layout_config.width}px" class="clearbox">
+
+	<!--{ ? layout_config.layoutHeader != 'hidden' }-->
+	{#LAYOUT_HEADER}
+	<!--{ / }-->
+
+	<!--{ ? layout_config.layoutTopBar != 'hidden' && layout_config.layoutTopBar != '' }-->
+	{#LAYOUT_TOPBAR}
+	<!--{ / }-->
+
+	<!--{ ? layout_config.layoutScrollLeft != 'hidden' || layout_config.layoutScrollRight != 'hidden' }-->
+	<table width="{layout_config.width}" align="{layout_config.align}" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<!--{ ? layout_config.layoutScrollLeft != 'hidden' }-->
+		<td width="0" style="width:0px !important;" valign="top">
+			<div style="position:relative;">
+				<div id="leftScrollLayer" style="position:absolute; width:100px; margin-left:-120px; top:0px;">{#LAYOUT_SCROLL_LEFT}</div>
+			</div>
+		</td>
+		<!--{ / }-->
+		<td width="100%"></td>
+		<!--{ ? layout_config.layoutScrollRight != 'hidden' }-->
+		<td width="0" style="width:0px !important;" valign="top">
+			<div style="position:relative;">
+				<div id="rightScrollLayer" style="position:absolute; margin-left:20px; top:0px;z-index:10;">{#LAYOUT_SCROLL_RIGHT}</div>
+			</div>
+		</td>
+		<!--{ / }-->
+	</tr>
+	</table>
+	<!--{ / }-->
+
+	<!--{ ? layout_config.layoutSide != 'hidden' }-->
+	<div class="clearbox">
+		<div style="width:{layout_config.width}px; {?layout_config.align=='center'}margin:auto;{:}float:{layout_config.align};{/}" >
+			<!--{ ? layout_config.layoutSideLocation == 'left' || !layout_config.layoutSideLocation }-->
+				<div class="fright" style="width:{layout_config.body_width}px; {?layout_config.bodyBackgroundImage}background:url('{layout_config.bodyBackgroundImage}');{/};{?layout_config.bodyBackgroundColor}background-color:{layout_config.bodyBackgroundColor}{/}">{#LAYOUT_BODY}</div>
+				<div class="fright" style="width:{=layout_config.width-layout_config.body_width}px;">{#LAYOUT_SIDE}</div>
+			<!--{:? layout_config.layoutSideLocation == 'right'}-->
+				<div class="fleft" style="width:{layout_config.body_width}px; {?layout_config.bodyBackgroundImage}background:url('{layout_config.bodyBackgroundImage}');{/};{?layout_config.bodyBackgroundColor}background-color:{layout_config.bodyBackgroundColor}{/}">{#LAYOUT_BODY}</div>
+				<div class="fleft" style="width:{=layout_config.width-layout_config.body_width}px;">{#LAYOUT_SIDE}</div>
+			<!--{/}-->
+		</div>
+	</div>
+	<!--{ : }-->
+	<div class="clearbox">
+		<div style="width:{layout_config.width}px; {?layout_config.align=='center'}margin:auto;{:}float:{layout_config.align};{/}">
+			<div style="{?layout_config.bodyBackgroundImage}background:url('{layout_config.bodyBackgroundImage}');{/};{?layout_config.bodyBackgroundColor}background-color:{layout_config.bodyBackgroundColor}{/}">{#LAYOUT_BODY}</div>
+		</div>
+	</div>
+	<!--{ / }-->
+	</div>
+{:}
+	<div id="layout_body" class="clearbox">
+		<div style="{?layout_config.align=='center'}margin:auto;{:}float:{layout_config.align};{/}" >
+			{#LAYOUT_BODY}
+		</div>
+	</div>
+{/}
+
+{?  !_GET.popup && !_GET.iframe }
+<!--{ ? layout_config.layoutFooter != 'hidden' }-->
+{#LAYOUT_FOOTER}
+<!--{ / }-->
+{/}
+
+<!--{? !_GET.iframe }-->
+<iframe name="actionFrame" src="/main/blank" frameborder="1" width="100%" height="600" {?!_GET.debug}class="hide"{/}></iframe>
+<div id="openDialogLayer" style="display: none">
+	<div align="center" id="openDialogLayerMsg"></div>
+</div>
+<!--{ / }-->
+
+<div id="ajaxLoadingLayer" style="display: none"></div>
+
+{#HTML_FOOTER}

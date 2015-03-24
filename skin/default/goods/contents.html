@@ -1,0 +1,28 @@
+<div id="countents_body">
+
+<!--{? goodsvideofiles }-->
+<div align="center" >
+<!--{@ goodsvideofiles }-->
+<div ><embed src="{.uccdomain_fileswf}" width="{? .pc_width }{.pc_width}{:}400{/}" height="{? .pc_height }{.pc_height}{:}300{/}" allowfullscreen="true" wmode="transparent"></embed>
+</div><br/>
+<!--{/}-->
+</div>
+<!--{/}-->
+
+{goods.contents}
+
+</div>
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+	goods_contents_resize();
+
+	$('img',document).load(function(){
+		goods_contents_resize();
+	});
+});
+function goods_contents_resize(){
+	$("#contents_frame", parent.document).height($("#countents_body").outerHeight()+30);
+}
+</script>

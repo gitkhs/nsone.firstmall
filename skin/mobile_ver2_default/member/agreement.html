@@ -1,0 +1,564 @@
+{is_file_kakao_tag}
+<script>
+$(function(){
+	$(".agreement_division").each(function(){
+		var divisionObj = this;
+		$(".agreement_title",this).click(function(){
+			$(divisionObj).toggleClass('agreement_division_opened');
+		});
+	});
+});
+</script>
+
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>회원가입</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+
+<form name="agreeFrm" id="agreeFrm" target="actionFrame" method="post" action="../member_process/register">
+<input type="hidden" name="join_type" value="{_GET.join_type}"/>
+<input type="hidden" name="agree" value="N"/>
+<input type="hidden" name="agree2" value="N"/>
+
+<div class="sub_division_title">약관동의<div class="sub_division_arw"></div></div>
+<div class="sub_division_contents" style="padding:10px">
+	<div class="agreement_division">
+		<div class="agreement_header">
+			<div class="agreement_title">이용약관<span class="fold_icon"></span></div>
+			<label>
+				<div class="btn_style agree">
+					<img src="../images/design/i_check_g.png" id="agree" width="12px" height="10px"/>
+					<span id="agree_txt">동의</span>
+				</div>
+			</label>
+		</div>
+		<div class="agreement_contents">{=nl2br(agreement)}</div>
+	</div>
+
+	<div class="agreement_division">
+		<div class="agreement_header">
+			<div class="agreement_title">개인정보취급방침<span class="fold_icon"></span></div>
+			<label>
+				<div class="btn_style agree2">
+					<img src="../images/design/i_check_g.png" id="agree2" width="12px" height="10px"/>
+					<span id="agree_txt2">동의</span>
+				</div>
+			</label>
+		</div>
+		<div class="agreement_contents">{=nl2br(policy)}</div>
+	</div>
+</div>
+
+<div class="pd10">
+	<input type="button" id="btn_submit" class="btn_important_large" value="회원가입" style="width:100%;" />
+</div>
+
+</form>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	var agree	= false;
+	var agree2	= false;
+
+	$('.agree').click(function(){
+		if(agree){
+			agree = false;
+			$('#agree').attr('src', '../images/design/i_check_g.png');
+			$("input[name='agree']").val("N");
+		}else{
+			agree = true;
+			$('#agree').attr('src', '../images/design/i_check_o.png');
+			$("input[name='agree']").val("Y");
+		}
+	});
+
+	$('.agree2').click(function(){
+		if(agree2){
+			agree2 = false;
+			$('#agree2').attr('src', '../images/design/i_check_g.png');
+			$("input[name='agree2']").val("N");
+		}else{
+			agree2 = true;
+			$('#agree2').attr('src', '../images/design/i_check_o.png');
+			$("input[name='agree2']").val("Y");
+		}
+	});
+
+	$('#btn_submit').click(function() {
+		{? _GET.join_type }
+			if(!agree){
+				alert('이용약관에 동의하셔야합니다.');
+				return false;
+			}
+			if(!agree2){
+				alert('개인정보취급방침에 동의하셔야합니다.');
+				return false;
+			}
+		{/}
+
+		{? !_GET.join_type || _GET.join_type == 'member' || _GET.join_type == 'business' //sns아닌경우 }
+			$('#agreeFrm').submit();
+		{:}
+			joinwindowopen();
+		{/}
+	});
+});
+
+function joinwindowopen() {
+	var w;var h;
+	var sns = '{=substr(_GET.join_type,0,2)}';
+	switch(sns) {
+		case 'tw':
+			w = 810;h = 550;
+			break;
+		case 'm2':
+			w = 900;h = 500;
+			break;
+		case 'yz':
+			w = 600;h = 450;
+			break;
+		case 'cy':
+			w = 430;h = 560;
+			break;
+		case 'nv':
+			w = 460;h = 517;
+			break;
+		case 'kk':
+			loginWithKakao();
+			return false;
+		break;
+		case 'dm':
+			w = 460;h = 517;
+		break;
+		default:
+			w = 800;h=400;
+	}
+
+	{? ( _SERVER.HTTP_HOST==APP_DOMAIN ) }
+		{? _GET.join_type == 'fbmember' }
+			//기본 가입
+			loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+			FB.login(handelStatusChange,{scope:'{fbuserauth}'});
+		{: _GET.join_type == 'fbbusiness' }
+			//기업회원 가입
+			loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+			FB.login(handelStatusChangebiz,{scope:'{fbuserauth}'});
+		{:}
+			{? in_array( _GET.join_type,array('twmember','twbusiness','m2member','m2business','yzmember','yzbusiness','cymember','cybusiness','nvmember','nvbusiness','dmmember','dmbusiness'))}
+			var join_type	= '';
+			var join_gubun	= '';
+			switch('{=_GET.join_type}'){
+				case "twmember":	join_type = "member";	join_gubun = "twitter"; break;	//일반회원
+				case "twbusiness":	join_type = "biz";		join_gubun = "twitter"; break;	//기업회원
+
+				case "m2member":	join_type = "member";	join_gubun = "me2day";	break;	//일반회원
+				case "m2business":	join_type = "biz";		join_gubun = "me2day";	break;	//기업회원
+
+				case "yzmember":	join_type = "member";	join_gubun = "yozm";	break;	//일반회원
+				case "yzbusiness":	join_type = "biz";		join_gubun = "yozm";	break;	//기업회원
+
+				case "cymember":	join_type = "member";	join_gubun = "cyworld"; break;	//일반회원
+				case "cybusiness":	join_type = "biz";		join_gubun = "cyworld"; break;	//기업회원
+
+				case "nvmember":	join_type = "member";	join_gubun = "naver";	break;	//일반회원
+				case "nvbusiness":	join_type = "biz";		join_gubun = "naver";	break;	//기업회원
+
+				case "dmmember":	join_type = "member";	join_gubun = "daum";	break;	//일반회원
+				case "dmbusiness":	join_type = "biz";		join_gubun = "daum";	break;	//기업회원
+			}			
+			joinloginajax(join_type,join_gubun);
+			{/}
+
+			{? _GET.oauth_verifier && _GET.oauth_token && _GET.oauth_token_GET.twitter == 'Y' }
+				joinloginajax(_GET.mtype, 'twitter');
+			{/}
+		{/}
+	{:}
+		if(sns == 'm2' || sns == 'cy' || sns == 'nv' || sns == 'dm' ) {//경고창사이즈
+			{? sns == 'cy' && TW_APP_ID == 'ifHWJYpPA2ZGYDrdc5wQ' }
+				window.open('http://m.{_SERVER.HTTP_HOST}/member/register_sns_form?popup=1&formtype=join&firstmallcartid={firstmallcartid}&join_type={_GET.join_type}&snsreferer={_SERVER.HTTP_HOST}','snspopup','width=410px,height=150px,statusbar=no,scrollbars=no,toolbar=no');
+			{:}
+				{? in_array( _GET.join_type,array('m2member','m2business','cymember','cybusiness','nvmember','nvbusiness','dmmember','dmbusiness'))}
+				var join_type = '';
+				var join_gubun = '';
+				switch('{=_GET.join_type}'){
+					case "m2member":	join_type = "member";	join_gubun = "me2day";	break;	//일반회원
+					case "m2business":	join_type = "biz";		join_gubun = "me2day";	break;	//기업회원
+
+					case "cymember":	join_type = "member";	join_gubun = "cyworld"; break;	//일반회원
+					case "cybusiness":	join_type = "biz";		join_gubun = "cyworld"; break;	//기업회원
+
+					case "nvmember":	join_type = "member";	join_gubun = "naver";	break;	//일반회원
+					case "nvbusiness":	join_type = "biz";		join_gubun = "naver";	break;	//기업회원
+
+					case "dmmember":	join_type = "member";	join_gubun = "daum";	break;	//일반회원
+					case "dmbusiness":	join_type = "biz";		join_gubun = "daum";	break;	//기업회원
+				}
+				joinloginajax(join_type,join_gubun);
+				{/}
+
+				{? _GET.oauth_verifier && _GET.oauth_token && _GET.oauth_token_GET.twitter == 'Y' }
+					joinloginajax(_GET.mtype, 'twitter');
+				{/}
+			{/}
+		}else{
+			window.open('http://m.{config_system.subDomain}/member/register_sns_form?popup=1&formtype=join&firstmallcartid={firstmallcartid}&join_type={_GET.join_type}&snsreferer={_SERVER.HTTP_HOST}','snspopup','width='+w+'px,height='+h+'px,statusbar=no,scrollbars=no,toolbar=no');
+		}
+	{/}
+}
+</script>
+
+
+ <script type="text/javascript">
+
+//기본 facebook 로그인
+function handelStatusChange_(response) {
+	if (response && response.status == 'connected') {
+	// 로그인
+	isLogin = true;
+	initializeFbTokenValues();
+	initializeFbUserValues();
+	if(response.authResponse){
+		fbId = response.authResponse.userID;
+		fbAccessToken = response.authResponse.accessToken;
+	}
+	FB.api('/me', function(response) {
+		 fbUid = response.email;
+		 fbName = response.name;
+		 if (fbName != "") {
+				loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+				$.ajax({
+				'url' : '../sns_process/facebookloginck',
+				'type' : 'post',
+				'dataType': 'json',
+				'success': function(res) {
+					if(res.result == true){
+						document.location.href='../main/index';
+					}else{
+						loadingStop("body",true);
+						openDialogAlert(res.msg,'400','140',function(){});
+					}
+				}
+				});
+		}
+	});
+   } else if (response.status == 'not_authorized' || response.status == 'unknown') {
+		// 로그아웃된 경우
+		isLogin = false;
+		{? defined('__ISUSER__')}
+			loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+			logoutajax('facebook');
+		{/}
+		if (fbId != "")  initializeFbTokenValues();
+		if (fbUid != "") initializeFbUserValues();
+		loadingStop("body",true);
+		openDialogAlert('연결을 취소하셨습니다.','400','160',function(){});
+	}else{
+		loadingStop("body",true);
+		openDialogAlert('연결을 취소하셨습니다.','400','160',function(){});
+	}
+}
+
+//기업회원으로 통합하기
+function handelStatusChangebiz_(response) {
+	if (response && response.status == 'connected') {
+	// 로그인
+	isLogin = true;
+	initializeFbTokenValues();
+	initializeFbUserValues();
+	if(response.authResponse){
+		fbId = response.authResponse.userID;
+		fbAccessToken = response.authResponse.accessToken;
+	}
+	FB.api('/me', function(response) {
+		 fbUid = response.email;
+		 fbName = response.name;
+		 if (fbName != "") {
+				$.ajax({
+				'url' : '../sns_process/facebookloginck',
+				'data' : {'mtype':'biz'},
+				'type' : 'post',
+				'dataType': 'json',
+				'success': function(res) {
+					if(res.result == true) {
+						document.location.href='../main/index';
+					}else{
+						loadingStop("body",true);
+						openDialogAlert(res.msg,'400','140',function(){});
+					}
+				}
+				});
+		}
+	});
+   } else if (response.status == 'not_authorized' || response.status == 'unknown') {
+		// 로그아웃된 경우
+		isLogin = false;
+		{? defined('__ISUSER__')}
+			loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+			logoutajax('facebook');
+		{/}
+		if (fbId != "")  initializeFbTokenValues();
+		if (fbUid != "") initializeFbUserValues();
+		loadingStop("body",true);
+		openDialogAlert('연결을 취소하셨습니다.','400','160',function(){});
+	}else{
+		loadingStop("body",true);
+		openDialogAlert('연결을 취소하셨습니다.','400','160',function(){});
+	}
+}
+
+function joinloginajax(jtype, sns ) {
+	loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+	var w;var h;
+	switch(sns) {
+		case 'twitter':
+			w = 810;h = 550;
+			break;
+		case 'me2day':
+			w = 900;h = 750;
+			break;
+		case 'cyworld':
+			w = 430;h = 560;
+			break;
+		case 'naver':
+			w = 460;h = 517;
+			break;
+		case 'daum':
+			w = 460;h = 517;
+			break;
+	}
+	var width_	= w;
+	var height_	= h;
+	var left_	= screen.width;
+	var top_	= screen.height;
+
+	left_		= left_/2 - (width_/2);
+	top_		= top_/2 - (height_/2);
+	var newWin  = window.open("../sns_process/snsredirecturl?snsloginstart=1","SnsFrmUp","height="+height_+",width="+width_+",status=yes,scrollbars=no,statusbar=no,resizable=no,left="+left_+",top="+top_+"");
+
+	if(jtype == 'biz'){
+		$.ajax({
+		'url' : '../sns_process/'+sns+'loginck',
+		'data' : {'mform':'join','mtype':'biz'},
+		'type' : 'post',
+		'dataType': 'json',
+		'success': function(res) {
+			if(res.result == true) {
+				newWin.location = res.loginurl;
+				newWin.focus();
+				//window.open('../sns_process/snsredirecturl?snsurl='+res.loginurl,'','width='+w+'px,height='+h+'px,statusbar=no,scrollbars=no,toolbar=no');
+				loadingStop("body",true);
+			}else{
+				newWin.close();
+				loadingStop("body",true);
+				openDialogAlert(res.msg,'400','140',function(){});
+			}
+		}
+		});
+	}else{
+		$.ajax({
+		'url' : '../sns_process/'+sns+'loginck',
+		'data' : {'mform':'join'},
+		'type' : 'post',
+		'dataType': 'json',
+		'success': function(res) {
+			if(res.result == true) {
+				newWin.location = res.loginurl;
+				newWin.focus();
+				//window.open('../sns_process/snsredirecturl?snsurl='+res.loginurl,'snsredirecturl','width='+w+'px,height='+h+'px,statusbar=no,scrollbars=no,toolbar=no');
+				loadingStop("body",true);
+			}else{
+				newWin.close();
+				loadingStop("body",true);
+				openDialogAlert(res.msg,'400','140',function(){});
+			}
+		}
+		});
+	}
+}
+
+//미투데이 쇼핑몰회원가입
+function me2dayjoginlogin() {
+	$.ajax({
+	'url' : '../sns_process/me2dayjoin',
+	'type' : 'post',
+	'dataType': 'json',
+	'success': function(res) {
+		if(res.result == true){
+			document.location.href='../main/index';
+		}else{
+			loadingStop("body",true);
+			openDialogAlert(res.msg,'400','140',function(){});
+		}
+	}
+	});
+}
+
+//cyworld 쇼핑몰로그인
+function cyworldjoginlogin() {
+	$.ajax({
+	'url' : '../sns_process/cyworldjoin',
+	'type' : 'post',
+	'dataType': 'json',
+	'success': function(res) {
+		if(res.result == true){
+			document.location.href='../main/index';
+		}else{
+			loadingStop("body",true);
+			openDialogAlert(res.msg,'400','140',function(){});
+		}
+	}
+	});
+}
+
+	//naver 쇼핑몰로그인
+	function naverjoinlogin() {
+
+		$.ajax({
+		'url' : '../sns_process/naverjoin',
+		'type' : 'post',
+		'dataType': 'json',
+		'success': function(res) {
+			if(res.result == true){
+				document.location.href='../main/index';
+			}else{
+				loadingStop("body",true);
+				openDialogAlert(res.msg,'400','140',function(){});
+			}
+		},'error': function(res){
+			debug('error : ');
+			debug(res);
+		}
+		});
+	}
+
+
+	//daum 쇼핑몰로그인
+	function daumaccess(str){
+
+		loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+
+		str = encodeURIComponent(str);
+
+		$.ajax({
+		'url' : '../sns_process/daumuserinfo',
+		'type' : 'post',
+		'data' : {'str':str},
+		'dataType': 'json',
+		'success': function(res) {
+			if(res.result == true){
+				daumjoinlogin();
+			}else{
+				alert(res.message);
+			}
+		}});
+	}
+
+	function daumjoinlogin() {
+
+		$.ajax({
+		'url' : '../sns_process/daumjoin',
+		'type' : 'post',
+		'dataType': 'json',
+		'success': function(res) {
+			if(res.result == true){
+				document.location.href='../main/index';
+			}else{
+				loadingStop("body",true);
+				openDialogAlert(res.msg,'400','140',function(){});
+			}
+		},'error': function(res){
+			debug('error : ');
+			debug(res);
+		}
+		});
+	}
+
+//kakao login start
+{? array_key_exists('kakao', use_sns) }
+	function loginWithKakao() {
+
+		loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+
+		{? _GET.join_type == "kkbusiness"}
+		var join_type = "biz";
+		{:}
+		var join_type = "member";
+		{/}
+
+		var IEIndex = navigator.appVersion.indexOf("MSIE");         // MSIE를 찾고 인덱스를 리턴
+		var IE8Over = navigator.userAgent.indexOf("Trident");		// MS IE 8이상 버전 체크
+
+		if( IEIndex > 0 && IE8Over < 0 )  {
+			alert("카카오 로그인을 지원하지 않는 브라우저 버전입니다.\nInternet Explorer 8 버전 이상 사용해 주세요.");
+		}else{
+
+			// 로그인 창을 띄웁니다.
+			Kakao.Auth.login({
+				success: function(authObj) {
+					var aaccess_token	= authObj.access_token;
+
+					if(authObj.access_token){
+						Kakao.API.request({
+							url: '/v1/user/me',
+							success: function(userObj) {
+
+								if(userObj.code < 0){
+									alert("잘못된 접근입니다.");
+									return false;
+								}else{
+
+									var pram = {'mtype':join_type};
+									var kakaoObj = $.extend(authObj,userObj,pram);
+									Kakao.API.cleanup();		//kakao 리소스 해제
+									kakaojoinlogin(kakaoObj);
+								}
+							}
+
+						});
+					}else{
+						alert("잘못된 접근입니다.");
+						return false;
+					}
+				},fail: function(res){
+					alert('잘못된 접근입니다.');
+					//JSON.stringify(res);
+				}
+			});
+		}
+	};
+
+	function kakaoAPI(kakaoKey){ Kakao.init(kakaoKey); }
+
+	$.ajax({
+		'url' : '../sns_process/kakaokeys',
+		'dataType': 'json',
+		'success': function(res) {
+			if(res.result == true){
+				kakaoAPI(res.keys);
+			}
+		}
+	});
+
+	function kakaojoinlogin(kakaoObj) {
+		$.ajax({
+		'url' : '../sns_process/kakaojoin',
+		'type' : 'post',
+		'dataType': 'json',
+		'data': kakaoObj,
+		'success': function(res) {
+			if(res.result == true){
+				document.location.href='../main/index';
+			}else{
+				loadingStop("body",true);
+				openDialogAlert(res.msg,'400','140',function(){});
+			}
+		}
+		});
+	}
+{ / }
+//kakao login end
+
+</script>

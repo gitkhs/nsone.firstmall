@@ -1,0 +1,159 @@
+<!-- {? viewlist != 'view' } -->
+<div class="sub_title_bar">
+	<h2>{manager.name}</a></h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../../../images/design/btn_back.png" /></a>
+</div>
+
+<div class="bbstopbox">
+	<div class="pright">
+		{? manager.auth_write != '[admin]' }
+		<span id="boad_write_btn{manager.isperm_write}" board_id="{boardid}" fileperm_read="{manager.fileperm_write}" class="btn_style black hand">평가하기</span>
+		{/}
+		<span class="btn_style black hand boad_search_btn_m" >검색 ▼</span>
+	</div>
+</div>
+{?!_GET.search_text}<script>$('.boad_search_btn_m').click();</script>{/}
+<div class="bbssearchbox" {?!_GET.search_text}style="display:none"{/}>
+	<form name="boardsearch" id="boardsearch" >
+	<input type="hidden" name="id" value="{_GET.id}" >
+	<input type="hidden" name="popup" value="{_GET.popup}" >
+	<input type="hidden" name="iframe" value="{_GET.iframe}" >
+	<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+	<input type="hidden" name="perpage" id="perpage" value="{_GET.perpage}" >
+	<input type="hidden" name="page" id="page" value="{_GET.page}" >
+	<input type="hidden" name="category" id="category" value="{_GET.category}" >
+	<input type="text" name="search_text" id="search_text" value="{_GET.search_text}" title="이 게시판 검색" /><input type="image" src="../../../images/design/btn_search_s.png" />
+	</form>
+</div>
+<!--{ / }-->
+
+<!--{? categorylist}-->
+<div class="bbstopbox"> <select  name="category" id="searchcategory" class="required common-select styled"  >
+	<option value="" selected="selected" >- 분류선택 -</option>
+	<!--{@ categorylist}-->
+	<option value="{.value_}" {? _GET.category == .value_} selected="selected"  {/}>{.value_}</option>
+	<!--{/}-->
+	</select>
+</div>
+<!--{ / }-->
+<script type="text/javascript">
+
+// iframe 방식일때 overwrite
+{ ? _GET.iframe }
+function openDialogAlert(msg,width,height,callback,customOptions){
+	top.openDialogAlert(msg,width,height,callback,customOptions);
+}
+
+function openDialogConfirm(msg,width,height,yesCallback,noCallback){
+	top.openDialogConfirm(msg,width,height,yesCallback,noCallback);
+}
+
+//function openDialog(title, layerId, customOptions, callback){
+//	top.openDialog(title, layerId, customOptions, callback);
+//}
+{ / }
+
+
+$(document).ready(function() {
+	// 평가하기
+	$(".btn_important_large").click(function() {
+		$(location).attr('href', './write?id=store_review&iframe={_GET.iframe}' );
+	});
+});
+</script>
+<ul class="bbslist_ul_style">
+	<!-- 공지사항 리스트데이터 : 시작 t -->
+	{? noticeloop }
+		{@ noticeloop }
+			<li>
+				<!-- 작성자 및 평가 정보 -->
+				<table border="0" width="100%" cellpadding="0" cellspacing="0" class="review_info">
+				<tr>
+					<td>
+						<b>{.name}</b> &nbsp;
+						({? getDateFormat(.r_date,"Y-m-d") == date("Y-m-d") }{=date('H:i',strtotime(.date))}{:}{.date}{/})
+						<span style="padding-left:5px;">{.scorelay}&nbsp;({.score_avg}점)</span>
+					</td>
+				</tr>
+				</table>
+
+				<!-- 내용 -->
+				<div class="review_contents cboth">
+					{.contents}
+				</div>
+			</li>
+		{/}
+	{/}
+	<!-- 공지사항리스트데이터 : 끝 -->
+
+
+	<!-- 리스트데이터 : 시작 scorelay -->
+	{? loop }
+		{@ loop }
+			{ ? .depth > 0}
+			<li class="reply">
+				<!-- 답글 작성자 -->
+				<table border="0" width="100%" cellpadding="0" cellspacing="0" class="review_info">
+				<tr>
+					<td>
+						<b>{.name}</b> &nbsp;
+						({? getDateFormat(.r_date,"Y-m-d") == date("Y-m-d") }{=date('H:i',strtotime(.date))}{:}{.date}{/})
+					</td>
+				</tr>
+				</table>
+
+				<!-- 답글 내용 -->
+				<div class="review_contents cboth">
+					{@ range(1, .depth)}<img src="../../../images/board/icon/icon_comment_reply.gif">{/}
+					&nbsp;{.contents}
+				</div>
+			</li>
+			{:}
+			<li>
+				<!-- 작성자 및 평가 정보 -->
+				<table border="0" width="100%" cellpadding="0" cellspacing="0" class="review_info">
+				<tr>
+					<td>
+						<b>{.name}</b> &nbsp;
+						({? getDateFormat(.r_date,"Y-m-d") == date("Y-m-d") }{=date('H:i',strtotime(.date))}{:}{.date}{/})
+						<span style="padding-left:5px;">{.scorelay}&nbsp;({.score_avg}점)</span>
+					</td>
+				</tr>
+				</table>
+
+				<!-- 내용 -->
+				<div class="review_contents cboth">
+					{.contents}
+				</div>
+			</li>
+			{/}
+		{/}
+	{/}
+	<!-- 리스트데이터 : 끝 -->
+</ul>
+
+<div class="pd20">
+	{? pagin }<!-- 페이징 --><div class="paging_navigation">{pagin}</div><!-- 페이징 --> {/}
+</div>
+
+<!--게시글 비회원 비밀번호 확인 -->
+<div id="ModDelBoardPwCk" class="hide BoardPwCk">
+	<div class="msg">
+		<h3>비밀번호 확인</h3>
+		<div>등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="ModDelBoardPwcheckForm" id="ModDelBoardPwcheckForm" method="post" action="{=sslAction('../board_process')}" target="comentFrame" >
+	<input type="hidden" name="modetype" id="modetype" value="board_delete" />
+	<input type="hidden" name="test" id="test" value="test" />
+	<input type="hidden" name="seq" id="moddel_pwck_seq" value="" />
+	<input type="hidden" name="iframe" value="{_GET.iframe}" >
+	<input type="hidden" name="returnurl" id="moddel_pwck_returnurl" value="{boardurl->userurl}" />
+	<div class="ibox">
+		<input type="password" name="pw" id="moddel_pwck_pw" class="input" />
+		<input type="button" id="BoardPwcheckBtn" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#moddel_pwck_pw').val(''); $('#ModDelBoardPwCk').dialog('close');" />
+	</div>
+	</form>
+</div>
+
+<iframe name="comentFrame" src="/main/blank" frameborder="0" width="0" height="0"></iframe>

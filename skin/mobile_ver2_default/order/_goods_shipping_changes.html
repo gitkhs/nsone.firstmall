@@ -1,0 +1,47 @@
+		<div align="center" style="padding-top:10px;"></div>
+		<form method="post" name="" action="goods_shipping_modify" target="actionFrame">
+		<input type="hidden" name="vmode" value="{_GET.vmode}">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+			<thead>
+				<tr>
+					<th>주문상품</th>
+					<th>배송</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!--{ ? list }-->
+				<!--{ @ list }-->
+				<tr>
+					<td class="cell">
+						<table width="100%" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td class="left" width="80" valign="top">
+							<a href="../goods/view?no={.goods_seq}"><img src="{.image}" align="absmiddle" hspace="5" style="border:1px solid #ddd;" onerror="this.src='../images/common/noimage_list.gif'" width="60" /></a>
+							</td>
+							<td class="left">
+								<div class="goods_name"><a href="../goods/view?no={.goods_seq}" title="{.goods_name}">{.goods_name}</a></div>
+								
+							</td>
+						</tr>
+						</table>
+					</td>
+
+					<td class="cell cell_left_line left" id="change_shipping_method_td">
+						<select name="shipping_method[{.cart_option_seq}]" class="shop{.provider_seq}" onchange="check_chnage_shipping_method(this)">
+							<!--{ @.select_shipping_method }-->
+							<option value="{..key_}" {?.shipping_method==..key_}selected{/}>{..value_}</option>
+							<!--{ / }-->
+						</select>
+					</td>
+				</tr>
+				<!--{ / }-->
+				<!--{ / }-->
+			</tbody>
+		</table>
+		{ ? _GET.vmode == 'settle' }
+		<div style="padding:10px 0px 0px 0px;" align="center" class="desc">배송방법 변경시 주소 정보등 입력한 정보가 초기화 됩니다.</div>
+		{ / }
+		<div align="center" style="padding:10px 0 20px 0;">
+		<button type="submit" style="width:100px; height:36px;" id="change_cart" class="btn_normal_small">변경하기</button>
+		</div>
+		</form>

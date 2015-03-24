@@ -1,0 +1,20 @@
+<style>
+.personal_item {position:relative; text-align:center; margin-bottom:12px; height:62px; background-color:#8ea8c1; border-bottom:6px solid #718ca5;}
+.personal_item .pi_icon {position:absolute; left:20px; top:17px;}
+.personal_item .pi_arrow {position:absolute; right:16px; top:23px;}
+.personal_item .pi_title {padding-top:10px; font-size:24px; color:#fff; font-weight:Bold;}
+.personal_item .pi_price {color:#fff; font-weight:bold; font-size:13px;}
+</style>
+
+<div class="pdl10 pdr10">
+<!--{@record}-->
+<div class="personal_item" onclick="document.location.href='/order/settle?person_seq={.person_seq}&member_seq={.member_seq}'">
+	<div class="pi_icon"><img src="../../images/design/icon_bag.png" width="30" height="29" /></div>
+	<div class="pi_arrow"><img src="../../images/design/icon_arw_go.png" width="12" height="20" /></div>
+
+	<div class="pi_title">{.title}</div>
+	<div class="pi_price">{=number_format((.total_price - .enuri))}원</div>
+
+</div>
+<!--{/}-->
+</div>

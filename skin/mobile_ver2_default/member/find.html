@@ -1,0 +1,451 @@
+<script>
+$(function(){
+	{?_GET.mode=='findpw'}
+		$(".sub_page_tab td").eq(1).click();
+	{:}
+		$(".sub_page_tab td").eq(0).click();
+	{/}
+});
+</script>
+
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>아이디/비밀번호 찾기</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+
+<div class="sub_page_tab_wrap">
+	<table width="100%" class="sub_page_tab" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>아이디 찾기</td>
+		<td>비밀번호 찾기</td>
+	</tr>
+	</table>
+
+	<div class="sub_page_tab_contents">
+		<!-- 아이디 찾기 -->
+		<a name="findid"></a>
+		<form name="loginForm" target="actionFrame" method="post" action="{=sslAction('../login_process/findid')}">
+		<div id="findidfromlay">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<div style="margin-bottom:10px;">
+						<span style="font-size:14px; color: #000; font-weight: bold;" >등록 정보로 찾기</span>
+					</div>
+
+					<div class="radio_tab_wrapper">
+						<table class="radio_tab_table">
+						<tr>
+							<td class="checked"><label><input type="radio" name="find_gb" value="email" checked/> 이메일로 찾기</label></td>
+							{? sms_auth }<td><label><input type="radio" name="find_gb" value="cellphone"/> 휴대번호로 찾기</label></td>{ / }
+						</tr>
+						</table>
+					</div>
+
+					<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0">
+					<tr><td height="10" colspan="2" ></td></tr>
+					<tr>
+						<td align="left" class="small" width="40">이름</td>
+						<td><span class="input_round_style" style="width:98%;"><input type="text" name="user_name" value=""  /></span></td>
+					</tr>
+					<tr><td height="5" colspan="2" ></td></tr>
+					<tr id="id_em">
+						<td align="left" class="small">이메일</td>
+						<td><span class="input_round_style" style="width:98%;"><input type="text" name="email" value="" /></span></td>
+					</tr>
+					<tr class="hide" id="id_cp">
+						<td align="left" class="small">휴대폰</td>
+						<td>
+							<span class="input_round_style" style="width:20%;"><input type="text" name="cellphone[]" value="" /></span> -
+							<span class="input_round_style" style="width:20%;"><input type="text" name="cellphone[]" value="" /></span> -
+							<span class="input_round_style" style="width:20%;"><input type="text" name="cellphone[]" value="" /></span>
+						</td>
+					</tr>
+					<tr><td height="15" colspan="2" ></td></tr>
+					</table>
+
+					<div><input type="submit" value="아이디 찾기" class="btn_normal_small" style="width:100%" /></div>
+				</td>
+			</tr>
+			{? realnameinfo.useRealnamephone=='Y' ||  realnameinfo.realnameId }
+			<tr><td height="30"></td></tr>
+			<tr><td height="26" style="border-top:1px dashed #d7d7d7"></td></tr>
+			<tr>
+				<td >
+					<div style="margin-bottom:10px;">
+						<span style="font-size:14px;color: #000; font-weight: bold;" >본인인증 수단으로 찾기</span>
+					</div>
+					<div style="height:200px;">
+						
+						<div class="radio_tab_wrapper">
+							<table class="radio_tab_table">
+							<tr>
+								{? realnameinfo.useRealnamephone=='Y' //휴대폰본인인증}
+								<td class="checked"><label><input type="radio" name="auth_type" findtype="id" value="phone" checked /> 휴대폰</label></td>
+								{/}
+								{? realnameinfo.realnameId}
+								<td><label><input type="radio" name="auth_type" findtype="id" value="ipin" {? realnameinfo.useRealnamephone!='Y'}checked{/}/> 아이핀(i-Pin)</label></td>
+								<td><label><input type="radio" name="auth_type" findtype="id" value="auth" /> 안심체크</label></td>
+								{/}
+
+							</tr>
+							</table>
+						</div>
+
+						<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0">
+						<tr><td height="10">&nbsp;</td></tr>
+						<tr>
+							<td>
+								<table width="100%" border="0" cellpadding="0" cellspacing="0" id="phone_id_tab"  {? realnameinfo.useRealnamephone !='Y'} class="hide" {/}>
+								<tr><td align="center" height="65"><img src="../images/design/icon_phone.png" width="48" height="64" /></td></tr>
+								<tr><td height="50" align="center">휴대폰번호와 이름을 사용하여 본인확인을 합니다.</td></tr>
+								<tr><td align="center"><button type="button" onclick="phonePopup('id')" class="btn_normal_small" style="width:100%">휴대폰 본인 인증</button></td></tr>
+								</table>
+								{? realnameinfo.realnameId }
+								<table width="100%" border="0" cellpadding="0" cellspacing="0" id="ipin_id_tab"  {? realnameinfo.useRealnamephone =='Y'} class="hide" {/}>
+								<tr><td align="center" height="65"><img src="../images/design/icon_iipn.png" width="164" height="50" ></td></tr>
+								<tr><td height="50" align="center">주민등록번호 대신 사용하는 사이버 신원확인번호입니다.</td></tr>
+								<tr><td align="center"><button type="button" onclick="ipinPopup('id')" class="btn_normal_small" style="width:100%">아이핀 인증</button></td></tr>
+								</table>
+
+								<table width="100%" border="0" cellpadding="0" cellspacing="0" id="auth_id_tab" class="hide">
+								<tr><td align="center" height="65"><img src="../images/design/icon_safecheck.png" width="58" height="58" /></td></tr>
+								<tr><td height="50" align="center">주민등록번호 대신 이름, 생년월일, <br/>성별, 유선전화 또는 주소로 인증합니다.</td></tr>
+								<tr><td align="center"><button type="button" onclick="checkPopup('id')" class="btn_normal_small" style="width:100%">안심체크 인증</button></td></tr>
+								</table>
+								{/}
+							</td>
+						</tr>
+						</table>
+					</div>
+				</td>
+			</tr>
+			{/}
+			</table>
+		</div>
+
+		<div id="findidresultlay" class="hide" >
+			<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td align="center" height="120" style="border:3px solid #ddd;">
+					<div class="findidresultok1" >
+						<span class="desc">고객님의 아이디는 <span style="color: #000; font-weight: bold; letter-spacing:normal;" id="findidlay1"></span> 입니다.</span>
+					</div>
+
+					<div class="findidresultok2 hide">
+						<span class="desc">회원 이메일 주소(<span style="color: #000; font-weight: bold; letter-spacing:normal;" id="findidlay2"></span>)로 정보가 발송되었습니다.</span><br/>
+						<span class="desc">메일을 확인하시기 바랍니다.</span>
+					</div>
+
+					<div class="findidresultok3 hide">
+						<span class="desc">회원 휴대폰(<span style="color: #000; font-weight: bold; letter-spacing:normal;" id="findidlay3"></span>)로 정보가 발송되었습니다.</span><br/>
+						<span class="desc">SMS를 확인하시기 바랍니다.</span>
+					</div>
+
+					<div class="findidresultfalse" >
+						<span  style="font-family: dotum;color: #d30000; letter-spacing:-1px;font-weight:bold;">일치하는 정보가 없습니다.</span>
+						<br/>
+						<span class="desc">아이디 찾기 방법을 변경하거나 회원가입을 해 주세요.</span>
+					</div>
+				</td>
+			</tr>
+			<tr><td height="5"></td></tr>
+			<tr>
+				<td align="center">
+					<div class="findidresultok1 findidresultok2 findidresultok3 hide" >
+						<table width="100%" cellpadding="0" cellspacing="2" border="0">
+						<tr>
+							<td width="50%"><button class="btn_normal_large btn_find_pw" style="width:100%">비밀번호 찾기</button></td>
+							<td width="50%"><button class="btn_important_large" style="width:100%" onclick="document.location.href='http://m.{config_system.subDomain}/member/login?return_url=/main'">로그인</button></td>
+						</tr>
+						</table>					
+					</div>
+					<div class="findidresultfalse hide" >
+						<table width="100%" cellpadding="0" cellspacing="3" border="0">
+						<tr>
+							<td width="50%"><button class="btn_normal_large btn_find_id" style="width:100%">아이디 찾기</button></td>
+							<td width="50%"><button class="btn_important_large" style="width:100%" onclick="document.location.href='/member/agreement'">회원가입</button></td>
+						</tr>
+						</table>
+					</div>
+				</td>
+			</tr>
+			</table>
+		</div>
+		</form>
+	</div>
+
+	<div class="sub_page_tab_contents">
+		<a name="findpw"></a>
+		<!-- 비밀번호 찾기 -->
+		<form name="loginForm2" target="actionFrame" method="post" action="{=sslAction('../login_process/findpwd')}">
+
+		<div id="findpwfromlay">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<div style="margin-bottom:10px;">
+						<span style="font-family: dotum;font-size:14px;color: #000; font-weight: bold;" >등록 정보로 찾기</span>
+					</div>
+
+					<div class="radio_tab_wrapper">
+						<table class="radio_tab_table">
+						<tr>
+							<td class="checked"><label><input type="radio" name="finds_gb" value="emails" checked/> 이메일로 찾기</label></td>
+							{? sms_auth }<td><label><input type="radio" name="finds_gb" value="cellphones"/> 휴대번호로 찾기</label></td>{ / }
+						</tr>
+						</table>
+					</div>
+
+					<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0">
+					<tr><td height="10" colspan="2"></td></tr>
+					<tr>
+						<td align="left" class="small" width="40">이름</td>
+						<td><span class="input_round_style" style="width:98%;"><input type="text" name="user_names" /></span></td>
+					</tr>
+					<tr><td height="5" colspan="2"></td></tr>
+					<tr>
+						<td align="left" class="small">아이디</td>
+						<td><span class="input_round_style" style="width:98%;"><input type="text" name="userids" value="" /></span></td>
+					</tr>
+					<tr><td height="5" colspan="2"></td></tr>
+					<tr id="pwd_em">
+						<td align="left" class="small">이메일</td>
+						<td><span class="input_round_style" style="width:98%;"><input type="text" name="emails" value="" /></span></td>
+					</tr>
+					<tr class="hide" id="pwd_cp">
+						<td align="left" class="small">휴대폰</td>
+						<td>
+							<span class="input_round_style" style="width:20%;"><input type="text" name="cellphones[]" value="" /></span> -
+							<span class="input_round_style" style="width:20%;"><input type="text" name="cellphones[]" value="" /></span> -
+							<span class="input_round_style" style="width:20%;"><input type="text" name="cellphones[]" value="" /></span>
+						</td>
+					</tr>
+					<tr><td height="15" colspan="2"></td></tr>
+					</table>
+				
+					<div><input type="submit" value="비밀번호 찾기" class="btn_normal_small" style="width:100%" /></div>
+				</td>
+			</tr>
+			{? realnameinfo.useRealnamephone=='Y' ||  realnameinfo.realnameId }
+			<tr><td height="30"></td></tr>
+			<tr><td height="26" style="border-top:1px dashed #d7d7d7"></td></tr>
+			<tr>
+				<td >
+					<div style="margin-bottom:10px;">
+						<span style="font-family: dotum;font-size:14px;color: #000; font-weight: bold;" >본인인증 수단으로 임시 비밀번호 찾기</span>
+					</div>
+					<div style="height:250px;">
+						<div class="radio_tab_wrapper">
+							<table class="radio_tab_table">
+							<tr>
+								{? realnameinfo.useRealnamephone=='Y' //휴대폰본인인증}
+								<td class="checked"><label><input type="radio" name="auth_type" findtype="pw" value="phone" checked /> 휴대폰</label></td>
+								{/}
+								{? realnameinfo.realnameId}
+								<td><label><input type="radio" name="auth_type" findtype="pw" value="ipin" {? realnameinfo.useRealnamephone!='Y'}checked{/}/> 아이핀(i-Pin)</label></td>
+								<td><label><input type="radio" name="auth_type" findtype="pw" value="auth" /> 안심체크</label></td>
+								{/}
+
+							</tr>
+							</table>
+						</div>
+						
+						<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td align="center" style="height:48px;"> <span style="font-family: dotum;font-size:12px;color: #000; font-weight: bold;" >아이디 입력</span> <span class="input_round_style" style="width:50%;"><input type="text" name="userids_find" value="" size="20" /></span></td>
+						</tr>
+						<tr><td height="1" bgcolor="#e2e2e2"></td></tr>
+						<tr><td height="10">&nbsp;</td></tr>
+						<tr>
+							<td>
+								<table width="100%" border="0" cellpadding="0" cellspacing="0" id="phone_pw_tab"  {? realnameinfo.useRealnamephone !='Y'} class="hide" {/}>
+								<tr><td align="center" height="65"><img src="../images/design/icon_phone.png" width="48" height="64" /></td></tr>
+								<tr><td height="50" align="center">휴대폰번호와 이름을 사용하여 본인확인을 합니다.</td></tr>
+								<tr><td align="center"><button type="button" onclick="phonePopup('pw')" class="btn_normal_small" style="width:100%">휴대폰 본인 인증</button></td></tr>
+								</table>
+								{? realnameinfo.realnameId }
+								<table width="100%" border="0" cellpadding="0" cellspacing="0" id="ipin_pw_tab"  {? realnameinfo.useRealnamephone =='Y'} class="hide" {/}>
+								<tr><td align="center" height="65"><img src="../images/design/icon_iipn.png" width="164" height="50" ></td></tr>
+								<tr><td height="50" align="center">주민등록번호 대신 사용하는 사이버 신원확인번호입니다.</td></tr>
+								<tr><td align="center"><button type="button" onclick="ipinPopup('pw')" class="btn_normal_small" style="width:100%">아이핀 인증</button></td></tr>
+								</table>
+
+								<table width="100%" border="0" cellpadding="0" cellspacing="0" id="auth_pw_tab" class="hide">
+								<tr><td align="center" height="65"><img src="../images/design/icon_safecheck.png" width="58" height="58" /></td></tr>
+								<tr><td height="50" align="center">주민등록번호 대신 이름, 생년월일, <br/>성별, 유선전화 또는 주소로 인증합니다.</td></tr>
+								<tr><td align="center"><button type="button" onclick="checkPopup('pw')" class="btn_normal_small" style="width:100%">안심체크 인증</button></td></tr>
+								</table>
+								{/}
+							</td>
+						</tr>
+						</table>
+					</div>
+				</td>
+			</tr>
+			{/}
+			</table>
+		</div>
+
+		<div id="findpwresultlay" class="hide" >
+			<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td align="center" height="120" style="border:3px solid #ddd;">
+					<div class="findpwresultok1 hide">
+						<span class="desc">고객님의 임시 비밀번호는 <span style="color: #000; font-weight: bold; letter-spacing:normal;" id="findpwlay1"></span> 입니다.</span><br/>
+						<span class="desc">로그인하신 후 변경해 주세요.</span>
+					</div>
+
+					<div class="findpwresultok2 hide">
+						<span  class="desc">회원 이메일 주소(<span style="color: #000; font-weight: bold; letter-spacing:normal;" id="findpwlay2"></span>)로 임시 비밀번호가 발송되었습니다.</span><br/>
+						<span class="desc">메일을 확인하시기 바랍니다.</span>
+					</div>
+
+					<div class="findpwresultok3 hide">
+						<span   class="desc">회원 휴대폰(<span style="color: #000; font-weight: bold; letter-spacing:normal;" id="findpwlay3"></span>)로 임시 비밀번호가 발송되었습니다.</span><br/>
+						<span class="desc">SMS를 확인하시기 바랍니다.</span>
+					</div>
+
+					<div class="findpwresultfalse1 hide">
+						<span  style="font-family: dotum;color: #d30000; letter-spacing:-1px;font-weight:bold;">일치하는 정보가 없습니다.</span><br/>
+						<span class="desc">찾기 방법을 변경하거나 회원가입을 해 주세요.</span>
+					</div>
+
+					<div class="findpwresultfalse2 hide">
+						<span  style="font-family: dotum;color: #d30000; letter-spacing:-1px;font-weight:bold;">입력한 아이디와 인증한 정보가 맞지 않습니다.</span><br/>
+						<span class="desc">아이디를 다시 확인해 주세요.</span>
+					</div>
+				</td>
+			</tr>
+			<tr><td height="5"></td></tr>
+			<tr>
+				<td align="center">
+					<div class="findpwresultok1 findpwresultok2 findpwresultok3 hide" >
+						<table width="100%" cellpadding="0" cellspacing="2" border="0">
+						<tr>
+							<td><button class="btn_important_large" style="width:100%" onclick="document.location.href='http://m.{config_system.subDomain}/member/login?return_url=/main'">로그인</button></td>
+						</tr>
+						</table>					
+					</div>
+					<div class="findpwresultfalse1 hide" >
+						<table width="100%" cellpadding="0" cellspacing="3" border="0">
+						<tr>
+							<td width="50%"><button class="btn_normal_large btn_find_pw" style="width:100%">비밀번호 찾기</button></td>
+							<td width="50%"><button class="btn_important_large" style="width:100%" onclick="document.location.href='/member/agreement'">회원가입</button></td>
+						</tr>
+						</table>
+					</div>
+					<div class="findpwresultfalse2 hide" >
+						<table width="100%" cellpadding="0" cellspacing="3" border="0">
+						<tr>
+							<td><button class="btn_normal_large btn_find_id" style="width:100%">아이디 찾기</button></td>
+						</tr>
+						</table>
+					</div>
+				</td>
+			</tr>
+			</table>
+		</div>
+
+		<!--{? joinform.use_f ||  joinform.use_t ||  joinform.use_m ||  joinform.use_c ||  joinform.use_n ||  joinform.use_d  ||  joinform.use_k }-->
+		<div  style="padding-top:10px;"><span class="desc">※ SNS 계정으로 가입한 회원의 비밀번호는 저장하고 있지 않으며 해당 SNS 서비스 제공사에 문의하시길 바랍니다.</span></div>
+		<!--{/}-->
+
+		</form>
+
+	</div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("input[name='find_gb']").click(function() {
+		if($(this).val()=='email'){
+			$("#id_em").show();
+			$("#id_cp").hide();
+		}else{
+			$("#id_em").hide();
+			$("#id_cp").show();
+		}
+	});
+
+	$("input[name='finds_gb']").click(function() {
+		if($(this).val()=='emails'){
+			$("#pwd_em").show();
+			$("#pwd_cp").hide();
+		}else{
+			$("#pwd_em").hide();
+			$("#pwd_cp").show();
+		}
+	});
+
+	//본인인증 수단선택
+	$("input:radio[name='auth_type']").live("click",function(){
+		var findtype = $(this).attr("findtype");
+		$(".findtype_auth").val(findtype);
+		if($(this).val()=='phone'){
+			$("#phone_"+findtype+"_tab").show();
+			$("#ipin_"+findtype+"_tab").hide();
+			$("#auth_"+findtype+"_tab").hide();
+		}else if($(this).val()=='ipin'){
+			$("#phone_"+findtype+"_tab").hide();
+			$("#ipin_"+findtype+"_tab").show();
+			$("#auth_"+findtype+"_tab").hide();
+		}else{
+			$("#phone_"+findtype+"_tab").hide();
+			$("#ipin_"+findtype+"_tab").hide();
+			$("#auth_"+findtype+"_tab").show();
+		}
+	});
+
+	$(".btn_find_id").click(function() {
+		document.location.href="/member/find";//?#findid
+	});
+
+	$(".btn_find_pw").click(function() {
+		document.location.href="/member/find";//?#findpw
+	});
+
+});
+
+window.name ="Parent_window";
+
+//본인인증:휴대폰
+function phonePopup(findtype_auth){
+	if( findtype_auth == 'pw' && !$("input[name='userids_find']").val() ){//비번착시기
+		openDialogAlert('아이디를 정확히 입력해 주세요.','400','140',function(){$("input[name='userids_find']").focus();});
+		return;
+	}
+
+	var url = "../member_process/realnamecheck?findidpw=1&realnametype=phone";
+	url += "&sReserved1="+findtype_auth;
+	if( findtype_auth == 'pw' ) url += "&sReserved2="+$("input[name='userids_find']").val();
+	window.open(url, 'popupChk', 'width=500, height=550, top=100, left=100, fullscreen=no, menubar=no, status=no, toolbar=no, titlebar=yes, location=no, scrollbar=no');
+}
+
+//아이핀 실명인증
+function ipinPopup(findtype_auth){
+	if( findtype_auth == 'pw' && !$("input[name='userids_find']").val() ){//비번착시기
+		openDialogAlert('아이디를 정확히 입력해 주세요.','400','140',function(){$("input[name='userids_find']").focus();});
+		return;
+	}
+
+	var url = "../member_process/realnamecheck?findidpw=1&realnametype=ipin";
+	url += "&sReserved1="+findtype_auth;
+	if( findtype_auth == 'pw' ) url += "&sReserved2="+$("input[name='userids_find']").val();
+	window.open(url, 'popupIPIN2', 'width=450, height=550, top=100, left=100,fullscreen=no, menubar=no status=no, toolbar=no, titlebar=yes, location=no, scrollbar=no');
+}
+
+//안심체크 실명인증
+function checkPopup(findtype_auth){
+	if( findtype_auth == 'pw' && !$("input[name='userids_find']").val() ){//비번착시기
+		openDialogAlert('아이디를 정확히 입력해 주세요.','400','140',function(){$("input[name='userids_find']").focus();});
+		return;
+	}
+
+	var url = "../member_process/realnamecheck?findidpw=1&realnametype=check";
+	url += "&sReserved1="+findtype_auth;
+	if( findtype_auth == 'pw' ) url += "&sReserved2="+$("input[name='userids_find']").val();
+	window.open(url, 'niceID_popup', 'width=500, height=550, toolbar=no,directories=no,scrollbars=no,resizable=no,status=no,menubar=no,top=0,left=0,location=no');
+}
+</script>

@@ -1,0 +1,304 @@
+<!-- {? viewlist != 'view' } -->
+<div class="sub_title_bar">
+	<h2>{manager.name}</a></h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../../../images/design/btn_back.png" /></a>
+</div>
+
+<div class="bbstopbox">
+	<div class="pright">
+		{? manager.auth_write != '[admin]' }
+		<span id="boad_write_btn{manager.isperm_write}" board_id="{boardid}" fileperm_read="{manager.fileperm_write}" class="btn_style black hand">예약하기</span>
+		{/}
+		<span class="btn_style black hand boad_search_btn_m" >검색 ▼</span>
+	</div>
+</div>
+{?!_GET.search_text}<script>$('.boad_search_btn_m').click();</script>{/}
+<div class="bbssearchbox" {?!_GET.search_text}style="display:none"{/}>
+	<form name="boardsearch" id="boardsearch" >
+	<input type="hidden" name="id" value="{_GET.id}" >
+	<input type="hidden" name="popup" value="{_GET.popup}" >
+	<input type="hidden" name="iframe" value="{_GET.iframe}" >
+	<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+	<input type="hidden" name="perpage" id="perpage" value="{_GET.perpage}" >
+	<input type="hidden" name="page" id="page" value="{_GET.page}" >
+	<input type="hidden" name="category" id="category" value="{_GET.category}" >
+	<input type="text" name="search_text" id="search_text" value="{_GET.search_text}" title="이 게시판 검색" /><input type="image" src="../../../images/design/btn_search_s.png" />
+	</form>
+</div>
+<!--{ / }-->
+
+<!--{? categorylist}-->
+<div class="bbstopbox"> <select  name="category" id="searchcategory" class="required common-select styled"  >
+	<option value="" selected="selected" >- 분류선택 -</option>
+	<!--{@ categorylist}-->
+	<option value="{.value_}" {? _GET.category == .value_} selected="selected"  {/}>{.value_}</option>
+	<!--{/}-->
+	</select>
+</div>
+<!--{ / }-->
+<script type="text/javascript">
+var board_id = '{manager.id}';
+
+$(document).ready(function() {
+
+	// 수정 클릭시
+	$('.modify_contents').click(function() {
+		var mseq		= $(this).attr('mseq');
+		var seq			= $(this).attr('seq');
+
+		$("#modetype").val('');
+
+		if(chk_modDel(mseq,seq)){
+			top.openDialogConfirm('수정하시겠습니까?','400','140',function(){
+				$(location).attr('href', './write?id='+board_id+'&iframe={_GET.iframe}&seq='+seq);
+			},function(){});
+		}
+	});
+
+	// 삭제하기 클릭시
+	$(".delete_contents").click(function() {
+		var mseq		= $(this).attr('mseq');
+		var seq			= $(this).attr('seq');
+
+		if(chk_modDel(mseq,seq)){
+			boarddeletelessmobile(board_id, seq );
+			/**
+			top.openDialogConfirm('정말 삭제하시겠습니까?','400','140',function(){
+				$("#mode").val("board_delete");
+				$("#seq").val(seq);
+				$("#writeform").submit();
+			},function(){});
+			return;
+			**/
+			return;
+		}
+	});
+
+
+	// 예약하기
+	$(".btn_important_large").click(function() {
+		$(location).attr('href', './write?id='+board_id+'&iframe={_GET.iframe}' );
+	});
+
+	// 비회원 게시글 비밀번호 확인 클릭시
+	$('#BoardPwcheckBtn').click(function() {
+		if($("#modetype").val() == 'board_delete'){
+			{? _GET.iframe }
+				var reurl = $("#moddel_pwck_returnurl").val() + "&iframe={_GET.iframe}";
+				$("#moddel_pwck_returnurl").val(reurl);
+			{/}
+			$("#ModDelBoardPwcheckForm").submit();
+		}else{
+			var seq		 = $("#moddel_pwck_seq").val();
+			var pw		 = $("#moddel_pwck_pw").val();
+			var board_id = $("#board_id").val();
+			var name	 = $("#real_name").val();
+
+			$.ajax({
+				'url' : '../board_process',
+				'data' : {'mode':'board_modifydelete_pwckeck', 'seq':seq, 'pw':pw, 'board_id':board_id, 'name':name },
+				'type' : 'post',
+				'dataType': 'json',
+				'success' : function(res) {
+					if(res.result == true) {
+						$(location).attr('href', './write?id='+board_id+'&iframe={_GET.iframe}&seq='+seq);
+					}else{
+						if(res.msg){
+							openDialogAlert(res.msg,'400','140',function(){});
+						}else{
+							openDialogAlert('잘못된 접근입니다.','400','140',function(){});
+						}
+					}
+				}
+			});
+		}
+	});
+
+});
+
+$(window).load(function(){
+	var body_height = ($("#wrap").height() > 650) ?  $("#wrap").height() : 650;
+	$('#'+board_id+'_frame',parent.document).height(body_height+50);
+}).resize();
+
+function chk_modDel(mseq,seq){
+	var member_seq	= '{=userInfo.member_seq}';
+
+	if(mseq == ''){
+		$("#moddel_pwck_seq").val(seq);
+		openDialog("<span class='desc'>비밀번호를 입력해 주세요.</span>", "ModDelBoardPwCk", {"width":"370","height":"200"});
+		return false;
+	}else{
+		if(member_seq == ''){
+			openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){parent.location.href="/member/login?return_url=/main/index";},function(){});
+			return false;
+		}
+
+		if(member_seq != mseq){
+			openDialogAlert('자신의 글만 변경 가능합니다.','400','140');
+			return false;
+		}
+
+		return true;
+	}
+}
+
+function iframeset(){
+	var body_height = ($("#wrap").height() > 650) ?  $("#wrap").height() : 650;
+	$('#'+board_id+'_frame',parent.document).height(body_height+50);
+}
+
+</script>
+
+<ul class="bbslist_ul_style">
+	<!-- 공지사항 리스트데이터 : 시작 t -->
+	{? noticeloop }
+		{@ noticeloop }
+		<li>
+			<span class="fl">
+				<div class="bus_subject">
+					<span>[공지사항] {.iconmobile}{.iconaward}{.blank}{.category} {.subjectcut} {? .comment >0 }
+						<span class="comment">
+						({=number_format(.comment)}){/}{.iconimage}{.iconfile}{.iconvideo}{.iconnew}{.iconhot}{.iconhidden}
+						</span>
+					</span>
+				</div>
+
+				<span class="bus_record_info">
+				<span style="font-size:11px; padding-left:5px;">({? getDateFormat(.r_date,"Y-m-d") == date("Y-m-d") }{=date('H:i',strtotime(.date))}{:}{.date}{/} 입력)</span>
+				</span>
+			</span>
+			<!-- 내용 -->
+			<div class="reserve_contents cboth">
+				&nbsp;{.contents}
+			</div>
+		</li>
+		{/}
+	{/}
+	<!-- 공지사항리스트데이터 : 끝 -->
+
+	<!-- 리스트데이터 : 시작 -->
+	{? loop }
+		{@ loop }
+			<li>
+				<!-- 작성자 정보 -->
+				<table border="0" width="100%" cellpadding="0" cellspacing="0" class="reserve_info">
+				<tr>
+					<td>
+						<b>{.name}</b> &nbsp;
+						{? getDateFormat(.r_date,"Y-m-d") == date("Y-m-d") }{=date('H:i',strtotime(.date))}{:}{.date}{/} 입력
+					</td>
+					<td align="right">
+						<span style="font-size:14px" class="modify_contents" seq="{.seq}" mseq="{.mseq}">수정</span> &nbsp;
+						<span style="font-size:14px" class="delete_contents" seq="{.seq}" mseq="{.mseq}">삭제</span>
+					</td>
+				</tr>
+				</table>
+
+				<!-- 예약 정보 -->
+				<div class="reserve_date cboth">
+					<img src="../../../images/board/icon/btn_calender.png" width="10" height="10" />&nbsp;{=date('Y년 m월 d일 H시 i분',strtotime(.reserve_date))}
+				</div>
+
+				<!-- 내용 -->
+				<div class="reserve_contents cboth">
+					<img src="../../../images/board/icon/icon_comment.gif" width="10" height="10" />&nbsp;{.contents}
+				</div>
+			</li>
+			{? .re_contents }
+			<!-- 관리자댓글이 있는 경우 -->
+			<div class="reply">
+				<div class="clearbox">
+					<div class="article_header">
+						{? manager.write_admin_type == 'TXT'}<b>{manager.write_admin}</b>
+						{:}
+							{? manager.icon_admin_img}<img src="/data/board/store_reservation/{manager.icon_admin_img}" />{:}관리자{/}
+						{/}
+					</div>
+				</div>
+				<table class="reserve_info" width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<div class="fleft"><img src="../../../images/board/icon/icon_comment.gif" width="10" height="10" />&nbsp;</div>
+						<div class="fleft">{.re_contents}</div>
+						<div class="cboth"></div>
+					</td>
+				</tr>
+				</table>
+			</div>
+			{/}
+		{/}
+	{/}
+	<!-- 리스트데이터 : 끝 -->
+</ul>
+
+
+<!--검색폼 : 시작 -->
+<div class="searchform hide">
+	<form name="boardsearch" id="boardsearch" >
+	<input type="hidden" name="id" value="{manager.id}" >
+	<input type="hidden" name="popup" value="{_GET.popup}" >
+	<input type="hidden" name="iframe" value="{_GET.iframe}" >
+	<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+	<input type="hidden" name="score" id="score" value="{_GET.score}" >
+	<input type="hidden" name="perpage" id="perpage" value="{_GET.perpage}" >
+	<input type="hidden" name="page" id="page" value="{_GET.page}" >
+	<input type="hidden" name="category" id="category" value="{_GET.category}" >
+	<input type="text" name="search_text" id="search_text" value="{_GET.search_text}" title="작성자, 제목, 내용" size="40" class="input"  />
+	<input type="submit" value=" 검색 " class="bbs_btn" />
+	<input type="button" value=" 초기화 " class="bbs_btn" onclick="document.location.href='{boardurl->resets}'"/>
+	</form>
+</div>
+<!-- 검색폼 : 끝 -->
+
+<!-- 컨트롤 폼 : 시작 -->
+<form name="writeform" id="writeform" method="post" action="{=sslAction('../board_process')}"  enctype="multipart/form-data" target="comentFrame">
+<input type="hidden" name="mode" id="mode" value="" />
+<input type="hidden" name="board_id" id="board_id" value="{_GET.id}" />
+<input type="hidden" name="iframe" value="{_GET.iframe}" >
+<input type="hidden" name="delseq" id="seq" value="" />
+<input type="hidden" name="real_name" id="real_name" value="" />
+</form>
+<!-- 컨트롤 폼 : 끝 -->
+
+{? count(loop) > 3 }
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td align="center" class="pd20">
+		{? manager.auth_write != '[admin]' }
+		<input type="button" name="reserve_write_btn" value="예약하기" class="btn_important_large hand" style="width:95%" />
+		{/}
+	</td>
+</tr>
+</table>
+{/}
+
+<div class="pd20">
+	{? pagin }<!-- 페이징 --><div class="paging_navigation">{pagin}</div><!-- 페이징 --> {/}
+</div>
+
+<div id="openDialogLayer" style="display: none">
+	<div align="center" id="openDialogLayerMsg"></div>
+</div>
+
+<!--게시글 비회원 비밀번호 확인 -->
+<div id="ModDelBoardPwCk" class="hide BoardPwCk">
+	<div class="msg">
+		<h3>비밀번호 확인</h3>
+		<div>등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="ModDelBoardPwcheckForm" id="ModDelBoardPwcheckForm" method="post" action="{=sslAction('../board_process')}" target="comentFrame" >
+	<input type="hidden" name="modetype" id="modetype" value="board_delete" />
+	<input type="hidden" name="test" id="test" value="test" />
+	<input type="hidden" name="seq" id="moddel_pwck_seq" value="" />
+	<input type="hidden" name="iframe" value="{_GET.iframe}" >
+	<input type="hidden" name="returnurl" id="moddel_pwck_returnurl" value="{boardurl->userurl}" />
+	<div class="ibox">
+		<input type="password" name="pw" id="moddel_pwck_pw" class="input" />
+		<input type="button" id="BoardPwcheckBtn" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#moddel_pwck_pw').val(''); $('#ModDelBoardPwCk').dialog('close');" />
+	</div>
+	</form>
+</div>
+
+<iframe name="comentFrame" src="/main/blank" frameborder="0" width="0" height="0"></iframe>

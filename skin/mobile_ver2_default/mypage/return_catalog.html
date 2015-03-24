@@ -1,0 +1,46 @@
+{?!mobileAjaxCall}
+	{#common_mypage_refund_top}
+{/}
+
+<!--{ @ record }-->
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="order_list_table">
+<col /><col width="90" />
+<tr>
+	<th class="cell" colspan="2" onclick="document.location.href='return_view?return_code={.return_code}&step_type={_GET.step_type}'">{=date('Y.m.d',strtotime(.regist_date))} ({=.mtype} / 반품코드:<b>{.return_code}</b>)</th>
+</tr>
+<tr>
+	<td class="cell left">
+		{.goods_name}
+		<!--{ ? item_cnt > 1 }--><div style="color:#999">외 {=item_cnt-1}건</div><!--{ / }-->
+		
+	</td>
+	<td class="cell center">
+	<span class="bold" style="color:#e68b00">{.mstatus}</span>
+	<div class="pdt5"><button onclick="document.location.href='/mypage/myqna_write?category={=urlencode('반품문의')}'" class="btn_style">반품문의</button></div>
+	</td>
+</tr>
+</table>
+<!--{ / }-->
+
+<div style="height:30px"></div>
+
+<table align="center" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+		<div class="paging_navigation">
+			<!--{ ? page.first }--><a href="?page={page.first}&amp;{page.querystring}" class="first">◀ 처음</a><!--{ / }-->
+			<!--{ ? page.prev }--><a href="?page={page.prev}&amp;{page.querystring}" class="prev">◀ 이전</a><!--{ / }-->
+			<!--{ @ page.page }-->
+				<!--{ ? page.nowpage ==  .value_ }-->
+					<a href="?page={.value_}&amp;{page.querystring}" class="on">{.value_ }</a>
+				<!--{ : }-->
+					<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? page.next }--><a href="?page={page.next}&amp;{page.querystring}" class="next">다음 ▶</a><!--{ / }-->
+			<!--{ ? page.last }--><a href="?page={page.last}&amp;{page.querystring}" class="last">마지막 ▶</a><!--{ / }-->
+		</div>
+	</td>
+</tr>
+</table>
+<div style="height:50px"></div>

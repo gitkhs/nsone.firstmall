@@ -1,0 +1,203 @@
+<!--{? !_GET.iframe }--><div><img src="../../../images/design/mypage_tit_review.gif" /></div><!--{/}-->
+<div class="right" style="margin-top:-20px;">
+	<button type="button" name="boardviewclose" class="bbs_btn">목록</button></span>
+	<!--{? managerview.isperm_write != "_no" }-->
+		<button type="button"   {? _GET.iframe }id="goods_boad_write_btn{managerview.isperm_write}"{:}id="boad_write_btn{managerview.isperm_write}"{/}    board_id="{boardid}"  class="bbs_btn">상품후기쓰기 </button>
+	<!--{/}-->
+	<!--{? display == 0 && managerview.isperm_moddel != "_mbno" }-->
+		<button type="button"  {? _GET.iframe }name="goods_boad_modify_btn{managerview.isperm_moddel}"{:}name="boad_modify_btn{managerview.isperm_moddel}"{/} board_seq="{seq}"  board_id="{boardid}"  class="bbs_btn">수정 </button>
+	<!--{/}-->
+	<!--{? !_GET.iframe }-->
+		<!--{? display == 0 && replylay == 'Y' && managerview.isperm_write != "_no" }-->
+			<button type="button"  name="boad_reply_btn" board_seq="{seq}"  board_id="{boardid}" class="bbs_btn" >답변 </button>
+		<!--{/}-->
+	<!--{/}-->
+	<!--{? ((display == 0 || (display == 1 && replyor == 0 && comment ==0) ) ) && managerview.isperm_moddel != "_mbno"  }--> <button type="button"  {? _GET.iframe }name="goods_boad_delete_btn{managerview.isperm_moddel}"{:}name="boad_delete_btn{managerview.isperm_moddel}"{/}    board_seq="{seq}"  board_id="{boardid}"  class="bbs_btn">삭제 </button> <!--{/}-->
+</div>
+<div class="cboth"></div>
+<br style="line-height:6px;" />
+<div class="viewbox">
+<form name="form1" id="form1" method="post" action="{=sslAction('../board_process')}"  target="actionFrame">
+<input type="hidden" name="mode" id="mode" value="{mode}" />
+<input type="hidden" name="board_id" id="board_id" value="{_GET.id}" />
+<input type="hidden" name="reply" id="reply" value="{_GET.reply}" />
+<!--{? seq }-->
+	<input type="hidden" name="seq" id="board_seq" value="{seq}" />
+<!--{/}-->
+<input type="hidden" name="popup" value="{_GET.popup}" >
+<input type="hidden" name="iframe" value="{_GET.iframe}" >
+<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+
+	<table class="bbsview_table_style" style="width:100%" cellpadding="0" cellspacing="0" border="0">
+	<colgroup>
+		<col /><col width="150px"/>
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="left pdl5  pdt5 pdb5"><b>{? datacategory }[{datacategory}]{/} {iconmobile} {subject} {iconnew} {iconhot} {iconhidden}</b></th>
+		<th class="right">{=snslinkurl('board', subject)}</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td class="cell" colspan="2">
+			{? !isplusfreenot //무료몰경우 }
+				<span class="han" >평점</span> {scorelay}
+			{:}
+				<span class="han" >평점</span> {scorelay}{? score_avg_lay }/100{/}
+				{? reviewcategorylist},&nbsp;&nbsp;
+				{@ reviewcategorylist}
+					{.title} {? .score }{=getGoodsScore(.score, manager, 'view', .idx)} {:} 0 {/}
+					{? count(reviewcategorylist)-1 > .index_ },&nbsp;&nbsp;{/}
+					{/}
+				{/}
+			{/}
+		</td>
+	</tr>
+
+	<tr>
+		<td class=" left"  valign="top" >
+			<div style="margin-top:5px;line-height:140%;">{goodsview}</div>
+		</td>
+		<td class="right" valign="top" style="border-left-width:0;">
+			<div style="margin:5px;line-height:140%;">
+				<span class="name">{name}</span>
+				<br/><span class="date">{r_date}</span>
+				<br/><span class="hit">조회수 {=number_format(hit)}</span>
+				<br/><span class="score">{buyertitle}</span>
+			</div>
+		</td>
+	</tr>
+
+	{? goodsreview_sub}
+		<tr>
+		<td class="left"  colspan="2">
+		<div class="content" >
+		{@ goodsreview_sub}
+			{? .used == 'Y' }
+				{.label_title} :  {.label_view}<br />
+			{/}
+		{/}
+		</div>
+		</td>
+	</tr>
+	{/}
+
+	<!--{? file_key_w && uccdomain_fileswf}-->
+	<tr>
+		<td class="center"   colspan="2">
+			<div class="content" >
+				<embed src="{uccdomain_fileswf}" width="{managerview.video_size0}" height="{managerview.video_size1}" allowfullscreen="true" wmode="transparent"></embed>
+			</div>
+		</td>
+	</tr>
+	<!--{/}-->
+
+	<!--{? filelist}-->
+	<tr>
+		<td class=""  colspan="2">
+			<div class="attach">
+				<ul>
+						<!--{@ filelist}-->
+						<li><span class="realfilelist hand highlight-link" realfiledir="{.realfiledir}" realfilename="{.orignfile}"  realfilename="{.orignfile}" board_id="{boardid}" filedown="../board_process?mode=board_file_down&board_id={boardid}&realfiledir={.realfiledir}&realfilename={.orignfile}">{.orignfile} (<span class="size">{.realsizefile}</span>) <button type="button"  class="bbs_btn">down</button></span>
+						{? .is_image }<span class="hand" imgsrc="{.realfile}" onclick="board_file_review('{.realfile}','{.imagesize[0]}','{.imagesize[1]}');" ><img src="../../../images/icon/icon_zoom.gif" hspace="1" title="미리보기"/></span>{/}</li>
+						<!--{/}-->
+				</ul>
+			</div>
+		</td>
+	</tr>
+	<!--{/}-->
+	</tbody>
+	</table>
+
+	<div class="content left" >
+		{contents}
+	</div>
+	</form>
+	
+	<!--{? managerview.auth_recommend_use == 'Y' }-->
+	<!-- 게시글평가 -->
+	<div class="scorelay"  style="margin: 15px 0 5px">{#scoreskin}</div>
+	<!-- 게시글평가 -->
+	<!--{/}-->  
+
+	<!--{? commentlay == 'Y' || comment > 0 // 댓글 사용여부, 댓글수 }-->
+	<!-- 코멘트부분 -->
+	<a name="cmtlist"></a>
+	<div class="comment"  id="comment_container" style="margin: 15px 0 5px">{#commentskin}</div>
+	<!-- 코멘트부분 -->
+	<!--{/}--> 
+
+
+	<!-- 이전/다음 -->
+	<div id="prenextlist"  style="margin: 15px 0 5px">{#prenextskin}</div>
+	<!-- 이전/다음 -->
+
+</div>
+
+<!-- 댓글 비회원 비밀번호 확인 -->
+<div id="CmtBoardPwCk" class="hide BoardPwCk">
+	<div class="msg">
+		<h3> 비밀번호 확인</h3>
+		<div>댓글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="BoardPwcheckForm" id="CmtBoardPwcheckForm" method="post" >
+	<input type="hidden" name="seq" id="cmt_pwck_seq" value="" />
+	<input type="hidden" name="cmtseq" id="cmt_pwck_cmtseq" value="" />
+	<div class="ibox">
+		<input type="password" name="pw" id="cmt_pwck_pw" class="input" />
+		<input type="submit" id="CmtBoardPwcheckBtn" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#CmtBoardPwCk').dialog('close');" />
+	</div>
+	</form>
+</div>
+
+<!--게시글 비회원 비밀번호 확인 -->
+<div id="ModDelBoardPwCk" class="hide BoardPwCk">
+	<div class="msg">
+		<h3> 비밀번호 확인</h3>
+		<div>게시글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="ModDelBoardPwcheckForm" id="ModDelBoardPwcheckForm" method="post" action="{=sslAction('../board_process')}" target="actionFrame " >
+	<input type="hidden" name="modetype" id="modetype" value="" />
+	<input type="hidden" name="seq" id="moddel_pwck_seq" value="" />
+	<input type="hidden" name="returnurl" id="moddel_pwck_returnurl" value="" />
+	<div class="ibox">
+		<input type="password" name="pw" id="moddel_pwck_pw" class="input" />
+		<input type="submit" id="BoardPwcheckBtn" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#ModDelBoardPwCk').dialog('close');" />
+	</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+function getboardLogin(){
+	{? defined('__ISUSER__') === true }
+		openDialogAlert('해당 서비스를 이용하시려면 관리자에게 문의하여 주시길 바랍니다.','450','140');
+	{:}
+		openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){location.href="/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+	{/}
+}
+
+function getcmtMbLogin(){
+	{? defined('__ISUSER__') === true }
+		openDialogAlert('글작성자만 이용가능합니다.','400','140');
+	{:}
+		openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){location.href="/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+	{/}
+}
+
+$(".content img").load(function() {
+	//이미지 가로가 큰경우
+	$(".content img").each(function() {
+		<!--{ ? layout_config.layoutScrollLeft != 'hidden' || layout_config.layoutScrollRight != 'hidden'}-->
+			var default_width = '{layout_config.body_width-100}';//(본문레이아웃사이즈-100) 또는 직접값변경
+		<!--{:}-->
+			var default_width = '{layout_config.body_width-50}';//(본문레이아웃사이즈-50) 또는 직접값변경
+		<!--{/}-->
+		if( $(this).width() > default_width || $(this).height() > default_width ) {
+			imageResize(this,default_width);
+		}
+	});
+});
+</script>

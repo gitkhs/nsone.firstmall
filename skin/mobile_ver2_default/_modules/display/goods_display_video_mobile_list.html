@@ -1,0 +1,175 @@
+<style>
+.mobilethumbnailvideo {position:absolute;z-index:5;background-position:center;background:url('../../images/common/thumb_play.png') no-repeat center center;vertical-align:middle;}
+.goods_list {padding-top:10px; border-bottom:1px dashed gray;}
+.goods_list li.gl_item {padding-left:8px; border-top:1px solid #ddd;}
+.goods_list li.gl_item>a {display:block; *zoom:1; padding-top:10px; padding-bottom:10px;}
+.goods_list li.gl_item>a:after {content:""; clear:both; display:block;}
+.goods_list li.gl_item:first-child {border-top:none;}
+.goods_list li.gl_item:first-child a {padding-top:0px;}
+.goods_list span.gli_image {float:left; width:25%;}
+.goods_list span.gli_image img {width:100%;}
+.goods_list ol.gli_contents {float:left; width:70%; padding-left:10px; padding-top:10px;}
+.goods_list ol.gli_contents .goods_name {font-size:15px; font-weight:bold;}
+.goods_list ol.gli_contents .goods_summary {display:block; padding-top:5px; font-size:12px; color:gray; }
+.goods_list ol.gli_contents .goods_consumer_price {color:gray}
+.goods_list ol.gli_contents .goods_price {font-weight:bold; font-size:14px; font-family:tahoma; color:#ff3300}
+.goods_list ol.gli_contents .gli_goodsprice {display:block; padding-top:5px; padding-bottom:5px;}
+
+.fb-like {width:60px;}
+</style>
+<!--{ ? perpage }-->
+<div class="goods_list_top pdt10">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td align="left">
+			<span class="list_summary">TOTAL <b>{=number_format(page.totalcount)}</b> ITEMS</span>
+		</td>
+		<td align="right">
+			<span class="sort_item">
+				<!--{ @ orders }-->
+					<!--{ ? in_array(.key_,array('popular','low_price','newly')) }-->
+						<!--{ ? .index_ }-->
+						&nbsp;|&nbsp;
+						<!--{ / }-->
+						<!--{ ? .key_ == sort }-->
+							<a href="?sort={.key_}{sortUrlQuerystring}"><b>{.value_}</b></a>
+						<!--{ : }-->
+							<a href="?sort={.key_}{sortUrlQuerystring}">{.value_}</a>
+						<!--{ / }-->
+					<!--{ / }-->
+				<!--{ / }-->
+			</span>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<br style="line-height:10px;" />
+<!--{ / }-->
+
+<!--{ ? count(displayTabsList)>1 }-->
+<ul class="displayTabContainer {tab_design_type}">
+	<!--{ @ displayTabsList }-->
+		<li {?.index_==0}class="current"{/} style="width:{=100/count(displayTabsList)}%">{.tab_title}</li>
+	<!--{ / }-->
+</ul>
+<!--{ / }-->
+
+<!--{ @ displayTabsList }-->
+<div class="displayTabContentsContainer {?count(displayTabsList)>1}displayTabContentsContainerBox{/}">
+	<!--{ ? .contents_type == 'text' }-->
+	<div>
+			{?mobileMode || storemobileMode}{.tab_contents_mobile}{:}{.tab_contents}{/}
+	</div>
+	<!--{ : }-->
+		<ul class="goods_list">
+		<!--{ @ .record }-->
+		<li class="gl_item">
+			<a href="/goods/view?no={..goods_seq}">
+
+				<!--{? kind == 'designvideo' //동영상인경우 }-->
+					<span class="gli_image goodsDisplayVideoWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(..value_))}">
+					<!--{? ..file_key_i && uccdomain_fileurl}--><iframe width="{? videosize_w }{videosize_w}{:}400{/}" height="{? videosize_h }{videosize_h}{:}200{/}" src="{..uccdomain_fileurl}&g=tag&width={..videosize_w}&height={..videosize_h}" frameborder="0" allowfullscreen class=""></iframe>
+					<!--{: ..file_key_w && uccdomain_fileurl}--><iframe   width="{? videosize_w }{videosize_w}{:}400{/}" height="{? videosize_h }{videosize_h}{:}200{/}" src="{..uccdomain_fileurl}&g=tag&width={..videosize_w}&height={..videosize_h}" frameborder="0"  class=""></iframe>
+					<!--{:}--><img src="{..image}" onerror="this.src='../../images/common/noimage.gif'" />
+					<!--{/}-->
+					</span>
+				<!--{:}-->
+					<span class="gli_image goodsDisplayImageWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(..value_))}"><img src="{..image}" onerror="this.src='../../images/common/noimage.gif'" /></span>
+				<!--{/}-->
+
+				<ol class="gli_contents">
+					<!--{ @ info_settings.list }-->
+						<!--{? ...value_->kind == 'goods_name' }-->
+						<li><span class="goods_name">{..goods_name}</span> <!--{ @ ..icons }--><img src="/data/icon/goods/{....value_}.gif" border="0"><!--{ / }--></li>
+						<!--{/}-->
+
+						<!--{? ...value_->kind == 'summary' && ..summary}-->
+						<li><span class="goods_summary">{..summary}</span></li>
+						<!--{/}-->
+
+
+						<!--{? ...value_->kind == 'price' }-->
+						<li class="gli_goodsprice">
+							<!--{? ..consumer_price > ..price }-->
+							<span class="goods_consumer_price">
+							<strike>
+							{=number_format(..consumer_price)}
+							{?...value_->postfix}{...value_->postfix}{/}
+							</strike>
+							</span>
+							&nbsp;→&nbsp;
+							<!--{/}-->
+
+							<span class="goods_price">
+							<!--{?..string_price}-->
+								{..string_price}
+							<!--{:}-->
+								{=number_format(..price)}
+								{?...value_->postfix}{...value_->postfix}{/}
+							<!--{/}-->
+							</span>
+						</li>
+						<!--{/}-->
+
+						<!--{? ...value_->kind == 'sale_price' }-->
+						<li >
+							<!--{?..sale_price}--> ->
+							<span {...value_->name_css}>
+								{=number_format(..sale_price)}
+								{?...value_->postfix}{...value_->postfix}{/}
+							</span>
+							<!--{/}-->
+						</li>
+						<!--{/}-->
+
+						<!--{? ...value_->kind == 'fblike' && APP_USE == 'f'  && APP_LIKE_TYPE != 'NO'}-->
+						<li>{=snsLikeButton(..goods_seq,...value_->fblike)}</li>
+						<!--{/}-->
+
+						<!--{? ...value_->kind == 'status_icon' }-->
+						<li>
+							<!--{ ? ...value_->status_icon_runout && ..goods_status == 'runout' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_runout}" />
+							<!--{ / }-->
+							<!--{ ? ...value_->status_icon_purchasing && ..goods_status == 'purchasing' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_purchasing}" />
+							<!--{ / }-->
+							<!--{ ? ...value_->status_icon_unsold && ..goods_status == 'unsold' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_unsold}" />
+							<!--{ / }-->
+						</li>
+						<!--{/}-->
+
+						<!--{? ...value_->kind == 'count' && ..eventEnd }-->
+							<li class="soloEventTd{..goods_seq}" style="font-face:Dotum; font-size:11px;">
+								<img src="../../images/common/icon_clock.gif" style="padding-bottom:2px;">남은시간 <span style="background-color:#c61515; color:#ffffff; padding:2px; font-weight:bold;"><span id="soloday{..goods_seq}" style="color:#ffffff; font-weight:bold;"></span>일 <span id="solohour{..goods_seq}" style="color:#ffffff; font-weight:bold;"></span>:<span id="solomin{..goods_seq}" style="color:#ffffff; font-weight:bold;"></span>:<span id="solosecond{..goods_seq}" style="color:#ffffff; font-weight:bold;"></span></span>
+							<script>
+							$(function() {
+								timeInterval{..goods_seq} = setInterval(function(){
+									var time{..goods_seq} = showClockTime('text', '{..eventEnd.year}', '{..eventEnd.month}', '{..eventEnd.day}', '{..eventEnd.hour}', '{..eventEnd.min}', '{..eventEnd.second}', 'soloday{..goods_seq}', 'solohour{..goods_seq}', 'solomin{..goods_seq}', 'solosecond{..goods_seq}', '{..goods_seq}');
+									if(time{..goods_seq} == 0){
+										clearInterval(timeInterval{..goods_seq});
+										$("..soloEventTd{displayGoods.goods_seq}").html("단독 이벤트 종료");
+									}
+								},1000);
+							});
+							</script>
+							</li>
+						<!--{/}-->
+
+					<!--{ / }-->
+				</ol>
+			</a>
+		</li>
+		<!--{ / }-->
+		</ul>
+	<!--{ / }-->
+</div>
+<!--{ / }-->
+
+
+<!--{ ? perpage }-->
+{#paging}
+<!--{ / }-->
+

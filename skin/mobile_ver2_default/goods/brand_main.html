@@ -1,0 +1,149 @@
+<!--{=assignBrandMenuData()}-->
+<style>
+	.brand_search_fm { font-size:0; background: #555555; border-bottom:1px solid #3a3a3a; padding:10px 0; }
+	.brand_search_fm > div {border:1px solid #3e3e3e; background:#ffffff;  height:28px; width:96%; margin:0 auto; position: relative; }
+	.brand_search_fm > div > input[type='text'] { border:#FFF; height:28px; width:90%; margin:0 10px; line-height:28px;}
+	.brand_search_fm > div > input[type='image'] {position:absolute; top:0; right:0;}
+	.brand_search_fm > div > a {position:absolute; top:2px; right:35px;}
+	.brand_search_btns { font-size:0; padding:10px 0; height:19px; border-bottom:1px solid #e3e3e3;}
+	.brand_search_btns > .la {float:left; width:17%; text-align:center; height:19px; border-right:1px #7e7e7e dotted;}
+	.brand_search_btns > .ra {float:right; width:83%; height:19px; margin-left:-1px;}
+	.brand_search_btns > .ra > ul {margin:0 13px;}
+	.brand_search_btns > .ra > ul > li {float:left;}
+	.brand_search_btns > .ra > ul > li.bar {font-size:11px; line-height:16px; color:#e6e6e6; margin:1px 2px; }
+	.brand_search_btns a {display:inline-block; border-top:1px solid #e6e6e6; border-left:1px solid #e6e6e6; border-bottom:1px solid #d3d3d3; border-right:1px solid #d3d3d3; color:#9f9f9f; padding:2px; min-width: 10px; line-height:10px; font-size:11px; cursor: pointer; text-align:center; margin:1px; height:11px;}
+	.brand_search_btns a:hover, .brand_search_btns a.on {background:#01669a; color:#FFF;}
+	.brand_search_classification {clear: both; padding-top:15px; color:#666; font-size:14px; }
+	.brand_search_classification > dl > dt {width:15%; float:left; text-align:center; margin:5px 0;}
+	.brand_search_classification > dl > dd {width:85%; float:left;}
+	.brand_search_classification > dl > dd > ul > li {float:left; width:160px; margin:5px;}
+	.brand_search_classification input[type='checkbox'] {vertical-align: middle;}
+	
+	.brand_list {border-top:1px solid #e3e3e3;}
+	.brand_list > dl {}
+	.brand_list > dl > dt { border-top:1px solid #ffffff; border-bottom:1px solid #ddded9; background: #f5f6f1; height:51px; position: relative; }
+	.brand_list > dl > dt > h1 {padding:13px; line-height:20px; font-size:20px; color:#4f4f4f;}
+	.brand_list > dl > dt > p {position: absolute; top:0; right:70px; line-height:51px; height:51px; }
+	.brand_list > dl > dt > a {position: absolute; padding:10px; top:0; right:10px; cursor: pointer; display: block; font-size:0; height:30px; width: 31px; }
+	.brand_list > dl > dd {  }
+	.brand_list > dl > dd > ul { display:none; }
+	.brand_list > dl > dd > ul > li { height:51px; background:#e5e6e1; border-bottom:1px solid #ddded9; }
+	.brand_list > dl > dd > ul > li > a.title { display:block; float:left; font-size:16px; margin-left:2%; line-height:51px; }
+	.brand_list > dl > dd > ul > li > a.icon { display:block; float:right; padding:10px; margin-right:10px;}
+	.brand_list .brandtxt.disable {color:#E0E0E0;}
+	.brand_list .brandtxt.on {font-weight:700; color:#003f7e;}
+</style>
+
+<div class="sub_title_bar">
+	<h2>브랜드 검색</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+
+<form id="brandFm">
+	<fieldset>
+		<legend>Search Brand</legend>
+		<div class="brand_search_fm">
+			<div>
+				<input type="text" name="keyword" value="" placeholder="BRAND SEARCH" />
+				<a id="search_cancel"><img src="../images/common/btn_brand_search_cancel.png" alt="cancel" /></a>
+				<input type="image" src="../images/common/btn_brand_search.png" />
+			</div> 
+		</div>
+	</fieldset>	
+</form>
+
+<div class="brand_list">
+	{ @ (brandMenuData) }
+	{ ? count(.value_) > 0 }
+	<dl class="brandwrap wrap{=str_replace("/", "", strtr(base64_encode(str_replace("/", "", .key_)), "+=", "-_"))}">
+		<dt class="open" data-img="../images/design/btn_arw_up.png" data-stat="close">
+			<h1>{=strtoupper(.key_)}</h1>
+			<p>
+				<b>{=count(.value_)} 개 </b> 브랜드
+				<span class="search_txt" data-cnt="0"></span>
+			</p>
+			<a><img src="../images/design/btn_arw_dn.png" alt="열기" /></a>
+		</dt>
+		<dd>
+			<ul>
+			{ @ .value_ }
+			<li>
+				<a href="/goods/brand?code={..category_code}" class="title brandtxt brand{..category_code}">- {..prn_title}</a>
+				<a class="icon" href="/goods/brand?code={..category_code}"><img src="../images/design/btn_arw_r.png" alt="열기" /></a>
+			</li>
+			{ / }
+			</ul>
+		</dd>
+	</dl>
+	<div class="clearbox"></div>
+	{ / }
+	{ / }
+</div>
+
+<script>
+	$(document).ready(function() {
+		$(".alphabet_btn").click(function(){
+			$(".alphabet_btn").removeClass("on");
+			$(this).addClass("on");
+			
+			$target = $(this).attr("data-target");
+			$(".brandwrap").hide();
+			$(".brandwrap."+$target).show();
+			if($target === "all") {
+				$(".brandwrap").show();
+			}
+		});
+		$("#search_cancel").click(function(){
+			$(".brand_search_fm input[type='text']").val("");
+			$("#brandFm").submit();
+		});
+		$("#brandFm").submit(function(){
+			$.post("/goods_process/brand_search",$(this).serializeArray(), function(response){
+				if (response.result == false) {
+					$(".brand_list > dl > dd > ul > li").show();
+					$(".brand_list .search_txt").attr("data-cnt", "0");
+					$(".brand_list .search_txt").html("");
+					$(".brand_list > dl > dd > ul").hide();
+				} else {
+					$(".brand_list > dl > dd > ul > li").hide();
+					$(response).each(function(idx, data){
+						$(".brandtxt.brand"+data.category_code).parent().show();
+						$(".brandtxt.brand"+data.category_code).parent().parent().slideDown();
+						$searchObj = $(".brandtxt.brand"+data.category_code).parent().parent().parent().prev().find(".search_txt");
+						$cc = Number($searchObj.attr("data-cnt")) + 1;
+						$searchObj.attr("data-cnt", $cc);
+					});
+					
+					$(".brand_list .search_txt").each(function(idx, obj){
+						$num = Number($(obj).attr("data-cnt"));
+						if($num > 0) {
+							$(obj).html("중 <b>"+$num+" 개</b> 검색");
+						}
+					});
+				}
+			}, "json");
+			return false;
+		});
+		
+		$(".brand_classification").click(function(){
+			$("#brandFm").submit();
+		});
+		
+		$(".brand_list .open").click(function(){
+			$st = $(this).attr("data-stat");
+			$img = $(this).attr("data-img");
+			$nowImg = $(this).find("img").attr("src");
+			
+			$(this).attr("data-img", $nowImg);
+			$(this).find("img").attr("src", $img);
+			if($st == "open") {
+				$(this).attr("data-stat", "close");
+				$(this).next().find("ul").slideUp()
+			}
+			else if($st == "close"){
+				$(this).attr("data-stat", "open");
+				$(this).next().find("ul").slideDown()
+			}
+		});
+	});
+</script>

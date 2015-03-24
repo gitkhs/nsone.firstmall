@@ -1,0 +1,85 @@
+<style>
+.withdrawal_table {border-collapse:collapse}
+.withdrawal_table>tbody>tr>th,
+.withdrawal_table>tbody>tr>td {min-height:20px; padding:8px 10px; text-align:left;}
+.withdrawal_table>tbody>tr>th {border-top:2px solid #d7d7d7; background-color:#f5f7f6; font-weight:normal;}
+.withdrawal_table>tbody>tr:first-child>th {border-top:none;}
+.withdrawal_table>tbody>tr>td {background-color:#fff; border-top:1px solid #d7d7d7;}
+</style>
+
+<script>
+$(function(){
+	$("form[name='withdrawalFrm']").submit(function(){
+		if(!$("input[name='agree']",this).is(":checked")){
+			openDialogAlert("정보삭제에 동의해주세요.",400,140,function(){ 
+				$("input[name='agree']",this).focus();
+			});
+			
+			return false;
+		}
+	});
+});
+</script>
+
+
+{?!mobileAjaxCall}
+	{#common_mypage_myinfo_top}
+{/}
+
+<form name="withdrawalFrm" id="withdrawalFrm" target="actionFrame" method="post" action="/member_process/withdrawal">
+<table class="withdrawal_table" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<th><b>탈퇴사유</b></th>
+</tr>
+<tr>
+	<td>
+		<!--{@ withdrawal_arr }-->
+		<!--{? .key_ && .key_%2==0 }--></td></tr><tr><td><!--{ / }-->
+		<label style="float:left; width:50%"> <input type="radio" name="reason" value="{.codecd}"/> {.value}</label>
+		<!--{ / }-->
+	</td>
+</tr>
+<tr>
+	<th><b>내용</b></th>
+</tr>
+<tr>
+	<td style="background-color:#f5f7f6; text-align:center;">
+		<div><textarea name="memo" rows="5" style="width:97%;"></textarea></div>
+	</td>
+</tr>
+<tr>
+	<th>
+		<div style="padding:10px 0px; line-height:18px; font-size:11px; color:#494b4a; word-break:break-all">
+			회원 탈퇴 시 회원님의 모든 정보가 바로 삭제되어집니다.<br />
+			회원님의 SNS계정(facebook) 정보가 쇼핑몰에서 삭제됩니다. 회원님의 개인정보, 주문내역, 적립금, 쿠폰 등 모든 정보가 쇼핑몰에서 삭제됩니다.
+		</div>
+
+		<div style="padding-bottom:10px;">
+			<label><input type="checkbox" name="agree" value="Y" /> <b>예, 정보삭제에 동의합니다.</b></label>
+		</div>	
+		
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td><button type="button" class="btn_cancel_large" style="width:100%" onclick="document.registFrm.reset()">취소</button></td>
+			<td width="4"></td>
+			<td width="60%"><input type="submit" value="확인" class="btn_important_large" style="width:100%" /></td>
+		</tr>
+		</table>
+
+	</th>
+</tr>
+</table>
+
+
+
+</form>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#btn_submit").click(function() {
+		if(!confirm("정말로 회원 탈퇴하시겠습니까?")) return;
+		$("#registFrm").submit();
+	});
+});
+</script>

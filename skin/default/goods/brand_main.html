@@ -1,0 +1,130 @@
+<!--{=assignBrandMenuData()}-->
+<style>
+	.bradn_search_fm { }
+	.bradn_search_fm > div {width:488px; height:28px; margin:0 auto; padding:32px 0;}
+	.bradn_search_fm > div > h1 {color:#666; font-size:16px; letter-spacing: -1px; float:left; width:160px; text-align:center; line-height:28px; height:28px;}
+	.bradn_search_fm > div > div {border:1px solid #a7a7a7; float:left; padding:5px; width:316px}
+	.bradn_search_fm > div > div > input[type='text'] {border:#FFF; width:300px; height:16px;}
+	.brand_search_btns { font-size:0; padding:10px 0; height:19px; border:1px solid #e3e3e3; background:#f5f5f5;}
+	.brand_search_btns > .la {float:left; width:17%; text-align:center; height:19px; border-right:1px #7e7e7e dotted;}
+	.brand_search_btns > .ra {width:100%; height:19px; margin:0 auto;;}
+	.brand_search_btns > .ra > ul {margin:0 13px;}
+	.brand_search_btns > .ra > ul > li {float:left;}
+	.brand_search_btns > .ra > ul > li.bar {font-size:11px; line-height:16px; color:#e6e6e6; margin:1px 2px; }
+	.brand_search_btns a {display:inline-block; border:1px solid #cbcbcb;color:#aeaeae; padding:2px; min-width: 10px; line-height:11px; font-size:11px; cursor: pointer; text-align:center; margin:1px; height:11px; background: #ffffff;}
+	.brand_search_btns a.on {background:#3d3c4a; border:1px solid #3d3c4a; color:#FFF;}
+	.brand_search_classification {clear: both; padding-top:15px; color:#666; font-size:12px; }
+	.brand_search_classification > dl > dt {width:15%; float:left; text-align:center; margin:5px 0;}
+	.brand_search_classification > dl > dd {width:85%; float:left;}
+	.brand_search_classification > dl > dd > ul > li {float:left; width:160px; margin:5px;}
+	.brand_search_classification input[type='checkbox'] {vertical-align: middle;}
+	.brand_list {border-top:1px solid #e3e3e3; margin-top:15px; padding:20px 0;}
+	.brand_list > dl {}
+	.brand_list > dl > dt { font-size:16px; font-weight: 700; color:#FFF; background:#767676; width:44px; height:44px; line-height:44px; text-align:center; margin:0 20px; float:left; margin-bottom:30px; }
+	.brand_list > dl > dd { float:left; width:90%; margin-bottom:30px; }
+	.brand_list > dl > dd > ul {list-style-type:disc; list-style-position: inside;}
+	.brand_list > dl > dd > ul > li { float:left; width:200px; font-size:12px; line-height:12px; padding:3px 10px;}
+	.brand_list > dl > dd > ul > li > a {color:#767676;}
+	.brand_list .brandtxt.disable {color:#E0E0E0;}
+	.brand_list .brandtxt.on {font-weight:700; color:#003f7e;}
+</style>
+
+<form id="brandFm">
+	<fieldset>
+		<legend>Search Brand</legend>
+		<div class="bradn_search_fm">
+			<div>
+				<h1><img src="../images/common/tit_search_brand.png" alt="search brands" style="margin:5px;" /></h1>
+				<div>
+					<input type="text" name="keyword" value="" />
+					<input type="image" src="../images/icon/icon_search.gif" />
+				</div> 
+			</div>
+		</div>
+
+		<div class="brand_search_btns">
+			<div class="ra">
+				<ul>
+					<li><a class="alphabet_btn on" data-target="all">ALL</a></li>
+					{ @ (brandMenuData) }
+					<li><a class="alphabet_btn" data-target="wrap{=str_replace("/", "", strtr(base64_encode(str_replace("/", "", .key_)), "+=", "-_"))}">{=strtoupper(.key_)}</a></li>
+					{ ? .key_ === "z"}
+					<li class="bar"> | </li>
+					{ / }
+					{ ? .key_ === "ㅎ"}
+					<li class="bar"> | </li>
+					{ / }
+					{ / }
+				</ul>
+			</div>
+		</div>
+
+		<div class="brand_search_classification">
+			<dl>
+				<dt><label><input type="checkbox" name="classification[]" class="brand_classification" value="" /> ALL</label></dt>
+				<dd>
+					<ul>
+						{ @classification }
+						<li><label><input type="checkbox" name="classification[]" class="brand_classification" value="{.seq}" /> {.title}</label></li>
+						{ / }
+					</ul>
+				</dd>
+			</dl>
+			<div class="clearbox"></div>
+		</div>
+	</fieldset>	
+</form>
+
+<div class="brand_list">
+	{ @ (brandMenuData) }
+	{ ? count(.value_) > 0 }
+	<dl class="brandwrap wrap{=str_replace("/", "", strtr(base64_encode(str_replace("/", "", .key_)), "+=", "-_"))}">
+		<dt>{=strtoupper(.key_)}</dt>
+		<dd>
+			<ul>
+			{ @ .value_ }
+			<li><a href="/goods/brand?code={..category_code}" class="brandtxt brand{..category_code}">{..prn_title}</a></li>
+			{ / }
+			</ul>
+		</dd>
+	</dl>
+	<div class="clearbox"></div>
+	{ / }
+	{ / }
+</div>
+
+<script>
+	$(document).ready(function() {
+		$(".alphabet_btn").click(function(){
+			$(".alphabet_btn").removeClass("on");
+			$(this).addClass("on");
+			
+			$target = $(this).attr("data-target");
+			$(".brandwrap").hide();
+			$(".brandwrap."+$target).show();
+			if($target === "all") {
+				$(".brandwrap").show();
+			}
+		});
+		$("#brandFm").submit(function(){
+			$.post("/goods_process/brand_search",$(this).serializeArray(), function(response){
+				if (response.result == false) {
+					$(".brandtxt").removeClass("disable");
+					$(".brandtxt").removeClass("on");
+				} else {
+					$(".brandtxt").addClass("disable");
+					$(".brandtxt").removeClass("on");
+					$(response).each(function(idx, data){
+						$(".brandtxt.brand"+data.category_code).removeClass("disable");
+						$(".brandtxt.brand"+data.category_code).addClass("on");
+					});
+				}
+			}, "json");
+			return false;
+		});
+		
+		$(".brand_classification").click(function(){
+			$("#brandFm").submit();
+		});
+	});
+</script>

@@ -1,0 +1,76 @@
+<html>
+<head>
+{@js_sources}
+<script type="text/javascript" language="javascript">
+/* [{.value_.url}] */
+{.value_.source}
+</script>
+{/}
+
+<script type="text/javascript" language="javascript">
+
+//flash(파일주소, 가로, 세로, 배경색, 윈도우모드, 변수, 경로)
+function flash(url,w,h,bg,win,vars,base){
+	var s=
+	"<object classid='clsid:d27cdb6e-ae6d-11cf-96b8-444553540000' codebase='http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0' width='"+w+"' height='"+h+"' align='middle'>"+
+	"<param name='allowScriptAccess' value='always' />"+
+	"<param name='movie' value='"+url+"' />"+
+	"<param name='wmode' value='transparent' />"+
+	"<param name='menu' value='false' />"+
+	"<param name='quality' value='high' />"+
+	"<param name='FlashVars' value='"+vars+"' />"+
+	"<param name='bgcolor' value='"+bg+"' />"+
+	"<param name='base' value='"+base+"' />"+
+  "<!-- This param tag prompts users with Flash Player 6.0 r65 and higher to download the latest version of Flash Player. Delete it if you don’t want users to see the prompt. -->"+
+  "<param name='expressinstall' value='Scripts/expressInstall.swf' />"+
+  "<!-- Next object tag is for non-IE browsers. So hide it from IE using IECC. -->"+
+  "<!--[if !IE]>-->"+
+  "<object type='application/x-shockwave-flash' data='"+url+"' width='"+w+"' height='"+h+"'>"+
+  "  <!--<![endif]-->"+
+  "  <param name='quality' value='high' />"+
+  "  <param name='wmode' value='transparent' />"+
+  "  <param name='swfversion' value='6.0.65.0' />"+
+  "  <param name='expressinstall' value='Scripts/expressInstall.swf' />"+
+  "  <!-- The browser displays the following alternative content for users with Flash Player 6.0 and older. -->"+
+  "  <div>"+
+  "    <h4>Content on this page requires a newer version of Adobe Flash Player.</h4>"+
+  "    <p><a href='http://www.adobe.com/go/getflashplayer'><img src='http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' width='112' height='33' /></a></p>"+
+  "  </div>"+
+  "  <!--[if !IE]>-->"+
+  "</object>"+
+  "<!--<![endif]-->"+
+
+
+
+	"</object>";
+	document.write(s);
+}
+
+$(function(){
+	var so = new SWFObject();
+	var playerVersion = so.installedVer;		
+	/*
+	if( !playerVersion.rev ){	
+		var items{flash_seq} = new Array();
+		
+		{@tree_items}
+		
+		items{flash_seq}[{.key_}] = {visual:"{.value_.visual.value}", menuOn:"{.value_.menuOn.value}", menuOff:"{.value_.menuOff.value}", menuW:{tree_items_size[.key_][0]}, menuH:{tree_items_size[.key_][1]}, link:"{.value_.url.value}", target:"{.value_.target.value}"};
+		{/}
+	
+		
+		btnTypeBanner{flash_seq} = new btnTypeBanner.banner("divBtnTypeBanner{flash_seq}", "btnTypeBanner{flash_seq}", items{flash_seq}, "{option.flashW.value}", "{option.flashH.value}", "{option.menuPosH.value}", "{option.menuMarH.value}", "{option.menuPosV.value}", "{option.menuMarV.value}",  true,  "{option.title.value}", 0, "{icon0}", "{icon1}", "{icon_gab}");
+		btnTypeBanner{flash_seq}.make();
+	}	
+	*/
+});
+</script>
+</head>
+<body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" style="background:transparent">
+<div class="flash_magic_scriptbanner" id = "divBtnTypeBanner{flash_seq}" style = "margin:0px; float:left">
+<script>
+flash("{swf_url}?xmlpath={xml_url}","{option.flashW.value}","{option.flashH.value}","","transparent");
+</script>
+</div>
+</body>
+</html>

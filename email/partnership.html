@@ -1,0 +1,110 @@
+<html>
+<head>
+<!--style>
+body{font-size:10px;}
+TH {color:#4D4D4D; font-size:12px; line-height:14px}
+TD {color:#4D4D4D; font-size:12px; line-height:14px}
+A:link {color:#4D4D4D; text-decoration:none}
+A:visited {color:#4D4D4D; text-decoration:none}
+A:active {color:#4D4D4D; text-decoration:none}
+A:hover {color:#0066FF; text-decoration:none}
+.texts {font-size: 12px; color : #616a74;  font-family: "돋움", Dotum; line-height:22px; padding-left:10px;}
+.company {font-size: 11px; color : #979ea5;  font-family: "돋움", Dotum; line-height:22px; text-align:center;}
+
+/* 기본 정보 테이블 스타일 */
+table.info-table-style {border-collapse:collapse; border-top:1px solid #aaa; border-right:1px solid #dadada;}
+table.info-table-style .its-section {border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:8px 5px 8px 5px; text-align:center; background-color:#f1f1f1; font-weight:normal;}
+table.info-table-style .its-th {border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:8px 0px 8px 28px; text-align:left; background-color:#f1f1f1; font-weight:normal;}
+table.info-table-style .its-td {border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 15px; line-height:180%; letter-spacing:0px;}
+table.info-table-style .its-th-align {border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:8px 0px 8px 0; background-color:#f1f1f1; font-weight:normal;}
+table.info-table-style .its-td-align {border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 0; line-height:180%; letter-spacing:0px;}
+table.info-table-style .its-th-center {border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 0; line-height:180%; letter-spacing:0px;text-align:center; background-color:#f1f1f1;}
+table.info-table-style .its-td-center {border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 0; line-height:180%; letter-spacing:0px;text-align:center;}
+
+table.info-table-style textarea {background-color:#f0f0f0;}
+table.info-table-style textarea.input-box-default-text {color:#a5a5a5 !important}
+.item-title {margin-top:10px; padding-left:30px; line-height:30px; font-size:14px; font-weight:bold; vertical-align:middle;width:696px;text-align:left;}
+</style-->
+</head>
+
+<body style="font-size:10px;">
+<table width="696" border="0" cellpadding="0" cellspacing="0">
+	<tr><td height="20" style="color:#4D4D4D; font-size:12px; line-height:14px"></td></tr>
+	<tr>
+		<td style="color:#4D4D4D; font-size:12px; line-height:14px"><img src="/data/mail/logo.gif"></td>
+	</tr>
+	<tr><td height="20" style="color:#4D4D4D; font-size:12px; line-height:14px"></td></tr>
+	<tr><td bgcolor="#000000" height="2" style="color:#4D4D4D; font-size:12px; line-height:14px"></td></tr>
+	<!-- 내용시작 -->
+	<tr><td height="35" style="color:#4D4D4D; font-size:12px; line-height:14px"></td></tr>
+	<tr>
+		<td align="center" style="color:#4D4D4D; font-size:12px; line-height:14px;">
+
+		<div class="item-title" style="margin-top:10px; padding-left:30px; line-height:30px; font-size:14px; font-weight:bold; vertical-align:middle;width:696px;text-align:left;">제휴 정보</div>	
+		<table width="676" class="info-table-style"  style="border-collapse:collapse; border-top:1px solid #aaa; border-right:1px solid #dadada;">
+		<col width="15%" /><col width="35%" /><col width="15%" /><col width="35%" />
+		<tr>
+			<th class="its-th" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:8px 0px 8px 28px; text-align:left; background-color:#f1f1f1; font-weight:normal;">문의종류</th>
+			<td class="its-td" colspan="3" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 15px; line-height:180%; letter-spacing:0px;">{order.qtype}</td>
+		</tr>
+		<tr>
+			<th class="its-th" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:8px 0px 8px 28px; text-align:left; background-color:#f1f1f1; font-weight:normal;">업체명</th>
+			<td class="its-td" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 15px; line-height:180%; letter-spacing:0px;">{order.company}</td>
+			<th class="its-th" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:8px 0px 8px 28px; text-align:left; background-color:#f1f1f1; font-weight:normal;">담당자명</th>
+			<td class="its-td" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 15px; line-height:180%; letter-spacing:0px;">{order.writer}</td>
+		</tr>
+		<tr>
+			<th class="its-th" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:8px 0px 8px 28px; text-align:left; background-color:#f1f1f1; font-weight:normal;">전화번호</th>
+			<td class="its-td" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 15px; line-height:180%; letter-spacing:0px;">{order.tel}</td>
+			<th class="its-th" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:8px 0px 8px 28px; text-align:left; background-color:#f1f1f1; font-weight:normal;">휴대폰번호</th>
+			<td class="its-td" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 15px; line-height:180%; letter-spacing:0px;">{order.hp}</td>
+		</tr>
+		<tr>
+			<th class="its-th" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:8px 0px 8px 28px; text-align:left; background-color:#f1f1f1; font-weight:normal;">이메일</th>
+			<td class="its-td" colspan="3" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 15px; line-height:180%; letter-spacing:0px;">{order.email}</td>
+			
+		</tr>
+		<tr>
+			<th class="its-th" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:8px 0px 8px 28px; text-align:left; background-color:#f1f1f1; font-weight:normal;">주소</th>
+			<td class="its-td" colspan="3" style="color:#4D4D4D; font-size:12px; line-height:14px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 15px; line-height:180%; letter-spacing:0px;">{order.recipient_zipcode} {order.recipient_address} {order.recipient_address_detail}</td>			
+		</tr>
+		</table>
+
+		<div style="padding:5px;"></div>
+
+		<table width="676" class="info-table-style" style="border-collapse:collapse; border-top:1px solid #aaa; border-right:1px solid #dadada;">
+		<tr>
+			<th class="its-th-center" style="color:#4D4D4D; font-size:12px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 0; line-height:180%; letter-spacing:0px;text-align:center; background-color:#f1f1f1;">내용</th>
+		</tr>
+		<tr>
+			<td class="its-td-center" style="color:#4D4D4D; font-size:12px; border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 0 5px 0; line-height:180%; letter-spacing:0px;text-align:center;">{order.contents}</td>
+		</tr>
+		</table>
+
+
+		</td>
+	</tr>
+	<tr><td height="100" style="color:#4D4D4D; font-size:12px; line-height:14px;"></td></tr>
+	<tr><td height="30" style="color:#4D4D4D; font-size:12px; line-height:14px;"></td></tr>
+	<tr><td bgcolor="#000000" height="2" style="color:#4D4D4D; font-size:12px; line-height:14px;"></td></tr>
+	<tr><td height="20" style="color:#4D4D4D; font-size:12px; line-height:14px"></td></tr>
+	<tr>
+		<td class="company" style="font-size: 11px; color : #979ea5;  font-family: 돋움, Dotum; line-height:22px; text-align:center;">
+			사업자등록번호 : {config_basic.businessLicense}&nbsp;&nbsp;&nbsp;&nbsp;통신판매업신고번호 : {config_basic.mailsellingLicense}&nbsp;&nbsp;&nbsp;&nbsp;대표이사 : {config_basic.ceo}
+		</td>
+	</tr>
+	<tr>
+		<td class="company" style="font-size: 11px; color : #979ea5;  font-family: 돋움, Dotum; line-height:22px; text-align:center;">
+			주소 : {config_basic.companyAddress} {config_basic.companyAddressDetail}&nbsp;&nbsp;&nbsp;&nbsp;대표전화 : {config_basic.companyPhone}&nbsp;&nbsp;&nbsp;&nbsp;팩스 : {config_basic.companyFax}
+		</td>
+	</tr>
+</table>
+
+
+
+
+
+
+</body>
+
+</html>

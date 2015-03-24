@@ -1,0 +1,137 @@
+<style type="text/css">
+.bbsview_division { padding:10px 0 !important; border:none;}
+.bbsview_top {padding:0 10px; height:30px; line-height:30px; }
+.content { padding:10px; }
+.cmt_division {border-top:1px solid #e6e6e6;}
+.cmt_area { padding:10px; }
+.cmt_reply { padding-left:20px; }
+.cmt_contents { padding-top:0px; padding-bottom:10px; border-bottom:0px solid #e6e6e6; min-height:30px; }
+.modify_contents { font-size:14px; color:#767575; cursor:pointer; }
+.delete_contents { font-size:14px; color:#767575; cursor:pointer; }
+.reply_stat td { height:25px; font-size:12px;}
+.reply_stat td:first-child { border-right:1px solid #BDBDBD; }
+</style>
+{? !pagemode}
+	<div class="sub_title_bar">
+		<h2>{manager.name}</a></h2>
+		<a href="javascript:history.back();" class="stb_back_btn"><img src="../../../images/design/btn_back.png" /></a>
+	</div>
+
+	<div class="bbstopbox">
+		<div class="pright">
+			{? manager.auth_write != '[admin]' }
+			<span id="boad_write_btn{manager.isperm_write}" board_id="{boardid}" fileperm_read="{manager.fileperm_write}" class="btn_style black hand">글쓰기</span>
+			{/}
+			<span class="btn_style black hand boad_search_btn_m" >검색 ▼</span>
+		</div>
+	</div>
+	{?!_GET.search_text}<script>$('.boad_search_btn_m').click();</script>{/}
+	<div class="bbssearchbox" {?!_GET.search_text}style="display:none"{/}>
+		<form name="boardsearch" id="boardsearch" >
+		<input type="hidden" name="id" value="{_GET.id}" >
+		<input type="hidden" name="popup" value="{_GET.popup}" >
+		<input type="hidden" name="iframe" value="{_GET.iframe}" >
+		<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+		<input type="hidden" name="perpage" id="perpage" value="{_GET.perpage}" >
+		<input type="hidden" name="page" id="page" value="{_GET.page}" >
+		<input type="hidden" name="category" id="category" value="{_GET.category}" >
+		<input type="text" name="search_text" id="search_text" value="{_GET.search_text}" title="이 게시판 검색" /><input type="image" src="../../../images/design/btn_search_s.png" />
+		</form>
+	</div>
+{/}
+<div class="bbsview_division">
+		{? !pagemode}
+	<div class="bbsview_division bbsview_style clearbox">
+		<div class="bvs_subject">
+			{iconmobile} {subject} {iconnew} {iconhot} {iconhidden}
+		</div>
+		<div class="bvs_record_info">
+			{? datacategory }<span class="cell_bar">|</span><span class="cell" >분류</span> : {datacategory}</span>{/}
+			{? strstr(manager.list_show,'[writer]') }<span class="cell_bar">|</span><span class="cell" >{name}</span>{/}
+			{? strstr(manager.list_show,'[date]') }<span class="cell_bar">|</span><span class="cell">{=date('Y.m.d',strtotime(m_date))}</span>{/}
+			{? strstr(manager.list_show,'[hit]') }<span class="cell_bar">|</span><span class="cell">조회 {hit}</span>{/}
+		</div>
+		</div>
+		{/}
+
+	<div class="bbsview_top">
+		<div class="fright">
+			{? !pagemode}<button type="button" name="boardviewclose" class="hand round_btn ">목록</button></span>{/}
+		</div>
+	</div>
+
+	<!-- 파일 리스트 -->
+	{? file_key_i && uccdomain_fileurl}
+		<div class="content" >
+			<iframe   width="{? manager.video_size_mobile0 }{manager.video_size_mobile0}{:}200{/}" height="{? manager.video_size_mobile1 }{manager.video_size_mobile1}{:}150{/}" src="{uccdomain_fileurl}&g=tag&width={manager.video_size_mobile0}&height={manager.video_size_mobile1}" frameborder="0" allowfullscreen></iframe>
+		</div>
+	{: file_key_w && uccdomain_fileurl}
+		<div class="content" >
+			<iframe   width="{? manager.video_size_mobile0 }{manager.video_size_mobile0}{:}200{/}" height="{? manager.video_size_mobile1 }{manager.video_size_mobile1}{:}150{/}" src="{uccdomain_fileurl}&g=tag&width={manager.video_size_mobile0}&height={manager.video_size_mobile1}" frameborder="0" allowfullscreen></iframe>
+		</div>
+	{/}
+
+	{? filelist}
+	<div class="content">
+		{@ filelist}
+		<span class="realfilelist hand highlight-link" realfiledir="{.realfiledir}" realfilename="{.orignfile}"  realfilename="{.orignfile}" board_id="{boardid}" filedown="../board_process?mode=board_file_down&board_id={boardid}&realfiledir={.realfiledir}&realfilename={.orignfile}">{.orignfile} (<span class="size">{.realsizefile}</span>) <button type="button"  class="bbs_btn">down</button></span>
+		{/}
+	</div>
+	{/}
+
+	<!-- 내용 -->
+	<div class="content"  style="min-height:50px;word-wrap:break-word;">
+		{contents}
+	</div>
+
+
+	<!-- 모바일등록시 첨부파일의 이미지노출 -->
+	{? filelist && editor == 0 }
+	<!-- <div class="content" >
+	첨부파일: <br/>
+		{@ filelist}
+			{? .is_image }
+			<img src="{.realfile}" width="200"  onerror="this.src='../../../images/common/noimage.gif'" />
+			{/}
+		{/}
+	</div> -->
+	{/}
+
+	<div class="center">
+		{=snslinkurl('board', subject)}
+	</div>
+
+	<!--{? managerview.auth_recommend_use == 'Y' }-->
+	<!-- 게시글평가 -->
+	<div class="scorelay"  style="margin: 15px 0 5px">{#scoreskin}</div>
+	<!-- 게시글평가 -->
+	<!--{/}-->  
+
+	<!-- 댓글 영역 -->
+	<!--{? commentlay == 'Y' || comment > 0 // 댓글 사용여부, 댓글수 }-->
+	<div class="content">
+		<a name="cmtlist"></a>
+		<div class="comment"  id="comment_container" style="margin: 15px 0 5px">{#commentskin}</div>
+	</div>
+	<!-- 댓글부분 -->
+	<!--{/}-->
+
+
+</div>
+
+{? !pagemode}
+<div >
+<!-- 이전/다음 -->
+<div id="prenextlist"  style="margin: 15px 0px">{#prenextskin}</div>
+<!-- 이전/다음 -->
+</div>
+{/}
+
+<!-- 컨트롤 폼 : 시작 -->
+<form name="writeform" id="writeform" method="post" action="{=sslAction('../board_process')}"  enctype="multipart/form-data" target="comentFrame">
+<input type="hidden" name="board_id" id="board_id" value="{_GET.id}" />
+<input type="hidden" name="iframe" value="{_GET.iframe}" >
+<input type="hidden" name="delseq" id="seq" value="" />
+<input type="hidden" name="real_name" id="real_name" value="" />
+</form>
+<!-- 컨트롤 폼 : 끝 -->

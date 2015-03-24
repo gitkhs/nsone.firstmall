@@ -1,0 +1,447 @@
+<script type="text/javascript">
+$(function(){
+
+	$("#order_refund_container input[name='chk_seq[]']").change(function(){
+		var row = $(this).closest(".goods-info-lay");
+		var idx = $("#order_refund_container select[name='chk_ea[]']").index(this);
+		var chk_item_seq = row.find("input[name='chk_item_seq[]']").val();
+		var chk_option_seq = row.find("input[name='chk_option_seq[]']").val();
+		var chk_shipping_seq = row.find("input[name='chk_shipping_seq[]']").val();
+		var chk_individual_refund = row.find("input[name='chk_individual_refund[]']").val();
+		var chk_individual_refund_inherit = row.find("input[name='chk_individual_refund_inherit[]']").val();
+
+		// 추가옵션 선택할때
+		if(row.find("input[name='chk_suboption_seq[]']").val()!='' && $(this).is(":checked")){
+			if(chk_individual_refund!='1'){ // 개별취소 안되도록 설정했을때
+				// 필수옵션이 선택되어있지 않으면 에러
+				var result = true;
+				$("#order_refund_container input[name='chk_item_seq[]'][value='"+chk_item_seq+"'][item_option_seq='"+chk_option_seq+"'][shipping_seq='"+chk_shipping_seq+"']").each(function(){
+					if($(this).closest(".goods-info-lay").find("input[name='chk_suboption_seq[]']").val()==''){
+						if(!$(this).closest(".goods-info-lay").find("input[name='chk_seq[]']").is(":checked")){
+							openDialogAlert("이 상품의 추가옵션은 개별취소할 수 없습니다.",400,140);
+							result = false;
+						}
+					}
+				});
+				if(!result) return false;
+			}
+		}
+
+		// 추가옵션 해제할때
+		if(row.find("input[name='chk_suboption_seq[]']").val()!='' && !$(this).is(":checked")){
+			if(chk_individual_refund!='1' || (chk_individual_refund=='1' && chk_individual_refund_inherit=='1')){
+				var result = true;
+				$("#order_refund_container input[name='chk_item_seq[]'][value='"+chk_item_seq+"'][item_option_seq='"+chk_option_seq+"'][shipping_seq='"+chk_shipping_seq+"']").each(function(){
+					if($(this).closest(".goods-info-lay").find("input[name='chk_suboption_seq[]']").val()==''){
+						if($(this).closest(".goods-info-lay").find("select[name='chk_ea[]'] option:last-child").is(":selected")){
+							if(chk_individual_refund!='1'){
+								openDialogAlert("이 상품의 추가옵션은 개별취소할 수 없습니다.",400,140);
+							}else if(chk_individual_refund=='1' && chk_individual_refund_inherit=='1'){
+								openDialogAlert("이 상품의 필수옵션이 취소되면 추가옵션도 함께 취소되어야합니다.",450,140);
+							}
+							result = false;
+						}
+					}
+				});
+				if(!result) return false;
+			}
+		}
+
+		// 필수옵션 해제할때
+		if(row.find("input[name='chk_suboption_seq[]']").val()=='' && !$(this).is(":checked")){
+			if(chk_individual_refund!='1'){ // 개별취소 안되도록 설정했을때
+				// 추가옵션 해제
+				$("#order_refund_container input[name='chk_item_seq[]'][value='"+chk_item_seq+"'][item_option_seq='"+chk_option_seq+"'][shipping_seq='"+chk_shipping_seq+"']").each(function(){
+					if($(this).closest(".goods-info-lay").find("input[name='chk_suboption_seq[]']").val()!=''){
+						$(this).closest(".goods-info-lay").find("input[name='chk_seq[]']").removeAttr("checked").each(function(){
+							$(this).closest(".goods-info-lay").find("input,select,textarea").not(this).attr("disabled",true);
+						});
+						$(this).closest(".goods-info-lay").find("select[name='chk_ea[]']").val('').attr("disabled",true);
+					}
+				});
+			}
+		}
+
+		if($(this).is(":checked")){
+			row.find("input,select,textarea").not(this).removeAttr("disabled");
+			row.find("select[name='chk_ea[]'] option:last-child").attr("selected",true).parent().change();
+		}
+		else{
+			row.find("input,select,textarea").not(this).attr("disabled",true);
+			row.find("select[name='chk_ea[]']").val('').change();
+			if($(this).attr('cancel_type') ==  1 ){
+				$(this).attr("disabled",true);
+			}
+		}
+
+		refund_method_layer_view();
+	}).change();
+
+	$("#order_refund_container select[name='chk_ea[]']").change(function(){
+		var row = $(this).closest(".goods-info-lay");
+		var idx = $("#order_refund_container select[name='chk_ea[]']").index(this);
+		var chk_item_seq = row.find("input[name='chk_item_seq[]']").val();
+		var chk_option_seq = row.find("input[name='chk_option_seq[]']").val();
+		var chk_shipping_seq = row.find("input[name='chk_shipping_seq[]']").val();
+		var chk_individual_refund = row.find("input[name='chk_individual_refund[]']").val();
+		var chk_individual_refund_inherit = row.find("input[name='chk_individual_refund_inherit[]']").val();
+
+		if($(this).val()=='0'){
+			$(this).closest(".goods-info-lay").find("input[name='chk_seq[]']").removeAttr("checked").change();
+		}
+
+		// 필수옵션일때
+		if(row.find("input[name='chk_suboption_seq[]']").val()==''){
+			if(chk_individual_refund!='1' || (chk_individual_refund=='1' && chk_individual_refund_inherit=='1')){
+				if(row.find("select[name='chk_ea[]'] option:last-child").is(":selected")){
+					$("#order_refund_container input[name='chk_item_seq[]'][value='"+chk_item_seq+"'][item_option_seq='"+chk_option_seq+"'][shipping_seq='"+chk_shipping_seq+"']").each(function(){
+						if($(this).parent().find("input[name='chk_suboption_seq[]']").val()!=''){
+							$(this).parent().find("input[name='chk_seq[]']").not(":disabled").attr("checked",true).change();
+							$(this).closest(".goods-info-lay").find("select[name='chk_ea[]'] option").not(":last-child").attr("disabled",true);
+						}
+					});
+				}else{
+					$("#order_refund_container input[name='chk_item_seq[]'][value='"+chk_item_seq+"'][item_option_seq='"+chk_option_seq+"'][shipping_seq='"+chk_shipping_seq+"']").each(function(){
+						if($(this).parent().find("input[name='chk_suboption_seq[]']").val()!=''){
+							$(this).closest(".goods-info-lay").find("select[name='chk_ea[]'] option").not(":last-child").removeAttr("disabled");
+						}
+					});
+				}
+			}
+		}
+
+		refund_method_layer_view();
+	});
+
+	$("#order_refund_container .chk_all").click(function(){
+		if($("#order_refund_container input[name='chk_seq[]']").not(":checked").length==0){
+			$("#order_refund_container input[name='chk_seq[]']").removeAttr("checked").change();
+		}else{
+			$("#order_refund_container input[name='chk_seq[]']").not(":disabled").attr("checked",true).change();
+		}
+	});
+
+
+	$("input[name='submitButton']").bind('click',function(){
+		var frm = this;
+		openDialogConfirm("정말로 결제취소/환불신청 하시겠습니까?",450,140,function(){
+			$("form[name='refundForm']").submit();
+		});
+		return false;
+	});
+
+
+});
+
+function refund_method_layer_view(){
+	var chk_ea_sum = 0;
+
+	$("#order_refund_container select[name='chk_ea[]']").each(function(){
+		chk_ea_sum += parseInt($(this).val());
+	});
+
+	if("{order_total_ea}" == chk_ea_sum.toString()){
+		document.refundForm.cancel_type.value='full';
+	}else{
+		document.refundForm.cancel_type.value='partial';
+	}
+
+	if("{orders.payment}" == "card" && "{order_total_ea}" == chk_ea_sum.toString()){
+		$("#refund_method_layer").hide();
+	}else{
+		$("#refund_method_layer").show();
+	}
+
+}
+
+function refundSubmit(){
+
+	document.refundForm.action = "../mypage_process/order_refund";
+
+	return true;
+}
+</script>
+
+<!--{ ? config_system.pgCompany == 'allat' && orders.payment == 'card' }-->
+	<script language="JavaScript" charset='utf-8' src='https://tx.allatpay.com/common/AllatPayRE.js'></script>
+<!--{ / }-->
+
+<div class="sub_title_bar">
+	<h2>결제취소/환불신청</a></h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" /></a>
+</div>
+
+<div id="order_refund_container">
+
+	<form name="refundForm" method="post" action="../mypage_process/order_refund" target="actionFrame" onsubmit="return refundSubmit()">
+	<input type="hidden" name="order_seq" value="{orders.order_seq}" />
+	<input type="hidden" name="cancel_type" value="" />
+	<input type="hidden" name="use_layout" value="{_GET.use_layout}" />
+
+	<!--{ ? config_system.pgCompany == 'allat' && orders.payment == 'card' }-->
+	<input type='hidden' name='actionUrl'		value='../mypage_process/order_refund' />
+	<input type='hidden' name='allat_shop_id'	value='{pg.mallCode}' />
+	<input type='hidden' name='allat_order_no'	value='{orders.order_seq}' />
+	<input type='hidden' name='allat_amt'		value='{orders.settleprice}' />
+	<input type='hidden' name='allat_seq_no'	value='{orders.pg_transaction_number}' />
+
+	<input type='hidden' name='allat_pay_type'	value='CARD' />
+	<input type='hidden' name='allat_enc_data'	value='' />
+	<input type='hidden' name='allat_opt_pin'	value='NOVIEW' />
+	<input type='hidden' name='allat_opt_mod'	value='WEB' />
+	<input type='hidden' name='allat_test_yn'	value='N' />
+	<!--{ / }-->
+
+	<!--{ ? config_system.pgCompany == 'kspay' }-->
+	<input type=hidden name="storeid"		value="{pg.mallId}">
+	<input type=hidden name="storepasswd"	value="{pg.mallPass}">
+	<input type=hidden name="authty"		value="{orders.kspay_authty}">
+	<input type=hidden name="trno" size=15 maxlength=12 value="{orders.pg_transaction_number}">
+	<!--{ / }-->
+
+	<div class="order-date-info">
+		<span class="order-date">{=date('Y.m.d', strtotime(orders.regist_date))}</span>
+		<span class="order-seq">({orders.order_seq})</span>
+	</div>
+
+	<div style="height:5px"></div>
+
+	<div class="refund-lay">
+	<!--{ @ loop }-->
+		<!--{ ? .items && count(loop)>1 }-->
+		<div class="shipping-info-lay">
+			↓ 배송지 : {.shipping.recipient_user_name}
+			{ ? orders.recipient_email } / {orders.recipient_email} { / }
+			/ {? .shipping.recipient_address_type == "street"} {.shipping.recipient_address} {:} {.shipping.recipient_address} {/} {.shipping.recipient_address_detail}
+		</div>
+		<!--{ / }-->
+		<!--{ ? .items}--><div class="refund-list-lay"><!--{ / }-->
+		<!--{ @ .items }-->
+			<!--{ @ ..options }-->
+			<!--{ ? ...able_refund_ea }-->
+			<div class="goods-info-lay">
+			<!--{ : }-->
+			<div class="goods-info-lay" disabled='disabled'>
+			<!--{ / }-->
+				<div class="goods-name">
+					{? ..cancel_type == '1' }
+						<label><input type="checkbox" name="chk_seq[]"  readonly="readonly" disabled="disabled"  cancel_type="{..cancel_type}" /></label>
+					{:}
+						<label><input type="checkbox" name="chk_seq[]" value="1"  cancel_type="{..cancel_type}" { ? !...able_refund_ea }disabled='disabled'{/} /></label>
+					{/}
+					{? ..cancel_type == '1' }<span class="order-item-cancel-type " >[청약철회불가]</span><br/>{/}{..goods_name}
+					<input type="hidden" name="chk_item_seq[]" value="{...item_seq}" item_option_seq="{...item_option_seq}" shipping_seq="{..shipping_seq}" />
+					<input type="hidden" name="chk_option_seq[]" value="{...item_option_seq}" />
+					<input type="hidden" name="chk_suboption_seq[]" value="" />
+
+					<input type="hidden" name="chk_shipping_seq[]" value="{.shipping.shipping_seq}" />
+					<input type="hidden" name="chk_individual_refund[]" value="{..individual_refund}" />
+					<input type="hidden" name="chk_individual_refund_inherit[]" value="{..individual_refund_inherit}" />
+				</div>
+
+				<table width="100%" border="0" cellpadding="5" cellspacing="0" class="goods-info-table">
+				<tr>
+					<td class="left" width="80" valign="top"><img src="{..image}" align="absmiddle" hspace="5" width="60" height="60" style="border:1px solid #ddd;" onerror="this.src='../images/common/noimage_list.gif'" /></td>
+					<td valign="top" class="goods-info">
+							<div class="goods-price">
+							<!-- { ? ...consumer_price } -->
+											<strike>{=number_format(...consumer_price)}</strike>
+							<!-- { / } -->
+											<span class="goods-price">{=number_format(...price)}</span>원
+							</div>
+							<!-- { ? ...option1 } -->
+										<div class="goods-option">[옵션] { ? ...title1 }{ ...title1 }:{ / }{ ...option1 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option2 } -->
+										<div class="goods-option">[옵션] { ? ...title2 }{ ...title2 }:{ / }{ ...option2 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option3 } -->
+										<div class="goods-option">[옵션] { ? ...title3 }{ ...title3 }:{ / }{ ...option3 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option4 } -->
+										<div class="goods-option">[옵션] { ? ...title4 }{ ...title4 }:{ / }{ ...option4 }</div>
+							<!-- { / } -->
+							<!-- { ? ...option5 } -->
+										<div class="goods-option">[옵션] { ? ...title5 }{ ...title5 }:{ / }{ ...option5 }</div>
+							<!-- { / } -->
+										<div class="goods-etc">수량 : {=number_format(...ea)}개</div>
+						</div>
+						<!--{ ? ..inputs }-->
+							<!--{ @ ..inputs }-->
+								<!--{ ? ...value }-->
+								<div class="desc" style="margin:1px;">
+									<!--{?...title}-->{...title}:<!--{ / }-->
+									<!--{?...type=='file'}-->
+									<a href="../order_process/filedown?file={...value}" target="actionFrame" style="color:#848484;">{...value}</a>
+									<!--{:}-->{...value}<!--{ / }-->
+								</div>
+								<!--{ / }-->
+							<!--{ / }-->
+						<!--{ / }-->
+					</td>
+				</tr>
+				</table>
+
+				<div class="sum-price-lay">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" class="sum-price-table">
+					<tr>
+						<td class="price-info">
+							합계
+							<span class="goods-price">{=number_format(...out_price)}</span>원
+						</td>
+						<td width="94" class="step-info">{...mstep}</td>
+					</tr>
+					</table>
+				</div>
+
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="ea-info-table">
+				<tr>
+					<td><span class="fleft">취소가능수량</span> <span class="fright red"><b>{=number_format(...able_refund_ea)}</b>개</span></td>
+					<td><span class="fleft">주문수량</span> <span class="fright"><b>{=number_format(...ea)}</b>개</span></td>
+				</tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="ea-input-table">
+				<tr>
+					<td class="left bold">결제취소수량</td>
+					<td class="right">
+						<!--{ ? ...able_refund_ea > 0 }-->
+							<select name="chk_ea[]"  class="common-select styled">
+							<option value="" selected>= 선택 =</option>
+							<!--{ @ range(0,...able_refund_ea) }-->
+							<!--{ ? ....index_ > 0 }-->
+							<option value="{....index_}">{....index_}</option>
+							<!--{ / }-->
+							<!--{ / }-->
+							</select>
+						<!--{ : }-->
+							-
+						<!--{ / }-->
+					</td>
+				</tr>
+				</table>
+			</div>
+
+			<!--{ @ ...suboptions }-->
+			<!--{ ? ....able_refund_ea }-->
+			<div class="suboption-lay">
+			<!--{ : }-->
+			<div class="suboption-lay" disabled='disabled'>
+			<!--{ / }-->
+				<div class="goods-name">
+					<img src="../images/design/icon_reply.png" width="10" />
+					{? .cancel_type == '1' }
+						<label><input type="checkbox" name="chk_seq[]"  readonly="readonly" disabled="disabled"  cancel_type="{.cancel_type}" /></label>
+					{:}
+						<label><input type="checkbox" name="chk_seq[]" value="1"  cancel_type="{.cancel_type}" { ? !....able_refund_ea }disabled='disabled'{/} /></label>
+					{/}
+					[추가] {....title} : {....suboption}
+
+					<input type="hidden" name="chk_item_seq[]" value="{....item_seq}" item_option_seq="{....item_option_seq}" shipping_seq="{..shipping_seq}" />
+					<input type="hidden" name="chk_option_seq[]" value="{...item_option_seq}" />
+					<input type="hidden" name="chk_suboption_seq[]" value="{....item_suboption_seq}" />
+					<input type="hidden" name="chk_shipping_seq[]" value="{.shipping.shipping_seq}" />
+
+					<input type="hidden" name="chk_individual_refund[]" value="{..individual_refund}" />
+					<input type="hidden" name="chk_individual_refund_inherit[]" value="{..individual_refund_inherit}" />
+				</div>
+
+				<div class="sum-price-lay">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" class="sum-price-table"  >
+					<tr>
+						<td class="price-info">
+							합계
+							<span class="goods-price">{=number_format(...out_price)}</span>원
+						</td>
+						<td width="94" class="step-info">{...mstep}</td>
+					</tr>
+					</table>
+				</div>
+
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="ea-info-table">
+				<tr>
+					<td><span class="fleft">취소가능수량</span> <span class="fright red"><b>{=number_format(....able_refund_ea)}</b>개</span></td>
+					<td><span class="fleft">주문수량</span> <span class="fright"><b>{=number_format(....ea)}</b>개</span></td>
+				</tr>
+				</table>
+
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="ea-input-table">
+				<tr>
+					<td class="left bold">결제취소수량</td>
+					<td class="right">
+						<!--{ ? ....able_refund_ea > 0 }-->
+							<select name="chk_ea[]"  class="common-select styled">
+							<option value="" selected>= 선택 =</option>
+							<!--{ @ range(0,....able_refund_ea) }-->
+							<!--{ ? .....index_ > 0 }-->
+							<option value="{.....index_}">{.....index_}</option>
+							<!--{ / }-->
+							<!--{ / }-->
+							</select>
+						<!--{ : }-->
+							-
+						<!--{ / }-->
+					</td>
+				</tr>
+				</table>
+
+			</div>
+			<!--{ / }-->
+			<!--{ / }-->
+		<!--{ / }-->
+		<!--{ ? .items}--></div><!--{ / }-->
+	<!--{ / }-->
+	</div>
+
+	<div class="sub_division_title">상세사유<div class="sub_division_arw"></div></div>
+	<div class="sub_division_contents" style="padding:10px">
+		<textarea name="refund_reason" style="width:97%;" rows="2"></textarea>
+	</div>
+
+	<div id="refund_method_layer">
+		<div class="sub_division_title">환불방법<div class="sub_division_arw"></div></div>
+		<div class="sub_division_contents">
+			<table width="100%" border="0" cellpadding="2">
+			<tr>
+				<td class="left fx11 pdl10">은행</td><td class="its_td"><input type="text" name="bank_name" value="" class="inputbox_large" style="width:94%" /></td>
+			</tr>
+			<tr>
+				<td class="left fx11 pdl10">예금주</td><td class="its_td"><input type="text" name="bank_depositor" value="" class="inputbox_large" style="width:94%" /></td>
+			</tr>
+			<tr>
+				<td class="left fx11 pdl10">계좌번호</td><td class="its_td"><input type="text" name="bank_account" value="" class="inputbox_large" style="width:94%" /></td>
+			</tr>
+			</table>
+
+			<table width="96%" cellpadding="4" cellspacing="0" align="center" style="border:2px solid #ddd">
+			<tr>
+				<td class="left fx12" height="20" style="background-color:#ddd">※ 주의사항</td>
+			</tr>
+			<tr>
+				<td style="padding:12px; font-size:11px; background-color:#fff; line-height:17px;">
+					- 환불방법은 복합결제(적립금, 쿠폰 사용 등) 및 최초 배송비 계산 등의 이유로 쇼핑몰 관리자와 협의 후 결정됩니다.<br />
+					<b>[최초 배송비]</b><br />
+					부분 결제 취소 시 추가 배송비가 발생할 수 있으며, 이 때, 추가 배송비를 결제해 주셔야만 결제취소 처리완료가 가능합니다.<br />
+					<b>[추가 배송비가 발생하는 경우]</b><br />
+					① ‘묶음 배송비’ 상품의 배송비 무료(금액별 차등) 조건을 충족하여 배송비 무료<br />
+					② 부분 결제취소로 배송비 무료 조건을 불충족하는 경우 추가 배송비 부과<br />
+					③ 추가 배송비는 카드 또는 적립금으로 결제 가능<br />
+				</td>
+			</tr>
+			</table>
+
+		</div>
+
+	</div>
+
+	<div style="height:15px"></div>
+
+	<div class="center">
+		<input type="button" class="btn_cancel_large" value="취소" onclick="document.location.href='order_view?no={orders.order_seq}';" style="width:45%" />
+		<input type="button" class="btn_important_large" name="submitButton" value="환불신청" style="width:45%" />
+	</div>
+
+	<div style="height:40px"></div>
+
+	</form>
+</div>

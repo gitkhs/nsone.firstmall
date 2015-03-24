@@ -1,0 +1,25 @@
+<style>
+#{locationNavigationKey} .categoryDepth1		{position:relative; height:25px; padding-right:5px; text-align:right;}
+#{locationNavigationKey} .categoryAllContainer {position:relative; z-index:100}
+</style>
+
+<script>
+setLocationAllBtnEvent("{locationNavigationKey}","/common/location_all_navigation?template_path={template_path}&locationNavigationKey={locationNavigationKey}&requesturi={=urlencode(_SERVER.REQUEST_URI)}");
+</script>
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+	<td class="categoryDepth1">
+		<a href="#" class="categoryAllBtn"><img src="../../images/common/left_all_location.gif" /></a>
+		<div class="categoryAllContainer"></div>
+	</td>
+</tr>
+<!--{ @ location }-->
+<tr><td height="1" bgcolor="#e5e5e5"></td></tr>
+<tr>
+	<td class="categoryDepth1">
+		<a href="/goods/location?code={.location_code}"><b>{.name}</b></a>
+	</td>
+</tr>
+<!--{ / }-->
+</table>

@@ -1,0 +1,106 @@
+<style>
+.issue_sublist{padding-left:15px; height:20px;}
+</style>
+
+
+
+<table width="500" height="100%" cellspacing="0" cellpadding="20" style="border:4px solid #000;" >
+<tr>
+	<td valign="top">
+
+		<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td>
+				<div class="fleft">
+				<!--{ ? coupons.issue_type == 'issue' }--><img src="../images/design/stit_list_apply.gif" /><!--{ / }-->
+				<!--{ ? coupons.issue_type == 'except' }--><img src="../images/design/stit_list_ect.gif" /><!--{ / }-->
+				</div>
+				<div class="fright"><img src="../images/design/btn_close.gif" class="hand" onclick="window.close();" /></div>
+			</td>
+		</tr>
+		<tr><td height="10"></td></tr>
+		<tr><td height="2" bgcolor="545454"></td></tr>
+
+		<tr><td height="10"></td></tr>
+		<tr>
+			<td style="padding:3px; border:2px solid #dedede;">
+				<div style="height:250px; padding:5px; overflow:auto;">
+				<table align="center" border="0" width="100%" >
+				<!--{ ? coupons.issue_type == 'issue' }-->
+					<!--{ ? issuecategorys }-->
+					<tr>
+						<td colspan="2" height="20px"><img src="../images/design/bullet_right.gif" ><b> 적용 카테고리</b></td>
+					</tr>
+						<!--{ @ issuecategorys }-->
+						<!--{ ? .type == 'issue' }-->
+					<tr><td colspan="2" class="issue_sublist">
+					- {.category}
+					</td>
+					</tr>
+						<!--{ / }-->
+						<!--{ / }-->
+					<tr>
+					<td colspan="2" height="20px"></td>
+					</tr>
+					<!--{ / }-->
+					<!--{ ? issuegoods }-->
+					<tr>
+						<td colspan="2" height="20px"><img src="../images/design/bullet_right.gif"><b> 적용 상품</b></td>
+					</tr>
+						<!--{ @ issuegoods }-->
+						<!--{ ? .type == 'issue' }-->
+					<tr>
+						<td class="issue_sublist">- {.goods_name}</td>
+						<td align="center">
+						<a href="../goods/view?no={.goods_seq}" target="_blank">
+						<img src="../images/design/btn_view_goods.gif"></a></td>
+					</tr>
+						<!--{ / }-->
+						<!--{ / }-->
+					<!--{ / }-->
+				<!--{ / }-->
+
+				<!--{ ? coupons.issue_type == 'except' }-->
+					<!--{ ? issuecategorys }-->
+					<tr>
+						<td colspan="2" height="20px"><img src="../images/design/bullet_right.gif" ><b> 제외 카테고리</b></td>
+					</tr>
+						<!--{ @ issuecategorys }-->
+						<!--{ ? .type == 'except' }-->
+					<tr><td colspan="2" class="issue_sublist">
+					- {.category}
+					</td>
+					</tr>
+						<!--{ / }-->
+						<!--{ / }-->
+					<tr>
+					<td colspan="2" height="20px"></td>
+					</tr>
+					<!--{ / }-->
+
+					<!--{ ? issuegoods }-->
+					<tr>
+						<td colspan="2" height="20px"><img src="../images/design/bullet_right.gif"><b> 제외 상품</b></td>
+					</tr>
+						<!--{ @ issuegoods }-->
+						<!--{ ? .type == 'except' }-->
+					<tr>
+						<td class="issue_sublist">- {.goods_name}</td>
+						<td align="center">
+						<a href="../goods/view?no={.goods_seq}" target="_blank">
+						<img src="../images/design/btn_view_goods.gif"></a></td>
+					</tr>
+						<!--{ / }-->
+						<!--{ / }-->
+					<!--{ / }-->
+
+				<!--{ / }-->
+				</table>
+				</div>
+			</td>
+		</tr>
+		</table>
+
+	</td>
+</tr>
+</table>

@@ -1,0 +1,349 @@
+<style>
+.goods_name {display:inline-block;white-space:nowrap;overflow:hidden;width:120px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+</style>
+
+<!-- 회원정보요약/마이쇼핑 -->
+<div style="padding:14px 25px; border:1px solid #d3d3d3; background-color:#f8f8f8;">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="50%" valign="top" style="padding-right:40px;">
+			<!-- 회원정보요약 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<table width="100%" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td valign="bottom" align="left" height="20"><b>{user_name}({userid})</b>님</td>
+							<td valign="bottom" align="right"><a href="/mypage/myinfo"><img src="../images/design/mypage_btn_del.gif" /></a></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr><td height="8"></td></tr>
+				<tr><td height="2" bgcolor="545454"></td></tr>
+				<tr><td height="8"></td></tr>
+				<tr>
+					<td>
+						<table width="100%" border="0" cellpadding="0" cellspacing="4" class="fx11">
+						<col width="100" />
+						<tr>
+							<td><font color="black">회원등급</font></td>
+							<td><font color="818181">{group_name}</font></td>
+						</tr>
+						<tr>
+							<td><font color="black">총구매금액</font></td>
+							<td><font color="818181">{=number_format(summary.step75_price)}원</font></td>
+						</tr>
+						<tr>
+							<td><font color="black">이메일</font></td>
+							<td><font color="818181">{email}</font></td>
+						</tr>
+						<tr>
+							<td><font color="black">휴대폰</font></td>
+							<td><font color="818181">{cellphone}</font></td>
+						</tr>
+						<tr>
+							<td><font color="black">주소</font></td>
+							<td><font color="818181">{? address_type == "street"}{address_street}{:}{address}{/} {address_detail}</font></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+		<td width="50%" valign="top" style="padding-left:40px;">
+			<!-- 마이쇼핑 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td valign="bottom" align="left" height="20"><img src="../images/design/mypage_tit_myshopping.gif" /></td>
+				</tr>
+				<tr><td height="8"></td></tr>
+				<tr><td height="2" bgcolor="545454"></td></tr>
+				<tr><td height="8"></td></tr>
+				<tr>
+					<td>
+						<table width="100%" border="0" cellpadding="0" cellspacing="4" class="fx11">
+						<col width="260" />
+						<tr>
+							<td><font color="black">진행중인 주문</font></td>
+							<td><font color="black"><b>{summary.order_ing_cnt}</b></font> <font color="818181">개</font></td>
+						</tr>
+						<tr>
+							<td><font color="black">교환 / 반품</font></td>
+							<td><font color="black"><b>{summary.return_ing_cnt}</b></font> <font color="818181">개</font></td>
+						</tr>
+						<tr>
+							<td><font color="black">적립금</font></td>
+							<td><font color="black"><b>{=number_format(emoney)}</b></font> <font color="818181">원</font></td>
+						</tr>
+						{? isplusfreenot && isplusfreenot.ispoint }
+						<tr>
+							<td><font color="black">포인트</font></td>
+							<td><font color="black"><b>{=number_format(point)}</b></font> <font color="818181">P</font></td>
+						</tr>
+						{/}
+						{? isplusfreenot && isplusfreenot.iscash }
+						<tr>
+							<td><font color="black">이머니</font></td>
+							<td><font color="black"><b>{=number_format(cash)}</b></font> <font color="818181">원</font></td>
+						</tr>
+						{/}
+						<tr>
+							<td><font color="black">할인쿠폰</font></td>
+							<td><font color="black"><b>{summary.coupondownloadtotal}</b></font> <font color="818181">개</font></td>
+						</tr>
+						<tr>
+							<td><font color="black">장바구니</font></td>
+							<td><font color="black"><b>{summary.cart_cnt}</b></font> <font color="818181">개</font></td>
+						</tr>
+						<tr>
+							<td><font color="black">관심상품</font></td>
+							<td><font color="black"><b>{summary.wish_cnt}</b></font> <font color="818181">개</font></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<div style="height:40px;"></div>
+
+<!-- Order List -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td valign="bottom" align="left" height="25"><img src="../images/design/mypage_tit_orderlist.gif" title="" alt="" /></td>
+	<td valign="bottom" align="right"><a href="../mypage/order_catalog"><img src="../images/design/cscenter_btn_more.gif" /></a></td>
+</tr>
+</table>
+<div style="height:10px;"></div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+<thead>
+	<tr>
+		<th width="90">날짜</th>
+		<th width="90">주문번호</th>
+		<th>상품명</th>
+		<th width="100">주문금액</th>
+		<th width="100">상태</th>
+	</tr>
+</thead>
+<tbody>
+	<!--{ @ orders }-->
+	<tr>
+		<td class="cell">{=date('Y-m-d',strtotime(.regist_date))}</td>
+		<td class="cell"><a href="../mypage/order_view?no={.order_seq}"><strong><u>{.order_seq}</u></strong></a></td>
+		<td class="cell left"><img src='{.image}'>
+		{? .gift_cnt==.opt_cnt }
+			<span style="color:red;">[사은품]</span> {.goods_name}
+		{ : }
+			{?.provider_name}<span style="color:#999;">[{.provider_name}]</span><br />{/}
+			{.goods_name} <!--{ ? .item_cnt > 1 }--> 외 {=.item_cnt-1}건<!--{ / }-->
+		{ / }
+		</td>
+		<td class="cell"><b>{=number_format(.settleprice)}원</b></td>
+
+		<td class="cell">
+		<div>{.mstep}</div>
+		<span style="display:inline-block;padding-left:3px;">
+		<!--{ @ .exports }-->
+		<!--{ ? ..tracking_url }-->
+		<a href="{..tracking_url}" target="_blank"><img src="../images/design/mypage_btn_delivery.gif" class="hand"></a><br/>
+		<!--{ / }-->
+		<!--{ / }-->
+		</span>
+		{ ? .cancel_list_ea || .return_list_ea  || .refund_list_ea }
+		<div class='pdt5'>
+		<img src='../images/icon/icon_list_cancel.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{.cancel_list_ea}</span>
+		<img src='../images/icon/icon_list_return.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{.return_list_ea}</span>
+		<img src='../images/icon/icon_list_refund.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{.refund_list_ea}</span>
+		</div>
+		{ / }
+		</td>
+	</tr>
+	<!--{ / }-->
+</tbody>
+</table>
+
+<div style="height:40px;"></div>
+
+<!-- Wish List -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td valign="bottom" align="left" height="25"><img src="../images/design/mypage_tit_wishlist.gif" title="" alt="" /></td>
+	<td valign="bottom" align="right"><a href="../mypage/wish"><img src="../images/design/cscenter_btn_more.gif" /></a></td>
+</tr>
+</table>
+<div style="height:10px;"></div>
+<div>
+	<script type="text/javascript">
+		$(function(){
+			$('#wishlist_slide').slides({
+				container: 'slides_container',
+				play: 4000,
+				pause: 2500,
+				next: 'next',
+				prev: 'prev',
+				hoverPause: true,
+				autoHeight:true,
+				generatePagination: false,
+				effect: 'slide',
+				slidesLoaded: function() {
+					$('#wishlist_slide .slide').width($('#wishlist_slide .slides_container').width());
+					$('#wishlist_slide .slides_container').height($('#wishlist_slide .slide').height());
+					$('#wishlist_slide').removeClass('unvisibility');
+
+					$('#wishlist_slide img').bind('load',function(){
+						$('#wishlist_slide .slides_container').height($('#wishlist_slide .slide').height());
+					});
+				}
+			});
+
+			// 장바구니담기 버튼
+			$("button[name='cart']").bind("click",function() {
+				var seq = $(this).attr('id');
+				seq = seq.replace("wishcart_","");
+				var url = "wish2cart?no="+seq;
+				$.get(url, function(data) {
+					$("div#cart_dialog").html(data);
+					openDialog("장바구니 담기", "cart_dialog", {"width":500,"height":600});
+				});
+			});
+		});
+	</script>
+	<div id="wishlist_slide" class="unvisibility">
+		<table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed">
+		<tr>
+			<td width="30" align="left"><a href="#" class="prev"><img src="../images/design/slide-arrow-prev.png"   /></a></td>
+			<td>
+				<div class="slides_container">
+					<div class="slide">
+						<table width="100%" border="0" style="table-layout:fixed;">
+						<tr>
+							<!--{ @ wish.record }-->
+							<td valign="top" align="left">
+								<table border="0">
+								<tr>
+								<td align="center">
+								<div><a href="../goods/view?no={.goods_seq}"><img src="{.image}" align="absmiddle" hspace="5" style="border:1px solid #ddd;" onerror="this.src='../images/common/noimage_list.gif'" /></a></div>
+								<div class="goods_name"><a href="../goods/view?no={.goods_seq}">{.goods_name}</a></div>
+								<div>
+								<!--{? .string_price_use }-->
+								<b class="price">{.string_price}</b>
+								<!--{ : }-->
+									<!--{ ? .org_price > .sale_price }-->
+									{=number_format(.org_price)} →
+									<!--{ / }-->
+									<b>{=number_format(.sale_price)}원</b>
+									</div>
+									<!--{ ? .reserve }-->
+									<div>{=number_format(.reserve)}원 적립</div>
+									<!--{ / }-->
+									<!--{ ? isplusfreenot && isplusfreenot.ispoint  }-->
+									<div>{=number_format(.point)}P 적립</div>
+									<!--{ / }-->
+									<div><button type="button" name="cart" class="wishcart" id="wishcart_{.wish_seq}" style="border:0"><img src="../images/design/mypage_btn_cart.gif" /></button></div>
+								<!--{/}-->
+								</td>
+								</tr>
+								</table>
+							</td>
+							<!--{ ? .key_ && .key_ % 5 == 4 }-->
+						</tr>
+						</table>
+					</div>
+					<div class="slide">
+						<table width="100%" border="0" style="table-layout:fixed;">
+						<tr>
+							<!--{ / }-->
+							<!--{ / }-->
+						</tr>
+						</table>
+					</div>
+
+				</div>
+			</td>
+			<td width="30" align="right"><a href="#" class="next"><img src="../images/design/slide-arrow-next.png"  /></a></td>
+		</tr>
+		<tr><td height="10"></td></tr>
+		</table>
+	</div>
+</div>
+<div style="height:40px;"></div>
+
+<!-- Q&A/Review 최근글 목록 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<col width="48%" valign="top" />
+<col width="4%" valign="top" />
+<col width="48%" valign="top" />
+<tr>
+	<td>
+		<!-- Q&A 최근글 -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td valign="bottom" align="left" height="25"><img src="../images/design/mypage_tit_qna_main.gif" title="" alt="" /></td>
+						<td valign="bottom" align="right"><a href="/mypage/myqna_catalog?id=mbqna"><img src="../images/design/cscenter_btn_more.gif" /></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="8"></td></tr>
+			<tr><td height="2" bgcolor="545454"></td></tr>
+			<!-- 리스트데이터 : 시작 -->
+			 {? getBoardData('mbqna', '5', 'mypage') }
+				<!-- {@ getBoardData('mbqna', '5', 'mypage') } -->
+				<tr class="bbslist">
+					<td height="30" class="sbj">{.subject}
+							{.iconnew}
+							{.iconhot}
+							{.iconfile}
+							{.iconhidden}</td>
+				</tr>
+				<tr><td height="1" bgcolor="e8e8e8"></td></tr>
+				<!-- {/} -->
+			 {/}
+			<!-- 리스트 : 끝 -->
+			<tr><td height="1" bgcolor="545454"></td></tr>
+		</table>
+
+	</td>
+	<td></td>
+	<td>
+		<!-- Review 최근글  -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td valign="bottom" align="left" height="25"><img src="../images/design/mypage_tit_review_main.gif" title="" alt="" /></td>
+						<td valign="bottom" align="right"><a href="/mypage/mygdreview_catalog"><img src="../images/design/cscenter_btn_more.gif" /></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="8"></td></tr>
+			<tr><td height="2" bgcolor="545454"></td></tr>
+			<!-- 리스트데이터 : 시작 -->
+			<!-- {? getBoardData('goods_review','5', 'mypage') } // url /mypage/myreview_catalog -->
+				<!-- {@ getBoardData('goods_review','5', 'mypage') } -->
+				<tr class="bbslist">
+					<td height="30" class="sbj">{.subject}
+							{.iconnew}
+							{.iconhot}
+							{.iconfile}
+							{.iconhidden}</td>
+				</tr>
+				<tr><td height="1" bgcolor="e8e8e8"></td></tr>
+				<!-- {/} -->
+			<!-- {/} -->
+			<!-- 리스트 : 끝 -->
+			<tr><td height="1" bgcolor="545454"></td></tr>
+		</table>
+	</td>
+</tr>
+</table>
+<div id="cart_dialog" style="display:none;"></div>

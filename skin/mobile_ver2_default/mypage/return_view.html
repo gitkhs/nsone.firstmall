@@ -1,0 +1,241 @@
+<script>
+function zipcode_popup(obj){
+	openDialogZipcode('sender');
+	//window.open('../popup/zipcode?popup=1&zipcode=senderZipcode[]&address=senderAddress&address_detail=senderAddressDetail','popup_zipcode','width=900,height=480');
+}
+</script>
+
+<style>
+/* 주문 내역 테이블 */
+table.order-view-table {width:100%; border-collapse:collapse; border-top:2px solid #666; border-bottom:1px solid #ddd;}
+table.order-view-table.summary-mode {border-top:0px;}
+table.order-view-table th {padding:0px; height:30px; font-weight:normal; background-color:#dfdfdf !important; border:1px solid #aeaeae;}
+table.order-view-table th.dark {background-color:#efefef !important; border:1px solid #ddd}
+table.order-view-table tbody.otb tr.order-item-row td {padding:3px 3px; letter-spacing:0px;height:50px;border:1px solid #ddd;}
+table.order-view-table tbody.otb tr.order-item-row div.order-item-name-wrap {position:relative; height:32px; overflow:hidden;}
+table.order-view-table tbody.otb tr.order-item-row div.order-item-name-place {position:absolute;}
+table.order-view-table tbody.otb tr.order-item-option-row div.order-item-name-wrap {position:relative; height:15px; overflow:hidden;}
+table.order-view-table tbody.otb tr.order-item-option-row div.order-item-name-place {position:absolute;}
+table.order-view-table tbody.otb span.order-item-image {display:inline-block;}
+table.order-view-table tbody.otb span.order-item-image img {border:1px solid #ccc; width:30px; height:30px; vertical-align:middle;}
+table.order-price-information-table {margin:auto; text-align:center;}
+table.order-price-information-table td {vertical-align:top;}
+table.order-price-information-table td dl dt {height:20px; color:#7a7a7a;}
+table.order-price-information-table td dl dd {height:25px; font-size:12px; font-family:tahoma; font-weight:bold;}
+table.order-price-information-table td dl dd .price-text {font-size:14px;}
+table.order-price-information-table td dl.order-price-plus-item {padding-left:40px; background:url('../images/common/icon_plus.gif') no-repeat 19px 23px;}
+table.order-price-information-table td dl.order-price-minus-item {padding-left:40px; background:url('../images/common/icon_minus.gif') no-repeat 19px 23px;}
+table.order-price-information-table td dl.order-price-total-item1 {padding-left:40px; background:url('../images/common/icon_equal.gif') no-repeat 19px 23px;}
+table.order-price-information-table td dl.order-price-total-item1 dt{color:#c24400; font-weight:bold;}
+table.order-price-information-table td dl.order-price-total-item1 dd{color:#b00000; font-weight:bold;}
+.price {text-align:right}
+span.export_title { display:inline-block;width:50px;padding-left:5px; }
+</style>
+
+<div class="sub_title_bar">
+	<h2>{data_return.mreturn_type}상세내역</a></h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" /></a>
+</div>
+
+<div class="center pd10">
+	{data_return.return_code} <span class="bold fx15">({data_return.mstatus})</span>
+</div>
+
+<div style="padding:10px 5px; border-top:2px soldi #aaa; border-bottom:1px solid #aaa; background-color:#bbb;">반품접수 : {=substr(data_return.regist_date,0,10)}</div>
+
+<div class="refund-lay">
+	<div class="refund-list-lay">
+	<!-- { @ data_return_item } -->
+		<div class="goods-info-lay">
+			<div class="goods-name">
+				<a href="../goods/view?no={.goods_seq}">{.goods_name}</a>
+				<!-- { ? .cancel_type == 1 } -->
+						<span class="canceltypetitle">청약철회불가</span>
+				<!-- { / } -->
+			</div>
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" class="goods-info-table">
+			<tr>
+				<td width="80">
+					<a href="../goods/view?no={.goods_seq}"><img src="{=viewImg(.goods_seq, 'thumbCart')}" align="absmiddle" hspace="5" style="border:1px solid #ddd;" onerror="this.src='../images/common/noimage_list.gif'" /></a>
+				</td>
+				<td valign="top" class="goods-info">
+					<div class="goods-price">
+						<span class="goods-price">{=number_format(.price)}</span>원
+					</div>
+						{? .couponinfo.coupon_serial }
+						<div class="goods-coupon">
+							<div class="goods-coupon-number">[쿠폰번호] : <span class="goods-coupon-number-serial bold blue">{.couponinfo.coupon_serial}</span></div>
+							<div class="goods-coupon-{.index_}">{.couponinfo.options}</div>
+							<!-- {? .biztel }<div class="goods-coupon-address"> 주소 : [{.biztel}] {.address} {.addressdetail}</div>{/} -->
+							<!--<div class="goods-coupon-expires">유효기간 : {.social_start_date}~{.social_end_date}</div> -->
+							<div class="goods-coupon-value">쿠폰값어치 : <b>{.couponinfo.coupon_value}</b></div>
+							<div class="goods-coupon-input-value">쿠폰잔여 값어치 : <b>{.couponinfo.coupon_used}</b></div>
+							<div class="goods-coupon-use-return">사용제한 : {.couponinfo.coupon_use_return}</div>
+							<div class="goods-coupon-cancel-day">취소 마감시간 : {.couponinfo.socialcp_cancel_refund_day}</div>
+						</div>
+						{:}
+		<!-- { ? .option1 } -->
+					<div class="goods-option">[옵션] { ? .title1 }{ .title1 }:{ / }{ .option1 }</div>
+		<!-- { / } -->
+		<!-- { ? .option2 } -->
+					<div class="goods-option">[옵션] { ? .title2 }{ .title2 }:{ / }{ .option2 }</div>
+		<!-- { / } -->
+		<!-- { ? .option3 } -->
+					<div class="goods-option">[옵션] { ? .title3 }{ .title3 }:{ / }{ .option3 }</div>
+		<!-- { / } -->
+		<!-- { ? .option4 } -->
+					<div class="goods-option">[옵션] { ? .title4 }{ .title4 }:{ / }{ .option4 }</div>
+		<!-- { / } -->
+		<!-- { ? .option5 } -->
+					<div class="goods-option">[옵션] { ? .title5 }{ .title5 }:{ / }{ .option5 }</div>
+		<!-- { / } -->
+						{/}
+					<div class="goods-etc">수량 : {=number_format(.ea)}개</div>
+				</td>
+			</tr>
+			</table>
+		</div>
+	<!-- { / } -->
+
+	<div class="sum-price-lay">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" class="sum-price-table">
+		<tr>
+			<td class="price-info">
+				합계
+				<span class="goods-price">{=number_format(tot.out_price)}</span>원
+			</td>
+			<td width="94" class="step-info">{data_return.mstatus}</td>
+		</tr>
+		</table>
+	</div>
+
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="ea-info-table">
+	<tr>
+		<td><span class="fleft">반품수량</span> <span class="fright"><b>{=number_format(tot.ea)}</b>개</span></td>
+		<td><span class="fleft">반품회수</span> <span class="fright"><b>{=number_format(tot.return_ea)}</b>개</span></td>
+	</tr>
+	</table>
+
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="ea-input-table">
+	<tr>
+		<td class="left bold">{data_return.mstatus}</td>
+		<td class="right">
+			{?data_return.return_date && data_return.return_date!='0000-00-00'}
+				: {data_return.return_date}
+			{/}
+		</td>
+	</tr>
+	</table>
+	</div>
+</div>
+
+<form action="../mypage_process/return_modify" target="actionFrame" method="post">
+<input type="hidden" name="return_code" value="{data_return.return_code}" />
+<div class="sub_division_title">반품정보 <div class="sub_division_arw"></div></div>
+<div class="sub_division_contents">
+	<table width="100%" border="0" cellpadding="2">
+	<tr>
+		<td class="left fx11 pdl10">은행</td><td class="its_td"><input type="text" name="bank_name" value="{data_return.bank_name}" class="inputbox_large" style="width:94%" /></td>
+	</tr>
+	<tr>
+		<td class="left fx11 pdl10">회수방법</td>
+		<td class="fx12">
+			{?data_return.status=='request'}
+				<label><input type="radio" name="return_method" value="user" /> 자가반품</label>
+				<label><input type="radio" name="return_method" value="shop" /> 택배회수</label>
+				<script>$("input[name='return_method'][value='{data_return.return_method}']").attr('checked',true);</script>
+			{:}
+				{data_return.mreturn_method}
+			{/}
+		</td>
+	</tr>
+	<tr>
+		<td class="left fx11 pdl10">휴대폰</td>
+		<td class="fx12">
+			{?data_return.status=='request'}
+			<select name="cellphone[]">
+			<!--{ @ code_load('cellPhone') }-->
+			<option value="{.codecd}">{.value}</option>
+			<!--{ / }-->
+			</select>
+			<script>$("select[name='cellphone[]'] option[value='{data_return.cellphone[0]']}").attr('selected',true);</script>
+			<input type="text" name="cellphone[]" size="4" class="inputbox_large" value="{data_return.cellphone[1]}" />
+			<input type="text" name="cellphone[]" size="4" class="inputbox_large" value="{data_return.cellphone[2]}" />
+			{:}
+				{=implode("-",data_return.cellphone)}
+			{/}
+		</td>
+	</tr>
+	<tr>
+		<td class="left fx11 pdl10">연락처</td>
+		<td class="fx12">
+			{?data_return.status=='request'}
+			<select name="phone[]">
+			<!--{ @ code_load('locationPhone') }-->
+			<option value="{.codecd}">{.value} {.codecd}</option>
+			<!--{ / }-->
+			</select>
+			<script>$("select[name='phone[]'] option[value='{data_return.phone[0]}']").attr('selected',true);</script>
+			<input type="text" name="phone[]" size="4" class="inputbox_large" value="{data_return.phone[1]}" />
+			<input type="text" name="phone[]" size="4" class="inputbox_large" value="{data_return.phone[2]}" />
+			{:}
+				{=implode("-",data_return.phone)}
+			{/}
+		</td>
+	</tr>
+	<tr>
+		<td class="left fx11 pdl10">회수주소</td>
+		<td class="fx12">
+			{?data_return.status=='request'}
+			<input type="text" name="senderZipcode[]" value="{data_return.sender_zipcode[0]}" size="3" class="inputbox_large" /> -
+			<input type="text" name="senderZipcode[]" value="{data_return.sender_zipcode[1]}" size="3" class="inputbox_large" />
+			<input type="button" id="senderZipcodeButton" value="우편번호" class="btn_style" onclick="zipcode_popup(this)" />
+			<div style="padding:1px;"><input type="hidden" name="senderAddress_type" value="{data_return.sender_address_type}" /><input type="text" name="senderAddress" value="{data_return.sender_address}" class="inputbox_large" style="width:95%" /><input type="text" name="senderAddress_street" value="{data_return.sender_address_street}" class="inputbox_large" style="width:95%; display:none;" /></div>
+			<div style="padding:1px;"><input type="text" name="senderAddressDetail" value="{data_return.sender_address_detail}" class="inputbox_large" style="width:95%" /></div>
+			{:}
+				{=implode("-",data_return.sender_zipcode)}<br>
+				(지번) {data_return.sender_address}<br>
+				(도로명) {data_return.sender_address_street}<br>
+				(공통상세) {data_return.sender_address_detail}
+			{/}
+		</td>
+	</tr>
+	<tr>
+		<td class="left fx11 pdl10">상세사유</td>
+		<td class="fx12">
+			{?data_return.status=='request'}
+			<textarea class="wp95 inputbox_large" rows="3" name="return_reason">{data_return.return_reason}</textarea>
+			{:}
+				{data_return.return_reason}
+			{/}
+		</td>
+	</tr>
+	</table>
+	{?data_return.status=='request'}
+	<div class="pd10 center"><button class="btn_style" type="submit" style="width:100%">변경</button></div>
+	{/}
+</div>
+</form>
+
+
+<div class="sub_division_title">반품처리<div class="sub_division_arw"></div></div>
+<div class="sub_division_contents">
+	<table width="100%" border="0" cellpadding="4">
+	<col width="120" />
+	<tr>
+		<td class="left fx11 pdl10">원주문번호</td><td class="its_td">{data_return.order_seq}</td>
+	</tr>
+	<tr>
+		<td class="left fx11 pdl10">반품종류</td><td class="its_td">{data_return.mreturn_type}</td>
+	</tr>
+	<tr>
+		<td class="left fx11 pdl10">반품접수일</td><td class="its_td">{=date('Y년 m월 d일',strtotime(data_return.regist_date))}</td>
+	</tr>
+	{?data_return.return_date && data_return.return_date!='0000-00-00'}
+	<tr>
+		<td class="left fx11 pdl10">반품완료일</td><td class="its_td">{=date('Y년 m월 d일',strtotime(data_return.return_date))}</td>
+	</tr>
+	{/}
+	</table>
+</div>
+

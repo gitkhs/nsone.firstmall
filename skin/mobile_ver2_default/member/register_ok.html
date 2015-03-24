@@ -1,0 +1,25 @@
+<div class="sub_title_bar">
+	<h2>회원가입</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+		<!-- 본문내용 시작 -->
+			<!-- Welcome 이미지 -->
+			<div align="center" style="padding:50px 0 20px 0;"><img src="../images/design/img_welcome.gif" /></div>
+
+			<div style="text-align:center">{? name}<font color="black"><strong>{name}</strong></font>님의 {/}회원가입을 진심으로 축하드립니다.</div>
+
+			<div style="text-align:center; padding-top:120px">
+				{? userInfo }<a href="../mypage/myinfo"><img src="../images/design/btn_myinfo.gif" hspace="3" class="hand" /></a>{:}<a href="../member/login?return_url={=urlencode('../main/index')}"><img src="../images/design/btn_login.gif" hspace="3" class="hand" /></a>{/}
+				<a href="../main"><img src="../images/design/btn_shopping.gif" hspace="3" class="hand" /></a>
+			</div>
+		<!-- 본문내용 끝 -->
+	</td>
+</tr>
+<tr>
+	<td height="40"></td>
+</tr>
+</table>

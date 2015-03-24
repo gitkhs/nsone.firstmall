@@ -1,0 +1,214 @@
+{?!mobileAjaxCall}
+	{#common_mypage_coupon_top}
+{/}
+
+<style>
+.coupon_name {font-weight:bold; text-align:left !important; color:#000; font-size:12px;}
+</style>
+
+
+{? _GET.tab == '1'  || !_GET.tab}
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+	<thead>
+		<tr>
+			<th>쿠폰명/할인액/종류</th>
+			<th width="150">기간<br />제한</th>
+			<th width="100" >사용<br />여부</th>
+			<th >조회</th>
+		</tr>
+	</thead>
+	<tbody>
+	{? loop }
+		{@ loop } 
+		<tr {?.use_status=='used' || .use_period=='n'}class="gray"{/}> 
+			<td class="cell hand coupon_name {? .use_type=='offline' && .use_status=='used' }gray{/}"  nowrap="nowrap"  {? .use_type=='offline'} {?.use_status=='used' || .use_period=='n'}onclick="alert('사용할 수 없습니다.');"{:}onclick="location.href='./my_coupon_detail?coupon_seq={.coupon_seq}&download_seq={.download_seq}'"{/} {/}>
+				<div class="bold">{.coupon_name}</div>
+				<div >{.issuebtn}</div>
+			</td>
+			<td class="cell hand {? .use_type=='offline' && .use_status=='used' }gray{/}"  {?.use_type=='offline'}   {?.use_status=='used' || .use_period=='n'}onclick="alert('사용할 수 없습니다.');"{:}onclick="location.href='./my_coupon_detail?coupon_seq={.coupon_seq}&download_seq={.download_seq}'"{/} {/}>{.issuedate}</td>
+			<td class="cell hand {? .use_type=='offline' && .use_status=='used' }gray{/}"  {? .use_type=='offline'} {?.use_status=='used' || .use_period=='n'}onclick="alert('사용할 수 없습니다.');"{:}onclick="location.href='./my_coupon_detail?coupon_seq={.coupon_seq}&download_seq={.download_seq}'"{/} {/}>{.use_status_title}</td>
+			<td class="cell" >
+				{? .type == 'offline_emoney' } 
+					-
+				{:}
+					<span class="btn small gray "><input type="button" class="coupongoodsreviewbtn" coupon_type="{? .type == 'offline_coupon' }offline{:}online{/}" coupon_seq="{.coupon_seq}" download_seq="{.download_seq}"  use_type="{.use_type}"  issue_type="{.issue_type}"   coupon_name="{.coupon_name}" value="조회" /></span> 
+				{/}  
+			</td>
+		</tr>
+		{/}
+	{:}
+		<tr >
+			<td colspan="3" align="center" class="cell">
+				보유한 쿠폰이 없습니다.
+			</td>
+		<tr>
+	{/}
+	</tbody>
+	</table>
+{:}
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+	<thead>
+		<tr>
+			<th>쿠폰명/할인액/종류</th>
+			<th width="150">다운로드 기간</th>
+			<th >조회</th>
+		</tr>
+	</thead>
+	<tbody>
+	{? loop }
+		{@ loop }
+		<tr >
+			<td class="cell coupon_name downloadbtn hand"  coupon_type="{.type}" coupon_seq="{.coupon_seq}" coupon_name="{.coupon_name}" coupon_point="{.coupon_point}"  alt="쿠폰받기" title="쿠폰받기">
+				<div class="bold">{.coupon_name}</div>
+				<div >{.salepricetitle}</div>
+				<div >{.issuebtn}</div>
+			</td>
+			<td class="cell downloadbtn hand"  coupon_type="{.type}" coupon_seq="{.coupon_seq}" coupon_name="{.coupon_name}" coupon_point="{.coupon_point}"  alt="쿠폰받기" title="쿠폰받기">{.downdate}</td>
+			<td class="cell" >
+				{? .type == 'offline_emoney' } 
+					-
+				{:}
+					<span class="btn small gray "><input type="button" class="coupongoodsreviewbtn" coupon_type="{? .type == 'offline_coupon' }offline{:}online{/}" coupon_seq="{.coupon_seq}" download_seq="{.download_seq}"  use_type="{.use_type}"  issue_type="{.issue_type}"   coupon_name="{.coupon_name}" value="조회" /></span> 
+				{/}  
+			</td>
+		</tr>
+		{/}
+	{:}
+		<tr >
+			<td colspan="2" align="center" class="cell">
+				다운가능한 쿠폰이 없습니다.
+			</td>
+		<tr>
+	{/}
+	</tbody>
+	</table>
+
+{/}
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin}</div>
+	</td>
+</tr>
+</table>
+
+<div style="height:20px;"></div>
+
+<script type="text/javascript">
+/* input form style 적용*/
+function apply_input_style(){
+$('img.small_goods_image').each(function() {
+	if (!this.complete ) {// image was broken, replace with your new image
+		this.src = '/data/icon/error/noimage_list.gif';
+	}
+});
+}
+
+$(document).ready(function() {
+	/* 스타일적용 */
+	apply_input_style();
+
+	{? _GET.tab == '2'}
+		//쿠폰받기
+		$(".downloadbtn").live("click",function(){
+			var mypoint = {mypoint};
+			var coupon_type = $(this).attr('coupon_type');
+			var coupon_seq = $(this).attr('coupon_seq');
+			var coupon_name = $(this).attr('coupon_name');
+			var coupon_point = $(this).attr('coupon_point');
+			if( coupon_type == 'point' && (mypoint < coupon_point || mypoint < 1) ){//전환포인트인경우
+				if(mypoint < 1){
+					openDialogAlert('보유포인트가 없습니다.','400','140',function(){});
+				}else{
+					openDialogAlert('전환포인트 금액이 보유포인트보다 작습니다.','400','140',function(){});
+				}
+				return false;
+			}else{ 
+				openDialogConfirm("["+coupon_name+"] 쿠폰을 다운받으시겠습니까?",400,140,function(){
+					$.ajax({
+						'url' : '../coupon/download_member',
+						'data' : {'coupon_seq':coupon_seq},
+						'type' : 'post',
+						'dataType': 'json',
+						'success': function(data) {
+							if(data.result){
+								openDialogAlert(data.msg,'400','140',function(){document.location.reload();});
+							}else{
+								openDialogAlert(data.msg,'400','140',function(){});
+							}
+						}
+					});
+				},function(){}); 
+			}
+		});
+	{:}
+
+	{/}
+	
+	
+	// 쿠폰사용가능한 상품 조회하기 (적용대상조회)
+	$('.coupongoodsreviewbtn').click(function() {
+		var coupon_type = $(this).attr("coupon_type");
+		var use_type = $(this).attr("use_type");
+		var issue_type = $(this).attr("issue_type");
+		{? _GET.tab == '1'  || !_GET.tab }
+			var download_seq = $(this).attr("download_seq");
+			var coupon_seq = $(this).attr("coupon_seq");
+			var coupongoodsreviewerurl = '../coupon/coupongoodsreviewer?no='+download_seq+'&coupon_type='+coupon_type+'&coupon_seq='+coupon_seq+'&download_seq='+download_seq;
+		{:}
+			var coupon_seq = $(this).attr("coupon_seq"); 
+			var coupongoodsreviewerurl = '../coupon/coupongoodsreviewer?no='+coupon_seq+'&coupon_type='+coupon_type;
+		{/}
+		var coupon_name = $(this).attr("coupon_name");   
+		addFormDialog(coupongoodsreviewerurl, '97%', '', '쿠폰정보','false');
+	});
+	//쿠폰상품 조회후 상품검색창
+	$("input:button[name=goodssearchbtn]").live("click",function(){
+		var goods_seq		= $("#coupongoods_goods_seq").val();
+		var coupon_seq	= $(this).attr("coupon_seq");
+
+		if(!goods_seq) {
+				openDialogAlert("상품번호를 정확히 입력해 주세요.",'260','140',function(){$("#coupongoods_goods_seq").focus();return;});
+		}else{ 
+			$.ajax({
+				'url' : '../coupon/coupongoodssearch',
+				'data' : {'coupon':coupon_seq,'goods':goods_seq},
+				'type' : 'post',
+				'dataType': 'json',
+				'success' : function(res){ 
+					$(".coupongoodsreviewerno").hide();//상품사용불가
+					$(".coupongoodsrevieweryes").hide();//쿠폰사용가능
+					if( res.result == 'goodsyes' ) {  
+						var imgsrc = (eval("res.goods.src"))?res.goods.src:"/admin/skin/default/images/common/noimage_list.gif";
+						$(".coupongoodsrevieweryes").show(); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".image").html("<img class=\"goodsThumbView\"  alt=\"\" src=\""+imgsrc+"\" width=\"50\" height=\"50\">"); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".name").html(res.goods.name);
+						$(".coupongoodsrevieweryes .issueGoods").find(".price").html(res.goods.price);
+						$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq",goods_seq); 
+						
+						openDialog('상품번호 찾기',"coupongoodsreviewerpopup",{"width":"480","height":"280"});
+					}else if( res.result == 'goodsno' ) {  						
+						var imgsrc = (eval("res.goods.src"))?res.goods.src:"/admin/skin/default/images/common/noimage_list.gif";
+						$(".coupongoodsreviewerno").show();
+						$(".coupongoodsrevieweryes .issueGoods").find(".image").html("<img class=\"goodsThumbView\"  alt=\"\" src=\""+imgsrc+"\" width=\"50\" height=\"50\">"); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".name").html(res.goods.name);
+						$(".coupongoodsrevieweryes .issueGoods").find(".price").html(res.goods.price);
+						$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq",goods_seq); 
+						
+						openDialog('상품번호 찾기',"coupongoodsreviewerpopup",{"width":"400","height":"250"});
+					}else{
+						openDialogAlert("상품을 찾을 수 없습니다.<br/>확인 후 다시 입력하시기 바랍니다.",'250','160'); 
+					}
+				}
+			});
+		}
+	});
+	
+	//상품상세보기
+	$('.coupongoodsdetail').live("click",function(){ 
+		window.open("/goods/view?no="+$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq"),'','');
+	});
+
+});
+</script>

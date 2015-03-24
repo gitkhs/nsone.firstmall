@@ -1,0 +1,148 @@
+<style>
+.mobilethumbnailvideo {position:absolute;z-index:5;background-position:center;background:url('../../images/common/thumb_play.png') no-repeat center center;vertical-align:middle;}
+</style>
+<div><font face="arial black, 돋움" size="2"><b>{title}</b></font></div>
+
+<!--{ ? perpage }-->
+<br style="line-height:10px;" />
+
+<div class="goods_list_top">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td align="left">
+			<span class="list_summary">TOTAL <b>{=number_format(page.totalcount)}</b> ITEMS</span>
+		</td>
+		<td align="right">
+			<span class="sort_item">
+				<!--{ @ orders }-->
+					<!--{ ? .index_ }-->
+					&nbsp;|&nbsp;
+					<!--{ / }-->
+					<!--{ ? .key_ == sort }-->
+						<a href="?sort={.key_}{sortUrlQuerystring}"><b>{.value_}</b></a>
+					<!--{ : }-->
+						<a href="?sort={.key_}{sortUrlQuerystring}">{.value_}</a>
+					<!--{ / }-->
+				<!--{ / }-->
+			</span>
+		</td>
+	</tr>
+	</table>
+</div>
+<!--{ / }-->
+
+<br style="line-height:10px;" />
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+	<!--{ @ displayGoodsList }-->
+		<!--{ ? .index_ && .index_ % 2 == 0 }--></tr><tr><td height="10"></td></tr><tr><!--{ / }-->
+		<td width="50%">
+			<table width="100%" cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<!--{? kind == 'designvideo' //동영상인경우 }-->
+					<!--{? .file_key_w && .uccdomain_fileurl}-->
+						<td width="{? videosize_w }{videosize_w}{:}400{/}"><span class="goodsDisplayVideoWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(.value_))}"><span class="mobilethumbnailvideo" width="{? videosize_w }{=(videosize_w)}{:}400{/}" height="{? videosize_h }{videosize_h}{:}200{/}" ></span>
+							<embed src="{.uccdomain_fileswf}" width="{? videosize_w }{videosize_w}{:}400{/}" height="{? videosize_h }{videosize_h}{:}200{/}" allowfullscreen="true" wmode="transparent" class="hide"></embed>
+								<img src="{.uccdomain_thumbnail}" width="{? videosize_w }{videosize_w}{:}400{/}" height="{? videosize_h }{videosize_h}{:}200{/}"onerror="this.src='../../images/common/noimage.gif'" />
+						</span></td>
+					<!--{:}-->
+						<td width="{goodsImageSize.width}"><span class="goodsDisplayImageWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(.value_))}"><a href="/goods/view?no={.goods_seq}" target="{target}"><img src="{.image}" width="{goodsImageSize.width}" onerror="this.src='../../images/common/noimage.gif'" /></a></span></td>
+					<!--{/}-->
+				<!--{:}-->
+					<td width="{goodsImageSize.width}"><span class="goodsDisplayImageWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(.value_))}"><a href="/goods/view?no={.goods_seq}" target="{target}"><img src="{.image}" width="{goodsImageSize.width}" onerror="this.src='../../images/common/noimage.gif'" /></a></span></td>
+				<!--{/}-->
+				<td width="10"></td>
+				<td>
+					<table width="100%" cellpadding="0" cellspacing="0" border="0">
+					<!--{ @ info_settings.list }-->
+						<!--{? ..value_->kind == 'goods_name' }-->
+						<tr><td height="6"></td></tr>
+						<tr>
+							<td align="{text_align}"><span {..value_->name_css}>{.goods_name}</span></td>
+						</tr>
+						<!--{/}-->
+
+						<!--{? ..value_->kind == 'summary' && .summary}-->
+						<tr><td height="6"></td></tr>
+						<tr>
+							<td align="{text_align}"><span {..value_->name_css}>{.summary}</span></td>
+						</tr>
+						<!--{/}-->
+
+						<!--{? ..value_->kind == 'icon' && .icons}-->
+						<tr><td height="6"></td></tr>
+						<tr>
+							<td height="18" align="{text_align}">
+								<!--{ @ .icons }-->
+								<img src="/data/icon/goods/{...value_}.gif" border="0">
+								<!--{ / }-->
+							</td>
+						</tr>
+						<!--{/}-->
+
+						<!--{? ..value_->kind == 'consumer_price' }-->
+						<tr><td height="6"></td></tr>
+						<tr>
+							<td align="{text_align}">
+								<span {..value_->name_css}>
+									{=number_format(.consumer_price)}
+									{?..value_->postfix}{..value_->postfix}{/}
+								</span>
+							</td>
+						</tr>
+						<!--{/}-->
+
+						<!--{? ..value_->kind == 'price' }-->
+						<tr><td height="6"></td></tr>
+						<tr>
+							<td align="{text_align}">
+								<span {..value_->name_css}>
+									{=number_format(.price)}
+									{?..value_->postfix}{..value_->postfix}{/}
+								</span>
+							</td>
+						</tr>
+						<!--{/}-->
+
+						<!--{? ..value_->kind == 'fblike' && APP_USE == 'f'  && APP_LIKE_TYPE != 'NO'}-->
+						<tr><td height="6"></td></tr>
+						<tr>
+							<td align="{text_align}">{=snsLikeButton(.goods_seq,..value_->fblike)}</td>
+						</tr>
+						<!--{/}-->
+
+					<!--{ / }-->
+					</table>
+				</td>
+			</tr>
+			</table>
+		</td>
+	<!--{ / }-->
+</tr>
+<tr><td height="10"></td></tr>
+</table>
+
+<!--{ ? perpage }-->
+<div style="height:30px"></div>
+
+<table align="center" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+		<div class="paging_navigation">
+			<!--{ ? page.first }--><a href="?page={page.first}&amp;{page.querystring}" class="first">◀ 처음</a><!--{ / }-->
+			<!--{ ? page.prev }--><a href="?page={page.prev}&amp;{page.querystring}" class="prev">◀ 이전</a><!--{ / }-->
+			<!--{ @ page.page }-->
+				<!--{ ? page.nowpage ==  .value_ }-->
+					<a href="?page={.value_}&amp;{page.querystring}" class="on">{.value_ }</a>
+				<!--{ : }-->
+					<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? page.next }--><a href="?page={page.next}&amp;{page.querystring}" class="next">다음 ▶</a><!--{ / }-->
+			<!--{ ? page.last }--><a href="?page={page.last}&amp;{page.querystring}" class="last">마지막 ▶</a><!--{ / }-->
+		</div>
+	</td>
+</tr>
+</table>
+<!--{ / }-->

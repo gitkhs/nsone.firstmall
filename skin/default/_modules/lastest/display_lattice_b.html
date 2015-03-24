@@ -1,0 +1,81 @@
+<!-- {recent.boardtitle} 최근글 start -->
+<style type="text/css">
+.{lastest_key} .tit {font-size:12px; font-weight:bold;}
+.{lastest_key} .normal_bbslist .cat {font-size:12px;font-family:gothic,gulim;color:#888;letter-spacing:-1px;}
+.{lastest_key} .normal_bbslist .sbj {text-align:left;letter-spacing:0px;}
+.{lastest_key} .normal_bbslist .sbj a {font-size:12px;font-family:gothic,gulim;color:#222222;text-decoration:none;line-height:150%;}
+.{lastest_key} .normal_bbslist .sbj a:hover {text-decoration:underline;}
+.{lastest_key} .normal_bbslist .comment {font:normal 11px arial;color:#FC6138;}
+</style>
+<div class='designDisplay {lastest_key}' designElement='displaylastest'  id="{lastest_key}" templatePath='{template_path}' >
+	<div>
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td valign="bottom" align="left" height="25"><span class="tit">{recent.title}</span></td>
+			<td valign="bottom" align="right"><b><a href="/board/?id={recent.boardId}"><img src="../../images/design/cscenter_btn_more.gif" /></a></b></td>
+		</tr>
+	</table>
+	</div>
+	<br style="line-height:10px;" />
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<!--{recent.getBoardData}-->
+			<!--{recent.toptr}-->
+			<td width="50%"  class="sbj">
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<!--{? recent.showNumber }--><td width="10"><span >{recent.Number}</span></td><!--{/}-->
+					<!--{? recent.showImg }--><td  width="{recent.image_w}"  height="{recent.image_h}">{recent.imagelay}</td><!--{/}-->
+					<td width="10"></td>
+					<td>
+						<table width="100%" cellpadding="0" cellspacing="0" border="0">
+						<tr>
+							<td align="{recent.text_align}">
+							{recent.goodsInfo}
+							{recent.subject}
+						</td>
+						</tr>
+
+						<!--{? recent.showContents }-->
+						<tr><td height="6"></td></tr>
+						<tr>
+							<td align="{recent.text_align}">{recent.contents}</td>
+						</tr>
+						<!--{/}-->
+
+						<tr><td height="6"></td></tr>
+						<tr>
+							<td align="{recent.text_align}">
+							<!--{ @ recent.info_settings }-->
+								<!--{? .value_ == 'showDate' &&  recent.showDate }-->
+									{recent.r_date}
+								<!--{/}-->
+								<!--{? .value_ == 'showView' &&  recent.showView }-->
+									{recent.hitlay}
+								<!--{/}-->
+								<!--{? .value_ == 'showRecommend' &&  recent.showRecommend }-->
+									{recent.recommendlay}
+								<!--{/}-->
+								<!--{? .value_ == 'showName' &&  recent.showName }-->
+									{recent.name}
+								<!--{/}-->
+								<!--{? .value_ == 'showScore' &&  recent.showScore }-->
+									{recent.scorelay}
+								<!--{/}-->
+								<!--{? .value_ == 'showBuyer' &&  recent.showBuyer }-->
+									{recent.buyertitle}
+								<!--{/}-->
+							<!--{/}-->
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				</table>
+			</td>
+		<!--{recent.end}-->
+	</tr>
+	<tr><td height="10"></td></tr>
+	</table>
+</div>
+<!-- {recent.boardtitle} 최근글 end -->

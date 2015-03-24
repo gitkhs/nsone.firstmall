@@ -1,0 +1,71 @@
+<style>
+#goods_view	{width:90%; margin:0 auto;}
+#goods_thumbs .pagination {text-align:center;width:100%;}
+#goods_thumbs .pagination li {display:inline important;}
+#goods_thumbs .pagination li img {border:1px solid #fff; margin:5px 2px;}
+#goods_thumbs .pagination li.current img {border:1px solid #333;}
+#goods_thumbs .pagination li a {width:100%;height:auto;background-image:url('');}
+</style>
+
+
+<table cellpadding="0" cellspacing="0" width="100%">
+<tbody>
+<tr>
+	<td align="center" style="padding-right:60px;">
+
+<div id="goods_view">
+	<div id="goods_thumbs" style="text-align:center;">
+		<table cellpadding="0" cellspacing="0" style="width:{goodsImageSize.large.width}px;text-align:center;">
+			<tbody>
+			<tr>
+				<td align="center" style="padding-top:50px;">
+					<div class="slides_container" style="margin:auto; width:{goodsImageSize.large.width}px;">
+						<!--{ @ images }-->
+						<a href="#"><img src="{.large.image}" width="{goodsImageSize.large.width}" onerror="this.src='../images/common/noimage.gif'"/></a>
+						<!--{ / }-->
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td align="center" width="100">
+					<!-- 상품이미지 썸네일 -->
+					<table style="width:100%" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td width="15" align="left"><a href="#" class="prev"><img src="../images/design/btn_detail_prev.gif" /></a></td>
+						<td>
+							<ul class="pagination">
+								<!--{ @ images }-->
+								<li><a href="#"><img src="{.thumbView.image}" width="{goodsImageSize.thumbView.width}" onerror="this.src='../images/common/noimage_list.gif'"/></a></li>
+								<!--{ / }-->
+							</ul>
+						</td>
+						<td width="15" align="right"><a href="#" class="next"><img src="../images/design/btn_detail_next.gif" /></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	</div>
+</div>
+
+
+	</td>
+</tr>
+</table>
+
+<script type="text/javascript">
+$("#goods_thumbs .slides_container a:gt(0)").hide();
+$(function(){
+	setTimeout(function(){
+		$("#goods_thumbs").slides({
+			preload: true,
+			preloadImage: "../images/design/loading.gif",
+			effect: "fade",
+			crossfade: true,
+			autoHeight: true,
+			generatePagination: false
+		});
+	},100);
+});
+</script>

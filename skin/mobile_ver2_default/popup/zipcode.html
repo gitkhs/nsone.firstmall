@@ -1,0 +1,651 @@
+<script type="text/javascript">
+var params = {
+	'address' : '{_GET.address}',
+	'address_street' : '{_GET.address_street}',
+	'address_detail' : '{_GET.address_detail}',
+	'zipcode' : '{_GET.zipcode}'
+};
+
+function getZipcodeResult(page){
+	$("input[name='page']").val(page);$("#zipForm").submit();
+}
+
+function getZipcodeResultgo(zipcode_type,page){
+	// $("select[name='SIDO'] option[value='']").attr("selected",true);
+	// $("select[name='SIGUNGU'] option[value='']").attr("selected",true);
+	$("input[name='zipcode_type']").val(zipcode_type);
+	$("input[name='page']").val(page);
+	$("#zipForm").submit();
+}
+
+function getZipcodeTab(zipcode_type,page){
+	$("select[name='SIDO'] option[value='']").attr("selected",true);
+	$("select[name='SIGUNGU'] option[value='']").attr("selected",true);
+	$("input[name='zipcode_keyword']").val('');
+	$("input[name='zipcode_type']").val(zipcode_type);
+	$("input[name='page']").val(page);
+	$("#zipForm").submit();
+}
+
+function enterchk(){
+	if(event.keyCode==13){
+		getZipcodeResult(1);
+		event.returnValue=false;
+		return;
+	}
+}
+
+function choice_zipcode(obj_tr)
+{
+	if(opener != null ) {
+		var winobj = opener.document;
+	}else{
+		var winobj = parent.document;
+	}
+
+	obj_tr = $(obj_tr);
+	var zip = obj_tr.find(".zipcode_number").html();
+	var zipArr = zip.split('-');
+
+	if(params.address){
+		if('{_GET.mtype}'=='order_multi' || '{zipcodeFlag}'=='order_multi'){
+			choice_order_multi(obj_tr,zipArr,winobj);
+		}else if('{_GET.mtype}'=='order_multi_view' || '{zipcodeFlag}'=='order_multi_view'){
+			choice_order_multi_view(obj_tr,zipArr,winobj);
+		}else{
+			choice_params_address(obj_tr,zipArr,winobj);
+		}
+		try{parent.order_price_calculate();}catch(e){};
+		try{opener.order_price_calculate();}catch(e){};
+	}else{
+		if('{_GET.mtype}'=='order_info' || '{zipcodeFlag}'=='order_info'){
+			choice_order_info(obj_tr,zipArr,winobj);
+		}else if('{_GET.mtype}'=='order' || '{zipcodeFlag}'=='order'){
+			choice_order(obj_tr,zipArr,winobj);
+		}else if('{_GET.mtype}'=='delivery' || '{zipcodeFlag}'=='delivery'){//3
+			choice_delivery(obj_tr,zipArr,winobj);
+		}else if('{_GET.mtype}'=='business' || '{zipcodeFlag}'=='business'){//4
+			choice_business(obj_tr,zipArr,winobj);
+		}else if('{_GET.mtype}'=='member' || '{zipcodeFlag}'=='member'){//5
+			choice_member(obj_tr,zipArr,winobj);
+		}else if('{_GET.mtype}'=='co_' || '{zipcodeFlag}'=='co_'){//6
+			choice_co(obj_tr,zipArr,winobj);
+		}else{//7
+			choice_mtype(obj_tr,zipArr,winobj);
+		}
+	}
+
+	if(opener != null ) {
+		opener.$("#{zipcodeFlag}BgId").remove();
+		opener.$("#{zipcodeFlag}Id").remove();
+	}else{
+		parent.$("#{zipcodeFlag}BgId").remove();
+		parent.$("#{zipcodeFlag}Id").remove();
+
+	}
+	self.close();
+}
+
+function choice_order_multi(obj_tr,zipArr,winobj)
+{
+	$("input[name='multi_recipient_address_type[]']",$(".multiShippingItem[multiShippingItemNo='{_GET.multiIdx}']",winobj)).val( "{zipcode_type}" );
+	if( eval("$('input[name=multi_recipient_address_type[]]',winobj).val()") ) {
+		{? zipcode_type == "street"}
+		$("input[name='multi_recipient_address[]']",$(".multiShippingItem[multiShippingItemNo='{_GET.multiIdx}']"),winobj).val( obj_tr.find(".address").html() ).hide();
+		$("input[name='multi_recipient_address_street[]']",$(".multiShippingItem[multiShippingItemNo='{_GET.multiIdx}']"),winobj).val( obj_tr.find(".address_street").html() ).show();
+		{:}
+		$("input[name='multi_recipient_address[]']",$(".multiShippingItem[multiShippingItemNo='{_GET.multiIdx}']"),winobj).val( obj_tr.find(".address").html() ).show();
+		$("input[name='multi_recipient_address_street[]']",$(".multiShippingItem[multiShippingItemNo='{_GET.multiIdx}']"),winobj).val( obj_tr.find(".address_street").html() ).hide();
+		{/}
+	}else{
+		$("input[name='multi_recipient_address[]']",$(".multiShippingItem[multiShippingItemNo='{_GET.multiIdx}']"),winobj).val( obj_tr.find(".address").html() );
+	}
+	$("input[name='multi_recipient_zipcode[0][]']",$(".multiShippingItem[multiShippingItemNo='{_GET.multiIdx}']"),winobj).val(zipArr[0]);
+	$("input[name='multi_recipient_zipcode[1][]']",$(".multiShippingItem[multiShippingItemNo='{_GET.multiIdx}']"),winobj).val(zipArr[1]);
+	$("input[name='multi_recipient_address_detail[]']",$(".multiShippingItem[multiShippingItemNo='{_GET.multiIdx}']"),winobj).focus();
+}
+
+function choice_order_multi_view(obj_tr,zipArr,winobj){
+	$("input[name='recipient_address_type']",$(".multiShippingItem").eq(),winobj).val( "{zipcode_type}" )
+
+	if( eval("$('input[name=recipient_address_type]',winobj).val()") ) {
+		{? zipcode_type == "street"}
+		$("input[name='recipient_address']",$(".multiShippingItem").eq(),winobj).val( obj_tr.find(".address").html() ).hide();
+		$("input[name='recipient_address_street']",$(".multiShippingItem").eq(),winobj).val( obj_tr.find(".address_street").html() ).show();
+		{:}
+		$("input[name='recipient_address']",$(".multiShippingItem").eq(),winobj).val( obj_tr.find(".address").html() ).show();
+		$("input[name='recipient_address_street']",$(".multiShippingItem").eq(),winobj).val( obj_tr.find(".address_street").html() ).hide();
+		{/}
+	}else{
+		$("input[name='recipient_address']",$(".multiShippingItem").eq(),winobj).val( $(this).find(".address").html() );
+	}
+	$("input[name='recipient_zipcode[]']",$(".multiShippingItem").eq(),winobj).eq(0).val(zipArr[0]);
+	$("input[name='recipient_zipcode[]']",$(".multiShippingItem").eq(),winobj).eq(1).val(zipArr[1]);
+	$("input[name='recipient_address_detail']",$(".multiShippingItem").eq(),winobj).focus();
+}
+
+function choice_params_address(obj_tr,zipArr,winobj)
+{
+	$("input[name='"+params.address+"_type']",winobj).val( "{zipcode_type}" );
+	if( eval("$(\"input[name='"+params.address+"_type']\",winobj).val()") ) {
+		{? zipcode_type == "street"}
+		$("input[name='"+params.address+"']",winobj).val( obj_tr.find(".address").html() ).hide();
+		$("input[name='"+params.address_street+"']",winobj).val( obj_tr.find(".address_street").html() ).show();
+		{:}
+		$("input[name='"+params.address+"']",winobj).val( obj_tr.find(".address").html() ).show();
+		$("input[name='"+params.address_street+"']",winobj).val( obj_tr.find(".address_street").html() ).hide();
+		{/}
+	}else{
+		$("input[name='"+params.address+"']",winobj).val( obj_tr.find(".address").html() );
+	}
+	$("input[name='"+params.zipcode+"']",winobj).eq(0).val(zipArr[0]);
+	$("input[name='"+params.zipcode+"']",winobj).eq(1).val(zipArr[1]);
+	$("input[name='"+params.address_detail+"']",winobj).focus();
+}
+
+function choice_order_info(obj_tr,zipArr,winobj)
+{
+	$("input[name='order_address_type']", winobj).val( "{zipcode_type}" );
+	$("input[name='order_address']", winobj).val( obj_tr.find(".address").html() );
+	$("input[name='order_address_street']", winobj).val( obj_tr.find(".address_street").html() );
+	$("input[name='order_zipcode[]']", winobj).eq(0).val(zipArr[0]);
+	$("input[name='order_zipcode[]']", winobj).eq(1).val(zipArr[1]);
+	$("input[name='order_address_detail']", winobj).focus();
+}
+
+function choice_order(obj_tr,zipArr,winobj)
+{
+	$("input[name='recipient_address_type']", winobj).val( "{zipcode_type}" );
+	if( eval("$('input[name=recipient_address_type]', winobj).val()") ) {
+		{? zipcode_type == "street"}
+		$("input[name='recipient_address']", winobj).val( obj_tr.find(".address").html() ).hide();
+		$("input[name='recipient_address_street']", winobj).val( obj_tr.find(".address_street").html() ).show();
+		{:}
+		$("input[name='recipient_address']", winobj).val( obj_tr.find(".address").html() ).show();
+		$("input[name='recipient_address_street']", winobj).val( obj_tr.find(".address_street").html() ).hide();
+		{/}
+	}else{
+		$("input[name='recipient_address']", winobj).val( obj_tr.find(".address").html() );
+	}
+	$("input[name='recipient_zipcode[]']", winobj).eq(0).val(zipArr[0]);
+	$("input[name='recipient_zipcode[]']", winobj).eq(1).val(zipArr[1]);
+	$("input[name='recipient_address_detail']", winobj).focus();
+	try{parent.order_price_calculate();}catch(e){};
+	try{opener.order_price_calculate();}catch(e){};
+}
+function choice_delivery(obj_tr,zipArr,winobj)
+{
+	$("input[name='recipient_address_type']",winobj).val( "{zipcode_type}" );
+	$("input[name='recipient_address']",winobj).val( obj_tr.find(".address").html() );
+	$("input[name='recipient_address_street']",winobj).val( obj_tr.find(".address_street").html() );
+	$("input[name='recipient_zipcode[]']",winobj).eq(0).val(zipArr[0]);
+	$("input[name='recipient_zipcode[]']",winobj).eq(1).val(zipArr[1]);
+	$("input[name='recipient_address_detail']",winobj).focus();
+}
+function choice_business(obj_tr,zipArr,winobj)
+{
+	$("input[name='baddress_type']",winobj).val( "{zipcode_type}" );
+	if( eval("$('input[name=baddress_type]').val()") ) {
+		{? zipcode_type == "street"}
+		$("input[name='baddress']",winobj).val( obj_tr.find(".address").html() ).hide();
+		$("input[name='baddress_street']",winobj).val( obj_tr.find(".address_street").html() ).show();
+		{:}
+		$("input[name='baddress']",winobj).val( obj_tr.find(".address").html() ).show();
+		$("input[name='baddress_street']",winobj).val( obj_tr.find(".address_street").html() ).hide();
+		{/}
+	}else{
+		$("input[name='baddress']",winobj).val( obj_tr.find(".address").html() );
+	}
+	$("input[name='bzipcode[]']",winobj).eq(0).val(zipArr[0]);
+	$("input[name='bzipcode[]']",winobj).eq(1).val(zipArr[1]);
+	$("input[name='baddress_detail']", winobj).focus();
+}
+function choice_member(obj_tr,zipArr,winobj)
+{
+	$("input[name='address_type']",winobj).val( "{zipcode_type}" );
+	if( eval("$('input[name=address_type]',winobj).val()") ) {
+		{? zipcode_type == "street"}
+		$("input[name='address']",winobj).val( obj_tr.find(".address").html() ).hide();
+		$("input[name='address_street']",winobj).val( obj_tr.find(".address_street").html() ).show();
+		{:}
+		$("input[name='address']",winobj).val( obj_tr.find(".address").html() ).show();
+		$("input[name='address_street']",winobj).val( obj_tr.find(".address_street").html() ).hide();
+		{/}
+	}else{
+		$("input[name='address']",winobj).val( obj_tr.find(".address").html() );
+	}
+	$("input[name='zipcode[]']",winobj).eq(0).val(zipArr[0]);
+	$("input[name='zipcode[]']",winobj).eq(1).val(zipArr[1]);
+
+	$("input[name='address_detail']", winobj).focus();
+}
+function choice_co(obj_tr,zipArr,winobj)
+{
+	$("input[name='co_address_type']",winobj).val( "{zipcode_type}" );
+	if( eval("$('input[name=co_address_type]',winobj).val()") ) {
+		{? zipcode_type == "street"}
+		$("input[name='co_address']",winobj).val( obj_tr.find(".address").html() ).hide();
+		$("input[name='co_address_street']",winobj).val( obj_tr.find(".address_street").html() ).show();
+		{:}
+		$("input[name='co_address']",winobj).val( obj_tr.find(".address").html() ).show();
+		$("input[name='co_address_street']",winobj).val( obj_tr.find(".address_street").html() ).hide();
+		{/}
+	}else{
+		$("input[name='co_address']",winobj).val( obj_tr.find(".address").html() );
+	}
+	$("input[name='co_zipcode[]']",winobj).eq(0).val(zipArr[0]);
+	$("input[name='co_zipcode[]']",winobj).eq(1).val(zipArr[1]);
+
+	$("input[name='co_address_detail']", winobj).focus();
+}
+function choice_mtype(obj_tr,zipArr,winobj)
+{
+	{? _GET.mtype }
+	$("input[name='{_GET.mtype}address_type']",winobj).val( "{zipcode_type}" );
+	if( eval("$(\"input[name='{_GET.mtype}address_type']\",winobj).val()") ) {
+		{? zipcode_type == "street"}
+		$("input[name='{_GET.mtype}address']",winobj).val( obj_tr.find(".address").html() ).hide();
+		$("input[name='{_GET.mtype}address_street']",winobj).val( obj_tr.find(".address_street").html() ).show();
+		{:}
+		$("input[name='{_GET.mtype}address']",winobj).val( obj_tr.find(".address").html() ).show();
+		$("input[name='{_GET.mtype}address_street']",winobj).val( obj_tr.find(".address_street").html() ).hide();
+		{/}
+	}else{
+		$("input[name='{_GET.mtype}address']",winobj).val( obj_tr.find(".address").html() );
+	}
+	$("input[name='{_GET.mtype}zipcode[]']",winobj).eq(0).val(zipArr[0]);
+	$("input[name='{_GET.mtype}zipcode[]']",winobj).eq(1).val(zipArr[1]);
+	$("input[name='{_GET.mtype}address_detail']", winobj).focus();
+	{:}
+	$("input[name='{zipcodeFlag}address_type']",winobj).val( "{zipcode_type}" );
+	if( eval("$(\"input[name='{zipcodeFlag}address_type']\",winobj).val()") ) {
+		{? zipcode_type == "street"}
+		$("input[name='{zipcodeFlag}address']",winobj).val( obj_tr.find(".address").html() ).hide();
+		$("input[name='{zipcodeFlag}address_street']",winobj).val( obj_tr.find(".address_street").html() ).show();
+		{:}
+		$("input[name='{zipcodeFlag}address']",winobj).val( obj_tr.find(".address").html() ).show();
+		$("input[name='{zipcodeFlag}address_street']",winobj).val( obj_tr.find(".address_street").html() ).hide();
+		{/}
+	}else{
+		$("input[name='{zipcodeFlag}address']",winobj).val( obj_tr.find(".address").html() );
+	}
+	$("input[name='{zipcodeFlag}zipcode[]']",winobj).eq(0).val(zipArr[0]);
+	$("input[name='{zipcodeFlag}zipcode[]']",winobj).eq(1).val(zipArr[1]);
+	$("input[name='{zipcodeFlag}address_detail']", winobj).focus();
+	{/}
+}
+
+
+$(document).ready(function() {
+
+	$(document).resize(function(){
+	$('#{zipcodeFlag}contents_frame',parent.document).height($("#wrap").height()+50);
+	}).resize();
+
+	$("select[name='SIGUNGU']").children("option[value!='']").remove();
+	var SIGUNGU = "{_GET.SIGUNGU}";
+	{? keyword }
+	$.ajax({
+		'url' : '/popup/zipcode_street_sigungu',
+		'data' : $('#zipForm').serialize(),
+		'dataType' : 'json',
+		'success' : function(res){
+			if(res){
+				var options = "";
+				for(var i=0;i<res.length;i++) options += "<option value='"+res[i].SIGUNGU+"'>"+res[i].SIGUNGU+"</option>";
+				$("select[name='SIGUNGU']").append(options);
+			}
+			if(SIGUNGU) $("select[name='SIGUNGU'] option[value='"+SIGUNGU+"']").attr("selected",true);
+		}
+	});
+	{ / }
+
+	{ ? zipcode_type=='street' }
+	$(".sub_page_tab td").eq(0).click();
+	{ : zipcode_type=='zibun' }
+	$(".sub_page_tab td").eq(1).click();
+	{ : zipcode_type=='oldzibun' }
+	$(".sub_page_tab td").eq(2).click();
+	{ / }
+	$(".sub_page_tab td").eq(0).bind("click",function(){
+		getZipcodeTab('street',1);
+	});
+	$(".sub_page_tab td").eq(1).bind("click",function(){
+		getZipcodeTab('zibun',1);
+	});
+	$(".sub_page_tab td").eq(2).bind("click",function(){
+		getZipcodeTab('oldzibun',1);
+	});
+});
+</script>
+
+<style>
+.ellipsis {}
+.zipcodeResult {cursor:pointer; height:19px; line-height:19px; font-size:13px;}
+.zipcodeResult:hover {color:#3333ff; background-color:#fafafa}
+.zipcodeResult th {font-weight:normal;}
+
+.zsfText {height:25px !important; width:80% !important;line-height:25px !important; padding:0 5px; border:4px solid #666 !important}
+.zsfSubmit {height:33px !important; padding:0 5px !important; border:4px solid #666 !important; background-color:#666; color:#fff; cursor:pointer; font-weight:bold;}
+
+.tabBody {border:3px solid #ddd; padding:5px;}
+.tabs {*zoom:1}
+.tabs:after {content:"";display:block;clear:both;}
+.tabs li {float:left;}
+.tabs li a {display:inline-block; padding:5px 10px; background-color:#fff; border:1px solid #fff; border-bottom:0px; color:#666;}
+.tabs li.on a { background-color:#eee; border-top:1px solid #ddd; border-right:1px solid #ddd; border-left:1px solid #ddd; color:#000; font-weight:bold; border-bottom:0px;}
+
+
+/* 페이징 네비게이션 */
+.paging_navigation_pop {white-space:nowrap; *zoom:1;margin-top:10px;text-align:center; }
+.paging_navigation_pop:after {display:block; content:""; clear:both;}
+.paging_navigation_pop a {display:inline-block; padding:0px; min-width:25px; height:22px;line-height:22px; font-weight:bold; vertical-align:middle; font-family:'돋움',Dotum,AppleGothic,sans-serif;font-size:11px;color:#605f60; text-align:center;}
+.paging_navigation_pop a:hover {/*background-color:#eee;*/ color:#f30;}
+.paging_navigation_pop a.on {background-color:#eee; color:#f30;}
+.paging_navigation_pop a.red {color:red;}
+
+.paging_navigation_pop .prev{background:url('../images/common/icon_paging_prev.gif') repeat-x; height:22px; width:22px; margin:0 2px;}
+.paging_navigation_pop .prev span {display:none}
+.paging_navigation_pop .next{background:url('../images/common/icon_paging_next.gif') repeat-x; height:22px; width:22px; margin:0 2px;}
+.paging_navigation_pop .next span {display:none}
+
+.paging_navigation_pop .first{background:url('../images/common/icon_paging_first.gif') repeat-x; height:22px;width:22px;}
+.paging_navigation_pop .first span {display:none}
+.paging_navigation_pop .end{background:url('../images/common/icon_paging_end.gif') repeat-x; height:22px;width:22px;}
+.paging_navigation_pop .end span {display:none}
+.paging_navigation_pop .last{background:url('../images/common/icon_paging_end.gif') repeat-x; height:22px;width:22px;}
+.paging_navigation_pop .last span {display:none}
+
+table.keyword_form tr td {font-size: 14px;}
+div.zipcode_search_contents {padding-bottom:10px;}
+div.sub_page_tab_contents {width:100% !important;padding:0px 0px 0px 0px !important;}
+tr.zipcodeResult td { border-bottom:1px solid #cecece; padding:5px 0 5px 0px; }
+tr.zipcodeResult th { border-bottom:1px solid #cecece; padding:5px 0 5px 0px; }
+tr.zipcodeResult:last-child td {border-bottom:none;}
+tr.zipcodeResult:last-child th {border-bottom:none;}
+</style>
+
+<div class="sub_page_tab_wrap">
+<table width="100%" class="sub_page_tab" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td {?!cfg_zipcode.zipcode_street}class="hide"{/}>도로명주소</td>
+	<td {?!cfg_zipcode.new_zipcode_lot_number}class="hide"{/}>지번주소</td>
+	<td {?!cfg_zipcode.old_zipcode_lot_number}class="hide"{/}>(구)지번주소</td>
+</tr>
+</table>
+
+<div class="zipcode_search_contents">
+	<form name="zipForm" id="zipForm" method="get">
+		<!--{? _GET.mtype }-->
+		<input type="hidden" name="mtype" value="{_GET.mtype}">
+		<!--{ / }-->
+		<input type="hidden" name="zipcodeFlag" value="{zipcodeFlag}">
+		<input type="hidden" name="zipcode_type" value="{zipcode_type}">
+		<input type="hidden" name="page" value="{page.nowpage}">
+		<input type="hidden" name="popup" value="{_GET.popup}">
+		<input type="hidden" name="addtext" value="" class="hide">
+		<!--{ @_GET }-->
+		<!--{?!in_array(.key_,array('page','keyword','SIDO','SIGUNGU'))}-->
+		<input type="hidden" name="{.key_}" value="{.value_}" />
+		<!--{ / }-->
+		<!--{ / }-->
+		<table cellpadding="10" cellspacing="0" border="0" width="100%" class="keyword_form">
+		<tr>
+			<td colspan="2" width="90%">
+			<input type="text" name="zipcode_keyword" value="{keyword}" class="zsfText" title="{? zipcode_type=='zibun'}지번입력{:zipcode_type=='oldzibun'}읍면동{:}도로명주소{/}" onkeydown="enterchk();" />
+			<span style="display:inline-block;width:10%">
+				<input type="button" id="zipcodeSearchButton" value="검색" class="zsfSubmit" onclick="getZipcodeResult(1);"/>
+			</span>
+			</td>
+		</tr>
+		<!--{? (keyword && arrSido) || _GET.SIDO }-->
+		<tr>
+			<td width="25%">시도 :</td>
+			<td>
+				<select name="SIDO" id="SIDO" style="width:75%;overflow:hidden;" class="common-select styled"  onchange="getZipcodeResult('1');">
+					<option value="">전체</option>
+					{ ? ! arrSido }
+					<option value="{_GET.SIDO}" selected>{_GET.SIDO}</option>
+					{ / }
+					<!--{ @ arrSido }-->
+					<option value="{.SIDO}" {? _GET.SIDO == .SIDO}selected{/}>{.SIDO}</option>
+					<!--{ / }-->
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>시군구 :</td>
+			<td>
+				<select name="SIGUNGU" style="width:75%;overflow:hidden;" class="common-select styled" onchange="getZipcodeResult('1');">
+					<option value="">전체</option>
+					<!--{ @ arrSigungu }-->
+					<option value="{.SIGUNGU}" {? _GET.SIGUNGU == .SIGUNGU}selected{/}>{.SIGUNGU}</option>
+					<!--{ / }-->
+				</select>
+			</td>
+		</tr>
+		<!--{ / }-->
+		<tr>
+			<td colspan="2" width="100%">
+
+				<table>
+				<!--{? zipcode_type=="zibun"}-->
+				<tr>
+					<td>
+					동이름 검색 예)
+					</td>
+					<td>
+					삼평동 670, 암사동 480-1
+					</td>
+				</tr>
+				<!--{: zipcode_type=="street"}-->
+				<tr>
+					<td>
+					'○○○길'이 있는 주소
+					</td>
+					<td>
+					예) 남부순환로123가길
+					</td>
+				</tr>
+				<tr>
+					<td>
+					'○○○길'이 없는 주소
+					</td>
+					<td>
+					예) 남부순환로 8
+					</td>
+				</tr>
+				<tr>
+					<td>
+					건물명 검색
+					</td>
+					<td>
+					예) 전쟁기념관, 스타타워
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2" class="desc pdt5">
+					※길이름은 공백없이 입력해주십시오.
+					</td>
+				</tr>
+				<!--{: zipcode_type=="oldzibun"}-->
+				<tr>
+					<td>
+					동을 입력하세요.
+					</td>
+					<td>
+					예) 압구정동
+					</td>
+				</tr>
+				<!--{ / }-->
+				</table>
+
+			</td>
+		</tr>
+		</table>
+	</form>
+</div>
+
+<!-- 도로명주소 -->
+<div class="sub_page_tab_contents">
+	<table border="0" cellpadding="0" cellspacing="2" style="border-top:2px solid #cecece;width:100%;">
+	<tr>
+		<td style="padding:0px; " height="100%">
+			<table width="100%" align="center" border="0">
+			<tr>
+				<th bgcolor="eeeeee">도로명/지번 주소</th>
+			</tr>
+
+			<!--{ ? page.totalcount >= 1000 }-->
+			<tr>
+				<td align="center">
+				1,000건 이상 검색되었습니다.<br />
+				"{keyword}xx xx" 와 같이 검색단어를 추가하여 검색해주세요.
+				</td>
+			</tr>
+			<!--{ : }-->
+
+			<!--{ @loop }-->
+			<tr class="zipcodeResult hand" onclick="choice_zipcode(this);">
+				<td>
+					<div class="zipcode_number">{.ZIPCODE}</div>
+					<div class="ellipsis">{.ADDRESS_STREET}</div><div class="address_street hide">{.ADDRESS_STREET}</div>
+					<div class="ellipsis">{.ADDRESS}</div><div class="address hide">{.ADDRESS}</div>
+				</td>
+			</tr>
+			<!--{ / }-->
+			<!--{ ? !loop }-->
+			<tr>
+				<td align="center" height="30">
+				<!--{ ? keyword }-->
+					<br><br>
+					검색 결과가 없습니다.
+					<br><br><span class="desc">주소가 검색되지 않는 경우는 행정안전부 새주소안내시스템<br>
+					<a href="http://www.juso.go.kr" target="_blank">http://www.juso.go.kr</a> 에서 확인하시기 바랍니다.</span>
+				<!--{ : }-->
+					<strong>도로명/건물명</strong>을 검색해 주세요.
+				<!--{ / }-->
+				</td>
+			</tr>
+			<!--{ / }-->
+
+			<!--{ / }-->
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<!-- 지번주소 -->
+<div class="sub_page_tab_contents">
+	<table border="0" cellpadding="0" cellspacing="5" style="border-top:2px solid #cecece;width:100%;">
+	<tr>
+		<td style="padding:0px; " height="100%">
+			<table width="100%" align="center" border="0">
+			<tr>
+				<th bgcolor="eeeeee">도로명/지번 주소</th>
+			</tr>
+
+			<!--{ ? page.totalcount >= 1000 }-->
+			<tr>
+				<td align="center">
+				1,000건 이상 검색되었습니다.<br />
+				"{keyword}xx xx" 와 같이 검색단어를 추가하여 검색해주세요.
+				</td>
+			</tr>
+			<!--{ : }-->
+
+			<!--{ @loop }-->
+			<tr class="zipcodeResult hand" onclick="choice_zipcode(this);">
+				<td>
+					<div class="zipcode_number">{.ZIPCODE}</div>
+					<div class="ellipsis">{.ADDRESS_STREET}</div><div class="address_street hide">{.ADDRESS_STREET}</div>
+					<div class="ellipsis">{.ADDRESS}</div><div class="address hide">{.ADDRESS}</div>
+				</td>
+			</tr>
+			<!--{ / }-->
+			<!--{ ? !loop }-->
+			<tr>
+				<td align="center" height="30">
+				<!--{ ? keyword }-->
+					<br><br>
+					검색 결과가 없습니다.
+					<br><br><span class="desc">주소가 검색되지 않는 경우는 행정안전부 새주소안내시스템<br>
+					<a href="http://www.juso.go.kr" target="_blank">http://www.juso.go.kr</a> 에서 확인하시기 바랍니다.</span>
+				<!--{ : }-->
+					읍/면/동을 검색해주세요.
+				<!--{ / }-->
+				</td>
+			</tr>
+			<!--{ / }-->
+
+			<!--{ / }-->
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<!-- (구)지번주소 -->
+<div class="sub_page_tab_contents">
+	<table border="0" cellpadding="0" cellspacing="5" style="border-top:2px solid #cecece;width:100%;background-color:#f9f9f9;">
+	<tr>
+		<td style="padding:0px; " height="100%">
+			<table width="100%" align="center" border="0">
+			<tr>
+				<th bgcolor="#eeeeee">지번 주소</th>
+
+			</tr>
+			<!--{ @loop }-->
+			<tr class="zipcodeResult hand" onclick="choice_zipcode(this);">
+				<td>
+					<div class="zipcode_number">{.ZIPCODE}</div>
+					<div class="ellipsis">{.ADDRESS}</div>
+					<div class="address hide">{.ADDRESS}</div>
+				</td>
+			</tr>
+			<!--{ / }-->
+			<!--{ ? !loop }-->
+			<tr>
+				<td align="center" height="30">
+				<!--{ ? keyword }-->
+					<br><br>
+					검색 결과가 없습니다.
+					<br><br><span class="desc">주소가 검색되지 않는 경우는 행정안전부 새주소안내시스템<br>
+					<a href="http://www.juso.go.kr" target="_blank">http://www.juso.go.kr</a> 에서 확인하시기 바랍니다.</span>
+				<!--{ : }-->
+					<strong>읍/면/동</strong>을 검색해주세요.
+				<!--{ / }-->
+				</td>
+			</tr>
+			<!--{ / }-->
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<!--{ ? page.totalpage > 1 }-->
+<table align="center" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+		<div class="paging_navigation_pop">
+			<!--{ ? page.first }--><a href="javascript:getZipcodeResultgo('{zipcode_type}','{page.first}');" class="first"></a><!--{ / }-->
+			<!--{ ? page.prev }--><a href="javascript:getZipcodeResultgo('{zipcode_type}','{page.prev}');" class="prev"></a><!--{ / }-->
+			<!--{ @ page.page }-->
+				<!--{ ? page.nowpage ==  .value_ }-->
+					<a href="javascript:getZipcodeResultgo('{zipcode_type}','{.value_}');" class="on"><b>{.value_ }</b></a>
+				<!--{ : }-->
+					<a href="javascript:getZipcodeResultgo('{zipcode_type}','{.value_}');">{.value_ }</a>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? page.next }--><a href="javascript:getZipcodeResultgo('{zipcode_type}','{page.next}');" class="next"></a><!--{ / }-->
+			<!--{ ? page.last }--><a href="javascript:getZipcodeResultgo('{zipcode_type}','{page.last}');" class="last"></a><!--{ / }-->
+		</div>
+	</td>
+</tr>
+</table>
+<!--{ / }-->
+</div>
+
+<br /><br />

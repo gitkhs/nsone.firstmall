@@ -1,0 +1,156 @@
+<style>
+.promocodeImage {position:relative; width:98px; height:95px; padding-bottom:10px; background:url('../images/common/img_promocode.gif') no-repeat;}
+.promocodeImage span {position:absolute; top:52px; left:0px; width:100%; color:#dc0000; font-size:16px; font-family:tahoma; font-weight:bold;}
+</style>
+
+<!-- 타이틀 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="10"></td></tr>
+<tr><td><img src="../images/common/tit_sub_change_point.gif" /></td></tr>
+<tr><td height="8"></td></tr>
+<tr><td height="3" bgcolor="#dddddd"></td></tr>
+<tr>
+	<td height="34">
+
+		{userInfo.user_name}님의 보유 포인트 <span class="bold black">P{=number_format(mypoint)}</span>
+		&nbsp;&nbsp;<span class="gray">|</span>&nbsp;&nbsp;
+		이번달 소멸 예정 포인트 <span class="bold black">P{=number_format(0)}</span>
+	</td>
+</tr>
+<tr><td height="1" bgcolor="#dddddd"></td></tr>
+</table>
+
+<!--div><img src="../images/common/stit_request_promocode.gif" /></div>
+
+<div style="height:10px"></div>
+
+<div style="padding-left:5px; background-color:#eaeaea;border:1px  solid  #d3d3d3;height:30px; line-height:30px; color:#a3a3a3;">
+	<font color="#ed2b07" style="font-weight: bold !important;">포인트 <b>P 20,000</b> 미만 </font>
+	&nbsp;&nbsp;<font color="#666666">|</font>&nbsp;&nbsp;
+	<font color="#7a7a7a">신청시 <font color="#000">프로모션 코드</font> 포인트만큼 차감됩니다! </font>
+</div-->
+<div style="padding-left:5px; padding-top:15px; line-height:30px; color:#a3a3a3;">
+	<font color="#ed2b07" style="font-weight: bold !important;"></font>
+	<font color="#dd2e2e">보유하신 포인트로 상품구매시 할인받으실 수 있는 1회성 프로모션코드로 교환하실  있습니다. </font>
+</div>
+
+<div class="pdt30">
+	<table width="90%" align="center" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<!--{? showMyPromotion('','20000') //limit data, limit point }-->
+		<!--{@ showMyPromotion('','20000') }-->
+		<!--{?.index_ && (.index_%5)==0}</tr><tr><td height="10"></td></tr><tr>{/}-->
+		<td>
+			<table align="left" border="0" cellpadding="0" cellspacing="0" class="center">
+			<tr><td  align="center"><div class="promocodeImage"><span style="color:#fff;font-size:20px; font-weight:bold;">{.percent_goods_sale_show}</span></div></td></tr>
+			<tr><td height="10"></td></tr>
+			<tr><td height="20"><b class="black fx12">{.percent_goods_sale_show}할인</b></td></tr>
+			<tr><td height="16">포인트 : <b>P{=number_format(.promotion_point)}</b></td></tr>
+			<tr><td height="16">남은수량 : <b style="color:#0083a9">{.limitnumber}</b></td></tr>
+			<tr><td height="10"></td></tr>
+			<tr><td><span class="promotiondownbtn hand"><img src="../images/common/btn_s_app.gif"  promotion_type="{.type}" promotion_seq="{.promotion_seq}" promotion_name="{.promotion_name}" promotion_point="{.promotion_point}" /></span></td></tr>
+			<!-- <tr><td><span class="{? !.downpromotionseq } promotiondownbtn hand{/}">{? .downpromotionseq }
+			CODE : <b><span  style="font-weight: bold !important;">{.downpromotionseq.promotion_input_serialnumber} </span><br/>
+			<a href="#"><img src="../images/common/btn_s_app_finish.gif" class="promotioncodecopy hand" promotion_input_serialnumber="{.downpromotionseq.promotion_input_serialnumber}" id="{.downpromotionseq.promotion_input_serialnumber}"  style="filter:gray;"  promotion_type="{.type}" promotion_seq="{.promotion_seq}" promotion_name="{.promotion_name}" promotion_point="{.promotion_point}" title="{.promotion_name}"/></a>{:}<img src="../images/common/btn_s_app.gif"  promotion_type="{.type}" promotion_seq="{.promotion_seq}" promotion_name="{.promotion_name}" promotion_point="{.promotion_point}" />{/}</span></td></tr> -->
+			</table>
+		</td>
+		<!--{/}-->
+	<!--{/}-->
+	</tr>
+	</table>
+</div>
+
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	//프로모션신청
+	$("span.promotiondownbtn img").live("click",function(){
+		var mypoint = {mypoint};
+		var promotion_type = $(this).attr('promotion_type');
+		var promotion_seq = $(this).attr('promotion_seq');
+		var promotion_name = $(this).attr('promotion_name');
+		var promotion_point = $(this).attr('promotion_point');
+		if( (promotion_type == 'point' || promotion_type == 'point_shipping' ) && (mypoint < promotion_point || mypoint < 1) ){//전환포인트인경우
+			if(mypoint < 1){
+				openDialogAlert('보유포인트가 없습니다.','400','140',function(){});
+			}else{
+				openDialogAlert('전환포인트 금액이 보유포인트보다 작습니다.','400','140',function(){});
+			}
+			return false;
+		}else{
+			if(confirm("["+promotion_name+"] 프로모션 코드를 신청하시겠습니까?")) {
+				$.ajax({
+					'url' : '../promotion/download_member',
+					'data' : {'promotion_seq':promotion_seq},
+					'type' : 'post',
+					'dataType': 'json',
+					'success': function(data) {
+						if(data.result){
+							openDialogAlert(data.msg,'400','150',function(){document.location.reload();});
+						}else{
+							openDialogAlert(data.msg,'400','150',function(){});
+						}
+					}
+				});
+			}
+		}
+	})
+
+	$(".req_gift").click(function(){
+		var my_point = $("input[name='point']").val();
+		var my_reserve = "{myemoney}";
+		var seq		= $(this).attr("seq");
+		var point	= $(this).attr("point");
+		var goods_rule	= $(this).attr("goods_rule");
+		var goods_name	= $(this).attr("goods_name");
+		
+		if(goods_rule == "reserve"){
+			//alert(my_point+" : "+$(this).attr("point"));
+			if(parseInt(my_reserve) < parseInt($(this).attr("point"))){
+				alert("해당 사은품은 증정 받기 위한 잔여 적립금이 부족합니다");
+				return;
+			}
+		}else{
+			//alert(my_point+" : "+$(this).attr("point"));
+			if(parseInt(my_point) < parseInt($(this).attr("point"))){
+				alert("해당 사은품은 증정 받기 위한 잔여 포인트가 부족합니다");
+				return;
+			}
+		}
+		//alert($(this).attr("point")+" : "+$(this).attr("seq"));
+
+		$.get('/mypage/buy_gift?seq='+seq+'&point='+point+'&goods_rule='+goods_rule+'&goods_name='+escape(goods_name), function(data) {
+		  	$('#giftPopup').html(data);
+		});
+		openDialog("사은품 신청", "giftPopup", {"width":"1000","height":700});
+	});
+
+	$(".promotioncodecopy").live("click", function(){
+			var promotion_input_serialnumber =  $(this).attr('promotion_input_serialnumber');
+			var clip = new ZeroClipboard.Client();
+			clip.setHandCursor( true );
+			clip.setCSSEffects( true );
+			clip.setText(promotion_input_serialnumber);
+			clip.addEventListener( 'complete', function(client, text) {
+				alert("클립보드에 복사되었습니다.");
+			});
+			clip.glue(promotion_input_serialnumber);
+	});
+
+});
+
+function clipBoard(name, id){
+	var clip = new ZeroClipboard.Client();
+	clip.setHandCursor( true );
+	clip.setCSSEffects( true );
+	clip.setText($("input[name='"+name+"']").val());
+	clip.addEventListener( 'complete', function(client, text) {
+		alert("클립보드에 복사되었습니다.");
+	});
+	clip.glue(id);
+}
+</script>
+
+
+
+<div id="giftPopup" style="display:none"></div>

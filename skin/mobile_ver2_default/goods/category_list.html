@@ -1,0 +1,21 @@
+<div class="sub_title_bar">
+	<h2>카테고리</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+
+<!--{ ? categorys }-->
+<ul class="category_list_depth">
+	<li><a href="?">카테고리</a></li>
+	<!--{ @ categorys.category }-->
+		<li><a href="?code={categorys.category_code[.index_]}">{.value_}</a></li>
+	<!--{ / }-->
+</ul>
+<!--{ / }-->
+
+<ul class="category_list">
+<!--{ @ loop }-->
+<li class="{?count(loop)>2 && .index_%2==0}even{/}"><a href="?code={.category_code}"><b>{.title}</b></a><a href="../goods/catalog?code={.category_code}" class="option_btn"><img src="../images/design/btn_view_goods.gif" /></a></li>
+<!--{ / }-->
+</ul>
+
+<br /><br /><br /><br /><br />

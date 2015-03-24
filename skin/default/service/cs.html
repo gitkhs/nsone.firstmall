@@ -1,0 +1,162 @@
+<style type="text/css">
+.bbslist .cat {font-size:12px;font-family:gothic,gulim;color:#888;letter-spacing:-1px;}
+.bbslist .sbj {text-align:left;letter-spacing:0px;}
+.bbslist .sbj a {font-size:12px;font-family:gothic,gulim;color:#222222;text-decoration:none;line-height:150%;}
+.bbslist .sbj a:hover {text-decoration:underline;}
+.bbslist .comment {font:normal 11px arial;color:#FC6138;}
+</style>
+<!-- 고객센터 타이틀 이미지 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td height="48"></td>
+</tr>
+<tr>
+	<td align="center"><img src="../images/design/cscenter_tit.gif" /></td>
+</tr>
+<tr>
+	<td height="80"></td>
+</tr>
+</table>
+
+<!-- 상품문의/배송문의/교환반품 버튼 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td width="33%" height="74" style="padding-left:20px; border-left:1px solid #e5e5e5">
+		<a href="/board/?id=goods_qna"><img src="../images/design/cscenter_go_qna.gif" /></a>
+	</td>
+	<td width="33%" height="74" style="padding-left:20px; border-left:1px solid #e5e5e5">
+		<a href="/board/write?id=mbqna"><img src="../images/design/cscenter_go_deliveryqna.gif" /></a>
+	</td>
+	<td width="33%" height="74" style="padding-left:20px; border-left:1px solid #e5e5e5; border-right:1px solid #e5e5e5">
+		<a href="/board/write?id=mbqna"><img src="../images/design/cscenter_go_refund.gif" /></a>
+	</td>
+</tr>
+</table>
+
+<div style="height:60px"></div>
+
+<!-- 공지사항/FAQ 최근글 목록 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<col width="48%" valign="top" />
+<col width="4%" valign="top" />
+<col width="48%" valign="top" />
+<tr>
+	<td valign="top" >
+		<!-- 공지사항 최근글 -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td valign="bottom" align="left" height="25"><img src="../images/common/cs_tit_notice_main.gif" title="" alt="" /></td>
+						<td valign="bottom" align="right"><a href="/board/?id=notice"><img src="../images/design/cscenter_btn_more.gif" /></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="8"></td></tr>
+			<tr><td height="2" bgcolor="545454"></td></tr>
+			<!-- 리스트데이터 : 시작 -->
+			<!-- {? getBoardData('notice','5') } //url /board/?id=notice -->
+				<!-- {@ getBoardData('notice','5') } //url /board/?id=notice -->
+				<tr class="bbslist">
+					<td height="30" class="sbj">{.subject}
+							{.iconnew}
+							{.iconhot}
+							{.iconfile}
+							{.iconhidden}</td>
+				</tr>
+				<tr><td height="1" bgcolor="e8e8e8"></td></tr>
+				<!-- {/} -->
+			<!-- {/} -->
+			<!-- 리스트 : 끝 -->
+			<tr><td height="1" bgcolor="545454"></td></tr>
+		</table>
+
+	</td>
+	<td></td>
+	<td valign="top" >
+		<!-- FAQ 최근글  -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="0"  >
+			<tr>
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td valign="bottom" align="left" height="25"><img src="../images/common/cs_tit_faq_main.gif" title="" alt="" /></td>
+						<td valign="bottom" align="right"><a href="/board/?id=faq"><img src="../images/design/cscenter_btn_more.gif" /></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="8"></td></tr>
+			<tr><td height="2" bgcolor="545454"></td></tr>
+			<!-- 데이터 : 시작 -->
+			<!-- {? getBoardData('faq','5') } //url /board/?id=notice-->
+				<!-- {@ getBoardData('faq','5') } //url /board/?id=notice-->
+				<tr class="bbslist">
+					<td height="30" class="sbj">{.subject}</td>
+				</tr>
+				<tr><td height="1" bgcolor="e8e8e8"></td></tr>
+				<!-- {/} -->
+			<!-- {/} -->
+			<!-- 리스트 : 끝 -->
+			<tr><td height="1" bgcolor="545454"></td></tr>
+		</table>
+	</td>
+</tr>
+</table>
+
+<div style="height:60px"></div>
+
+<!-- 운영시간/입금계좌 안내 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<col width="48%" valign="top" />
+<col width="4%" valign="top" />
+<col width="48%" valign="top" />
+<tr>
+	<td valign="top">
+
+		<!-- 운영시간 안내 -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td valign="bottom" align="left" height="25"><img src="../images/design/cs_tit_centerhours.gif" title="" alt="" /></td>
+			</tr>
+			<tr><td height="8"></td></tr>
+			<tr><td height="2" bgcolor="545454"></td></tr>
+			<tr><td height="10"></td></tr>
+
+			<tr>
+				<td>MON - FRI AM 10:00 ~ PM 06:00</td>
+			</tr>
+			<tr><td height="5"></td></tr>
+			<tr>
+				<td>SAT AM 10:00 ~ PM 01:00</td>
+			</tr>
+			<tr>
+				<td><span style="font-size:28px; font-family:tahoma; color:#000; font-weight:bold; letter-spacing:-1px;">0000-0000</span></td>
+			</tr>
+		</table>
+
+	</td>
+	<td></td>
+	<td valign="top">
+		<!-- 입금계좌 안내  -->
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td valign="bottom" align="left" height="25"><img src="../images/design/cs_tit_bank.gif" title="" alt="" /></td>
+			</tr>
+			<tr><td height="8"></td></tr>
+			<tr><td height="2" bgcolor="545454"></td></tr>
+			<tr><td height="10"></td></tr>
+			<!--{ @ bank }-->
+			<!--{ ? .accountUse == 'y' }-->
+			<tr>
+				<td><span style="display:inline-block;width:80px">{.bank}</span><span style="display:inline-block;width:150px">{.account}</span><span>예금주 : {.bankUser}</span></td>
+			</tr>
+			<tr><td height="8"></td></tr>
+			<!--{ / }-->
+			<!--{ / }-->
+		</table>
+	</td>
+</tr>
+</table>

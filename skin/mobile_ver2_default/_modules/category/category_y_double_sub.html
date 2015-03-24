@@ -1,0 +1,38 @@
+<style>
+#{categoryNavigationKey} .categoryDepth1		{z-index:10; position:relative; height:25px; padding-right:5px; text-align:right;}
+#{categoryNavigationKey} .categoryDepth2		{position:relative; height:25px; padding-right:5px; text-align:right; background-color:#f9f9f9;}
+#{categoryNavigationKey} .categorySubDepth	{height:25px; padding:0 5px; text-align:left;}
+
+#{categoryNavigationKey} .categorySub {position:absolute; z-index:10; min-width:100px; display:none; top:0px; left:100%; border-collapse:collapse; background-color:#ffffff}
+#{categoryNavigationKey} .categorySub td {border:1px dashed #dddfff}
+
+#{categoryNavigationKey} .categoryDepth2:hover .categorySub {display:block;}
+</style>
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<!--{ @ category }-->
+<!--{ ? .index_ }--><tr><td height="1" bgcolor="#e5e5e5"></td></tr><!--{ / }-->
+<tr>
+	<td class="categoryDepth1"><a href="/goods/catalog?code={.category_code}"><b>{.name}</b></a></td>
+</tr>
+	<!--{ ? .childs}-->
+	<tr><td height="1" bgcolor="#e5e5e5"></td></tr>
+	<!--{ @ .childs}-->
+	<tr>
+		<td class="categoryDepth2">
+			<a href="/goods/catalog?code={..category_code}">{..name}</a>
+			<!--{ ? ..childs}-->
+			<table class="categorySub" cellpadding="0" cellspacing="0">
+			<!--{ @ ..childs}-->
+			<tr>
+				<td class="categorySubDepth"><a href="/goods/catalog?code={...category_code}">{...name}</a></td>
+			</tr>
+			<!--{ / }-->
+			</table>
+			<!--{ / }-->
+		</td>
+	</tr>	
+	<!--{ / }-->
+	<!--{ / }-->
+<!--{ / }-->
+</table>

@@ -1,0 +1,152 @@
+<!--{=assignBrandMenuData()}-->
+<style>
+#{categoryNavigationKey} .categoryAll {display:none; z-index:100; position:absolute; width:{layout_config.width}px; background-color:#fff; text-align:left;}
+#{categoryNavigationKey} .categoryAllBorder {border:2px solid #000;}
+#{categoryNavigationKey} .categoryAllClose {position:absolute; right:0px; top:100%; cursor:pointer}
+#{categoryNavigationKey} .categoryAllTable {width:100%; table-layout:fixed;}
+#{categoryNavigationKey} .categoryAllBestBrand {padding:0 6px; border-right:1px solid #e8e8e8;}
+#{categoryNavigationKey} .categoryAllBestBrandTitle {height:30px; line-height:30px; border-bottom:2px solid #dadada}
+#{categoryNavigationKey} .categoryAllBestBrandList {padding:12px 5px;}
+#{categoryNavigationKey} .categoryAllBestBrandList li {padding-bottom:8px;}
+#{categoryNavigationKey} .categoryAllBrand {padding:0 6px;}
+#{categoryNavigationKey} .categoryAllBrandTitle {height:24px; line-height:24px; padding-top:6px; border-bottom:2px solid #dadada}
+#{categoryNavigationKey} .categoryAllBanner {margin-top:-1px; padding:15px; border-top:1px solid #e0e0e0; background-color:#f7f7f7; text-align:center;}
+
+#{categoryNavigationKey} .brandPrefixBtn {float:left; margin-left:1px; overflow:hidden; white-space:nowrap; width:18px; background:url("../../images/common/brand_img.gif") no-repeat; height:17px; text-indent:-100px; cursor:pointer}
+
+#{categoryNavigationKey} .brandPrefixBtn_all {width:27px;background-position:0px 0px;}
+#{categoryNavigationKey} .brandPrefixBtn_a {background-position:0px -20px;}
+#{categoryNavigationKey} .brandPrefixBtn_b {background-position:0px -40px;}
+#{categoryNavigationKey} .brandPrefixBtn_c {background-position:0px -60px;}
+#{categoryNavigationKey} .brandPrefixBtn_d {background-position:0px -80px;}
+#{categoryNavigationKey} .brandPrefixBtn_e {background-position:0px -100px;}
+#{categoryNavigationKey} .brandPrefixBtn_f {background-position:0px -120px;}
+#{categoryNavigationKey} .brandPrefixBtn_g {background-position:0px -140px;}
+#{categoryNavigationKey} .brandPrefixBtn_h {background-position:0px -160px;}
+#{categoryNavigationKey} .brandPrefixBtn_i {background-position:0px -180px;}
+#{categoryNavigationKey} .brandPrefixBtn_j {background-position:0px -200px;}
+#{categoryNavigationKey} .brandPrefixBtn_k {background-position:0px -220px;}
+#{categoryNavigationKey} .brandPrefixBtn_l {background-position:0px -240px;}
+#{categoryNavigationKey} .brandPrefixBtn_m {background-position:0px -260px;}
+#{categoryNavigationKey} .brandPrefixBtn_n {background-position:0px -280px;}
+#{categoryNavigationKey} .brandPrefixBtn_o {background-position:0px -300px;}
+#{categoryNavigationKey} .brandPrefixBtn_p {background-position:0px -320px;}
+#{categoryNavigationKey} .brandPrefixBtn_q {background-position:0px -340px;}
+#{categoryNavigationKey} .brandPrefixBtn_r {background-position:0px -360px;}
+#{categoryNavigationKey} .brandPrefixBtn_s {background-position:0px -380px;}
+#{categoryNavigationKey} .brandPrefixBtn_t {background-position:0px -400px;}
+#{categoryNavigationKey} .brandPrefixBtn_u {background-position:0px -420px;}
+#{categoryNavigationKey} .brandPrefixBtn_v {background-position:0px -440px;}
+#{categoryNavigationKey} .brandPrefixBtn_w {background-position:0px -460px;}
+#{categoryNavigationKey} .brandPrefixBtn_x {background-position:0px -480px;}
+#{categoryNavigationKey} .brandPrefixBtn_y {background-position:0px -500px;}
+#{categoryNavigationKey} .brandPrefixBtn_z {background-position:0px -520px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㄱ {background-position:0px -540px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㄴ {background-position:0px -560px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㄷ {background-position:0px -580px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㄹ {background-position:0px -600px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅁ {background-position:0px -620px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅂ {background-position:0px -640px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅅ {background-position:0px -660px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅇ {background-position:0px -680px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅈ {background-position:0px -700px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅊ {background-position:0px -720px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅋ {background-position:0px -740px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅌ {background-position:0px -760px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅍ {background-position:0px -780px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅎ {background-position:0px -800px;}
+#{categoryNavigationKey} .brandPrefixBtn_123 {width:23px; background-position:0px -820px;}
+
+#{categoryNavigationKey} .brandPrefixBtn_all.current {width:27px;background-position:-40px 0px;}
+#{categoryNavigationKey} .brandPrefixBtn_a.current {background-position:-40px -20px;}
+#{categoryNavigationKey} .brandPrefixBtn_b.current {background-position:-40px -40px;}
+#{categoryNavigationKey} .brandPrefixBtn_c.current {background-position:-40px -60px;}
+#{categoryNavigationKey} .brandPrefixBtn_d.current {background-position:-40px -80px;}
+#{categoryNavigationKey} .brandPrefixBtn_e.current {background-position:-40px -100px;}
+#{categoryNavigationKey} .brandPrefixBtn_f.current {background-position:-40px -120px;}
+#{categoryNavigationKey} .brandPrefixBtn_g.current {background-position:-40px -140px;}
+#{categoryNavigationKey} .brandPrefixBtn_h.current {background-position:-40px -160px;}
+#{categoryNavigationKey} .brandPrefixBtn_i.current {background-position:-40px -180px;}
+#{categoryNavigationKey} .brandPrefixBtn_j.current {background-position:-40px -200px;}
+#{categoryNavigationKey} .brandPrefixBtn_k.current {background-position:-40px -220px;}
+#{categoryNavigationKey} .brandPrefixBtn_l.current {background-position:-40px -240px;}
+#{categoryNavigationKey} .brandPrefixBtn_m.current {background-position:-40px -260px;}
+#{categoryNavigationKey} .brandPrefixBtn_n.current {background-position:-40px -280px;}
+#{categoryNavigationKey} .brandPrefixBtn_o.current {background-position:-40px -300px;}
+#{categoryNavigationKey} .brandPrefixBtn_p.current {background-position:-40px -320px;}
+#{categoryNavigationKey} .brandPrefixBtn_q.current {background-position:-40px -340px;}
+#{categoryNavigationKey} .brandPrefixBtn_r.current {background-position:-40px -360px;}
+#{categoryNavigationKey} .brandPrefixBtn_s.current {background-position:-40px -380px;}
+#{categoryNavigationKey} .brandPrefixBtn_t.current {background-position:-40px -400px;}
+#{categoryNavigationKey} .brandPrefixBtn_u.current {background-position:-40px -420px;}
+#{categoryNavigationKey} .brandPrefixBtn_v.current {background-position:-40px -440px;}
+#{categoryNavigationKey} .brandPrefixBtn_w.current {background-position:-40px -460px;}
+#{categoryNavigationKey} .brandPrefixBtn_x.current {background-position:-40px -480px;}
+#{categoryNavigationKey} .brandPrefixBtn_y.current {background-position:-40px -500px;}
+#{categoryNavigationKey} .brandPrefixBtn_z.current {background-position:-40px -520px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㄱ.current {background-position:-40px -540px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㄴ.current {background-position:-40px -560px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㄷ.current {background-position:-40px -580px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㄹ.current {background-position:-40px -600px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅁ.current {background-position:-40px -620px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅂ.current {background-position:-40px -640px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅅ.current {background-position:-40px -660px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅇ.current {background-position:-40px -680px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅈ.current {background-position:-40px -700px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅊ.current {background-position:-40px -720px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅋ.current {background-position:-40px -740px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅌ.current {background-position:-40px -760px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅍ.current {background-position:-40px -780px;}
+#{categoryNavigationKey} .brandPrefixBtn_ㅎ.current {background-position:-40px -800px;}
+#{categoryNavigationKey} .brandPrefixBtn_123.current {width:23px; background-position:-40px -820px;}
+
+#{categoryNavigationKey} .categoryAllBrandList {max-height:400px; overflow:auto;}
+#{categoryNavigationKey} .categoryAllBrandListGroup {position:relative; min-height:50px; padding:10px 0 10px 50px; border-top:1px solid #dcdcdc}
+#{categoryNavigationKey} .categoryAllBrandListGroup:first-child {border-top:0px;}
+#{categoryNavigationKey} .categoryAllBrandListGroupTitle {position:absolute; left:10px; top:10px; min-width:14px; padding:0 2px; height:18px; text-align:center; line-height:20px; border:1px solid #a2a2a2; background-color:#b5b5b5; font-size:12px; font-family:dotum; font-weight:bold; color:#fff;}
+#{categoryNavigationKey} .categoryAllBrandListGroupItem {float:left; width:25%; line-height:18px;}
+</style>
+
+<div class="categoryAll">
+	<div class="categoryAllBorder">
+		<table class="categoryAllTable" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td valign="top" width="130" class="categoryAllBestBrand">
+				<div class="categoryAllBestBrandTitle">
+					<img src="../../images/common/stit_best_brand.gif" />&nbsp;
+				</div>
+				<ul class="categoryAllBestBrandList">
+					<!--{ @ bestBrandData }-->
+					<li><a href="/goods/brand?code={.category_code}">{.name}</a></li>
+					<!--{ / }-->
+				</ul>
+			</td>
+			<td valign="top" class="categoryAllBrand">
+				<div class="categoryAllBrandTitle clearbox">
+						<span prefix="all" class="brandPrefixBtn brandPrefixBtn_all current">All</span>	
+					<!-- 브랜드 목록 -->
+					<!--{ @ (brandMenuData) }-->
+						<span prefix="{.key_}" class="brandPrefixBtn brandPrefixBtn_{.key_}">{.key_}</span>
+					<!--{ / }-->
+				</div>
+				<div class="categoryAllBrandList">
+					<!--{ @ (brandMenuData) }-->
+					<div class="categoryAllBrandListGroup clearbox" prefix="{.key_}">
+						<div class="categoryAllBrandListGroupTitle" prefix="{.key_}">{=strtoupper(.key_)}</div>
+						<!--{ @ .value_ }-->
+						<a href="/goods/brand?code={..category_code}" class="categoryAllBrandListGroupItem">{..prn_title}</a>
+						<!--{ / }-->
+					</div>
+					<!--{ / }-->
+				</div>
+			</td>
+		</tr>
+		</table>
+		<!--{?category_gnb_banner}-->
+		<div class="categoryAllBanner">
+			<!--{category_gnb_banner}-->
+		</div>
+		<!--{/}-->
+	</div>	
+	<div class="categoryAllClose"><img src="../../images/common/btn_close_full.gif" title="전체 브랜드 닫기" /></div>
+</div>

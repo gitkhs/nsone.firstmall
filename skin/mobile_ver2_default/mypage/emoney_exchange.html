@@ -1,0 +1,114 @@
+<style>
+.goods_list {border-bottom:1px dashed gray;}
+.goods_list li.gl_item {padding-left:8px; padding-top:10px; padding-bottom:10px; border-top:1px solid #ddd;}
+.goods_list li.gl_item:first-child {border-top:none;}
+.goods_list span.gli_image {float:left; width:25%;}
+.goods_list ol.gli_contents {float:left; width:70%; padding-left:10px; padding-top:10px;}
+.goods_list ol.gli_contents .goods_name {display:block; padding-bottom:10px; font-size:15px; font-weight:bold; letter-spacing:-1px;}
+</style>
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$(".req_gift").click(function(){
+		var my_point = $("input[name='point']").val();
+		var my_reserve = "{myemoney}";
+		var seq		= $(this).attr("seq");
+		var point	= $(this).attr("point");
+		var goods_rule	= $(this).attr("goods_rule");
+		var goods_name	= $(this).attr("goods_name");
+		
+		if(goods_rule == "reserve"){
+			//alert(my_point+" : "+$(this).attr("point"));
+			if(parseInt(my_reserve) < parseInt($(this).attr("point"))){
+				alert("해당 사은품은 증정 받기 위한 잔여 적립금이 부족합니다");
+				return;
+			}
+		}else{
+			//alert(my_point+" : "+$(this).attr("point"));
+			if(parseInt(my_point) < parseInt($(this).attr("point"))){
+				alert("해당 사은품은 증정 받기 위한 잔여 포인트가 부족합니다");
+				return;
+			}
+		}
+		//alert($(this).attr("point")+" : "+$(this).attr("seq"));
+
+		$.get('/mypage/buy_gift?seq='+seq+'&point='+point+'&goods_rule='+goods_rule+'&goods_name='+escape(goods_name), function(data) {
+		  	$('#giftPopup').html(data);
+		});
+		openDialog("사은품 신청", "giftPopup", {"width":"1000","height":700});
+	});
+
+
+});
+
+function clipBoard(name, id){
+	var clip = new ZeroClipboard.Client();
+	clip.setHandCursor( true );
+	clip.setCSSEffects( true );
+	clip.setText($("input[name='"+name+"']").val());
+	clip.addEventListener( 'complete', function(client, text) {
+		alert("클립보드에 복사되었습니다.");
+	});
+	clip.glue(id);
+}
+</script>
+
+<!-- 타이틀 -->
+
+{?!mobileAjaxCall}
+	{#common_mypage_emoney_exchange_top}
+{/}
+
+<!-- 타이틀 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="border:3px solid #d8d8d8; text-align:center">
+<tr>
+	<td height="50">
+		<span style="font-size:26px; color:#f15f2e; font-weight:bold; font-family:tahoma;">{=number_format(myemoney)}<span style="font-size:12px">원</span></span>		
+		(이번달 소멸 예정 <b>{=number_format(0)}</b>원)
+	</td>
+</tr>
+</table>
+
+<div style="height:2px"></div>
+
+<div style="text-align:center; font-size:12px; color:#4a4a4a; background-color:#d8d8d8; padding:10px 0;">
+	보유하신 적립금으로<br />사은품을 교환하실 수 있습니다.
+</div>
+
+<div style="height:10px"></div>
+
+<input type="hidden" name="point" value="{=get_member_money('point',userInfo.member_seq)}"/>
+
+<!--{? gift_loop }-->
+{@ gift_loop }
+
+{? trim(strip_tags(.gift_contents))}
+<div>{.gift_contents}</div>
+<div style="height:10px"></div>
+{/}
+<ul class="goods_list">
+	{@ .goods }
+	<li class="gl_item clearbox">
+		<span class="gli_image"><img src="{=get_gift_image(..value_,'list1')}" width="100%" onerror="this.src='../images/common/noimage.gif'" /></span>
+		<ol class="gli_contents">
+			<li><span class="goods_name">{=get_gift_name(..value_)}</span></li>
+			<li><b style="font-size:20px; font-family:tahoma; color:#f15f2e">{=number_format(.sprice)}원</b></li>
+			<li><span style="color:#4a4a4a">{=number_format(get_gift_stock(..value_))}개 남음</span></li>
+			{? get_gift_stock(..value_) > 0 }
+			<li class="fright"><button type="button" class="btn_style req_gift" point="{.sprice}" seq="{..value_}" goods_rule="{gift_info.goods_rule}" goods_name="{=get_gift_name(..value_)}">교환신청</button></li>
+			{ / }
+		</ol>
+			
+	</li>
+	{ / }
+</ul>
+<div style="height:25px"></div>
+{ / }
+<!--{ / }-->
+
+
+<div style="height:30px"></div>
+
+
+<div id="giftPopup" style="display:none"></div>

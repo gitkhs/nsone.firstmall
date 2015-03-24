@@ -1,0 +1,181 @@
+<!-- 상단영역 : 시작 -->
+<table width="{layout_config.width}" align="{layout_config.align}" cellpadding="0" cellspacing="0" border="0">
+<tr>
+	<td valign="top">
+		<a href="/main/index" target='_self'><img src="../images/design/logo.gif" alt="" title="" /></a>
+	</td>
+	<td valign="top">
+
+		<table align="right" cellpadding="0" cellspacing="0" border="0">
+		<tr><td height="50"></td></tr>
+		<tr>
+			<td align="right">
+				<form name="topSearchForm" id="topSearchForm" action="../goods/search">
+				<input type="text" name="search_text" value="" style="width:300px; background-color:#f3f3f3; border:0px; height:20px; line-height:20px; text-indent:5px;" {? auto_search_use == 'y'}title="{auto_search_text}"{/}/><input type="image" src="../images/icon/icon_search.gif" value="검색" style="margin-left:5px; vertical-align:middle;" />
+				</form>
+			</td>
+		</tr>
+		<tr>
+			<td align="right">
+				
+				<!--{ ? auto_search_use == 'y' }-->
+				<script type="text/javascript">
+				$("form#topSearchForm").submit(function(event){
+					if( $("input[name='search_text']").val() == '{auto_search_text}' ){
+						{ ? auto_search_type == 'direct' }						
+							{ ? auto_search_target == '_self' }
+							document.location.href="{auto_search_link}";
+							{ : }
+							var openNewWindow = window.open("about:blank");
+							openNewWindow.document.location.href="{auto_search_link}";
+							{ / }
+						{ : }							 
+							{ ? auto_search_target == '_self' }
+							document.location.href="../goods/search?search_text={=urlencode(auto_search_link)}";
+							{ : }
+							var openNewWindow = window.open("about:blank");
+							openNewWindow.document.location.href="../goods/search?search_text={=urlencode(auto_search_link)}";
+							{ / }							
+						{ / }
+						
+						setTimeout(function(){
+							$("input[name='search_text']").focusout();	
+						},50);							
+						event.preventDefault();
+						return false;
+					}
+				});
+				</script>
+				<!--{ / }-->
+			</td>
+		</tr>
+		<tr><td height="18"></td></tr>
+		<tr>
+			<td>
+				<table cellpadding="0" cellspacing="0" border="0">
+				<tr>
+				<!--{? userInfo.member_seq }-->
+					<td>{? userInfo.snsfacebookcon && fbuser  }<a href="../login_process/logout" target= "actionFrame"   ><img src="../images/design/top_logout.gif" alt="logout" /></a>{:}<a href="../login_process/logout" target= "actionFrame"   ><img src="../images/design/top_logout.gif" alt="logout" /></a>{/}</td>
+					<td width="20"></td>
+					<td><a href="../mypage/myinfo"><img src="../images/design/top_myinfo.gif" /></a></td>
+				<!--{ : }-->
+					<td><a href="../member/login"><img src="../images/design/top_login.gif" /></a></td>
+					<td width="20"></td>
+					<td><a href="../member/agreement"><img src="../images/design/top_join.gif" /></a></td>
+				<!--{ / }-->
+					<td width="20"></td>
+					<td><a href="../order/cart"><img src="../images/design/top_cart.gif" /></a></td>
+					<td width="20"></td>
+					<td><a href="../mypage/order_catalog"><img src="../images/design/top_order.gif" /></a></td>
+					<td width="20"></td>
+					<td><a href="../mypage/index"><img src="../images/design/top_mypage.gif" /></a></td>
+					<td width="20"></td>
+					<td><a href="../service/cs"><img src="../images/design/top_cscenter.gif" title="" alt="" /></a></td>
+					<td width="20"></td>
+					<td><a href="{bookmark}" ><img src="../images/design/top_bookmark.gif" title="" /></a></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+
+	</td>
+</tr>
+</table>
+<!-- 상단영역 : 끝 -->
+
+<!-- 마이페이지 상단 영역 : 시작 -->
+<!--{=assignMypageSummaryData()}--><!--[이부분 삭제금지]-->
+<!--{ ? summary }-->
+<table width="{layout_config.width}" align="{layout_config.align}" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed">
+<tr>
+	<td>
+		<div style="background-color:#f8f8f8; border:1px solid #dedede;">
+		<div style="background:url('../images/design/mypage_qbg_01.gif') no-repeat left top; margin:-1px;">
+		<div style="background:url('../images/design/mypage_qbg_02.gif') no-repeat right top">
+		<div style="background:url('../images/design/mypage_qbg_03.gif') no-repeat left bottom">
+		<div style="background:url('../images/design/mypage_qbg_04.gif') no-repeat right bottom; padding:1px 10px;">
+			<table width="100%" height="120" cellpadding="0" cellspacing="0" border="0" style="text-align:center; font-size:11px; letter-spacing:-1px;">
+			<tr>
+				<td {?in_array(member_group.use_type, array('AUTO', 'AUTOPART'))}valign="top"{/} style="padding-top:22px">
+					<table align="center" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td valign="top">{? myicon }<img src="../../data/icon/mypage/{myicon}">{ / }</td>
+						<td width="8px;"><td>
+						<td style="text-align:left;" valign="top">
+							<div style="color:#818181; font-weight:bold;">
+								<span style="font-size:11px;">{=date('Y')}년 {=date('m')}월 <font color="black">{user_name}</font>님은 </span><br />
+								<b style="font-size:14px;color:#000;">{group_name}</b> 등급입니다.
+							</div>
+						<!--{ ? in_array(member_group.use_type, array('AUTO', 'AUTOPART')) }-->
+							<!--{ ? next_group }-->
+							<div style="line-height:15px;padding:8px 0; color:#818181; font-size:11px;">
+								{next_group.group_name}회원이 되시려면?<br>
+								구매금액: {=number_format(next_group.order_sum_price)}원
+								{?next_group.order_sum_ea}<br/>구매건수: {next_group.order_sum_ea}건{/}
+								{?next_group.order_sum_cnt}<br/>구매횟수: {next_group.order_sum_cnt}건{/}
+							</div>
+							<!--{ : }-->
+							<div style="line-height:15px;padding:8px 0; color:#818181; font-size:11px;">
+								{member_group.group_name}을 유지하시려면?<br>
+								구매금액: {=number_format(member_group.order_sum_price)}원
+								{?member_group.order_sum_ea}<br/>구매건수: {member_group.order_sum_ea}건{/}
+								{?member_group.order_sum_cnt}<br/>구매횟수: {member_group.order_sum_cnt}건{/}
+							</div>
+							<!--{ / }-->
+						<!--{ / }-->
+						</td>
+					</tr>
+					</table>
+				</td>
+				<td width="1" background="../images/design/mypage_qbg_dot.gif"></td>
+				<td width="100" valign="top" style="padding-top:22px">
+					<img src="../images/design/mypage_stit_cart.gif" alt="장바구니" />
+					<div style="padding-top:20px;"><span style="font-size:20px; font-family:tahoma; color:#333; font-weight:bold;">{summary.cart_cnt}</span> 개</div>
+				</td>
+				<td width="1" background="../images/design/mypage_qbg_dot.gif"></td>
+				<td width="100" valign="top" style="padding-top:22px">
+					<img src="../images/design/mypage_stit_wishlist.gif" alt="관심상품" />
+					<div style="padding-top:20px;"><span style="font-size:20px; font-family:tahoma; color:#333; font-weight:bold;">{summary.wish_cnt}</span> 개</div>
+				</td>
+				<td width="1" background="../images/design/mypage_qbg_dot.gif"></td>
+				<td width="150" valign="top" style="padding-top:22px">
+					<img src="../images/design/mypage_stit_coupon.gif" alt="사용가능쿠폰" />
+					<div style="padding-top:20px;"><span style="font-size:20px; font-family:tahoma; color:#333; font-weight:bold;">{summary.coupondownloadtotal}</span> 개 
+					 <a href="../mypage/offlinecoupon"><img src="../images/design/mypage_btn_coupon.gif" /></a></div>
+					 <div style="padding:10px 0;">이번주 소멸 {=number_format(extinction.coupon)}개</div>
+				</td>
+				<td width="1" background="../images/design/mypage_qbg_dot.gif"></td>
+				<td width="150" valign="top" style="padding-top:22px">
+					<img src="../images/design/mypage_stit_savedmoney.gif" alt="적립금" />
+					<div style="padding-top:20px;"><span style="font-size:20px; font-family:tahoma; color:#333; font-weight:bold;">{=number_format(emoney)}</span> 원</div>
+					 <div style="padding:10px 0;">이번달 소멸 {=number_format(extinction.reserve)}원</div>
+				</td>
+				<td width="1" background="../images/design/mypage_qbg_dot.gif"></td>
+				<td width="150" valign="top" style="padding-top:22px">
+					<img src="../images/design/mypage_stit_ordering.gif" alt="진행 중 주문" />
+					<div style="padding-top:20px;"><span style="font-size:20px; font-family:tahoma; color:#333; font-weight:bold;">{summary.order_ing_cnt}</span> 개</div>
+					<!--{ ? extinction.buyconfirm }-->
+					<div style="padding:10px 0;">구매확정대기 {=number_format(extinction.buyconfirm)}개</div>
+					<!--{ / }-->
+				</td>
+				<td width="1" background="../images/design/mypage_qbg_dot.gif"></td>
+				<td width="100" valign="top" style="padding-top:22px">
+					<img src="../images/design/mypage_stit_refund.gif" alt="교환반품 중 주문" />
+					<div style="padding-top:20px;"><span style="font-size:20px; font-family:tahoma; color:#333; font-weight:bold;">{summary.return_ing_cnt}</span> 개</div>
+				</td>
+			</tr>
+			</table>
+		</div>
+		</div>
+		</div>
+		</div>
+		</div>
+	</td>
+</tr>
+<tr>
+	<td height="22"></td>
+</tr>
+</table>
+<!-- 마이페이지 상단 영역 : 끝 -->
+<!--{ / }-->

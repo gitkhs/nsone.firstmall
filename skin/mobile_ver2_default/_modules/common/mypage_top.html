@@ -1,0 +1,20 @@
+<!--{?userInfo.member_seq}-->
+<div class="sub_title_button_bar">
+	<table class="sub_title_button_tb" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="33.3%" onclick="location.href='?step_type=order'" {?_GET.step_type=='order'}class="sel"{/} >
+			주문접수<br/>
+			<span>{=showMypageTop('order')}</span>
+		</td>
+		<td width="33.3%" onclick="location.href='?step_type=deposit'" {?_GET.step_type=='deposit'}class="sel"{/}>
+			결제확인<br/>
+			<span>{=showMypageTop('deposit')}</span>
+		</td>
+		<td width="33.3%" onclick="location.href='?step_type=export'" {?_GET.step_type=='export'}class="sel"{/}>
+			배송/사용<br/>
+			<span>{=showMypageTop('export')}</span>
+		</td>
+	</tr>
+	</table>
+</div>
+<!--{/}-->

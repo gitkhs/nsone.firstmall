@@ -1,0 +1,76 @@
+<style type="text/css">
+.list_table_style td.myshop_info			{padding:10px 0;}
+.list_table_style td .shop_memo				{width:355px;height:30px;}
+.list_table_style td						{border-bottom:1px solid #dfdfdf;}
+.myshop_list								{margin-top:40px;width:100%;}
+.myshop_list .myshop_list_title				{margin-bottom:10px;}
+.myshop_list .myshop_list_tb td				{border:none;}
+.myshop_list .myshop_list_tb td.home_icon	{padding:0 5px;}
+.myshop_list .myshop_list_tb td.shop_name	{font-size:12px;font-family:Dotum;color:#000;
+											font-weight:bold;padding:3px 5px 0 0;}
+.myshop_list .myshop_list_tb td.shop_regist	{padding-top:5px;}
+.minishop_memo_save							{margin-top:10px;text-align:right;}
+.delMinishop								{cursor:pointer;}
+.goMinishop									{cursor:pointer;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+	$(".goMinishop").live("click", function(){
+		window.open('../mshop/?m='+$(this).attr("shopseq"));
+	});
+	$(".delMinishop").live("click", function(){
+		if	(confirm("단골미니샵을 삭제하시겠습니까?")){
+			$.getJSON("/mshop_process/delete_myshop", {'mseq':'{user.member_seq}', 'shopno':$(this).attr("shopseq")},function(data){
+				if	(data.result == 'ok'){
+					alert('삭제되었습니다.');
+					location.reload();
+				}
+			});
+		}
+	});
+});
+</script>
+<div><img src="../images/design/tit_mymns.gif" /></div>
+<div class="myshop_list">
+	<div class="myshop_list_title">
+		* 등록하신 단골미니샵은 <u style="color:#000;font-weight:bold;">{=number_format(my_total_cnt)}개</u>입니다.
+	</div>
+	<form name="myFrm" method="post" action="/mshop_process/save_memolist" target="actionFrame">
+	<input type="hidden" name="mseq" value="{user.member_seq}" />
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+		<thead>
+		<tr>
+			<th>미니샵 정보</th>
+			<th width="370">메모</th>
+			<th width="180">관리</th>
+		</tr>
+		</thead>
+		<tbody>
+		<!--{ ? my }{ @ my }-->
+		<tr>
+			<td class="myshop_info">
+				<table cellpadding="0" cellspacing="0" border="0" class="myshop_list_tb">
+				<tr>
+					<td class="home_icon"><img src="../images/icon/icon_mns.gif" /></td>
+					<td class="shop_name">{.provider_name}({.provider_id})</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td class="shop_regist">단골등록일자 : {.regist_date}</td>
+				</tr>
+				</table>
+			</td>
+			<td align="center"><textarea name="memo[{.provider_seq}]" class="shop_memo">{.memo}</textarea></td>
+			<td align="center">
+				<img src="../images/design/btn_mns_del.gif" class="delMinishop hand" shopseq="{.provider_seq}"  />
+				<img src="../images/design/btn_mns_go.gif" class="goMinishop hand" shopseq="{.provider_seq}" />
+			</td>
+		</tr>
+		<!--{ / }{ / }-->
+		</tbody>
+	</table>
+	<div class="minishop_memo_save">
+		<input type="image" src="../images/design/btn_save_memo.gif" />
+	</div>
+	</form>
+</div>

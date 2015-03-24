@@ -1,0 +1,216 @@
+{?!mobileAjaxCall}
+<!-- <div class="sub_title_bar">
+	<h2>{manager.name}</a></h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.png" /></a>
+</div>
+ -->
+{/}
+{#catalog_top}
+<div class="bbstopbox">
+	<div class="pright">
+		{? manager.auth_write != '[admin]' }
+		<span id="boad_write_btn{manager.isperm_write}" board_id="{boardid}" fileperm_read="{manager.fileperm_write}" class="btn_style black hand">글쓰기</span>
+		{/}
+		<span class="btn_style black hand boad_search_btn_m" >검색 ▼</span>
+	</div>
+</div>
+{?!_GET.search_text}<script>$('.boad_search_btn_m').click();</script>{/}
+<div class="bbssearchbox" {?!_GET.search_text}style="display:none"{/}>
+	<form name="boardsearch" id="boardsearch" >
+	<input type="hidden" name="id" value="{_GET.id}" >
+	<input type="hidden" name="popup" value="{_GET.popup}" >
+	<input type="hidden" name="iframe" value="{_GET.iframe}" >
+	<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+	<input type="hidden" name="perpage" id="perpage" value="{_GET.perpage}" >
+	<input type="hidden" name="page" id="page" value="{_GET.page}" >
+	<input type="hidden" name="category" id="category" value="{_GET.category}" >
+	<input type="text" name="search_text" id="search_text" value="{_GET.search_text}" title="이 게시판 검색" /><input type="image" src="../images/design/btn_search_s.png" />
+	</form>
+</div>
+
+		<!-- 본문내용 시작 -->
+		<link type="text/css" rel="stylesheet" charset="utf-8" href="../css/mypage_board.css" />
+		<script type="text/javascript">
+		//<![CDATA[
+		var board_id = '{manager.id}';
+		var boardlistsurl = '{boardurl->lists}';
+		var boardwriteurl = '{boardurl->write}';
+		var boardviewurl = '{boardurl->view}';
+		var boardmodifyurl = '{boardurl->modify}';
+		var gl_isuser = false;
+		{ ? defined('__ISUSER__') }
+		gl_isuser = '{=defined('__ISUSER__')}';
+		{ / }
+
+		var comment = '{comment}';
+		var commentlay = '{commentlay}';
+		var isperm_write = '{managerview.isperm_write}';
+
+		//]]>
+		</script>
+		<script type="text/javascript" src="/app/javascript/js/board.js?v=7"></script>
+		<script type="text/javascript" src="/app/javascript/js/board_mobile.js?v=1"  charset="utf-8"></script>
+		{? commentskinjsuse }
+		<script type="text/javascript" src="/app/javascript/js/board_comment_mobile.js?v=2"  charset="utf-8"></script>
+		{/}
+		<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" charset="euc-kr"></script>
+		<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"  charset="utf-8"></script>
+
+<ul class="bbslist_ul_style">
+	<!-- 공지사항 리스트데이터 : 시작 -->
+	{? noticeloop }
+		{@ noticeloop }
+		<li>
+			{?.goodsInfo.image}
+			<span class="bus_goods_image">
+				<img  src="{.goodsInfo.image}" class="hand small_goods_image" />
+			</span>
+			{/}
+			<span class="hand boad_view_btn_m{.isperm_read}" viewlink="{boardurl->view}{.seq}"  viewtype="{manager.viewtype}"  pagetype="{pagetype}"  board_seq="{.seq}" board_id="{_GET.id}">
+				<div class="bus_subject">
+					<img src="../images/board/icon/icon_notice.gif" />
+					<span ><a>{.iconmobile}{.iconaward}{.blank}{.category} {.subjectcut} {.iconimage}{.iconfile}{.iconvideo}{.iconnew}{.iconhot}{.iconhidden}</a></span></span>
+				</div>
+				<span class="bus_record_info">
+				<span class="cell"> {? getDateFormat(.r_date,"Y-m-d") == date("Y-m-d") }{=date('H:i',strtotime(.date))}{:}{.date}{/}</span>
+				<span class="cell">조회 {=number_format(.hit)}</span>
+				</span>
+			</span>
+			{? manager.auth_cmt_use == 'Y' }<span class="bus_comment">{=number_format(.comment)}</span>{/}
+		</li>
+		<li class="board_contents hide" style="background-color:#fcfcfc;" id="board_contents_{.seq}">{.seq}</li>
+		{/}
+	{/}
+	<!-- 공지사항리스트데이터 : 끝 -->
+
+	<!-- 리스트데이터 : 시작 -->
+	{? loop }
+		{@ loop }
+		<li>
+			{?.goodsInfo.image}
+			<span class="bus_goods_image">
+				<img  src="{.goodsInfo.image}" class="hand small_goods_image" />
+			</span>
+			{/}
+			<span class="hand boad_view_btn_m{.isperm_read}" viewlink="{boardurl->view}{.seq}"  viewtype="{manager.viewtype}"  pagetype="{pagetype}"  board_seq="{.seq}" board_id="{_GET.id}">
+				<div class="bus_subject">
+					<span>
+					<a>{.iconmobile}{.iconaward}{.blank}{.category} {.subject_real}
+						<span class="comment_{.seq}">
+							{.iconimage}{.iconfile}{.iconvideo}
+							{? .iconnew }
+								<img src="../images/icon/icon_new.png" title="new" align="absmiddle" >
+							{/}
+							{.iconhot}{.iconhidden} {.scorelay}
+						</span>
+					</a>
+					</span>
+				</div>
+				<span class="bus_record_info">
+				<span class="cell"> {? getDateFormat(.r_date,"Y-m-d") == date("Y-m-d") }{=date('H:i',strtotime(.date))}{:}{.date}{/}</span>
+				<span class="cell">조회 {=number_format(.hit)}</span>
+				<span class="cell">{.buyertitle}</span>
+				</span>
+			</span>
+
+			{? manager.auth_cmt_use == 'Y' }<span class="bus_comment idx-comment-{.seq}">{=number_format(.comment)}</span>{/}
+		</li>
+		<li class="board_contents hide" style="background-color:#fcfcfc;" id="board_contents_{.seq}">{.seq}</li>
+		{/}
+	{:}
+		<li style="text-align:center;">등록된 게시글이 없습니다.</li>
+	{/}
+	<!-- 리스트데이터 : 끝 -->
+</ul>
+
+{? loop }
+<div class="pd20">
+	{? pagin }<!-- 페이징 --><div class="paging_navigation">{pagin}</div><!-- 페이징 --> {/}
+</div>
+{/}
+
+{? _GET.iframe }
+<script type="text/javascript">
+$(document).ready(function(){
+	$(document).resize(function(){
+	  $('#'+board_id+'_frame',parent.document).height($('#boardlayout').height()+50);
+	 }).resize();
+});
+function iframeset(){
+	  $('#'+board_id+'_frame',parent.document).height($('#boardlayout').height()+50);
+}
+</script>
+{/}
+
+
+{? manager.viewtype=='layer'}
+
+<div id="CmtBoardPwCk" class="hide BoardPwCk">
+	<div class="msg">
+		<h3> 비밀번호 확인</h3>
+		<div>댓글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="CmtBoardPwcheckForm" id="CmtBoardPwcheckForm" method="post"  target="actionFrame" >
+	<input type="hidden" name="seq" id="cmt_pwck_seq" value="" />
+	<input type="hidden" name="cmtseq" id="cmt_pwck_cmtseq" value="" />
+	<div class="ibox">
+		<input type="password" name="pw" id="cmt_pwck_pw" class="input" />
+		<input type="submit" id="CmtBoardPwcheckBtn" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#CmtBoardPwCk').dialog('close');" />
+	</div>
+	</form>
+</div>
+
+
+<div id="ModDelBoardPwCk" class="hide BoardPwCk">
+	<div class="msg">
+		<h3> 비밀번호 확인</h3>
+		<div>게시글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="ModDelBoardPwcheckForm" id="ModDelBoardPwcheckForm" method="post" action="{=sslAction('../board_process')}" target="actionFrame" >
+	<input type="hidden" name="modetype" id="modetype" value="" />
+	<input type="hidden" name="seq" id="moddel_pwck_seq" value="" />
+	<input type="hidden" name="returnurl" id="moddel_pwck_returnurl" value="" />
+	<div class="ibox">
+		<input type="password" name="pw" id="moddel_pwck_pw" class="input" />
+		<input type="submit" id="BoardPwcheckBtn" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#ModDelBoardPwCk').dialog('close');" />
+	</div>
+	</form>
+</div>
+
+<!-- <div id="BoardPwCk" class="hide BoardPwCk">
+	<div class="msg">
+		<h3> 비밀번호 확인</h3>
+		<div>게시글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="BoardPwcheckForm" id="BoardPwcheckForm" method="post" action="{=sslAction('../board_process')}" target="actionFrame" >
+	<input type="hidden" name="seq" id="pwck_seq" value="" />
+	<input type="hidden" name="returnurl" id="pwck_returnurl" value="" />
+	<div class="ibox">
+		<input type="password" name="pw" id="pwck_pw" class="input" />
+		<input type="submit" id="BoardPwcheckBtn" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#BoardPwCk').dialog('close');" />
+	</div>
+	</form>
+</div> -->
+
+<script type="text/javascript">
+function getboardLogin(){
+	{? defined('__ISUSER__') === true }
+		openDialogAlert('해당 서비스를 이용하시려면 관리자에게 문의하여 주시길 바랍니다.','450','140');
+	{:}
+		openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){top.location.href="http://m.{config_system.subDomain}/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+	{/}
+}
+
+function getcmtMbLogin(){
+	{? defined('__ISUSER__') === true }
+		openDialogAlert('글작성자만 이용가능합니다.','400','140');
+	{:}
+		openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){top.location.href="http://m.{config_system.subDomain}/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+	{/}
+}
+</script>
+
+{/}

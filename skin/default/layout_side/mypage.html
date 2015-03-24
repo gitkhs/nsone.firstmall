@@ -1,0 +1,105 @@
+<!-- 측면영역 : 시작 -->
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+	<td>
+		<div style="padding:0 0 20px 0"><a href="../mypage/index"><img src="../images/common/tit_mypage.gif" /></a></div>
+		<!-- 나의쇼핑 -->
+		<table align="right" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td><img src="../images/design/mypage_left_myshopping.gif" /></td>
+		</tr>
+		<tr><td height="5"></td></tr>
+		<tr><td><a href="../mypage/order_catalog"><img src="../images/design/mypage_left_s_myorder.gif" /></a></td></tr>
+		<!--
+		<tr><td><a href="#"><img src="../images/design/mypage_left_s_refund.gif" /></a></td></tr>
+		-->
+		<!--
+		<tr><td><a href="#"><img src="../images/design/mypage_left_s_address.gif" /></a></td></tr>
+		-->
+		<tr><td><a href="../order/cart"><img src="../images/design/mypage_left_s_cart.gif" /></a></td></tr>
+		<tr><td><a href="../mypage/wish"><img src="../images/design/mypage_left_s_wishlist.gif" /></a></td></tr>
+		<!--
+		<tr><td><a href="#"><img src="../images/design/mypage_left_s_private.gif" /></a></td></tr>
+		-->
+		<tr><td><a href="../mypage/taxinvoice"><img src="../images/design/mypage_left_s_taxinvoice.gif" /></a></td></tr>
+		{? isplusfreenot }
+		<tr><td><a href="../mypage/personal"><img src="../images/common/mypage_left_s_private_payment.gif" alt="개인결제"  /></a></td></tr>
+		{/}
+		<tr><td><a href="../mypage/delivery_address?tab=1"><img src="../images/design/mypage_left_s_delivery_address.gif" /></a></td></tr>
+		<tr><td><a href="../mypage/return_catalog"><img src="../images/design/mypage_left_s_returnlist.gif" /></a></td></tr>
+		<tr><td><a href="../mypage/refund_catalog"><img src="../images/design/mypage_left_s_refundlist.gif" /></a></td></tr>
+		<tr><td height="30"></td></tr>
+		</table>
+
+		<div class="cboth"></div>
+
+		<!-- 나의혜택 -->
+		<table align="right" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td><img src="../images/common/mypage_left_mybenefit.gif" /></td>
+		</tr>
+		<tr><td height="5"></td></tr>
+		<tr><td><a href="../mypage/emoney"><img src="../images/design/mypage_left_s_savedmoney.gif" /></a></td></tr>
+		<tr><td><a href="../mypage/coupon"><img src="../images/design/mypage_left_s_coupon.gif" /></a></td></tr>
+		<tr><td><a href="../mypage/offlinecoupon"><img src="../images/design/mypage_left_s_coupon_confirmation.gif" /></a></td></tr>
+		{? isplusfreenot }
+		<tr><td><a href="../mypage/cash"><img src="../images/common/mypage_left_s_emoney.gif" /></a></td></tr>
+		<tr><td><a href="../mypage/point"><img src="../images/common/mypage_left_s_point.gif" /></a></td></tr>
+		{? emoney_exchange_use == 'y'}
+		<tr><td><a href="../mypage/point_exchange"><img src="../images/common/mypage_left_s_changepoint_emny.gif" /></a></td></tr>
+		{/}
+        <tr><td><a href="../mypage/promotion"><img src="../images/common/mypage_left_s_changepoint_promo.gif"></a></td></tr>
+        <tr><td><a href="../mypage/emoney_exchange"><img src="../images/common/mypage_left_s_gift.gif"></a></td></tr>
+		{/}
+		<tr><td height="30"></td></tr>
+		</table>
+
+		<div class="cboth"></div>
+
+		<!-- 나의활동 -->
+		<table align="right" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td><img src="../images/design/mypage_left_myactivity.gif" /></td>
+		</tr>
+		<tr><td height="5"></td></tr>
+		<tr><td><a href="../mypage/myqna_catalog"><img src="../images/design/mypage_left_s_myqna.gif" alt="1:1문의"/></a></td></tr>
+		<tr><td><a href="../mypage/mygdqna_catalog"><img src="../images/design/mypage_left_s_mygoodsqna.gif" alt="상품문의" /></a></td></tr>
+		<tr><td><a href="../mypage/mygdreview_catalog"><img src="../images/design/mypage_left_s_myreview.gif" alt="상품후기"/></a></td></tr>
+		<tr><td height="30"></td></tr>
+		</table>
+
+		<div class="cboth"></div>
+
+		<!-- 나의정보 -->
+		<table align="right" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td><img src="../images/design/mypage_left_myinfo.gif" /></td>
+		</tr>
+		<tr><td height="5"></td></tr>
+		<tr><td><a href="../mypage/myinfo"><img src="../images/design/mypage_left_s_myinfo.gif" alt="회원정보수정" title="정보수정" /></a></td></tr>
+		<!--{? joinform.use_f  && APP_VER != "2.0" }-->
+			<!--{? empty(myinfo_sns_f) }-->
+				<tr><td><a href="#" ><img src="../images/design/mypage_left_s_myfbrecommend.gif" alt="facebook 친구초대" title="facebook 친구초대" id="facebookmbconnectalert" /></a></td></tr>
+			<!--{:}-->
+				<tr><td><a href="../mypage/myfbrecommend"><img src="../images/design/mypage_left_s_myfbrecommend.gif" alt="facebook 친구초대" title="facebook 친구초대"  /></a></td></tr>
+			<!--{ / }-->
+ 		<!--{ / }-->
+		<tr><td><a href="../mypage/withdrawal"><img src="../images/design/mypage_left_s_withdrawal.gif"  alt="회원탈퇴" title="회원탈퇴" /></a></td></tr>
+		<tr><td height="30"></td></tr>
+		</table>
+
+		<div class="cboth"></div>
+	</td>
+	<td width="20"></td>
+</tr>
+</table>
+<script type="text/javascript">
+$(document).ready(function() {
+	//기존멤버-통합하기
+	$("#facebookmbconnectalert").click(function(){
+		openDialogConfirm('facebook 친구들을 쇼핑몰에 초대하기 위해서는 facebook계정으로 쇼핑몰을 이용해 주셔야 합니다.<br>회원정보수정에서 "SNS계정사용"을 수락해 주세요. <br>친구들을 초대하시면 다양한 혜택을 받으실 수 있습니다.<br>지금 회원정보수정 화면으로 이동하시겠습니까?','650','200',function(){document.location.href='../mypage/myinfo'},function(){});
+	});
+});
+</script>
+<!-- 측면영역 : 끝 -->

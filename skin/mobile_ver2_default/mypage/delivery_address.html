@@ -1,0 +1,643 @@
+<script>
+function check_shipping_method(){
+
+	var idx = $("select[name='international'] option:selected").val();
+	if(!idx)idx = 0;
+
+	if(idx == 0){
+		$(".domestic").show();
+		$(".international").hide();
+	}else{
+		$(".international").show();
+		$(".domestic").hide();
+	}
+}
+
+function opener_shipping_method(){
+
+	var idx = opener.$("select[name='international'] option:selected").val();
+
+	opener.$("div.shipping_method_radio").each(function(){
+		$(this).hide();
+	});
+	if(!idx)idx=0;
+
+	opener.$("div.shipping_method_radio").eq(idx).show();
+
+	if(idx == 0){
+
+		opener.$(".domestic").show();
+		opener.$(".international").hide();
+	}else{
+		opener.$(".international").show();
+		opener.$(".domestic").hide();
+	}
+}
+
+function delete_address_btn(seq){
+	var chk = confirm('정말 삭제하시겠습니까?');
+	if(chk == true){
+	var str="../mypage_process/delete_address?address_seq=" + seq + "&popup={_GET.popup}";
+	$("iframe[name='actionFrame']").attr('src',str);
+	}else{
+		return;
+	}
+}
+
+function change_address_btn(seq){
+	var chk = confirm('자주쓰는 배송지로 등록하시겠습니까?');
+	if(chk == true){
+	var str="../mypage_process/change_address?address_seq=" + seq + "&popup={_GET.popup}";
+	$("iframe[name='actionFrame']").attr('src',str);
+	}else{
+		return;
+	}
+}
+
+$(function() {
+
+	// 해외/국내 배송 선택
+	$("select[name='international']").bind("change",function(){
+		check_shipping_method();
+	});
+
+	// 해외배송 방법 선택 시
+	$("input[name='shipping_method_international']").bind("click",function(){
+		var region = new Array();
+		<!--{ @ shipping_policy.policy[1] }-->
+		region[{.key_}] = new Array();
+		<!--{ @ .value_.region }-->
+		region[{.key_}][{..key_}] = "{..value_}";
+		<!--{ / }-->
+		<!--{ / }-->
+		$("select[name='region'] option").remove();
+		var idx = $(this).val();
+		for(var i=0;i<region[idx].length;i++){
+			$("select[name='region']").append("<option value='"+i+"'>"+region[idx][i]+"</option>");
+		}
+	});
+
+	check_shipping_method();
+	<!--{ ? shipping_policy.count && array_sum(shipping_policy.count) > 1 }-->
+	$("tr.shipping_tr").show();
+	<!--{ : }-->
+	$("tr.shipping_tr").hide();
+	<!--{ / }-->
+	<!--{ ? shipping_policy.count[0] && shipping_policy.count[1] }-->
+	$("div.international_layer").show();
+	<!--{ / }-->
+
+	$(".addAddress").bind("click",function(){
+
+		$("input[name='insert_mode']").val('insert');
+		// 배송지 정보 초기화
+		$("input[name='address_description']").val('');
+		$("input[name='recipient_zipcode[]']").each(function(idx){
+				$("input[name='recipient_zipcode[]']").eq(idx).val("");
+			});
+		$("input[name='recipient_address_type']").val("");
+		$("input[name='recipient_address']").val("");
+		$("input[name='recipient_address_street']").val("");
+		$("input[name='recipient_address_detail']").val("");
+		$("input[name='recipient_user_name']").val("");
+		$("input[name='recipient_phone[]']").each(function(idx){
+			$("input[name='recipient_phone[]']").eq(idx).val("");
+		});
+		$("input[name='recipient_cellphone[]']").each(function(idx){
+			$("input[name='recipient_cellphone[]']").eq(idx).val("");
+		});
+
+		openDialog("배송지 등록 하기", "inAddress", {"width":600});
+	});
+
+	$(".updateaddress").bind("click",function(){
+		var seq = $(this).attr('seq');
+		$.ajax({
+		  url: '/mypage/delivery_address_ajax',
+		  data : {
+			  'address_seq':seq
+		  },
+		  dataType : 'json',
+		  success: function(data) {
+
+			$("input[name='address_group']").val(data.address_group);
+
+			if(data.defaults=='Y'){
+				$("input[name='save_delivery_address']").attr('checked',true);
+			}else{
+				$("input[name='save_delivery_address']").removeAttr('checked');
+			}
+
+			if(data.international =='domestic'){
+				$("select[name='international']").val('0');
+				$("input[name='address_description']").val(data.address_description);
+				$("input[name='recipient_user_name']").val(data.recipient_user_name);
+				$("input[name='recipient_address_type']").val(data.recipient_address_type);
+				$("input[name='recipient_address']").val(data.recipient_address);
+				$("input[name='recipient_address_street']").val(data.recipient_address_street);
+				$("input[name='recipient_address_detail']").val(data.recipient_address_detail);
+				zipcode = new Array();
+				zipcode = data.recipient_zipcode.split('-');
+				$("input[name='recipient_zipcode[]']").each(function(idx){
+					$("input[name='recipient_zipcode[]']").eq(idx).val(zipcode[idx]);
+				});
+
+				phone = new Array();
+				phone = data.recipient_phone.split('-');
+				$("input[name='recipient_phone[]']").each(function(idx){
+					$("input[name='recipient_phone[]']").eq(idx).val(phone[idx]);
+				});
+
+				cellphone = new Array();
+				cellphone = data.recipient_cellphone.split('-');
+				$("input[name='recipient_cellphone[]']").each(function(idx){
+					$("input[name='recipient_cellphone[]']").eq(idx).val(cellphone[idx]);
+				});
+			}else{
+				$("select[name='international']").val('1');
+				$("input[name='address_description']").val(data.address_description);
+				$("input[name='recipient_user_name']").val(data.recipient_user_name);
+				$("select[name='region']").val(data.region);
+				$("input[name='international_county']").val(data.international_county);
+				$("input[name='international_address']").val(data.international_address);
+				$("input[name='international_town_city']").val(data.international_town_city);
+				$("input[name='international_postcode']").val(data.international_postcode);
+				$("input[name='international_country']").val(data.international_country);
+
+				phone = new Array();
+				phone = data.recipient_phone.split('-');
+				$("input[name='international_recipient_phone[]']").each(function(idx){
+					$("input[name='international_recipient_phone[]']").eq(idx).val(phone[idx]);
+				});
+
+				cellphone = new Array();
+				cellphone = data.recipient_cellphone.split('-');
+				$("input[name='international_recipient_cellphone[]']").each(function(idx){
+					$("input[name='international_recipient_cellphone[]']").eq(idx).val(cellphone[idx]);
+				});
+			}
+			
+
+			$("input[name='insert_mode']").val('update');
+			$("input[name='address_seq']").val(seq);
+			check_shipping_method();
+			openDialog("배송지 수정 하기", "inAddress", {"width":550});
+		  }
+		});
+
+
+	});
+
+	$("#insert_address").bind("click",function(){
+		var f = $("form#in_Address");
+		f.attr("action","../mypage_process/delivery_address");
+		f.attr("target","actionFrame");
+		f[0].submit();
+	});
+
+	$("#change_desc").bind("click",function(){
+		var order = "{_GET.order}";
+		if( order == '' || order != "desc_up"){
+		parent.document.location.href = "/mypage/delivery_address?tab={_GET.tab}&popup={_GET.popup}&order=desc_up";
+		}else if( order != "desc_dn"){
+		parent.document.location.href = "/mypage/delivery_address?tab={_GET.tab}&popup={_GET.popup}&order=desc_dn";
+		}
+	});
+
+	$("#change_name").bind("click",function(){
+		var order = "{_GET.order}";
+		if( order == '' || order != "name_up"){
+		parent.document.location.href = "/mypage/delivery_address?tab={_GET.tab}&popup={_GET.popup}&order=name_up";
+		}else if( order != "name_dn"){
+		parent.document.location.href = "/mypage/delivery_address?tab={_GET.tab}&popup={_GET.popup}&oorder=name_dn";
+		}
+	});
+
+
+	{?_GET.popup}
+		$(".addressResult").bind("click",function(){
+			var seq = $(this).attr('seq');
+			{?_GET.multiIdx==''}
+			var containerObj = opener.$('body');
+			{:}
+			var multiIdx = {=_GET.multiIdx+0};
+			var containerObj = opener.$("form[name='recipient']").eq(multiIdx);
+			{/}
+
+			$.ajax({
+				  url: '/mypage/delivery_address_ajax',
+				  data : {
+					  'address_seq':seq
+				  },
+				  dataType : 'json',
+				  success: function(data) {
+					var check_internal = '{shipping_policy.policy[1]}' ;
+
+					if(!check_internal){
+						if(data.international =='domestic'){
+							opener.$("select[name='international']",containerObj).val('0');
+							opener.$("input[name='address_description']",containerObj).val(data.address_description);
+							opener.$("input[name='recipient_user_name']",containerObj).val(data.recipient_user_name);
+							opener.$("input[name='recipient_address_type']",containerObj).val(data.recipient_address_type);
+							opener.$("input[name='recipient_address']",containerObj).val(data.recipient_address);
+							opener.$("input[name='recipient_address_street']",containerObj).val(data.recipient_address_street);
+							opener.$("input[name='recipient_address_detail']",containerObj).val(data.recipient_address_detail);
+							if(data.recipient_address_type=='street'){
+								opener.$("input[name='recipient_address_street']",containerObj).show();
+								opener.$("input[name='recipient_address']",containerObj).hide();
+							}else{
+								opener.$("input[name='recipient_address_street']",containerObj).hide();
+								opener.$("input[name='recipient_address']",containerObj).show();
+							}
+							zipcode = new Array();
+							zipcode = data.recipient_zipcode.split('-');
+							opener.$("input[name='recipient_zipcode[]']",containerObj).each(function(idx){
+							opener.$("input[name='recipient_zipcode[]']",containerObj).eq(idx).val(zipcode[idx]);
+							 });
+							phone = new Array();
+							phone = data.recipient_phone.split('-');
+							opener.$("input[name='recipient_phone[]']",containerObj).each(function(idx)
+							{
+								opener.$("input[name='recipient_phone[]']",containerObj).eq(idx).val(phone[idx]);
+							});
+
+							cellphone = new Array();
+							cellphone = data.recipient_cellphone.split('-');
+							opener.$("input[name='recipient_cellphone[]']",containerObj).each(function(idx)
+							{
+								opener.$("input[name='recipient_cellphone[]']",containerObj).eq(idx).val(cellphone[idx]);
+							});
+							window.close();
+						}else{
+						openDialogAlert('현재 해외배송은 불가능합니다.',400,150);
+						}
+					}else{
+
+						if(data.international =='domestic'){
+							opener.$("select[name='international']",containerObj).val('0');
+							opener.$("input[name='address_description']",containerObj).val(data.address_description);
+							opener.$("input[name='recipient_user_name']",containerObj).val(data.recipient_user_name);
+							opener.$("input[name='recipient_address']",containerObj).val(data.recipient_address);
+							opener.$("input[name='recipient_address_street']",containerObj).val(data.recipient_address_street);
+							opener.$("input[name='recipient_address_detail']",containerObj).val(data.recipient_address_detail);
+							if(data.recipient_address_type=='street'){
+								opener.$("input[name='recipient_address_street']",containerObj).show();
+								opener.$("input[name='recipient_address']",containerObj).hide();
+							}else{
+								opener.$("input[name='recipient_address_street']",containerObj).hide();
+								opener.$("input[name='recipient_address']",containerObj).show();
+							}
+							zipcode = new Array();
+							zipcode = data.recipient_zipcode.split('-');
+							opener.$("input[name='recipient_zipcode[]']",containerObj).each(function(idx){
+								opener.$("input[name='recipient_zipcode[]']",containerObj).eq(idx).val(zipcode[idx]);
+							});
+						}else{
+							opener.$("select[name='international']",containerObj).val('1');
+							opener.$("input[name='address_description']",containerObj).val(data.address_description);
+							opener.$("input[name='recipient_user_name']",containerObj).val(data.recipient_user_name);
+							opener.$("select[name='region']",containerObj).val(data.region);
+							opener.$("input[name='international_county']",containerObj).val(data.international_county);
+							opener.$("input[name='international_address']",containerObj).val(data.international_address);
+							opener.$("input[name='international_town_city']",containerObj).val(data.international_town_city);
+							opener.$("input[name='international_postcode']",containerObj).val(data.international_postcode);
+							opener.$("input[name='international_country']",containerObj).val(data.international_country);
+						}
+						phone = new Array();
+						phone = data.recipient_phone.split('-');
+						opener.$("input[name='recipient_phone[]']",containerObj).each(function(idx)
+						{
+							opener.$("input[name='recipient_phone[]']",containerObj).eq(idx).val(phone[idx]);
+						});
+						opener.$("input[name='international_recipient_phone[]']",containerObj).each(function(idx)
+						{
+							if(idx<1){
+								opener.$("input[name='international_recipient_phone[]']",containerObj).eq(idx).val(phone[idx]);
+							}else{
+								opener.$("input[name='international_recipient_phone[]']",containerObj).eq(idx).val(phone[1]+phone[2]);
+							}
+						});
+
+						cellphone = new Array();
+						cellphone = data.recipient_cellphone.split('-');
+						opener.$("input[name='recipient_cellphone[]']",containerObj).each(function(idx)
+						{
+							opener.$("input[name='recipient_cellphone[]']",containerObj).eq(idx).val(cellphone[idx]);
+						});
+						opener.$("input[name='international_recipient_cellphone[]']",containerObj).each(function(idx)
+						{
+							if(idx<1){
+								opener.$("input[name='international_recipient_cellphone[]']",containerObj).eq(idx).val(cellphone[idx]);
+							}else{
+								opener.$("input[name='international_recipient_cellphone[]']",containerObj).eq(idx).val(cellphone[1]+cellphone[2]);
+							}
+						});
+
+						opener_shipping_method();
+						window.close();
+					}
+				}
+			});
+		});
+	{/}
+
+	$("select[name='select_address_group']").bind('change',function(){
+		if($(this).val()==""){
+			$("input[name='address_group']").val('').show();
+		}else{
+			$("input[name='address_group']").val($(this).val()).hide();
+		}
+	}).trigger('change');
+
+});
+
+function submitAddressBookFrm(key,value){
+	var frmObj = $("form[name='addressBookFrm']");
+	if(typeof key != "undefined" && typeof value != "undefined"){
+		$("input[name='"+key+"']",frmObj).val(value);
+	}
+	frmObj.submit();
+}
+
+</script>
+<style>
+.ud-line{border:0px; border-bottom:2px solid #333; text-align:center;}
+.selected-tab {border:2px solid #333; border-bottom:2px; text-align:center; padding:2px; background-color:#fff}
+.normal-tab {border-top:2px solid #e5e5e5; border-bottom:2px solid #333; text-align:center; padding:2px; background-color:#e5e5e5}
+
+table.in-delivery {border:0px solid #f1f1f1; border-collapse: collapse; }
+table.in-delivery tr.up-line  {border-top:2px solid #000000 }
+table.in-delivery tr.down-line  {border-bottom:2px solid #f1f1f1 }
+table.in-delivery td.list-name { text-align:center; padding:5px;}
+</style>
+
+{?!mobileAjaxCall}
+	{#common_mypage_delivery_top}
+{/}
+
+<div id="wrapper">
+	<form name="addressBookFrm">
+	<input type="hidden" name="tab" value="{_GET.tab}" />
+	<input type="hidden" name="popup" value="{_GET.popup}" />
+
+	<table width="98%" align="center" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+	<tr height="50">
+		<td class="ud-line right">
+			<!--{ ? _GET.popup }-->
+			<span class="desc pdl5">최대 30개까지 보여집니다.</span>
+			<!--{ / }-->
+			{? _GET.tab == '1' || !_GET.tab}
+			<span class="btn large"><input type="button" class="addAddress" value="등록" /></span>
+			{/}
+		</td>
+	</tr>
+	</table>
+
+	<table width="98%" align="center" cellpadding="8">
+	<tr>
+		<td>
+			<select name="view_international" onchange="submitAddressBookFrm()">
+				<option value="" {?_GET.view_international==''}selected{/}>국내/해외</option>
+				<option value="domestic" {?_GET.view_international=='domestic'}selected{/}>국내</option>
+				<option value="international" {?_GET.view_international=='international'}selected{/}>해외</option>
+			</select>
+			{? _GET.tab == '1' || !_GET.tab}
+			<select name="group" onchange="submitAddressBookFrm()">
+				<option value="" {?_GET.group==''}selected{/}>전체그룹</option>
+				{@arr_address_group}
+				<option value="{.address_group}" {?_GET.group==.address_group}selected{/}>{.address_group}</option>
+				{/}
+			</select>
+			{/}
+		</td>
+		<td align="right" height="20px">
+			<select class="custom-select-box-multi" name="order" onchange="submitAddressBookFrm()">
+				<option value="ads" {?_GET.order=='ads' || !_GET.order}selected{/}>최근등록순</option>
+				{? _GET.tab == '1' || !_GET.tab}
+				<option value="desc_dn" {?_GET.order=='desc_dn'}selected{/}>배송지설명↓</option>
+				<option value="desc_up" {?_GET.order=='desc_up'}selected{/}>배송지설명↑</option>
+				{/}
+				<option value="name_dn" {?_GET.order=='name_dn'}selected{/}>받는분↓</option>
+				<option value="name_up" {?_GET.order=='name_up'}selected{/}>받는분↑</option>
+			</select>
+		</td>
+	</tr>
+	</table>
+	</form>
+
+	<table class="info_table_style" width="95%" style="text-align:center; margin-bottom:20px;" align="center" >
+	{? loop }
+		{@ loop}
+			<tr {?.default=='Y'}class="bold" style="background-color:#f7f7ee"{/}>
+			{? .international == 'domestic' }
+			<td  class="its_td_center addressResult" style="padding-left:10px; text-align:left" seq="{.address_seq}">
+				{.recipient_user_name}<br />
+				{? _GET.popup}<span style="cursor:pointer;">{/}
+				({.recipient_zipcode})
+				{? .recipient_address_type == "street"} {.recipient_address_street} {:} {.recipient_address} {/}<br/> {.recipient_address_detail}
+				{?.default=='Y'}<img src="../images/common/icon_default.gif" title="기본" />{/}
+				<br />
+				{.recipient_phone}<br />
+				{.recipient_cellphone}
+				{? _GET.popup}</span>{/}
+			</td>
+			<td class="its_td_center">{? _GET.tab == '1' || !_GET.tab}
+				<span class="btn large mb5"><input type="button" class="updateaddress" value="수정" seq="{.address_seq}" ></span>
+				{:}
+				<span class="btn large mb5"><input type="button" value="자주쓰는 배송지" onclick="change_address_btn({.address_seq})"></span>
+				{/}
+				<span class="btn large mb5"><input type="button" value="삭제" onclick="delete_address_btn({.address_seq})"></span>
+			</td>
+			{:}
+			<td class="its_td_center addressResult" style="padding-left:10px; text-align:left;" seq="{.address_seq}">
+				{.recipient_user_name}<br />
+				{? _GET.popup}<span style="cursor:pointer;">{/}
+				{.international_address},
+				<br/>{.international_town_city},{.international_county},<br/>{.international_postcode},{.international_country}
+				{?.default=='Y'}<img src="../images/common/icon_default.gif" title="기본" />{/}
+				<br />
+				{.international_recipient_phone}<br />
+				{.international_recipient_cellphone}
+				{? _GET.popup}</span>{/}
+			</td>
+			<td class="its_td_center">{? _GET.tab == '1' || !_GET.tab}
+				<span class="btn large mb5"><input type="button" class="updateaddress" value="수정" seq="{.address_seq}" ></span>
+				{:}
+				<span class="btn large mb5"><input type="button" value="자주쓰는 배송지" onclick="change_address_btn({.address_seq})"></span>
+				{/}
+				<span class="btn large mb5"><input type="button" value="삭제" onclick="delete_address_btn({.address_seq})"></span>
+			</td>
+			{/}
+			</tr>
+		{/}
+	{:}
+	<tr>
+
+		<!--{? _GET.tab == '1' || !_GET.tab}-->
+		<td colspan="2" align="center" style="padding:20px 0px 0px 0px;">
+			등록하신 자주쓰는 배송지가 없습니다.
+		<!--{: _GET.tab == '2'}-->
+		<td colspan="2" align="center" style="padding:20px 0px 0px 0px;">
+			최근 배송지가 없습니다.
+		<!--{/}-->
+		</td>
+	</tr>
+	{/}
+	</table>
+	<!-- 페이징 -->
+
+	<div class="paging_navigation" style="margin:auto;">{page.html}</div>
+
+	<!--{? _GET.popup }-->
+	<div class="pdt20 pdb40 center">
+		<span class="btn large"><input type="button" value="닫기" onclick="self.close()"></span>
+	</div>
+	<!--{ / }-->
+
+	<!-- 배송지등록 -->
+	<div id="inAddress" style="display:none;">
+	<form id="in_Address" method="post" >
+	<input type="hidden" name="insert_mode">
+	<input type="hidden" name="address_seq">
+	<div><span style="font-size:11px; padding-left:2px;"> - 자주쓰는 배송지는 최대 30개까지 등록할 수 있습니다.</span></div>
+	<div style="height:10px;"></div>
+	<table width="100%" class="in-delivery" border="0" cellpadding="5" cellspacing="0">
+		<col width="90" />
+		<tr style="height:10px" class="up-line">
+			<td></td>
+			<td ></td>
+		</tr>
+		<tr >
+			<td class="list-name">그룹</td>
+			<td class="fx12">
+				<select name="select_address_group">
+				{@arr_address_group}
+				{?.address_group}<option value="{.address_group}" />{.address_group}</option>{/}
+				{/}
+				<option value="" />새 그룹 만들기</option>
+				</select>
+				<input type="text" name="address_group" value="" size="20" maxlength="20" />
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>
+				<div><label><input type="checkbox" name="save_delivery_address" value="1" /> 기본 배송지로 지정합니다.</label></div>
+			</td>
+		</tr>
+		<tr >
+			<td class="list-name">설명</td>
+			<td class="fx12"><input type="text" name="address_description" value="" size="40" /></td>
+		</tr>
+		<tr>
+			<td class="list-name">받는분</td>
+			<td class="fx12"><input type="text" name="recipient_user_name" value="" size="15" /></td>
+		</tr>
+
+		<tr class="shipping_tr">
+
+			<td class="list-name">국가</td>
+			<td class="fx12">
+			<div style="float:left;padding-right:10px;display:none;" class="international_layer">
+				<select name="international">
+					<!--{ ? shipping_policy.count[0] }-->
+					<option value="0">국내</option>
+					<!--{ / }-->
+					<!--{ ? shipping_policy.count[1] }-->
+					<option value="1">해외</option>
+					<!--{ / }-->
+				</select>
+			</div>
+			</td>
+		</tr>
+
+		<tr class="domestic">
+			<td rowspan="4"  class="list-name" >주소</td>
+			<td class="fx12">
+				<input type="text" name="recipient_zipcode[]" value="" size="10" readonly /> -
+				<input type="text" name="recipient_zipcode[]" value="" size="10" readonly />
+				<span class="btn large black"><button class="hand" type="button" onclick="window.open('../popup/zipcode?mtype=delivery','popup_zipcode','width=600,height=480')">주소찾기</button></span>
+			</td>
+		</tr>
+
+		<tr class="domestic">
+			<td class="fx12">
+				<input type="hidden" name="recipient_address_type" value="" />
+				<input type="text" name="recipient_address_street" value="" size="45" readonly /> <span class="desc">도로명 주소</span>
+			</td>
+		</tr>
+		<tr class="domestic">
+			<td class="fx12"><input type="text" name="recipient_address" value="" size="45" readonly /> <span class="desc">지번 주소</span></td>
+		</tr>
+		<tr class="domestic">
+			<td class="fx12"><input type="text" name="recipient_address_detail" value="" size="45" /> <span class="desc">나머지주소</span></td>
+		</tr>
+		<tr class="domestic">
+			<td  class="list-name">유선전화</td>
+			<td class="fx12"><input type="text" name="recipient_phone[]" value="" size="10" /> - <input type="text" name="recipient_phone[]" value="" size="10" /> - <input type="text" name="recipient_phone[]" value="" size="10" /></td>
+		</tr>
+
+		<tr class="domestic">
+			<td  class="list-name">휴대폰</td>
+			<td class="fx12"><input type="text" name="recipient_cellphone[]" value="" size="10" /> - <input type="text" name="recipient_cellphone[]" value="" size="10" /> - <input type="text" name="recipient_cellphone[]" value="" size="10" /></td>
+		</tr>
+
+		<tr class="international">
+			<td rowspan="6"  class="list-name" valign="top">주소</td>
+			<td class="fx12">
+				<span id="region">
+					<select name="region">
+						{? shipping_policy.policy}
+						<!--{ @ shipping_policy.policy[1][0].region }-->
+						<option value="{.key_}">{.value_}</option>
+						<!--{ / }-->
+						{ / }
+					</select>
+				</span>
+				</td>
+		</tr>
+
+		<tr class="international">
+			<td class="fx12"><input type="text" name="international_address" value="" size="45" /> <span class="desc">주소</span></td>
+		</tr>
+
+		<tr class="international">
+			<td class="fx12"><input type="text" name="international_town_city" value="" size="30" /> <span class="desc">시도</span></td>
+		</tr>
+
+		<tr class="international">
+			<td class="fx12"><input type="text" name="international_county" value="" size="22" /> <span class="desc">주</span></td>
+		</tr>
+
+		<tr class="international">
+			<td class="fx12"><input type="text" name="international_postcode" value="" size="15" /> <span class="desc">우편번호</span></td>
+		</tr>
+
+		<tr class="international">
+			<td class="fx12"><input type="text" name="international_country" value="" size="30" /> <span class="desc">국가</span></td>
+		</tr>
+
+		<tr class="international">
+			<td  class="list-name">유선전화</td>
+			<td class="fx12"><input type="text" name="international_recipient_phone[]" value="" size="10" /> - <input type="text" name="international_recipient_phone[]" value="" size="10" /> - <input type="text" name="international_recipient_phone[]" value="" size="10" /></td>
+		</tr>
+
+		<tr class="international">
+			<td  class="list-name">휴대폰</td>
+			<td class="fx12"><input type="text" name="international_recipient_cellphone[]" value="" size="10" /> - <input type="text" name="international_recipient_cellphone[]" value="" size="10" /> - <input type="text" name="international_recipient_cellphone[]" value="" size="10" /></td>
+		</tr>
+		<tr style="height:10px" class="down-line">
+			<td ></td>
+			<td ></td>
+		</tr>
+	</table>
+	<div style="height:10px;"></div>
+	<table width="100%" cellpadding="0" cellspacing="0">
+		<tr>
+			<td align="center"><span class="black btn large"><button id="insert_address" type="button">확인</button></span></td>
+		</tr>
+	</table>
+	<div style="height:40px;"></div>
+	</form>
+	</div>
+</div>

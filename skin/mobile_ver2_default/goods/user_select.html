@@ -1,0 +1,143 @@
+<script type="text/javascript">
+function keyMoveSelectedItem(e){
+	if($("div#targetList div.selectedGoods").length){
+		var sArr = new Array();
+		if(e.keyCode == '38'){ // up
+			$("div#{_GET.displayId} div#targetList div.targetGoods").each(function(idx){
+				if( $(this).hasClass("selectedGoods") ){
+					idx--;
+					if( idx >= 0 ){
+						$("div#{_GET.displayId} div#targetList div.targetGoods").eq(idx).before( $(this) );
+					}
+				}
+			});
+		}
+		if(e.keyCode == '40'){ // downt
+			var i = 0;
+			$("div#{_GET.displayId} div#targetList div.targetGoods").each(function(idx){
+				if( $(this).hasClass("selectedGoods") ){
+					sArr[i] = idx;
+					i++;
+				}
+			});
+			for(var i=sArr.length-1;i>=0;i--){
+				var idx = sArr[i];
+				var obj = $("div#{_GET.displayId} div#targetList div.targetGoods").eq(idx);
+				idx++;
+				if( idx < $("div#{_GET.displayId} div#targetList div.targetGoods").length ){
+					$("div#{_GET.displayId} div#targetList div.targetGoods").eq(idx).after( obj );
+				}
+			}
+		}
+		select_{_GET.displayId}.apply_layer();
+	}
+}
+
+document.onkeydown = function(){keyMoveSelectedItem(event);};
+
+function targetGoods_click(obj){
+	obj.toggleClass('selectedGoods');
+}
+
+$(document).ready(function() {
+
+	/* 카테고리 불러오기 */
+	category_select_load('','selectCategory1','');
+	$("div#{_GET.displayId} select[name='selectCategory1']").bind("change",function(){
+		category_select_load('selectCategory1','selectCategory2',$(this).val());
+		category_select_load('selectCategory2','selectCategory3',"");
+		category_select_load('selectCategory3','selectCategory4',"");
+	});
+	$("div#{_GET.displayId} select[name='selectCategory2']").bind("change",function(){
+		category_select_load('selectCategory2','selectCategory3',$(this).val());
+		category_select_load('selectCategory3','selectCategory4',"");
+	});
+
+	$("div#{_GET.displayId} select[name='selectCategory3']").bind("change",function(){
+		category_select_load('selectCategory3','selectCategory4',$(this).val());
+	});
+
+	$("div#{_GET.displayId} div.targetGoods").live('dblclick',function(){
+		$(this).remove();
+		select_{_GET.displayId}.apply_layer();
+	});
+
+});
+</script>
+<style>
+.selectedGoods{ background-color:#e7f2fc; }
+
+/* 검색폼 양식 */
+div.search-form-container {background:#e6e9e9; padding:7px 0 10px 0;}
+div.search-form-container table.search-form-table	{margin:auto;}
+div.search-form-container table.sf-option-table th	{height:25px; text-align:left; padding-right:10px;}
+div.search-form-container table.sf-keyword-table {width:100%; border:2px solid #000; background-color:#fff; table-layout:fixed;}
+div.search-form-container table.sf-keyword-table .sfk-td-txt {padding-right:5px;}
+div.search-form-container table.sf-keyword-table .sfk-td-txt input {width:100%; height:22px; border:0px; margin:0px; background-color:#fff; line-height:22px; text-align:center;}
+div.search-form-container table.sf-keyword-table .sfk-td-btn {padding-left:2px; width:25px; text-align:center; border-left:1px solid #ccc;}
+div.search-form-container table.sf-keyword-table .sfk-td-btn button {width:22px; height:22px; border:0px; background:url('../images/common/btn_search.gif') no-repeat center center; cursor:pointer}
+div.search-form-container table.sf-keyword-table .sfk-td-btn button span {display:none}
+</style>
+<div>
+<div id="goodsSelectorSearch" class="search-form-container" >
+
+<form action="/goods/user_select_list" method="get" target="select_{_GET.displayId}" id="selectform{_GET.displayId}" >
+	<input type="hidden" name="inputGoods" value="{_GET.inputGoods}" />
+	<input type="hidden" name="displayId" value="{_GET.displayId}" />
+	<input type="hidden" name="goods_review" value="{_GET.goods_review}" />
+	<input type="hidden" name="order3month" value="{order3month}" />
+	<input type="hidden" name="order_seq" value="{_GET.order_seq}" />
+
+	<div align="center">
+	<table class="sf-keyword-table" style="width:{? _GET.goods_review }200px;{:}250px;{/}">
+	<tr>
+		<td class="sfk-td-txt"><input type="text" name="selectGoodsName" value="" title="상품명(매입상품명), 상품코드"  /></td>
+		<td class="sfk-td-btn"><button type="submit" id="selectSearchButton"><span>검색</span></button></td>
+	</tr>
+	</table>
+	</div>
+	<div style="padding-top:5px;" align="center">
+		<select name="selectCategory1">
+		<option value="">1차 카테고리</option>
+		</select>
+		<select name="selectCategory2">
+		<option value="">2차 카테고리</option>
+		</select>
+		<br />
+		<select name="selectCategory3">
+		<option value="">3차 카테고리</option>
+		</select>
+		<select name="selectCategory4">
+		<option value="">4차 카테고리</option>
+		</select>
+
+
+		<div class="pdt5">
+			가격대 : <input type="text" name="selectStartPrice" size="6" value="" class="onlynumber"  /> ~
+			<input type="text" name="selectEndPrice" size="6" value="" class="onlynumber"  />
+		</div>
+		<div class="pdt5">
+			{? !_GET.isadmin }{ ? defined('__ISUSER__') }<label ><input type="checkbox" name="mborder" value="1" {? order3month }  checked="checked" {/} onclick="$('#selectform{_GET.displayId}').submit();">내가 구매한상품</label>{:}<label ><input type="checkbox" name="mborder" value="1" onclick="alert('로그인 후 이용해 주세요.')">내가 구매한상품</label>{/}{/}
+		</div>
+	</div>
+</form>
+</div>
+<div style="height:1px;"></div>
+<table style="width:100%">
+<col width="50%">
+<col width="50%">
+<tr>
+	<td valign="top">
+	<div style="background-color:#f1f1f1; font-weight:normal;border-collapse:collapse; border:1px solid #aaa;height:10px;padding:10px">검색된 상품 리스트 <span class="desc">상품을 클릭하면 선택됩니다.</span></div>
+	<iframe width="100%" height="600" frameborder="0" src="/goods/user_select_list?iframe=1&inputGoods={_GET.inputGoods}&displayId={_GET.displayId}&bulkorder={_GET.bulkorder}&goods_review={_GET.goods_review}{? order3month }&mborder=1{/}&order3month={order3month}&order_seq={_GET.order_seq}" name="select_{_GET.displayId}" id="select_{_GET.displayId}"></iframe>
+	</td>
+	{? !_GET.goods_review }
+	<td valign="top">
+	<div style="background-color:#f1f1f1; font-weight:normal;border-collapse:collapse; border:1px solid #aaa;height:10px;padding:10px">선택된 상품 리스트 <span class="desc">상품을 더블클릭하면 제외됩니다. 노출순서는 클릭 후 키보드 방향키 ↑↓로변경하세요.</span></div>
+	<div id="targetList" style="height:600px;overflow:auto;"></div>
+	</td>
+	{:}<div id="targetList" style="height:600px;overflow:auto;" class="hide"></div>
+	{/}
+</tr>
+</table>
+</div>

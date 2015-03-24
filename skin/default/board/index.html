@@ -1,0 +1,91 @@
+<div id="boardlayout" >
+
+		<!-- 본문내용 시작 -->
+		<link type="text/css" rel="stylesheet" charset="utf-8" href="{skindir}/board.css" />
+		<script type="text/javascript">
+		//<![CDATA[
+		var board_id = '{_GET.id}';
+		var boardlistsurl = '{boardurl->lists}';
+		var boardwriteurl = '{boardurl->write}';
+		var boardviewurl = '{boardurl->view}';
+		var boardmodifyurl = '{boardurl->modify}';
+		var boardreplyurl = '{boardurl->reply}';
+		var boardrpermurl = '{boardurl->perm}';
+		var gl_isuser = false;
+		{ ? defined('__ISUSER__') }
+		gl_isuser = '{=defined('__ISUSER__')}';
+		{ / }
+		var return_url = '{=urlencode(_SERVER.REQUEST_URI)}';
+		//]]>
+		</script>
+		<script type="text/javascript" src="/app/javascript/js/board.js?v=7"></script>
+		{? commentskinjsuse }
+		<script type="text/javascript" src="/app/javascript/js/board_comment.js?v=4"  charset="utf-8"></script>
+		{/}
+		<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" ></script>
+		<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"  charset="utf-8"></script>
+		<div id="bbslist">{#skin}</div>
+		<!-- 본문내용 끝 //-->
+</div>
+
+<!-- {? viewlist != 'view' } -->
+<div id="CmtBoardPwCkNew" class="hide BoardPwCk">
+	<div class="msg">
+		<h3> 비밀번호 확인</h3>
+		<div>댓글/답글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="BoardPwcheckFormNew" id="CmtBoardPwcheckFormNew" method="post" >
+	<input type="hidden" name="modetype" id="cmtmodetype_new" value="" />
+	<input type="hidden" name="seq" id="cmt_pwck_seq_new" value="" />
+	<input type="hidden" name="cmtseq" id="cmt_pwck_cmtseq_new" value="" />
+	<input type="hidden" name="cmtparentseq" id="cmt_pwck_cmtreplyseq_new" value="" />
+	<input type="hidden" name="cmtreplyidx" id="cmt_pwck_cmtreplyidx_new" value="" />
+	<div class="ibox">
+		<input type="password" name="pw" id="cmt_pwck_pw_new" class="input" />
+		<input type="button" id="CmtBoardPwcheckBtnNew" value=" 확인 " class="btnblue" />
+		<input type="button" value=" 취소 " class="btngray" onclick="$('#CmtBoardPwCkNew').dialog('close');" />
+	</div>
+	</form>
+</div>
+<!-- {/} -->
+
+{? _GET.iframe }
+<script type="text/javascript">
+$(document).ready(function(){
+	$(document).resize(function(){
+	  $('#'+board_id+'_frame',parent.document).height($('#boardlayout').height()+50);
+	 }).resize();
+});
+function iframeset(){
+	  $('#'+board_id+'_frame',parent.document).height($('#boardlayout').height()+50);
+}
+</script>
+{/}
+
+
+<script type="text/javascript">
+function getAuthLogin(){
+	{? defined('__ISUSER__') === true }
+		openDialogAlert('접근권한이 없습니다.\n관리자에게 문의하여 주시길 바랍니다.','450','140');
+	{:}
+		openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){location.href="/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+	{/}
+}
+
+function getLogin(){
+	{? defined('__ISUSER__') === true }
+		openDialogAlert('해당 서비스를 이용하시려면 관리자에게 문의하여 주시길 바랍니다.','450','140');
+	{:}
+		openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){location.href="/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+	{/}
+}
+
+function getMbLogin(){
+	{? defined('__ISUSER__') === true }
+		openDialogAlert('글작성자만 이용가능합니다.','400','140');
+	{:}
+		openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','155',function(){location.href="/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+	{/}
+}
+
+</script>

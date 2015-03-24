@@ -1,0 +1,42 @@
+<!--{?userInfo.member_seq}-->
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>내정보/<!--{? joinform.use_f  && APP_VER != "2.0" }-->SNS친구초대/<!--{ / }-->탈퇴</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../../images/design/btn_back.png" width="22" height="22" /></a>
+</div>
+<!-- 상단 마이 리스트 버튼바 -->
+<div class="sub_title_button_bar">
+	<table class="sub_title_button_tb" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="33.3%" onclick="location.href='myinfo'" {?uri_string()=='mypage/myinfo'}class="sel"{/} >
+			내 정보 수정
+		</td>
+		<!--{? joinform.use_f  && APP_VER != "2.0" }-->
+			<!--{? empty(sns_f) }-->
+				<td width="33.3%" id="facebookmbconnectalert" {?uri_string()=='mypage/myfbrecommend'}class="sel"{/}>
+					Facebook<br/>
+					친구초대
+				</td>
+			<!--{:}-->
+				<td width="33.3%" onclick="location.href='myfbrecommend'" {?uri_string()=='mypage/myfbrecommend'}class="sel"{/}>
+					Facebook<br/>
+					친구초대
+				</td>
+			<!--{ / }-->
+		<!--{ / }-->
+		<td width="33.3%" onclick="location.href='withdrawal'" {?uri_string()=='mypage/withdrawal'}class="sel"{/}>
+			회원탈퇴
+		</td>
+	</tr>
+	</table>
+</div>
+<!--{/}-->
+
+<script type="text/javascript">
+$(document).ready(function() {
+	//기존멤버-통합하기
+	$("#facebookmbconnectalert").click(function(){
+		openDialogConfirm('facebook 친구들을 쇼핑몰에 초대하기 위해서는 facebook계정으로 쇼핑몰을 이용해 주셔야 합니다.<br>회원정보수정에서 "SNS계정사용"을 수락해 주세요. <br>친구들을 초대하시면 다양한 혜택을 받으실 수 있습니다.<br>지금 회원정보수정 화면으로 이동하시겠습니까?','650','200',function(){document.location.href='../mypage/myinfo'},function(){});
+	});
+});
+</script>
