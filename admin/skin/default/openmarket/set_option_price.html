@@ -1,0 +1,331 @@
+{ ? openType == 'popup' || openType == 'frame' }
+{ #common_html_header }
+{ / }
+<style type="text/css">
+.top-set-list-type {width:100%;text-align:center;margin:10px 0; line-height:30px;font-size:14px;font-weight:bold;}
+.cut-price-lay {margin:20px;width:100%;text-align:center;}
+.bottom-btn-lay {margin:15px;width:100%;text-align:center;}
+.price-list-table-lay {height:350px;overflow:auto;}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+	// 자동/수동 선택
+	$("select[name='cal_type']").change(function(){
+		if	($(this).val() == 'manual'){
+			$("div.mall-auto").hide();
+			$("div.mall-manual").show();
+		}else{
+			$("div.mall-auto").show();
+			$("div.mall-manual").hide();
+		}
+	});
+
+	// 적용 대상 판매몰 선택 시
+	$("select[name='top_set_mall']").change(function(){
+		var idx	= 0;
+		$("select[name='top_sel_mall']").find("option").each(function(){
+			if	(idx > 0)	$(this).remove();
+			idx++;
+		});
+		if	($(this).val() != 'all'){
+			$("select[name='top_sel_mall']").append($(this).find("option:selected").clone());
+		}
+		$(".set-mall-lay").hide();
+		$(".set-mall-"+$("select[name='top_sel_mall']").val()).show();
+	});
+
+	// 적용 마켓 선택
+	$("select[name='top_sel_mall']").change(function(){
+		var target	= $("select[name='top_set_mall']").val();
+		if	(target == 'all'){
+			if	($(this).val() != 'direct')
+				$(this).find("option[value='direct']").attr('selected', true);
+		}else{
+			if	($(this).val() != 'direct' && target != $(this).val())
+				$(this).find("option[value='"+target+"']").attr('selected', true);
+		}
+
+		$(".set-mall-lay").hide();
+		$(".set-mall-"+$(this).val()).show();
+	});
+
+	$("button#calculate_market").click(function(){
+		var cal_type				= $("select[name='cal_type']").val();
+		var target					= $("select[name='top_set_mall']").val();
+		var chg_set					= $("select[name='top_sel_mall']").val();
+		var eachName				= '';
+		var revision_val			= 0;
+		var revision_unit			= '';
+		var revision_type			= '';
+		var	price					= 0;
+		var	consumer_price			= 0;
+		var	supply_price			= 0;
+		var market_price			= 0;
+		var market_consumer_price	= 0;
+		var market_supply_price		= 0;
+		var revision_str			= '';
+
+		if	(chg_set == 'direct'){
+			revision_val	= $(".set-mall-direct").find("input[name='set_revision_val']").val();
+			revision_unit	= $(".set-mall-direct").find("select[name='set_revision_unit']").val();
+			revision_type	= $(".set-mall-direct").find("select[name='set_revision_type']").val();
+		}else{
+			var obj			= $(".set-mall-"+chg_set).find("select[name='revision_set']");
+			revision_val	= obj.find('option:selected').val();
+			revision_unit	= obj.find('option:selected').attr('revisionUnit');
+			revision_type	= obj.find('option:selected').attr('revisionType');
+		}
+
+		if	(!revision_val)	revision_val	= 0;
+		if	(cal_type == 'manual'){
+			if	(target == 'all')	eachName	= $(".mall-manual");
+			else					eachName	= $(".mall-manual_"+target);
+			eachName.each(function(){
+				market_price			= 0;
+				market_consumer_price	= 0;
+				market_supply_price		= 0;
+				price					= $(this).closest('tr').find('input.shop_sale_price').val();
+				consumer_price			= $(this).closest('tr').find('input.shop_consumer_price').val();
+				supply_price			= $(this).closest('tr').find('input.shop_supply_price').val();
+				if	(price > 0)
+					market_price			= calculate_price(price, revision_val, revision_unit, revision_type);
+				if	(consumer_price > 0)
+					market_consumer_price	= calculate_price(consumer_price, revision_val, revision_unit, revision_type);
+				if	(supply_price > 0)
+					market_supply_price		= calculate_price(supply_price, revision_val, revision_unit, revision_type);
+
+				$(this).find("input.market-price").val(market_price);
+				$(this).find("input.market-consumer-price").val(market_consumer_price);
+				$(this).find("input.market-supply-price").val(market_supply_price);
+			});
+
+		}else{
+			if	(target == 'all')	eachName	= $(".mall-auto");
+			else					eachName	= $(".mall-auto_"+target);
+
+			// 노출 문자열
+			if	(revision_type == 'M')		revision_str	+= '(-) ';
+			else							revision_str	+= '(+) ';
+			revision_str	+= comma(revision_val);
+			if	(revision_unit == 'won')	revision_str	+= '원';
+			else							revision_str	+= '%';
+
+			eachName.each(function(){
+				$(this).find("input.revision_val").val(revision_val);
+				$(this).find("input.revision_type").val(revision_type);
+				$(this).find("input.revision_unit").val(revision_unit);
+				$(this).find(".mall-auto-config").html(revision_str);
+			});
+		}
+
+	});
+});
+
+// 변경 금액 계산
+function calculate_price(org_price, revision_val, revision_unit, revision_type){
+
+	var add_price	= '';
+	var res_price	= '';
+
+	if	(revision_unit == 'won'){
+		add_price	= revision_val;
+	}else{
+		add_price	= Math.floor(org_price * (revision_val / 100));
+	}
+
+	if	(revision_type == 'M')	res_price	= parseInt(org_price) - parseInt(add_price);
+	else						res_price	= parseInt(org_price) + parseInt(add_price);
+
+	{ ? linkage.cut_price_use == 'y' }
+	// 절사 처리
+	res_price	= Math.{linkage.cut_price_type}(res_price / {linkage.cut_price_unit}) * {linkage.cut_price_unit};
+	{ / }
+
+	return res_price;
+}
+
+// 결과 처리 함수 호출 ( 임시번호 return )
+function save_result(tmp_seq){
+	{ ? openType == 'popup' }
+		opener.{resfunc}(tmp_seq);
+		self.close();
+	{ : openType == 'frame' }
+		parent.{resfunc}(tmp_seq);
+		// close는 결과를 받은 함수에서 처리
+	{ : }
+		{resfunc}(tmp_seq);
+		// close는 결과를 받은 함수에서 처리
+	{ / }
+}
+</script>
+<div class="option-revision-lay">
+	<form name="marketFrm" method="post" action="../openmarket_process/save_goods_option_tmp" target="marketFrame">
+	<div class="top-set-list-type">
+		현재 : 
+		<select name="cal_type">
+			<option value="auto" { ? cal_type == 'auto' }selected{ / }>자동 계산 방식</option>
+			<option value="manual" { ? cal_type == 'manual' }selected{ / }>수동 입력 방식</option>
+		</select>
+	</div>
+	<div class="price-list-table-lay">
+		<table class="info-table-style" style="min-width:100%;width:{=((count(opt[0].option_divide_title)*80)+(count(mall)*100) + 100)}px;">
+		<colgroup>
+		<!--{ @ opt[0].option_divide_title }-->
+			<col width="80" />
+		<!--{ : }-->
+			<col width="80" />
+		<!--{ / }-->
+			<col width="100" />
+		<!--{ @ mall }-->
+			<col width="100" />
+		<!--{ : }-->
+			<col />
+		<!--{ / }-->
+		</colgroup>
+		<thead>
+		<tr height="50">
+			<th class="its-th-align" {?count(opt[0].option_divide_title)>1}colspan="{=count(opt[0].option_divide_title)}"{/}>필수옵션</th>
+			<th class="its-th-align" rowspan="2">할인가(판매가)</th>
+			<th class="its-th-align left pdl10" {?count(mall)>1}colspan="{=count(mall)}"{/}>
+				<select name="top_set_mall">
+					<option value="all">모든 판매마켓</option>
+					<!--{ ? mall }-->
+						<!--{ @ mall }-->
+					<option value="{.mall_code}">{.mall_name}</option>
+						<!--{ / }-->
+					<!--{ / }-->
+				</select>
+				판매가를→
+				<select name="top_sel_mall">
+					<option value="direct">직접입력</option>
+				</select>
+				<span class="set-mall-lay set-mall-direct">
+					<input type="text" size="3" name="set_revision_val" />
+					<select name="set_revision_unit">
+						<option value="percent">%</option>
+						<option value="won">원</option>
+					</select>
+					<select name="set_revision_type">
+						<option value="P">+조정</option>
+						<option value="M">-조정</option>
+					</select>
+				</span>
+				<!--{ ? mall }-->
+					<!--{ @ mall }-->
+				<span class="set-mall-lay set-mall-{.mall_code} hide">
+					<select name="revision_set">
+						<!--{ @ .revision }-->
+						<option value="{..revision_val}" revisionUnit="{..revision_unit}" revisionType="{..revision_type}" {? .save_type=='Y'}{?..save_type=='Y'}selected{/}{:}{?..default_yn=='Y'}selected{/}{/}>{..revision_str}</option>
+						<!--{ / }-->
+					</select>
+				</span>
+					<!--{ / }-->
+				<!--{ / }-->
+				<span class="btn small red"><button type="button" id="calculate_market">적용</button></span>
+			</th>
+		</tr>
+		<tr>
+		<!--{ @ opt[0].option_divide_title }-->
+			<th class="its-th-align">{.value_}</th>
+		<!--{ : }-->
+			<th class="its-th-align"></th>
+		<!--{ / }-->
+
+		<!--{ ? count(mall) > 0 }-->
+			<!--{ @ mall }-->
+			<th class="its-th-align">{.value_['mall_name']}</th>
+			<!--{ / }-->
+		<!--{ / }-->
+		</tr>
+		</thead>
+		<tbody>
+		<!--{ @ opt }-->
+			<!--{ ? .index_ == 0 }-->
+		<input type="hidden" name="tmp_seq" value="{.tmp_seq}" />
+		<input type="hidden" name="option_tmp_seq" value="{.tmp_no}" />
+		<input type="hidden" name="goods_seq" value="{.goods_seq}" />
+		<input type="hidden" name="option_title" value="{.option_title}" />
+			<!--{ / }-->
+		<input type="hidden" name="option1[{.option_seq}]" value="{.option1}" />
+		<input type="hidden" name="option2[{.option_seq}]" value="{.option2}" />
+		<input type="hidden" name="option3[{.option_seq}]" value="{.option3}" />
+		<input type="hidden" name="option4[{.option_seq}]" value="{.option4}" />
+		<input type="hidden" name="option5[{.option_seq}]" value="{.option5}" />
+		<tr>
+				<!--{ @ .opts }-->
+			<td class="its-td-align center">{ ..value_ }</td>
+				<!--{ : }-->
+			<td class="its-td-align center"></td>
+				<!--{ / }-->
+			<td class="its-td-align center org-price-td">
+				{=number_format(.price)}
+				<input type="hidden" name="option_seq[]" value="{.option_seq}" />
+				<input type="hidden" name="shop_consumer_price[{.option_seq}]" class="shop_consumer_price" value="{.consumer_price}" />
+				<input type="hidden" name="shop_supply_price[{.option_seq}]" class="shop_supply_price" value="{.supply_price}" />
+				<input type="hidden" name="shop_sale_price[{.option_seq}]" class="shop_sale_price" value="{.price}" />
+			</td>
+				<!--{ @ .mall }-->
+			<td class="its-td-align center">
+					<!--{ ? .index_ == 0 && ..index_ == 0 }-->
+				<input type="hidden" name="linkage_seq" value="{..linkage_seq}" />
+					<!--{ / }-->
+					<!--{ ? .index_ == 0 }-->
+				<input type="hidden" name="mall_name[{..key_}]" value="{..mall_name}" />
+					<!--{ / }-->
+
+				<div class="mall-auto mall-auto_{..key_} { ? cal_type == 'manual' }hide{ / }">
+					<!--{ ? .index_ == 0 }-->
+					<input type="hidden" name="revision_val[{..key_}]" class="revision_val" value="{ ..revision_val }" />
+					<input type="hidden" name="revision_type[{..key_}]" class="revision_type" value="{ ..revision_type }" />
+					<input type="hidden" name="revision_unit[{..key_}]" class="revision_unit" value="{ ..revision_unit }" />
+					<span class="mall-auto-config">
+						<!--{ ? ..revision_type == 'M' }-->(-)<!--{ : }-->(+)<!--{ / }-->
+						{ ..revision_val }
+						<!--{ ? ..revision_unit == 'won' }-->원<!--{ : }-->%<!--{ / }-->
+					</span>
+					<!--{ : }-->
+					상동
+					<!--{ / }-->
+				</div>
+				<div class="mall-manual mall-manual_{..key_} { ? cal_type != 'manual' }hide{ / }">
+					<input type="text" size="6" name="market_price[{.option_seq}][{..key_}]" value="{?mgprice[.option_seq][..key_]}{mgprice[.option_seq][..key_]['sale_price']}{:}{.price}{/}" class="market-price" />
+					<input type="hidden" name="market_consumer_price[{.option_seq}][{..key_}]" class="market-consumer-price" value="{?mgprice[.option_seq][..key_]}{mgprice[.option_seq][..key_]['consumer_price']}{:}{.consumer_price}{/}" />
+					<input type="hidden" name="market_supply_price[{.option_seq}][{..key_}]" class="market-supply-price" value="{?mgprice[.option_seq][..key_]}{mgprice[.option_seq][..key_]['supply_price']}{:}{.supply_price}{/}" />
+				</div>
+			</td>
+				<!--{ / }-->
+		</tr>
+		<!--{ / }-->
+		</tbody>
+		</table>
+	</div>
+
+	<!--{ ? linkage.cut_price_use == 'y' }-->
+	<div class="cut-price-lay">
+		<div>
+			조정된 가격을 
+			{ ? (linkage.cut_price_unit / 10) == '10' }십원{ : (linkage.cut_price_unit / 10) == '100' }백원{ : (linkage.cut_price_unit / 10) == '1000' }천원{ : (linkage.cut_price_unit / 10) == '10000' }만원{ : }일원{ / }자리에서 
+			{ ? linkage.cut_price_type == 'ceil' }올림{ : linkage.cut_price_type == 'floor' }버림{ : }반올림{ / }하여 절사처리합니다.
+		</div>
+		<br style="line-height:10px;" />
+		<div class="desc">
+			설정변경은 
+			<span class="highlight-link hand" onclick="window.open('../openmarket/config');">판매마켓 설정</span>
+			에서 가능합니다. 
+		</div>
+	</div>
+	<!--{ / }-->
+
+	<div class="bottom-btn-lay">
+		<span class="btn large black"><button type="submit">  저 장  </button></span>
+	</div>
+	</form>
+</div>
+
+<iframe name="marketFrame" id="marketFrame" width="100%" frameborder="0" height="0" class="hide"></iframe>
+
+{ ? openType == 'popup' || openType == 'frame' }
+{ #common_html_footer }
+{ / }

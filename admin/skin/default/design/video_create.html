@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>동영상 첨부</title>
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/editor/css/popup.css" />
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+<script type="text/javascript" src="/app/javascript/jquery/jquery.min.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	$(".submit").click(function(){
+		var encoding_screen = '';
+		if( $("#encoding_screen0").val() && $("#encoding_screen1").val() ) {
+			encoding_screen = $("#encoding_screen0").val()+'|'+$("#encoding_screen1").val();
+		}else{
+			encoding_screen = '400|300';
+		}
+		$("#encoding_screen").val(encoding_screen);
+		doSubmit(event, document.designVideo);
+		if( !$("#txtFileName").val() ) {
+			document.designVideo.submit();
+		}
+	});
+
+
+	{? videook == true &&  videoerror == false && uccdomainembedsrc }
+		window.opener.load_video_list();
+		window.self.close();
+	{:  videook == true &&  videoerror == true }
+		alert(' Error: {error}');
+	{/}
+});
+
+</script>
+<style>
+.desc{color:#747474; font-size:11px; letter-spacing:-1px;}
+</style>
+</head>
+<body>
+<div class="wrapper">
+	<div class="header">
+		<h1>동영상 첨부</h1>
+	</div>
+	<div class="body">
+	<form name="designVideo" id="designVideo" method="post" enctype="multipart/form-data" action="./video_create" >
+		<dl class="alert">
+		    <dt>동영상</dt>
+		    <dd>
+				<!-- API 추가 -->
+					<script type="text/javascript" src="{uccdomain}"></script>
+				<!-- API 완료 -->
+			</dd>
+		    <dt>관리자용타이틀</dt>
+		    <dd><input type="text" name="memo" ></dd>
+			 <dt>인코딩 품질과 크기</dt>
+		    <dd>
+			품질 : <input type="text" name="encoding_speed"  id="encoding_speed"  size="3" value=" " class="line onlynumber "   /> Kbps
+			<span class="desc">예) 200, 400(기본), 600, 800, 1000 </span><br/>
+			크기 : <input type="text" name="encoding_screen[]"  id="encoding_screen0"  size="3" value="{? encoding_screen0}{encoding_screen0}{:}400{/}" class="line onlynumber "   /> Pixel X <input type="text" name="encoding_screen[]"  id="encoding_screen1"  size="3" value="{? encoding_screen1 }{encoding_screen1}{:}300{/}" class="line onlynumber "   />  Pixel
+			<span class="desc">예) 320X240, 400X300, 640|480, 720|480 </span>
+			</dd>
+		</dl>
+	</div>
+	<div class="footer">
+		<p><a onclick="window.self.close();" title="닫기" class="close">닫기</a></p>
+		<ul>
+			<li class="submit"><a title="등록" class="btnlink">등록</a> </li>
+			<li class="cancel"><a onclick="window.self.close();" title="취소" class="btnlink">취소</a></li>
+		</ul>
+	</div>
+
+</div>
+</body>
+</html>

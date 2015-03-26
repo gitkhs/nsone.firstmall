@@ -1,0 +1,78 @@
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>반품내역</a></h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.gif" /></a>
+</div>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="10"></td></tr>
+<tr><td><span class="desc">- 고객님의 반품내역입니다.</span></td></tr>
+<tr><td><span class="desc">- 반품번호를 클릭하면 상세내역을 확인하실 수 있습니다.</span></td></tr>
+</table>
+
+<div style="height:30px"></div>
+<!-- List -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td align="right">
+		total <strong>{=number_format(page.totalcount)}</strong>
+	</td>
+</tr>
+</table>
+<div style="height:8px;"></div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+<thead>
+<tr>
+	<th width="90">날짜</th>
+	<th width="96">반품번호</th>
+	<th width="96">반품종류</th>
+	<th>상품명</th>
+	<th width="90">반품완료일</th>
+	<th width="180">상태</th>
+</tr>
+</thead>
+<tbody>
+<!--{ @ record }-->
+<tr>
+	<td class="cell">{=date('Y-m-d',strtotime(.regist_date))}</td>
+	<td class="cell"><a href="return_view?return_code={.return_code}"><strong><u>{.return_code}</u></strong></a></td>
+	<td class="cell">{.mtype}</td>
+	<td class="cell left">
+		<div style="font-size:12px; line-height:20px;">{.goods_name}</div>
+		<!--{ ? item_cnt > 1 }--><div style="color:#999">외 {=item_cnt-1}건</div><!--{ / }-->
+	</td>
+	<td class="cell">{.mreturn_date}</td>
+	<td class="cell">
+	{.mstatus} <a href="/mypage/myqna_write?category={=urlencode('반품문의')}">[문의]</a>
+	</td>
+</tr>
+<!--{ / }-->
+</tbody>
+</table>
+
+<div style="height:30px"></div>
+
+<table align="center" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+		<div class="paging_navigation">
+			<!--{ ? page.first }--><a href="?page={page.first}&amp;{page.querystring}" class="first">◀ 처음</a><!--{ / }-->
+			<!--{ ? page.prev }--><a href="?page={page.prev}&amp;{page.querystring}" class="prev">◀ 이전</a><!--{ / }-->
+			<!--{ @ page.page }-->
+				<!--{ ? page.nowpage ==  .value_ }-->
+					<a href="?page={.value_}&amp;{page.querystring}" class="on">{.value_ }</a>
+				<!--{ : }-->
+					<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? page.next }--><a href="?page={page.next}&amp;{page.querystring}" class="next">다음 ▶</a><!--{ / }-->
+			<!--{ ? page.last }--><a href="?page={page.last}&amp;{page.querystring}" class="last">마지막 ▶</a><!--{ / }-->
+		</div>
+	</td>
+</tr>
+</table>
+<div style="height:50px"></div>
+<div align="center">
+<img src="../images/design/img_return_step.gif" />
+</div>
+

@@ -1,0 +1,194 @@
+{ #layout_header }
+<style type="text/css">
+div.goods-view-lay { width:100%;margin:30px 0;text-align:center;font-weight:bold;font-size:15px; }
+div.result-bigdata-lay {width:100%;text-align:center;}
+.active {color: #000;font-size: 11px;letter-spacing: -1px;}
+
+
+/* 빅데이터 설정 영역 */
+div.set-bigdata-lay {width:100%;text-align:center;}
+div.set-bigdata-lay table.set-bigdata-table {width:100%;border:2px solid #8d8d8d;}
+div.set-bigdata-lay table.set-bigdata-table th {background-color:#f1f1f1;border-bottom:1px solid #dadada;border-right:1px solid #dadada;}
+div.set-bigdata-lay table.set-bigdata-table .end-line {border-right:none;}
+div.set-bigdata-lay table.set-bigdata-table .last-line {border-bottom:none;}
+div.set-bigdata-lay table.set-bigdata-table td {height:25px;border-bottom:1px solid #dadada;border-right:1px solid #dadada;text-align:left;padding-left:10px;}
+div.set-bigdata-lay table.set-bigdata-table td.center {text-align:center !important;padding-left:0;padding-right:0;}
+div.set-bigdata-lay table.set-bigdata-table td.standard-line {font-weight:bold;color:red;}
+div.set-bigdata-lay table.set-bigdata-table td.standard-line select {font-weight:bold;color:red;}
+div.set-bigdata-lay table.set-bigdata-table td table {border:none;}
+div.set-bigdata-lay table.set-bigdata-table td table td {border:none;}
+.btn-lay {text-align:center !important;padding:10px 0;}
+.btn-disable {-moz-opacity:0.5; -khtml-opacity:0.5;-ms-filter:"alpha(opacity:0.5)"; filter:alpha(opacity:50); opacity:0.5;}
+select.disable{color:#747474;}
+div.result-bigdata-title {margin-top:60px;border-top:1px solid #828282;border-bottom:1px solid #e3e3e3;line-height:58px;font-size:12px;color:#000;}
+div.result-bigdata-title img {margin:10px;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+
+	{ ? !chkBigdata }
+	openDialog("업그레이드 안내", "freefacebookService", {"width":"550","height":"400","noClose":"true"});
+	{ / }
+
+	// 구분 변경
+	$("select.tkind").change(function(){
+		var kind	= $(this).closest("div.set-bigdata-lay").attr('kindName');
+		$("span."+kind+"-title-text").html($(this).find('option:selected').html());
+	}).change();
+
+	// 저장
+	$("button.submit-form").click(function(){
+		if	(!$(this).closest('span').hasClass('btn-disable'))
+			$("form#bigdataFrm").submit();
+	});
+
+	// 안내 팝업
+	$("button.btn-bigdata-info").click(function(){
+		openDialog('빅데이터 저장기간 안내', 'bigdata_info_pop', {'width':'450','height':'200'});
+	});
+});
+</script>
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>빅데이터를 통한 추천상품 조건 설정</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<span class="btn small orange"><button type="button" class="btn-bigdata-info">안내) 빅데이터 저장기간</button></span>
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<span class="btn large black"><button type="button" class="submit-form">빅데이터 조건 저장</button></span>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 빅데이터 설정 : 시작 -->
+<form name="bigdataFrm" id="bigdataFrm" method="post" action="../bigdata_process/save_config" target="actionFrame" onsubmit="return loadingStart();">
+<input type="hidden" name="goods_seq" value="" />
+<!--{ @ kinds }-->
+<div class="result-bigdata-title {.key_}-title">
+	<img src="../images/design/ico_bd_{.key_}.gif" align="absmiddle" />이 상품을 {.value_} 고객들이 가장 많이 <span class="{.key_}-title-text">구매한</span> 다른 상품
+</div>
+<div class="set-bigdata-lay" kindName="{.key_}">
+	<table class="set-bigdata-table" cellpadding="0" cellspacing="0" border="0">
+	<colgroup>
+		<col width="124" />
+		<col width="200" />
+		<col />
+		<col />
+	</colgroup>
+	<tbody>
+	<tr>
+		<th rowspan="3">빅데이터 노출페이지</th>
+		<td>구분</td>
+		<td class="center">PC</td>
+		<td class="center end-line">Mobile</td>
+	</tr>
+	<tr>
+		<td>빅데이터 전용 페이지</td>
+		<td>가로
+			<select name="{.key_}[list_count_w]">
+				<option value="5" {?cfg_bigdata[.key_]['list_count_w']==5}selected{/}}>5</option>
+				<option value="4" {?cfg_bigdata[.key_]['list_count_w']==4}selected{/}>4</option>
+				<option value="3" {?cfg_bigdata[.key_]['list_count_w']==3}selected{/}>3</option>
+				<option value="2" {?cfg_bigdata[.key_]['list_count_w']==2}selected{/}>2</option>
+				<option value="1" {?cfg_bigdata[.key_]['list_count_w']==1}selected{/}>1</option>
+			</select>
+			x 세로 1, 최대 20개의 빅데이터 상품 노출
+		</td>
+		<td class="end-line">가로 3 x 세로 1, 최대 21개의 빅데이터 상품 노출</td>
+	</tr>
+	<tr>
+		<td>상품 상세 페이지</td>
+		<td>
+			가로
+			<select name="{.key_}[view_count_w]">
+				<option value="5" {?cfg_bigdata[.key_]['view_count_w']==5}selected{/}>5</option>
+				<option value="4" {?cfg_bigdata[.key_]['view_count_w']==4}selected{/}>4</option>
+				<option value="3" {?cfg_bigdata[.key_]['view_count_w']==3}selected{/}>3</option>
+				<option value="2" {?cfg_bigdata[.key_]['view_count_w']==2}selected{/}>2</option>
+				<option value="1" {?cfg_bigdata[.key_]['view_count_w']==1}selected{/}>1</option>
+			</select>
+			x 세로 1, 최대 20개의 빅데이터 상품
+			<label><input type="checkbox" name="{.key_}[use_view_p]" id="{.key_}_use_view_p" value="y"  {?cfg_bigdata[.key_]['use_view_p']=='y'}checked{/} /> 노출</label>
+		</td>
+		<td class="end-line">가로 3 x 세로 1, 최대 21개의 빅데이터 상품 <label><input type="checkbox" name="{.key_}[use_view_m]" id="{.key_}_use_view_m" value="y" {?cfg_bigdata[.key_]['use_view_m']=='y'}checked{/} /> 노출</label></td>
+	</tr>
+	<tr>
+		<th class="last-line">빅데이터 검색조건</th>
+		<td colspan="3" class="end-line last-line">
+			<table width="100%" cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td class="standard-line">
+					이 상품을
+					<select name="{.key_}[smonth]">
+						<option value="12" {?cfg_bigdata[.key_]['smonth']==12}selected{/}>최근 12개월 안에</option>
+						<option value="6" {?cfg_bigdata[.key_]['smonth']==6}selected{/}>최근 6개월 안에</option>
+						<option value="3" {?cfg_bigdata[.key_]['smonth']==3}selected{/}>최근 3개월 안에</option>
+						<option value="1" {?cfg_bigdata[.key_]['smonth']==1}selected{/}>최근 1개월 안에</option>
+					</select>
+					{.value_} 고객들이 
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label><input type="checkbox" name="{.key_}[same_type][]" value="category" {?strstr(cfg_bigdata[.key_]['same_type'], 'category')}checked{/} /> 동일 카테고리</label>
+					<label><input type="checkbox" name="{.key_}[same_type][]" value="brand" {?strstr(cfg_bigdata[.key_]['same_type'], 'brand')}checked{/} /> 동일 브랜드</label>
+					<label><input type="checkbox" name="{.key_}[same_type][]" value="location" {?strstr(cfg_bigdata[.key_]['same_type'], 'location')}checked{/} /> 동일 지역</label>
+					에서
+					<select name="{.key_}[tmonth]">
+						<option value="12" {?cfg_bigdata[.key_]['tmonth']==12}selected{/}>최근 12개월 안에</option>
+						<option value="6" {?cfg_bigdata[.key_]['tmonth']==6}selected{/}>최근 6개월 안에</option>
+						<option value="3" {?cfg_bigdata[.key_]['tmonth']==3}selected{/}>최근 3개월 안에</option>
+						<option value="1" {?cfg_bigdata[.key_]['tmonth']==1}selected{/}>최근 1개월 안에</option>
+					</select>
+					가장 많이
+					<select name="{.key_}[tkind]" class="tkind">
+						<option value="order" {?cfg_bigdata[.key_]['tkind']=='order'}selected{/}>구매한</option>
+						<option value="view" {?cfg_bigdata[.key_]['tkind']=='view'}selected{/}>본</option>
+						<option value="review" {?cfg_bigdata[.key_]['tkind']=='review'}selected{/}>리뷰를 쓴</option>
+						<option value="cart" {?cfg_bigdata[.key_]['tkind']=='cart'}selected{/}>장바구니에 담은</option>
+						<option value="wish" {?cfg_bigdata[.key_]['tkind']=='wish'}selected{/}>위시리스트에 담은</option>
+						<option value="like" {?cfg_bigdata[.key_]['tkind']=='like'}selected{/}>좋아요한</option>
+					</select>
+					다른 상품
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<select name="{.key_}[except]">
+						<option value="0">빅데이터 결과 개수와 상관없이 노출</option>
+						<option value="100" {?cfg_bigdata[.key_]['except']==100}selected{/}>빅데이터 결과가 최소 100개 이상일 때 노출</option>
+						<option value="50" {?cfg_bigdata[.key_]['except']==50}selected{/}>빅데이터 결과가 최소 50개 이상일 때 노출</option>
+						<option value="30" {?cfg_bigdata[.key_]['except']==30}selected{/}>빅데이터 결과가 최소 30개 이상일 때 노출</option>
+					</select>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</tbody>
+	</table>
+</div>
+<!-- 빅데이터 설정 : 끝 -->
+<!--{ / }-->
+</form>
+
+<div id="bigdata_info_pop" class="hide">
+<ul>
+	<li style="line-height:27px;">최근 12개월 동안의 빅데이터를 저장합니다. (무료 지원)</li>
+	<li style="line-height:27px;">※ 12개월 이상의 빅데이터 보관은 별도 구축을 통해 진행되오니,</li>
+	<li style="line-height:27px;margin-left:15px;">고객센터 또는 1:1게시판을 통해 문의해 주십시오.</li>
+	<li style="line-height:27px;">※ 단, 무료몰 Plus+버전은 미지원</li>
+</ul>
+</div>
+
+{ #layout_footer }

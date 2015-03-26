@@ -1,0 +1,274 @@
+<!-- 타이틀 t-->
+<div class="sub_title_bar">
+	<h2>약관동의</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.gif" /></a>
+</div>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td height="30"></td>
+</tr>
+<tr>
+	<td width="40"></td>
+	<td>
+		<!-- 본문내용 시작 //-->
+
+<form name="agreeFrm" id="agreeFrm" target="actionFrame" method="post" action="../member_process/register">
+	<input type="hidden" name="join_type" value="{_GET.join_type}"/>
+
+			<!-- 타이틀 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td><img src="../images/design/tit_join.gif" /></td></tr>
+			<tr><td height="10"></td></tr>
+			<tr><td><span class="desc">회원이 되셔서 회원등급할인/할인쿠폰/적립금 등 다양한 서비를 받으세요.</span></td></tr>
+			</table>
+
+			<div style="height:40px"></div>
+
+			<!-- 회원약관 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<table border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td valign="top" align="left" height="15"><img src="../images/design/join_stit_clause.gif"/></td>
+							<td width="8"></td>
+							<td valign="bottom" align="right"><span class="desc">회원 가입을 하기 전에 <strong>회원약관</strong>을 읽어보시기 바랍니다.</span></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr><td height="6"></td></tr>
+				<tr><td height="2" bgcolor="545454"></td></tr>
+				<tr><td height="15"></td></tr>
+				<tr>
+					<td>
+						<textarea style="padding:0px; width:100%; height:200px; border:0px;" class="small" readonly>{agreement}</textarea>
+					</td>
+				</tr>
+				<tr><td height="15"></td></tr>
+				<tr><td height="1" bgcolor="cbcbcb"></td></tr>
+				<tr><td height="25"></td></tr>
+				<tr>
+					<td align="center" class="small">
+						<label><input type="radio" name="agree" value="Y" /> 약관에 동의합니다.</label>&nbsp;&nbsp;&nbsp;
+						<label><input type="radio" name="agree" value="N" checked/> 동의하지 않습니다.</label>
+					</td>
+				</tr>
+			</table>
+
+			<div style="height:55px"></div>
+
+			<!-- 개인정보취급방침 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<table border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td valign="top" align="left" height="15"><img src="../images/design/join_stit_privacy_guide.gif"/></td>
+							<td width="8"></td>
+							<td valign="bottom" align="right"><span class="desc"></span></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr><td height="6"></td></tr>
+				<tr><td height="2" bgcolor="545454"></td></tr>
+				<tr><td height="15"></td></tr>
+				<tr>
+					<td>
+						<textarea style="padding:0px; width:100%; height:200px; border:0px;" class="small" readonly>{policy}</textarea>
+					</td>
+				</tr>
+				<tr><td height="15"></td></tr>
+				<tr><td height="1" bgcolor="cbcbcb"></td></tr>
+				<tr><td height="25"></td></tr>
+				<tr>
+					<td align="center" class="small">
+						<label><input type="radio" name="agree2" value="Y" /> 개인정보 수집 및 이용에 대해 동의합니다.</label>&nbsp;&nbsp;&nbsp;
+						<label><input type="radio" name="agree2" value="N" checked/> 동의하지 않습니다.</label>
+					</td>
+				</tr>
+			</table>
+
+
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td height="70"></td></tr>
+			<tr>
+				<td align="center">
+					<a href="javascript:;" id="btn_submit"><img src="../images/buttons/btn_join.gif" /></a>&nbsp;&nbsp;&nbsp;
+					<a href="javascript:;" onclick="history.back();"><img src="../images/buttons/btn_cancel.gif" /></a>
+				</td>
+			</tr>
+			</table>
+
+</form>
+
+		<!-- 본문내용 끝 -->
+	</td>
+	<td width="40"></td>
+</tr>
+</table>
+
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#btn_submit').click(function() {
+		{? _GET.join_type }
+			if($("input[name='agree']:checked").val()!='Y'){
+				alert('이용약관에 동의하셔야합니다.');
+				$("input[name='agree']").focus();
+				return false;
+			}
+			if($("input[name='agree2']:checked").val()!='Y'){
+				alert('개인정보취급방침에 동의하셔야합니다.');
+				$("input[name='agree2']").focus();
+				return false;
+			}
+		{/}
+
+		{? _GET.join_type == 'fbmember' }
+			//기본 가입
+			FB.login(handelStatusChange,{scope:'{fbuserauth}'});
+		{: _GET.join_type == 'fbbusiness' }
+			//기업회원 가입
+			FB.login(handelStatusChangebiz,{scope:'{fbuserauth}'});
+		{:}
+			$('#agreeFrm').submit();
+		{/}
+	});
+
+});
+</script>
+ <script type="text/javascript">
+//기본 facebook 로그인
+function handelStatusChange(response) {
+	if (response && response.status == 'connected') {
+	// 로그인
+	isLogin = true;
+	initializeFbTokenValues();
+	initializeFbUserValues();
+	fbId = response.authResponse.userID;
+	fbAccessToken = response.authResponse.accessToken;
+	FB.api('/me', function(response) {
+		 fbUid = response.email;
+		 fbName = response.name;
+		 if (fbName != "") {
+			{? !defined('__ISUSER__')}
+			loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+				$.ajax({
+				'url' : '../sns_process/facebookloginck',
+				'type' : 'post',
+				'dataType': 'json',
+				'success': function(res) {
+					if(res.result == true){
+						{? login || register }
+							document.location.href='/mypage/';
+						{:}
+							document.location.reload();
+						{/}
+					}else{
+						loadingStop("body",true);
+						openDialogAlert(res.msg,'400','140',function(){});
+					}
+				}
+				});
+			{/}
+		}
+	});
+   } else if (response.status == 'not_authorized' || response.status == 'unknown') {
+		// 로그아웃된 경우
+		isLogin = false;
+		{? defined('__ISUSER__')}
+		loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+			$.ajax({
+			'url' : '../sns_process/facebooklogout',
+			'dataType': 'json',
+			'success': function(res) {
+				if(res.result == true){
+					{? login || register }
+						document.location.href='../main/';
+					{:}
+						document.location.reload();
+					{/}
+				}else{
+					loadingStop("body",true);
+					document.location.reload();
+				}
+			}
+			});
+
+		{/}
+		if (fbId != "")  initializeFbTokenValues();
+		if (fbUid != "") initializeFbUserValues();
+	}
+}
+
+//기업회원으로 통합하기
+function handelStatusChangebiz(response) {
+	if (response && response.status == 'connected') {
+	// 로그인
+	isLogin = true;
+	initializeFbTokenValues();
+	initializeFbUserValues();
+	fbId = response.authResponse.userID;
+	fbAccessToken = response.authResponse.accessToken;
+	FB.api('/me', function(response) {
+		 fbUid = response.email;
+		 fbName = response.name;
+		 if (fbName != "") {
+			{? !defined('__ISUSER__')}
+			loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+				$.ajax({
+				'url' : '../sns_process/facebookloginck',
+				'data' : {'mtype':'biz'},
+				'type' : 'post',
+				'dataType': 'json',
+				'success': function(res) {
+					if(res.result == 'emailck'){//이메일이 등된 경우
+						openDialog("회원 통합하기  <span class='desc'>로그인해 주세요.</span>", "member_facebook_connect", {"width":"470","height":"250"});
+					}else if(res.result == true){
+						{? login || register }
+							document.location.href='/mypage/';
+						{:}
+							document.location.reload();
+						{/}
+					}else{
+						loadingStop("body",true);
+						openDialogAlert(res.msg,'400','140',function(){});
+					}
+				}
+				});
+			{/}
+		}
+	});
+   } else if (response.status == 'not_authorized' || response.status == 'unknown') {
+		// 로그아웃된 경우
+		isLogin = false;
+		{? defined('__ISUSER__')}
+		loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+			$.ajax({
+			'url' : '../sns_process/facebooklogout',
+			'dataType': 'json',
+			'success': function(res) {
+				if(res.result == true){
+					{? login || register }
+						document.location.href='../main/';
+					{:}
+						document.location.reload();
+					{/}
+				}else{
+					loadingStop("body",true);
+					document.location.reload();
+				}
+			}
+			});
+
+		{/}
+		if (fbId != "")  initializeFbTokenValues();
+		if (fbUid != "") initializeFbUserValues();
+	}
+}
+
+ </script>

@@ -1,0 +1,329 @@
+<script type="text/javascript">
+$(document).ready(function() {
+
+	// 바로열기
+	$(".btn-direct-open").toggle(function(){
+		var nextTr = $(this).parent().parent().next();
+		var goods_seq = $(this).parent().parent().find("input[type='checkbox']").val();
+		$.get('batch_option_view?mode=view&no='+goods_seq, function(data) {
+			nextTr.find('div.option_info').html(data);
+		});
+		nextTr.removeClass('hide');
+		$(this).addClass("opened");
+
+		$(this).parent().parent().find(".option_td input,select").each(function(){
+			$(this).attr('disabled',true);
+			$(this).attr('readonly',true);
+		});
+
+	},function(){
+		var nextTr = $(this).parent().parent().next();
+		nextTr.find('div.order_info').html('');
+		nextTr.addClass('hide');
+		$(this).removeClass("opened");
+
+		$(this).parent().parent().find(".option_td input,select").each(function(){
+			$(this).attr('disabled',false);
+			$(this).attr('readonly',false);
+		});
+	});
+
+	// 상품명 일괄변경
+	$("#btn_all_goods_name").bind("click",function(){
+		change_all_input('batch_goods_name','input_goods_name',true);
+	});
+
+	// 간략설명 일괄변경
+	$("#btn_all_summary").bind("click",function(){
+		change_all_input('batch_summary','input_summary',true);
+	});
+
+	// 공용정보선택 일괄변경
+	$("#btn_all_info").bind("click",function(){
+		change_all_select('batch_info_select','input_info_select');
+	});
+
+	// 관련상품 일괄변경
+	$("#btn_all_relation").bind("click",function(){
+		change_all_select('batch_relation_type','input_relation_type');
+		change_all_input('batch_relation_count_w','input_relation_count_w',true);		
+		change_all_input('batch_relation_count_h','input_relation_count_h',false);
+		change_all_select('batch_relation_image_size','input_relation_image_size');
+	});
+
+});
+
+function change_all_input(input_name,class_name,msg_yn)
+{
+	var cnt = $("input:checkbox[name='goods_seq[]']:checked").length;
+	if(cnt<1){
+		if( msg_yn ) alert("일괄적용할 상품을 선택해 주세요.");
+		return;
+	}else{
+		var obj_val = $("input[name='"+input_name+"']").val();
+		$("."+class_name).each(function(){
+			if( $(this).parent().parent().find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+				$(this).val(obj_val);
+			}
+		});
+	}
+}
+
+function change_all_checkbox(input_class_name,class_name)
+{
+	$("." + class_name).each(function(){
+		if( $(this).parent().parent().parent().parent().parent().parent().find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+			$(this).attr('checked',false);
+		}
+	});
+
+	$("." + input_class_name).each(function(){
+		var batch_obj = $(this);
+		if(batch_obj.attr('checked') == 'checked'){
+			$("." + class_name).each(function(){
+				if( $(this).parent().parent().parent().parent().parent().parent().find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+					if( $(this).val() == batch_obj.val() ){
+						$(this).attr('checked',true);
+					}
+				}
+			});
+		}
+	});
+}
+
+function change_all_select(input_name,class_name)
+{
+	var obj_val = $("select[name='"+input_name+"'] option:selected").val();
+	$("."+class_name).each(function(){
+		if( $(this).parent().parent().find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+			$(this).find("option[value='"+obj_val+"']").attr('selected',true);
+		}
+	});
+}
+
+</script>
+
+
+<br class="table-gap" />
+
+<ul class="left-btns clearbox">
+	<li><div style="margin-top:rpx;">
+	<!--{ ? search_yn == 'y' }-->
+	검색 <b>{=number_format(page.totalcount)}</b> 개
+	<!--{ : }-->
+	총 <b>{=number_format(page.totalcount)}</b> 개</div>
+	<!--{ / }-->
+	</li>
+	<li><span class="desc">※ 이용방법 : [검색하기]버튼으로 검색 후 상품정보를 조건 업데이트 하세요!</span></li>
+</ul>
+
+<div class="fr">
+	<div class="clearbox">
+		<ul class="right-btns clearbox">
+		<li><select class="custom-select-box-multi" name="orderby">
+			<option value="goods_seq" {?orderby=='goods_seq'}selected{/}>최근등록순</option>
+			<option value="goods_name" {?orderby=='goods_name'}selected{/}>상품명순</option>
+			<option value="page_view" {?orderby=='page_view'}selected{/}>페이지뷰순</option>
+		</select></li>
+		<li><select  class="custom-select-box-multi" name="perpage">
+			<option id="dp_qty10" value="10" {? perpage == 10 } selected{/} >10개씩</option>
+			<option id="dp_qty50" value="50" {? perpage == 50 } selected{/} >50개씩</option>
+			<option id="dp_qty100" value="100" {? perpage == 100 } selected{/} >100개씩</option>
+			<option id="dp_qty200" value="200" {? perpage == 200 } selected{/} >200개씩</option>
+		</select></li>
+	</ul>
+	</div>
+</div>
+
+<table class="list-table-style" cellspacing="0">
+	<colgroup>
+		<col width="30" /><!--체크-->
+		<col width="30" /><!--중요-->
+		<col width="40" /><!--번호-->
+		<col width="40" /><!--이벤트-->
+		<col width="60" /><!--상품이미지-->
+		<col width="250" /><!--상품명-->
+		<col width="40" /><!--옵션-->
+		<col /><!--간략설명-->
+		<!-- <col width="350" /> --><!--아이콘-->
+		<col width="130" /><!--공용정보-->
+		<col width="160" /><!--관련상품-->
+	</colgroup>
+	<thead class="lth">
+	<tr style="background-color:#e3e3e3">
+		<th align="center"></th>
+		<th align="center"></th>
+		<th align="center"></th>
+		<th align="center"></th>
+		<th align="center" colspan="2"><input type='text' name="batch_goods_name" value="" size="30"><span class="btn small gray">&nbsp;<button type="button" id="btn_all_goods_name">▼</button></span></th>
+		<th align="center"></th>
+		<th align="center"><input type='text' name="batch_summary" value="" size="60"><span class="btn small gray">&nbsp;<button type="button" id="btn_all_summary">▼</button></span></th>
+		<!--<th align="center">
+		<span style="display:inline-block;width:300px">
+		<ul>
+		{ @ r_goods_icon }
+		<li style="float:left;width:100px;height:20px;text-align:left;overflow:hidden">
+			<label>
+			<NOBR>
+			<input type="checkbox" name="batch_goodsIconCode[{.codecd}]" value="{.codecd}" class="batch_icon" />
+			<img src="/data/icon/goods/{.codecd}.gif" border="0">
+			</NOBR>
+			</label>
+		</li>
+		{ / }
+		</ul>
+		</span>
+		<span class="btn small gray">&nbsp;<button type="button" id="btn_all_icon">▼</button></span>
+		</th>
+		-->
+		<th align="center">
+		<select name="batch_info_select" style="width:80px">
+		<option value="">공용정보선택</option>
+		<!--{@ info_loop }-->
+		<!--{? .info_name!='== 선택하세요 ==' && .info_name!='== ←좌측에 공용정보명을 입력하여 새로운 공용정보를 만드시거나 또는 ↓아래에서 이미 만들어진 공용정보를 불러오세요 ==' }-->
+		<option value="{.info_seq}">{.info_name}</option>
+		<!--{ / }-->
+		<!--{ / }-->
+		</select>
+		<span class="btn small gray">&nbsp;<button type="button" id="btn_all_info">▼</button></span>
+		</th>
+		<th align="center">
+		<select name="batch_relation_type">
+		<option value="AUTO" >자동선정</option>
+		<option value="MANUAL" >직접선정</option>
+		</select>
+		<br/>
+		<input type="text" name="batch_relation_count_w" value="" class="line onlynumber" size="2" maxlength="2" />개
+		X <input type="text" name="batch_relation_count_h"" value="" class="line onlynumber" size="2" maxlength="2" />개<br/>
+		<select name="batch_relation_image_size" class="goods_image_size">
+		<!--{ @ r_img_size }-->
+			<option value="{.key}" width="{.width}" height="{.height}" >{.name}</option>
+		<!--{ / }-->
+		</select>
+		<span class="btn small gray">&nbsp;<button type="button" id="btn_all_relation">▼</button></span>
+		</th>
+	</tr>
+	</thead>
+</table>
+<br style="line-height:2px;" />
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="30" /><!--체크-->
+		<col width="30" /><!--중요-->
+		<col width="40" /><!--번호-->
+		<col width="40" /><!--이벤트-->
+		<col width="60" /><!--상품이미지-->
+		<col width="250" /><!--상품명-->
+		<col width="40" /><!--옵션-->
+		<col /><!--간략설명-->
+		<!-- <col width="350" /> --><!--아이콘-->
+		<col width="130" /><!--공용정보-->
+		<col width="160" /><!--관련상품-->
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th><input type="checkbox" id="chkAll" /></th>
+		<th><span class="icon-star-gray {?sc.orderby=='favorite_chk' && sc.sort=='desc'}checked{/}" id="order_star"></span></th>
+		<th>번호</th>
+		<th>이벤트</th>
+		<th colspan="2">상품명</th>
+		<th>옵션</th>
+		<th>간략설명</th>
+		<!-- <th>아이콘</th> -->
+		<th>공용정보</th>
+		<th>관련상품</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+	<!--{? loop }-->
+	<!--{@ loop }-->
+		<tr class="list-row" style="height:70px;">
+			<td align="center"><input type="checkbox" class="chk" name="goods_seq[]" value="{.goods_seq}" /></td>
+			<td align="center"><span class="icon-star-gray star_select {.favorite_chk}" goods_seq="{.goods_seq}"></span></td>
+			<td align="center">{page.totalcount - ._no + 1}</td>
+			<td align="center">{?.event_seq}<a href="../event/regist?event_seq={.event_seq}" target="_blank" style="color:blue">{.event_seq}</a>{:}-{/}</td>
+			<td align="center"><a href="/goods/view?no={.goods_seq}" target="_blank"><img src="{=viewImg(.goods_seq,'thumbView')}" width="50"></a></td>
+			<td align="left" style="padding-left:10px;">
+				{? .tax=='exempt' && .cancel_type == '1'}
+					<div>
+					<span style="color:red;" class="left" >[비과세]</span>
+					<span class="order-item-cancel-type left" >[청약철회불가]</span>
+					</div>
+				{: .tax=='exempt' }
+					<div>
+					<span style="color:red;" class="left" >[비과세]</span>
+					</div>
+				{: .cancel_type == '1'}
+					<div>
+					<span class="order-item-cancel-type left" >[청약철회불가]</span>
+					</div>
+				{/}
+			{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+			<input type="text" name="goods_name[{.goods_seq}]" size="35" value="{.goods_name}" class="input_goods_name"> <div style="padding-top:5px;">{.catename}</div>
+			</td>
+			<td align="center"><span class="btn-direct-open"><span class="hide">바로열기</span></span></td>
+			<td align="center"><input type='text' name="summary[{.goods_seq}]" value="{.summary}" class="input_summary" size="65"></td>
+			<!--<td align="center">
+			<ul>
+			{ @ .goods_icon }
+			<li style="float:left;width:100px;text-align:left;height:20px;overflow:hidden">
+				<label><NOBR>
+				{ ? in_array(..codecd,.icons) }
+				<input type="checkbox" name="goodsIconCode[{.goods_seq}][{..codecd}]" value="{..codecd}" class="input_icon" checked />
+				{ : }
+				<input type="checkbox" name="goodsIconCode[{.goods_seq}][{..codecd}]" value="{..codecd}" class="input_icon" />
+				{ / }
+				<img src="/data/icon/goods/{..codecd}.gif" border="0">
+				</NOBR></label>
+			</li>
+			{ / }
+			</ul>
+			</td>-->
+			<td align="center">
+			<select name="info_select[{.goods_seq}]" style="width:100px" class="input_info_select">
+			<option value="">공용정보선택</option>
+			<!--{@ .info_loop }-->
+			<!--{? ..info_name!='== 선택하세요 ==' && ..info_name!='== ←좌측에 공용정보명을 입력하여 새로운 공용정보를 만드시거나 또는 ↓아래에서 이미 만들어진 공용정보를 불러오세요 ==' }-->
+			<option value="{..info_seq}" { ? ..info_seq == .info_seq }selected{ / } >{..info_name}</option>
+			<!--{ / }-->
+			<!--{ / }-->
+			</select>
+			</td>
+			<td align="center">
+			<select name="relation_type[{.goods_seq}]" class="input_relation_type">
+			<option value="AUTO" {?.relation_type=='AUTO'}selected{/}>자동선정</option>
+			<option value="MANUAL" {?.relation_type=='MANUAL'}selected{/}>직접선정</option>
+			</select><br/>
+			<input type="text" class="input_relation_count_w" name="relation_count_w[{.goods_seq}]" value="{.relation_count_w}" class="line onlynumber" size="2" maxlength="2" />개
+			X <input type="text" class="input_relation_count_h" name="relation_count_h[{.goods_seq}]"" value="{.relation_count_h}" class="line onlynumber" size="2" maxlength="2" />개<br/>
+			<select name="relation_image_size[{.goods_seq}]" class="input_relation_image_size goods_image_size">
+			<!--{ @ .r_img_size }-->
+				<option value="{..key}" width="{..width}" height="{..height}" {? .relation_image_size==..key }selected{ / }>{..name}</option>
+			<!--{ / }-->
+			</select>
+			</td>
+		</tr>
+		<tr class="order-list-summary-row hide">
+			<td colspan="10" class="order-list-summary-row-td"><div class="option_info"></div></td>
+		</tr>
+	<!--{ / }-->
+	<!--{ : }-->
+	<tr class="list-row">
+		<td align="center" colspan="10">
+			<!--{ ? search_text }-->
+				'{search_text}' 검색된 상품이 없습니다.
+			<!--{:}-->
+				등록된 상품이 없습니다.
+			<!--{/}-->
+		</td>
+	</tr>
+	<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+</table>
+<!-- 주문리스트 테이블 : 끝 -->

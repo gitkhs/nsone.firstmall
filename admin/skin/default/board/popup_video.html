@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>동영상 첨부</title>
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/editor/css/popup.css" />
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+<script type="text/javascript" src="/app/javascript/jquery/jquery.min.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	$(".submit").click(function(){
+		var encoding_screen = '';
+		if( $("#encoding_screen0").val() && $("#encoding_screen1").val() ) {
+			encoding_screen = $("#encoding_screen0").val()+'|'+$("#encoding_screen1").val();
+		}else{
+			encoding_screen = '400|300';
+		}
+		$("#encoding_screen").val(encoding_screen);
+
+		doSubmit(event, document.goodsVideo);
+		if( !$("#txtFileName").val() ) {
+			alert("동영상 파일을 선택해 주세요.");
+		}
+	});
+	{? videook == true &&  videoerror == false && uccdomainembedsrc }
+		var videohtml = '';
+		videohtml +='<label ><input type="hidden" name="file_key_w" value="{file_key_w}" ><input type="hidden" name="file_key_i" value="{file_key_i}" ><input type="checkbox" name="video_del" value="1" >삭제</label>';
+		videohtml +='<div>';
+		videohtml +='	<embed src="{uccdomainembedsrc}" width="200" height="200" allowfullscreen="true" wmode="transparent"></embed>';
+		videohtml +='</div>';
+		$("#boardVideolay",window.opener.document).html(videohtml);
+		window.self.close();
+	{:  videook == true &&  videoerror == true }
+		alert(' Error: {error}');
+	{/}
+});
+</script>
+
+<style>
+.desc{color:#747474; font-size:11px; letter-spacing:-1px;}
+</style>
+</head>
+<body>
+<div class="wrapper">
+	<div class="header">
+		<h1>동영상 첨부</h1>
+	</div>
+	<div class="body">
+	<form name="goodsVideo" id="goodsVideo" method="post" enctype="multipart/form-data" action="./popup_video?id={_GET.id}" >
+	<input type="hidden" name="seq" value="{seq}">
+	<input type="hidden" name="id" value="{_GET.id}">
+		<dl class="alert">
+		    <dt>동영상</dt>
+		    <dd>
+				<!-- API 추가 -->
+					<script type="text/javascript" src="{uccdomain}"></script>
+				<!-- API 완료 -->
+			</dd>
+			 <dt>인코딩 품질과 크기</dt>
+		    <dd>
+			품질 : <select name="encoding_speed" >
+			<option value="200"  {? video_type == '200' } selected="selected" {/} >200</option>
+			<option value="400"  {? video_type == '400' || !video_type } selected="selected" {/}  >400(기본)</option>
+			<option value="600" {? video_type == '600' } selected="selected" {/} >600</option>
+			<option value="800"  {? video_type == '800' } selected="selected" {/} >800</option>
+			<option value="1000"  {? video_type == '1000' } selected="selected" {/} >1000</option>
+			</select> Kbps<span class="desc">예) 200, 400(기본), 600, 800, 1000 </span><br/>
+			크기 : <input type="text" name="encoding_screen[]"  id="encoding_screen0"  size="3" value="{? manager.video_screen0}{manager.video_screen0}{:}400{/}" class="line onlynumber "   /> Pixel X <input type="text" name="encoding_screen[]"  id="encoding_screen1"  size="3" value="{?manager. video_screen1 }{manager.video_screen1}{:}300{/}" class="line onlynumber "   /> Pixel
+			<span class="desc">예) 320X240, 400X300, 640|480, 720|480 </span>
+			</dd>
+		</dl>
+	</div>
+	<div class="footer">
+		<p><a onclick="window.self.close();" title="닫기" class="close">닫기</a></p>
+		<ul>
+			<li class="submit"><a title="등록" class="btnlink">등록</a> </li>
+			<li class="cancel"><a onclick="window.self.close();" title="취소" class="btnlink">취소</a></li>
+		</ul>
+	</div>
+	</form>
+</div>
+</body>
+</html>

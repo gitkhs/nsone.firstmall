@@ -1,0 +1,38 @@
+<style>
+span.supplier_name {}
+span.supplier_name:hover {color:#3399cc; text-decoration:underline;}
+</style>
+<script>
+$(function(){
+	$("#supplier_regist_btn").click(function(){
+		openDialogPopup("매입처 등록", "registSupplierPopup", {
+			'url' : '../goods/supplier_regist',
+			'width' : 350,
+			'height' : 200
+		});
+	});
+});
+</script>
+<form name="supplierSearchFrm" class="pdb10">
+<table align="center">
+<tr>
+	<td><input type="text" name="keyword" value="{_GET.keyword}" class="line" /></td>
+	<td><span class="btn small"><input type="submit" value="검색" /></td>
+	<td><span class="btn small"><button type="button" id="supplier_regist_btn">매입처 등록</button></td>	
+</tr>
+</table>
+</form>
+
+<table class="info-table-style" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	{@result}
+		{?.index_ && .index_%2==0}</tr><tr>{/}
+		<td width="15%" class="its-th-align center">{.supplier_seq}</td>
+		<td class="its-td"><span class="supplier_name hand" supplier_seq="{.supplier_seq}">{.supplier_name}</span></td>
+	{/}
+	{? count(result) > 2 && count(result)%2}
+		<td class="its-th-align center">&nbsp;</td>
+		<td class="its-td">&nbsp;</td>
+	{/}
+</tr>
+</table>

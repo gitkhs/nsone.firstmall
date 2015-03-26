@@ -1,0 +1,6 @@
+<ul class="pd5">
+{@mainNewsNoticeList}
+	<li style="position:relative;"><a href="{.link.value}" target="_blank">{=getstrcut(.title.value,27)}</a> 
+	<div class="date">{=date('m.d',strtotime(.pubDate.value))}</div></li>
+{/}
+</ul>

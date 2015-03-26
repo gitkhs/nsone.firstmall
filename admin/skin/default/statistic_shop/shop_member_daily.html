@@ -1,0 +1,141 @@
+{ #layout_header }
+  
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/excanvas.min.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/jquery.jqplot.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.pointLabels.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.dateAxisRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.barRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.pieRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.donutRenderer.min.js"></script>    
+<link class="include" rel="stylesheet" type="text/css" href="/app/javascript/plugin/jqplot/jquery.jqplot.min.css" />
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+	
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+		
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>쇼핑몰분석 통계</h2>
+		</div>
+		
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<div class="sub-layout-container body-height-resizing">
+	
+	{#shop_menu}
+	
+	<!-- 서브메뉴 바디 : 시작-->
+	<div class='slc-body-wrap'>
+		<div class="slc-body">
+		
+			<div class="clearbox">
+				<div class="item-title fl" style="margin-left:25px;">회원가입현황 <span class="helpicon" title="회원 가입현황을 확인할 수 있습니다."></span></div>
+				<div class="fr pd20"><span class="btn medium"><a href="shop_member_monthly">월별 통계 가기</a></span></div>
+			</div>
+					
+			<div style="width:1000px; margin:auto;">
+				
+				<br style="line-height:10px" />
+				
+				<form>
+					<div align="center">
+						<select name="year">
+						<option value="">= 연도 선택 =</option>
+						{@range(date('Y'),2010)}
+							<option value="{.value_}" {?_GET.year==.value_}selected{/}>{.value_} 년</option>
+						{/}
+						</select>
+						
+						<select name="month">
+						<option value="">= 월 선택 =</option>
+						{@range(1,12)}
+							<option value="{.value_}" {?_GET.month==.value_}selected{/}>{.value_} 월</option>
+						{/}
+						</select>
+				
+						<span class="btn small"><input type="submit" value="검색" /></span>
+						<span class="btn small"><input type="button" value="이번달" onclick="this.form.year.value='';this.form.month.value='';this.form.submit()" /></span>
+				
+					</div>
+				</form>
+				
+				<br style="line-height:30px" />
+				
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="center" valign="top">
+						<span class="bold fx16">성별</span>
+						<div id="shop_member_daily_sex"></div>
+					</td>
+				</tr>
+				</table>
+				
+				<br style="line-height:50px" />
+				
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="center" valign="top">
+						<span class="bold fx16">연령별</span>
+						<div id="shop_member_daily_age"></div>
+					</td>
+				</tr>
+				</table>
+				
+				<br style="line-height:50px" />
+				
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="center" valign="top">
+						<span class="bold fx16">지역별</span>
+						<div id="shop_member_daily_location"></div>
+					</td>
+				</tr>
+				</table>
+				
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<script class="code" type="text/javascript">
+var seqIndex = 0;
+var seqList = [
+     ["#shop_member_daily_sex","shop_member_daily_sex?year={_GET.year}&month={_GET.month}"],
+     ["#shop_member_daily_age","shop_member_daily_age?year={_GET.year}&month={_GET.month}"],
+     ["#shop_member_daily_location","shop_member_daily_location?year={_GET.year}&month={_GET.month}"],
+];
+       	
+$(document).ready(function(){
+	ajaxLoadSeqs();
+});
+
+function ajaxLoadSeqs(){
+	if(seqIndex<seqList.length){
+		$.ajax({
+			"url" : seqList[seqIndex][1],
+			"global" : false,
+			"success" : function(res){
+				$(seqList[seqIndex][0]).html(res);	
+				seqIndex++;
+				ajaxLoadSeqs();
+			}		
+		});
+	}
+}
+</script>
+
+{ #layout_footer }

@@ -1,0 +1,118 @@
+{#layout_header_popup}
+
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/jquery.uploadify.v2.1.4.js"></script>
+
+<script type="text/javascript">
+$(function(){	
+	parent.DM_window_title_set("left","<a href=\"javascript:;\" onmouseup=\"DM_window_sourceeditor('{tplPath}','{designImgSrcOri}')\">◀ 이미지 영역의 HTML소스보기</a>");
+	parent.DM_window_title_set("center","{layout_config.tpl_desc}({layout_config.tpl_path})에 선택한 ");
+
+	$(".btn_recomm").click(function() {
+		parent.DM_window_recomm_goods_edit("{_GET['template_path']}","{_GET['designTplPath']}","{_GET['designImgSrc']}","{_GET['designImgSrcOri']}","{_GET['designImageLabel']}","{_GET['link']}","{_GET['elementType']}","{_GET['target']}","{_GET['viewSrc']}");
+	});
+
+	setUploadifyButton('imageUploadButton');
+});
+</script>
+
+<style>
+	#newImagePriviewContainer {width:700px; margin:auto; min-height:20px; padding:10px;  border:1px solid #ddd; text-align:center;}
+	.webftpFormItemPreview {max-height:100px; max-width:100px;}
+</style>
+
+
+<form name="imageManagerForm" action="../design_process/image_edit" method="post" enctype="multipart/form-data" target="actionFrame">
+<input type="hidden" name="designTplPath" value="{designTplPath}" />
+<input type="hidden" name="designImgSrc" value="{designImgSrc}" />
+<input type="hidden" name="designImgSrcOri" value="{designImgSrcOri}" />
+<input type="hidden" name="designImgPath" value="{designImgPath}" />
+
+<img class="fileSearchBtnImage hide" src="../images/common/btn_filesearch.gif" />
+
+<div style="height:15px"></div>
+
+{?_GET['recommGoods']=='Y'}
+<span class="btn_recomm red fr fx12 pdr10 hand"><strong>추천상품 선정하기 >&nbsp;&nbsp;</strong></span>
+{/}
+
+<div style="height:15px"></div>
+
+<div id="newImagePriviewContainer">
+	<img src="{designImgSrc}" id="newImagePriview" style="max-height:300px; max-width:700px;" />
+	
+	<div class="center" style="padding:5px;">
+		ALT 이미지 레이블 <input type="text" name="imageLabel" value="{designImageLabel}" class="line" /> 
+	</div>
+</div>
+
+<div style="height:15px"></div>
+
+<div style="padding:10px;">
+
+	<table class="design-simple-table-style" width="100%" align="center">
+	<col width="140" />
+	<tr>
+		<th class="dsts-th">
+		변경 이미지
+		</th>
+		<td class="dsts-td left">
+			<div class="webftpFormItem" >
+				<input type="radio" name="webftpFormItemSelector" class="hide" />
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed">
+				<col width="120" /><col />
+				<tr>
+					<th>
+						<div style="max-height:100px; max-width:100px; line-height:100px;"><img src="{designImgSrc}" class="webftpFormItemPreview" /></div>
+						<div style="max-width:100px; line-height:20px" class="webftpFormItemPreviewSize">{designImgScale}</div>
+					</td>
+					<td>
+						<input type="text" name="newDesignImgPath" value="" size="30" class="webftpFormItemInput line" readonly="readonly" />
+						<input id="imageUploadButton" type="file" value="" class="uploadify" />
+
+						{?elementType=='IMG'}
+						<div>
+							<input type="text" name="link" value="{link}" title="링크URL" class="line" size="50" />
+							<select name="target" class="custom-select-box">
+								<option value="_self" {?target=='_self'}selected{/}>현재창</option>
+								<option value="_blank" {?target=='_blank'}selected{/}>새창</option>
+							</select>
+							<select class="custom-select-box-multi" onchange="$(this.form.link).val(this.value).trigger('focus')">
+								<option value="">자주쓰는 페이지 주소</option>
+								{@frequentUrls}
+								<option value="{.value_.value}">{.value_.name}</option>
+								{/}
+							</select>
+						</div>
+						{/}
+						<div class="hide">
+							<span class="btn small"><input type="button" value="이미지 편집" /></span>
+						</div>
+					</td>
+				</tr>
+				</table>
+			</div>
+		</td>
+	</tr>
+	</table>
+	
+	<div style="height:15px"></div>
+	
+	<div class="center">
+		<label><input type="checkbox" name="removeDesignImageArea" value="Y" /> 이미지 영역을 없앰 (이미지 파일은 삭제되지 않음)</label>
+	</div>
+	
+	<div style="height:15px"></div>
+	
+	<div class="center">
+		<span class="btn medium cyanblue"><input type="submit" value="적용" /></span>
+	</div>
+	
+	</form>
+	
+	{#mini_webftp}
+
+</div>
+
+{#layout_footer_popup}

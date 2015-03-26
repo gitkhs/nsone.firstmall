@@ -1,0 +1,103 @@
+<div class="sub-wrap" style="position:relative;">
+	{ ? advanced_statistic_limit == 'y' }
+	<div class="upgrade-for-free-graph"></div>
+	<div class="upgrade-for-free-graph_btn">
+		<img src="../images/common/btn_upgrade_free.png" style="cursor:pointer;" onclick="window.open('http://firstmall.kr/ec_hosting/addservice/frelocate.php?p=upgrade&s=P_FREE');" />
+	</div>
+	{ / }
+	<div class="sub-select-bar">
+		<select name="date_term" class="sub-selectbox">
+			<option value="yesterday" {?_GET.date_term == 'yesterday'}selected{/}>어제</option>
+			<option value="today" {?_GET.date_term == 'today'}selected{/}>오늘</option>
+			<option value="7days" {?_GET.date_term == '7days'}selected{/}>최근 7일</option>
+			<option value="30days" {?_GET.date_term == '30days'}selected{/}>30일</option>
+		</select>
+		<select name="catenbrand" class="sub-selectbox { _GET.catenbrand }">
+			<option class="category" value="category" {?_GET.catenbrand == 'category'}selected{/}>비교 - 동일 카테고리</option>
+			<option class="brand" value="brand" {?_GET.catenbrand == 'brand'}selected{/}>비교 - 동일 브랜드</option>
+		</select>
+	</div>
+
+	<div class="stistic-data-div">
+
+		<div class="sub_title">구매금액	<span class="add_info">(단위:천원)</span></div>
+
+		<br style="line-height:10px" />
+
+		<div id="chart1" class="sub-chart2"></div>
+
+		<br style="line-height:20px" />
+
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td align="left" valign="bottom"><span class="add_info">(체크를 하시면 그래프로 표시됩니다.)</span></td>
+			<td align="right" valign="bottom">
+				<span class="btn small"><input type="button" value="엑셀출력" onclick="divExcelDownload('{?sc.dateSel_type == 'd'}일별{:}월별{/}_매출유입경로통계_구매금액','#category_price_table')" /></span>
+			</td>
+		</tr>
+		</table>
+
+		<br style="line-height:10px" />
+		<div id="category_price_table">
+			<table width="100%" class="simpledata-table-style" style="margin:auto;">
+			<thead>
+			<tr>
+				<th></th>
+				<th width="100"></th>
+			{ @ table_title }
+				<th>{.value_}</th>
+			{ / }
+				<th>합계</th>
+			</tr>
+			</thead>
+			<tbody>
+			{ @ statlist }
+				{ ? .index_ > 2 }<tr class="overtr hide">{ : }<tr>{ / }
+				<td class="ctd"><input type="checkbox" name="statsCode[]" value="{.key_}" titleName="{.key_}" {?.index_==0}checked{/} onclick="chgStatisticChart();" /></td>
+				<td class="ctd">{.key_}</td>
+				{ @ .date }
+				<td class="rtd">{=number_format(..value_)}</td>
+				{ / }
+				<td class="rtd">{=number_format(total[.key_])}</td>
+			</tr>
+			{ / }
+			</tbody>
+			</table>
+
+			{ ? count(statlist) > 3 }
+			<div id="btn_more" style="width:100%;text-align:center;margin-top:5px;">
+				<span class="btn small gray"><input type="button" value="모두보기 ▼" onclick="$('.overtr').removeClass('hide');$('#btn_more').hide();" /></span>
+			</div>
+			{ / }
+		</div>
+	</div>
+</div>
+
+<script class="code" type="text/javascript">
+function chgStatisticChart(){
+
+	var data		= [];
+	var label		= [];
+	var listData	= new Object();
+
+	{ @ dataForChart }
+	listData['{.key_}']	= {=json_encode(.value_)};
+	{ / }
+
+	if	(!chkCheckCode('statsCode[]') > 0) {
+		alert('1개 이상 체크되어야 합니다.');
+		$("input[name='statsCode[]']").eq(0).attr('checked', true);
+	}
+
+	$("input[name='statsCode[]']:checked").each(function(){
+		data.push(listData[$(this).val()]);
+		label.push({'label':$(this).attr('titleName')});
+	});
+
+	createChart('line', 'chart1', '{maxValue}', data, label, true);
+}
+
+{ ? count(dataForChart) > 0 }
+chgStatisticChart();
+{ / }
+</script>

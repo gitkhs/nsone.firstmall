@@ -1,0 +1,173 @@
+<style type="text/css">
+.opt-red			{ background-color:red;color:#fff; }
+.opt-cyanblue		{ background-color:#3399ff;color:#fff; }
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+
+	// 판매마켓별 상품 판매가 안내 팝업
+	$("button.btn-info").click(function(){
+		openDialog("[안내] 판매마켓별 상품 판매가", "infomation1", {'width':600,'height':250});
+	});
+});
+
+// mall key 설정 disable 조정
+function chg_mall_key(obj){
+	$(obj).removeClass('opt-cyanblue');
+	if	($(obj).val() == 'Y'){
+		$(obj).addClass('opt-cyanblue');
+		$(obj).closest('tr').find('input.mall-key').attr('disabled', false);
+	}else{
+		$(obj).closest('tr').find('input.mall-key').attr('disabled', true);
+	}
+}
+
+// 판매가 조정 추가
+function plus_revision(obj){
+	var is_check	= false;
+	if	($(obj).closest("div").find("input[type='radio']").is(":checked"))	is_check	= true;
+
+	var clone = $(obj).closest("td").find("div").eq(0).clone();
+	clone.find("input[type='radio']").attr("checked", false);
+	clone.find("input[type='text']").val('');
+	clone.find("span.btnplusminus").removeClass("btn-plus");
+	clone.find("span.btnplusminus").addClass("btn-minus");
+	clone.find("button.btn_revision").attr("onclick", '');
+	clone.find("button.btn_revision").click(function(){
+		minus_revision(this);
+	});
+	if	(is_check)	$(obj).closest("div").find("input[type='radio']").attr('checked', true);
+	$(obj).closest("td").append(clone);
+
+	redefine_default_value(obj);
+}
+
+// 판매가 조정 삭제
+function minus_revision(obj){
+	if	($(obj).closest("div").find("input.default_revision").attr('checked')){
+		$(obj).closest("td").find("input.default_revision").eq(0).attr('checked', true);
+	}
+	$(obj).closest("div").remove();
+	redefine_default_value(obj);
+}
+
+// radio 버튼의 값 재정의
+function redefine_default_value(obj){
+	var idx	= 0;
+	$(obj).closest("tr").find("input.default_revision").each(function(){
+		$(this).val(idx);
+		idx++;
+	});
+}
+
+// 기본 0값 제거
+function chgZeroVal(type, obj){
+	if	(type == 'f'){
+		if	(!$(obj).val() || $(obj).val() == 0){
+			$(obj).val('');
+		}
+	}else{
+		if	(!$(obj).val() || $(obj).val() == 0){
+			$(obj).val('0');
+		}
+	}
+}
+</script>
+
+		<table width="100%" class="info-table-style">
+		<colgroup>
+			<col width="100px" />
+			<col width="150px" />
+			<col width="250px" />
+			<col width="" />
+			<col width="230px" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align">마켓 구분</th>
+			<th class="its-th-align">판매마켓</th>
+			<th class="its-th-align">판매마켓으로 상품정보 전송 여부</th>
+			<th class="its-th-align" colspan="2">
+				[기본] 마켓별 상품 판매가 (판매마진 보정)
+				<span class="btn small orange"><button type="button" class="btn-info">안내</button></span>
+			</th>
+		</tr>
+		</thead>
+		<tbody class="linkage">
+		<!--{ ? malllist }-->
+			<!--{ @ malllist }-->
+				<!--{ ? .value_ }-->
+					<!--{ @ .value_ }-->
+		<tr>
+						<!--{ ? ..index_ == 0 }-->
+			<td class="its-td-align center" rowspan="{=count(.value_)}">
+				{.key_}
+				<!--{ ? .key_ == '오픈마켓' }-->
+				<input type="text" size="10" name="master_key" value="{mall[..mall_code][0].master_key}" title="마스터 ID" />
+				<!--{ / }-->
+			</td>
+						<!--{ / }-->
+			<td class="its-td-align pdl5">
+				{..mall_name}
+				<input type="hidden" name="mall_name[{..linkage_seq}][{..mall_seq}]" value="{..mall_name}" />
+				<input type="hidden" name="mall_code[{..linkage_seq}][{..mall_seq}]" value="{..mall_code}" />
+				<input type="hidden" name="mall_type[{..linkage_seq}][{..mall_seq}]" value="{..mall_type}" />
+			</td>
+			<td class="its-td">
+				<select name="linkage_type[{..linkage_seq}][{..mall_seq}]" onchange="chg_mall_key(this);" { ? mall[..mall_code] }class="opt-cyanblue"{ / }>
+					<option value="N">미전송</option>
+					<option value="Y" { ? mall[..mall_code] }selected{ / } class="opt-cyanblue">전송</option>
+				</select>
+				<input type="text" name="linkage_key[{..linkage_seq}][{..mall_seq}]" class="mall-key" value="{mall[..mall_code][0].mall_key }" title="{..mall_name} 아이디" { ? !mall[..mall_code] }disabled{ / } />
+			</td>
+			<td class="its-td-align right">{..mall_name} 판매가 = 상품 할인가(판매가) + </td>
+			<td class="its-td">
+				<div><div>
+					<label><input type="radio" name="default_revision[{..linkage_seq}][{..mall_seq}]" class="default_revision" value="0" {?!mall[..mall_code][0] || mall[..mall_code][0].default_yn=='Y'}checked{/}/></label>
+					<input type="text" size="5" style="text-align:right;" name="revision_val[{..linkage_seq}][{..mall_seq}][]" value="{ ? mall[..mall_code][0].revision_val}{mall[..mall_code][0].revision_val}{:}0{/}" onfocus="chgZeroVal('f', this);" onblur="chgZeroVal('b', this);" />
+					<select name="revision_unit[{..linkage_seq}][{..mall_seq}][]">
+						<option value="percent" {?mall[..mall_code][0].revision_unit=='percent'}selected{/}>%</option>
+						<option value="won" {?mall[..mall_code][0].revision_unit=='won'}selected{/}>원</option>					
+					</select>
+					<select name="revision_type[{..linkage_seq}][{..mall_seq}][]">
+						<option value="P" {?mall[..mall_code][0].revision_type=='P'}selected{/}>+ 조정</option>
+						<option value="M" {?mall[..mall_code][0].revision_type=='M'}selected{/}>- 조정</option>
+					</select>
+					<span class="btn-plus btnplusminus"><button type="button" class="btn_revision" onclick="plus_revision(this);"></button></span>
+				</div></div>
+							<!--{ @ mall[..mall_code] }-->
+								<!--{ ? ...index_ > 0 }-->
+				<div>
+					<label><input type="radio" name="default_revision[{..linkage_seq}][{..mall_seq}]" class="default_revision" value="{...index_}" {?...default_yn=='Y'}checked{/} /></label>
+					<input type="text" size="5" style="text-align:right;" name="revision_val[{..linkage_seq}][{..mall_seq}][]" value="{?...revision_val}{...revision_val}{:}0{/}" onfocus="chgZeroVal('f', this);" onblur="chgZeroVal('b', this);" />
+					<select name="revision_unit[{..linkage_seq}][{..mall_seq}][]">
+						<option value="percent" {?...revision_unit=='percent'}selected{/}>%</option>
+						<option value="won" {?...revision_unit=='won'}selected{/}>원</option>
+					</select>				
+					<select name="revision_type[{..linkage_seq}][{..mall_seq}][]">
+						<option value="P" {?...revision_type=='P'}selected{/}>+ 조정</option>
+						<option value="M" {?...revision_type=='M'}selected{/}>- 조정</option>
+					</select>
+					<span class="btn-minus btnplusminus"><button type="button" class="btn_revision" onclick="minus_revision(this);"></button></span>
+				</div>
+								<!--{ / }-->
+							<!--{ / }-->
+			</td>
+		</tr>
+					<!--{ / }-->
+				<!--{ / }-->
+			<!--{ / }-->
+		<!--{ / }-->
+		</tbody>
+		</table>
+
+		<div id="infomation1" class="hide">
+			<div >마켓별 상품 판매가로 마켓별로 상품의 판매가를 조정할 수 있으며,</div>
+			<div >상품별로도 마켓별 상품의 판매가를 세세하게 조정할 수 있습니다.</div>
+			<div >예시) A마켓 판매가 = 판매가 + (판매가 x 10%)</div>
+			<div >예시) B마켓 판매가 = 판매가 + 1,000원</div>
+			<div style="padding:16px;"><span style="display:none;">입점몰</span></div>
+			<div >또한 마켓별 상품 판매가는 입점한 판매자와의 정산에는 영향을 미치지 않습니다.</div>
+			<div >예시) 쇼핑몰 판매 시 : 10만원 = 1만원(수수료) + 9만원 (정산금액)</div>
+			<div >예시) 마켓 판매 시 : 11만원 = 1만원  + 1만원(수수료) + 9만원 (정산금액)</div>
+		</div>

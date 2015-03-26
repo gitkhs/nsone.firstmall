@@ -1,0 +1,15 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#gabiaFrm').attr('action', 'http://firstmall.kr/payment_firstmall/');
+	$('#gabiaFrm').attr('target', 'gabiaPayment');
+	setTimeout(function(){
+		$('#gabiaFrm').submit();
+	},100);
+});
+</script>
+
+
+<form name="gabiaFrm" id="gabiaFrm" method="post">
+<input type="hidden" name="mm_param" value="{param}">
+</form>
+<iframe name="gabiaPayment" id="gabiaPayment" width="100%" height="500" frameborder="0"></iframe>

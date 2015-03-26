@@ -1,0 +1,182 @@
+<script type="text/javascript">
+var board_id = '{_GET.id}';
+var boardlistsurl = '{boardurl->lists}';
+var boardwriteurl = '{boardurl->write}';
+var boardviewurl = '{boardurl->view}';
+var boardmodifyurl = '{boardurl->modify}';
+var boardreplyurl = '{boardurl->reply}';
+var file_use = '{=manager.file_use}';
+</script>
+<script type="text/javascript" src="/app/javascript/js/admin-board.js?v=20141105"></script>
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js"></script>
+
+<!-- 페이지 타이틀 바 : 시작 t -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		<!-- 타이틀 -->
+		<div class="page-title">
+				<h2 >
+				<select class="custom-select-box-multi" id="boardgo" onchange="if(this.value){document.location.href='./board?id='+this.value;}">
+				<option value="" >주요게시판</option>
+				{@ boardmanagerlist }
+					<option value="{.id}" {? _GET.id == .id } selected {/} >{=getstrcut(.name, 20)} ({=number_format(.totalnum)})</option>
+				{/}
+				</select></h2>
+				<h2>[{manager.name}] 게시글 리스트</h2>
+
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large white"><button type="submit" onclick="document.location.href='{boardurl->lists}';"> 게시글리스트<span class="arrowright"></span></button></span></li>
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large cyanblue valign-middle"><input type="button" onclick="window.open('{boardurl->userurl}', '', ''); return false;"  value="사용자보기" ></span></li>
+
+			<li><span class="btn large black"><button type="button" name="boardwrite" id="boad_write_btn" title="{manager.name}">게시글등록<span class="arrowright"></span></button></span></li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 게시글리스트검색폼 : 시작 -->
+<div class="search-form-container">
+<form name="boardsearch" id="boardsearch" >
+<input type="hidden" name="id" value="{_GET.id}" >
+<input type="hidden" name="perpage" id="perpage" value="{_GET.perpage}" >
+<input type="hidden" name="page" id="page" value="{_GET.page}" >
+<input type="hidden" name="category" id="category" value="{_GET.category}" >
+<input type="hidden" name="searchreply" id="searchreply" value="{_GET.searchreply}" >
+<input type="hidden" name="score" id="score" value="{_GET.score}" >
+<input type="hidden" name="score_avg" id="score_avg" value="{_GET.score_avg}" >
+<input type="hidden" name="member_seq" id="member_seq" value="{_GET.member_seq}" >
+<input type="hidden" name="mseq" id="mseq" value="{_GET.mseq}" >
+	<table class="search-form-table">
+	<tr>
+		<td width="850">
+			<table class="sf-keyword-table">
+				<td class="sfk-td-txt"><input type="text" name="search_text" id="search_text" value="{_GET.search_text}" title="{? _GET.id == 'goods_qna' ||  _GET.id == 'goods_review'}상품명, 상품간략설명, 상품설명, 입점사, {/}{? _GET.id == 'bulkorder'} 상품명, 상품간략설명, 상품설명, 회사명, {/}작성자, 아이디, 제목, 내용" /></td>
+				<td class="sfk-td-btn"><button type="submit" class="boardsearchsubmit"><span>검색</span></button></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th><span class="icon-arrow-down">작성일</span></th>
+				<td>
+					<input type="text" name="rdate_s" id="rdate_s" value="{_GET.rdate_s}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="rdate_f" id="rdate_f" value="{_GET.rdate_f}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button"  id="today" value="오늘" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="3day" value="3일간" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="1week" value="일주일" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="1month" value="1개월" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="3month" value="3개월" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="select_date_all"  value="전체" class="select_date"  /></span>
+					<span class="btn small"><button type="submit"  class="boardsearchsubmit"/><span>검색</span></button></span>
+					{? _GET.id == 'faq'}
+						<input type="radio" name="hidden"  id="searchhidden" value="2" {? _GET.hidden == '2' } checked {/}/><label for="searchhidden" > 노출보기</label>
+						<input type="radio" name="hidden"  id="searchhiddennone" value="1" {? _GET.hidden == '1' } checked {/}/><label for="searchhiddennone" > 미노출보기</label>
+						<input type="radio" name="hidden"  id="searchhiddenall" value="all" {? !_GET.hidden || _GET.hidden == 'all' } checked {/}/><label for="searchhiddenall" > 전체보기</label>
+					{:}
+					<input type="checkbox" name="display" id="searchdisplay" value="1" {? _GET.display == '1' } checked {/}/><label for="searchdisplay" > 삭제글제외</label>
+					<input type="checkbox" name="hidden"  id="searchhidden" value="2" {? _GET.hidden == '2' } checked {/}/><label for="searchhidden" > 비밀글보기</label>
+					{/}
+				</td>
+			</tr>
+			{? _GET.id == 'goods_review'}
+			<tr>
+				<th>주문번호</th>
+				<td>
+				<input type="text" name="order_seq" id="order_seq" value="{_GET.order_seq}" size="33"/>
+				&nbsp;&nbsp;&nbsp;
+				<label for="isorder_seq" ><input type="checkbox" name="isorder_seq"  id="isorder_seq" value="checked" {_GET.isorder_seq} /> 구매한 상품후기</label>
+				<label for="noorder_seq" ><input type="checkbox" name="noorder_seq"  id="noorder_seq" value="checked" {_GET.noorder_seq} /> 비구매 상품후기</label>
+				<label for="mborder_seq" ><input type="checkbox" name="mborder_seq"  id="mborder_seq" value="checked" {_GET.mborder_seq} /> 회원 상품후기</label>
+				<label for="nomborder_seq" ><input type="checkbox" name="nomborder_seq"  id="nomborder_seq" value="checked" {_GET.nomborder_seq} /> 비회원 상품후기</label>
+				<label for="best" ><input type="checkbox" name="best"  id="best" value="checked" {_GET.best} /> 베스트 상품후기</label>
+				</td>
+			</tr>
+			{/}
+			</table>
+		</td>
+	</tr>
+	</form>
+	</table>
+</div>
+<!-- 게시글리스트검색폼 : 끝 -->
+
+
+<ul class="left-btns clearbox">
+	<li><select class="custom-select-box-multi" id="multichkec" >
+		<option value="true">전체선택</option>
+		<option value="false">전체해제</option>
+		</select>
+	</li>
+	<li><select class="custom-select-box-multi" id="multicmode" >
+		{? multi_copymove }
+		<option value="board_multi_copy">선택복사</option>
+		<option value="board_multi_move">선택이동</option>
+		{/}
+		<option value="board_multi_delete">선택삭제</option>
+		</select>
+	</li>
+	<li><div style="margin-top:4px;">{? sc.totalcount > sc.searchcount }검색 {=number_format(sc.searchcount)}개/{/}총 {=number_format(sc.totalcount)}개(현재 {? sc.total_page== 0 }0{:}{=((sc.page/sc.perpage)+1)}{/}/총 {=number_format(sc.total_page)}페이지)</div></li>
+</ul>
+
+<ul class="right-btns clearbox">
+<li><select  class="custom-select-box-multi btn drop_multi_main " id="display_quantity">
+	<option id="dp_qty10" value="10" {? sc.perpage == '10' } selected {/} >10개씩</option>
+	<option id="dp_qty20" value="20" {? sc.perpage == '20' } selected{/} >20개씩</option>
+	<option id="dp_qty30" value="30" {? sc.perpage == '30' } selected{/} >30개씩</option>
+	<option id="dp_qty50" value="50" {? sc.perpage == '50' } selected{/} >50개씩</option>
+	<option id="dp_qty50" value="100" {? sc.perpage == '100' } selected{/} >100개씩</option>
+	<option id="dp_qty50" value="150" {? sc.perpage == '150' } selected{/} >150개씩</option>
+	<option id="dp_qty50" value="200" {? sc.perpage == '200' } selected{/} >200개씩</option>
+</select></li>
+</ul>
+
+
+<div id="boardmovecopyPopup" class="hide">
+	<form name="BoardCopy" id="BoardCopy" method="post" action="../board_process"  target="actionFrame">
+	<input type="hidden" name="mode" id="board_mode" value="" />
+	<input type="hidden" name="board_id" id="orignalboardid" value="{_GET.id}" />
+	<input type="hidden" name="delseq" id="delseq" value="" />
+	<input type="hidden" name="queryString" id="queryString" value="" />
+	<div align="center">
+		<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+			<col width="80%" />
+		</colgroup>
+		<thead class="hide">
+		<tr>
+			<th class="its-th-align center" colspan="4">기본정보</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">게시판</th>
+			<td class="its-td">
+				<select name="copyid" id="copyid" >
+					<option value="" selected>-선택해주세요-</option>
+				{@ boardmanagercopylist }
+					<option value="{.id}" >{.name} ({=number_format(.totalnum)}) </option>
+				{/}
+				</select>
+			</td>
+		</tr>
+		</tbody>
+		</table>
+	</div>
+	<div style="padding:10px 0 0 0" align="center"><span class="btn medium"><input type="button" value="게시글복사" id="boardcopybtn" name="boardcopybtn" /></span></div>
+	</form>
+</div>
+{#emoneyform}

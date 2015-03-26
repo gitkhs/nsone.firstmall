@@ -1,0 +1,294 @@
+<?php /* Template_ 2.2.6 2014/09/29 15:56:49 /www/nsone_firstmall_kr/admin/skin/default/setting/member.html 000010825 */ ?>
+<?php $this->print_("layout_header",$TPL_SCP,1);?>
+
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript">
+function set_member_html(){
+	var url = $("form[name='memberForm'] input[name='gb']").val();
+
+<?php if($_GET["gb"]=="member_sale"&&$_GET["page"]!=""){?>
+		url = url+"?page=<?php echo $_GET["page"]?>";
+<?php }?>
+
+	$.get(url, function(data) {
+		$('#memberContents').html(data);
+	});
+	var gb = $("input[name='gb']").val();
+	if(gb=='realname') $("#rn_realname").show();
+	else $("#rn_realname").hide();
+
+	if(gb=="grade"){
+		$("#left_btn").hide();
+		$("#grade_btn").show();
+		$("#join_btn").hide();
+		$("#save_btn").hide();
+		$("#member_sale_btn").hide();
+
+	}else if(gb=="joinform"){
+		$("#left_btn").hide();
+		$("#grade_btn").hide();
+		$("#join_btn").show();
+		$("#save_btn").show();
+		$("#member_sale_btn").hide();
+		$("#joinDiv").dialog('close').remove();
+
+	}else if(gb.substring(0,12)=="grade_modify"){
+		$("#left_btn").show();
+		$("#grade_btn").hide();
+		$("#join_btn").hide();
+		$("#save_btn").show();
+		$("#member_sale_btn").hide();
+	}else if(gb=="member_sale"){
+		$("#left_btn").hide();
+		$("#grade_btn").hide();
+		$("#join_btn").hide();
+		$("#save_btn").hide();
+		$("#member_sale_btn").show();
+
+	}else{
+		$("#left_btn").hide();
+		$("#grade_btn").hide();
+		$("#join_btn").hide();
+		$("#save_btn").show();
+		$("#member_sale_btn").hide();
+	}
+
+	var clip = new ZeroClipboard.Client();
+	clip.destroy();
+
+	if(gb=='agreement' || gb=='privacy' || gb=='joinform') $("#rn_join").show();
+	else $("#rn_join").hide();
+}
+
+function formMove(gb, no){
+	classCont(no);
+	if(no==2){
+		formMoveSub(gb, 1);
+	}else{
+		if(gb=='grade_write'){
+			$("form[name='memberForm'] input[name='gb']").val('grade_modify');
+
+<?php if($TPL_VAR["service_code"]=='P_FREE'||$TPL_VAR["service_code"]=='P_STOR'){?>
+			if($("#gcount").val() >= 4){
+				openDialog("업그레이드 안내<span class='desc'></span>", "nostorfreeService", {"width":600,"height":350});
+				return;
+			}
+<?php }?>
+		}else{
+			$("form[name='memberForm'] input[name='gb']").val(gb);
+		}
+		$("form[name='memberForm']").attr('action','../member_process/'+gb);
+		set_member_html();
+	}
+}
+
+function formMoveSub(gb, no){
+	$(".ctab-on").addClass("ctab");
+	$(".ctab-on").removeClass("ctab-on");
+	$(".t"+no).addClass("ctab-on");
+	$("form[name='memberForm'] input[name='gb']").val(gb);
+	$("form[name='memberForm']").attr('action','../member_process/'+gb);
+	set_member_html();
+}
+
+function classCont(no){
+	$(".mtabon-left").addClass("mtab-left");
+	$(".mtabon").addClass("mtab");
+	$(".mtabon-right").addClass("mtab-right");
+	$(".mtabon-left").removeClass("mtabon-left");
+	$(".mtabon").removeClass("mtabon");
+	$(".mtabon-right").removeClass("mtabon-right");
+
+	$(".tl"+no).addClass("mtabon-left");
+	$(".tc"+no).addClass("mtabon");
+	$(".tr"+no).addClass("mtabon-right");
+}
+
+$(document).ready(function() {
+<?php if($TPL_VAR["grade"]){?>
+	formMove('grade_modify?group_seq=<?php echo $TPL_VAR["seq"]?>',4);
+<?php }else{?>
+	//set_member_html();
+<?php }?>
+
+	$("#submit_btn").click(function(){
+		var gb = $("input[name='gb']").val();
+		if(gb.substring(0,12)=="grade_modify"){
+			$("#gradeFrm").submit();
+		}else{
+			$("#memberForm").submit();
+		}
+	});
+
+	// 첫로드시 "가입 > 가입형식"으로 이동(삭제 하지 마시오)
+<?php if($_GET["gb"]=='realname'){?>
+	formMove('realname',1);
+<?php }elseif($_GET["gb"]=='joinform'){?>
+	formMove('joinform',2);formMoveSub('joinform',3);
+<?php }elseif($_GET["gb"]=='approval'){?>
+	formMove('approval',3);
+<?php }elseif($_GET["gb"]=='grade'){?>
+	formMove('grade',4);
+<?php }elseif($_GET["gb"]=='withdraw'){?>
+	formMove('withdraw',5);
+<?php }elseif($_GET["gb"]=='member_sale'){?>
+	formMove('member_sale',6);
+<?php }else{?>
+<?php if(!$TPL_VAR["grade"]){?>
+	formMove('joinform',2);formMoveSub('joinform',3);
+<?php }?>
+<?php }?>
+
+});
+</script>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+
+<?php $this->print_("require_info",$TPL_SCP,1);?>
+
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2><span class="darkgray">설정 →</span> 회원</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li id="left_btn" class="hide"><span class="btn large icon" onclick="formMove('grade',4);"><button>등급리스트</button></span></li>
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li id="join_btn"><span class="btn large black"><button type="button" id="joinBtn">가입항목 만들기<span class="arrowright"></span></button></span></li>
+			<li id="save_btn"><span class="btn large black"><button type="button" id="submit_btn">저장하기<span class="arrowright"></span></button></span></li>
+
+			<li id="grade_btn"><span class="btn large black" class="hide"><input type="button" value="등급만들기" onclick="formMove('grade_write',4);"></span></li>
+
+			<li id="member_sale_btn"><span class="btn large black" class="hide"><input type="button" value="혜택 세트 만들기" onclick="sale_write();"></span></li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<form name="memberForm" id="memberForm" method="post" enctype="multipart/form-data" action="../member_process/joinform" target="actionFrame">
+<input type="hidden" name="gb" value="joinform"/>
+
+<style>
+.mtab-left {background:url('/admin/skin/default/images/common/tab_mem_bg_left.gif');width:4px;height:36px;border-bottom:2px solid #52ADCA;}
+.mtab-right {background:url('/admin/skin/default/images/common/tab_mem_bg_right.gif');width:4px;height:36px;border-bottom:2px solid #52ADCA;}
+.mtab {background:url('/admin/skin/default/images/common/tab_mem_bg_center.gif');font-size:12px;font-family:Dotum;font-weight:bold;color:#757575;padding-top:5px;border-bottom:2px solid #52ADCA;}
+.mtabon-left {background:url('/admin/skin/default/images/common/tab_mem_bg_left_on.gif');width:5px;height:38px;border-bottom:none;}
+.mtabon-right {background:url('/admin/skin/default/images/common/tab_mem_bg_right_on.gif');width:5px;height:38px;border-bottom:none;}
+.mtabon {background:url('/admin/skin/default/images/common/tab_mem_bg_center_on.gif');font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;padding-top:5px;border-bottom:none;}
+
+.ctab {border-top:1px solid #d6d6d6;border-right:1px solid #d6d6d6;border-bottom:1px solid #d6d6d6;width:100px;line-height:30px;text-align:center;background-color:#eeeeee;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#757575;}
+.ctab-on {border-top:1px solid #d6d6d6;border-bottom:1px solid #ffffff;border-right:1px solid #d6d6d6;width:100px;line-height:30px;text-align:center;background-color:#ffffff;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;}
+</style>
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<div class="sub-layout-container">
+
+	<!-- 서브메뉴 탭 : 시작 -->
+<?php $this->print_("setting_menu",$TPL_SCP,1);?>
+
+	<!-- 서브메뉴 탭 : 끝 -->
+
+	<!-- 서브메뉴 바디 : 시작-->
+	<div class='slc-body-wrap'>
+		<div class="slc-body">
+
+			<br style="line-height:30px;" />
+
+			<!-- 상단 단계 링크 : 시작 -->
+			<div class="center">
+				<div style="text-align:center;position:absolute;left:50%;margin-left:-470px;">
+				<table cellpadding="0" cellspacing="0">
+				<tr>
+					<td class="mtabon-left tl1"></td>
+					<td class="mtabon tc1" style="width:100px;"><span class="hand" onclick="formMove('realname',1);">본인확인</span></td>
+					<td class="mtabon-right tr1"></td>
+					<td width="24"><img src="/admin/skin/default/images/common/tab_mem_arrow.gif"></td>
+					<td class="mtab-left tl2"></td>
+					<td class="mtab tc2" style="width:250px;"><span class="hand" onclick="formMove('joinform',2);formMoveSub('joinform',3);">약관/개인정보취급/로그인 및 회원가입</span></td>
+					<td class="mtab-right tr2"></td>
+					<td width="24"><img src="/admin/skin/default/images/common/tab_mem_arrow.gif"></td>
+					<td class="mtab-left tl3"></td>
+					<td class="mtab tc3" style="width:100px;"><span class="hand" onclick="formMove('approval',3);">승인혜택</span></td>
+					<td class="mtab-right tr3"></td>
+					<td width="24"><img src="/admin/skin/default/images/common/tab_mem_arrow.gif"></td>
+					<td class="mtab-left tl4"></td>
+					<td class="mtab tc4" style="width:100px;"><span class="hand" onclick="formMove('grade',4);">등급</span></td>
+					<td class="mtab-right tr4"></td>
+					<td width="24"><img src="/admin/skin/default/images/common/tab_mem_arrow.gif"></td>
+					<td class="mtab-left tl6"></td>
+					<td class="mtab tc6" style="width:100px;"><span class="hand" onclick="formMove('member_sale',6);">등급별 구매혜택</span></td>
+					<td class="mtab-right tr6"></td>
+					<td width="24"><img src="/admin/skin/default/images/common/tab_mem_arrow.gif"></td>
+					<td class="mtab-left tl5"></td>
+					<td class="mtab tc5" style="width:150px;"><span class="hand" onclick="formMove('withdraw',5);">로그아웃/탈퇴/재가입</span></td>
+					<td class="mtab-right tr5"></td>
+				</tr>
+				</table>
+				</div>
+				<table height="38" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:2px solid #52ADCA;">
+				<tr>
+					<td align="center"></td>
+				</tr>
+				</table>
+
+			</div>
+			<!-- 상단 단계 링크 : 끝 -->
+
+			<br class="table-gap" />
+
+			<div id="rn_realname">
+				<table style="margin:auto;">
+				<tr>
+					<td><img src="/admin/skin/default/images/common/icon_setting_now.gif" align="absmiddle" hspace="5" /></td>
+					<td>
+						<span class="bold fx16">현재설정 : </span>
+						<span class="bold fx16 blue" id="now_operating"></span>
+					</td>
+				</tr>
+				</table>
+
+				<br class="table-gap" />
+			</div>
+
+			<div class="left" id="rn_join">
+				<br style="line-height:20px;" />
+
+
+				<div style="position:absolute;">
+				<table cellpadding="0" cellspacing="0">
+				<tr>
+					<td class="ctab-on t1"><span class="hand" onclick="formMoveSub('agreement',1);">이용약관</span></td>
+					<td class="ctab t2"><span class="hand" onclick="formMoveSub('privacy',2);">개인정보취급</span></td>
+					<td class="ctab t3" style="width:130px"><span class="hand" onclick="formMoveSub('joinform',3);">로그인 및 회원가입</span></td>
+				</tr>
+				</table>
+				</div>
+				<table height="32" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #d6d6d6;">
+				<tr>
+					<td align="center"></td>
+				</tr>
+				</table>
+
+
+				<br style="line-height:20px;" />
+			</div>
+
+
+			<div id="memberContents"></div>
+
+		</div>
+	</div>
+	<!-- 서브메뉴 바디 : 끝 -->
+
+</div>
+<!-- 서브 레이아웃 영역 : 끝 -->
+</form>
+<?php $this->print_("layout_footer",$TPL_SCP,1);?>

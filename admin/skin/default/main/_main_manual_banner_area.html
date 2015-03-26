@@ -1,0 +1,40 @@
+<script>
+$(function(){
+	$(".main_manual_banner_close").click(function(){
+
+		$(".main_manual_banner")
+		.css({
+			'z-index':'1000',
+			'position':'absolute',
+			'left':$(".main_manual_banner").offset().left,
+			'top':$(".main_manual_banner").offset().top
+		})
+		.animate({
+			'left':$(".header-snb-item-manual").offset().left+20,
+			'top':$(".header-snb-item-manual").offset().top+20
+		},'normal',function(){
+			$("ul.header-snb-item-manual-subnb").stop(true,true).slideDown('fast',function(){
+				$(this).slideUp('fast');
+			});
+		})
+		.appendTo($("#layout-header"))
+		.children("img")
+		.removeAttr('usemap')
+		.animate({
+			'width':'0px'
+		},'normal',function(){
+			$(".main_manual_banner").hide();
+		});
+	});
+});
+</script>
+<img src="../images/common/banner_pencil.png" usemap="#main_manual_banner_area_map" />
+
+<!-- 배너 -->
+<map name="main_manual_banner_area_map">
+	<area coords="224,8,323,52" href="http://interface.firstmall.kr/firstmall_plus/data/manual/firstmall_manual.zip" alt="메뉴얼다운로드" />
+	<area coords="340,8,523,52" href="#" onclick="show_simple_manual('menu')" />
+	<area coords="540,8,725,52" href="#" onclick="show_simple_manual('setting')" />
+	<area coords="737,8,933,52" href="#" onclick="show_simple_manual('design')" />
+	<area coords="971,5,1007,52" href="#" class="main_manual_banner_close" />
+</map>

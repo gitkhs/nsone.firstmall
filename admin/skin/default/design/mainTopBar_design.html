@@ -1,0 +1,455 @@
+{#layout_header_popup}
+<link rel="stylesheet" href="/data/skin/{working_skin}/css/topbar_admin.css" />
+<style>
+.currentColor{font-weight:bold;}
+.tabStyle span{margin-right:50px}
+</style>
+<script type="text/javascript">
+$(function(){
+	{?template_path}
+	parent.DM_window_title_set("left","<a href=\"javascript:;\" onmouseup=\"DM_window_sourceeditor('{template_path}','')\">◀ 메인상단바 영역의 HTML소스보기</a>");
+	{/}
+
+	$('.colorType').click(function(){
+		$(".currentColor").removeClass("currentColor");
+		$(this).addClass("currentColor");
+		$('.tabTable').find("input:radio[name=tab_style]").each(function(i){
+			if($(this).prop("checked")) $(this).addClass("styleCheck");
+		});
+		beforeHtml = $('.tabTable').html();
+		afterHtml = beforeHtml.split($('#tabStyleName').val()).join($(this).attr('color'));
+		$('.tabTable').html(afterHtml);
+		$('.styleCheck').prop("checked","checked").removeClass("styleCheck");
+	});
+	$("table.simplelist-table-style tbody").sortable({items:'tr'});
+	$("input[name='tab_type']").change(function(){
+		if($(this).is(":checked")){
+			if($(this).val()=='image'){
+				$(".displayTabKindWrapImage").show();
+				$(".displayTabKindWrapText").hide();
+			}else{
+				$(".displayTabKindWrapImage").hide();
+				$(".displayTabKindWrapText").show();
+				if($("input[name='tab_style']:checked").val()=='displayTabTypeImage'){
+					$("input[name='tab_style']").eq(0).attr("checked",true);
+				}
+			}
+		}
+	}).trigger("change");
+
+	$(".tabPlusBtn").live('click',function(){
+		$(".displayTabMakeInputs:last-child").after($(".displayTabMakeInputs:last-child").clone().addClass("tab_idx"));
+		$(".displayTabMakeImages:last-child").after($(".displayTabMakeImages:last-child").clone().addClass("tab_img_idx"));
+		$('.tab_idx').find('input[name="tab_idx[]"]').val('');
+		$('.tab_img_idx').find('input[name="tab_img_idx[]"]').val('');
+
+		addIndex($('.tab_idx').find('.strMakeTabIdx'));
+		addIndex($('.tab_img_idx').find('.strMakeTabIdx'));
+
+		$('.tab_idx').removeClass("tab_idx");
+		$('.tab_img_idx').removeClass("tab_img_idx");
+	});
+
+	$(".tabMinusBtn").live('click',function(){
+		if($(this).closest(".displayTabMakeInputs").length){
+			var tabIdx = $(".displayTabMakeInputs").index($(this).closest(".displayTabMakeInputs"));
+		}else{
+			var tabIdx = $(".displayTabMakeImages").index($(this).closest(".displayTabMakeImages"));
+		}
+
+		tab_delete = $('#tab_delete').val();
+		if(tab_delete) tab_delete += ",";
+		$('#tab_delete').val(tab_delete += $(".displayTabMakeInputs").eq(tabIdx).find('input[name="tab_idx[]"]').val());
+		$(".displayTabMakeInputs").eq(tabIdx).remove();
+		$(".displayTabMakeImages").eq(tabIdx).remove();
+	});
+
+	$('.tab_cursor').click(function(){
+		$('#tab_cursor').val($(this).val());
+	});
+});
+
+var addIndex = function(e){
+	addElement = $(e);
+	idx = parseInt(addElement.attr("idx"))+1;
+	addElement.html(idx).attr({"idx":idx});
+};
+</script>
+<form name="displayManagerForm" action="../design_process/mainTopBar_edit" method="post" target="actionFrame" enctype="multipart/form-data">
+<input type="hidden" name="tab_index" value="{data.tab_index}" />
+<input type="hidden" id="tab_delete" name="tab_delete" value="" />
+<input type="hidden" id="tab_cursor" name="tab_cursor" value="{data.tab_cursor}" />
+
+<div id="displayTabMakePopup">
+	<div class="displayTabMakePopupInner">
+		<ul class="displayTabKindWrap">
+			<li><label><input type="radio" name="tab_type" value="text" {?!data.tab_type || data.tab_type=='text'}checked{/}/> 텍스트 탭 만들기</label></li>
+			<li><label><input type="radio" name="tab_type" value="image" {?data.tab_type=='image'}checked{/}/> 이미지로 탭 만들기</label></li>
+		</ul>
+
+		<div class="displayTabKindWrapText">
+			<div class="displayTabDivisionLine">
+				<b>1.탭 스타일</b>
+				<div class="pdt10 tabStyle">
+					<span class="colorType hand {? data.tab_styleName == 'tabGrey'}currentColor{ / }" color="tabGrey">그레이</span><span class="colorType hand {? data.tab_styleName == 'tabRed'}currentColor{ / }" color="tabRed">레드</span><span class="colorType hand {? data.tab_styleName == 'tabOrange'}currentColor{ / }" color="tabOrange">오렌지</span>
+					<span class="colorType hand {? data.tab_styleName == 'tabPink'}currentColor{ / }" color="tabPink">핑크</span><span class="colorType hand {? data.tab_styleName == 'tabBlue'}currentColor{ / }" color="tabBlue">블루</span><span class="colorType hand {? data.tab_styleName == 'tabGreen'}currentColor{ / }" color="tabGreen">그린</span><span class="colorType hand {? data.tab_styleName == 'tabViolet'}currentColor{ / }" color="tabViolet">바이올릿</span>
+				</div>
+				<div class="pdt10 tabTable">
+					<input type="hidden" name="tabStyleName" id="tabStyleName" value="{data.tab_styleName}" />
+					<table>
+						<tr>
+							<td>
+								<input type="radio" name="tab_style" value="{data.tab_styleName}1" {?!data.tab_style || data.tab_style==data.tab_styleName+"1"}checked{/}/>
+							</td>
+							<td class="{data.tab_styleName}1">
+								<div class="fl"><span class="leftTab"></span></div>
+								<div class="fl">
+									<ul>
+										<li class="current">탭1</li>
+										<li>탭2</li>
+										<li>탭3</li>
+										<li>탭4</li>
+									</ul>
+								</div>
+								<div class="fl"><span class="rightTab"></span></div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="radio" name="tab_style" value="{data.tab_styleName}2" {?!data.tab_style || data.tab_style == data.tab_styleName + "2"}checked{/}/>
+							</td>
+							<td class="{data.tab_styleName}2">
+								<div class="fl"><span class="leftTab"></span></div>
+								<div class="fl">
+									<ul>
+										<li class="current">탭1</li>
+										<li>탭2</li>
+										<li>탭3</li>
+										<li>탭4</li>
+									</ul>
+								</div>
+								<div class="fl"><span class="rightTab"></span></div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="radio" name="tab_style" value="{data.tab_styleName}3" {?!data.tab_style || data.tab_style==data.tab_styleName + "3"}checked{/}/>
+							</td>
+							<td class="{data.tab_styleName}3">
+								<div class="fl"><span class="leftTab"></span></div>
+								<div class="fl">
+									<ul>
+										<li class="current">탭1</li>
+										<li>탭2</li>
+										<li>탭3</li>
+										<li>탭4</li>
+									</ul>
+								</div>
+								<div class="fl"><span class="rightTab"></span></div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="radio" name="tab_style" value="{data.tab_styleName}4" {?!data.tab_style || data.tab_style==data.tab_styleName + "4"}checked{/}/>
+							</td>
+							<td class="{data.tab_styleName}4">
+								<div class="fl"><span class="leftTab"></span></div>
+								<div class="fl">
+									<ul>
+										<li class="current">
+											<span>탭1</span>
+											<span class="bottomLine"></span>
+											<span class="underLine"></span>
+										</li>
+										<li>
+											탭2
+											<span class="bottomLine"></span>
+										</li>
+										<li>
+											탭3
+											<span class="bottomLine"></span>
+										</li>
+										<li>
+											탭4
+											<span class="bottomLine"></span>
+										</li>
+									</ul>
+								</div>
+								<div class="fl"><span class="rightTab"></span></div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="radio" name="tab_style" value="{data.tab_styleName}5" {?!data.tab_style || data.tab_style==data.tab_styleName + "5"}checked{/}/>
+							</td>
+							<td class="{data.tab_styleName}5">
+								<div class="fl"><span class="leftTab"></span></div>
+								<div class="fl">
+									<ul>
+										<li class="current">탭1</li>
+										<li>탭2</li>
+										<li>탭3</li>
+										<li>탭4</li>
+									</ul>
+								</div>
+								<div class="fl"><span class="rightTab"></span></div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="radio" name="tab_style" value="{data.tab_styleName}6" {?!data.tab_style || data.tab_style==data.tab_styleName + "6"}checked{/}/>
+							</td>
+							<td class="{data.tab_styleName}6">
+								<div class="fl"><span class="leftTab"></span></div>
+								<div class="fl">
+									<ul>
+										<li class="current">탭1</li>
+										<li>탭2</li>
+										<li>탭3</li>
+										<li>탭4</li>
+									</ul>
+								</div>
+								<div class="fl"><span class="rightTab"></span></div>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<input type="radio" name="tab_style" value="{data.tab_styleName}7" {?!data.tab_style || data.tab_style==data.tab_styleName + "7"}checked{/}/>
+							</td>
+							<td class="{data.tab_styleName}7">
+								<div class="fl"><span class="leftTab"></span></div>
+								<div class="fl">
+									<ul>
+										<li class="current">
+											<span>탭1</span>
+										</li>
+										<li>탭2</li>
+										<li>탭3</li>
+										<li>탭4</li>
+									</ul>
+								</div>
+								<div class="fl"><span class="rightTab"></span></div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<br />
+			<div class="displayTabDivisionLine" style="width:540px;">
+				<b>2.탭 명칭</b>(직접 클릭하여 순서를 변경하실수 있습니다.)
+				<br /><br />
+				<div class="displayTabList">
+					<table width="540px" class="simplelist-table-style" cellspacing="0">
+					<col width="5%"/>
+					<col width="30%"/>
+					<col width="25%"/>
+					<col width="10%"/>
+					<tr>
+						<th class="its-th"></th>
+						<th class="its-th-align center">탭 이름</th>
+						<th class="its-th-align center">탭 파일명</th>
+						<th class="its-th-align center">추가/삭제</th>
+					</tr>
+					<tr>
+						<table width="540px" class="info-table-style simplelist-table-style">
+						<col width="5%"/>
+						<col width="30%"/>
+						<col width="25%"/>
+						<col width="10%"/>
+						<!--{ ? tabsData.tabs }-->
+							<!--{ @ tabsData.tabs }-->
+						<tr class="displayTabMakeInputs">
+							<td class="its-th-align center" style="cursor:move;">탭 <span class="strMakeTabIdx" idx="{=(.index_+1)}">{=(.index_+1)}</td>
+							<td class="its-th-align center"><input type="text" name="tab_title[]" value="{.tab_title}" size="30" maxlength="15" /></td>
+							<td class="its-th-align center">
+								<select name="tab_filename[]">
+									<!--{@ tabsData.folders}-->
+									<option value="{ ..value_}" {?..value_ == .tab_filename } selected {/} >{ ..value_}</option>
+									<!--{ / }-->
+									<option value="new" >생성</option>
+								</select>
+							</td>
+							<td class="its-th-align center">
+								 <img src="../images/design/icon_design_plus.gif" align="absmiddle" class="tabPlusBtn hand" /><img src="../images/design/icon_design_minus.gif" align="absmiddle" class="tabMinusBtn hand" />
+								 <input type="hidden" name="tab_idx[]" value="{.tab_idx}"/>
+							</td>
+						</tr>
+							<!--{ / }-->
+						<!--{ :}-->
+						<tr class="displayTabMakeInputs">
+							<td class="its-th-align center" style="cursor:move;">탭 <span class="strMakeTabIdx" idx="1">1</td>
+							<td class="its-th-align center"><input type="text" name="tab_title[]" value="" size="30" maxlength="15" /></td>
+							<td class="its-th-align center">
+								<select name="tab_filename[]">
+									<!--{@ tabsData.folders}-->
+									<option value="{ .value_}">{ .value_}</option>
+									<!--{ / }-->
+									<option value="new" >생성</option>
+								</select>
+							</td>
+							<td class="its-th-align center">
+								<img src="../images/design/icon_design_plus.gif" align="absmiddle" class="tabPlusBtn hand" /><img src="../images/design/icon_design_minus.gif" align="absmiddle" class="tabMinusBtn hand" />
+								<input type="hidden" name="tab_idx[]" value=""/>
+							</td>
+						</tr>
+						<!--{ / }-->
+						</table>
+					</table>
+				</div>
+			</div>
+			<br />
+			<div class="displayTabDivisionLine">
+				<b>3. 탭의 수가 화면보다 많을 경우</b>
+				<div class="pdt10 displayTabList">
+					<div>
+						<label><input type="radio" name="tab_cursor_text" class="tab_cursor" value="1" {? data.tab_cursor == 1 } checked { / } checked />
+						좌측화살표(<)와 우측 화살표(>)를 자동으로 생성합니다.</label>
+					</div>
+					<div>
+						<label><input type="radio" name="tab_cursor_text" class="tab_cursor" value="0" {? data.tab_cursor == 0 } checked { / }/>
+						좌측화살표(<)와 우측 화살표(>)는 없지만 계속 스와이핑 됩니다.</label>
+					</div>
+				</div>
+			</div>
+			<div style="position:absolute;right:30px;top:55px;width:246px;">
+				<img src="/data/skin/{working_skin}/images/topbar/top_guideimg.gif" height="430px" alt="안내이미지" />
+			</div>
+		</div>
+		<div class="displayTabKindWrapImage">
+			<div class="displayTabDivisionLine">
+				<b>1. 탭 이미지 추가</b>(직접 클릭하여 순서를 변경하실수 있습니다.)
+				<div class="pdt10">
+					<table width="800px" class="info-table-style displayTabList">
+					<col width="5%"/>
+					<col width="30%"/>
+					<col width="30%"/>
+					<col width="25%"/>
+					<col width="10%"/>
+					<tr>
+						<th class="its-th"></th>
+						<th class="its-th-align center">탭 활성 이미지</th>
+						<th class="its-th-align center">탭 비활성 이미지</th>
+						<th class="its-th-align center">탭 파일명</th>
+						<th class="its-th-align center">추가/삭제</th>
+					</tr>
+					<tr>
+						<table width="800px" class="info-table-style simplelist-table-style">
+						<col width="5%"/>
+						<col width="30%"/>
+						<col width="30%"/>
+						<col width="25%"/>
+						<col width="10%"/>
+					<!--{ ? tabsData.tabs }-->
+						<!--{ @ tabsData.tabs }-->
+						<tr class="displayTabMakeImages" style="cursor:move;">
+							<td class="its-th-align center">탭 <span class="strMakeTabIdx" idx="{=(.index_+1)}">{=(.index_+1)}</div></td>
+							<td class="its-td-align center">
+								{?.tab_title_img_on}<img src="/data/skin/{working_skin}/images/topbar/tabs/{.tab_title_img_on}" width="220px" height="30px;"/>{/}
+								<div>
+									<input type="text" name="tab_title_img_on[]" value="{.tab_title_img_on}" class="hide" />
+									<input type="file" name="new_tab_title_img_on[]" size="20" />
+								</div>
+							</td>
+							<td class="its-td-align center">
+								{?.tab_title_img}<img src="/data/skin/{working_skin}/images/topbar/tabs/{.tab_title_img}" width="220px" height="30px;" />{/}
+								<div>
+									<input type="text" name="tab_title_img[]" value="{.tab_title_img}" class="hide" />
+									<input type="file" name="new_tab_title_img[]" size="20" />
+								</div>
+							</td>
+							<td class="its-td-align center">
+								<select name="tab_img_filename[]">
+									<!--{@ tabsData.folders}-->
+									<option value="{ ..value_}" {?..value_ == .tab_filename } selected {/} >{ ..value_}</option>
+									<!--{ / }-->
+									<option value="new" >생성</option>
+								</select>
+							</td>
+							<td class="its-td-align center"><img src="../images/design/icon_design_plus.gif" align="absmiddle" class="tabPlusBtn hand" /><img src="../images/design/icon_design_minus.gif" align="absmiddle" class="tabMinusBtn hand" />
+							<input type="hidden" name="tab_img_idx[]" value="{.tab_idx}"/>
+							</td>
+						</tr>
+						<!--{ / }-->
+					<!--{ :}-->
+						<tr class="displayTabMakeImages" style="cursor:move;">
+							<td class="its-th-align center">탭 <span class="strMakeTabIdx" idx="1">1</div></td>
+							<td class="its-td-align center">
+								<div>
+									<input type="text" name="tab_title_img_on[]" value="" class="hide" />
+									<input type="file" name="new_tab_title_img_on[]" size="20" />
+								</div>
+							</td>
+							<td class="its-td-align center">
+								<div>
+									<input type="text" name="tab_title_img[]" value="" class="hide" />
+									<input type="file" name="new_tab_title_img[]" size="20" />
+								</div>
+							</td>
+							<td class="its-td-align center">
+								<select name="tab_img_filename[]">
+									<!--{@ tabsData.folders}-->
+									<option value="{ .value_}">{ .value_}</option>
+									<!--{ / }-->
+									<option value="new" >생성</option>
+								</select>
+							</td>
+							<td class="its-td-align center"><img src="../images/design/icon_design_plus.gif" align="absmiddle" class="tabPlusBtn hand" /><img src="../images/design/icon_design_minus.gif" align="absmiddle" class="tabMinusBtn hand" />
+							<input type="hidden" name="tab_img_idx[]" value=""/>
+							</td>
+						</tr>
+					<!--{ / }-->
+						</table>
+					</tr>
+					</table>
+				</div>
+			</div>
+			<br />
+			<div class="displayTabDivisionLine">
+				<b>2. 탭의 수가 화면보다 많을 경우</b>
+				<div class="displayTabList pdt10">
+					<div>
+						<label><input type="radio" name="tab_cursor_img" class="tab_cursor" value="1" {? data.tab_cursor == 1 } checked { / } checked />
+						좌측화살표(<)와 우측 화살표(>)를 자동으로 생성합니다.</label>
+					</div>
+					<div>
+						<label><input type="radio" name="tab_cursor_img" class="tab_cursor" value="0" {? data.tab_cursor == 0 } checked { / }/>
+						좌측화살표(<)와 우측 화살표(>)는 없지만 계속 스와이핑 됩니다.</label>
+					</div>
+				</div>
+			</div>
+			<br />
+			<div class="displayTabDivisionLine">
+				<b>3. 왼쪽/오른쪽 이동 이미지</b>
+				<div class="pdt10">
+					<table width="600px" class="info-table-style">
+						<tr>
+							<th class="its-th-align center" width="40%">왼쪽 이동버튼</th>
+							<th class="its-th-align center" width="40%">오른쪽 이동버튼</th>
+						</tr>
+						<tr>
+							<td class="its-td-align center" width="40%">
+								<!--{? data.tab_img_prev }--><img src="/data/skin/{working_skin}/images/topbar/tabs/{data.tab_img_prev}" width="40px" height="41px;"/><!--{ / }-->
+								<div>
+									<input type="text" name="tab_img_prev" value="{data.tab_img_prev}" class="hide" />
+									<input type="file" name="new_tab_img_prev" size="20" />
+								</div>
+							</td>
+							<td class="its-td-align center" width="40%">
+								<!--{? data.tab_img_next }--><img src="/data/skin/{working_skin}/images/topbar/tabs/{data.tab_img_next}" width="40px" height="41px;" /><!--{ / }-->
+								<div>
+									<input type="text" name="tab_img_next" value="{data.tab_img_next}" class="hide" />
+									<input type="file" name="new_tab_img_next" size="20" />
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div class="pdt20 pdb20 center">
+			<span class="btn large cyanblue"><button type="submit">적용</button></span>
+		</div>
+	</div>
+</div>
+</form>

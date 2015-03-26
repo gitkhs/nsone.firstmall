@@ -1,0 +1,245 @@
+{#layout_header_popup}
+
+<script>
+$(function(){
+	
+	{?template_path}
+	parent.DM_window_title_set("left","<a href=\"javascript:;\" onmouseup=\"DM_window_sourceeditor('{template_path}','\{=showlocationNavigation()\}')\">◀ 지역 영역의 HTML소스보기</a>");
+	{/}
+	
+	/* 윈도우 크기 리사이징 */
+	setTimeout(function(){
+		$("#DMWindowBody",parent.document).height($(document).height());
+	},200);
+	
+	$("input[name='location_type']").change(function(){
+		$("img[location_type]").removeClass('location_type_img_selected');
+		$("img[location_type='"+$(this).val()+"']").addClass('location_type_img_selected');
+	}).change();
+	
+	$("img[location_type]").click(function(){
+		$("input[name='location_type']").val($(this).attr('location_type')).change();
+	});
+	
+	$("input[name='direction']").change(function(){
+		
+	
+		
+		if($(this).is(":checked")){
+
+			switch($(this).val()){
+				case "x":
+					$("input[name='location_type'][value^=y_]").parent().css('opacity','0.5').end().attr('disabled',true);
+					$("input[name='location_type'][value^=x_]").parent().css('opacity','1').end().removeAttr('disabled');
+				break;
+				case "y":
+					$("input[name='location_type'][value^=x_]").parent().css('opacity','0.5').end().attr('disabled',true);
+					$("input[name='location_type'][value^=y_]").parent().css('opacity','1').end().removeAttr('disabled');
+				break;
+			}
+		}
+
+		if($("input[name='location_type']:checked").not(":disabled").length==0){
+			$("input[name='location_type']").not(":disabled").eq(0).attr("checked",true);
+		}
+		
+		
+		
+	}).change();	
+	
+	$("input[name='direction'], input[name='location_type']").change(function(){
+		$(".category_source_view_btn").hide();
+		$("input[name='location_type']:checked").closest('td').find(".category_source_view_btn").show();
+	}).change();
+	
+});
+
+/* 지역 HTML 소스보기 */
+function source_view_popup(){
+	window.open("../design/source_view_popup?mode=location&tpl_path="+location_type_template_path(),"source_view","width=800,height=550,scrollbars=0,resizable=1");
+}
+
+/* 현재 선택된 타입값 반환 */
+function location_type_template_path(){
+	var location_type = $("input[name='location_type']:checked").val();
+	return "_modules/location/location_"+location_type+".html";
+}
+
+/* 폼 서브밋 */
+function submitNavigationForm(frm){
+	var location_type = $("input[name='location_type']:checked").val();
+	var msg = "";
+
+	{?location=='layout_header'}
+		if(location_type.substring(0,1)=='y'){
+			msg += "현재 지역 네비게이션이 상단영역에 있기 때문에<br />"; 
+			msg += "자동적용디자인의 가로형 선택을 권장합니다.<br /><br />";
+			msg += "지역 네비게이션 디자인을 세로형으로 변경하면<br />";
+			msg += "쇼핑몰 디자인이 일그러질 것입니다.<br />";
+			msg += "정말 변경(가로형→세로형) 하시겠습니까?";
+			openDialogConfirm(msg,400,220,function(){
+				frm.submit();
+			});
+			return false;
+		}
+	{:location=='layout_side'}
+		if(location_type.substring(0,1)=='x'){
+			msg += "현재 지역 네비게이션이 측면영역에 있기 때문에<br />"; 
+			msg += "자동적용디자인의 세로형 선택을 권장합니다.<br /><br />";
+			msg += "지역 네비게이션 디자인을 가로형으로 변경하면<br />";
+			msg += "쇼핑몰 디자인이 일그러질 것입니다.<br />";
+			msg += "정말 변경(세로형→가로형) 하시겠습니까?";
+			openDialogConfirm(msg,400,220,function(){
+				frm.submit();
+			});
+			return false;
+		}
+	{:location=='layout_footer'}
+		if(location_type.substring(0,1)=='y'){
+			msg += "현재 지역 네비게이션이 하단영역에 있기 때문에<br />"; 
+			msg += "자동적용디자인의 가로형 선택을 권장합니다.<br /><br />";
+			msg += "지역 네비게이션 디자인을 세로형으로 변경하면<br />";
+			msg += "쇼핑몰 디자인이 일그러질 것입니다.<br />";
+			msg += "정말 변경(가로형→세로형) 하시겠습니까?";
+			openDialogConfirm(msg,400,220,function(){
+				frm.submit();
+			});
+			return false;
+		}				
+	{:location=='layout_scroll'}
+		if(location_type.substring(0,1)=='x'){
+			msg += "현재 지역 네비게이션이 스크롤영역에 있기 때문에<br />"; 
+			msg += "자동적용디자인의 세로형 선택을 권장합니다.<br /><br />";
+			msg += "지역 네비게이션 디자인을 가로형으로 변경하면<br />";
+			msg += "쇼핑몰 디자인이 일그러질 것입니다.<br />";
+			msg += "정말 변경(세로형→가로형) 하시겠습니까?";
+			openDialogConfirm(msg,400,220,function(){
+				frm.submit();
+			});
+			return false;
+		}
+	{/}
+	
+	return true;
+}
+</script>
+
+<div class="pd10" style="overflow:auto; max-height:650px;">
+	
+	<form action="/admin/design_process/location_navigation_design" target="actionFrame" method="post" onsubmit="return submitNavigationForm(this)">
+		<div class="imageCheckboxContainer">
+			<table class="info-table-style" width="100%">
+			<col width="100" />
+			{?template_path && location}
+			<tr>
+				<th class="its-th">
+					권장안내
+				</th>
+				<td class="its-td">
+					{?location=='layout_header'}
+						현재 지역 네비게이션이 <b>상단영역</b>({template_path})에 있기 때문에 <b>자동적용디자인의 가로형 선택을 권장</b>합니다.<br />
+						만약 세로형으로 하면 아마도 디자인이 일그러질 것입니다.<br />
+						그러나 세로형으로 하는 방법이 없는 것은 아닙니다. 지역 네비게이션 디자인을 측면영역으로 옮기면 문제는 해결됩니다.
+					{:location=='layout_side'}
+						현재 지역 네비게이션이 <b>측면영역</b>({template_path})에 있기 때문에 <b>자동적용디자인의 세로형 선택을 권장</b>합니다.<br />
+						만약 가로형으로 하면 아마도 디자인이 일그러질 것입니다.<br />
+						그러나 가로형으로 하는 방법이 없는 것은 아닙니다. 지역 네비게이션 디자인을 상단영역으로 옮기면 문제는 해결됩니다.
+					{:location=='layout_footer'}
+						현재 지역 네비게이션이 <b>하단영역</b>({template_path})에 있기 때문에 <b>자동적용디자인의 가로형 선택을 권장</b>합니다.<br />
+						만약 세로형으로 하면 아마도 디자인이 일그러질 것입니다.<br />
+						그러나 세로형으로 하는 방법이 없는 것은 아닙니다. 지역 네비게이션 디자인을 측면영역으로 옮기면 문제는 해결됩니다.
+					{:location=='layout_scroll'}
+						현재 지역 네비게이션이 <b>스크롤영역</b>({template_path})에 있기 때문에 <b>자동적용디자인의 세로형 선택을 권장</b>합니다.<br />
+						만약 가로형으로 하면 아마도 디자인이 일그러질 것입니다.<br />
+						그러나 가로형으로 하는 방법이 없는 것은 아닙니다. 지역 네비게이션 디자인을 상단영역으로 옮기면 문제는 해결됩니다.
+					{/}
+				</td>
+			</tr>
+			{:}
+			<tr>
+				<th class="its-th">
+					권장안내
+				</th>
+				<td class="its-td">
+					지역 네비게이션이 <b>측면영역</b>에 있을 때는 <b>자동적용디자인의 세로형 선택을 권장</b>합니다.<br />
+					만약 가로형으로 하면 아마도 디자인이 일그러질 것입니다.<br />
+					그러나 가로형으로 하는 방법이 없는 것은 아닙니다. 지역 네비게이션 디자인을 상단영역으로 옮기면 문제는 해결됩니다.<br />
+					지역 네비게이션이 <b>상단영역</b>에 있을 때는 <b>자동적용디자인의 가로형 선택을 권장</b>합니다.<br />
+					만약 세로형으로 하면 아마도 디자인이 일그러질 것입니다.<br />
+					그러나 세로형으로 하는 방법이 없는 것은 아닙니다. 지역 네비게이션 디자인을 측면영역으로 옮기면 문제는 해결됩니다.<br />
+				</td>
+			</tr>
+			{/}
+			<tr>
+				<th class="its-th" rowspan="2">자동적용<br />디자인</th>
+				<td class="its-td">
+					<table class="center" >
+					<col width="250" /><col width="250" /><col width="250" />
+					<tr>
+						<td>
+							<div class="imageCheckboxItem"><label><input type="radio" name="location_type" value="y_single" {?location_type=='y_single'}checked{/} /><img src="../images/design/category_navi01.gif" class="location_type_img" location_type="y_single" /></label></div>
+							<div>(세로형) 1차</div>
+							<div><span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor(location_type_template_path('y_single'))" /></span> <span class="btn small category_source_view_btn hide"><input type="button" value="실제 HTML" onclick="source_view_popup()" /></span></div>
+						</td>
+						<td>
+							<div class="imageCheckboxItem"><label><input type="radio" name="location_type" value="y_single_sub" {?location_type=='y_single_sub'}checked{/} /><img src="../images/design/category_navi02.gif" class="location_type_img" location_type="y_single_sub" /></label></div>
+							<div>(세로형) 1차 → 2차</div>
+							<div><span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor(location_type_template_path('y_single_sub'))" /></span> <span class="btn small category_source_view_btn hide"><input type="button" value="실제 HTML" onclick="source_view_popup()" /></span></div>
+						</td>
+						<td>
+							<div class="imageCheckboxItem"><label><input type="radio" name="location_type" value="y_double_sub" {?location_type=='y_double_sub'}checked{/} /><img src="../images/design/category_navi03.gif" class="location_type_img" location_type="y_double_sub" /></label></div>
+							<div>(세로형) 1차+2차 → 3차</div>
+							<div><span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor(location_type_template_path('y_double_sub'))" /></span> <span class="btn small category_source_view_btn hide"><input type="button" value="실제 HTML" onclick="source_view_popup()" /></span></div>
+						</td>
+					</tr>
+					</table>
+
+					<table class="center" >
+					<col width="250" /><col width="250" /><col width="250" />
+					<tr><td height="10"></td></tr>
+					<tr>
+						<td>
+							<div class="imageCheckboxItem"><label><input type="radio" name="location_type" value="x_single" {?location_type=='x_single'}checked{/} /><img src="../images/design/category_navi04.gif" class="location_type_img" location_type="x_single" /></label></div>
+							<div>(가로형) 1차</div>
+							<div><span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor(location_type_template_path('x_single'))" /></span> <span class="btn small category_source_view_btn hide"><input type="button" value="실제 HTML" onclick="source_view_popup()" /></span></div>
+						</td>
+						<td>
+							<div class="imageCheckboxItem"><label><input type="radio" name="location_type" value="x_single_sub" {?location_type=='x_single_sub'}checked{/} /><img src="../images/design/category_navi05.gif" class="location_type_img" location_type="x_single_sub" /></label></div>
+							<div>(가로형) 1차 → 2차</div>
+							<div><span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor(location_type_template_path('x_single_sub'))" /></span> <span class="btn small category_source_view_btn hide"><input type="button" value="실제 HTML" onclick="source_view_popup()" /></span></div>
+						</td>
+						<td>
+							<div class="imageCheckboxItem"><label><input type="radio" name="location_type" value="x_double" {?location_type=='x_double'}checked{/} /><img src="../images/design/category_navi06.gif" class="location_type_img" location_type="x_double" /></label></div>
+							<div>(가로형) 1차+2차</div>
+							<div><span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor(location_type_template_path('x_double'))" /></span> <span class="btn small category_source_view_btn hide"><input type="button" value="실제 HTML" onclick="source_view_popup()" /></span></div>
+						</td>
+					</tr>
+					
+					</table>
+					
+				</td>
+			</tr>
+			</table>
+		</div>
+		
+		<div class="center pdt10"><span class="btn medium cyanblue"><input type="submit" value="저장" /></span></div>
+				
+		<div class="pd10">
+			<div class="pdb5"><b>자동 적용 디자인이란?</b></div>
+			<span class="desc">관리자환경 > 상품 > 지역에 등록된 지역 정보(텍스트 또는 이미지)를 가지고 지역 네비게이션 디자인을 자동 완성합니다.</span><br />
+			<br />
+			<div class="pdb5"><b>소스편집란?</b></div>
+			<span class="desc">정확하게 지역 네비게이션 디자인에 대한 프로그램 소스입니다. 그리고 그 소스를 편집할 수 있습니다.<br />
+			조심히 편집하세요. 프로그램이 오작동 할 수도 있습니다.</span><br />
+			<br />
+			<div class="pdb5"><b>지역 네비게이션 디자인의 HTML보기란?</b></div>
+			<span class="desc">소스편집 버튼으로 확인할 수 있는 프로그램 소스를 HTML로 변환한 HTML소스입니다.<br /> 
+			이 HTML소스는 지역의 주소(URL)가 링크되어 있고 선택한 옵션(가로형 또는 세로형, 고정, 마우스오버)도 포함하고 있습니다.<br />
+			그렇기 때문에 HTML로 직접 지역 네비게이션을 디자인할 경우에 매우 유용한 기초 HTML소스가 됩니다.<br />
+			만약 HTML로 직접 수정한 후에 다시 '자동'적용을 원하시면, 지역 네비게이션 디자인을 원복소스로 복구 하십시오.</span>
+
+		</div>
+	</form>
+</div>
+	
+{#layout_footer_popup}

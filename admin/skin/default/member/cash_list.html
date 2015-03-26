@@ -1,0 +1,135 @@
+{ #layout_header_popup }
+
+<script type="text/javascript">
+$(document).ready(function() {
+	// IFRAME RESIZING
+	parent.$("#mbcontainercash").css("height","0px");
+	$("#mbcontainercash", parent.document).height($(document).height()+10);
+
+
+
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+
+});
+</script>
+
+<div class="item-title" style="width:92%">이머니 <span class="helpicon" title="이머니 지급/차감에 관한 내역을 확인할 수 있습니다."></span></div>
+
+<table width="100%" class="info-table-style">
+<form name="emoneylist" id="emoneylist">
+<input type="hidden" name="member_seq" value="{_GET.member_seq}" />
+<colgroup>
+<col width="100" />
+<col />
+</colgroup>
+<tbody>
+<tr>
+	<th class="its-th-align">지급/차감일</th>
+	<td class="its-td-align">
+		<input type="text" name="sdate" value="{sc.sdate}" class="datepicker line"  maxlength="10" size="10" />
+		&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+		<input type="text" name="edate" value="{sc.edate}" class="datepicker line" maxlength="10" size="10" />
+		&nbsp;&nbsp;
+		<span class="btn small"><input type="button" value="오늘" id="today" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="전체" id="all" name="select_date"/></span>
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align">지급/차감</th>
+	<td class="its-td-align">
+		<label><input type="checkbox" name="gb[]" value="plus" {?sc.gb && in_array('plus',sc.gb)}checked{/}/>지급<label>
+		<label><input type="checkbox" name="gb[]" value="minus" {?sc.gb && in_array('minus',sc.gb)}checked{/}/>차감<label>
+	</td>
+</tr>
+<tr><td height="5"></td></tr>
+<tr>
+	<td colspan="2" align="center" >
+	<span class="btn small cyanblue"><button type="submit" id="send_submit">검색</button></span>
+	</td>
+</tr>
+</form>
+</table>
+<br/>
+
+<table class="list-table-style" cellspacing="0" width="100%">
+	<colgroup>
+		<col width="40" />
+		<col width="15%" />
+		<col width="10%" />
+		<col />
+		<col width="10%" />
+		<col width="10%" />
+		<col width="10%" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>번호</th>
+		<th>날짜</th>
+		<th>지급/차감 금액</th>
+		<th>사유</th>
+		<th>내역</th>
+		<th>유효기간</th>
+		<th>자동/수동</th>
+	</tr>
+	</thead>
+	<tbody class="ltb otb" >
+{? loop }
+	{@ loop }
+	<tr class="list-row">
+		<td align="center">{.number}</td>
+		<td align="center">{.regist_date}</td>
+		<td align="center">{?.gb=='plus'}<span style="color:red;">(+)</span>{:}<span style="color:blue;">(-)</span>{/} {=number_format(.cash)}</td>
+		<td align="center">{.memo}</td>
+		<td align="center">{.contents}</td>
+		<td align="center">{.limit_date}</td>
+		<td align="center">{? .manager_seq }[수동] {.mname}{ : }[자동]{ / }</td>
+	</tr>
+	{ / }
+{ : }
+	<tr class="list-row">
+		<td align="center" colspan="7">이머니 내역이 없습니다.</td>
+	</tr>
+{ / }
+	</tbody>
+</table>
+
+
+<table align="center" border="0" cellpadding="0" cellspacing="0"  width="100%">
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin}</div>
+	</td>
+</tr>
+</table>

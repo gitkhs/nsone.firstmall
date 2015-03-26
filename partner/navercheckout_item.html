@@ -1,0 +1,37 @@
+<response>
+{ @ result }
+<item id="{.goods_seq}">
+<name><![CDATA[{.goods_name}]]></name>
+<url>http://{_SERVER.HTTP_HOST}/goods/view?no={.goods_seq}</url>
+<description><![CDATA[{.contents}]]></description>
+<image>{.viewimg}</image>
+<thumb>{.list1img}</thumb>
+<price>{.price}</price>
+<quantity>{.tot_stock}</quantity>
+<options>
+{ @.options }
+<option name="{..key_}">
+{ @..value_ }<select><![CDATA[{...value_}]]></select>
+{ / }
+</option>
+{ / }
+</options>
+<category>
+{ @ arr_category }
+{ ? ..index_ == 0 }
+<first>{..value_}</first>
+{ / }
+{ ? ..index_ == 1 }
+<second>{..value_}</second>
+{ / }
+{ ? ..index_ == 2 }
+<third>{..value_}</first>
+{ / }
+{ ? ..index_ == 3 }
+<fourth>{..value_}</first>
+{ / }
+{ / }
+</category>
+</item>
+{ / }
+</response>

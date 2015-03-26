@@ -1,0 +1,789 @@
+<style type="text/css">
+body {overflow-x:hidden;}
+.input-box-default-text-code {border:1px solid #ccc; background-color:#f6f6f6; color:#999 !important;}
+.input-box-default-text-code option {background-color:#f6f6f6; color:#999; }
+.top_title	{width:100%;background:url('../images/design/win_tbl_thbg.gif') repeat-x;font-weight:bold;font-size:15px;padding:6px 0;padding-left:20px;color:#747474;}
+.top_title_memo {line-height:25px;border-bottom:1px solid #000;margin-bottom:10px;}
+.top_btn_area	{margin:5px 0;}
+.pricetd		{background-color:#ffffcc;}
+.pricetd input	{color:red;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+// 목록형태로 노출되지 않는 object만 여기서 event를 일괄로 잡는다.
+// 목록형태로 n개 노출되는 object는 해당 object에 각각 event를 잡아야 함.
+
+	// 옵션 생성
+	$("#optionMake").bind("click",function(){
+		openDialog("필수옵션", "optionMakePopup", {"width":"1150","height":"500","show" : "fade","hide" : "fade"});
+		$("input[name='optionMakeDepth']").val('{=count(options[0].option_divide_title)+1}');
+		$("input[name='optionName']").val('');
+		$("input[name='optionPrice']").val('');
+	});
+
+	// 특수옵션 개별 수정 시 저장
+	$("#goodsoptiondirectmodifybtn").bind("click",function(){
+		var newtype		= $(this).attr("newtype");
+		var opttblidx	= $(this).attr("opttblidx");
+		goodsoptiondirectmodify(opttblidx, newtype);
+
+		if	(newtype == 'color' || newtype == 'address' || newtype == 'date'){
+			$("#gdoptdirectmodifylay input[name='newType']").val(newtype);
+			$("#gdoptdirectmodifylay input[name='tmpSeq']").val('{tmp_seq}');
+			loadingStart();
+			$("#specialOption").submit();
+		}else{
+			closeDialog("gdoptdirectmodifylay");
+		}
+	});
+
+	// 자주사용하는 옵션 가져오기
+	$("#frequentlytypeoptbtn").bind("click",function(){
+		var add_goods_seq = $("select[name='frequentlytypeopt']").find("option:selected").val();
+		if( add_goods_seq<=0 ){
+			alert("옵션정보를 가져올 상품을 선택해 주세요!");
+			return false;
+		}
+		var goods_name = $("select[name='frequentlytypeopt']").find("option:selected").text();
+		openDialogConfirm('정말로 ['+goods_name+'] 상품의 <br/>필수옵션 정보를 가져오시겠습니까?',400,200,function(){
+			opener.openSettingOptionnew(add_goods_seq);
+		});
+	});
+
+    // 우편번호 검색
+    $(".direct_zipcode_btn").bind("click",function(){
+		openDialogZipcode('direct_');
+    });
+
+	// 일괄저장 버튼
+	$(".save_all").bind("click", function(){
+		if	($(this).attr('id') == 'reserve_rate_all' && $("select[name='reserve_policy']").val() == 'shop'){
+			openDialogAlert("적립금 일괄적용은 적립금 지급정책이 개별정책 입력일 경우에만 가능합니다.", 550, 150 );
+			return;
+		}else{
+			var href	= '../goods_process/save_tmpoption_cell?tmpSeq={tmp_seq}&target='+$(this).attr('id')+'&value='+$("input[name='"+$(this).attr('id')+"']").val();
+
+			// 적립금은 단위까지 넘어가야 한다.
+			if	($(this).attr('id') == 'reserve_rate_all'){
+				href	+= '&reserve_unit='+$("select[name='reserve_unit_all']").val();
+			}
+			optionFrame.location.href	= href;
+		}
+	});
+
+	// 상품 상세 페이지에 적용
+	$("#setTmpSeq").bind("click", function(){
+		var tmp_frequently = ($("input[name='frequently']:checked"))?$("input[name='frequently']:checked").val():0;
+		opener.setOptionTmp('{tmp_seq}',tmp_frequently);
+		self.close();
+	});
+
+	setDatepicker($(".datepicker"));
+
+	{ ? goods.reserve_policy == 'shop' }
+	setDisableSelectbox($("select[name='reserve_unit_all']"), true);
+	{ / }
+
+	// 옵션 한줄 추가
+	$("#addOption").click(function(){
+		var trobj	= $("input[name='default_option']:checked").closest('tr');
+		var seq		= trobj.find("input[name='option_seq[]']").val();
+		optionFrame.location.replace('../goods_process/save_option_one_row?saveType=add&tmpSeq={_GET.tmp_seq}&optionSeq='+seq);
+	});
+});
+
+
+/****************** 리스트 수정 및 변경 처리 ******************************/
+
+var saverObj	= new DomSaver('hideFormLay', 'post', '../goods_process/save_tmpoption_piece', 'optionFrame');
+// 각 input을 클릭 시 저장 대기로 돌린다.
+function ready_input_save(obj){
+	saverObj.setTarget(obj);
+	if	($(obj).val() == $(obj).attr('title') || $(obj).val() == 0){
+		$(obj).val('');
+	}
+}
+
+// 키 이벤트 처리
+function key_input_value(evt, obj){
+	var e			= evt || window.event;
+
+	if	(e.keyCode == 13){
+		var name	= $(obj).attr('name');
+		var idx		= $("input[name='"+name+"']").index(obj) + 1;
+		if	($("input[name='"+name+"']").eq(idx).attr('name')){
+			$("input[name='"+name+"']").eq(idx).focus();
+		}
+/*
+	}else if	(e.ctrlKey && e.keyCode == 37){
+		var idx		= $(obj).closest('tr').find('input').index(obj) - 1;
+		if	($(obj).closest('tr').find('input').eq(idx).attr('name')){
+			$(obj).closest('tr').find('input').eq(idx).focus();
+		}
+	}else if	(e.ctrlKey && e.keyCode == 38){
+		var name	= $(obj).attr('name');
+		var idx		= $("input[name='"+name+"']").index(obj) - 1;
+		if	($("input[name='"+name+"']").eq(idx).attr('name')){
+			$("input[name='"+name+"']").eq(idx).focus();
+		}
+	}else if	(e.ctrlKey && e.keyCode == 39){
+		var idx		= $(obj).closest('tr').find('input').index(obj) + 1;
+		if	($(obj).closest('tr').find('input').eq(idx).attr('name')){
+			$(obj).closest('tr').find('input').eq(idx).focus();
+		}
+	}else if	(e.ctrlKey && e.keyCode == 40){
+		var name	= $(obj).attr('name');
+		var idx		= $("input[name='"+name+"']").index(obj) + 1;
+		if	($("input[name='"+name+"']").eq(idx).attr('name')){
+			$("input[name='"+name+"']").eq(idx).focus();
+		}
+*/
+	}
+}
+
+
+// 각 input의 폼값 저장
+function save_input_value(obj){
+
+	if	($(obj).attr('name') == 'default_option')	saverObj.setTarget(obj);
+
+	var optionSeq				= $(obj).closest('tr').find("input[name='option_seq[]']").val();
+	var param					= new Array();
+	param['tmpSeq']				= '{tmp_seq}';
+	param['optionSeq']			= optionSeq;
+	param[$(obj).attr('name')]	= $(obj).val();		
+
+	// 변경 시 계산이 필요한 컬럼들 계산처리
+	if	($(obj).attr('name') == 'price' || $(obj).attr('name') == 'reserve_rate' || $(obj).attr('name') == 'reserve_unit'){
+		var reserve = tmpOptCalculate(obj);
+		param['reserve']	= reserve;	
+	}
+
+	saverObj.sendValue(param);	
+
+	if	(!$(obj).val())	$(obj).val($(obj).attr('title'));
+	if	(!$(obj).val())	$(obj).val('0');
+}
+
+// 정산율 및 할인금액 변경 시 계산 처리
+function tmpOptCalculate(obj){
+
+	var calulateReserve	= false;
+
+	if	($(obj).attr('name') == 'price' || $(obj).attr('name') == 'reserve_rate' || $(obj).attr('name') == 'reserve_unit'){
+		calulateReserve	= true;
+	}
+
+	// 적립금 계산
+	if	(calulateReserve){
+		var reserve				= '';
+		var price				= $(obj).closest("tr").find("input[name='price']").val();
+		// 통합정책
+		if	($("select[name='reserve_policy']").val() == 'shop'){
+			var reserve_rate	= '{reserves.default_reserve_percent}';
+			var reserve_unit	= 'percent';
+
+		// 개별정책
+		}else{
+			var reserve_rate	= $(obj).closest("tr").find("input[name='reserve_rate']").val();
+			var reserve_unit	= $(obj).closest("tr").find("select[name='reserve_unit']").val();
+		}
+
+		if	(reserve_unit == 'won')	reserve		= reserve_rate;
+		else						reserve		= Math.floor(price * (reserve_rate / 100));
+
+		$(obj).closest("tr").find(".reserve-shop").html(comma(reserve));
+		$(obj).closest("tr").find(".reserve").html(comma(reserve));
+
+		return reserve;
+	}
+}
+
+// 전체 적립금 일괄 계산
+function tmpReserveCalculate(){
+	var reserve				= '';
+	var reserve_rate		= '';
+	var reserve_unit		= '';
+	// 통합정책
+	if	($("select[name='reserve_policy']").val() == 'shop'){
+		reserve_rate		= '{reserves.default_reserve_percent}';
+		reserve_unit		= 'percent';
+	}
+
+	$("input[name='price']").each(function(){
+		// 통합정책
+		if	($("select[name='reserve_policy']").val() == 'goods'){
+			reserve_rate	= $(this).closest("tr").find("input[name='reserve_rate']").val();
+			reserve_unit	= $(this).closest("tr").find("select[name='reserve_unit']").val();
+		}
+
+		if	(reserve_unit == 'won')	reserve		= reserve_rate;
+		else						reserve		= Math.floor($(this).val() * (reserve_rate / 100));
+
+		$(this).closest("tr").find(".reserve-shop").html(comma(reserve));
+		$(this).closest("tr").find(".reserve").html(comma(reserve));
+	});
+}
+
+// selectbox disabled
+function setDisableSelectbox(obj, disable){
+	if	(disable){
+		var orgVal	= $(obj).val();
+		$(obj).css('background-color', '#f0f0f0');
+		$(obj).find('option').css('background-color', '#f0f0f0');
+		$(obj).bind("change", function(){
+			$(obj).find("option[value='"+orgVal+"']").attr('selected', true);
+		});
+	}else{
+		$(obj).css('background-color', '#fff');
+		$(obj).find('option').css('background-color', '#fff');
+		$(obj).unbind("change");
+	}
+}
+
+// 적립금 정책 변경
+function chgReservePolicy(obj){
+	if	($(obj).val() == 'shop'){
+		$("input[name='reserve_rate_all']").attr('disabled', true);
+		setDisableSelectbox($("select[name='reserve_unit_all']"), true);
+	}else{
+		$("input[name='reserve_rate_all']").attr('disabled', false);
+		setDisableSelectbox($("select[name='reserve_unit_all']"), false);
+	}
+	optionFrame.location.href	= '../goods_process/save_tmpoption_cell?tmpSeq={tmp_seq}&target=tmp_policy_all&value='+$(obj).val();
+}
+
+// 일괄 변경 시 계산 처리
+function tmpSaveAll(target, value){
+	if	(target == 'tmp_policy'){
+		if	(value == 'goods'){
+			$(".reserve-shop-lay").hide();
+			$(".reserve-goods-lay").show();
+		}else{
+			$(".reserve-goods-lay").hide();
+			$(".reserve-shop-lay").show();
+		}
+
+		tmpReserveCalculate();
+	}else{
+		$("input[name='"+target+"']").each(function(){
+			$(this).val(value);
+			if	(target == 'reserve_rate'){
+				$("select[name='reserve_unit']").val($("select[name='reserve_unit_all']").val());
+			}
+			tmpOptCalculate($(this));
+		});
+	}
+}
+
+// 옵션 한줄 추가 ( script )
+function add_option_row(optionSeq){
+	var trobj	= $("input[name='default_option']:checked").closest('tr');
+	var clone	= trobj.clone();
+	clone.find("input[name='option_seq[]']").val(optionSeq);
+	clone.find("input[name='default_option']").attr('checked', false);
+	trobj.closest('table').find('tbody').append(clone);
+}
+
+// 옵션 한줄 제거
+function removeOption(obj){
+	var seq		= $(obj).closest('td').find("input[name='option_seq[]']").val();
+	optionFrame.location.replace('../goods_process/save_option_one_row?saveType=del&tmpSeq={_GET.tmp_seq}&optionSeq='+seq);
+}
+
+// 옵션 한줄 제거 ( script )
+function del_option_row(optionSeq){
+	if	($("input[name='option_seq[]'][value='"+optionSeq+"']").closest('tr').find("input[name='default_option']").is(':checked')){
+		$("input[name='default_option']").eq(0).attr('checked', true);
+	}
+	$("input[name='option_seq[]'][value='"+optionSeq+"']").closest('tr').remove();
+}
+/****************** 리스트 수정 및 변경 처리 ******************************/
+
+
+
+/****************** 특수옵션 개별 수정 팝업 ******************************/
+
+
+//직접입력 > 색상
+function chgColorOption(obj){
+	var optSeq	= $(obj).closest('tr').find("input[name='option_seq[]']").val();
+	if( $(obj).attr("opttype") && optSeq){
+		$("#gdoptdirectmodifylay input[name='same_spc_save_type'][value='y']").attr('checked', true);
+		$("#gdoptdirectmodifylay input[type='text']").val('');
+		var opttblobj = $(obj).parents("tr");
+		var opttblidx = opttblobj.index();
+		$("#gdoptdirectmodifylay input[name='optionSeq']").val(optSeq);
+		$("#gdoptdirectmodifylay input[name='optionNo']").val($(obj).attr('optno'));
+		$("#goodsoptiondirectmodifybtn").attr("opttblidx",opttblidx);
+		$("#goodsoptiondirectmodifybtn").attr("newtype","color");
+		$("#gdoptdirectmodifylay div.goodsoptiondirectlay").hide();
+		$("#gdoptdirectmodifylay div.colordateaddresslay").show();
+		$("#gdoptdirectmodifylay div.colorlay").show();
+		$("#gdoptdirectmodifylay div.datelay").hide();
+		$("#gdoptdirectmodifylay div.addresslay").hide();
+		$($("#gdoptdirectmodifylay input[name='direct_color']")).customColorPicker("destroy");
+		$("#gdoptdirectmodifylay input[name='direct_color']").val(opttblobj.find("input[name='optcolor[]']").val());
+		$($("#gdoptdirectmodifylay input[name='direct_color']")).customColorPicker();
+		openDialog("색상 변경", "gdoptdirectmodifylay", {"width":"450","height":"300","show" : "fade","hide" : "fade"});
+	}
+}
+
+//직접입력 > 지역
+function chgAddressOption(obj){
+	var optSeq	= $(obj).closest('tr').find("input[name='option_seq[]']").val();
+	if( $(obj).attr("opttype") && optSeq){
+		$("#gdoptdirectmodifylay input[name='same_spc_save_type'][value='y']").attr('checked', true);
+		$("#gdoptdirectmodifylay input[type='text']").val('');
+		var opttblobj = $(obj).parents("tr");
+		var opttblidx = opttblobj.index();
+		$("#gdoptdirectmodifylay input[name='optionSeq']").val(optSeq);
+		$("#gdoptdirectmodifylay input[name='optionNo']").val($(obj).attr('optno'));
+		$("#goodsoptiondirectmodifybtn").attr("opttblidx",opttblidx);
+		$("#goodsoptiondirectmodifybtn").attr("newtype","address");
+		$("#gdoptdirectmodifylay div.goodsoptiondirectlay").hide();
+		$("#gdoptdirectmodifylay div.colordateaddresslay").show();
+		$("#gdoptdirectmodifylay div.addresslay").show();
+		$("#gdoptdirectmodifylay div.colorlay").hide();
+		$("#gdoptdirectmodifylay div.datelay").hide();
+		var zipcode = new Array();
+		zipcode = opttblobj.find("input[name='optzipcode[]']").val().split("-");
+		$("#gdoptdirectmodifylay input.direct_zipcode1").val(zipcode[0]);
+		$("#gdoptdirectmodifylay input.direct_zipcode2").val(zipcode[1]);
+		$("#gdoptdirectmodifylay input[name='direct_address_type']").val(opttblobj.find("input[name='optaddress_type[]']").val());
+		$("#gdoptdirectmodifylay input[name='direct_address']").val(opttblobj.find("input[name='optaddress[]']").val());
+		$("#gdoptdirectmodifylay input[name='direct_address_street']").val(opttblobj.find("input[name='optaddress_street[]']").val());
+		$("#gdoptdirectmodifylay input[name='direct_addressdetail']").val(opttblobj.find("input[name='optaddressdetail[]']").val());
+		$("#gdoptdirectmodifylay input[name='direct_biztel']").val(opttblobj.find("input[name='optbiztel[]']").val());
+		$("#gdoptdirectmodifylay input[name='direct_address_commission']").val(opttblobj.find("input[name='optaddress_commission[]']").val());
+		openDialog("지역 변경", "gdoptdirectmodifylay", {"width":"450","height":"400","show" : "fade","hide" : "fade"});
+		setDefaultText();
+	}
+}
+
+//직접입력 > 날짜
+function chgDateOption(obj){
+	var optSeq	= $(obj).closest('tr').find("input[name='option_seq[]']").val();
+	if( $(obj).attr("opttype") && optSeq){
+		$("#gdoptdirectmodifylay input[name='same_spc_save_type'][value='y']").attr('checked', true);
+		$("#gdoptdirectmodifylay input[type='text']").val('');
+		var opttblobj = $(obj).parents("tr");
+		var opttblidx = opttblobj.index();
+		$("#gdoptdirectmodifylay input[name='optionSeq']").val(optSeq);
+		$("#gdoptdirectmodifylay input[name='optionNo']").val($(obj).attr('optno'));
+		$("#goodsoptiondirectmodifybtn").attr("opttblidx",opttblidx);
+		$("#goodsoptiondirectmodifybtn").attr("newtype","date");
+		$("#gdoptdirectmodifylay div.goodsoptiondirectlay").hide();
+		$("#gdoptdirectmodifylay div.colordateaddresslay").show();
+		$("#gdoptdirectmodifylay div.datelay").show();
+		$("#gdoptdirectmodifylay div.colorlay").hide();
+		$("#gdoptdirectmodifylay div.addresslay").hide();
+		$("#gdoptdirectmodifylay input[name='direct_codedate']").val(opttblobj.find("input[name='codedate[]']").val());
+		openDialog("날짜 변경", "gdoptdirectmodifylay", {"width":"450","height":"300","show" : "fade","hide" : "fade"});
+	}
+}
+
+//직접입력 > 수동기간
+function chgInputDateOption(obj){
+	var optSeq	= $(obj).closest('tr').find("input[name='option_seq[]']").val();
+	if( $(obj).attr("opttype") && optSeq){
+		var opttblobj = $(obj).parents("tr");
+		var opttblidx = opttblobj.index();
+		$("#gdoptdirectmodifylay input[name='optionSeq']").val(optSeq);
+		$("#gdoptdirectmodifylay input[name='optionNo']").val($(obj).attr('optno'));
+		$("#goodsoptiondirectmodifybtn").attr("opttblidx",opttblidx);
+		$("#goodsoptiondirectmodifybtn").attr("newtype","dayinput");
+		$("#gdoptdirectmodifylay div.goodsoptiondirectlay").hide();
+		$("#gdoptdirectmodifylay div.colordateaddresslay").hide();
+		$("#gdoptdirectmodifylay div.dayinputlay").show();
+		openDialog("수동기간 변경", "gdoptdirectmodifylay", {"width":"350","height":"150","show" : "fade","hide" : "fade"});
+	}
+}
+
+//직접입력 > 자동기간
+function chgAutoDateOption(obj){
+	var optSeq	= $(obj).closest('tr').find("input[name='option_seq[]']").val();
+	if( $(obj).attr("opttype") && optSeq){
+		var opttblobj = $(obj).parents("tr");
+		var opttblidx = opttblobj.index();
+		$("#gdoptdirectmodifylay input[name='optionSeq']").val(optSeq);
+		$("#gdoptdirectmodifylay input[name='optionNo']").val($(obj).attr('optno'));
+		$("#goodsoptiondirectmodifybtn").attr("opttblidx",opttblidx);
+		$("#goodsoptiondirectmodifybtn").attr("newtype","dayauto");
+		$("#gdoptdirectmodifylay div.goodsoptiondirectlay").hide();
+		$("#gdoptdirectmodifylay div.colordateaddresslay").hide();
+		$("#gdoptdirectmodifylay div.dayautolay").show();
+		openDialog("자동기간 변경", "gdoptdirectmodifylay", {"width":"350","height":"150","show" : "fade","hide" : "fade"});
+	}
+}
+
+//직접입력 > 개별수정레이어창에서 수정하기
+function goodsoptiondirectmodify(opttblidx, newtype) {
+	var opttblobj = $("div#optionLayer tr.optionTr").eq(opttblidx);
+	switch(newtype){
+		case "color":
+			var optcolor = $("#gdoptdirectmodifylay input[name='direct_color']").val();
+			if	($("#gdoptdirectmodifylay input[name='same_spc_save_type']:checked").val() == 'y'){
+				var optName = $(opttblobj.find("div.colorhelpicon")).closest("td").find("input.optionval").attr("name");
+				var optValue = $(opttblobj.find("div.colorhelpicon")).closest("td").find("input.optionval").val();
+				$("div#optionLayer tr.optionTr").find("input[name='"+optName+"'][value='"+optValue+"']").each(function(i){
+					var otherOpttblobj	= $(this).closest("tr.optionTr");
+					otherOpttblobj.find("input[name='optcolor[]']").val(optcolor);
+					otherOpttblobj.find("div.colorhelpicon").css("background-color",optcolor);
+					otherOpttblobj.find("div.colorhelpicon").attr("title", "[색상]을 클릭하여 변경할 수 있습니다.");
+					$(otherOpttblobj.find("div.colorhelpicon")).customColorPicker(optcolor);//colorpickerlay();
+				});
+			}else{
+				opttblobj.find("input[name='optcolor[]']").val(optcolor);
+				opttblobj.find("div.colorhelpicon").css("background-color",optcolor);
+				opttblobj.find("div.colorhelpicon").attr("title", "[색상]을 클릭하여 변경할 수 있습니다.");
+				$(opttblobj.find("div.colorhelpicon")).customColorPicker(optcolor);//colorpickerlay();
+			}
+		break;
+		case "address":
+			var direct_zipcode1 = $("#gdoptdirectmodifylay input.direct_zipcode1").val();
+			var direct_zipcode2 = $("#gdoptdirectmodifylay input.direct_zipcode2").val();
+			var optaddress_type = $("#gdoptdirectmodifylay input[name='direct_address_type']").val();
+			var optaddress = $("#gdoptdirectmodifylay input[name='direct_address']").val();
+			var optaddress_street = $("#gdoptdirectmodifylay input[name='direct_address_street']").val();
+			optaddress_street = optaddress_street.replace(",","&");
+			var optaddressdetail = $("#gdoptdirectmodifylay input[name='direct_addressdetail']").val();
+			var optbiztel = $("#gdoptdirectmodifylay input[name='direct_biztel']").val();
+			var optaddress_commission = $("#gdoptdirectmodifylay input[name='direct_address_commission']").val();
+			var addresstitle = "["+direct_zipcode1+"-"+direct_zipcode2+"] <br> (지번) "+optaddress + optaddressdetail + " <br>(도로명) "+optaddress_street + optaddressdetail + " <br>  연락처:" + optbiztel + "<br/>[지역]을 클릭하여 변경할 수 있습니다.";
+			addresstitle += "<br/>수수료 : "+optaddress_commission+"%";
+			if	($("#gdoptdirectmodifylay input[name='same_spc_save_type']:checked").val() == 'y'){
+				var optName = $(opttblobj.find("span.addrhelpicon")).closest("td").find("input.optionval").attr("name");
+				var optValue = $(opttblobj.find("span.addrhelpicon")).closest("td").find("input.optionval").val();
+				$("div#optionLayer tr.optionTr").find("input[name='"+optName+"'][value='"+optValue+"']").each(function(i){
+					var otherOpttblobj	= $(this).closest("tr.optionTr");
+					otherOpttblobj.find("input[name='optbiztel[]']").val(optbiztel);
+					otherOpttblobj.find("input[name='optaddressdetail[]']").val(optaddressdetail);
+					otherOpttblobj.find("input[name='optaddress_type[]']").val(optaddress_type);
+					otherOpttblobj.find("input[name='optaddress[]']").val(optaddress);
+					otherOpttblobj.find("input[name='optaddress_street[]']").val(optaddress_street);
+					otherOpttblobj.find("input[name='optzipcode[]']").val(direct_zipcode1+"-"+direct_zipcode2);
+					otherOpttblobj.find("input[name='optaddress_commission[]']").val(optaddress_commission);
+					otherOpttblobj.find("span.addrhelpicon").attr("title",addresstitle);
+				});
+			}else{
+				opttblobj.find("input[name='optbiztel[]']").val(optbiztel);
+				opttblobj.find("input[name='optaddressdetail[]']").val(optaddressdetail);
+				opttblobj.find("input[name='optaddress_type[]']").val(optaddress_type);
+				opttblobj.find("input[name='optaddress[]']").val(optaddress);
+				opttblobj.find("input[name='optaddress_street[]']").val(optaddress_street);
+				opttblobj.find("input[name='optzipcode[]']").val(direct_zipcode1+"-"+direct_zipcode2);
+				opttblobj.find("input[name='optaddress_commission[]']").val(optaddress_commission);
+				opttblobj.find("span.addrhelpicon").attr("title",addresstitle);
+			}
+		break;
+		case "date":
+			var codedate = $("#gdoptdirectmodifylay input[name='direct_codedate']").val();
+			if	($("#gdoptdirectmodifylay input[name='same_spc_save_type']:checked").val() == 'y'){
+				var optName = $(opttblobj.find("span.codedatehelpicon")).closest("td").find("input.optionval").attr("name");
+				var optValue = $(opttblobj.find("span.codedatehelpicon")).closest("td").find("input.optionval").val();
+				$("div#optionLayer tr.optionTr").find("input[name='"+optName+"'][value='"+optValue+"']").each(function(i){
+					var otherOpttblobj	= $(this).closest("tr.optionTr");
+					otherOpttblobj.find("input[name='codedate[]']").val(codedate);
+					otherOpttblobj.find("span.codedatehelpicon").attr("title",codedate + "<br/>[날짜]를 클릭하여 변경할 수 있습니다.");
+				});
+			}else{
+				opttblobj.find("input[name='codedate[]']").val(codedate);
+				opttblobj.find("span.codedatehelpicon").attr("title",codedate + "<br/>[날짜]를 클릭하여 변경할 수 있습니다.");
+			}
+		break;
+	}
+	help_tooltip();
+	closeDialog("gdoptdirectmodifylay");
+}
+/****************** 특수옵션 개별 수정 팝업 ******************************/
+</script>
+
+<div class="top_title">필수옵션</div>
+<div style="width:99%;padding:10px;">
+	<div id="optionLayer">
+		<div class="top_title_memo">
+			<span class="bold">자주 쓰는 상품의 옵션 가져오기</span> :
+			자주 쓰는 상품의 옵션 중에서 선택된 상품의 필수옵션 정보를 가져옵니다.
+			<br/>
+			<span class="btn small cyanblue"><button type="button">생성 및 변경</button></span> :
+			여러 개의 필수옵션을 생성 및 변경 할 수 있습니다. 또한 미리 등록해 놓은 옵션 정보를 가져와서 쉽고 정확하게 옵션을 등록할 수도 있습니다.
+			<br/>
+			<span class="btn-plus"><button type="button"></button></span> <span class="btn-minus"><button type="button"></button></span> &nbsp; : &nbsp;
+			생성된 필수옵션을 기준으로 1줄을 추가하거나 삭제할 수 있습니다.
+		</div>
+		<div class="top_btn_area">
+			<div class="left">
+				<span id="frequentlytypeoptlay">
+					<select name="frequentlytypeopt" class="frequentlytypeopt" >
+						<option value="0">자주 쓰는 상품의 필수옵션 </option>
+					<!--{ ? frequentlyoptlist }-->
+						<!--{ @ frequentlyoptlist }-->
+						<option value="{.goods_seq}"  >{=strip_tags(.goods_name)}</option>
+						<!--{ / }-->
+					<!--{ / }-->
+					</select>을
+					<span class="btn small cyanblue"><button type="button" id="frequentlytypeoptbtn" goods_seq="{goods_seq}">가져오기</button></span>
+				</span>
+				또는
+				<span class="btn small cyanblue"><button type="button" id="optionMake" goods_seq="{goods_seq}">생성 및 변경</button></span>
+			</div>
+			<div class="cboth"></div>
+		</div>
+
+		<table class="info-table-style" style="width:100%;">
+		<thead>
+		{ ? count(options[0].option_divide_title) > 0 }
+		<tr>
+			<th class="its-th-align" colspan="{=(count(options[0].option_divide_title) + 2)}">
+				<b>일괄적용 →</b>
+			</th>
+			<th class="its-th-align center">
+				<input type="text" size="5" name="supply_price_all" value="" />
+				<span class="btn small black"><button type="button" class="save_all" id="supply_price_all">▼</button></span>
+			</th>
+			<th class="its-th-align center {? !_GET.socialcp_input_type }hide{/}">
+				<input type="text" size="5" name="coupon_input_all" value="" />
+				<span class="btn small black"><button type="button" class="save_all" id="coupon_input_all">▼</button></span>
+			</th>
+			<th class="its-th-align center">
+				<input type="text" size="5" name="consumer_price_all" value="" />
+				<span class="btn small black"><button type="button" class="save_all" id="consumer_price_all">▼</button></span>
+			</th>
+			<th class="its-th-align center">
+				<input type="text" size="5" name="price_all" value="" />
+				<span class="btn small black"><button type="button" class="save_all" id="price_all">▼</button></span>
+			</th>
+			<th class="its-th-align center">
+				<input type="text" size="5" name="stock_all" value="" />
+				<span class="btn small black"><button type="button" class="save_all" id="stock_all">▼</button></span>
+			</th>
+			<th class="its-th-align center">
+				<input type="text" size="5" name="reserve_rate_all" value="" { ? goods.reserve_policy == 'shop' }disabled{/} />
+				<select name="reserve_unit_all">
+					<option value="percent">%</option>
+					<option value="won">원</option>
+				</select>
+				<span class="btn small black"><button type="button" class="save_all" id="reserve_rate_all">▼</button></span>
+			</th>
+			<th class="its-th-align"></th>
+		</tr>
+		{ / }
+		<tr>
+			<th class="its-th-align center" rowspan="2"><span class="btn-plus"><button type="button" id="addOption"></button></span></th>
+			<th class="its-th-align center" rowspan="2">기준할인가</th>
+			<th class="its-th-align center" colspan="{=count(options[0].option_divide_title)}">필수옵션<br/><span class="desc">옵션코드</span></th>
+			<th class="its-th-align center" rowspan="2">매입가</th>
+			<!--{ ? _GET.socialcp_input_type }-->
+			<th class="its-th-align center couponinputtitle" rowspan="2">쿠폰1장→값어치<br/><span class="couponinputsubtitle">{? _GET.socialcp_input_type =='price' }금액{:}횟수{/}</span></th>
+			<!--{ / }-->
+			<th class="its-th-align center" rowspan="2">정가<br/>(소비자가/시중가)</th>
+			<th class="its-th-align center" rowspan="2">할인가(판매가) <span class="goods_required"></span></th>
+			<th class="its-th-align center" rowspan="2">재고</th>
+			<th class="its-th-align center" rowspan="2">
+			{ ? count(options[0].option_divide_title) > 0 }
+				<div style="margin-bottom:5px;" >
+					<select name="reserve_policy" onchange="chgReservePolicy(this);">
+					<option value="shop">통합정책 적용</option>
+					<option value="goods" { ? goods.reserve_policy == 'goods' }selected{ / }>개별정책 입력</option>
+					</select>
+				</div>
+			{ / }
+				지급 적립금
+			</th>
+			<th class="its-th-align center" rowspan="2">옵션설명 <span class="helpicon" options="{alignX:'left'}" title="옵션설명이란 해당 옵션에 대한 안내 문구입니다.<br/>옵션설명이 있는 경우 구매자가 해당 옵션을 선택하면 옵션설명이 보여지게 됩니다."></span></th>
+		</tr>
+		<tr>
+			<!--{ @ options[0].option_divide_title }-->
+			<th class="its-th-align center">{.value_}</th>
+			<!--{ / }-->
+		</tr>
+		</thead>
+	<!--{ ? count(options[0].option_divide_title) }-->
+		<tbody>
+		<!--{ @ options }-->
+		<tr class="optionTr">
+			<td class="its-td-align center">
+				<input type="hidden" name="option_seq[]" value="{.option_seq}" />
+				<span class="btn-minus"><button class="removeOption" type="button" onclick="removeOption(this);"></button></span>
+			</td>
+			<td class="its-td-align center">
+				<input type="radio" name="default_option" value="y" onclick="save_input_value(this);" {?.default_option=='y'}checked{/} />
+			</td>
+			<!--{ @ .opts }-->
+			<td class="its-td-align center" valign="top">
+				<input type="text" size="10" name="option{..index_+1}" class="optionval" value="{..value_}" onkeyup="key_input_value(event, this);" onfocus="ready_input_save(this);" onblur="save_input_value(this);" />
+				<br/>
+				<input type="text" size="10" name="optioncode{..index_+1}" value="{?.optcodes[..index_] != '' }{.optcodes[..index_]}{:}옵션코드 입력{/}" onkeyup="key_input_value(event, this);" onfocus="ready_input_save(this);" onblur="save_input_value(this);" title="옵션코드 입력" />
+				<!--{ ? .divide_newtype[..key_] }-->
+					<br/>
+					<!--{ ? .divide_newtype[..key_] == 'color' }-->
+						<input type="hidden"  name="optcolor[]" value="{.color}">
+						<div class="colorPickerBtn colorhelpicon helpicon1" opttype="{.option_divide_type[..key_]}" optno="{..key_+1}" style="background-color:{.color}" title="[색상]을 클릭하여 변경할 수 있습니다." onclick="chgColorOption(this);"></div>
+					<!--{ : .divide_newtype[..key_] == 'address'  }-->
+						<input type="hidden"  name="optzipcode[]" value="{.zipcode}">
+						<input type="hidden"  name="optaddress_type[]" value="{.address_type}">
+						<input type="hidden"  name="optaddress[]" value="{.address}">
+						<input type="hidden"  name="optaddress_street[]" value="{.address_street}">
+						<input type="hidden"  name="optaddressdetail[]" value="{.addressdetail}">
+						<input type="hidden"  name="optbiztel[]" value="{.biztel}">
+						<input type="hidden"  name="optaddress_commission[]" value="{.address_commission}">
+						<span class="addrhelpicon helpicon" opttype="{.option_divide_type[..key_]}" title="{? .zipcode }[{.zipcode}]  <br> (지번) {.address} {.addressdetail}<br>(도로명) {.address_street} {.addressdetail}  {:}지역 정보가 없습니다. {/} <br/> {?.biztel}업체 연락처:{.biztel}{/}<br/>수수료: {.address_commission}%<br/>[지역]을 클릭하여 변경할 수 있습니다." optno="{..key_+1}" onclick="chgAddressOption(this);">지역</span>
+					<!--{ : .divide_newtype[..key_] == 'date'  }-->
+						<input type="hidden"  name="codedate[]" value="{.codedate}">
+						<span class="codedatehelpicon helpicon" opttype="{.option_divide_type[..key_]}" title="{? .codedate && .codedate !='0000-00-00' }{.codedate} {:}날짜 정보가 없습니다.{/}<br/>[날짜]를 클릭하여 변경할 수 있습니다." optno="{..key_+1}" onclick="chgDateOption(this);">날짜</span>
+					<!--{ : .divide_newtype[..key_] == 'dayinput'  }-->
+						<input type="hidden"  name="sdayinput[]" value="{.sdayinput}">
+						<input type="hidden"  name="fdayinput[]" value="{.fdayinput}">
+						<span class="dayinputhelpicon helpicon" opttype="{.option_divide_type[..key_]}" title="{? .sdayinput && .fdayinput }{.sdayinput} ~ {.fdayinput} {:}수동기간 정보가 없습니다.{/} <br/> [생성 및 변경]에서 변경할 수 있습니다." optno="{..key_+1}" onclick="chgInputDateOption(this);">수동기간</span>
+					<!--{ : .divide_newtype[..key_] == 'dayauto'  }-->
+						<input type="hidden"  name="sdayauto[]" value="{.sdayauto}">
+						<input type="hidden"  name="fdayauto[]" value="{.fdayauto}">
+						<input type="hidden"  name="dayauto_type[]" value="{.dayauto_type}">
+						<input type="hidden"  name="dayauto_day[]" value="{.dayauto_day}">
+						<span class="dayautohelpicon helpicon" opttype="{.option_divide_type[..key_]}" title="{? .dayauto_type }'결제확인' {.dayauto_type_title} {.sdayauto}일 {? .dayauto_type == 'day' }이후{: .dayauto_type == 'month' }부터{/} + {.fdayauto}일{.dayauto_day_title} {:}자동기간 정보가 없습니다.{/} <br/>[생성 및 변경]에서 변경할 수 있습니다." optno="{..key_+1}" onclick="chgAutoDateOption(this);">자동기간</span>
+					<!--{ / }-->
+				<!--{ / }-->
+			</td>
+			<!--{ / }-->
+			<td class="its-td-align center">
+				<input type="text" size="5" name="supply_price" value="{.supply_price}" onkeyup="key_input_value(event, this);" onfocus="ready_input_save(this);" onblur="save_input_value(this);" />
+			</td>
+			<!--{ ? _GET.socialcp_input_type }-->
+			<td class="its-td-align center">
+				<input type="text" size="5" name="coupon_input" value="{.coupon_input}" onkeyup="key_input_value(event, this);" onfocus="ready_input_save(this);" onblur="save_input_value(this);" />
+			</td>
+			<!--{ / }-->
+			<td class="its-td-align center">
+				<input type="text" size="5" name="consumer_price" value="{.consumer_price}" onkeyup="key_input_value(event, this);" onfocus="ready_input_save(this);" onblur="save_input_value(this);" />
+			</td>
+			<td class="its-td-align center pricetd">
+				<input type="text" size="5" name="price" value="{.price}" onkeyup="key_input_value(event, this);" onfocus="ready_input_save(this);" onblur="save_input_value(this);" />
+			</td>
+			<td class="its-td-align center">
+				<input type="text" size="5" name="stock" value="{.stock}" onkeyup="key_input_value(event, this);" onfocus="ready_input_save(this);" onblur="save_input_value(this);" />
+			</td>
+			<td class="its-td-align center">
+				<div class="reserve-shop-lay {?goods.reserve_policy=='goods'}hide{/}">
+					{reserves.default_reserve_percent}%
+					<span class="reserve-shop">{=number_format(.shop_reserve)}</span>
+				</div>
+				<div class="reserve-goods-lay {?goods.reserve_policy=='shop'}hide{/}">
+					<input type="text" size="5" name="reserve_rate" value="{.reserve_rate}" onkeyup="key_input_value(event, this);" onfocus="ready_input_save(this);" onblur="save_input_value(this);" />
+					<select name="reserve_unit" onfocus="ready_input_save(this);" onchange="save_input_value(this);">
+						<option value="percent">%</option>
+						<option value="won" {? .reserve_unit == 'won' }selected{ / }>원</option>
+					</select>
+					<span class="reserve">{=number_format(.reserve)}</span>
+				</div>
+			</td>
+			<td class="its-td-align center">
+				<textarea name="infomation" rows="3" width="width:90%;" onkeyup="key_input_value(event, this);" onfocus="ready_input_save(this);" onblur="save_input_value(this);">{.infomation}</textarea>
+			</td>
+		</tr>
+		<!--{ / }-->
+		</tbody>
+	<!--{ / }-->
+		</table>
+
+		<div class="center" style="padding:10px;"  id="frequentlay">
+			이 상품의 옵션 정보를 자주 쓰는 상품의 필수옵션으로 사용하시겠습니까? <label><input type="checkbox" name="frequently" value="1" {? goods.frequentlyopt==1} checked="checked" {/} >예, 사용하겠습니다.</label>
+		</div>
+
+		<div class="center" style="padding:10px;">
+			<span class="btn large black"><button type="button" id="setTmpSeq">적용하기</button></span>
+		</div>
+
+	</div>
+</div>
+
+<!-- 직접입력 > 색상, 지역, 날짜  -->
+<div id="gdoptdirectmodifylay" class="hide">
+	<!-- 직접입력 > 날짜 -->
+	<div class="dayinputlay goodsoptiondirectlay hide">
+		<span class="help">수동기간은 [생성 및 변경]에서 변경할 수 있습니다.</span>
+	</div>
+
+	<!-- 직접입력 > 날짜 -->
+	<div class="dayautolay goodsoptiondirectlay hide">
+	<span class="help">자동기간은 [생성 및 변경]에서 변경할 수 있습니다.</span>
+	</div>
+
+	<div class="goodsoptiondirectlay colordateaddresslay">
+		<form name="specialOption" id="specialOption" method="post" action="../goods_process/save_special_option" target="optionFrame">
+		<input type="hidden" name="tmpSeq" value="{_GET.tmp_seq}" />
+		<input type="hidden" name="optionSeq" value="" />
+		<input type="hidden" name="optionNo" value="" />
+		<input type="hidden" name="newType" value="" />
+		<table width="100%" border="0" cellspacing="5" cellpadding="5" >
+		<tr>
+			<td  valign="top" class="center">
+				<div style="margin-bottom:10px;">
+					<label><input type="radio" name="same_spc_save_type" value="y" checked /> 동일옵션 모두 적용</label>
+					<label><input type="radio" name="same_spc_save_type" value="n" /> 현재 선택한 옵션만 적용</label>
+				</div>
+				<div class="datelay">
+					<input type="text" name="direct_codedate" value="" class="line datepicker"  maxlength="10" size="10" />
+				</div>
+				<div class="colorlay">
+					<input type="text" name="direct_color" value="" class="line colorpickerreview colorpicker"  maxlength="10" size="10" />
+				</div>
+				<div class="addresslay">
+					<input type="text" name="direct_zipcode[]" value="" size="5" class="line direct_zipcode1" /> - <input type="text" name="direct_zipcode[]"   value="" size="5" class="line direct_zipcode2" /> <span class="btn small"><button type="button" class="direct_zipcode_btn">우편번호</button></span><br/>
+					<input type="text" name="direct_address_type" value="" size="40" class="line direct_address_type hide" />
+					<table width="100%" border="0" cellspacing="5" cellpadding="5" >
+					<tr>
+						<td  valign="top" class="center">(지번) </td>
+						<td><input type="text" name="direct_address" value="" size="40" class="line direct_address" /></td>
+					</tr>
+					<tr>
+						<td  valign="top" class="center">(도로명) </td>
+						<td><input type="text" name="direct_address_street" value="" size="40" class="line direct_address_street" /></td>
+					</tr>
+					<tr>
+						<td  valign="top" class="center">(공통상세) </td>
+						<td><input type="text" name="direct_addressdetail"  value="" size="40" class="line direct_addressdetail" /></td>
+					</tr>
+					<tr>
+						<td  valign="top" class="center">(업체연락처) </td>
+						<td><input type="text" name="direct_biztel" value="" title="업체 연락처" size="40" class="line direct_biztel" />
+						</td>
+					</tr>
+					</table>
+					<!-- <div >map</div> -->
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td  valign="top" class="left">
+				<div class="addresslay"style="padding-top:10px;">
+					<table width="100%" border="0" cellspacing="0" cellpadding="0" >
+					<tr>
+						<td valign="top" class="center" width="105">수수료</td>
+						<td valign="top" class="left"> <input style="text-align: right;" class="input-box-default-text direct_address_commission" name="direct_address_commission" value="0" size="3" type="text">%</div></td>
+					</tr>
+					<tr>
+						<td valign="top" colspan="2">
+							<div class="desc" style="padding-top:10px;">
+								※ 해당 상품을 해당 매장(지역,장소)에서 사용했을 경우의 수수료입니다.  </br>
+								※ 해당 수수료는 판매자(본사 또는 입점사)와 매장간 정산 내역에 자동 반영됩니다.							</div>
+						</td>
+					</tr>
+					</table><br/>
+				</div>
+			</td>
+		</tr>
+		</table>
+	</div>
+
+	<div class="center" style="padding:5px;">
+		<span class="btn large black"><button type="button" id="goodsoptiondirectmodifybtn">확인</button></span>
+	</div>
+	</form>
+</div>
+
+<div id="hideFormLay"></div>
+
+{ # CREATE_OPTION }
+
+<iframe name="optionFrame" id="optionFrame" src="" width="100%" height="0" frameborder="0"  class="hide"></iframe>

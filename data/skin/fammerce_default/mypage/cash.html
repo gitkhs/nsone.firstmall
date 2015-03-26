@@ -1,0 +1,147 @@
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>이머니(캐쉬)내역 </h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.gif" /></a>
+</div>
+<div style="height:30px;"></div>
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".mypagecashbtn")
+	.mousemove(function(e){
+		var obj = $(".mypagecashlay");
+		obj.css({
+			'left' : e.clientX-50,
+			'top' : e.clientY-(obj.children(".orderleft_mbox").height()+5)
+		});
+		obj.show();
+	})
+	.mouseleave(function(){
+		var obj = $(".mypagecashlay");
+		obj.hide();
+	});
+
+
+	$(".mypageemoneybtn")
+	.mousemove(function(e){
+		var obj = $(".mypageemoneylay");
+		obj.css({
+			'left' : e.clientX-50,
+			'top' : e.clientY-(obj.children(".orderleft_mbox").height()+5)
+		});
+		obj.show();
+	})
+	.mouseleave(function(){
+		var obj = $(".mypageemoneylay");
+		obj.hide();
+	});
+
+
+});
+</script>
+
+<style type="text/css">
+.orderleft_mbox { overflow:hidden; position:relative; }
+.orderleft_mbody { position:relative; z-index:99; margin:5px 3px;}
+.orderleft_mcontent {margin:18px 18px;letter-spacing:-1px; font-family:dotum;line-height:180%; }
+.orderleft_rb { position:absolute; right:0; bottom:0; width:100%; height:100%; background:url('../images/common/bg_speech_bubble_l.png') no-repeat right bottom;}
+.orderleft_lb { position:absolute; left:0; bottom:0; width:102px; height:100%; margin-right:52px; background:url('../images/common/bg_speech_bubble_l.png') no-repeat left bottom;}
+.orderleft_rt { position:absolute; right:0; top:0; height:52px; width:100%; background:url('../images/common/bg_speech_bubble_l.png') no-repeat right top;}
+.orderleft_lt { position:absolute; left:0; top:0; height:52px; width:102px; background:url('../images/common/bg_speech_bubble_l.png') no-repeat left top;}
+</style>
+<div class="absolute mypagecashlay hide">
+	<div  style="width:280px;height:100px;" class="orderleft_mbox hand left" >
+		<span class="orderleft_rb"></span>
+		<span class="orderleft_lb"></span>
+		<span class="orderleft_rt"></span>
+		<span class="orderleft_lt"></span>
+		<div class="orderleft_mbody">
+			<div class="orderleft_mcontent" >
+				<span class="bold" style=" font-family:dotum; font-size:12px; color:#ef1b1a;" >&nbsp;이머니(캐쉬) ?</span>
+				<div style="padding-bottom:5px;" >
+					<span style=" font-family:dotum; font-size:11px; color:#888;" >
+					전자금융법에 따라 200만원 이상 보유가 불가하며, 출금 시 최초 입금자의 명의로만 출금이 가능합니다
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- 타이틀 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td><img src="../images/common/tit_savedcash.gif" title="" alt="" /></td></tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="5"></td></tr>
+<tr><td height="3" bgcolor="#dddddd"></td></tr>
+<tr><td height="5"></td></tr>
+</table>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr>
+	<td>
+		<span class="desc"><b>이머니(캐쉬)</b> : 반품 또는 교환 차액 등을 통해 발생됩니다. 현금과 동일하게 사용 및 출금 요청이 가능하며, 유효기간이 없습니다.</span>
+		<img src="../images/common/btn_help.gif"  align="absmiddle"  class="hand mypagecashbtn">
+	</td>
+</tr>
+<tr><td height="20"></td></tr>
+</table>
+<table width="100%" class="list_table_style">
+<tr>
+	<th class="cell"><span style="font-size:14px;font-weight:bold;">{user_name}</span>({userid}) 회원님이 보유한 총 이머니(캐쉬)의 합계는 <span style="font-size:14px;font-weight:bold;" class="totalprice" >{=number_format(cash)}</span>원 입니다.</th>
+</tr>
+</table>
+
+<div style="height:8px;"></div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+	<colgroup>
+		<col width="40" />
+		<col width="15%" />
+		<col width="15%" />
+		<col />
+		<col width="25%" />
+		<col width="10%" />
+	</colgroup>
+	<thead >
+	<tr>
+		<th>번호</th>
+		<th>날짜</th>
+		<th>지급/차감 금액</th>
+		<th>사유</th>
+		<th>내역</th>
+		<th>유효기간</th>
+	</tr>
+	</thead>
+	<tbody  >
+{? loop }
+	{@ loop }
+	<tr >
+		<td align="center" class="cell">{.number}</td>
+		<td align="center" class="cell">{.regist_date}</td>
+		<td class="cell">{?.gb=='plus'}<span style="color:red;">(+)</span>{:}<span style="color:blue;">(-)</span>{/} {=number_format(.cash)}</td>
+		<td class="cell" style="text-align:left;padding-left:5px;">{.memo}</td>
+		<td class="cell" style="text-align:left;padding-left:5px;">{.contents}</td>
+		<td class="cell">{?.limit_date}~ {.limit_date}{ : }-{ / }</td>
+	</tr>
+	{ / }
+{ : }
+	<tr  >
+		<td align="center" colspan="6"  class="cell">이머니(캐쉬) 내역이 없습니다.</td>
+	</tr>
+{ / }
+	</tbody>
+</table>
+
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin}</div>
+	</td>
+</tr>
+</table>
+
+
+<div style="padding:20px;"></div>

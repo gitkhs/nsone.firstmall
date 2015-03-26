@@ -1,0 +1,274 @@
+{ #layout_header }
+<script type="text/javascript">
+
+	function useTypeCont(id, name){
+		if(!$(id).attr("checked")){
+			$("#"+name).attr('disabled',true);
+		}else{
+			$("#"+name).attr('disabled',false);
+			$("#"+name).focus();
+		}
+	}
+
+	function chkUseType(){
+
+		var use_type = $("input:radio[name='use_type']");
+		var chked,disabled;
+
+		$.each(use_type,function(idx,obj){
+
+			if(obj.checked == true){
+				disabled = false;
+				checked	 = true;
+			}else{
+				chked	= false;
+				disabled = true;
+			}
+
+			if(idx < 2){
+
+				var chkUse = $("input:checkbox[name='order_sum_use"+eval(idx+1)+"[]']");
+				{? data.pgroup_seq == 1 }
+				disabled = true;
+				{/}
+				chkUse.attr('disabled',disabled);
+
+				$.each(chkUse,function(i,obj2){
+					if(i > 0){
+					{@ data.order_sum_us }
+						if(obj2.value == "{=.value_}") chkUse[i].checked = true;
+					{/}
+						if(disabled == true) chkUse[i].checked = chked;
+
+					}else{
+						{? data.pgroup_seq == 1 }
+						chkUse[i].checked	= false;
+						{:}
+						chkUse[i].checked	= obj.checked;
+						{/}
+					}
+
+					useTypeCont(chkUse[i],"order_sum_"+obj2.value);
+				});
+			}
+		});
+
+	}
+
+	$(document).ready(function() {
+
+		// 산정기준
+		$("input:radio[name='use_type']").click(function(){
+			chkUseType($(this));
+		});
+		// 산정기준:조건
+		$(".chkUse").click(function(){
+			var obj		= $(this);
+			var target	= "order_sum_"+obj.val();
+
+			if(obj.val() == "price1" || obj.val() == "price2"){
+				obj.attr("checked",true);
+			}
+			useTypeCont(obj,target);
+		});
+		
+		$(".onlynumber").bind("blur focus",(function(e){
+			if(e.type == "blur"){
+				if($(this).val()!='0' && $(this).val().length)
+				$(this).val(comma($(this).val()));
+			}else{
+				if($(this).val()!='0' && $(this).val().length)
+				$(this).val(uncomma($(this).val()));
+			}
+		}));
+
+	});
+
+
+	function icon_click(img)
+	{
+		var imgname = $(img).attr("filenm");
+		var html = "<img src=\""+$(img).attr('src')+"\" align='absmiddle'>";
+		$("#imgHtml").html(html);
+		$("input[name='pgroup_icon']").val(imgname);
+		closeDialog("iconPopup");
+	}
+
+	function iconFileUpload(str){
+		if(str > 0) {
+			alert('아이콘을 선택해 주세요.');
+			return false;
+		}
+		//파일전송
+		var frm = $('#iconRegist');
+		frm.attr("action","../provider_process/iconUpload");
+		frm.submit();
+	}
+
+	function iconDisplay(filenm){
+		var html = "<img src=\"../../data/icon/provider/"+filenm+"\" class=\"hand icons\" filenm=\""+filenm+"\" onload=\"icon_click(this);\">";
+		$("#iconDisplay").html(html);
+	}
+
+	function iconBtn_click()
+	{
+		openDialog("아이콘 선택  <span class='desc'>아이콘으로 사용할 이미지를 등록해 주세요.</span>", "iconPopup", {"width":"350","height":"250","show" : "fade","hide" : "fade"});
+	}
+
+</script>
+
+<style>
+.line.onlynumber.inp { width:90px;height:16px;padding:2px;text-align:right; }
+</style>
+
+
+<form name="gradeFrm" id="gradeFrm" method="post" target="actionFrame" action="../provider_process/provider_group_write">
+{? data.pgroup_seq }
+<input type="hidden" name="pgroup_seq" value="{data.pgroup_seq}">
+<input type="hidden" name="mode" value="modify">
+{ / }
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>입점사 등급수정</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large white"><button type="button" onclick="document.location.href='provider_group';">입점사 등급 리스트<span class="arrowright"></span></button></span></li>
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+
+<div class="item-title" style="width:92%">입점사 등급 {? data.pgroup_seq }수정{ : }생성{ / }</div>
+
+<table width="100%" class="info-table-style">
+<colgroup>
+	<col width="8%" /><col width="8%" /><col /><col width="15%" /><col />	
+</colgroup>
+<tbody>
+{? data.pgroup_seq }
+<tr>
+	<th class="its-th-align center" colspan="2">등 록 일</th>
+	<td class="its-td">
+		{data.regist_date}
+	</td>
+	<th class="its-th-align center">수 정 일</th>
+	<td class="its-td">
+		{data.update_date}
+	</td>
+</tr>
+{ / }
+<tr>
+	<th class="its-th-align center" colspan="2">등급명칭</th>
+	<td class="its-td" colspan="3">
+		<input type="text" name="pgroup_name" class="line" value="{=data.pgroup_name}" style="width:97%"/>
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center" colspan="2">아 이 콘</th>
+	<td class="its-td" colspan="3">
+
+		<p style="line-height:26px;">- 기본아이콘(권장 15 × 16) 
+		<span id="imgHtml">{?data.pgroup_icon}<img src="../../data/icon/provider/{data.pgroup_icon}" align="absmiddle">{/}</span> <span class="btn small black"><button type="button" id="iconBtn" onclick="iconBtn_click();">등록하기</button></span>
+		<input type="hidden" name="pgroup_icon" class="line" value="{data.pgroup_icon}"/>
+		</p>
+
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center" colspan="2">산정기준</th>
+	<td class="its-td" colspan="3">
+		<div style="margin-top:5px">
+			{? data.pgroup_seq == 1}
+			<div style="color:#ff0000;">&lt;회원 가입시 자동으로 부여되는 등급입니다. (선정기준  변경 불가)&gt;</div>
+			{/}
+			<label><input type="radio" name="use_type" {?data.use_type == "auto1"}checked{/} value="1" {?data.pgroup_seq == 1}disabled{/}/> <strong>자동관리</strong> : 조건을 모두 만족할 때 등급 변경 </label> 
+			<ul style="margin-left:30px;">
+				<li>
+					<label style="width:150px;"><input type="checkbox" name="order_sum_use1[]" class="chkUse" {=selected.order_sum_price1_use}  value="price1" disabled/> 총 판매 금액</label> 
+					<input type="text" name="order_sum_price1" id="order_sum_price1" value="{=number_format(data.order_sum_price1)}" class="line onlynumber inp type1" disabled/>원 이상(필수)
+				</li>
+
+				<li>
+					<label><input type="checkbox" name="order_sum_use1[]" class="chkUse"  {=selected.order_sum_ea1_use}  value="ea1" disabled/> 총 판매 개수</label>
+					<input type="text" name="order_sum_ea1" id="order_sum_ea1" value="{=number_format(data.order_sum_ea1)}"  class="line onlynumber inp type1" disabled/>개 이상
+				</li>
+			
+				<li>
+					<label><input type="checkbox" name="order_sum_use1[]" class="chkUse" {=selected['order_sum_cnt1_use']}  value="cnt1" disabled/> 총 판매 횟수</label> 
+					<input type="text" name="order_sum_cnt1" id="order_sum_cnt1" value="{=number_format(data.order_sum_cnt1)}"  class="line onlynumber inp type1" disabled/>회 이상
+				</li>
+			</ul>
+		</div>
+		
+		<div style="margin-top:15px;">
+			<label><input type="radio" name="use_type" {?data.use_type == "auto2"}checked{/} value="2" {?data.pgroup_seq == 1}disabled{/}/> <strong>자동관리</strong> : 조건 1가지라도 만족하면 등급 변경</label> 
+			<ul style="margin-left:30px;">
+				<li><label><input type="checkbox" name="order_sum_use2[]" class="chkUse" value="price2" {=selected['order_sum_price2_use']} disabled/> 총 판매 금액</label> 
+				<input type="text" name="order_sum_price2" id="order_sum_price2" value="{=number_format(data.order_sum_price2)}"  class="line onlynumber inp" disabled/>원 이상(필수)
+				</li>
+
+				<li>
+				<label><input type="checkbox" name="order_sum_use2[]" class="chkUse" value="ea2" {=selected['order_sum_ea2_use']} disabled/> 총 판매 개수</label>
+				<input type="text" name="order_sum_ea2" id="order_sum_ea2" value="{=number_format(data.order_sum_ea2)}"  class="line onlynumber inp" disabled/>개 이상
+				</li>
+			
+				<li>
+				<label><input type="checkbox" name="order_sum_use2[]" class="chkUse" value="cnt2" {=selected['order_sum_cnt2_use']} disabled/> 총 판매 횟수</label> 
+				<input type="text" name="order_sum_cnt2" id="order_sum_cnt2" value="{=number_format(data.order_sum_cnt2)}"  class="line onlynumber inp" disabled/>회 이상
+				</li>
+			</ul>
+		</div>
+
+		<div style="margin-top:15px;">
+			<label><input type="radio" name="use_type" value="3" {?data.use_type == "manual" || !data.use_type }checked{/} {?data.pgroup_seq == 1}disabled{/}/> <strong>수동관리</strong> : 
+			해당 등급에 속하거나 제외에 대한 결정을 모두 수동으로 함</label> 
+		</div>
+
+	</td>
+</tr>
+</table>
+
+<!--div style="padding-top:10px;" class="center">
+<span class="btn large black"><button type="submit" class="addDeliveryCost">저장하기</button></span>
+</div-->
+
+</form>
+
+
+
+<!-- 아이콘 선택 -->
+<div id="iconPopup" style="display:none;">
+	<form name="iconRegist" id="iconRegist" method="post" action="" enctype="multipart/form-data"  target="actionFrame">
+	<ul>
+		<li>
+		{@ icons}
+		<img src="../../data/icon/provider/{.value_}" class="hand icons" filenm="{.value_}" onclick="icon_click(this);">
+		{ / }
+		<span id="iconDisplay"></span>
+		</li>
+		<li style="float:left;width:100px;height:30px;text-align:center" ><input type="file" name="pgrade_icon" id="pgrade_icon" onChange="iconFileUpload();" /></li>
+	</ul>
+	</form>
+</div>
+
+<script type="text/javascript">
+
+	$(document).ready(function() {
+		chkUseType();
+	});
+
+</script>
+
+{ #layout_footer }

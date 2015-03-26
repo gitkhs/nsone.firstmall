@@ -1,0 +1,384 @@
+{ #layout_header }
+<style type="text/css">
+.related-category-table {}
+.search-category {margin:10px 0 30px 100px;}
+.no-border-right {border-right:none !important;}
+.no-border-left {border-left:none !important;}
+.table-top-btn {margin:5px 0;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+	// 카테고리 매칭 팝업 오픈
+	$("button#open_link_popup").click(function(){
+		openDialog("카테고리 매칭하기", "om-category-match-lay", {'width':1000,'height':740});
+	});
+
+	// 쇼핑몰 카테고리 검색
+	$("select[name='sc_cate[]']").change(function(){
+		chg_child_category(this, 'sc_cate', 'get_next_category');
+	});
+
+	$("#category_src").click(function(){
+		// 현재 선택된 최종 카테고리 코드 추출
+		var src_cate	= '';
+		$("select[name='sc_cate[]']").each(function(){
+			if	($(this).val())	src_cate	= $(this).val();
+		});
+
+		var cate		= '';
+		var chk_cate	= '';
+		var src_len		= src_cate.length;
+		$("tr.category-tr").each(function(){
+			cate		= $(this).attr('cate');
+			chk_cate	= cate.substr(0, src_len);
+
+			$(this).hide();
+			if	(chk_cate == src_cate){
+				$(this).show();
+			}
+		});
+	});
+
+	// 연결 대상 쇼핑몰 카테고리 선택
+	$("select[name='mall_cate[]']").change(function(){
+		chg_child_category(this, 'mall_cate', 'get_next_category');
+
+		// 현재 선택된 최종 카테고리 코드 추출
+		var src_cate	= '';
+		$("select[name='mall_cate[]']").each(function(){
+			if	($(this).val())	src_cate	= $(this).val();
+		});
+
+		var cate		= '';
+		var chk_cate	= '';
+		var src_len		= src_cate.length;
+		$("tr.linkage-category-tr").each(function(){
+			cate		= $(this).attr('cate');
+			chk_cate	= cate.substr(0, src_len);
+
+			$(this).hide();
+			if	(chk_cate == src_cate){
+				$(this).show();
+			}
+		});
+
+	});
+
+	// 연결할 연동사 카테고리 선택
+	$("select[name='linkage_cate[]']").change(function(){
+		$("input[name='linkage_cate_name[]']").eq($("select[name='linkage_cate[]']").index(this)).val($(this).find("option:selected").text());
+		chg_child_category(this, 'linkage_cate', 'get_next_category_linkage');
+	});
+
+	// 연결 submit
+	$("button.linkage_submit").click(function(){
+		var chk_status	= true;
+		var chkboxcnt	= 0;
+
+		// 체크박스 체크 수량
+		$("input[name='chk_linkage[]']").each(function(){
+			if	($(this).attr('checked'))	chkboxcnt++;
+		});
+
+		// 연결 대상 카테고리 선택 체크
+		if	(chkboxcnt < 1){
+			openDialogAlert("연결할 쇼핑몰 카테고리를 선택해 주세요.", 400, 150);
+			chk_status	= false;
+		}
+
+		// 연결할 연동사 카테고리 체크
+		if	(chk_status){
+			if	(!$("select[name='linkage_cate[]']").eq(0).val() || !$("select[name='linkage_cate[]']").eq(1).val()){
+				openDialogAlert("연결할 {linkage.linkage_name} 카테고리를 선택해 주세요.", 400, 150);
+				chk_status	= false;
+			}
+		}
+
+		if	(chk_status){
+			loadingStart();
+			$(this).closest("form").submit();
+		}
+	});
+
+	// 연결해제 ( 단일row )
+	$("button.unlink_category").click(function(){
+		loadingStart();
+		var seq	= $(this).attr('seq');
+		actionFrame.location.href='../openmarket_process/save_unlink_category?unSeq='+seq;
+	});
+
+	// checkbox check
+	$("button.all-chk").click(function(){
+		$("input[name='chk_category[]']").attr('checked', true);
+	});
+	// checkbox uncheck
+	$("button.all-unchk").click(function(){
+		$("input[name='chk_category[]']").attr('checked', false);
+	});
+	// 연결해제 ( 전체 )
+	$("button.all-unlink").click(function(){
+		var chk	= false;
+		$("input[name='chk_category[]']").each(function(){
+			if	($(this).is(":checked")){
+				chk	= true;
+				return;
+			}
+		});
+
+		if	(chk){
+			$("form[name='omlistFrm']").submit();
+		}else{
+			openDialogAlert("해제할 카테고리를 선택해 주세요.", 400, 150);
+			return;
+		}
+	});
+
+	// checkbox check
+	$("button.match-all-chk").click(function(){
+		$("input[name='chk_linkage[]']").attr('checked', true);
+	});
+	// checkbox uncheck
+	$("button.match-all-unchk").click(function(){
+		$("input[name='chk_linkage[]']").attr('checked', false);
+	});
+
+	{ ? !LINKAGE_SERVICE }
+	$.ajax({
+		type: "get",
+		url: "notice_pop",
+		data: {},
+		success: function(result){
+			$("#openmarket_pop_info").html(result);
+			openDialog("다중 판매마켓  서비스 안내", "openmarket_pop_info", {"width":"500","height":"200","noClose":"true"});
+		}
+	});
+	{ / }
+});
+
+// 하위 카테고리 변경
+function chg_child_category(obj, selname, getUrl){
+	if	(!$(obj).hasClass("end")){
+		var cCode		= $(obj).val();
+		var cDepth		= $("select[name='"+selname+"[]']").index(obj) + 1;
+
+		// 하위 카테고리들 초기화
+		var nBox		= reset_child_select_box(selname, cDepth);
+
+		// 하위 카테고리들 추출
+		$.getJSON(getUrl, {'parent_code':cCode,'parent_depth':cDepth}, function(rs){
+			if	(rs.result){
+				add_selectbox_option(rs.data, nBox);
+			}
+		});
+	}
+}
+
+// 하위 카테고리들 초기화
+function reset_child_select_box(selname, c){
+	var nDepth	= parseInt(c) + 1;
+	var nBox	= $("select[name='"+selname+"[]']").eq(c);
+
+	$("select[name='"+selname+"[]']").each(function(){
+		var n		= $("select[name='"+selname+"[]']").index(this) + 1;
+		if	(n > c){
+			$(this).find('option').each(function(){
+				var idx	= $("select[name='"+selname+"[]']").eq(n-1).find('option').index(this);
+				if	(idx > 0)	$(this).remove();
+			});
+		}
+	});
+
+	return nBox;
+}
+
+// selectbox에 option 추가
+function add_selectbox_option(data, sBox){
+	var dataLen	= data.length;
+	var optHTML	= '';
+	for	(var c = 0; c < dataLen; c++){
+		optHTML	= '<option value="'+data[c].code+'">'+data[c].name+'</option>';
+		sBox.append(optHTML);
+	}
+}
+
+// 매핑결과 저장 후 처리
+function save_result(status){
+	loadingStop();
+	if	(status == 'ok'){
+		location.reload();
+	}
+}
+</script>
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>판매마켓 카테고리 매칭</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button type="button" id="open_link_popup">매칭하기</button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+
+<!-- 설정 테이블 : 시작 -->
+<div class="om-category-lay">
+	<div class="item-title">카테고리 매칭 리스트</div>
+	<div class="search-category">
+		<b>쇼핑몰 카테고리</b> 
+		<select name="sc_cate[]">
+			<option value="">= 1차 분류 =</option>
+			<!--{ ? fcategory }-->
+				<!--{ @ fcategory }-->
+			<option value="{.key_}">{.title}</option>
+				<!--{ / }-->
+			<!--{ / }-->
+		</select>
+		<select name="sc_cate[]">
+			<option value="">= 2차 분류 =</option>
+		</select>
+		<select name="sc_cate[]">
+			<option value="">= 3차 분류 =</option>
+		</select>
+		<select name="sc_cate[]" class="end">
+			<option value="">= 4차 분류 =</option>
+		</select>
+		<span class="btn small black"><button type="button" id="category_src">검색</button></span>
+	</div>
+	<div class="table-top-btn">
+		<span class="btn small gray"><button type="button" class="all-chk">전체선택</button></span>
+		<span class="btn small gray"><button type="button" class="all-unchk">선택해제</button></span>
+		<span class="btn small orange"><button type="button" class="all-unlink">연결해제</button></span>
+	</div>
+	<form name="omlistFrm" method="post" action="../openmarket_process/save_unlink_category" target="actionFrame">
+	<div class="related-category-table">
+		<table width="100%" class="info-table-style">
+		<colgroup>
+			<col width="30px" />
+			<col width="40%" />
+			<col width="*" />
+			<col width="8%" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align" colspan="2">쇼핑몰 카테고리</th>
+			<th class="its-th-align" colspan="2">{linkage.linkage_name} 통합 카테고리 (판매마켓用)</th>
+		</tr>
+		</thead>
+		<tbody>
+		<!--{ ? category }-->
+			<!--{ @ category }-->
+		<tr class="category-tr" cate="{.key_}">
+			<td class="its-td center"><input type="checkbox" name="chk_category[]" id="chk_category_{.linkseq}" value="{.linkseq}" /></td>
+			<td class="its-td no-border-left"><label for="chk_category_{.linkseq}">{.name}</label></td>
+			<td class="its-td">{.linkage}</td>
+			<td class="its-td no-border-left">
+				<!--{ ? .linkseq }-->
+				<span class="btn small orange"><button type="button" class="unlink_category" seq="{.linkseq}">연결해제</button></span>
+				<!--{ / }-->
+			</td>
+		</tr>
+			<!--{ / }-->
+		<!--{ / }-->
+		</tbody>
+		</table>
+	</div>
+	</form>
+</div>
+
+<div id="om-category-match-lay" class="hide">
+	<form name="omFrm" method="post" action="../openmarket_process/save_link_category" target="actionFrame">
+	<div class="item-title">STEP 1) ↓아래에서 선택한 쇼핑몰 카테고리를</div>
+	<div class="search-category">
+		<b>쇼핑몰 카테고리</b> 
+		<select name="mall_cate[]">
+			<option value="">= 1차 분류 =</option>
+			<!--{ ? fcategory }-->
+				<!--{ @ fcategory }-->
+			<option value="{.key_}">{.title}</option>
+				<!--{ / }-->
+			<!--{ / }-->
+		</select>
+		<select name="mall_cate[]">
+			<option value="">= 2차 분류 =</option>
+		</select>
+		<select name="mall_cate[]">
+			<option value="">= 3차 분류 =</option>
+		</select>
+		<select name="mall_cate[]" class="end">
+			<option value="">= 4차 분류 =</option>
+		</select>
+	</div>
+	<div class="table-top-btn">
+		<span class="btn small gray"><button type="button" class="match-all-chk">전체선택</button></span>
+		<span class="btn small gray"><button type="button" class="match-all-unchk">선택해제</button></span>
+	</div>
+	<div class="related-category-table">
+		<table width="100%" class="info-table-style">
+		<colgroup>
+			<col width="30px" />
+			<col width="40%" />
+			<col width="*" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align" colspan="2">쇼핑몰 카테고리</th>
+			<th class="its-th-align">{linkage.linkage_name} 통합 카테고리 (판매마켓用)</th>
+		</tr>
+		</thead>
+		<tbody>
+		<!--{ ? category }-->
+			<!--{ @ category }-->
+		<tr class="linkage-category-tr" cate="{.key_}">
+			<td class="its-td center"><input type="checkbox" name="chk_linkage[]" id="chk_linkage_{.index_}" value="{.key_}" /></td>
+			<td class="its-td no-border-left"><label for="chk_linkage_{.index_}">{.name}</label></td>
+			<td class="its-td">{.linkage}</td>
+		</tr>
+			<!--{ / }-->
+		<!--{ / }-->
+		</tbody>
+		</table>
+	</div>
+	<div class="item-title">STEP 2) ↓아래에서 선택한 {linkage.linkage_name} 통합 카테고리로 연결합니다.</div>
+	<div class="search-category">
+		<select name="linkage_cate[]">
+			<option value="">= 1차 분류 =</option>
+			<!--{ ? linkage_category }-->
+				<!--{ @ linkage_category }-->
+			<option value="{.category_code1}">{.category_name1}</option>
+				<!--{ / }-->
+			<!--{ / }-->
+		</select>
+		<input type="hidden" name="linkage_cate_name[]" value="" />
+		<select name="linkage_cate[]">
+			<option value="">= 2차 분류 =</option>
+		</select>
+		<input type="hidden" name="linkage_cate_name[]" value="" />
+		<select name="linkage_cate[]">
+			<option value="">= 3차 분류 =</option>
+		</select>
+		<input type="hidden" name="linkage_cate_name[]" value="" />
+		<select name="linkage_cate[]" class="end">
+			<option value="">= 4차 분류 =</option>
+		</select>
+		<input type="hidden" name="linkage_cate_name[]" value="" />
+	</div>
+	<div style="width:100%;text-align:center;">
+		<span class="btn large cyanblue"><button type="button" class="linkage_submit">연결</button></span>
+	</div>
+	</form>
+</div>
+
+<div id="openmarket_pop_info" class="hide"></div>
+
+{ #layout_footer }

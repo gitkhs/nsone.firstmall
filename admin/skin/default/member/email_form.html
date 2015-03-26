@@ -1,0 +1,234 @@
+{ #layout_header_popup }
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+	Editor.onPanelLoadComplete(function(){
+		$("#container", parent.document).height($(document).height());
+	});
+
+
+	// CHECKBOX COUNT
+	parent.chkMemberCount();
+	parent.searchMemberCount();
+
+	if(parent.$("input[name='type']").val()=='select'){
+		$("input[name='member'][value='select']").attr('checked','checked');
+	}
+
+	// SMS "+" CLICK
+	$("#send_to_add_btn").click(function(){
+		var cellphoneNo = $("input[name='send_to_add']").val();
+		var bool = true;
+		if(cellphoneNo){
+			$("select[name='send_to_list'] option").each(function(e, data) {
+				if(data.value == cellphoneNo) bool = false;
+			});
+
+			if(bool){
+				$("select[name='send_to_list']").append("<option value='"+cellphoneNo+"'>"+cellphoneNo+"</option>");
+				$("input[name='send_to_add']").val('');
+			} else {
+				alert("동일한 번호가 입력되어 있습니다.");
+				return true;
+			}
+		}
+		sendMemberSum();
+	});
+	// SMS "-" CLICK
+	$("#send_to_del_btn").click(function(){
+		$("select[name='send_to_list'] option:selected").remove();
+	});
+
+	$("select[name='selectEmail']").live("change", function(){
+		if($(this).val()){
+			$.get('../member_process/logmail?seq='+$(this).val(), function(response) {
+				var data = eval(response)[0];
+				$("#title").val(data.title);
+				Editor.switchEditor($("#contents").data("initializedId"));
+				Editor.modify({"content" : data.contents});
+			});
+		}else{
+			$("#title").val('');
+			Editor.switchEditor($("#contents").data("initializedId"));
+			Editor.modify({"content" : " "});
+		}
+	});
+
+	// MEMBER COUNT
+	$("input[name='add_num_chk']").click(function(){
+		sendMemberSum();
+	});
+	$("input[name='member']").click(function(){
+		if($(this).val()=='excel'){
+			$.get('../member_process/getExcelPopup', function(data) {
+				parent.$('#excel_popup').html(data);
+				parent.openDialog("EMAIL 엑셀 등록 <span class='desc'>&nbsp;</span>", "excel_popup", {"width":"300","height":"350"});
+			});
+		}
+		sendMemberSum();
+	});
+
+	$("#send_submit").click(function(){
+		$("input[name='send_num']").val($("#send_member").attr("count"));
+		var cellNoList = "";
+		$("select[name='send_to_list'] option").each(function(e, data) {
+			cellNoList += ","+String(data.value);
+		});
+		$("input[name='send_to']").val(cellNoList);
+
+
+		var serialize = "";
+		if($("input[name='member']:checked").val()=='select'){
+			parent.$("input:checkbox[name='member_chk[]']:checked").each(function(){
+				serialize += ","+this.value;
+			});
+		}else if($("input[name='member']:checked").val()=='search'){
+			serialize = parent.$('#memberForm').serialize();
+		}
+		$("input[name='serialize']").val(serialize);
+
+		submitEditorForm(document.emailForm);
+	});
+
+	sendMemberSum();
+});
+
+// SEND MEMBER COUNT - IFRAME CONTROLLER
+function sendMemberSum(){
+	var add_cnt = $("select[name='send_to_list'] option").size();
+	var chk = $("input:radio[name='member']:checked").val();
+	var chk_cnt = 0;
+	if(chk=='all'){
+		chk_cnt = $("input:radio[name='member']:checked").attr("count");
+	}else if(chk=='search'){
+		chk_cnt = parent.$("input[name='searchcount']").val();
+	}else if(chk=='excel'){
+		chk_cnt = 0;
+	}else if(chk=='select'){
+		chk_cnt = parent.$("input:checkbox[name='member_chk[]']:checked").length;
+	}
+
+	var add_chk = $("input[name='add_num_chk']").attr('checked');
+	if(add_chk=='checked'){
+		chk_cnt = 0;
+	}
+	var total = parseInt(add_cnt) + parseInt(chk_cnt);
+	$("#send_member").attr("count",total);
+	$("#send_member").html(total);
+}
+</script>
+
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+
+<form name="emailForm" id="emailForm" method="post" target="actionFrame" action="../member_process/send_email">
+<input type="hidden" name="send_to"/>
+<input type="hidden" name="send_num"/>
+<input type="hidden" name="serialize"/>
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="250" />
+		<col width="/" />
+		<col width="250" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th colspan="3">이메일 전송 {? !email_chk }[보유 이메일 건수 : {=number_format(mail_count)}건]{ / }</th>
+	</tr>
+	<tr>
+		<th>받는 사람</th>
+		<th>보낸 메시지 (기존 보관 메시지 선택할 수 있습니다)</th>
+		<th>전송</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb otb" >
+		<td style="padding:10px;" valign="top">
+
+		<!-- ### RECEIVE USER FORM -->
+		<table width="100%" cellspacing="0">
+		<tr>
+			<td>
+				<label><input type="radio" name="member" value="all"  count="{mInfo.total}"/>전체 회원 ({mInfo.total}명)</label><br>
+				<label><input type="radio" name="member" value="search"/>검색된 회원 (<span id="search_member">0</span>명)</label><br>
+				<label><input type="radio" name="member" value="select"  checked="checked" />선택된 회원 (<span id="selected_member">0</span>명)</label><br>
+				<!--
+				<label><input type="radio" name="member" value="excel"/>엑셀파일등록</label><br>
+				-->
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellspacing="0">
+				<tr>
+					<td width="120"><input type="text" name="send_to_add" style="width:113px;"></td>
+					<td><span class="btn small gray"><button type="button" id="send_to_add_btn">+</button></span></td>
+				</tr>
+				<tr>
+					<td><select name="send_to_list" size="8" class="scrollbox03" style="width:123px;"></select></td>
+					<td valign="top"><span class="btn small gray"><button type="button" id="send_to_del_btn">-</button></span></td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<label><input type="checkbox" name="add_num_chk" value="Y">추가 이메일만 보냄</label>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+
+
+		</td>
+		<td style="padding:10px;" valign="top">
+
+			<div class="clearbox">
+				<table class="info-table-style" style="width:100%">
+					<colgroup>
+						<col width="15%" />
+						<col />
+					</colgroup>
+					<tbody>
+					<tr>
+						<td class="its-td-align center">
+							<select name="selectEmail" style="width:90%;">
+								<option value="">= 최근 발송한 이메일 선택 =</option>
+								{@ loop }
+								<option value="{.seq}">{.subject} [{.regdate}]</option>
+								{ / }
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="its-td-align center">
+							<input type="text" name="title" id="title" value="" style="width:90%" title="제목을 입력해주세요."/>
+						</td>
+					</tr>
+					<tr>
+						<td class="its-td-align center">
+							<textarea name="contents" id="contents" class="daumeditor" style="width:80%" title="내용을 입력해 주세요."></textarea>
+						</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+
+		</td>
+		<td style="padding:10px;" valign="top">
+
+			받는사람 : <span id="send_member" count="0">0</span>명<br>
+			보내는사람 : <input type="text" name="send_email" value="{email}"/><br>
+
+			<span class="btn small gray"><button type="button" {? isdemo.isdemo } {isdemo.isdemojs1} {:}  id="send_submit" {/} >전송</button></span>
+
+		</td>
+	</tbody>
+</table>
+
+</form>

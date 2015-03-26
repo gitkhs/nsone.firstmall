@@ -1,0 +1,29 @@
+
+<div class="slc-head pdt5">
+<ul>
+	<li><span class="mitem"><a href="promotion_coupon_monthly">쿠폰 월별 분석</a></span></li>
+	<li><span class="mitem"><a href="promotion_coupon_daily">쿠폰 일별 분석</a></span></li>
+	<li><span class="mitem"><a href="promotion_inflow_monthly">월별 유입(광고포함)</a></span></li>
+	<li><span class="mitem"><a href="promotion_inflow_daily">일별 유입(광고포함)</a></span></li>
+	
+</ul>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("div.slc-head a[href='{selected_promotion_menu}']").parent().parent().addClass("selected");
+});
+
+function openAddInflowRootLayer(){
+	$.ajax({
+		type: "get",
+		url: "../statistic_promotion/promotion_inflow_add",
+		success: function(result){	
+			$("div#addInflowRootLayer").html(result);
+		}
+	});
+	openDialog("광고 매체 추가", "addInflowRootLayer", {"width":"900","height":"550","show" : "fade","hide" : "fade"});
+}
+</script>
+
+<div id="addInflowRootLayer" style="padding:0px !important; overflow:auto;"></div>

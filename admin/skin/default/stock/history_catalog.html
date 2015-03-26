@@ -1,0 +1,238 @@
+{ #layout_header }
+<style>
+.search_label 	{display:inline-block;width:50px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+});
+
+function set_date(start,end){	
+	$("input[name='sdate']").val(start);
+	$("input[name='edate']").val(end);
+}
+</script>
+
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>재고 조정 리스트</h2>
+		</div>
+		
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+		
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<form name="searchForm" id="searchForm">
+
+<!-- 주문리스트 검색폼 : 시작 -->
+<div class="search-form-container">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table width="500" align="center">
+			<tr>
+				<td align="center" height="30">
+					조정 사유 :
+					<label class="search_label"><input type="radio" name="reason" value="" {?!_GET.reason}checked{/}/>전체</label> 				
+					<label class="search_label"><input type="radio" name="reason" value="input" {?_GET.reason == 'input'}checked{/}/>입고</label>
+					<label class="search_label"><input type="radio" name="reason" value="lost" {?_GET.reason == 'lost'}checked{/}/>분실</label>
+					<label class="search_label"><input type="radio" name="reason" value="error" {?_GET.reason == 'error'}checked{/}/>오류</label>
+					<label class="search_label"><input type="radio" name="reason" value="bad" {?_GET.reason == 'bad'}checked{/}/>불량</label>
+					<label class="search_label"><input type="radio" name="reason" value="etc" {?_GET.reason == 'etc'}checked{/}/>기타</label>	
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table class="sf-keyword-table">
+					<tr>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{_GET.keyword}" title="매입처코드, 매입처명, 관리자명, 관리자아이디" /></td>
+						<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+
+			<table class="sf-option-table">
+			<colgroup>
+				<col width="80" />
+				<col width="" />
+			</colgroup>
+			<tr>
+				<th>
+					<select name="sdate_key">
+					<option value="regist_date" {?_GET.sdate_key=='regist_date'}selected{/}>저장일</option>
+					<option value="stock_date" {?_GET.sdate_key=='stock_date'}selected{/}>입고일</option>
+					</select>
+				</th>
+				<td>
+					<input type="text" name="sdate" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button" value="오늘" id="today" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="전체" id="all" name="select_date"/></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<!-- 주문리스트 검색폼 : 끝 -->
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="8%" />
+		<col width="10%" />
+		<col width="10%" />
+		<col width="10%" />
+		<col width="15%" />
+		<col width="5%" />
+		<col width="5%" />
+		<col width="10%" />
+		<col width="10%" />
+		<col width="6%" />
+				
+	</colgroup>
+	<thead class="lth">
+	<tr class="double-row th">
+		<th>번호</th>
+		<th>저장일</th>
+		<th>
+			사유
+			{?_GET.reason=='input'}
+			(입고일)
+			{:}
+			(조정일)
+			{/}
+		</th>
+		<th>매입전표</th>
+		<th>매입처</th>
+		<th>상품 종수</th>
+		<th>
+			{?_GET.reason=='input'}
+			입고 수량
+			{:}
+			조정 수량
+			{/}
+		</th>
+		<th>매입가 합계</th>
+		<th>행위자</th>
+		<th>관리</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+		<!--{ ? !loop }-->
+		<tr class="list-row">
+			<td colspan="9" align="center">검색어가 없거나 검색 결과가 없습니다.</td>
+		</tr>
+		<!--{ : }-->	
+		<!--{ @ loop }-->		
+		<tr class="list-row">
+			<td align="center">{page.totalcount - ._no + 1}</td>
+			<td align="center">
+				{?.reason=='input'}
+				<span class="blue bold">
+				{:}
+				<span class="red bold">
+				{/}
+				{.regist_date}
+				</span>
+			</td>
+			<td align="center">{.mreason} ({=substr(.stock_date,0,10)})</td>
+			<td align="center">
+				{?.reason=='input'}{.stock_code}{/}
+			</td>
+			<td align="center">{?supplier_seq}{.supplier_name}({.supplier_seq}){:}-{/}</td>
+			<td align="right">{=number_format(.goods_count)}</td>
+			<td align="right">{=number_format(.input_count)}</td>
+			<td align="right">{=number_format(.supply_price_sum)}원</td>
+			<td align="center">{.manager_name}({.manager_id})</td>
+			<td align="center">
+				<a href="history_view?no={.stock_history_seq}">[상세]</a>
+			</td>
+		</tr>
+		<tr class="list-row hide">
+			<td colspan="10" class="list-end-row-td"><div class="detail"></div></td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+		<!--{ / }-->
+		<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+</table>
+<!-- 주문리스트 테이블 : 끝 -->
+
+</form>
+
+<br style="line-height:10px;" />
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">
+<!--{ ? page.prev }-->
+<a href="?page={page.page.prev}&amp;{page.page.querystring}"><span class="prev" />◀ 이전 </span></a>
+<!--{ / }-->
+<!--{ @ page.page }-->
+<!--{ ? page.nowpage ==  .value_ }-->
+<a class="on red">{.value_ }</a>&nbsp;
+<!--{ : }-->
+<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>&nbsp;
+<!--{ / }-->
+<!--{ / }-->
+<!--{ ? page.next }-->
+<a href="?page={page.next}&amp;{page.querystring}"><span class="next " />다음 ▶</span></a>
+<!--{ / }-->
+</div>
+
+{ #layout_footer }

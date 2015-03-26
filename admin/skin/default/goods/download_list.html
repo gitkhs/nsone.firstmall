@@ -1,0 +1,84 @@
+{ #layout_header }
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".modify").click(function(){
+		var seq = $(this).attr("seq");
+		document.location.href = "/admin/order/download_write?seq="+seq;
+	});
+
+	$(".delete").click(function(){
+		var seq = $(this).attr("seq");
+		if(!confirm("삭제하시겠습니까?")) return;
+		$("input[name='seq']").val(seq);
+		$("#input_form").submit();
+	});
+});
+</script>
+
+<form id="input_form" name="input_form" method="post" action="../order_process/download_delete" target="actionFrame">
+<input type="hidden" name="seq" />
+</form>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2><span class="bold fx16">다운로드 항목설정</span></h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large icon"><button type="button" onclick="location.href='/admin/order/catalog';"><span class="arrowleft"></span>주문리스트</button></span></li>
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button type="button" onclick="location.href='/admin/order/download_write';">양식추가</button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+
+<div class="item-title">다운로드 항목설정 리스트</div>
+<table class="info-table-style" style="width:100%">
+	<colgroup>
+		<col width="40%" />
+		<col width="10%"/>
+		<col width="20%" />
+		<col width="20%"/>
+		<col width="10%"/>
+	</colgroup>
+	<thead>
+		<tr>
+			<th class="its-th-align center">설정명</th>
+			<th class="its-th-align center">항목수</th>
+			<th class="its-th-align center">종류</th>
+			<th class="its-th-align center">생성일</th>
+			<th class="its-th-align center">관리</th>
+		</tr>
+	</thead>
+	<tbody>
+	{@ loop }
+		<tr>
+			<td class="its-td-align center">{.name}</td>
+			<td class="its-td-align center">{.count}</td>
+			<td class="its-td-align center">{?.criteria=='ORDER'}주문별 한줄{:}상품별 한줄{/}</td>
+			<td class="its-td-align center">{.regdate}</td>
+			<td class="its-td-align center">
+				<span class="btn small gray"><button type="button" class="modify" seq="{.seq}">수정</button></span>
+				{? .seq==1 || .seq==2 }{ : }
+				<span class="btn small gray"><button type="button" class="delete" seq="{.seq}">삭제</button></span>
+				{ / }
+			</td>
+		</tr>
+	{ / }
+	</tbody>
+</table>
+
+
+
+
+{ #layout_footer }

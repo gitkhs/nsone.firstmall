@@ -1,0 +1,14 @@
+{? showTopPromotion({프로모션고유번호},layout_config.width) //프로모션고유번호, 가로사이즈 }
+<table width="{=(layout_config.width)}" height="45"  align="{layout_config.align}" cellpadding="0" cellspacing="0" border="0" >
+<tr>
+	<td valign="top">
+		<style>
+		.header_promo{프로모션고유번호} li {list-style:none;display:inline-block; width:{=(layout_config.width)}px; height:40px; line-height:40px; text-align:center; font-size:16px; font-family:dotum; font-weight:bold; color:#fff; letter-spacing:-1px;}
+		</style>
+		<div class="header_promo{프로모션고유번호}">
+			<div>{=showTopPromotion({프로모션고유번호},layout_config.width)}</div>
+		</div>
+</td>
+</tr>
+</table>
+{/}

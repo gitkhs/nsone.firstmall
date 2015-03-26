@@ -1,0 +1,14 @@
+<div class="sub-wrap" style="position:relative;">
+	<div class="stistic-data-div">
+		<div style="padding:10px 0;text-align:center;font-size:14px;font-weight:bold;">
+			위 유입경로의 최근 30일 주문 추이
+		</div>
+		<div id="chart1" class="sub-chart"></div>
+	</div>
+</div>
+<script class="code" type="text/javascript">
+$(document).ready(function(){
+	var data	= [{=json_encode(dataForChart)}];
+	createChart('line', 'chart1', '{maxValue}', data, [], false);
+});
+</script>

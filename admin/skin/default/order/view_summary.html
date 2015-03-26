@@ -1,0 +1,1217 @@
+<style>
+.price {padding-right:5px;text-align:right}
+table.order-inner-table td,table.order-inner-table th {border:0 !important;height:9px !important;}
+.ea {font-family:dotum; color:#a400ff; font-weight:bold;}
+.title_order_number {font-family:dotum;font-size:13px;}
+
+div.under_div_view_contents table { background-color:#ffffff !important; border-collapse:collapse !important; border:1px solid #bcbfc1 !important; }
+div.under_div_view_contents table th { background-color:#efefef; height:40px !important; border:1px solid #bcbfc1 !important; }
+div.under_div_view_contents table td { height:40px !important; border:1px solid #bcbfc1 !important; }
+.coupon_status{color:red}
+.coupon_status_all{color:red}
+.coupon_order_status{color:gray}
+.coupon_status_use{color:blue}
+.coupon_input_value{color:green}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+
+	//티켓상품 > 사용내역 레이어
+	$("div.coupon_use_log_hand").bind("click",function(){ 
+		var coupon_use_log_table_html = $(this).find("div.coupon_use_log_table").html();
+		var tableheight = $(this).find("div.coupon_use_log_table").height()+100; 
+
+		$("#coupon_use_log_dialog").html(coupon_use_log_table_html);
+  		openDialog("사용내역", "coupon_use_log_dialog", {width:500,height:tableheight});
+	});
+
+	//티켓 상품의 상태 안내
+	$("div.coupon_status_btn").bind("click",function(){
+		var socialcp_status = $(this).attr("socialcp_status");
+		$(".socialcp_status_tr").css("background-color","");
+		$(".socialcp_status_"+socialcp_status).css("background-color","yellow");
+  		openDialog("티켓 상품의 상태 안내", "coupon_status_dialog", {width:270,height:600});
+	});
+
+	$("select.delivery_company").bind("change",function(){
+		if($(this).val().substring(0,5)=='auto_'){
+			$("option",this).not(":selected").attr("disabled",true);
+			$(this).parent().find("input.delivery_number").attr("readonly",true).addClass("disabled");
+		}else{
+			$(this).parent().find("input.delivery_number").attr("readonly",false).removeClass("disabled");
+		}
+	}).change();
+
+	$(".coupon_use_btn").bind('click', function(){
+		$.ajax({
+			type: "post",
+			url: "../export/coupon_use",
+			data: "order_seq="+$(this).attr('order_seq'),
+			success: function(result){
+				if	(result){
+					$("#coupon_use_lay").html(result);
+					openDialog("쿠폰사용 확인 / 쿠폰번호 재발송 <span class='desc'></span>", "coupon_use_lay", {"width":"1000","height":"700"});
+				}
+			}
+		});
+	});
+
+	// 지역 추가 배송비
+	$(".area_add_delivery_cost").poshytip({
+		className: 'tip-darkgray',
+		allowTipHover: true,
+		slide: true,
+		showTimeout : 0
+	});
+	$(".add_goods_shipping").poshytip({
+		className: 'tip-darkgray',
+		allowTipHover: true,
+		slide: true,
+		showTimeout : 0
+	});
+	// sns 계정 정보 확인
+	$(".btnsnsdetail").on("click",function(){
+		var obj		= $("div#snsdetailPopup1");
+		var disp	= obj.css("display");
+		if(obj.html() == ''){
+			$.get('../member/sns_detail?snscd='+$(this).attr("snscd")+'&member_seq={=members.member_seq}&no=1', function(data) {
+				obj.html(data);
+			});
+		}
+		if(disp == "none") obj.show(); else obj.hide();
+	});
+
+});
+</script>
+
+
+<!-- { ? _GET.mode != 'order_list' } -->
+
+<div class="item-title">
+주문정보
+<!-- { ? orders.orign_order_seq } -->
+<span class="desc" style="font-weight:normal">(본 주문은 원래 주문 <strong><a href="/admin/order/view?no={orders.orign_order_seq}" target="_blank">{orders.orign_order_seq}</a></strong>에 대한 맞교환으로 발생한 주문입니다.)</span>
+<!-- { / } -->
+<!-- { ? child_order_seq } -->
+<span class="desc" style="font-weight:normal">(본 주문상품의 교환으로 인해 생성된 맞교환 주문은 <strong>{@child_order_seq}<a href="/admin/order/view?no={.value_}" target="_blank">{.value_}</a>{/}</strong>입니다.)</span>
+<!-- { / } -->
+</div>
+
+<!-- 주문정보 테이블 : 시작 -->
+<table width="100%" class="simplelist-table-style">
+	<tbody>
+		<tr>
+			<!--{? linkage_mallnames && orders.linkage_id }-->
+			<th>연동</th>
+			<!--{ / }-->
+			<th>유입|마켓</th>
+			<!--{? linkage_mallnames && orders.linkage_id }-->
+			<th>수집일시</th>
+			<!--{ / }-->
+			<th>주문번호</th>
+			<th>주문일</th>
+			<th>주문자</th>
+			<th>수령자</th>
+			<th>배송방법</th>
+			<th>결제</th>
+			<th>결제일</th>
+			<th>주문상태</th>
+		</tr>
+	</tbody>
+	<tbody>
+		<tr class="center">
+			<!--{? linkage_mallnames && orders.linkage_id }-->
+			<td>{linkage.linkage_name}</td>
+			<!--{ / }-->
+			<td>
+				<!--{ ? orders.linkage_id }-->
+				{linkage_mallnames[orders.linkage_mall_code]}
+				<!--{ : }-->
+				{ ? orders.referer }<a href="{orders.referer}" target="_blank">{ / }
+				<span class="help" title="{orders.referer_name} {orders.referer}" style="font-size:11px;font-weight:bold;color:#006666;">{=getstrcut(orders.referer_name, 1, '')}</span>
+				{ ? orders.referer }</a>{ / }
+				<!--{ / }-->
+			</td>
+			<!--{? linkage_mallnames && orders.linkage_id }-->
+			<td>{orders.linkage_order_reg_date}</td>
+			<!--{ / }-->
+			<td><a href="../order/view?no={orders.order_seq}" target="_blank"><span class="blue">{orders.order_seq}</span></a> <a href="javascript:printOrderView('{orders.order_seq}')"><span class="icon-print-order"></span></a></td>
+			<td>{=substr(orders.regist_date,2)}</td>
+			<td>
+				<!-- { ? members.member_seq } -->
+				<div>
+					{?members.type=='개인'}<img src="../images/common/icon/icon_personal.gif" />
+					{:members.type=='기업'}<img src="../images/common/icon/icon_besiness.gif" />{/}
+					{orders.order_user_name}
+					{? orders.sns_rute }
+						(
+						<img src="../images/sns/sns_{=substr(orders.sns_rute,0,1)}0.gif" align="absmiddle" snscd="{=orders.sns_rute}" class="btnsnsdetail hand">/<span class="blue">{members.group_name}</span>)
+						<div id="snsdetailPopup1" class="absolute hide"></div>
+					{ : }
+					<!-- { ? members.rute == 'facebook' //facebook 회원인경우 } -->
+						(<a href="/admin/member/detail?member_seq={members.member_seq}" target="_blank"><span style="color:#d13b00;"><img src="../images/board/icon/sns_f0.gif" align="absmiddle">{members.email}</span>/<span class="blue">{members.group_name}</span></a>)
+					<!-- { : } -->
+						(<a href="/admin/member/detail?member_seq={members.member_seq}" target="_blank"><span style="color:#d13b00;">{members.userid}</span>/<span class="blue">{members.group_name}</span></a>)
+					<!-- { / } -->
+					{ / }
+				</div>
+				<!-- { : } -->
+				<img src="../images/common/icon/icon_personal.gif" /> {orders.order_user_name}(<span class="desc">비회원</span>)
+				<!-- { / } -->
+			</td>
+			<td>{orders.recipient_user_name}</td>
+			<td>{orders.mshipping}</td>
+			<td>
+				{?orders.pg=='kakaopay'}<img src="../images/common/kakaopay_slogo.gif" />{:}{orders.mpayment}{/}
+			</td>
+			<td>{=substr(orders.deposit_date,2)}</td>
+			<td><span class="icon-order-step-{orders.step}">{orders.step}</span></td>
+		</tr>
+	</tbody>
+</table>
+<div class="step-description-{orders.step} center pd5">
+	<table width="900" style="color:#fff">
+	<tr>
+		<td class="left">
+			{ ? orders.step=='15' }
+			<strong>{orders.mstep}</strong> 상태인 이 주문 <span class="yellow bold">{orders.total_ea}</span>개({orders.total_type}종)는 결제가 확인되어야 합니다. <span class="btn small orange"><button type="button" class="order_deposit">결제확인</button></span>
+			{ : orders.step=='85' }
+			<strong>{orders.mstep}</strong> 상태인 이 주문 <span class="yellow bold">{orders.total_ea}</span>개({orders.total_type}종)는 결제가 취소되었습니다.
+			{ : orders.step=='95' }
+			<strong>{orders.mstep}</strong> 상태인 이 주문 <span class="yellow bold">{orders.total_ea}</span>개({orders.total_type}종)는 주문이 무효되었습니다.
+			{ : orders.step=='99' }
+			<strong>{orders.mstep}</strong> 상태인 이 주문 <span class="yellow bold">{orders.total_ea}</span>개({orders.total_type}종)는 주문이 실패되었습니다.
+			{ : }
+			<strong>{orders.mstep}</strong> 상태인 이 주문 <span class="yellow bold">{orders.total_ea}</span>개({orders.total_type}종)는
+			<span class="yellow bold">{=number_format(items_tot.ready_ea)}</span>개를 보내야 { ? items_tot.ready_ea > 0 }<span class="btn small black"><button type="button" class="goods_export">출고처리</button></span>{ / }하며,
+			<span class="yellow bold">{=number_format(orders.export_ready_ea)}</span>개는 보낼 준비 중 이며,
+			<span class="yellow bold">{=number_format(orders.export_complete_ea)}</span>개는 보내졌습니다.
+			{ / }
+		</td>
+	</tr>
+	<!-- { ? orders.cancel_list } -->
+	<tr>
+		<td class="left">
+			취소는 총<span class="yellow bold">{=count(orders.cancel_list)}</span>건이며
+			<!-- { @ orders.cancel_list } -->
+			1건(<span class="yellow bold">{.ea}</span>개)은 {?.status!='complete'}[미환불]{:}[환불완료]{/}
+			<!-- { ? .index_ != .size_-1 } -->
+			,
+			<!-- { / } -->
+			<!-- { / } -->
+			입니다.
+		</td>
+	</tr>
+	<!-- { / } -->
+	<!-- { ? orders.return_list } -->
+	<tr>
+		<td class="left">
+			반품은 총<span class="yellow bold">{=count(orders.return_list)}</span>건이며
+			<!-- { @ orders.return_list } -->
+			1건(<span class="yellow bold">{.ea}</span>개)은 {?.status!='complete'}[미회수{:}[회수완료{/}→{?.refund_status!='complete'}미환불]{:}환불완료]{/}
+			<!-- { ? .index_ != .size_-1 } -->
+			,
+			<!-- { : } -->
+			입니다.
+			<!-- { / } -->
+			<!-- { / } -->
+		</td>
+	</tr>
+	<!-- { / } -->
+	<!-- { ? orders.exchange_list } -->
+	<tr>
+		<td class="left">
+			교환은 총<span class="yellow bold">{=count(orders.exchange_list)}</span>건이며
+			<!-- { @ orders.exchange_list } -->
+			{.status}
+			1건(<span class="yellow bold">{.ea}</span>개)은 {?.status!='complete'}[미회수→재주문안됨]{:}[회수완료→재주문됨]{/}
+			<!-- { ? .index_ != .size_-1 } -->
+			,
+			<!-- { / } -->
+			<!-- { / } -->
+			입니다.
+		</td>
+	</tr>
+	<!-- { / } -->
+	</table>
+</div>
+
+<div class="item-title">주문<span class="title_order_number">({orders.order_seq})</span>의 출고내역
+	<span class="desc" style="font-weight:normal"> - 본 주문으로 인한 출고내역는 아래와 같습니다. 그리고 한 눈에 <a href="../export/catalog?hsb_kind=export&header_search_keyword={orders.order_seq}" target="_blank"><img src="../images/common/btn_list_release.gif" align="absmiddle" alt="해당 출고의 주문을 기준으로 모든 출고리스트를 확인합니다"></a>에서도 확인 가능합니다
+	</span>
+</div>
+<table width="100%" class="simplelist-table-style">
+	<tbody>
+		<tr>
+			<th>출고일</th>
+			<th>출고번호</th>
+			<th>출고상품금액</th>
+			<th>배송</th>
+			<th>
+				{?config_system.invoice_use}
+					<span class="icon-invoice-auto"></span>
+					<span class="helpicon" title="택배 업무 자동화 서비스로 출고된 출고건"></span>
+				{/}
+				운송장번호
+			</th>
+			<th>출고수량</th>
+			<th>출고완료일</th>
+			<th>배송완료일</th>
+			<th>구매확정일</th>
+			<th>출고상태</th>
+			<th>적립금 지급</th>
+		</tr>
+	</tbody>
+	<tbody>
+		<!-- { ? data_export } -->
+		<!-- { @ data_export } -->
+		<tr align="center">
+			<td>
+			<!-- { ? _GET.mode == 'export_view'} -->
+			<input type="text" name="export_date[{.export_code}][]" class="datepicker line" value="{.export_date}" size="10" />
+			<!-- { : } -->
+			{.export_date}
+			<!-- { / } -->
+			</td>
+			<td>
+				{?_GET.export_code==.export_code}
+					<span style="background-color:yellow">{.export_code}</span>
+				{ : }
+					<a href='../export/view?no={.export_code}'><span class="blue hand">{.export_code}</span></a>
+				{ / }
+				<a href="javascript:printExportView('{.order_seq}','{.export_code}')"><span class="icon-print-export"></span></a>
+			</td>
+
+
+			<td>{=number_format(.price)}</td>
+			<!-- { ? .goods_kind == 'coupon' } -->
+			<td>이메일/SMS</td>
+			<td>
+				<div>쿠폰번호 : {.coupon_serial} ({=number_format(.coupon_input)}{?.coupon_input_type=='price'}원{:}회{/} /
+				<span class="red">잔여 {=number_format(.coupon_remain_value)}{?.coupon_input_type=='price'}원{:}회{/}</span>)</div>
+				<!-- { @ .mail_send_log } -->
+					<div>{=date('Y-m-d H:i', strtotime(..regist_date))}
+					{..send_val}[{?..status=='y'}성공{:}실패{/}] /
+					{.sms_send_log[..key_]['send_val']}[{?.sms_send_log[..key_]['status']=='y'}성공{:}실패{/}]</div>
+				<!-- { / } -->
+			</td>
+			<!-- { : .international == 'domestic' } -->
+			<td>{=get_domestic_method(.domestic_shipping_method)}</td>
+			<td>
+				<!-- { ? .invoice_send_yn=='y' } -->
+				<span class="icon-invoice-auto"></span>
+				<!-- { / } -->
+
+				
+				<!-- { ? _GET.mode == 'export_view' && get_shipping_company(.international,.domestic_shipping_method) } -->
+				<select name="delivery_company_code[{.export_code}][]" class="delivery_company">
+					<!-- { @get_shipping_company(.international,.domestic_shipping_method) } -->
+						<!-- { ? substr(..key_,0,5)=='auto_' } -->
+						<option value="{..key_}" style="background-color:yellow" {?.delivery_company_code==..key_}selected{/}>{..company}</option>
+						<!-- { : } -->
+						<option value="{..key_}" {?.delivery_company_code==..key_}selected{/}>{..company}</option>
+						<!-- { / } -->
+					<!-- { / } -->
+				</select>
+				<input type="text" name="delivery_number[{.export_code}][]" class="line delivery_number" value="{.delivery_number}" />
+				<!-- { : } -->
+				{=get_delivery_company(.delivery_company_code)} {.delivery_number}
+				<!-- { / } -->
+
+				<!-- { ? .delivery_number } -->
+					<a href="{.tracking_url}" target="_blank"><span class="blue">  배송추적</span></a>
+				<!-- { : } -->
+					<a href="javascript:alert('운송장번호가 없습니다.');"><span class="blue">배송추적</span></a>
+				<!-- { / } -->
+
+				<!-- { ? .invoice_send_yn=='y' } -->
+				<a href="javascript:printInvoiceView('{.order_seq}','{.export_code}')"><span class="icon-print-invoice"></span></a>
+				<!-- { / } -->
+			</td>
+			<!-- { : } -->
+			<td>
+				<!-- { ? _GET.mode == 'export_view' && get_international_company() } -->
+				<select name="international_shipping_method[{.export_code}][]">
+					<!-- { @get_international_company() } -->
+						<!-- { ? ..company == .international_shipping_method } -->
+					<option value='{..company}' selected>{..method}</option>
+						<!-- { : } -->
+					<option value='{..company}'>{..method}</option>
+						<!-- { / } -->
+					<!-- { / } -->
+				</select>
+				<!-- { : } -->
+				{=get_international_method(.international_shipping_method)}
+				<!-- { / } -->
+			</td>
+			<td>
+				<!-- { ? _GET.mode == 'export_view' && get_international_company() } -->
+				<input type="text" name="international_delivery_no[{.export_code}][]" class="line" value="{.international_delivery_no}" />
+				<!-- { : } -->
+				{.international_delivery_no}
+				<!-- { / } -->
+				{ ? .international_shipping_method != 'ups' }
+				<a href="{=get_delivery_company(get_international_method_code(strtoupper(.international_shipping_method)),'url')}{.international_delivery_no}" target="_blank"><span class="blue">배송추적</span></a>
+				{ / }
+			</td>
+			<!-- { / } -->
+			<td><span class="icon-goods-kind-{.goods_kind}-order"></span> {.ea}</td>
+			<td>{?strtotime(.complete_date)>0}{.complete_date}{/}</td>
+			<td  nowrap="nowrap" >
+				<!--{ ? .goods_kind == 'coupon' }-->
+					<div class="orange coupon_use_log_hand hand">
+						<!--{? .coupon_use_log }-->
+							<div style="width:100%;" class=""> 
+							<!--{ @ .coupon_use_log }-->
+								<div class="underline">
+									<span class="left">
+										{=date('Y-m-d', strtotime(..regist_date))}
+									</span>
+									<span class="right">
+										{=number_format(..coupon_use_value)}{?..coupon_value_type == 'price'}원{:}회{/}
+									</span> 
+								</div>
+							<!--{ / }-->  
+							</div>
+						<!--{ / }-->
+						<div class="coupon_use_log_table hide" >
+							<!--{? .coupon_use_log }-->
+								<div style="width:100%;margin-top:10px;" class="hand">
+									<table width="100%" class="simpledata-table-style" >
+									<thead >
+									<tr>
+										<th>사용 일시</th>
+										<th>사용</th>
+										<th>지역(수수료)</th>
+										<th>확인자</th>
+									</tr>
+									</thead>
+									<tbody>
+								<!--{ @ .coupon_use_log }-->
+									<tr>
+										<td class="center">
+											{=date('Y-m-d H:i', strtotime(..regist_date))}
+										</td>
+										<td class="center">
+											{=number_format(..coupon_use_value)}{?..coupon_value_type == 'price'}원{:}회{/}
+										</td>
+										<td class="center">{..coupon_use_area}({=number_format(..address_commission)}%)</td>
+										<td class="center">{?..confirm_user}{..confirm_user}{:}{..manager_id}{/}</td>
+									</tr>
+								<!--{ / }-->
+									</tbody>
+									</table>
+								</div>
+							<!--{ / }-->
+						</div>
+					</div>
+				<!--{ : }-->
+				{?strtotime(.shipping_date)>0}{.shipping_date}{/}
+				<!--{ / }-->
+			</td>
+			<td>
+				<!--{ ? .goods_kind == 'coupon' }-->
+				{.socialcp_confirm_date}
+				<!--{ : }-->
+				{?config_order.buy_confirm_use}{.confirm_date}{:}미사용{/}
+				<!--{ / }-->
+			</td>
+			<td>
+			{?_GET.export_code==.export_code}
+			<div class="{ ? .goods_kind == 'coupon' } coupon_status_btn hand {/}" { ? .goods_kind == 'coupon' } socialcp_status="{.socialcp_status}" {/} ><span style="background-color:yellow">{.mstatus}</span></div>
+			{ : } 
+			<div class="{ ? .goods_kind == 'coupon' } coupon_status_btn hand {/}" { ? .goods_kind == 'coupon' } socialcp_status="{.socialcp_status}" {/} >{.mstatus}</div>
+			{ / }
+			</td>
+			<td>
+				<table class="order-inner-table">
+					<col /><col width="40" />
+					<tr>
+						<td><img src="../images/common/icon/icon_ord_emn.gif" title="적립금" /></td>
+						<td class="right pdr5">{=number_format(.reserve)}</td>
+					</tr>
+					<tr>
+						<td><img src="../images/common/icon/icon_ord_point.gif" title="포인트" /></td>
+						<td class="right pdr5">{=number_format(.point)}</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<!-- { / } -->
+		<!-- { : } -->
+		<tr align="center">
+			<td colspan="11">출고 내역이 없습니다.</td>
+		</tr>
+		<!-- { / } -->
+	</tbody>
+</table>
+
+{?goods_kind_arr['coupon'] >= 50 }
+<div style="margin:20px 0;width:100%;text-align:center;">
+	<span class="btn large icon red"><button type="button" class="coupon_use_btn" order_seq="{orders.order_seq}">쿠폰 사용확인 및 쿠폰 재발송</button></span>
+</div>
+{/}
+
+<div class="item-title">주문<span class="title_order_number">({orders.order_seq})</span>의 무효/취소/반품 내역</div>
+<table width="100%" class="simplelist-table-style">
+	<tbody>
+		<tr>
+			<th colspan="2">무효/취소/반품</th>
+			<th>처리 금액</th>
+			<th>처리 수량</th>
+			<th>처리 상태</th>
+			<th>접수일</th>
+			<th>완료일</th>
+			<th>처리 완료자</th>
+		</tr>
+	</tbody>
+	<tbody>
+		<!-- { ? data_refund } -->
+		<!-- { @ data_refund } -->
+		<tr class="center">
+			<td>
+			환불
+			<!-- { ? .is_return == 1 } -->
+			(반품)
+			<!-- { : } -->
+			(취소)
+			<!-- { / } -->
+			</td>
+			<td>
+			<a href="../refund/view?no={.refund_code}" target="_blank">
+			{?_GET.refund_code == .refund_code}
+			<span style="background-color:yellow">{.refund_code}</span>
+			{ : }
+			<span class="blue">{.refund_code}</span>
+			{ / }
+			</a>
+			</td>
+			<td>{=number_format(.refund_price)}</td>
+			<td>{=number_format(.ea)}</td>
+			<td>
+				{?_GET.refund_code == .refund_code}
+				<span style="background-color:yellow">{.mstatus}</span>
+				{ : }
+				{.mstatus}
+				{ / }
+			</td>
+			<td>{.regist_date}</td>
+			<td>{? .refund_date && .refund_date!='0000-00-00 00:00:00'}{.refund_date}{/}</td>
+			<td>{.mname}</td>
+		</tr>
+		<!-- { / } -->
+
+		<!-- { @ data_return } -->
+		<tr class="center">
+			<td>
+			반품
+			</td>
+			<td>
+				<a href="../returns/view?no={.return_code}" target="_blank">
+					{?_GET.return_code == .return_code}
+					<span class="blue" style="background-color:yellow">{.return_code}</span>
+					{ : }
+					<span class="blue">{.return_code}</span>
+					{ / }
+				</a>
+			</td>
+			<td>{=number_format(.return_price)}</td>
+			<td>{=number_format(.ea)}</td>
+			<td>
+				{?_GET.return_code == .return_code}
+				<span style="background-color:yellow">{.mstatus}</span>
+				{ : }
+				{.mstatus}
+				{ / }
+			</td>
+			<td>{.regist_date}</td>
+			<td>{? .return_date && .return_date!='0000-00-00 00:00:00'}{.return_date}{/}</td>
+			<td>{.mname}</td>
+		</tr>
+		<!-- { / } -->
+
+		<!-- { @ data_exchange } -->
+		<tr class="center">
+			<td>
+			반품
+			(맞교환)
+			</td>
+			<td>
+			<a href="../returns/view?no={.return_code}" target="_blank"><span class="blue">{.return_code}</span></a>
+			</td>
+			<td>{=number_format(.return_price)}</td>
+			<td>{=number_format(.ea)}</td>
+			<td>{.mstatus}</td>
+			<td>{.regist_date}</td>
+			<td>{? .return_date && .return_date!='0000-00-00 00:00:00'}{.return_date}{/}</td>
+			<td>{.mname}</td>
+		</tr>
+		<!-- { / } -->
+
+		<!-- { : } -->
+		<tr align="center">
+			<td colspan="11">무효/취소/반품 내역이 없습니다.</td>
+		</tr>
+		<!-- { / } -->
+	</tbody>
+</table>
+
+<br class="table-gap" />
+<!-- { / } -->
+
+<!-- { ? _GET.mode == 'export_view'} -->
+<script>
+$(function(){
+	$("#order_summary_open").bind("click",function(){
+		$(this).hide();
+		$("#order_summary_close").show();
+		$("#order-summary").stop(true,true).slideDown();
+	});
+	$("#order_summary_close").bind("click",function(){
+		$(this).hide();
+		$("#order_summary_open").show();
+		$("#order-summary").stop(true,true).slideUp();
+	});
+})
+</script>
+<div class="center pdb10">
+	<span id="order_summary_open" class="btn medium"><button type="button">원주문({orders.order_seq}) 정보 펼쳐보기  ▼</button></span>
+	<span id="order_summary_close" class="btn medium" style="display:none"><button  type="button">원주문({orders.order_seq}) 정보 닫기 ▲</button></span>
+</div>
+<!-- { / } -->
+<div id="order-summary">
+	<table class="order-view-table" width="100%" border=0 style="background-color:#edf3ff;">
+	<colgroup>
+		<col />
+		<col width="5%" />
+		<col width="5%" />
+		<col width="5%" />
+		<col width="5%" />
+		<col width="5%" />
+		<col width="5%" />
+		<col width="5%" />
+		<col width="5%" />
+		<col width="5%" />
+		<col width="5%" />
+		<col width="8%" />
+		<col width="8%" />
+	</colgroup>
+	<thead class="oth">
+		<tr>
+			<th class="dark">주문상품</th>
+			<th class="dark">수량</th>
+			<th class="dark">매입가</th>
+			<th class="dark">정가</th>
+			<th class="dark">할인가<br />(단가)</th>
+			<th class="dark">할인</th>
+			<th class="dark">적립금<br/>포인트</th>
+			<th class="dark">
+				재고/가용<br/>
+				<!--{ @config_load('order','ableStockStep') }-->
+				<!--{ ? .value_ == '25' }-->
+				<span class="helpicon" title="가용 = 재고-출고예약량<br/>출고예약량 = 결제확인+상품준비+출고준비"></span>
+				<!--{ : }-->
+				<span class="helpicon" title="가용 = 재고-출고예약량<br/>출고예약량 = 주문접수+결제확인+상품준비+출고준비"></span>
+				<!--{ / }-->
+				<!--{ / }-->
+
+			</th>
+			<th class="dark">준비 <span class="helpicon" title="[주문상품 기준 합계]<br />결제확인+상품준비"></span></th>
+			<th class="dark">발송 <span class="helpicon" title="[주문상품 기준 합계]<br />출고준비+출고완료+배송중+배송완료"></span></th>
+			<th class="dark">취소 <span class="helpicon" title="[주문상품 기준 합계]<br />결제취소"></span></th>
+			<th class="dark">상품상태</th>
+			<th class="dark">배송</th>
+		</tr>
+
+	</thead>
+
+	<tbody class="otb">
+	<!--{ @ items }-->
+		<!--{ @ .value_ }-->
+			<!--{ @ ..options }-->
+				<!--{?..goods_type == 'gift'}-->
+		<tr class="order-item-row" bgcolor="#f6f6f6">
+				<!--{:}-->
+		<tr class="order-item-row">
+				<!--{/}-->
+			<td class="info">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<col width="40" /><col />
+				<tr>
+					<td class="left" valign="top" style="border:none;">
+						<!--{ ? ..goods_type == 'gift'}-->
+						<span class="order-item-image"><img class="small_goods_image" src="{..image}" /></span>
+						<!--{ : }-->
+						<a href='/goods/view?no={..goods_seq}' target='_blank'><span class="order-item-image"><img class="small_goods_image" src="{..image}" /></span></a>
+						<!--{ / }-->
+					</td>
+					<td class="left" valign="top" style="border:none;">
+						<div class="goods_name">
+							<!--{?..goods_type == 'gift'}-->
+							<img src="/admin/skin/default/images/common/icon_gift.gif" align="absmiddle" />
+							<!--{/}-->
+							<!--{?..goods_kind == 'coupon'}-->
+							<a href='../goods/social_regist?no={..goods_seq}' target='_blank'>
+							<!--{ : ..goods_type == 'gift'}-->
+							<a href='../goods/gift_regist?no={..goods_seq}' target='_blank'>
+							<!--{:}-->
+							<a href='../goods/regist?no={..goods_seq}' target='_blank'>
+							<!--{/}-->
+								<span class="goods_name1" style="color:#000000;">
+								<!--{? ..cancel_type == '1' }-->
+									<span class="order-item-cancel-type " >[청약철회불가]</span>
+								<!--{/}-->
+								{..goods_name}
+								</span>
+							</a>
+							<img src="../images/design/btn_stats.gif" style="cursor:pointer;" onclick="openAdvancedStatistic('{..goods_seq}');" align="absmiddle"  />
+						</div>
+						<!--{ ? ..event_seq && ..event_title }-->
+							<a href="/admin/event/{? ..event_type =='solo' }solo{/}regist?event_seq={..event_seq}" target='_blank'><span class="btn small gray"><button type="button" class="goods_event hand">{..event_title}</button></span></a>
+							<!--{ / }-->
+						<!--{?...option1}-->
+						<div class="goods_option">
+							<img src="/admin/skin/default/images/common/icon_option.gif" align="absmiddle" />
+							<!--{?...title1}-->{...title1}:<!--{ / }-->{...option1}
+							<!--{?...option2 }{?...title2}-->{...title2}:<!--{ / }-->{...option2}<!--{ / }-->
+							<!--{?...option3 }{?...title3}-->{...title3}:<!--{ / }-->{...option3}<!--{ / }-->
+							<!--{?...option4 }{?...title4}-->{...title4}:<!--{ / }-->{...option4}<!--{ / }-->
+							<!--{?...option5 }{?...title5}-->{...title5}:<!--{ / }-->{...option5}<!--{ / }-->
+						</div>
+						{? ...goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {...goods_code}]</div>{/}
+						<!--{ : }-->
+							{? ...goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {...goods_code}]</div>{/}
+						<!--{ / }-->
+						<!--{ ? ...inputs }-->
+							<!--{ @ ...inputs }-->
+								<!--{ ? ....value }-->
+						<div class="goods_input">
+							<img src="/admin/skin/default/images/common/icon_input.gif" align="absmiddle" />
+							<!--{?....title}-->{....title}:<!--{ / }-->
+							<!--{?....type=='file'}-->
+							<a href="../order_process/filedown?file={....value}" target="actionFrame">{....value}</a>
+							<!--{:}-->{....value}<!--{ / }-->
+						</div>
+								<!--{ / }-->
+							<!--{ / }-->
+						<!--{ / }-->
+					</td>
+				</tr>
+				</table>
+			</td>
+			<td class="price info ea"><span class="icon-goods-kind-{.goods_kind}-order"></span> {...ea}</td>
+			<td class="price info">{=number_format(...out_supply_price)}</td>
+			<td class="price info">{=number_format(...out_consumer_price)}</td>
+			<td class="price info">{=number_format(...out_price)}<br />({=number_format(...price)})</td>
+			<td class="price info">
+				<div class="hand underline under_div_view">
+					{=number_format(...out_coupon_sale + ...out_member_sale + ...out_fblike_sale + ...out_mobile_sale + ...out_promotion_code_sale + ...out_referer_sale)}
+					<div class="absolute hide under_div_view_contents">
+						<table>
+							<col width='60' />
+							<col width='60' />
+							<col width='60' />
+							<col width='60' />
+							<col width='60' />
+							<col width='60' />
+							<tr>
+								<th style="text-align:center;">쿠폰</th>
+								<th style="text-align:center;">등급</th>
+								<th style="text-align:center;">좋아요</th>
+								<th style="text-align:center;">모바일</th>
+								<th style="text-align:center;">코드</th>
+								<th style="text-align:center;">유입</th>
+							</tr>
+							<tr>
+								<td style="text-align:right;">{=number_format(...out_coupon_sale)}</td>
+								<td style="text-align:right;">{=number_format(...out_member_sale)}</td>
+								<td style="text-align:right;">{=number_format(...out_fblike_sale)}</td>
+								<td style="text-align:right;">{=number_format(...out_mobile_sale)}</td>
+								<td style="text-align:right;">{=number_format(...out_promotion_code_sale)}</td>
+								<td style="text-align:right;">{=number_format(...out_referer_sale)}</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</td>
+			<td class="price info">
+				<table class="order-inner-table">
+					<col /><col width="40" />
+					<tr>
+						<td><img src="../images/common/icon/icon_ord_emn.gif" title="적립금" /></td>
+						<td class="right">
+							<div class="under_div_view hand underline">
+								{=number_format(...out_reserve)}
+								<div class="absolute hide under_div_view_contents">
+									<table width="200">
+										<col >
+										<tr>
+											<th style="text-align:center;">적립금 내역</th>
+										</tr>
+										<tr>
+											<td style="text-align:left;">
+											{ ? ...reserve_log }
+												({...reserve_log}) * {...ea}
+											{ / }
+											</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td><img src="../images/common/icon/icon_ord_point.gif" title="포인트" /></td>
+						<td class="right">
+							<div class="under_div_view hand underline">
+								{=number_format(...out_point)}
+								<div class="absolute hide under_div_view_contents">
+									<table width="200">
+										<col>
+										<tr>
+											<th style="text-align:center;">포인트 내역</th>
+										</tr>
+										<tr>
+											<td style="text-align:left;">
+											{ ? ...point_log }
+												({...point_log}) * {...ea}
+											{ / }
+											</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</td>
+			<td class="info" align="center">
+			<!--{ ? ...real_stock > 0 }-->
+			<span class="blue bold">{=number_format(...real_stock)}</span>
+			<!--{ : }-->
+			<span class="red bold">{=number_format(...real_stock)}</span>
+			<!--{ / }-->
+			/
+			<!--{ ? ...stock > 0 }-->
+			<span class="blue bold">{=number_format(...stock)}</span>
+			<!--{ : }-->
+			<span class="red bold">{=number_format(...stock)}</span>
+			<!--{ / }-->
+			</td>
+			<td class="info ea" align="center">{=number_format(...ready_ea)}</td>
+			<td align="center">
+				<div class="under_div_view hand">
+					<span class="info ea underline">{ ...step_complete }</span>
+					<div class="absolute hide under_div_view_contents">
+						<table>
+							<col width="60"/><col width="60"/><col width="60"/><col width="60"/><col width="60"/><col width="60"/>
+							<tr>
+								<th style="text-align:center;">택배선불</th>
+								<th style="text-align:center;">택배착불</th>
+								<th style="text-align:center;">퀵서비스</th>
+								<th style="text-align:center;">직접수령</th>
+							</tr>
+							<tr>
+								<td style="text-align:right;">{=number_format(...export_sum_ea.delivery)}</td>
+								<td style="text-align:right;">{=number_format(...export_sum_ea.postpaid)}</td>
+								<td style="text-align:right;">{=number_format(...export_sum_ea.quick)}</td>
+								<td style="text-align:right;">{=number_format(...export_sum_ea.direct)}</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+
+				{ ? ...cancel_list_ea || ...exchange_list_ea || ...return_list_ea  || ...refund_list_ea }
+				<div>
+					{ ? ...exchange_list_ea }
+					<a href="/admin/returns/catalog?keyword={..order_seq}" target="_blank"><img src='../images/common/icon/icon_list_return_exchange.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{...exchange_list_ea}</span></a>
+					{ / }
+					{ ? ...return_list_ea }
+					<a href="/admin/returns/catalog?keyword={..order_seq}" target="_blank"><img src='../images/common/icon/icon_list_return.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{...return_list_ea}</span></a>
+					<a href="/admin/refund/catalog?keyword={..order_seq}" target="_blank"><img src='../images/common/icon/icon_list_refund.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{...return_list_ea}</span></a>
+					{ / }
+				</div>
+				{ / }
+			</td>
+			<td class="info ea" align="center">{...step85}</td>
+			<td class="info" align="center">
+				{...mstep}
+				<!-- { ? ..goods_kind == 'coupon' && ...step >= 55 } -->
+				<span class="btn"><img src="../images/common/btn_ok_use.gif" class="coupon_use_btn" order_seq="{..order_seq}" /></span>
+				<!-- { / } -->
+			</td>
+			{ ? ..index_ == 0 && ...index_ == 0 }
+			<td class="info" align="right" style="padding-right:5px;{ ? preg_match('/^goods/', .key_) }color:#ff9966;{ / }" rowspan="{..shipping_row_cnt}">
+				{ ? .key_ == 'coupon' }티켓
+				{ : .key_ == 'gift' }사은품
+				{ : }
+					<div>
+					{ ? ..international == 'international' }해외
+					{ : preg_match('/^goods/', .key_) }개별배송
+					{ : }기본배송{ / }
+					</div>
+
+					<div>
+					{ ? orders.shipping_method == 'quick' }퀵서비스
+					{ : orders.shipping_method == 'direct' }직접수령
+					{ : orders.shipping_method == 'postpaid' }택배(착불)
+					{ : }택배(선불){ / }
+					</div>
+					
+					{ ? .key_ == 'shop' && ..shippings['basic_cost'] > 0 }
+						<div>{=number_format(..shippings['basic_cost'])}</div>
+					{ : preg_match('/^goods/', .key_) && ..shippings['goods_cost'] > 0 }
+						<div>{=number_format(..shippings['goods_cost'])}</div>
+					{ : orders.shipping_method == 'delivery' }<div>무료배송</div>{ / }
+
+					{ ? .key_ == 'shop' && ..shippings['basic_add_cost'] > 0 }
+						<div>+{=number_format(..shippings['basic_add_cost'])}</div>
+					{ : preg_match('/^goods/', .key_) && ..shippings['goods_add_cost'] > 0 }
+						<div>+{=number_format(..shippings['goods_add_cost'])}</div>
+					{ / }
+				{ / }
+			</td>
+			{ / }
+		</tr>
+		<!--{ @ ...suboptions }-->
+		<tr class="order-item-row">
+			<td class="info suboption">
+				<!--{ ? ....suboption }-->
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<col width="40" /><col />
+					<tr>
+						<td valign="top" align="right" style="border:none;height:10px;"><img src="../images/common/icon_add_arrow.gif" /></td>
+						<td valign="top" style="border:none;height:10px;">
+							<img src="../images/common/icon_add.gif" align="absmiddle" />
+							<span class="desc">{....title}:{....suboption}</span>
+							{? ....goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {....goods_code}]</div>{/}
+						</td>
+					</tr>
+				</table>
+				<!--{ / }-->
+			</td>
+			<td class="price info suboption ea">{=number_format(....ea)}</td>
+			<td class="price info suboption">{=number_format(....out_supply_price)}</td>
+			<td class="price info suboption">{=number_format(....out_consumer_price)}</td>
+			<td class="price info suboption">{=number_format(....out_price)}</td>			
+			<td class="price info suboption">
+				<div class="under_div_view hand underline">
+					{=number_format(....out_coupon_sale + ....out_member_sale + ....out_fblike_sale + ....out_mobile_sale + ....out_promotion_code_sale + ....out_referer_sale)}
+					<div class="absolute hide under_div_view_contents">
+						<table>
+							<col width='60' />
+							<col width='60' />
+							<col width='60' />
+							<col width='60' />
+							<col width='60' />
+							<col width='60' />
+							<tr>
+								<th style="text-align:center;">쿠폰</th>
+								<th style="text-align:center;">등급</th>
+								<th style="text-align:center;">좋아요</th>
+								<th style="text-align:center;">모바일</th>
+								<th style="text-align:center;">코드</th>
+								<th style="text-align:center;">유입</th>
+							</tr>
+							<tr>
+								<td style="text-align:right;">{=number_format(....out_coupon_sale)}</td>
+								<td style="text-align:right;">{=number_format(....out_member_sale)}</td>
+								<td style="text-align:right;">{=number_format(....out_fblike_sale)}</td>
+								<td style="text-align:right;">{=number_format(....out_mobile_sale)}</td>
+								<td style="text-align:right;">{=number_format(....out_promotion_code_sale)}</td>
+								<td style="text-align:right;">{=number_format(....out_referer_sale)}</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</td>
+			<td class="price info suboption">
+				<table class="order-inner-table">
+					<col /><col width="40" />
+					<tr>
+						<td><img src="../images/common/icon/icon_ord_emn.gif" title="적립금" /></td>
+						<td class="right">
+							{=number_format(....out_reserve)}
+						</td>
+					</tr>
+					<tr>
+						<td><img src="../images/common/icon/icon_ord_point.gif" title="포인트" /></td>
+						<td class="right">
+							{=number_format(....out_point)}
+						</td>
+					</tr>
+				</table>
+			</td>
+			<td class="info suboption" align="center">
+			<!--{ ? ....real_stock > 0 }-->
+			<span class="blue bold">{=number_format(....real_stock)}</span>
+			<!--{ : }-->
+			<span class="red bold">{=number_format(....real_stock)}</span>
+			<!--{ / }-->
+			/
+			<!--{ ? ...stock > 0 }-->
+			<span class="blue bold">{=number_format(....stock)}</span>
+			<!--{ : }-->
+			<span class="red bold">{=number_format(....stock)}</span>
+			<!--{ / }-->
+			</td>
+			<td class="info suboption ea" align="center">{=number_format(....ready_ea)}</td>
+			<td class="info suboption ea" align="center">
+
+				<div class="under_div_view hand">
+					<span class="info ea underline">{ ....step_complete }</span>
+					<div class="absolute hide under_div_view_contents">
+						<table>
+							<col width="60"/><col width="60"/><col width="60"/><col width="60"/><col width="60"/><col width="60"/>
+							<tr>
+								<th style="text-align:center;">택배선불</th>
+								<th style="text-align:center;">택배착불</th>
+								<th style="text-align:center;">퀵서비스</th>
+								<th style="text-align:center;">직접수령</th>
+							</tr>
+							<tr>
+								<td style="text-align:right;">{=number_format(....export_sum_ea.delivery)}</td>
+								<td style="text-align:right;">{=number_format(....export_sum_ea.postpaid)}</td>
+								<td style="text-align:right;">{=number_format(....export_sum_ea.quick)}</td>
+								<td style="text-align:right;">{=number_format(....export_sum_ea.direct)}</td>
+							</tr>
+						</table>
+					</div>
+				</div>
+
+				{ ? ....cancel_list_ea || ....exchange_list_ea || ....return_list_ea  || ....refund_list_ea }
+				<div>
+					{ ? ....exchange_list_ea }
+					<a href="/admin/returns/catalog?keyword={..order_seq}" target="_blank"><img src='../images/common/icon/icon_list_return_exchange.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{....exchange_list_ea}</span></a>
+					{ / }
+					{ ? ....return_list_ea }
+					<a href="/admin/returns/catalog?keyword={..order_seq}" target="_blank"><img src='../images/common/icon/icon_list_return.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{....return_list_ea}</span></a>
+					<a href="/admin/refund/catalog?keyword={..order_seq}" target="_blank"><img src='../images/common/icon/icon_list_refund.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{....return_list_ea}</span></a>
+					{ / }
+				</div>
+				{ / }
+			</td>
+			<td class="info suboption ea" align="center">{....step85}</td>
+			<td class="info suboption" align="center">{....mstep}</td>
+		</tr>
+		<!--{ / }-->
+		<!--{ / }-->
+	<!--{ / }-->
+	<!--{ / }-->
+		<tr class="order-item-row">
+			<td align="right" style="padding-right:5px;">소계</td>
+			<td class="info" align="right"><strong>{orders.total_ea} ({orders.total_type}종)</strong></td>
+			<td class="price info"><strong>{=number_format(items_tot.supply_price)}</strong></td>
+			<td class="price info"><strong>{=number_format(items_tot.consumer_price)}</strong></td>
+			<td class="price info" style="color:#ff9966"><strong>{=number_format(items_tot.price)}</strong></td>
+			<td class="price info" style="color:#33cccc"><strong>{=number_format(items_tot.coupon_sale+items_tot.member_sale+items_tot.fblike_sale+items_tot.mobile_sale+items_tot.promotion_code_sale+items_tot.referer_sale)}</strong></td>
+			<td class="price info">
+				<table class="order-inner-table">
+					<col /><col width="40" />
+					<tr>
+						<td><img src="../images/common/icon/icon_ord_emn.gif" title="적립금" /></td>
+						<td class="right">{=number_format(items_tot.reserve)}</td>
+					</tr>
+					<tr>
+						<td><img src="../images/common/icon/icon_ord_point.gif" title="포인트" /></td>
+						<td class="right">{=number_format(items_tot.point)}</td>
+					</tr>
+				</table>
+			</td>
+			<td class="info" align="center">
+			<!--{ ? items_tot.real_stock > 0 }-->
+			<span class="blue bold">{=number_format(items_tot.real_stock)}</span>
+			<!--{ : }-->
+			<span class="red bold">{=number_format(items_tot.real_stock)}</span>
+			<!--{ / }-->
+			/
+			<!--{ ? items_tot.stock > 0 }-->
+			<span class="blue bold">{=number_format(items_tot.stock)}</span>
+			<!--{ : }-->
+			<span class="red bold">{=number_format(items_tot.stock)}</span>
+			<!--{ / }-->
+			</td>
+			<td class="info ea center">{=number_format(items_tot.ready_ea)}</td>
+			<td class="info ea center">{=number_format(items_tot.step_complete)}</td>
+			<td class="info ea center">{=number_format(items_tot.step85)}</td>
+			<td></td>
+			<td class="price info"><strong>{=number_format(items_tot.tot_shipping_cost)}</strong></td>
+		</tr>
+	</tbody>
+</table>
+
+<br class="table-gap" />
+<table class="order-price-information-table">
+<tr>
+	<td>
+		<dl>
+			<dt style="color:#ff7537">할인가</dt>
+			<dd style="color:#ff7537"><span class="price-text">{=number_format(items_tot.price)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-plus-item">
+			<dt style="color:#ff7537">
+				개별배송비
+				{?items_tot.add_goods_shipping}
+				<img class="add_goods_shipping" src="../images/common/icon/icon_add_dlv_fee.gif" title="지역 추가 배송비 : {=number_format(items_tot.add_goods_shipping)}원" align="absmiddle"  />
+				{/}
+			</dt>
+			<dd style="color:#ff7537"><span class="price-text">{=number_format(items_tot.goods_shipping_cost)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-plus-item">
+			<dt>
+				기본배송비
+				{?items_tot.area_add_delivery_cost}
+				<img class="area_add_delivery_cost" src="../images/common/icon/icon_add_dlv_fee.gif" title="지역 추가 배송비 : {=number_format(items_tot.area_add_delivery_cost)}원" align="absmiddle"  />
+				{/}
+			</dt>
+			<dd><span class="price-text">{=number_format(items_tot.shop_shipping_cost)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt style="color:#04a1a1">상품쿠폰</dt>
+			<dd style="color:#04a1a1"><span class="price-text">{=number_format(items_tot.coupon_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt style="color:#04a1a1">회원등급</dt>
+			<dd style="color:#04a1a1"><span class="price-text">{=number_format(items_tot.member_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt style="color:#04a1a1">좋아요</dt>
+			<dd style="color:#04a1a1"><span class="price-text">{=number_format(items_tot.fblike_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt style="color:#04a1a1">모바일</dt>
+			<dd style="color:#04a1a1"><span class="price-text">{=number_format(items_tot.mobile_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt style="color:#04a1a1">코드</dt>
+			<dd style="color:#04a1a1"><span class="price-text">{=number_format(items_tot.promotion_code_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt style="color:#04a1a1">유입경로</dt>
+			<dd style="color:#04a1a1"><span class="price-text">{=number_format(items_tot.referer_sale)}</span> 원</dd>
+		</dl>
+	</td>
+</tr>
+</table>
+
+<table class="order-price-information-table">
+<tr>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt>배송비쿠폰</dt>
+			<dd><span class="price-text">{=number_format(orders.coupon_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt>배송비코드</dt>
+			<dd><span class="price-text">{=number_format(orders.shipping_promotion_code_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt>적립금사용</dt>
+			<dd><span class="price-text">{=number_format(orders.emoney)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt>이머니사용</dt>
+			<dd><span class="price-text">{=number_format(orders.cash)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt>에누리</dt>
+			<dd>{orders.enuri}</dd>
+		</dl>
+	</td>
+
+	<td>
+		<dl class="order-price-total-item">
+			<dt>최종결제금액</dt>
+			<dd><span class="price-text">{=number_format(orders.settleprice)}</span> 원</dd>
+		</dl>
+	</td>
+	<!--{ ? orders.shipping_method=='postpaid' && orders.postpaid }-->
+	<td width="30">&nbsp;</td>
+	<td>
+		<dl>
+			<dt>착불배송비</dt>
+			<dd><span class="price-text">{=number_format(orders.postpaid)}</span> 원</dd>
+		</dl>
+	</td>
+	<!--{ / }-->
+</tr>
+</table>
+
+</div>
+
+<div id="coupon_use_lay" class="hide"></div>
+<div id="coupon_use_log_dialog" class="hide"></div>
+<!-- { ? _GET.mode == 'export_view'} -->
+<script>$("#order-summary").hide();</script>
+<!-- { / } -->
+
+<!-- 주문자 정보 테이블 : 끝 -->
+<script type="text/javascript">
+
+$(".helpicon").poshytip({
+	className: 'tip-darkgray',
+	bgImageFrameSize: 8,
+	alignTo: 'target',
+	alignX: 'right',
+	alignY: 'center',
+	offsetX: 10,
+	allowTipHover: false,
+	slide: false,
+	showTimeout : 0
+});
+setDatepicker();
+
+function openAdvancedStatistic(goods_seq){
+	$.ajax({
+		type: "get",
+		url: "../statistic/advanced_statistics",
+		data: "ispop=pop&goods_seq="+goods_seq,
+		success: function(result){
+			$(document).find('body').append('<div id="Advanced_Statistics"></div>');
+			$("#Advanced_Statistics").html(result);
+			openDialog("<span style='margin-left:410px;'>이 상품의 고급 통계</span>", "Advanced_Statistics", {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+		}
+	});
+}
+
+$("button.goods_export").bind("click",function(){
+	var url = "../order/goods_export?seq={orders.order_seq}";
+	$.get(url, function(data) {
+		$('#goods_export_dialog').html(data);
+	});
+	openDialog("출고처리<span class='desc'> - {orders.order_seq}</span>", "goods_export_dialog", {"width":"95%","height":800});
+});
+
+$(".under_div_view").bind("mouseover",function(){
+	$(this).find("div.under_div_view_contents").removeClass("hide");
+}).bind("mouseout",function(){
+	$(this).find("div.under_div_view_contents").addClass("hide");
+});
+
+</script>
+
+<div id="coupon_status_dialog" class="hide">{#socialcp_status_guide}</div>

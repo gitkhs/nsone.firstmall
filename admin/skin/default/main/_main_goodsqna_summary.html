@@ -1,0 +1,20 @@
+<!-- 상품문의 -->
+<table cellpadding="0" cellspacing="0" border="0" align="center" class="tb_summary_partition">
+<!--{? goodsqnaloop }-->
+	<!--{@ goodsqnaloop }-->
+		<!--{? .seq < 1 }-->
+	<tr>
+		<td colspan="3">&nbsp;</td>
+	</tr>
+		<!--{ : }-->
+	<tr>
+		<td class="llign subject">{.main_subject}</td>
+		<td class="redtxt rlign" width="35px">{? !(.re_contents) && .seq }미답변{/}</td>
+		<td class="rlign" width="30px">{.main_date}</td>
+	</tr>
+		<!--{ / }-->
+	<!--{ / }-->
+<!--{ : }-->
+	<tr ><td colspan="3" > 등록된 게시글이 없습니다. </td><tr>
+<!--{ / }-->
+</table>

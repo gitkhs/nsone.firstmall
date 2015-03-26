@@ -1,0 +1,335 @@
+{ #layout_header }
+
+<style>
+/* 간단 데이터 테이블 스타일 */
+table.salesgoods-table-style {border-collapse:collapse;}
+table.salesgoods-table-style th {background-color:#f3f3f3; min-height:24px; line-height:24px; border:1px solid #c8c8c8; color:#666; font-weight:normal;}
+table.salesgoods-table-style td {padding:5px 5px; border:1px solid #d7d7d7; color:#666}
+table.salesgoods-table-style th.tdLineRight,
+table.salesgoods-table-style td.tdLineRight {border-right:2px solid #000;}
+table.salesgoods-table-style tr.trLineBottom th,
+table.salesgoods-table-style tr.trLineBottom td {border-bottom:2px solid #000;}
+table.salesgoods-table-style tr.trLineTop th,
+table.salesgoods-table-style tr.trLineTop td {border-top:2px solid #000;}
+</style>
+
+<script>
+$(function(){
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','',function(){
+		<!--{?sc.category1}-->
+		$("select[name='category1']").val('{_GET.category1}').change();
+		<!--{/}-->
+	});
+	$("select[name='category1']").live("change",function(){
+		category_admin_select_load('category1','category2',$(this).val(),function(){
+			<!--{?sc.category2}-->
+			$("select[name='category2']").val('{_GET.category2}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").live("change",function(){
+		category_admin_select_load('category2','category3',$(this).val(),function(){
+			<!--{?sc.category3}-->
+			$("select[name='category3']").val('{_GET.category3}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category3']").live("change",function(){
+		category_admin_select_load('category3','category4',$(this).val(),function(){
+			<!--{?sc.category4}-->
+			$("select[name='category4']").val('{_GET.category4}').change();
+			<!--{/}-->
+		});
+	});
+
+	/* 브랜드 불러오기 */
+	brand_admin_select_load('','brands1','',function(){
+		<!--{?sc.brands1}-->
+		$("select[name='brands1']").val('{_GET.brands1}').change();
+		<!--{/}-->
+	});
+	$("select[name='brands1']").live("change",function(){
+		brand_admin_select_load('brands1','brands2',$(this).val(),function(){
+			<!--{?sc.brands2}-->
+			$("select[name='brands2']").val('{_GET.brands2}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('brands2','brands3',"");
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("select[name='brands2']").live("change",function(){
+		brand_admin_select_load('brands2','brands3',$(this).val(),function(){
+			<!--{?sc.brands3}-->
+			$("select[name='brands3']").val('{_GET.brands3}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("select[name='brands3']").live("change",function(){
+		brand_admin_select_load('brands3','brands4',$(this).val(),function(){
+			<!--{?sc.brands4}-->
+			$("select[name='brands1']").val('{_GET.brands1}').change();
+			<!--{/}-->
+		});
+	});
+
+	// 상품 옵션 불러오기 :: 2014-08-06 lwh
+	$(".btn-direct-open").bind("click", function(){
+		var goods_seq	= $(this).attr("goods_seq");
+		var nClass		= $(this).attr('class');
+		var sdate		= $("input[name='sdate']").val();
+		var edate		= $("input[name='edate']").val();
+		var option_name	= "";
+		
+		// 상품 옵션 호출
+		if	(nClass.search(/opened/) == -1){
+			$.ajax({
+				'url'		: './sales_option_ajax',
+				'data'		: {'goods_seq':goods_seq,'sdate':sdate,'edate':edate},
+				'type'		: 'post',
+				'dataType'	: 'json',
+				'success'	: function(data) {
+					var tb_html	= "<table style='margin-left:50px;' width='58%'>";
+					tb_html += "<colgroup><col width='5%' /><col /><col width='10%' /><col width='13%' /><col width='13%' /></colgroup>";
+					tb_html += "<tr><th>순위</th><th>옵션명</th><th>판매 수량</th><th>판매 금액</th><th>재고 / 가용</th></tr>";
+					$.each(data, function(idx,item){						
+						tb_html = tb_html + "<tr>"
+						+ "<td style='background-color:#fff;' align='center'>" + (idx+1) + "</td>"
+						+ "<td class='ltd optiontd'> <img src='../images/common/icon_option.gif' /> " + item.option1 + item.option2 + item.option3 + item.option4 + item.option5 + "</td>"
+						+ "<td class='rtd'>" + item.option_cnt + "개</td>"
+						+ "<td class='rtd'>" + comma(item.option_price) + "원</td>"
+						+ "<td class='rtd'>" + comma(item.stock) + " / "
+						{ ? cfg_order.ableStockStep == 25 }
+						+ comma(item.stock - item.badstock - item.reservation25)
+						{ : }
+						+ comma(item.stock - item.badstock - item.reservation15)
+						{ / }
+						+ "</td>"
+						+ "</tr>";
+					});
+					tb_html += "</table>";
+					
+					$("#option_"+goods_seq).html(tb_html);
+				}
+			});
+
+			$("#goods_area_"+goods_seq).show();
+			$(this).addClass("opened");
+		}else{
+			$("#goods_area_"+goods_seq).hide();
+			$(this).removeClass("opened");
+		}
+	});
+});
+</script>
+<style type="text/css">
+table.simpledata-table-style thead td.top_title {text-align:center;font-weight:bold;background-color:#eee;}
+table.simpledata-table-style tbody td.ltd {text-align:left;padding-left:5px;background-color:#fff;}
+table.simpledata-table-style tbody td.rtd {text-align:right;padding-right:5px;background-color:#fff;}
+table.simpledata-table-style tbody td.nulltd {background-color:#e6e6e6;}
+table.simpledata-table-style tbody td.ltd.optiontd {padding-left:15px;}
+
+</style>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+
+		</ul>
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>구매 통계</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<div class="sub-layout-container body-height-resizing">
+
+	{#sales_menu}
+
+	<!-- 서브메뉴 바디 : 시작-->
+	<div class='slc-body-wrap'>
+		<div class="slc-body">
+
+			<div class="item-title" style="margin-left:25px;">구매 통계 - 상품</div>
+
+			<div style="padding:0 20px">
+
+				<br style="line-height:10px" />
+
+				<form>
+					<div class="search-form-container" style="padding:0px; background-color:#fff">
+						<table class="search-form-table">
+						<tr>
+							<td align="center">
+								<label><input type="radio" name="sc_type" value="goods" checked /> 상품별</label>
+								<label><input type="radio" name="sc_type" value="daily" /> 일별</label>
+
+								<input type="text" name="sdate" value="{_GET.sdate}" size="10" class="line datepicker" /> ~
+								<input type="text" name="edate" value="{_GET.edate}" size="10" class="line datepicker" />
+
+								<span class="helpicon" title="입금완료일 기준입니다"></span>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<table>
+								<tr>
+									<td width="500">
+										<table class="sf-keyword-table">
+										<tr>
+											<td class="sfk-td-txt"><input type="text" name="keyword" value="{_GET.keyword}" title="상품명, 상품코드, 매입용 상품명" /></td>
+											<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+										</tr>
+										</table>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						</table>
+						
+						<table width="600" align="center">
+						<col width="10%" />
+						<col width="40%" />
+						<col width="10%" />
+						<col width="40%" />
+						<tr>
+							<th class="its-th">카테고리</th>
+							<td class="its-td">
+								<select class="line" name="category1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+								<select class="line" name="category2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+								<select class="line" name="category3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+								<select class="line" name="category4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+							</td>
+						</tr>
+						<tr>
+							<th class="its-th">브랜드</th>
+							<td class="its-td">
+								<select class="line" name="brands1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+								<select class="line" name="brands2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+								<select class="line" name="brands3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+								<select class="line" name="brands4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+							</td>
+						</tr>
+						</table>
+					</div>
+
+					<br style="line-height:10px" />
+
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td align="right" valign="bottom">
+						<select name="order_by" onchange="$(this.form).submit();">
+						<option value="cnt" {?sc.order_by == 'cnt'}selected{/}>판매수량↑</option>
+						<option value="price" {?sc.order_by == 'price'}selected{/}>판매금액↑</option>
+						</select>
+						</td>
+					</tr>
+					</table>
+
+				</form>
+
+				<br style="line-height:10px" />
+
+
+				<div id="goods_cart_list">
+					<table width="100%" class="simpledata-table-style" style="margin:auto;">
+					<colgroup>
+						<col width="4%" />
+						<col />
+						<col width="7%" />
+						<col width="6%" />
+						<col width="7%" />
+						<col width="8%" />
+						<col width="7%" />
+						<col width="6%" />
+						<col width="6%" />
+						<col width="6%" />
+						<col width="7%" />
+						<col width="6%" />
+					</colgroup>
+					<thead>
+					<tr>
+						<td class="top_title" colspan="5">검색 기간 내</td>
+						<td class="top_title" colspan="7" bgcolor="#eeeeee">해당 상품의 현재 정보</td>
+					</tr>
+					<tr>
+						<th>순위</th>
+						<th>상품</th>
+						<th>옵션</th>
+						<th>판매 수량</th>
+						<th>판매 금액</th>
+
+						<th>재고</th>
+						<th>페이지뷰</th>
+						<th>장바구니</th>
+						<th>위시리스트</th>
+						<th>좋아요</th>
+						<th>재입고알림</th>
+						<th>리뷰</th>
+					</tr>
+					</thead>
+					<tbody>
+					<!-- { ? statlist } -->
+						<!-- { @ statlist } -->							
+							<!-- { ? .goods_first } -->
+					<tr>
+						<td align="center">{=.lank}</td>
+						<td class="ltd">
+							<a href="/goods/view?no={.goods_seq}" target="_blank">
+							<img class="small_goods_image" src="{=viewImg(.goods_seq,'thumbView')}" onerror="this.src='/data/icon/error/noimage_list.gif';" width="50" align="absmiddle" />
+							<span style="mragin-left:5px;">{.stat_goods_name}</span>
+							</a>
+						</td>
+						<td width="70" class="desc ltd">
+							{?.title1}{.title1} : {.option1}<br />{/}
+							{?.title2}{.title2} : {.option2}<br />{/}
+							{?.title3}{.title3} : {.option3}<br />{/}
+							{?.title4}{.title4} : {.option4}<br />{/}
+							{?.title5}{.title5} : {.option5}{/}
+						</td>
+						<td class="rtd">{=number_format(.goods_cnt)}개</td>
+						<td class="rtd">{=number_format(.goods_price)}원</td>
+						<td class="rtd">{=number_format(.tot_stock)}</td>
+						<td class="rtd">{=number_format(.page_view)}</td>
+						<td class="rtd">{=number_format(.now_cart_cnt)}</td>
+						<td class="rtd">{=number_format(.now_wish_cnt)}</td>
+						<td class="rtd">{=number_format(.now_like_cnt)}</td>
+						<td class="rtd">{=number_format(.now_restock_cnt)}</td>
+						<td class="rtd">{=number_format(.now_review_cnt)}</td>
+					</tr>
+							<!-- { / } -->
+					<tr class="hide" id="goods_area_{.goods_seq}">
+						<td class="nulltd" colspan="12" id="option_{.goods_seq}"></td>
+					</tr>
+						<!-- { / } -->
+					<!-- { : } -->
+					<tr>
+						<td colspan="12" align="center">검색된 통계가 없습니다.</td>
+					</tr>
+					<!-- { / } -->
+					</tbody>
+					</table>
+
+		</div>
+	</div>
+</div>
+
+{ #layout_footer }

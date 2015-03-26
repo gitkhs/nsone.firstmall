@@ -1,0 +1,125 @@
+<style>
+.promocodeImage {position:relative; width:98px; height:95px; padding-bottom:10px; background:url('../images/common/img_promocode.gif') no-repeat;}
+.promocodeImage span {position:absolute; top:52px; left:0px; width:100%; color:#dc0000; font-size:16px; font-family:tahoma; font-weight:bold;}
+</style>
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$(".req_gift").click(function(){
+		var my_point = $("input[name='point']").val();
+		var my_reserve = "{myemoney}";
+		var seq		= $(this).attr("seq");
+		var point	= $(this).attr("point");
+		var goods_rule	= $(this).attr("goods_rule");
+		var goods_name	= $(this).attr("goods_name");
+		
+		if(goods_rule == "reserve"){
+			//alert(my_point+" : "+$(this).attr("point"));
+			if(parseInt(my_reserve) < parseInt($(this).attr("point"))){
+				alert("해당 사은품은 증정 받기 위한 잔여 적립금이 부족합니다");
+				return;
+			}
+		}else{
+			//alert(my_point+" : "+$(this).attr("point"));
+			if(parseInt(my_point) < parseInt($(this).attr("point"))){
+				alert("해당 사은품은 증정 받기 위한 잔여 포인트가 부족합니다");
+				return;
+			}
+		}
+		//alert($(this).attr("point")+" : "+$(this).attr("seq"));
+
+		$.get('/mypage/buy_gift?seq='+seq+'&point='+point+'&goods_rule='+goods_rule+'&goods_name='+escape(goods_name), function(data) {
+		  	$('#giftPopup').html(data);
+		});
+		openDialog("사은품 신청", "giftPopup", {"width":"1000","height":700});
+	});
+
+
+});
+
+function clipBoard(name, id){
+	var clip = new ZeroClipboard.Client();
+	clip.setHandCursor( true );
+	clip.setCSSEffects( true );
+	clip.setText($("input[name='"+name+"']").val());
+	clip.addEventListener( 'complete', function(client, text) {
+		alert("클립보드에 복사되었습니다.");
+	});
+	clip.glue(id);
+}
+</script>
+<!-- 타이틀 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="10"></td></tr>
+<tr><td><img src="../images/common/tit_chg_gift.gif" /></td></tr>
+<tr><td height="8"></td></tr>
+<tr><td height="3" bgcolor="#dddddd"></td></tr>
+<tr>
+	<td height="34">
+
+		{userInfo.user_name}님의 보유 적립금 <span class="bold black">{=number_format(myemoney)}</span>
+		&nbsp;&nbsp;<span class="gray">|</span>&nbsp;&nbsp;
+		이번달 소멸 예정 적립금 <span class="bold black">P{=number_format(0)}</span>
+	</td>
+</tr>
+<tr><td height="1" bgcolor="#dddddd"></td></tr>
+</table>
+
+<div style="height:22px"></div>
+
+
+<input type="hidden" name="point" value="{=get_member_money('point',userInfo.member_seq)}"/>
+
+<!--{? gift_loop }-->
+{@ gift_loop }
+<div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td><span style="font-size:14px; font-family:Dotum; color:#ee6a00; letter-spacing:-1px; font-weight:bold;">{.title}</span></td>
+	<td align="right" style="font:11px; font-fmaily:Dotum; color:#000;"><b>{.start_date} ~ {.end_date}</b></td>
+</tr>
+</table>
+</div>
+<div style="height:10px"></div>
+{? .gift_contents}
+<div>{.gift_contents}</div>
+<div style="height:10px"></div>
+{/}
+<div style="padding-left:5px; background-color:#333; height:30px; line-height:30px; color:#a3a3a3;">
+	<font color="#ff6000">적립금 <b>{=number_format(.sprice)}</b>  </font>
+	&nbsp;&nbsp;<font color="#666666">|</font>&nbsp;&nbsp;
+	신청시 <font color="white">사은품</font> {? gift_info.goods_rule == "reserve" }적립금{ : }포인트{ / }만큼 차감됩니다!
+</div>
+<div class="pdt30">
+	<table width="90%" align="center" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+		{@ .goods }
+			<!--{? ..index_ >0 && ..index_ % 5 == 0 }--><tr>{/}
+			<td valign="top">
+				<table width='100%' border="0" cellpadding="0" cellspacing="0" align="center">
+				<tr align="center"><td ><div style="display:inline-block; background-color:#ddd"><img src="{=get_gift_image(..value_,'list1')}" width="120"></div></td></tr>
+				<tr align="center"><td height="10"></td></tr>
+				<tr align="center"><td height="20"><b class="black fx12">{=get_gift_name(..value_)}</b></td></tr>
+				<tr align="center"><td height="16">{? gift_info.goods_rule == "reserve" }적립금{ : }포인트{ / } : <b>{=number_format(.sprice)}</b></td></tr>
+				<tr align="center"><td height="16">남은수량 : <b style="color:#0083a9">{=number_format(get_gift_stock(..value_))}개</b></td></tr>
+				<tr><td height="10"></td></tr>
+				{? get_gift_stock(..value_) > 0 }
+				<tr align="center"><td><img src="../images/common/btn_s_app.gif" class="hand req_gift" point="{.sprice}" seq="{..value_}" goods_rule="{gift_info.goods_rule}" goods_name="{=get_gift_name(..value_)}"/></td></tr>
+				{ / }
+				</table>
+			</td>
+			<!--{?..index_ % 5 == 4 }--></tr><tr><td height=10></td></tr>{/}
+		{ / }
+		</tr>
+	</table>
+</div>
+<div style="height:25px"></div>
+{ / }
+<!--{ / }-->
+
+
+<div style="height:30px"></div>
+
+
+<div id="giftPopup" style="display:none"></div>

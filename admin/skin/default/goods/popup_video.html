@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>동영상 첨부</title>
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/editor/css/popup.css" />
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+<script type="text/javascript" src="/app/javascript/jquery/jquery.min.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	$(".submit").click(function(){
+		var encoding_screen = '';
+		if( $("#encoding_screen0").val() && $("#encoding_screen1").val() ) {
+			encoding_screen = $("#encoding_screen0").val()+'|'+$("#encoding_screen1").val();
+		}else{
+			encoding_screen = '400|300';
+		}
+		$("#encoding_screen").val(encoding_screen);
+		doSubmit(event, document.goodsVideo);
+		if( !$("#txtFileName").val() ) {
+			document.goodsVideo.submit();
+		}
+	});
+
+
+	{? videook == true &&  videoerror == false && uccdomainembedsrc }
+
+		var videohtml = '';
+		videohtml ='<div  align="center" >';
+		videohtml +='<table  align="center" width="50%"><tr>';
+		videohtml +='<td align="center"><embed src="{uccdomainembedsrc}" width="200" height="200" allowfullscreen="true" wmode="transparent"></embed></td>';
+		videohtml +='<td align="left" ><div style="margin-left:10px;">';
+		videohtml +='동영상링크 &nbsp;&nbsp;&nbsp;&nbsp; <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{uccdomainembedsrc}" htmlkey="{file_key_w}" htmltype="link" >URL</button></span><br/>';
+		videohtml +='HTML(Embed) <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{uccdomainembedsrc}" htmlkey="{file_key_w}"  htmltype="embed" >URL</button></span><br/>';
+		videohtml +='HTML(Object) <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{uccdomainembedsrc}" htmlkey="{file_key_w}"  htmltype="object" >URL</button></span><br/>';
+		videohtml +='동영상페이지 &nbsp; <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{pageurl}"  htmltype="page" >URL</button></span><br/>';
+		videohtml +='인코딩품질 &nbsp; {encoding_speed}<br/>';
+		videohtml +='인코딩크기 &nbsp; {encoding_screen}';
+		videohtml +='</div></td></tr></table>';
+		videohtml +='</div>';
+
+		var videodelhtml ='<input type="hidden" name="videofiles[{uptype}][{videoseq}]" value="{videoseq}" ><input type="hidden" name="file_key_w[{uptype}][{videoseq}]" value="{file_key_w}" ><input type="hidden" name="file_key_i[{uptype}][{videoseq}]" value="{file_key_i}" ><input type="checkbox" name="video_del[{uptype}][{videoseq}]" value="1" >';
+
+		goodsvideolay(videohtml, videodelhtml,'{r_date}');
+		window.self.close();
+	{:  videook == true &&  videoerror == true }
+		alert(' Error: {error}');
+	{/}
+});
+
+
+// goodsvideolay
+function goodsvideolay(videohtml, videodelhtml, r_date ){
+	var videotdtag = '';
+	videotdtag += '<tr class="checked-tr-background" >';
+	videotdtag += '<td class="its-td-align center" >';
+	{? uptype == 'image' }
+	videotdtag += '	<img src="../images/common/img_video_position1.gif" > <br/>';
+	{:}
+	videotdtag += '	<img src="../images/common/img_video_position2.gif" > <br/>';
+	{/}
+	videotdtag += '	<label ><input type="checkbox" name="viewer_use[{uptype}][{videoseq}]" value="Y"  checked="checked" class="viewer_uselay"  />노출</label>';
+	videotdtag += '<select name="viewer_position[{uptype}][{videoseq}]"><option value="first">맨앞에</option><option value="last">맨뒤에</option></select><br/>';
+	videotdtag += '	<div style="margin-right:30px;" align="right">';
+	videotdtag += '		PC/테블릿용:<input type="text" name="pc_width[{uptype}][{videoseq}]"   size="3" value="400" class="line onlynumber video_size"   />pixel X <input type="text" name="pc_height[{uptype}][{videoseq}]"  size="3" value="300" class="line onlynumber video_size"   />pixel <br/>';
+	videotdtag += '		모바일용:<input type="text" name="mobile_width[{uptype}][{videoseq}]"   size="3" value="320" class="line onlynumber video_size_mobile"   />pixel X <input type="text" name="mobile_height[{uptype}][{videoseq}]"  size="3" value="240" class="line onlynumber video_size_mobile"   />pixel';
+	videotdtag += '		<br/> <span class="desc" >(예: 320X240, 400X300(기본), 640X480, 720X480)</span>';
+	videotdtag += '	 </div>';
+	videotdtag += '</td>';
+	{? uptype != 'image' }
+	videotdtag += '<td class="its-td-align center videomove hand" ><img src="../images/common/icon_move.gif" class="hand"></td>';
+	{/}
+	videotdtag += '<td class="its-td-align center" nowrap >';
+	videotdtag += '	<div id="videolay{videoseq}" class="videolay" seq="{videoseq}" tmpcode="{videotmpcode}" style="margin-right:50px;">';
+	videotdtag += videohtml;
+	videotdtag += '	</div>';
+	videotdtag += '</td>';
+	videotdtag += '<td class="its-td-align center" >'+r_date+'</td>';
+	videotdtag += '<td class="its-td-align center" ><div id="videodellay{videoseq}" class="videodellay" seq="{videoseq}" tmpcode="{videotmpcode}"  >';
+	videotdtag += videodelhtml;
+	videotdtag += '</td>';
+	videotdtag += '	</tr>';
+
+	{? uptype == 'image' }
+		$("#videofiles_tables_nonetd_img", window.opener.document).remove();
+		$("table.videofiles_tables_images", window.opener.document).append(videotdtag);
+
+	{:}
+		$("#videofiles_tables_nonetd", window.opener.document).remove();
+		$("table.videofiles_tables", window.opener.document).append(videotdtag);
+	{/}
+}
+
+</script>
+<style>
+.desc{color:#747474; font-size:11px; letter-spacing:-1px;}
+</style>
+
+</head>
+<body>
+<div class="wrapper">
+	<div class="header">
+		<h1>동영상 첨부</h1>
+	</div>
+	<div class="body">
+	<form name="goodsVideo" id="goodsVideo" method="post" enctype="multipart/form-data" action="./popup_video" >
+	<!-- <input type="hidden" name="encoding_speed" value="{_GET.encoding_speed}"> -->
+	<input type="hidden" name="no" value="{goodsSeq}">
+	<input type="hidden" name="uptype" value="{uptype}">
+	<input type="hidden" name="client_key" value="{videotmpcode}">
+	<input type="hidden" name="encoding_screen" id="encoding_screen" value="{encoding_screen}">
+
+		<dl class="alert">
+		    <dt>동영상</dt>
+		    <dd>
+				<!-- API 추가 -->
+					<script type="text/javascript" src="{uccdomain}"></script>
+				<!-- API 완료 -->
+			</dd>
+			 <dt>인코딩 품질과 크기</dt>
+		    <dd>
+			품질 : <input type="text" name="encoding_speed"  id="encoding_speed"  size="3" value="400" class="line onlynumber "   /> Kbps
+			<span class="desc">예) 200, 400(기본), 600, 800, 1000 </span><br/>
+			크기 : <input type="text" name="encoding_screen_txt[]"  id="encoding_screen0"  size="3" value="{? encoding_screen0}{encoding_screen0}{:}400{/}" class="line onlynumber "   /> Pixel X <input type="text" name="encoding_screen_txt[]"  id="encoding_screen1"  size="3" value="{? encoding_screen1 }{encoding_screen1}{:}300{/}" class="line onlynumber "   /> Pixel
+			<span class="desc">예) 320X240, 400X300, 640|480, 720|480 </span>
+			</dd>
+		</dl>
+	</div>
+	<div class="footer">
+		<p><a onclick="window.self.close();" title="닫기" class="close">닫기</a></p>
+		<ul>
+			<li class="submit"><a title="등록" class="btnlink">등록</a> </li>
+			<li class="cancel"><a onclick="window.self.close();" title="취소" class="btnlink">취소</a></li>
+		</ul>
+	</div>
+
+</div>
+</body>
+</html>

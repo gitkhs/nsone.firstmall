@@ -1,0 +1,113 @@
+{#layout_header_popup}
+
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/jquery.uploadify.v2.1.4.js"></script>
+
+<script type="text/javascript">
+$(function(){	
+	
+	parent.DM_window_title_set("left","<a href=\"javascript:;\" onmousedown=\"DM_window_sourceeditor('{tplPath}','{designImgSrcOri}')\">◀ HTML소스보기</a>");
+	parent.DM_window_title_set("center","{layout_config.tpl_desc}({layout_config.tpl_path})에 선택한 ");
+	
+	setUploadifyButton('imageUploadButton');
+});
+</script>
+
+<style>
+	#newImagePriviewContainer {width:700px; margin:auto; min-height:20px; padding:10px;  border:1px solid #ddd; text-align:center;}
+	.webftpFormItemPreview {max-height:100px; max-width:100px; display:none;}
+</style>
+
+
+<form name="imageManagerForm" action="../design_process/image_insert" method="post" enctype="multipart/form-data" target="actionFrame">
+<input type="hidden" name="tplPath" value="{tplPath}" />
+<input type="hidden" name="uploadPath" value="data/skin/{designWorkingSkin}/images" />
+
+<img class="fileSearchBtnImage hide" src="../images/common/btn_filesearch.gif" />
+
+<div style="height:15px"></div>
+
+<div id="newImagePriviewContainer" class="hide">
+	<img src="" id="newImagePriview" style="max-height:300px; max-width:700px;" />
+	
+	<div class="center" style="padding:5px;">
+		ALT 이미지 레이블 <input type="text" name="imageLabel" value="{designImageLabel}" class="line" /> 
+	</div>
+</div>
+
+
+<div style="height:15px"></div>
+
+<div style="padding:10px;">
+	
+	<table class="design-simple-table-style" width="100%" align="center">
+	<col width="140" />
+	<tr>
+		<th class="dsts-th">
+		삽입 이미지
+		</th>
+		<td class="dsts-td left">
+			<div class="webftpFormItem" >
+				<input type="radio" name="webftpFormItemSelector" class="hide" />
+				<table border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed">
+				<tr>
+					<td>
+						<div class="hide"><img src="{designImgSrc}" class="webftpFormItemPreview" onload="$('#newImagePriview').attr('src',this.src); $('#newImagePriviewContainer').show()" style="max-height:100px; max-width:100px;" /></div>
+						<input type="text" name="newDesignImgPath" value="" size="30" class="webftpFormItemInput line" readonly="readonly" />
+						<input type="text" name="originalFileName" class="webftpFormItemInputOriName hide" />
+						<input id="imageUploadButton" type="file" value="" class="uploadify" />
+	
+						<div>
+							<input type="text" name="link" value="{link}" title="링크URL" class="line" size="50" />
+							<select name="target" class="custom-select-box">
+								<option value="_self">현재창</option>
+								<option value="_blank">새창</option>
+							</select>
+							
+							<select class="custom-select-box-multi" onchange="$(this.form.link).val(this.value).trigger('focus')">
+								<option value="">자주쓰는 페이지 주소</option>
+								{@frequentUrls}
+								<option value="{.value_.value}">{.value_.name}</option>
+								{/}
+							</select>
+							
+						</div>
+
+						<div class="hide">
+							<span class="btn small"><input type="button" value="이미지 편집" /></span>
+						</div>
+					</td>
+				</tr>
+				</table>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<th class="dsts-th">
+		삽입 위치
+		</th>
+		<td class="dsts-td left">
+			<div class="imageCheckboxContainer">
+				<div class="imageCheckboxItem"><label><input type="radio" name="location" value="top" checked="checked" /><img src="../images/design/{up_image_name}.gif" /></label></div>
+				<div class="imageCheckboxItem"><label><input type="radio" name="location" value="bottom" /><img src="../images/design/{down_image_name}.gif" /></label></div>
+			</div>
+		</td>
+	</tr>
+	</table>
+	
+	<div style="height:15px"></div>
+	
+	<div class="center">
+		<span class="btn medium cyanblue"><input type="submit" value="적용" /></span>
+	</div>
+
+	</form>
+	<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+<br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+</div>
+
+
+{#mini_webftp}
+
+{#layout_footer_popup}

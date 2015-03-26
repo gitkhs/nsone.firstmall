@@ -1,0 +1,67 @@
+<script type="text/javascript">
+$(document).ready(function() {
+
+});
+function modifyInflowData(seq,title,url){
+	var frm = document.inflowAddForm;
+	frm.seq.value = seq;
+	frm.title.value = title;
+	frm.url.value = url;
+}
+function deleteInflowData(seq){
+	if(confirm('삭제하시겠습니까?')){
+		$.ajax({
+			'url' : '../statistic_process/promotion_inflow_del',
+			'data' : 'seq='+seq,
+			'success' : function(){
+				openAddInflowRootLayer();
+			}
+		});
+	}
+}
+</script>
+
+<div class="pd20">
+	<div class="item-title" style="margin:0px;">광고 매체 등록 및 수정</div>
+	
+	<form name="inflowAddForm" method="post" action="../statistic_process/promotion_inflow_add" target="actionFrame">
+	<input type="hidden" name="seq" value="" />
+	<table width="100%" class="info-table-style">
+	<col width="150" /><col width="" /><col width="150" /><col width="" />
+	<tr>
+		<th class="its-th">광고매체명</th>
+		<td class="its-td"><input type="text" name="title" value="" style="width:200px;"/></td>
+	</tr>
+	<tr>
+		<th class="its-th">연결URL</th>
+		<td class="its-td"><input type="text" name="url" value="" style="width:400px;" /></td>
+	</tr>
+	</table>
+	<br style="line-height:10px;"/>
+	<div align="center"><span class="btn medium black"><input type="submit" value="저장" /></span></div>
+	</form>
+	
+	<br style="line-height:10px;"/>
+	
+	<table class="info-table-style" width="100%">
+	<tr>
+		<th class="its-th-align">매체명</th>
+		<th class="its-th-align">표시URL</th>
+		<th class="its-th-align">연결URL</th>
+		<th class="its-th-align">등록일</th>
+		<th class="its-th-align">수정</th>
+	</tr>
+	{@data}
+	<tr>
+		<td class="its-td-align center">{.title}</td>
+		<td class="its-td">{.inflow_url}</td>
+		<td class="its-td"><a href="{.url}" target="_blank">{.url}</a></td>
+		<td class="its-td-align center">{.regist_date}</td>
+		<td class="its-td-align center">
+			<span class="btn small"><input type="button" value="수정" onclick="modifyInflowData('{.seq}','{.title}','{.url}')" /></span>
+			<span class="btn small"><input type="button" value="삭제" onclick="deleteInflowData('{.seq}')" /></span>
+		</td>
+	</tr>
+	{/}
+	</table>
+</div>

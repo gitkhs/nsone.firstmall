@@ -1,0 +1,275 @@
+● 세금계산서 입력해 주세요.
+<form  name="refundForm" method="post" action="../sales_process/taxwrite" target="actionFrame">
+<input type="hidden" name="order_seq" value="{orders.order_seq}" />
+<input type="hidden" name="settleprice" value="{orders.settleprice}" />
+<input type="hidden" name="tax_seq" value="{tax.seq}" />
+<table width="100%" border="0"  class="list_table_style">
+	<tr>
+		<th align="center">상호명</th>
+		<td  class="fx12 ">
+			<input type="text" name="co_name" id="co_name" value="{tax.co_name}" />
+		</td>
+	</tr>
+	<tr>
+		<th align="center">대표자</th>
+		<td  class="fx12">
+			<input type="text" name="co_ceo" id="co_ceo" value="{tax.co_ceo}"/>
+		</td>
+	</tr>
+	<tr>
+		<th align="center">업태</th>
+		<td  class="fx12">
+			<input type="text" name="co_status" id="co_status" value="{tax.co_status}"/>
+		</td>
+		</tr>
+	<tr>
+		<th align="center">업종</th>
+		<td  class="fx12">
+			<input type="text" name="co_type" id="co_type" value="{tax.co_type}"/>
+		</td>
+		</tr>
+	<tr>
+		<th align="center">사업자번호</th>
+		<td  class="fx12">
+			<input type="text" name="busi_no" id="busi_no" value="{tax.busi_no}" /> ex)123-12-12345
+		</td>
+	</tr>
+	<tr>
+		<th align="center">주소</th>
+		<td class="fx12" colspan="3">
+			<input type="text" name="zipcode[]" value="{tax.zipcode0}" size="10" /> -
+			<input type="text" name="zipcode[]" value="{tax.zipcode1}" size="10" />
+			<img src="../images/design/btn_zipsearch.gif" hspace="1" alt="우편번호검색" class="hand" onclick="window.open('../popup/zipcode','popup_zipcode','width=500,height=350')" /> <br />
+			<input type="hidden" name="address_type" value="{tax.address_type}">
+			<input type="text" name="address" id="address" size="40" {? tax.address_type == "street"}class="hide"{/} value="{tax.address}"/>
+			<input type="text" name="address_street" id="address_street" size="40" {? tax.address_type != "street"}class="hide"{/} value="{tax.address_street}"/>(기본주소)
+			<input type="text" name="address_detail" size="40" value="{tax.address_detail}">(상세주소)
+		</td>
+	</tr>
+	<tr>
+		<th align="center">담당자명</th>
+		<td  class="fx12">
+			<input type="text" name="person" id="person" value="{tax.bperson}"/>
+		</td>
+	</tr>
+	<tr>
+		<th align="center">이메일</th>
+		<td  class="fx12">
+			<input type="text" name="email" id="email" value="{tax.email}"/>
+		</td>
+	</tr>
+	<tr>
+		<th align="center">연락처</th>
+		<td  class="fx12">
+			<input type="text" name="phone" id="phone" value="{tax.bphone}"/>
+		</td>
+	</tr>
+
+	<tr>
+		<td class="fx12" colspan="4">
+			<div style="height:15px"></div>
+
+			<div class="center"><span class="btn large black"><input type="submit" value="{? tax.seq}수정하기{:}신청하기{/}" /></span></div>
+
+			<div style="height:15px"></div>
+		</td>
+	</tr>
+</table>
+</form>
+<!-- List -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+<thead>
+<tr>
+	<th>상품명</th>
+	<th width="70">수량</th>
+	<th width="90">판매가격</th>
+</tr>
+</thead>
+<tbody>
+<!--{ @ items }-->
+	<!--{ @ .options }-->
+	<tr>
+		<td class="cell left">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td class="left">
+					<div style="line-height:35px;">{.goods_name}</div>
+					<!--{ ? ..option1 || ..option2 || ..option3 || ..option4 || ..option5 }-->
+					<div class="desc"><img src="../images/design/icon_option.gif" style="vertical-align:bottom" />
+					<!--{ ? ..option1 }-->{..title1} : {..option1}<!--{ / }-->
+					<!--{ ? ..option2 }-->, {..title2} : {..option2}<!--{ / }-->
+					<!--{ ? ..option3 }-->, {..title3} : {..option3}<!--{ / }-->
+					<!--{ ? ..option4 }-->, {..title4} : {..option4}<!--{ / }-->
+					<!--{ ? ..option5 }-->, {..title5} : {..option5}<!--{ / }-->
+					<!--{ / }-->
+					</div>
+				</td>
+			</tr>
+			</table>
+		</td>
+		<td class="cell">{=number_format(..ea)}</td>
+		<td class="cell">{=number_format(..out_price)}원</td>
+	</tr>
+	<!--{ / }-->
+	<!--{ @ .suboptions }-->
+	<tr>
+		<td class="cell left">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td class="left" width="80" valign="top"><img src="{.image}" align="absmiddle" hspace="5" width="60" height="60" style="border:1px solid #ddd;" onerror="this.src='../images/common/noimage_list.gif'" /></td>
+				<td class="left">
+					<div style="line-height:35px;">{.goods_name}</div>
+					<!--{ ? ..suboption }-->
+					<div class="desc"><img src="../images/design/icon_option.gif" style="vertical-align:bottom" />
+					{..title} : {..suboption}
+					<!--{ / }-->
+					</div>
+				</td>
+			</tr>
+			</table>
+		</td>
+		<td class="cell">{=number_format(..ea)}</td>
+		<td class="cell">{=number_format(..price*..ea)}원</td>
+	</tr>
+	<!--{ / }-->
+<!--{ / }-->
+</tbody>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:2px solid #dedede">
+<tr>
+	<td height="34" align="right" style="padding:0 5px; background-color:#f7f7f7">
+		<b>상품가격합계{=number_format(items_tot.price)}원
+		<!--{ ? items_tot.goods_shipping_cost }-->
+		+ [개별배송비] {=number_format(items_tot.goods_shipping_cost)}원
+		<!--{ / }-->
+		<!--{ ? orders.shipping_cost }-->
+		+ [배송비:xx,xxx원이상 구매시 무료] {=number_format(orders.shipping_cost)}원
+		<!--{ / }-->
+		= {=number_format(items_tot.price+items_tot.goods_shipping_cost+orders.shipping_cost)}원</b>
+	</td>
+</tr>
+</table>
+
+<div style="height:30px"></div>
+
+<!-- 결제정보 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td valign="bottom" align="left" height="25"><img src="../images/design/order_stit_paymentinfo.gif" /></td>
+	</tr>
+	<tr><td height="8"></td></tr>
+	<tr><td height="2" bgcolor="545454"></td></tr>
+	<tr><td height="23"></td></tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<col width="90" />
+	<!--{ ? items_tot.reserve }-->
+	<tr>
+		<td>적립금</td>
+		<td class="fx12">{=number_format(items_tot.reserve)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+	<!--{ ? items_tot.point }-->
+	<tr>
+		<td>포인트</td>
+		<td class="fx12">P {=number_format(items_tot.point)}</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+	<!--{ ? orders.coupon_sale }-->
+	<tr>
+		<td>배송비쿠폰할인</td>
+		<td class="fx12">-{=number_format(orders.coupon_sale)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+	<!--{ ? orders.shipping_promotion_code_sale }-->
+	<tr>
+		<td>배송비P코드할인</td>
+		<td class="fx12">-{=number_format(orders.shipping_promotion_code_sale)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+	<!--{ ? orders.enuri }-->
+	<tr>
+		<td>에누리할인</td>
+		<td class="fx12">-{=number_format(orders.enuri)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+	<!--{ ? items_tot.coupon_sale }-->
+	<tr>
+		<td>상품쿠폰할인</td>
+		<td class="fx12">-{=number_format(items_tot.coupon_sale)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+	<!--{ ? items_tot.promotion_code_sale }-->
+	<tr>
+		<td>상품P코드할인</td>
+		<td class="fx12">-{=number_format(items_tot.promotion_code_sale)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+	<!--{ ? items_tot.member_sale }-->
+	<tr>
+		<td>회원할인</td>
+		<td class="fx12">-{=number_format(items_tot.member_sale)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+	<!--{ ? items_tot.fblike_sale }-->
+	<tr>
+		<td>상품LIKE할인</td>
+		<td class="fx12">-{=number_format(items_tot.fblike_sale)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+
+	<!--{ ? items_tot.mobile_sale }-->
+	<tr>
+		<td>MOBILE할인</td>
+		<td class="fx12">-{=number_format(items_tot.mobile_sale)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+
+	<!--{ ? items_tot.referer_sale }-->
+	<tr>
+		<td>유입경로할인</td>
+		<td class="fx12">-{=number_format(items_tot.referer_sale)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+
+	<!--{ ? orders.emoney_use == 'use' && orders.emoney}-->
+	<tr>
+		<td>적립금사용</td>
+		<td class="fx12">-{=number_format(orders.emoney)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+
+	<!--{ ? orders.cash_use == 'use' && orders.cash}-->
+	<tr>
+		<td>이머니사용</td>
+		<td class="fx12">-{=number_format(orders.cash)}원</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<!--{ / }-->
+	<tr>
+		<td>결제방식</td>
+		<td class="fx12">{orders.mpayment}<font color="black"><strong>({=number_format(orders.settleprice)}원)</strong></font>
+		</td>
+	</tr>
+</table>
+
+<div style="height:30px"></div>
+
+<script type="text/javascript">
+function taxlayerclose(){
+	document.location.reload();
+}
+</script>

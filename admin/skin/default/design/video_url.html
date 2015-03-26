@@ -1,0 +1,33 @@
+<table width="100%" ><tr>
+<td><textarea style='width:300px;' rows='5' id="realvideourl" readOnly>{realvideourl}</textarea></td>
+<td> <span class="btn small lightblue"><button type="button" id="videourlCopybtn" onclick="clip_copy()">URL/코드 복사</button></span></td>
+</tr>
+</table>
+<script Language="JavaScript">
+<!--
+function clip_copy() {
+	var meintext = '{realvideourl}';
+
+　 if (window.clipboardData) {
+　 　 window.clipboardData.setData("Text", meintext);
+　 } else if (window.netscape) {
+　 　 netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
+　 　 var clip = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);
+　 　 if (!clip) return;
+　 　 var trans = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
+　 　 if (!trans) return;
+　 　 trans.addDataFlavor('text/unicode');
+　 　 var str = new Object();
+　 　 var len = new Object();
+　 　 var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+　 　 var copytext=meintext;
+　 　 str.data=copytext;
+　 　 trans.setTransferData("text/unicode",str,copytext.length*2);
+　 　 var clipid=Components.interfaces.nsIClipboard;
+　 　 if (!clip) return false;
+　 　 clip.setData(trans,null,clipid.kGlobalClipboard);
+　 }
+
+}
+// -->
+</script>

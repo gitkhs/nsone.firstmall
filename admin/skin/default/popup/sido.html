@@ -1,0 +1,83 @@
+<style>
+.sidoResult { cursor:pointer }
+</style>
+<script type="text/javascript">
+function getsidoResult(sidoFlag,idx){
+	$.get('../popup/sido',{'sido':$("input[name='sido']").val(),'zipcode_type':$("input[name='zipcode_type']:checked").val(), 'sidoFlag':sidoFlag, 'idx':idx} , function(data) {
+		$("#"+sidoFlag+"Id").html(data);
+	});
+}
+$(document).ready(function() {
+	$("#sidoSearchButton").bind("click",function(){
+		getsidoResult('{sidoFlag}','{idx}');
+	});
+
+	$(':input[name=sido]').keyup(function(e) {
+		if(e.keyCode == 13){
+			getsidoResult('{sidoFlag}','{idx}');
+		}
+	});
+
+	$(".sidoResult").bind("click",function(){
+		var tag = $(this).find("td").html();
+		var result = true;
+		$(".{sidoFlag}").each(function(){
+			if( tag == $(this).html() ){
+				result = false;
+			}
+		});
+		if(result){
+			$("input[name='{sidoFlag}[]']").eq({idx}).val($(this).attr("addr"));
+			$(".{sidoFlag}").eq({idx}).html($(this).attr("addr"));
+			$("input[name='{sidoFlag}_street[]']").eq({idx}).val($(this).attr("addr_street"));
+			$(".{sidoFlag}_street").eq({idx}).html($(this).attr("addr_street"));
+		}
+		closeDialog('{sidoFlag}Id');
+	});
+});
+</script>
+<div class="search-form-container" >
+<table class="search-form-table">
+<tr>
+	<td>
+		<table>
+		<tr>
+			<td>
+				<label><input type="radio" name="zipcode_type" value="street" {? _GET.zipcode_type == "" || _GET.zipcode_type == "street"}checked{/}>도로명 검색</label>
+				<label><input type="radio" name="zipcode_type" value="zibun" {? _GET.zipcode_type == "zibun"}checked{/}>지번 검색</label>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<table class="sf-keyword-table">
+				<tr>
+					<td class="sfk-td-txt"><input type="text" name="sido" value="{sido}" title="시/군/구/읍/면/동/리" /></td>
+					<td class="sfk-td-btn"><button type="button" id="sidoSearchButton"><span>검색</span></button></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+</table>
+</div>
+<div class="slc-body" style="padding:5px 0 0 0">
+	<table width="100%" class="simplelist-table-style" id="searchResult">
+	<tr>
+		<th width="50%">지번 주소</th>
+		<th width="50%">도로명 주소</th>
+	</tr>
+	<!--{ @loop }-->
+	<tr class="sidoResult" addr="{.addr}" addr_street="{.addr_street}">
+		<td style="padding-left:5px;">{.addr}</td>
+		<td style="padding-left:5px;">{.addr_street}</td>
+	</tr>
+	<!--{ / }-->
+	<!--{ ? !loop }-->
+	<tr>
+		<td align="center" colspan="2"><strong>시/군/구/읍/면/동/리/도로명</strong>을 검색해주세요.</td>
+	</tr>
+	<!--{ / }-->
+	</table>
+</div>

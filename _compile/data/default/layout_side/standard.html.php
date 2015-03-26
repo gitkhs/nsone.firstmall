@@ -1,0 +1,89 @@
+<?php /* Template_ 2.2.6 2014/09/29 15:56:49 /www/nsone_firstmall_kr/data/skin/default/layout_side/standard.html 000003905 */  $this->include_("showCategoryNavigation","showBrandNavigation","showLocationNavigation");?>
+<!-- 측면영역 : 시작 -->
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+	<td>
+        <?php echo showCategoryNavigation()?>
+
+		<!-- 카테고리
+		<table align="right" cellpadding="0" cellspacing="0" border="0">
+		<tr><td><a href="../goods/catalog"><img src="/data/skin/default/images/design/category01.gif" /></a></td></tr>
+		<tr><td><a href="../goods/catalog"><img src="/data/skin/default/images/design/category02.gif" /></a></td></tr>
+		<tr><td><a href="../goods/catalog"><img src="/data/skin/default/images/design/category03.gif" /></a></td></tr>
+		<tr><td><a href="../goods/catalog"><img src="/data/skin/default/images/design/category04.gif" /></a></td></tr>
+		<tr><td><a href="../goods/catalog"><img src="/data/skin/default/images/design/category05.gif" /></a></td></tr>
+		<tr><td><a href="../goods/catalog"><img src="/data/skin/default/images/design/category06.gif" /></a></td></tr>
+		<tr><td><a href="../goods/catalog"><img src="/data/skin/default/images/design/category07.gif" /></a></td></tr>
+		<tr><td><a href="../goods/catalog"><img src="/data/skin/default/images/design/category08.gif" /></a></td></tr>
+		<tr><td height="10"></td></tr>
+		<tr><td height="1" bgcolor="ededed"></td></tr>
+		<tr><td height="10"></td></tr>
+		<tr><td><a href="../goods/catalog"><img src="/data/skin/default/images/design/category09.gif" /></a></td></tr>
+		<tr><td><a href="../goods/catalog"><img src="/data/skin/default/images/design/category10.gif" /></a></td></tr>
+		<tr><td><a href="../goods/catalog"><img src="/data/skin/default/images/design/category11.gif" /></a></td></tr>
+		<tr><td height="10"></td></tr>
+		</table>
+		-->
+		<?php echo showBrandNavigation()?>
+
+		<?php echo showLocationNavigation()?>
+
+
+		<div class="cboth"></div>
+
+		<!-- 쿠폰배너 -->
+		<table align="right" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td>
+				<a href="/board/?id=userboard" target='_self'><img src="/data/skin/default/images/design/banner_left.gif" title="" alt="" /></a>
+			</td>
+		</tr>
+		</table>
+
+		<div class="cboth"></div>
+
+		<!-- 고객센터메뉴 -->
+		<table align="right" cellpadding="0" cellspacing="0" border="0">
+		<tr><td height="20"></td></tr>
+		<tr>
+			<td><img src="/data/skin/default/images/design/left_cscenter_tit.gif" /></td>
+		</tr>
+		<tr><td height="5"></td></tr>
+		<tr><td><a href="/board/?id=notice"><img src="/data/skin/default/images/design/left_cscenter_notice.gif" alt="notice" /></a></td></tr>
+		<tr><td><a href="/board/?id=goods_qna"><img src="/data/skin/default/images/design/left_cscenter_qna.gif"alt="qna"  /></a></td></tr>
+		<tr><td><a href="/board/?id=faq"><img src="/data/skin/default/images/design/left_cscenter_faq.gif" alt="faq" /></a></td></tr>
+		<tr><td><a href="/board/?id=goods_review"><img src="/data/skin/default/images/design/left_cscenter_review.gif"alt="goods_review"  /></a></td></tr>
+		<tr><td><a href="/goods/personal"><img src="/data/skin/default/images/design/left_s_private_payment.gif"alt="personal"  /></a></td></tr>
+		
+		<tr><td height="20"></td></tr>
+		<tr><td height="1" bgcolor="ededed"></td></tr>
+		<tr><td height="20"></td></tr>
+		</table>
+
+		<div class="cboth"></div>
+
+		<!-- 기타정보 -->
+		<table align="right" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td>
+				<img src="/data/skin/default/images/design/left_callcenter.gif" />
+			</td>
+		</tr>
+		<tr><td height="26"></td></tr>
+		<tr>
+			<td>
+				<img src="/data/skin/default/images/design/left_bank.gif" title="" />
+			</td>
+		</tr>
+		<tr><td height="26"></td></tr>
+		<tr><td height="1" bgcolor="ededed"></td></tr>
+		</table>
+
+		<div class="cboth"></div>
+	</td>
+	<td width="20"></td>
+</tr>
+</table>
+
+<!-- 측면영역 : 끝 -->

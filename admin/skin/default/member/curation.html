@@ -1,0 +1,223 @@
+{ #layout_header }
+<script type="text/javascript">
+
+	function getMailForm(id) {
+		$.get('../member_process/getPersonalReservation?id='+id, function(response) {
+			var data = eval(response)[0];
+			$("#personal_title").html(data.personal_title);
+			$("#personal_msg").html(data.personal_msg);
+			$("#personal_sms").html(data.personal_sms);
+			$("#personal_email").html(data.personal_email);
+			Editor.switchEditor($("#contents").data("initializedId"));
+			Editor.modify({"content" : data.contents});
+		});
+	}
+
+	function info_code(){
+		$.get('../member/replace_pop?mode=curation', function(data) {
+			$('#replace_pop').html(data);
+			openDialog("사용 가능한 치환코드", "replace_pop", {"width":"400","height":"580"});
+		});
+	}
+
+	function reserve_use(val){
+
+		if(val == "y"){
+			$("select[name='personal_time']").attr("disabled",false);
+			$("select[name='personal_day']").attr("disabled",false);
+			$("input[name='user_yn_sms']").attr("disabled",false);
+			$("input[name='user_yn_email']").attr("disabled",false);
+			$("input[name='title_sms']").attr("disabled",false);
+			$("input[name='title_email']").attr("disabled",false);
+		}else{
+			$("select[name='personal_time']").attr("disabled",true);
+			$("select[name='personal_day']").attr("disabled",true);
+			$("input[name='user_yn_sms']").attr("disabled",true);
+			$("input[name='user_yn_email']").attr("disabled",true);
+			$("input[name='title_sms']").attr("disabled",true);
+			$("input[name='title_email']").attr("disabled",true);
+		}
+
+	}
+
+	function smsRequire(obj){
+		obj.checked = true;
+	}
+
+	$(document).ready(function() {
+
+		$(".selectMail").on("click",function(){
+			
+			{ ? service_code == 'P_FREE' }
+			if(($(this).val()) == "personal_emoney" || ($(this).val()) == "personal_timesale" ){
+				openDialog('쇼핑몰 업그레이드 안내<span class=\'desc\'></span>', 'nofreeService', {'width':600,'height':350});
+			}else{
+				$("input[name='mail_form']").val($(this).val());
+				getMailForm($(this).val());
+			}
+			{ : }
+				$("input[name='mail_form']").val($(this).val());
+				getMailForm($(this).val());
+			{/}
+		});
+
+
+		$("input[name='mail']").val(['personal_coupon']);
+		$("input[name='mail_form']").val(["personal_coupon"]);
+		getMailForm('personal_coupon');
+
+		$("select[name='go_item_use']").change(function(){
+
+			if($(this).val() == 'y'){
+				$(".goodsnmlimit").show();
+			}else{
+				$(".goodsnmlimit").hide();
+			}
+			
+		});
+
+		// shorturl url 설정
+		$(".shorturlConfig").click(function() {
+			openDialog("짧은 URL 설정", "shorturl_help_lay", {"width":"500","height":"240","show" : "fade","hide" : "fade"});
+		});
+
+		//짧은주소 관련
+		 $("input[name='shorturl_use']").click(function(){
+			 if( $("input[name='shorturl_use']:checked").val() == "Y" ) {
+				 $(".btnshorturl").show();
+			 }else{
+				 $(".btnshorturl").hide();
+			 }
+		 });
+
+
+	});
+</script>
+
+
+<style>
+	#personal_msg { position:relative;margin:0px;padding:15px;line-height:22px;border:1px solid #ccc;background-color:#f2f2f2; }
+	#personal_sms,#personal_email { position:relative;padding:15px;line-height:22px;border:0px solid #ccc;margin-top:10px;}
+	#personal_sms .use_sms { }
+	#personal_sms .title_sms input{width:85%;}
+	#personal_email .title_email input{ width:99%; }
+	.guidebox{margin:20px auto;width:971px;height:275px;}
+	.guidebox .msg {position:relative;background:url(../images/design/sms_alarm.jpg) no-repeat; width:971px;height:275px;}
+	.guidebox .msg .sms {position:absolute;left:14px;bottom:1px;}
+</style>
+
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+
+<form name="memberForm" id="memberForm" method="post" target="actionFrame" action="../member_process/curation">
+<input type="hidden" name="mail_form" />
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title"><h2>고객 리마인드 SMS/Email</h2></div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button type="submit" onclick="submitEditorForm(document.memberForm)">저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 상단 단계 링크 : 시작 -->
+{#top_menu}
+<!-- 상단 단계 링크 : 끝 -->
+
+
+<div class="guidebox">
+	<div class="msg"><div class="sms"><img src="../images/design/mobile_sms.gif"></div></div>
+</div>
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<div class="item-title" style="width:92%"><span>알림 리스트</span></div>
+
+<div class="clearbox">
+	<table class="info-table-style" style="width:100%">
+		<tbody>
+		<tr>
+			<td class="its-td-align left pdl5" colspan="3">
+				<ul style="padding-top:5px;padding-bottom:8px;">
+					{ @ loop }<li style="float:left;padding-left:25px;width:360px;"><label><input type="radio" name="mail" class="selectMail" value="{.name}" /> {.title} {.etc}</label>
+					</li>{ / }
+				</ul>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center" width="6%" rowspan="2">공통</th>
+			<th class="its-th-align center" width="12%">짧은 URL</th>
+			<td class="its-td-align left pdl5">
+				<div style="padding-left:20px;">
+				SMS에 URL(주소) 정보가 보여질 때<br />
+				<label ><input type="radio" name="shorturl_use" value="N" {? sns.shorturl_use == 'N' || !sns.shorturl_use } checked="checked" {/} /> URL(주소) 정보를 그대로 보여줍니다.</label>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<br /><span class="desc ml15">예) {shorturl_test}</span>
+				<br />
+				<label ><input type="radio" name="shorturl_use" id="shorturl_use" value="Y" {? sns.shorturl_use == 'Y' } checked="checked" {/} > URL(주소) 정보를 짧게 변환하여 보여줍니다.</label>
+				<br /><span class="desc shorturllay ml15">예) <span id="shorturlview">{shorturl}</span></span>
+				<span class="btnshorturl" {? sns.shorturl_use == 'N' || !sns.shorturl_use }style="display:none;"{/}><span class="btn small cyanblue "><button type="button" class="shorturlConfig">설정</button></span>{? set_string} <span class="red">({set_string})</span>{/}</span>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center" width="10%">상품명 길이<br />(장바구니/위시리스트<br />상품 알림)</th>
+			<td class="its-td-align left pdl5">
+				<div style="padding-left:20px;">
+				상품명 길이가 긴 경우 
+				<span class="goodsnmlimit"><input type="text" name="go_item_limit" value="{go_item_limit}" id="" size="5" style="text-align:right;">자로 </span>
+				<select name="go_item_use">
+					<option value="n" {? go_item_use == 'n'}selected{/}>제한안함</option>
+					<option value="y" {? go_item_use == 'y'}selected{/}>제한함</option>
+				</select>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+
+
+<div class="item-title" style="width:92%;"><span id="personal_title"></span> <span class="helpicon" title="각 상황이 일어나면 설정된 SMS/이메일이 자동으로 발송됩니다."></span></div>
+
+
+<div class="clearbox">
+
+	<div id="personal_msg"></div>
+
+	<!-- 수신동의 고객 : SMS발송 -->
+	<div id="personal_sms"></div>
+
+	<!-- 수신동의 고객 : 메일발송 -->
+	<div id="personal_email"></div>
+
+	<table class="info-table-style" style="width:100%">
+		<tbody>
+		<tr>
+			<td class="its-td-align left"  style="padding-left:10px;" style="padding-left:10px;">
+				<textarea name="contents" id="contents" class="daumeditor"></textarea>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+</form>
+
+<div id="replace_pop" class="hide"></div>
+
+<!--- include : snsconf_shorturl_setting.html -->
+{# shorturl_setting }
+
+{? go_item_use == "n"} 
+<script type="text/javascript">
+$(".goodsnmlimit").hide();
+</script>
+{ / }
+
+{ #layout_footer }

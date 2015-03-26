@@ -1,0 +1,24 @@
+<div style="height:3px"></div>
+<div>
+	<table cellpadding="0" cellspacing="0" class="info-table-style" >
+		<colgroup>
+		<col width="350" />
+		<col width="350" />
+		</colgroup>
+		<tr height="40">
+			<td class="its-td center {? selected_editor_menu == 'flash_editor_insert' || !selected_editor_menu } bg-darkgray {/}"  >
+			{? selected_editor_menu == 'flash_editor_insert' || !selected_editor_menu }<span class=" white bold">{:}<a href="flash_editor_insert"><span class="hand">{/}플래시 삽입</span>{? selected_editor_menu != 'flash_editor_insert'}</a>{/}</td>
+			{? cfg_goods.video_use =='Y'  }
+			<td class="its-td center {? selected_editor_menu == 'video_editor_insert'} bg-darkgray {/}"  >
+			{? selected_editor_menu == 'video_editor_insert'}<span class="white bold">{:}<a href="video_editor_insert"><span class="hand">{/}동영상 삽입</span>{? selected_editor_menu != 'video_editor_insert'}</a>{/}</td>
+			{/}
+		</tr>
+	</table>
+</div>
+	<div style="height:3px"></div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("div.slc-head a[href='{selected_editor_menu}']").parent().parent().addClass("selected");
+});
+</script>

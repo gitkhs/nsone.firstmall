@@ -1,0 +1,137 @@
+<style>
+	button.btn_select_all, button.btn_select_del, button.btn_select_wishlist { border:0 }
+	button.btn_ea_modify, button.btn_option_modify, button.btn_selected_order { border:0 }
+	.goods_name {line-height:35px;white-space:nowrap;overflow:hidden;width:120px;text-overflow:ellipsis;-o-text-overflow:ellipsis}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	// 전체 선택
+	$("form#wish_form button.btn_select_all").toggle(function() {
+		$("input[name='wish_seq[]']").attr("checked",true);
+	}, function() {
+		$("input[name='wish_seq[]']").attr("checked",false);
+	});
+
+	// 선택삭제
+	$("form#wish_form button.btn_select_del").bind("click",function(){
+		$("form#wish_form").attr("action","wish_del");
+		$("form#wish_form").attr("target","actionFrame");
+		$("form#wish_form")[0].submit();
+	});
+
+	// 장바구니담기 버튼
+	$("button[name='cart']").bind("click",function() {
+		var seq = $(this).attr('id');
+		seq = seq.replace("wishcart_","");
+		var url = "wish2cart?no="+seq;
+		$.get(url, function(data) {
+			/*
+			if(isNumber(data)){
+				$("input[name='goodsSeq']").val(data);
+				document.wishForm.submit();
+			}else
+			*/
+			{
+				$("div#cart_dialog").html(data);
+				openDialog("장바구니 담기", "cart_dialog", {"width":500,"height":600});
+			}
+		});
+
+	});
+});
+</script>
+<!--
+<form name="wishForm" method="post" action="../order/add" target="actionFrame">
+<input type="hidden" name="goodsSeq" value="{goods.goods_seq}" />
+<input type="hidden" name="option[0][]" value="" />
+<input type="hidden" name="optionTitle[0][]" value="" />
+<input type="hidden" name="optionEa[]" value="1" />
+</form>
+-->
+
+<!-- 타이틀 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td><img src="../images/design/tit_wishlist.gif" title="" alt="" /></td></tr>
+<tr><td height="10"></td></tr>
+</table>
+<div style="height:30px;"></div>
+
+<form name="wish_form" id="wish_form" method="post">
+<!-- List -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+		<button type="button" class="btn_select_all"><img src="../images/design/btn_select_all.gif"  /></button>
+		<button type="button" class="btn_select_del"><img src="../images/design/btn_select_del.gif" /></button>
+	</td>
+</tr>
+</table>
+
+<div style="height:8px;"></div>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+<tr><td height="30"></td></tr>
+<tr>
+	<td>
+		<table border="0">
+		<tr>
+			<!--{ @ record }-->
+			<!--{ ? .key_ && .key_ % 4 == 0 }--></tr><tr><td height="10"></td></tr><tr><!--{ / }-->
+			<td valign="top" align="left">
+				<table border="0" border="0" cellpadding="0">
+				<tr>
+				<td align="center" valign="top"><input type="checkbox" name="wish_seq[]" value="{.wish_seq}" /></td>
+				<td align="center">
+				<div><a href="../goods/view?no={.goods_seq}"><img src="{.image}" align="absmiddle" hspace="5" style="border:1px solid #ddd;" width='170' onerror="this.src='../images/common/noimage_list.gif'" /></a></div>
+				<div class="goods_name"><a href="../goods/view?no={.goods_seq}">{.goods_name}</a></div>
+				<div>
+				<!--{? .string_price_use }-->
+				<b class="price">{.string_price}</b>
+				<!--{ : }-->
+					<!--{ ? .consumer_price && .sale_price != .consumer_price  }-->
+					{=number_format(.consumer_price)} →
+					<!--{ / }-->
+					<b>{=number_format(.sale_price)}원</b>
+					</div>
+					<!--{ ? .reserve }-->
+					<div>{=number_format(.reserve)}원 적립</div>
+					<!--{ / }-->
+					<!--{ ? isplusfreenot && isplusfreenot.ispoint  }-->
+					<div>{=number_format(.point)}P 적립</div>
+					<!--{ / }-->
+					<div><button type="button" name="cart" class="wishcart" id="wishcart_{.wish_seq}" style="border:0"><img src="../images/design/mypage_btn_cart.gif" /></button></div>
+				<!--{ / }-->
+				</td>
+				</tr>
+				</table>
+			</td>
+			<!--{ / }-->
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="30"></td></tr>
+</table>
+
+<div style="height:5px"></div>
+
+<div class="paging_navigation">
+<!--{ ? page.prev }-->
+<a href="wish?page={page.prev}&amp;{page.querystring}"><span class="prev" />◀ 이전 </span></a>
+<!--{ / }-->
+<!--{ @ page.page }-->
+<!--{ ? page.nowpage ==  .value_ }-->
+<a class="on red">{.value_ }</a>&nbsp;
+<!--{ : }-->
+<a href="wish?page={.value_}&amp;{page.querystring}">{.value_ }</a>&nbsp;
+<!--{ / }-->
+<!--{ / }-->
+<!--{ ? page.next }-->
+<a href="wish?page={page.next}&amp;{page.querystring}"><span class="next " />다음 ▶</span></a>
+<!--{ / }-->
+</div>
+
+
+</form>
+<div id="cart_dialog" style="display:none;"></div>

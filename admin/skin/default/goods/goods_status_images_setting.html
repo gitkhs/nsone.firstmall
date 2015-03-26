@@ -1,0 +1,66 @@
+<style>
+img.goodsStatusImage {cursor:pointer}
+</style>
+
+{? _GET.type != "gift"}
+<div class="pdb5 dotum">1. 소비자가 보는 상품상세페이지 사용되는 <b>상품상태 이미지</b>입니다. 아래 이미지를 클릭하여 변경할 수 있습니다.</div>
+<div class="dotum fx11">
+	※ 상품의 상태는 [<b>정상</b>] [<b>품절</b>] [<b>재고확보중</b>] [<b>판매중지</b>] 이렇게 4개입니다.<br />
+	※ 상품의 상태가 [<b>품절</b>] 또는[<b>재고확보중</b>] 일 때는 ‘<b>재입고알림신청하기</b>’ 기능이 동작할 수 있습니다.<br />
+	※ 상품의 상태는 관리환경 > 상품 > 상품리스트에서 상품마다 수정 가능 합니다.
+</div>
+
+
+<div style="height:20px;"></div>
+
+<table width="100%" border="0">
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+<col width="14%" />
+<tr>
+	<td align="center" valign="top"><div class="pdb5 fx11">[정상]</div><img src="{iconDirectoryPath}{goodsStatusImage.btn_buy}?{=time()}" codecd="btn_buy" class="goodsStatusImage" /></td>
+	<td align="center" valign="top"><div class="pdb5 fx11">[정상]</div><img src="{iconDirectoryPath}{goodsStatusImage.btn_cart}?{=time()}" codecd="btn_cart" class="goodsStatusImage" /></td>
+	<td align="center" valign="top"><div class="pdb5 fx11">[정상,품절,재고확보중]</div><img src="{iconDirectoryPath}{goodsStatusImage.btn_wish}?{=time()}" codecd="btn_wish" class="goodsStatusImage" /></td>
+	<td align="center" valign="top"><div class="pdb5 fx11">[품절]</div><img src="{iconDirectoryPath}{goodsStatusImage.btn_runout}?{=time()}" codecd="btn_runout" class="goodsStatusImage" /></td>
+	<td align="center" valign="top"><div class="pdb5 fx11">[재고확보중]</div><img src="{iconDirectoryPath}{goodsStatusImage.btn_purchasing}?{=time()}" codecd="btn_purchasing" class="goodsStatusImage" /></td>
+	<td align="center" valign="top"><div class="pdb5 fx11">[재입고알림]</div><img src="{iconDirectoryPath}{goodsStatusImage.btn_restock_notify}?{=time()}" codecd="btn_restock_notify" class="goodsStatusImage" /></td>
+	<td align="center" valign="top"><div class="pdb5 fx11">[판매중지]</div><img src="{iconDirectoryPath}{goodsStatusImage.btn_unsold}?{=time()}" codecd="btn_unsold" class="goodsStatusImage" /></td>
+</tr>
+</table>
+
+<div style="height:20px; border-bottom:1px solid #ddd"></div>
+
+<div style="height:20px;"></div>
+{/}
+<div class="pdb5 dotum">{? _GET.type != "gift"}2{:}1{/}. 소비자가 보는 상품디스플레이에서 사용되는 <b>상품상태 아이콘 이미지</b>입니다. 아래 이미지를 클릭하여 변경할 수 있습니다.</div>
+<div class="dotum fx11">
+	※ 상품디스플레이에서 상품상태 아이콘 이미지는 EYE-DESIGN > 상품디스플레이에서 노출되는 상품정보 중 [<b>상태 아이콘</b>]을 선택해야 보입니다.<br />
+	※ 카테고리(또는 브랜드)의 페이지에서 상품상태 아이콘 이미지는 관리환경 > 상품 > 카테고리 > 꾸미기에서 노출되는 상품정보 중 [<b>상태 아이콘</b>]을 선택해야 보입니다.<br />
+</div>
+
+<div style="height:20px;"></div>
+
+<table width="100%" border="0">
+<tr>
+	<td align="center" valign="top"><div class="pdb5 fx11">[품절 아이콘]</div><img src="{iconDirectoryPath}{goodsStatusImage.icon_runout}?{=time()}" codecd="icon_runout" class="goodsStatusImage" /></td>
+	<td align="center" valign="top"><div class="pdb5 fx11">[재고확보 아이콘]</div><img src="{iconDirectoryPath}{goodsStatusImage.icon_purchasing}?{=time()}" codecd="icon_purchasing" class="goodsStatusImage" /></td>
+	<td align="center" valign="top"></td>
+	<td align="center" valign="top"><div class="pdb5 fx11">[판매중지 아이콘]</div><img src="{iconDirectoryPath}{goodsStatusImage.icon_unsold}?{=time()}" codecd="icon_unsold" class="goodsStatusImage" /></td>
+</tr>
+</table>
+
+<div style="height:20px; border-bottom:1px solid #ddd"></div>
+<div style="height:20px;"></div>
+<div class="pdb5 dotum">3. 소비자가 보는 결제하기페이지에서 사용되는 <b>주문 아이콘 이미지</b>입니다. 아래 이미지를 클릭하여 변경할 수 있습니다.</div>
+
+<div style="height:20px;"></div>
+<table width="100%" border="0">
+<tr>
+	<td align="center" valign="top"><div class="pdb5 fx11">[결제하기]</div><img src="{iconDirectoryPath}{goodsStatusImage.btn_order_pay1}?{=time()}" codecd="btn_order_pay1" class="goodsStatusImage" /></td>
+	<td align="center" valign="top"><div class="pdb5 fx11">[주문하기]</div><img src="{iconDirectoryPath}{goodsStatusImage.btn_order_pay2}?{=time()}" codecd="btn_order_pay2" class="goodsStatusImage" /></td>
+</tr>
+</table>

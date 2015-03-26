@@ -1,0 +1,828 @@
+{ #layout_header }
+
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+
+<script>
+
+$(function(){
+
+	$("button.category_button").live("click",function(){
+
+		var obj = $(this).parent().parent();
+		var obj_select = obj.find("select");
+		var category = '';
+		var code = '';
+		var index = $("#apply_goods>li").index($(this).closest("li"));
+		var mode = 'apply';
+		var category_tag_name = "category_code["+index+"][]";
+		if( obj_select.eq(0).attr('name') == 'except_category1[]'){
+			category_tag_name = "except_category_code["+index+"][]";
+			var mode = 'except';
+		}
+
+		obj_select.each(function(idx){
+			var opt = $(this).find("option:selected");
+			if(obj.val()){
+				category = opt.html();
+				categoryCode = obj.val();
+			}
+			if(opt.val()){
+				if(idx == 0){
+					category = opt.html();
+				}else{
+					category += ' > ' + opt.html();
+				}
+				code = opt.attr('value');
+			}
+		});
+
+		if( code && !$("input[name='"+category_tag_name+"'][value='"+code+"']").val() ){
+			if( mode != 'apply' || !$(".choice_category_list input[value='"+code+"']").val() ){
+				var tag = "<span style='display:inline-block;width:300px'>"+category+"</span>";
+				tag += "<span class='btn-minus'><button type='button' class='del_category'></button></span>";
+				tag += "<input type='hidden' name='" + category_tag_name + "' value='"+code+"' />";
+				obj.next().append("<div style='padding:1px;'>"+tag+"</div>");
+			}
+		}
+	});
+
+	$("button.del_category").live("click",function(){
+		$(this).parent().parent().remove();
+	});
+
+	$("button.add_group").live("click",function(){
+		add_goods();
+	});
+
+	$("button.del_group").live("click",function(){
+		$(this).closest("li").remove();
+	});
+
+	$("input[name='goods_rule']").bind("change",function(){
+		check_goods_rule();
+		$("#apply_goods").html("");
+		add_goods();
+	});
+
+	$("button.choice_goods_button").live("click",function(){
+		var index = $("#apply_goods>li").index($(this).closest("li"));
+		index += 1;
+		var displayId = "choice_goods_selected_"+index;
+		var inputGoods = "choice_goods_"+index;
+		set_goods_list(displayId,inputGoods);
+	});
+
+	$("button.except_goods_button").live("click",function(){
+		var index = $("#apply_goods>li").index($(this).closest("li"));
+		index += 1;
+		var displayId = "except_goods_selected_"+index;
+		var inputGoods = "except_goods_"+index;
+		set_goods_list(displayId,inputGoods);
+	});
+
+	check_goods_rule();
+	{ ? !event.data_choice }
+	$("#apply_goods").html('');
+	add_goods();
+	{ / }
+	set_plus_minus_button();
+	apply_input_style();
+
+	$(".event_view_btn").click(function(){
+		window.open("/page/index?tpl="+encodeURIComponent($(".event_view_btn").attr("tpl_path")));
+	});
+
+	if($("#url_copy").length){
+		var tagCopyClip = new ZeroClipboard.Client();
+		tagCopyClip.setHandCursor( true );
+		tagCopyClip.setCSSEffects( true );
+		tagCopyClip.setText("/page/index?tpl="+encodeURIComponent($(".event_view_btn").attr("tpl_path")));
+		tagCopyClip.addEventListener( 'complete', function(client, text) {
+			alert("주소가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+		} );
+		tagCopyClip.glue('url_copy','page-buttons-right');
+	}
+
+	// SNS 치환코드복사
+	var copy_qrcode_btns = [];
+	$(".copy_qrcode_btn").each(function(i){
+		$(this).attr("id","copy_qrcode_btn_"+i);
+		copy_qrcode_btns[i] = new ZeroClipboard.Client();
+		copy_qrcode_btns[i].setHandCursor( true );
+		copy_qrcode_btns[i].setCSSEffects( true );
+		copy_qrcode_btns[i].setText($(this).attr("code"));
+		copy_qrcode_btns[i].addEventListener( 'complete', function(client, text) {
+			alert("치환코드가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+		} );
+		copy_qrcode_btns[i].glue("copy_qrcode_btn_"+i);
+	});
+
+
+	/* ### */
+	$("select[name='reserve_select[]']").live("change",function(){
+		$("select[name='reserve_select[]']").each(function(idx){
+			//alert($(this).val());
+			var reserve_y = $("span[name='reserve_y[]']").eq(idx);
+			var reserve_d = $("span[name='reserve_d[]']").eq(idx);
+			if($(this).val()==""){
+				reserve_y.hide();
+				reserve_d.hide();
+			}else if($(this).val()=="year"){
+				reserve_y.show();
+				reserve_d.hide();
+			}else if($(this).val()=="direct"){
+				reserve_y.hide();
+				reserve_d.show();
+			}
+		});
+	});
+
+	$("select[name='point_select[]']").live("change",function(){
+		$("select[name='point_select[]']").each(function(idx){
+			//alert($(this).val());
+			var point_y = $("span[name='point_y[]']").eq(idx);
+			var point_d = $("span[name='point_d[]']").eq(idx);
+			if($(this).val()==""){
+				point_y.hide();
+				point_d.hide();
+			}else if($(this).val()=="year"){
+				point_y.show();
+				point_d.hide();
+			}else if($(this).val()=="direct"){
+				point_y.hide();
+				point_d.show();
+			}
+		});
+	});
+
+
+	$(".is_hour").bind("blur", function(){
+		if	($(this).val() > 23){
+			openDialogAlert("시간은 0 ~ 23까지만 입력가능합니다.", 400, 150);
+			$(this).val(23);
+		}
+	});
+
+	$(".is_minute").bind("blur", function(){
+		if	($(this).val() > 59){
+			openDialogAlert("분은 0 ~ 59까지만 입력가능합니다.", 400, 150);
+			$(this).val(59);
+		}
+	});
+
+	$(".target_sale").live('click', function(){
+		$(this).parent().parent().parent().find(".event_sale").attr('disabled', true);
+		$(this).parent().find(".event_sale").attr('disabled', false);
+	});
+
+	$("input[name='except_coupongoods']").click(function(){
+		if	($(this).attr('checked'))	$(".except_coupongoods").removeClass('desc');
+		else							$(".except_coupongoods").addClass('desc');
+	});
+
+	$("input[name='daily_event']").click(function(){
+		if	($(this).attr('checked')){
+			$(".add_event_date").removeClass("desc");
+			$(".add_event_date").find("input").attr('disabled', false);
+		}else{
+			$(".add_event_date").addClass("desc");
+			$(".add_event_date").find("input").attr('disabled', true);
+		}
+	});
+
+	{? event.event_seq }
+	init_span();
+		{ ? time() > event.end_time }
+		openDialogAlert('이벤트가 종료되었습니다.', 300, 150);
+		{ / }
+	{ / }
+});
+
+
+/* 카테고리 가져오기*/
+function multi_category_load(preSelect,targetSelect,code,callbackFunction)
+{
+	targetSelect.find("option").each(function(){ if( $(this).val() ) $(this).remove(); });
+	if(preSelect && !code) return;
+	$.ajax({
+		type: "GET",
+		url: "/admin/common/category2json",
+		data: "categoryCode=" + code,
+		dataType: 'json',
+		success: function(result){
+			var options = "";
+			for(var i=0;i<result.length;i++) options += "<option value='"+result[i].category_code+"'>"+result[i].title+"</option>";
+			targetSelect.append(options);
+			if(options){
+				targetSelect.show();
+			}
+			if(preSelect){
+				targetSelect.find("option[value='"+code+"']").attr("selected",true);
+			}
+
+			if(callbackFunction){
+				callbackFunction(result);
+			}
+		}
+	});
+
+}
+
+function category_load(idx)
+{
+	multi_category_load('',$("select[name='category1[]']").eq(idx),'');
+	$("select[name='category1[]']").eq(idx).bind("change",function(){
+		multi_category_load($("select[name='category1[]']").eq(idx),$("select[name='category2[]']").eq(idx),$(this).val());
+		multi_category_load($("select[name='category2[]']").eq(idx),$("select[name='category3[]']").eq(idx),"");
+		multi_category_load($("select[name='category3[]']").eq(idx),$("select[name='category4[]']").eq(idx),"");
+	});
+	$("select[name='category2[]']").eq(idx).bind("change",function(){
+		multi_category_load($("select[name='category2[]']").eq(idx),$("select[name='category3[]']").eq(idx),$(this).val());
+		multi_category_load($("select[name='category3[]']").eq(idx),$("select[name='category4[]']").eq(idx),"");
+	});
+	$("select[name='category3[]']").eq(idx).bind("change",function(){
+		multi_category_load($("select[name='category3[]']").eq(idx),$("select[name='category4[]']").eq(idx),$(this).val());
+	});
+
+	multi_category_load('',$("select[name='except_category1[]']").eq(idx),'');
+	$("select[name='except_category1[]']").eq(idx).bind("change",function(){
+		multi_category_load($("select[name='except_category1[]']").eq(idx),$("select[name='except_category2[]']").eq(idx),$(this).val());
+		multi_category_load($("select[name='except_category2[]']").eq(idx),$("select[name='except_category3[]']").eq(idx),"");
+		multi_category_load($("select[name='except_category3[]']").eq(idx),$("select[name='except_category4[]']").eq(idx),"");
+	});
+	$("select[name='except_category2[]']").eq(idx).bind("change",function(){
+		multi_category_load($("select[name='except_category2[]']").eq(idx),$("select[name='except_category3[]']").eq(idx),$(this).val());
+		multi_category_load($("select[name='except_category3[]']").eq(idx),$("select[name='except_category4[]']").eq(idx),"");
+	});
+	$("select[name='except_category3[]']").eq(idx).bind("change",function(){
+		multi_category_load($("select[name='except_category3[]']").eq(idx),$("select[name='except_category4[]']").eq(idx),$(this).val());
+	});
+}
+
+function add_goods(){
+	var clone  = $("#default_group").clone();
+	var idx = $("ul#apply_goods li").length+1;
+
+	if( $("input[name='goods_rule']:checked").val() == 'all' )
+	{
+		clone.find(".add_group").parent().remove();
+	}
+
+	clone.find("#choice_goods_selected_").attr("id","choice_goods_selected_"+idx);
+	clone.find("#choice_goods_").attr("id","choice_goods_"+idx);
+	clone.find("#except_goods_selected_").attr("id","except_goods_selected_"+idx);
+	clone.find("#except_goods_").attr("id","except_goods_"+idx);
+	clone.find("input").each(function(){
+		$(this).attr("name",$(this).attr("name").replace("[0]","["+(idx-1)+"]"));
+	});
+
+	$("#apply_goods").append("<li>" + clone.html() + "</li>");
+	set_plus_minus_button();
+	category_load(idx);
+}
+
+function set_plus_minus_button(){
+	$("#apply_goods li").each(function(idx){
+		if(idx != 0){
+			$(this).find(".add_group").removeClass("add_group").addClass("del_group");
+			$(this).find(".btn-plus").removeClass("btn-plus").addClass("btn-minus");
+		}
+	});
+}
+
+function check_goods_rule(mode)
+{
+	var arr = new Array();
+	arr[0] = 'all';
+	arr[1] = 'category';
+	arr[2] = 'goods_view';
+
+	for(var i=0;i < arr.length;i++){
+		$("."+arr[i]).hide();
+	}
+	if(!$("input[name='goods_rule']:checked").val()) $("input[name='goods_rule']").eq(0).attr("checked",true);
+	var view_type = $("input[name='goods_rule']:checked").val();
+	$("."+view_type).show();
+}
+
+function set_goods_list(displayId,inputGoods){
+	$.ajax({
+		type: "get",
+		url: "../goods/select",
+		data: "page=1&inputGoods="+inputGoods+"&displayId="+displayId,
+		success: function(result){
+			$("div#"+displayId).html(result);
+		}
+	});
+	openDialog("상품 검색", displayId, {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+}
+
+function init_span(){
+	$("select[name='reserve_select[]']").each(function(idx){
+		//alert($(this).val());
+		var reserve_y = $("span[name='reserve_y[]']").eq(idx);
+		var reserve_d = $("span[name='reserve_d[]']").eq(idx);
+		if($(this).val()==""){
+			reserve_y.hide();
+			reserve_d.hide();
+		}else if($(this).val()=="year"){
+			reserve_y.show();
+			reserve_d.hide();
+		}else if($(this).val()=="direct"){
+			reserve_y.hide();
+			reserve_d.show();
+		}
+	});
+
+	$("select[name='point_select[]']").each(function(idx){
+		//alert($(this).val());
+		var point_y = $("span[name='point_y[]']").eq(idx);
+		var point_d = $("span[name='point_d[]']").eq(idx);
+		if($(this).val()==""){
+			point_y.hide();
+			point_d.hide();
+		}else if($(this).val()=="year"){
+			point_y.show();
+			point_d.hide();
+		}else if($(this).val()=="direct"){
+			point_y.hide();
+			point_d.show();
+		}
+	});
+}
+</script>
+
+<style>
+.info_item {min-height:30px;line-height:30px;padding:0 3px;border:1px solid #ddd;background-color:#fff;margin:1px;}
+.info_item_holder {min-height:30px;line-height:30px;padding:0 3px;border:1px solid #ddd;background-color:#ffeecc;margin:1px;}
+.ui-datepicker { z-index: 99999 !important;}
+</style>
+
+<div class="hide" id="default_group">
+<table class="info-table-style" style="width:99%">
+	<tr>
+	<th class="its-th-align center">이벤트 혜택<br/>
+		<span class='btn-plus'><button type='button' class='add_group'></button></span>
+	</th>
+	<td  class="its-td">
+		<div>① <label><input type="radio" name="target_sale[0]" class="target_sale" value="0" checked /> &#123;상품 할인가(판매가) x 수량&#125;의 <input type="text" name="event_sale[0]" class="event_sale line onlynumber" style="text-align:right" maxlength="2" size="3" value="" />% 추가할인 </label> ← 할인가 기준으로 추가할인</div>
+		<div style="margin-left:15px;">
+		<span class="desc">예시) 10,000원(정가) → 9,000원(할인가) → 8,100원(할인가에서 10% 추가할인)</span>
+		</div>
+
+		<div style="margin-left:15px;"><label><input type="radio" name="target_sale[0]" class="target_sale" value="1" /> &#123;상품 정가 x 수량&#125;의 <input type="text" name="event_sale[0]" class="event_sale line onlynumber" style="text-align:right" maxlength="2" size="3" value="" disabled />% 할인 </label> ← 정가 기준으로 추가할인</div>
+		<div style="margin-left:15px;" class="desc">예시) 10,000원(정가) → 8,000원(정가에서 20% 할인)  /   상품의 정가 미입력 시 할인가격이 정가가 되어 이벤트 혜택이 계산됨</div>
+
+		<div>② 적립금은 &#123;상품 실 결제금액&#125;의 <input type="text" name="event_reserve[]" class="line onlynumber" style="text-align:right" maxlength="2" size="3" class="line onlynumber" value="" />% 추가 지급, 지급 적립금의 유효기간은 {reservetitle}</div>
+
+		<div><span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  > ③ 포인트는 &#123;상품 실 결제금액&#125;의 <input type="text" name="event_point[]" class="line onlynumber" style="text-align:right" maxlength="2" size="3" class="line onlynumber" value="" />% 추가 지급, 지급 포인트의 유효기간은 {pointtitle}</span></div>
+	</td>
+	</tr>
+	<tr class="all category goods_view">
+		<th class="its-th-align center" width="100">적용 상품</th>
+		<td class="its-td">
+			<div class="all">
+				전체상품 →
+				<label style="display:inline-block;width:50px;">
+					<input type="radio" name="apply_goods_kind" value="all" {?event.apply_goods_kind=='all'||!event.apply_goods_kind}checked{/} />
+					<span class="desc">전체</span>
+				</label>
+				<label style="display:inline-block;width:75px;">
+					<input type="radio" name="apply_goods_kind" value="goods" {?event.apply_goods_kind=='goods'}checked{/} />
+					<span class="desc">실물 상품만</span>
+				</label>
+				<label style="display:inline-block;width:75px;">
+					<input type="radio" name="apply_goods_kind" value="coupon" {?event.apply_goods_kind=='coupon'}checked{/} />
+					<span class="desc">쿠폰 상품만</span>
+				</label>
+			</div>
+			<div class="choice_category category" >
+				<div>
+					<select class="line" name="category1[]">
+						<option value="">1차 카테고리</option>
+					</select>
+					<select class="line" name="category2[]">
+						<option value="">2차 카테고리</option>
+					</select>
+					<select class="line" name="category3[]">
+						<option value="">3차 카테고리</option>
+					</select>
+					<select class="line" name="category4[]">
+						<option value="">4차 카테고리</option>
+					</select>
+					<span class="btn small gray"><button type="button" class="category_button">카테고리 선택</button></span>
+				</div>
+				<div class="choice_category_list">
+				</div>
+			</div>
+			<div class="goods_view">
+				<div><span class="btn small gray"><button type="button" class="choice_goods_button">상품 선택</button></span></div>
+				<div class="clearbox" style="height:5px;"></div>
+				<div id="choice_goods_selected_"></div>
+				<div id="choice_goods_" class="choice_goods_list"></div>
+			</div>
+		</td>
+	</tr>
+	<tr class="all category">
+		<th class="its-th-align center">예외 상품</th>
+		<td class="its-td">
+			<div class="except_category" >
+				<div>
+					<select class="line" name="except_category1[]">
+						<option value="">1차 카테고리</option>
+					</select>
+					<select class="line" name="except_category2[]">
+						<option value="">2차 카테고리</option>
+					</select>
+					<select class="line" name="except_category3[]">
+						<option value="">3차 카테고리</option>
+					</select>
+					<select class="line" name="except_category4[]">
+						<option value="">4차 카테고리</option>
+					</select>
+					<span class="btn small gray"><button type="button" class="category_button">카테고리 선택</button></span>
+				</div>
+				<div  class="except_category_list">
+				</div>
+			</div>
+			<div>
+				<div><span class="btn small gray"><button type="button" class="except_goods_button">상품 선택</button></span></div>
+				<div class="clearbox" style="height:5px;"></div>
+				<div id="except_goods_selected_"></div>
+				<div id="except_goods_"></div>
+			</div>
+		</td>
+	</tr>
+</table>
+</div>
+
+<form name="eventRegist" id="eventRegist" method="post" enctype="multipart/form-data" action="../event_process/regist" target="actionFrame">
+{?event.event_seq}<input type="hidden" name="event_seq" value="{event.event_seq}" />{/}
+<input type="hidden" name="event_type" value="multi" />
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+		<!-- { ? event.event_seq } -->
+			<h2>{=getstrcut(event.title,20)} <span style="color:blue;padding-left:20px;">{event.status} / {=number_format(event.page_view)}</span></h2>
+		<!-- { : } -->
+			<h2>[일반] 이벤트 등록</h2>
+		<!-- { / } -->
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large white"><button type="button" onclick="document.location.href='/admin/event/catalog?{query_string}';">이벤트리스트<span class="arrowright"></span></button></span></li>
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right" id="page-buttons-right">
+			<!-- { ? event.event_seq } -->
+			<li><span class="btn large white"><button type="button" id="url_copy">주소복사</button></span></li>
+			<li><span class="btn large white"><button type="button" class="event_view_btn" tpl_path="{event.tpl_path}">화면에서 꾸미기<span class="arrowright"></span></button></span></li>
+			<!-- { / } -->
+			<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!--{ ? event.event_seq }-->
+<div style="text-align:center">
+
+</div>
+<!--{/}-->
+
+<div class="item-title">이벤트 정보</div>
+<table class="info-table-style" style="width:100%">
+<colgroup>
+	<col width="10%" />
+	<col width="10%" />
+	<col />
+</colgroup>
+
+<tbody>
+<tr>
+	<th class="its-th-align center" colspan="2">이벤트명</th>
+	<td class="its-td">
+		<input type="text" name="title" class="line" size="50" value="{event.title}" />
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center" colspan="2">이벤트 기간</th>
+	<td class="its-td">
+		<div class="basic_event_date">
+			<input type="text" name="start_date" id="start_date" value="{?event.start_time}{=date('Y-m-d',event.start_time)}{:}{=date('Y-m-d')}{/}" class="datepicker line"  maxlength="10" size="10" />
+			<input type="text" name="start_hour" value="{?event.start_time}{=date('H',event.start_time)}{:}00{/}" size="2" maxlength="2" class="line is_hour" />시
+			<input type="hidden" name="start_minute" value="00" />
+
+			<span class="gray" style="margin:0 5px;">-</span>
+
+			<input type="text" name="end_date"  id="end_date"  value="{?event.end_time}{=date('Y-m-d',event.end_time)}{:}{=date('Y-m-d',strtotime('+1 month'))}{/}" class="datepicker line" maxlength="10" size="10" />
+			<input type="text" name="end_hour" value="{?event.end_time}{=date('H',event.end_time)}{:}23{/}" size="2" maxlength="2" class="line is_hour" />시
+			<input type="hidden" name="end_minute" value="59" />
+			<span class="helpicon" title="종료시간이 23시일 경우 23:59:59까지 혜택이 적용됩니다."></span>
+		</div>
+
+		<div class="chk_add_event_date" style="margin-top:5px;">
+			<label><input type="checkbox" name="daily_event" value="1" {?event.daily_event}checked{/} />
+			특정 시간 또는 특정 요일에만 →
+			체크하면 <span class="red">이벤트의 남은시간은 1일을 기준으로 계산됩니다.</span></label>
+		</div>
+
+		<div class="add_event_date {?!event.daily_event}desc{/}">
+			<span style="margin-left:0px;"><label><input type="checkbox" name="week[]" value="1" {?strstr(event.app_week, '1')}checked{/} {?!event.daily_event}disabled{/} /> 월요일마다</label></span>
+			<span style="margin-left:10px;"><label><input type="checkbox" name="week[]" value="2" {?strstr(event.app_week, '2')}checked{/} {?!event.daily_event}disabled{/} /> 화요일마다</label></span>
+			<span style="margin-left:10px;"><label><input type="checkbox" name="week[]" value="3" {?strstr(event.app_week, '3')}checked{/} {?!event.daily_event}disabled{/} /> 수요일마다</label></span>
+			<span style="margin-left:10px;"><label><input type="checkbox" name="week[]" value="4" {?strstr(event.app_week, '4')}checked{/} {?!event.daily_event}disabled{/} /> 목요일마다</label></span>
+			<span style="margin-left:10px;"><label><input type="checkbox" name="week[]" value="5" {?strstr(event.app_week, '5')}checked{/} {?!event.daily_event}disabled{/} /> 금요일마다</label></span>
+			<span style="margin-left:10px;"><label><input type="checkbox" name="week[]" value="6" {?strstr(event.app_week, '6')}checked{/} {?!event.daily_event}disabled{/} /> 토요일마다</label></span>
+			<span style="margin-left:10px;"><label><input type="checkbox" name="week[]" value="7" {?strstr(event.app_week, '7')}checked{/} {?!event.daily_event}disabled{/} /> 일요일마다</label></span>
+
+			<span style="margin:0 3px 0 20px;"></span>
+			<input type="text" name="app_start_hour" value="{?event.app_start_hour}{event.app_start_hour}{:}00{/}" size="2" maxlength="2" class="line is_hour" {?!event.daily_event}disabled{/} />시
+			<input type="hidden" name="app_start_minute" value="00" />
+			<span class="gray" style="margin:0 5px;">-</span>
+			<input type="text" name="app_end_hour" value="{?event.app_end_hour}{event.app_end_hour}{:}23{/}" size="2" maxlength="2" class="line is_hour" {?!event.daily_event}disabled{/} />
+			<input type="hidden" name="app_end_minute" value="59" />
+			에만 이벤트 진행
+			<span class="helpicon" title="종료시간이 23시일 경우 23:59:59까지 혜택이 적용됩니다."></span>
+		</div>
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center" rowspan="{?event.event_seq}3{:}2{/}">이벤트 페이지</th>
+	<th class="its-th-align center">접속</th>
+	<td class="its-td">
+		{? event.event_seq }
+			<div class="case1 {?event.status == '진행 중' || event.status == '종료'}hide{/}">이벤트가 시작 전입니다. 이벤트 페이지를 볼 수 없습니다. 단, 관리자는 볼 수 있습니다.</div>
+			<div class="case2 {? event.status && event.status != '진행 중'}hide{/}">
+				이벤트가 진행 중입니다. 이벤트 페이지를 볼 수 있습니다.<br/>
+				<input type="checkbox" name="display" value="n" {?event.display=='n'}checked{/} /> 강제로 볼 수 없도록 합니다. 단, 관리자는 볼 수 있습니다.
+			</div>
+			<div class="case3 {?event.status != '종료'}hide{/}">이벤트가 종료되었습니다. 이벤트 페이지를 볼 수 없습니다. 단, 관리자는 볼 수 있습니다.</div>
+		{:}
+			<div class="case">
+				<input type="checkbox" name="display" value="n" {?event.display=='n'}checked{/} /> 강제로 볼 수 없도록 합니다. 단, 관리자는 볼 수 있습니다.
+			</div>
+		{/}
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">SNS치환코드</th>
+	<td class="its-td">
+		<table width="100%"  class="info-table-style" >
+			<tr>
+				<th  class="its-th-align center">전체</th>
+				<th  class="its-th-align center">페이스북</th>
+				<th  class="its-th-align center">트위터</th>
+				<th  class="its-th-align center">google+</th>
+				<th  class="its-th-align center">싸이월드</th>
+				<th  class="its-th-align center">마이피플</th>
+				<th  class="its-th-align center">카카오톡</th>
+				<th  class="its-th-align center">카카오스토리</th>
+				<th  class="its-th-align center">LINE</th>
+			</tr>
+			<tr>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명')//SNS전체}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명')}">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','fa')//페이스북}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','fa')//페이스북}">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','tw')//트위터}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','tw')//트위터}">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','go')//google+}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','go')//google+}">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','cy')//싸이월드}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','cy')//싸이월드}">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','my')//마이피플}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','my')//마이피플}">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','ka')//카카오톡}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','ka')//카카오톡}">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','kakaostory')//카카오스토리}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','kakaostory')//카카오스토리}"  onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','line')//LINE}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','line')//LINE}"  onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+			</tr>
+		</table>
+	</td>
+</tr>
+
+
+{?event.event_seq}
+<tr>
+	<th class="its-th">QR 코드</th>
+	<td class="its-td">
+		{=qrcode("event",event.event_seq,4)}
+		<a href="javascript:;" class="qrcodeGuideBtn fx11 lsp-1" key="event" value="{event.event_seq}">자세히▶</a>
+	</td>
+</tr>
+{/}
+</tbody>
+</table>
+<div class="item-title">이벤트 상품</div>
+<table class="info-table-style" style="width:100%">
+<colgroup>
+	<col width="150" />
+
+</colgroup>
+
+<tbody>
+<tr>
+	<th class="its-th-align center">선정 기준</th>
+	<td class="its-td" colspan="2">
+		<label><input type="radio" name="goods_rule" value="all" /> 전체 상품</label>
+		<label><input type="radio" name="goods_rule" value="category" /> 카테고리로 선정</label>
+		<label><input type="radio" name="goods_rule" value="goods_view" /> 상품으로 선정</label>
+		<!--{ ? event.goods_rule }-->
+		<script>$("input[name='goods_rule'][value='{event.goods_rule}']").attr('checked',true);</script>
+		<!--{ / }-->
+	</td>
+</tr>
+
+<tr class="all category goods_view">
+	<th class="its-th-align center">혜택 및 상품선택
+		<div>
+			<span class="btn small orange addsaleGuideBtn "><button type="button" class="hand" >안내) 추가 혜택 적용 범위</button></span>
+		</div>
+	</th>
+	<td class="its-td" colspan="2">
+	<ul id="benefit_info">
+		<li>※ 이벤트 기간 중에만 이벤트 혜택이 자동 적용 → 이벤트 종료 시 이벤트 혜택은 자동 소멸</li>
+		<li>※ 적립금 및 포인트 지급 시점과 유효기간은 관리환경 > 설정 > <a href="../setting/reserve" target="_blank"><u style="color:#ff6633;">적립금/포인트/예치금</u></a>에 따릅니다.</li>
+		<li>※ 상품 실 결제금액 = {상품 할인가(판매가) x 수량} – 할인(쿠폰, 코드, 등급, 좋아요, 모바일, 유입처) </li>
+		<li style="color:red;">※ 상품이 일반 이벤트와 단독 이벤트 모두 포함되었을 경우 단독 이벤트가 기준이 되어 우선 적용 되어집니다.</li>
+	</ul>
+	<ul id="apply_goods">
+	<!--{ @ event.data_choice }-->
+	<li>
+		<table class="info-table-style" style="width:99%">
+			<tr>
+			<th class="its-th-align center">이벤트 혜택<br/>
+					<span class='btn-plus {?event.goods_rule=='all'}hide{/}'><button type='button' class='add_group'></button></span>
+			</th>
+				<td  class="its-td">
+					<div>
+					① <label><input type="radio" name="target_sale[{.key_}]" class="target_sale" value="0" {?.target_sale==0}checked{/} /> &#123;상품 할인가(판매가) x 수량&#125;의 <input type="text" name="event_sale[{.key_}]" class="event_sale line onlynumber" style="text-align:right" maxlength="2" size="3" {?.target_sale==0}value="{.event_sale}"{:}value="" disabled{/} />% 추가할인 </label>  ← 할인가 기준으로 추가할인
+					</div>
+					<div style="margin-left:15px;">
+					<span class="desc">예시) 10,000원(정가) → 9,000원(할인가) → 8,100원(할인가에서 10% 추가할인)</span>
+					</div>
+
+					<div style="margin-left:15px;">
+						<label><input type="radio" name="target_sale[{.key_}]" class="target_sale" value="1" {?.target_sale==1}checked{/} /> &#123;상품 정가 x 수량&#125;을 기준으로 <input type="text" name="event_sale[{.key_}]" class="event_sale line onlynumber" style="text-align:right" maxlength="2" size="3" {?.target_sale==1}value="{.event_sale}"{:}value="" disabled{/} />% 할인 </label>  ← 정가 기준으로 추가할인
+						<br/><span class="desc">예시) 10,000원(정가) → 8,000원(정가에서 20% 할인)  /   상품의 정가 미입력 시 할인가격이 정가가 되어 이벤트 혜택이 계산됨</span>
+					</div>
+
+					<div>② 적립금은 &#123;상품 실 결제금액&#125;의 <input type="text" name="event_reserve[{.key_}]" class="line onlynumber" style="text-align:right" maxlength="2" size="3" class="line onlynumber" value="{.event_reserve}" />% 추가 지급, 지급 적립금의 유효기간은 {reservetitle}</div>
+
+					<div><span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  > ③ 포인트는 &#123;상품 실 결제금액&#125;의 <input type="text" name="event_point[{.key_}]" class="line onlynumber" style="text-align:right" maxlength="2" size="3" value="{.event_point}" />% 추가 지급, 지급 포인트의 유효기간은 {pointtitle}</span></div>
+				</td>
+
+			</tr>
+			<tr class="all category goods_view">
+				<th class="its-th-align center" width="100">적용 상품</th>
+				<td class="its-td">
+					<div class="all">
+						전체상품 →
+						<label style="display:inline-block;width:50px;">
+							<input type="radio" name="apply_goods_kind" value="all" {?event.apply_goods_kind=='all'||!event.apply_goods_kind}checked{/} />
+							<span class="desc">전체</span>
+						</label>
+						<label style="display:inline-block;width:75px;">
+							<input type="radio" name="apply_goods_kind" value="goods" {?event.apply_goods_kind=='goods'}checked{/} />
+							<span class="desc">실물 상품만</span>
+						</label>
+						<label style="display:inline-block;width:75px;">
+							<input type="radio" name="apply_goods_kind" value="coupon" {?event.apply_goods_kind=='coupon'}checked{/} />
+							<span class="desc">쿠폰 상품만</span>
+						</label>
+					</div>
+					<div class="choice_category category" >
+						<div>
+							<select class="line" name="category1[]">
+								<option value="">1차 카테고리</option>
+							</select>
+							<select class="line" name="category2[]">
+								<option value="">2차 카테고리</option>
+							</select>
+							<select class="line" name="category3[]">
+								<option value="">3차 카테고리</option>
+							</select>
+							<select class="line" name="category4[]">
+								<option value="">4차 카테고리</option>
+							</select>
+							<span class="btn small gray"><button type="button" class="category_button">카테고리 선택</button></span>
+						</div>
+						<div class="choice_category_list">
+							<!--{ @ .category }-->
+							<div style='padding:1px;'>
+							<span style='display:inline-block;width:300px'>{..category_name }</span>
+							<span class='btn-minus'><button type='button' class='del_category'></button></span>
+							<input type='hidden' name='category_code[{.index_}][]' value='{..category_code }' />
+							</div>
+							<!--{ / }-->
+						</div>
+					</div>
+					<div class="goods_view">
+						<div><span class="btn small gray"><button type="button" class="choice_goods_button">상품 선택</button></span></div>
+						<div class="clearbox" style="height:5px;"></div>
+						<div id="choice_goods_selected_{.index_+1}"></div>
+						<div id="choice_goods_{.index_+1}" class="choice_goods_list">
+						<!--{ @ .goods }-->
+						<div class='goods' style='float:left;'>
+							<div align='center' class='image'>
+								<img class="goodsThumbView" alt="" src="{..image}" width="50" height="50">
+							</div>
+							<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{..goods_name}</div>
+							<div align='center' class='price'>{=number_format(..price)}</div>
+							<input type="hidden" name='choice_goods_{.index_+1}[]' value='{..goods_seq}' />
+						</div>
+						<!--{ / }-->
+						</div>
+					</div>
+				</td>
+			</tr>
+			<tr class="all category">
+				<th class="its-th-align center">예외 상품</th>
+				<td class="its-td">
+					<div class="except_category pdb5" >
+						<div>
+							<select class="line" name="except_category1[]">
+								<option value="">1차 카테고리</option>
+							</select>
+							<select class="line" name="except_category2[]">
+								<option value="">2차 카테고리</option>
+							</select>
+							<select class="line" name="except_category3[]">
+								<option value="">3차 카테고리</option>
+							</select>
+							<select class="line" name="except_category4[]">
+								<option value="">4차 카테고리</option>
+							</select>
+							<span class="btn small gray"><button type="button" class="category_button">카테고리 선택</button></span>
+						</div>
+						<div  class="except_category_list">
+						<!--{ @ .except_category }-->
+						<div style='padding:1px;'>
+						<span style='display:inline-block;width:300px'>{..category_name }</span>
+						<span class='btn-minus'><button type='button' class='del_category'></button></span>
+						<input type='hidden' name='except_category_code[{.index_}][]' value='{..category_code }' />
+						</div>
+						<!--{ / }-->
+						</div>
+					</div>
+					<div>
+						<div><span class="btn small gray"><button type="button" class="except_goods_button">상품 선택</button></span></div>
+						<div class="clearbox" style="height:5px;"></div>
+						<div id="except_goods_selected_{.index_+1}">
+						</div>
+						<div id="except_goods_{.index_+1}">
+						<!--{ @ .except_goods }-->
+						<div class='goods' style='float:left;'>
+							<div align='center' class='image'>
+								<img class="goodsThumbView" alt="" src="{..image}" width="50" height="50">
+							</div>
+							<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{..goods_name}</div>
+							<div align='center' class='price'>{=number_format(..price)}</div>
+							<input type="hidden" name='except_goods_{.index_+1}[]' value='{..goods_seq}' />
+						</div>
+						<!--{ / }-->
+						</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</li>
+	<script>category_load({.index_+1});</script>
+	<!--{ / }-->
+	</ul>
+	</td>
+</tr>
+</tbody>
+</table>
+</form>
+
+<div class="tip_box">
+	<div class="tip_box_contents">
+		- 이벤트명, 이벤트 진행기간, 이벤트 상품을 결정하신 후 해당 이벤트 페이지에 디자인 및 상품노출은 EYE-DESIGN으로 쉽게 할 수 있습니다.<br />
+		- 이벤트의 이미지배너를 등록, 팝업을 띄우는 것도 모두 간편하게 할 수 있습니다.<br />
+		- 또한 가장 중요한 이벤트 상품의 노출도 상품디스플레이 기능으로 쉽게 설정할 수 있습니다.<br />
+		- 아래의 샘플화면과 같이 설정된 이벤트 상품만을 자동으로 검색해 드립니다.
+	</div>
+	<div><img src="../images/common/sample_img_event.gif" /></div>
+</div>
+
+{ #layout_footer }

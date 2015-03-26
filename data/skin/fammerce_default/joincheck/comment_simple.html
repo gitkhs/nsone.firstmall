@@ -1,0 +1,126 @@
+<script type="text/javascript">
+
+function sub_wrt_btn(){
+	var setform = document.jcwrite;
+	var minfo_seq = setform.member_seq.value;
+	if(!minfo_seq){
+		alert('로그인 후 참여 가능합니다.');
+		opener.location.href="/member/login";
+		self.close();
+	}else{
+		var scomment = setform.comment.value; //.replace(/\s/g,"");
+		var ccomment = setform.comment.value.replace(/\s/g,"");		
+		
+		if(!ccomment || scomment == setform.comment.getAttribute('title')){
+			alert('댓글을 입력해주세요.');
+			setform.comment.focus();
+			return false;
+		}else{
+		setform.action="../joincheck_process";
+		setform.target="actionFrame";
+		}
+	}
+}
+
+function my_log(seq,mode){
+	location.href="?seq="+seq+"&mode="+mode;
+}
+</script>
+<style>	
+.comment-list-table { border-collapse: collapse; border:2px solid #afafaf}
+.comment-list-table .clt-username {padding:8px 5px; font-weight:bold; color:#717171; font-size:11px; font-family:dotum;}
+.comment-list-table .clt-date {text-align:left; font-size:11px; font-family:dotum; color:#717171;}
+.comment-list-table .clt-comment {padding:18px 5px; color:#717171; font-size:12px; font-family:dotum; border-bottom:1px solid #e0e0e0;}
+</style>
+
+<div style="padding-left:30px; padding-right:30px;padding-top:12px">	
+	<div>
+	<table width=100% height='140'>
+	<tr>
+		<td>
+		<img src='/data/joincheck/comment_simple/tit_check.gif'>
+		</td>		
+		<td rowspan='3' align="right" valign="bottom">
+		<img src='/data/joincheck/comment_simple/img_stamp.gif'>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<span style="font-size:12px; font-family:dotum; color:#000000; font-weight:Bold; text-decoration:underline">{joincheck.title}</span>
+		</td>
+	</tr>
+	<tr>
+		<td style="font-size:11px; font-family:dotum; color:#5d81a9; line-height:15px; letter-spacing:-1px;">
+		진행기간 : <span style="font-weight:bold;"">{joincheck.start_date} ~ {joincheck.end_date}</span><br/>
+		이벤트 조건 : 이벤트 기간 중 총 <span style="font-weight:bold;">{joincheck.check_clear_count}회 {joincheck.mclear_type} 출석</span> 하는 경우<br/>
+		이벤트 혜택 : 적립금 <b>{=number_format(joincheck.emoney)}원</b> 지급<br/>
+		참여 방법 : <span style="font-weight:bold;">{mdata.type_ment}</span> 1일 1회 자동 참여
+		</td>
+	</tr>
+	</table>
+	</div>
+	
+	<div>
+	<!--{? minfo.user_name}-->
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:2px;">
+	<tr>
+		<td><span style="font-size:12px; font-family:dotum; color:#717171; letter-spacing:-1px; text-decoration:underline"><b>{minfo.user_name}</b>님께서는 현재 총 <b>{mdata.acount}일</b> 출석하였습니다.
+		{?mdata.chage==0}(목표를 달성하셨습니다.){:}(<b>{mdata.chage}번</b> 더 연속으로 출석을 하셔야 합니다.){/}</span></td>
+		<td align="right"><button id="mylog" name="mylog" onclick="my_log('{joincheck.joincheck_seq}','mylog')"><img src='/data/joincheck/comment_simple/btn_my_comment.gif'></button></td>
+	</tr>	
+	</table>
+	<!--{:}-->
+	<!--{/}-->
+	</div>
+	<form name="jcwrite" id="jcwrite" method="post" enctype="multipart/form-data" onsubmit="return sub_wrt_btn()" >
+	<input type='hidden' name='mode' value='comment_wrt'>
+	<input type="hidden" name="joincheck_seq" value="{joincheck.joincheck_seq}" />
+	<input type="hidden" name="member_seq" value="{minfo.member_seq}" />
+	<div style="border:1px solid #c7c7c7; background-color:#f4f4f4;">
+		<table width="100%" cellpadding="0" cellspacing="5" border="0">
+			<tr>
+			<td><textarea name='comment' title='댓글을 입력하세요' style='width:99%; height:46px; padding:2px;'></textarea></td>
+			<td width="50"><button name='comment_wrt_btn' id='comment_wrt_btn' style="border:0px;"><img src='/data/joincheck/comment_simple/btn_comment.gif' ></button></td>
+			</tr>
+		</table>  
+	</div>
+	</form>
+	
+	<table width="100%" height="50" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td align="left">{joincheck.prev_day}</td>
+		<td align="center"><span style="font-size:12px; font-famliy:tahoma; text-decoration:underline; font-weight:Bold; color:#000000">{joincheck.tdate}</span></td>
+		<td align="right">{joincheck.next_day}</td>
+	</tr>
+	</table>
+
+	
+	
+	<table class="comment-list-table" width="100%" cellpadding="0" cellspacing="0" border="0">
+	{? record }
+		{@ record }	
+			<tr>
+				<td class="clt-username" width="140">{.user_name}({.userid})</td>
+				<td class="clt-date">{.regist_date}</td>
+			</tr>
+			<tr>
+				<td class="clt-comment" colspan='2'>{.check_comment}</td>
+			</tr>	
+		{/}
+		{:}
+			<tr>
+				<td align="center" height="28">현재 등록된 댓글이 존재하지 않습니다.</td>			
+			</tr>
+	{/}
+	</table>
+	</div>
+	
+	<!-- 페이징 -->
+	<div class="paging_navigation" style="margin:15px;">{page.html}</div>
+	<div class="paging_navigation" style="margin:15px;">	
+	<button><img src='/data/joincheck/comment_simple/btn_close.gif' onclick="self.close()"></button>
+	</div>
+
+</div>
+
+<iframe name="actionFrame" src="/data/index.php" frameborder="0" width="100%" height="0"></iframe>

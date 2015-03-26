@@ -1,0 +1,29 @@
+
+<div class="slc-head pdt5">
+<ul>
+	<li><span class="mitem"><a href="sales_sales">매출</a></span></li>
+	<!--li><span class="mitem"><a href="sales_weekday">요일별 매출</a></span></li-->
+	{?!statistic_sales_detail_limit}
+		<li><span class="mitem"><a href="sales_goods">상품</a></span></li>
+		<li><span class="mitem"><a href="sales_referer">유입경로</a></span></li>
+		<li><span class="mitem"><a href="sales_category">카테고리/브랜드</a></span></li>
+		<li><span class="mitem"><a href="sales_platform">환경</a></span></li>
+		<li><span class="mitem"><a href="sales_payment">결제수단</a></span></li>
+		<li><span class="mitem"><a href="sales_etc">성별/연령/지역</a></span></li>
+	{:}
+		<li><span class="noshopfreelinknone mitem"><a href="#">상품</a></span></li>
+		<li><span class="noshopfreelinknone mitem"><a href="#">유입경로</a></span></li>
+		<li><span class="noshopfreelinknone mitem"><a href="#">카테고리/브랜드</a></span></li>
+		<li><span class="noshopfreelinknone mitem"><a href="#">환경</a></span></li>
+		<li><span class="noshopfreelinknone mitem"><a href="#">수단</a></span></li>
+		<li><span class="noshopfreelinknone mitem"><a href="#">성별/연령/지역</a></span></li>
+	{/}
+
+</ul>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("div.slc-head a[href='{selected_sales_menu}']").parent().parent().addClass("selected");
+});
+</script>

@@ -1,0 +1,105 @@
+{?key}
+<div class="item-title" style="margin-top:0px;">
+	{?key=='goods'	}이 상품의 QR코드{/}
+	{?key=='category'	}이 카테고리의 QR코드{/}
+	{?key=='brand'	}이 브랜드의 QR코드{/}
+	{?key=='event'	}이 이벤트의 QR코드{/}
+	{?key=='delivery'	}이 송장번호의 배송추적 QR코드{/}
+</div>
+	
+<table width="100%" class="center" style="margin-top:-15px;">
+<tr>
+	<td>{=qrcode(key,value,2)}</td>
+	<td>{=qrcode(key,value,3)}</td>
+	<td>{=qrcode(key,value,4)}</td>
+	<td>{=qrcode(key,value,5)}</td>
+	<td>{=qrcode(key,value,6)}</td>
+</tr>
+<tr>
+	<td>74 x 74<br /><span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=qrcode('{key}','{value}',2)}" onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+	<td>111 x 111<br /><span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=qrcode('{key}','{value}',3)}" onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+	<td>148 x 148<br /><span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=qrcode('{key}','{value}',4)}" onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+	<td>185 x 185<br /><span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=qrcode('{key}','{value}',5)}" onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+	<td>222 x 222<br /><span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=qrcode('{key}','{value}',6)}" onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+</tr>
+</table>
+
+<div style="height:25px;"></div>
+{/}
+
+<div class="item-title" style="margin-top:0px;">쇼핑몰에서 활용할 수 있는 QR코드 안내</div>
+<table class="info-table-style fx11 lsp-1" width="100%">
+<tr>
+	<th class="its-th-align">QR코드 스캔 시</th>
+	<th class="its-th-align">QR코드용 치환코드 <span class="desc"><font color=red>(크기값는 1~10사이)</font></span></th>
+	<th class="its-th-align" width="440">이용 안내 <span class="desc">(오프라인에서는 인쇄물에 QR코드를 활용하세요)</span></th>
+	<th class="its-th-align">바로가기</th>
+</tr>
+<tr>
+	<td class="its-td">메인 페이지로 이동</td>
+	<td class="its-td">{=qrcode("shop",<font color=red>3</font>)}</td>
+	<td class="its-td lsp-1">
+		1) 모든 페이지 :  치환코드 삽입 → QR코드 보임
+	</td>
+	<td class="its-td lsp-1">
+		<a href="/admin/setting/basic">설정 &gt; 일반정보</a>
+	</td>
+</tr>
+<tr>
+	<td class="its-td">상품상세 페이지로 이동</td>
+	<td class="its-td">{=qrcode("goods",goods.goods_seq,<font color=red>3</font>)}</td>
+	<td class="its-td lsp-1">
+		1) 상품상세페이지 : 치환코드 삽입 → 해당 상품의 QR코드 보임<br />
+		2) 그 외 페이지 : 상품고유번호를 넣은 치환코드 삽입 → 해당 상품의  QR코드 보임
+	</td>
+	<td class="its-td">
+		<a href="/admin/goods/catalog">상품</a>
+	</td>
+</tr>
+<tr>
+	<td class="its-td">카테고리 페이지로 이동</td>
+	<td class="its-td">{=qrcode("category",categoryCode,<font color=red>3</font>)}</td>
+	<td class="its-td lsp-1">
+		1) 카테고리페이지 : 치환코드 삽입 → 해당 카테고리의 QR코드 보임<br />
+		2) 그 외 페이지 : 카테고리고유번호를 넣은 치환코드 삽입 → 해당 카테고리의  QR코드 보임
+	</td>
+	<td class="its-td">
+		<a href="/admin/category/catalog">카테고리</a>
+	</td>
+</tr>
+<tr>
+	<td class="its-td">브랜드 페이지로 이동</td>
+	<td class="its-td">{=qrcode("brand",brandCode,<font color=red>3</font>)}</td>
+	<td class="its-td lsp-1">
+		1) 브랜드페이지 : 치환코드 삽입 → 해당 브랜드의 QR코드 보임<br />
+		2) 그 외 페이지 :  브랜드고유번호를 넣은 치환코드 삽입 → 해당 브랜드의  QR코드 보임
+	</td>
+	<td class="its-td">
+		<a href="/admin/brand/catalog">브랜드</a>
+	</td>
+</tr>
+<tr>
+	<td class="its-td">이벤트 페이지로 이동</td>
+	<td class="its-td">{=qrcode("event",event_seq,<font color=red>3</font>)}</td>
+	<td class="its-td lsp-1">
+		1) 이벤트페이지 : 치환코드 삽입 → 해당 이벤트의 QR코드 보임<br />
+		2) 그 외 페이지 : 이벤트고유번호를 넣은 치환코드 삽입 → 해당 이벤트의  QR코드 보임
+	</td>
+	<td class="its-td">
+		<a href="/admin/event/catalog">이벤트</a>
+	</td>
+</tr>
+<!-- 
+<tr>
+	<td class="its-td">배송추적 페이지에 삽입</td>
+	<td class="its-td">{=qrcode("delivery","출고번호",<font color=red>3</font>)}</td>
+	<td class="its-td lsp-1">
+		1) 마이페이지 > 주문상세페이지 : 치환코드 삽입 → 해당 배송추적의 QR코드 보임<br />
+		2) 그 외 페이지 : 출고고유번호를 넣은 치환코드 삽입 → 해당 배송추적의  QR코드 보임
+	</td>
+	<td class="its-td">
+		<a href="">출고리스트</a>
+	</td>
+</tr>
+ -->
+</table>

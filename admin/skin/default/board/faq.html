@@ -1,0 +1,114 @@
+{ #layout_header }
+
+<script>
+//체크박스 색상
+$("input[type='checkbox'][name='del[]']").live('change',function(){
+	if($(this).is(':checked')){
+		$(this).closest('tr').addClass('checked-tr-background');
+	}else{
+		$(this).closest('tr').removeClass('checked-tr-background');
+	}
+}).change();
+</script>
+
+{ #searchform }
+<!-- 게시글리스트테이블 : 시작 -->
+<table class="list-table-style " cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+	<col width="20" />
+	<col width="40" />
+	{? categorylist}<col width="150" />{/}
+	<col />
+	<col width="110" />
+	<col width="90" />
+	<col width="50" />
+	<col width="150" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th><input type="checkbox" name="checkboxAll" value="" id="checkboxAll" /></th>
+		<th>번호</th>
+		{? categorylist}<th><select  name="category" id="searchcategory" class="line">
+		<option value="" selected="selected" >- 전체 -</option>
+		{@ categorylist}
+			<option value="{.value_}" {? _GET.category == .value_} selected="selected"  {/}>{.value_}</option>
+		{/}
+		</select></th>{/}
+		<th>FAQ</th>
+		<th>등록일</th>
+		<th>조회수</th>
+		<th>노출</th>
+		<th>관리</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb otb"  id="ajaxTable" >
+		<!-- 리스트데이터 : 시작 -->
+		{? loop }
+			{@ loop }
+			<tr class="list-row {? .display == 1}gray{/} {.tdclass}">
+				<td align="center"><input type="checkbox" name="del[]" value="{.seq}"  class="checkeds"  /></td>
+				<td align="center" class="number">{.number}</td>
+				{? categorylist}<td align="center" class="category" >{.category}</td>{/}
+				<td align="left"><div  style="padding:10px 0 10px 0;line-height:160%;">{.subject} </div>
+
+				<div id="faqcontent_{.seq}" class="{? _GET.seq != .seq }hide{/}" style="padding:20px 0 20px 0;line-height:160%;">
+					<!-- 업로드 파일 리스트 : 시작 -->
+					{? .filelist}
+						<div class="attach">
+							<ul>
+								{@ .filelist}
+									<li><span class="realfilelist hand highlight-link" realfiledir="{..realfiledir}" realfilename="{..orignfile}" board_id="{.boardid}" filedown="../board_process?mode=board_file_down&board_id={.boardid}&realfiledir={..realfiledir}&realfilename={..orignfile}">{..orignfile} (<span class="size">{..realsizefile}</span>)<button type="button"  class="bbs_btn">down</button></span></li>
+								{/}
+							</ul>
+						</div>
+					{/}
+					<!-- 업로드 파일 리스트 : 끝 -->
+					{.contents}
+				</div>
+				</td>
+				<td align="center" class="date">{.date}</td>
+				<td align="center" class="hit">{.hit}</td>
+				<td align="center">{.hiddenbtn}</td>
+				<td align="center">
+					{.modifybtn}
+					{.deletebtn}
+				</td>
+			</tr>
+			{/}
+		{:}
+			<tr class="list-row">
+				<td colspan="all" align="center">
+					{ ? search_text }
+						'{search_text}' 검색된 게시글이 없습니다.
+					{:}
+						등록된 게시글이 없습니다.
+					{/}
+				</td>
+			<tr>
+		{/}
+
+	</tbody>
+	<!-- 리스트 : 끝 -->
+</table>
+<!-- 게시글리스트테이블 : 끝 -->
+
+<br style="line-height:10px;" />
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{pagin}</div>
+
+<!--{ ? !loop }-->
+<script>
+// colspan 계산
+$("td[colspan='all']").each(function(){
+	$(this).attr('colspan',$(this).closest("table").children("thead").first().children("tr").first().children("th").length);
+});
+</script>
+<!--{ / }-->
+
+{ #layout_footer }
+

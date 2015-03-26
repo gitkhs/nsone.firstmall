@@ -1,0 +1,360 @@
+<style type="text/css">
+.color80 {color:#808080;}
+#coupon_use_info { width:100%;margin-top:10px;}
+.coupon_info_text {margin:20px 0;font-size:20px;line-height:25px;font-weight:bold;}
+#use_coupon_serial {width:300px;height:22px;border:2px solid #7b7b7b;font-size:20px;color:#6c6c6c;text-align:center;}
+#use_coupon_value {width:100px;height:22px;border:2px solid #7b7b7b;font-size:20px;color:red;font-weight:bold;text-align:center;}
+#use_coupon_area_direct {width:100px;height:22px;border:2px solid #7b7b7b;font-size:20px;color:#6c6c6c;}
+#use_coupon_memo {width:350px;height:22px;border:2px solid #7b7b7b;font-size:20px;color:#6c6c6c;}
+#use_coupon_area {height:34px;border:2px solid #7b7b7b;font-size:20px;color:#6c6c6c;}
+.coupon_use_btn_area {margin:20px 0;text-align:center;line-height:28px;}
+#coupon_remain_value {color:red;}
+</style>
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript">
+$(function(){
+
+	// 쿠폰번호 자동넣기
+	$(".insert_coupon_serial").bind('click', function(){
+		var couponSerial	= $(this).attr('couponSerial');
+		$("input[name='use_coupon_serial']").val(couponSerial);
+	});
+
+	// 쿠폰 이메일 발송내역
+	$(".coupon_send_history_mail").bind('click', function(){
+		$.ajax({
+			type: "get",
+			url: "../export/coupon_send_list",
+			data: "order_seq="+$(this).attr('orderSeq')+"&type=mail",
+			success: function(result){
+				$("#coupon_send_list_lay").html(result);
+				openDialog("이메일 발송내역 <span class='desc'></span>", "coupon_send_list_lay", {"width":"800","height":"500"});
+			}
+		});
+	});
+
+	// 쿠폰 SMS 발송내역
+	$(".coupon_send_history_sms").bind('click', function(){
+		$.ajax({
+			type: "get",
+			url: "../export/coupon_send_list",
+			data: "order_seq="+$(this).attr('orderSeq')+"&type=sms",
+			success: function(result){
+				$("#coupon_send_list_lay").html(result);
+				openDialog("SMS 발송내역 <span class='desc'></span>", "coupon_send_list_lay", {"width":"800","height":"500"});
+			}
+		});
+	});
+
+	// 쿠폰 사용내역
+	$(".coupon_use_history_btn").bind('click', function(){
+		$.ajax({
+			type: "get",
+			url: "../export/coupon_use_list",
+			data: "export_code="+$(this).attr('exportCode')+"&coupon_serial="+$(this).attr('couponSerial'),
+			success: function(result){
+				$("#coupon_use_list_lay").html(result);
+				openDialog("쿠폰사용내역 <span class='desc'></span>", "coupon_use_list_lay", {"width":"800","height":"500"});
+			}
+		});
+	});
+
+	// 쿠폰인증
+	$(".use_coupon_confirm").bind('click', function(){
+		var coupon_serial	= $("#use_coupon_serial").val();
+		var order_seq		= $("#use_coupon_serial").attr('orderSeq');
+		if	(coupon_serial.search(/[^a-zA-Z0-9]/) != -1 || coupon_serial.length != 16){
+			//openDialogAlert("잘못된 쿠폰번호입니다.<br/>영문, 숫자만으로 16자리를 입력해 주세요", 400, 170);
+			//return;
+		}
+
+		$.getJSON('../export/get_coupon_info', {
+			'order_seq':order_seq,
+			'coupon_serial':coupon_serial
+		}, function(data) {
+			coupon_use_form_reset();
+			$("#use_coupon_serial").val($("#use_coupon_serial").attr('title'));
+			if			(data.result == 'success'){
+				var value_unit	= (data.coupon_value_type == 'price') ? '원' : '회';
+				$("input[name='export_code']", "form[name='frmCoupon']").val(data.export_code);
+				$("input[name='coupon_serial']", "form[name='frmCoupon']").val(data.coupon_serial);
+				$("#coupon_info_serial").html(data.coupon_serial);
+				$("#coupon_value").html(comma(data.coupon_value));
+				$("#coupon_start").html(data.coupon_start_date);
+				$("#coupon_end").html(data.coupon_end_date);
+				$(".coupon_value_unit").html(value_unit);
+				$("#coupon_remain_value").html(comma(data.coupon_remain_value));
+				var addressLen	= data.address.length;
+				for	(var a = 0; a < addressLen; a++){
+					$("#use_coupon_area").get(0).options[a+1] = new Option(data.address[a], data.address[a]);
+					$("#use_coupon_area").get(0).options[a+2] = new Option('직접입력', 'direct');
+				}
+				$("#coupon_use_info").slideDown('');
+
+			}else if	(data.result == 'refund'){
+				openDialogAlert("환불된 쿠폰입니다.", 300, 150, function(){
+					$("input[name='export_code']", "form[name='frmCoupon']").val('');
+					$("input[name='coupon_serial']", "form[name='frmCoupon']").val('');
+					//$("#coupon_use_info").hide();
+				});
+			}else if	(data.result == 'noremain'){
+				openDialogAlert("이미 모두 사용된 쿠폰입니다.", 300, 150, function(){
+					$("input[name='export_code']", "form[name='frmCoupon']").val('');
+					$("input[name='coupon_serial']", "form[name='frmCoupon']").val('');
+					//$("#coupon_use_info").hide();
+				});
+			}else if	(data.result == 'notyet'){
+				openDialogAlert("사용 가능한 기간이 아닙니다.", 300, 150, function(){
+					$("input[name='export_code']", "form[name='frmCoupon']").val('');
+					$("input[name='coupon_serial']", "form[name='frmCoupon']").val('');
+					//$("#coupon_use_info").hide();
+				});
+			}else if	(data.result == 'expire'){
+				openDialogAlert("만료된 쿠폰입니다.", 300, 150, function(){
+					$("input[name='export_code']", "form[name='frmCoupon']").val('');
+					$("input[name='coupon_serial']", "form[name='frmCoupon']").val('');
+					//$("#coupon_use_info").hide();
+				});
+			}else{
+				openDialogAlert("유효하지 않은 쿠폰번호입니다.", 300, 150, function(){
+					$("input[name='export_code']", "form[name='frmCoupon']").val('');
+					$("input[name='coupon_serial']", "form[name='frmCoupon']").val('');
+					//$("#coupon_use_info").hide();
+				});
+			}
+		});
+	});
+
+	// 사용장소
+	$("#use_coupon_area").bind('change', function(){
+		$("#use_coupon_area_direct_area").hide();
+		if	($("#use_coupon_area option:selected").val() == 'direct'){
+			$("#use_coupon_area_direct").val('');
+			$("#use_coupon_area_direct_area").show();
+		}
+	});
+
+	// 이메일 재발송
+	$(".resend_email").live('click', function(){
+		var exportCode	= $(this).attr('exportcode');
+		var email		= $("input[name='email["+exportCode+"]']").val();
+		if	(!email){
+			openDialogAlert("이메일 주소를 입력해주세요.", 300, 150, function(){});
+			return;
+		}
+		if	(email.search(/^[0-9a-zA-Z\_\-]+@[0-9a-zA-Z\_\-]+\.[a-zA-Z\.]+$/) == -1){
+			openDialogAlert("올바르지 않은 이메일 주소입니다.", 300, 150, function(){});
+			return;
+		}
+		$.getJSON('../export_process/resend_coupon_info', {
+			'type':'mail',	'email':email, 'export_code':exportCode
+		}, function(data) {
+			if	(data.result == 'success')	openDialogAlert("전송되었습니다.", 300, 150, function(){});
+			else							openDialogAlert(data.msg, 300, 150, function(){});
+		});
+	});
+
+	// SMS 재발송
+	$(".resend_sms").live('click', function(){
+		var exportCode	= $(this).attr('exportcode');
+		var sms			= $("input[name='sms["+exportCode+"]']").val();
+		if	(!sms){
+			openDialogAlert("휴대폰번호를 입력해주세요.", 300, 150, function(){});
+			return;
+		}
+		if	(sms.search(/^01[0-9]\-{0,1}[0-9]{3,4}\-{0,1}[0-9]{4}$/) == -1){
+			openDialogAlert("올바르지 않은 휴대폰번호입니다.", 300, 150, function(){});
+			return;
+		}
+		$.getJSON('../export_process/resend_coupon_info', {
+			'type':'sms',	'sms':sms, 'export_code':exportCode
+		}, function(data) {
+			if	(data.result == 'success')	openDialogAlert("전송되었습니다.", 300, 150, function(){});
+			else							openDialogAlert(data.msg, 300, 150, function(){});
+		});
+	});
+});
+
+function coupon_use_form_reset(){
+	$("#coupon_use_info").hide();
+	$("input[name='export_code']", "form[name='frmCoupon']").val('');
+	$("input[name='coupon_serial']", "form[name='frmCoupon']").val('');
+	$("#coupon_info_serial").html('');
+	$("#coupon_value").html('');
+	$("#coupon_value_unit").html('');
+	$("#coupon_remain_value").html('');
+	while ($("#use_coupon_area option").length > 2){
+		$("#use_coupon_area option").eq(1).remove();
+	}
+}
+
+function focusCouponSerial(obj){
+	if	($(obj).val() == $(obj).attr('title'))
+		$(obj).val('');
+}
+
+function blurCouponSerial(obj){
+	if	(!$(obj).val())
+		$(obj).val($(obj).attr('title'));
+}
+
+function useCouponSubmit(fObj){
+
+	focusCouponSerial($("#use_coupon_memo"));
+
+	var coupon_value	= $("#use_coupon_value").val();
+	var msg				= '';
+	if	(!coupon_value || coupon_value == 0){
+		msg	= ($(".coupon_value_unit").html() == '원') ? "쿠폰 사용금액을" : "쿠폰 사용횟수를";
+		openDialogAlert(msg+" 입력해 주세요.", 400, 150);
+		return false;
+	}
+
+	if	(coupon_value.search(/[^0-9]/) != -1){
+		msg	= ($(".coupon_value_unit").html() == '원') ? "쿠폰 사용금액은" : "쿠폰 사용횟수는";
+		openDialogAlert(msg+" 숫자로 입력해 주세요", 400, 150);
+		return false;
+	}
+
+	if	(!$("#use_coupon_area option:selected").val() || ($("#use_coupon_area option:selected").val() == 'direct' && !$("#use_coupon_area_direct").val())){
+		openDialogAlert('사용장소를 선택(입력)해 주세요.', 400, 150);
+		return false;
+	}
+
+	var manager_code	= $("#manager_code").val();
+
+	if	(manager_code.length < 6 || manager_code.length > 16 || manager_code.search(/[^0-9a-zA-Z]/) != -1){
+		openDialogAlert('확인코드를 6자리 이상 16자리 이하 영문, 숫자로 입력해주세요.', 500, 150);
+		return false;
+	}
+
+//	loadingStart($("#ajaxLoadingLayer"));
+
+	return true;
+}
+</script>
+<div style="width:100%;text-align:right;">
+	<span class="sms_icon" title="SMS 잔여건수"></span>
+	<span class="color80">잔여 SMS</span>
+	<b>{=number_format(smsinfo.cnt)}건</b>
+	<span class="btn small cyanblue"><button type="button" onclick="location.href='{smsinfo.link}';">충전</button></span>
+	<span class="color80" style="margin:0 10px;">|</span>
+	<span class="color80 hand coupon_send_history_mail" orderSeq="{order_seq}">이메일 발송내역</span>
+	<span class="color80" style="margin:0 10px;">|</span>
+	<span class="color80 hand coupon_send_history_sms" orderSeq="{order_seq}">SMS 발송내역</span>
+</div>
+<div style="width:100%;margin-top:5px;">
+	<table width="100%" class="simpledata-table-style">
+	<colgroup>
+		<col />
+		<col width="7%" />
+		<col width="25%" />
+		<col width="10%" />
+		<col width="12%" />
+		<col width="24%" />
+	</colgroup>
+	<thead>
+	<tr>
+		<th>쿠폰 발송 상품</th>
+		<th>쿠폰수량</th>
+		<th>쿠폰번호</th>
+		<th>쿠폰 값어치</th>
+		<th>잔여 쿠폰 값어치</th>
+		<th>이메일/SMS 발송</th>
+	</tr>
+	</thead>
+	<tbody>
+<!-- { @ export } -->
+	<tr>
+		<td class="left pdl5">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td class="left" valign="top" style="border:none;"><a href='/goods/view?no={.goods_seq}' target='_blank'><span class="order-item-image"><img class="small_goods_image" src="{=viewImg(.goods_seq,'thumbView')}" /></span></a></td>
+				<td class="left" valign="top" style="border:none;">
+					<div>{.goods_name}</div>
+					<div class="goods_option">
+						{?.option}
+						<img src="/admin/skin/default/images/common/icon_option.gif" align="absmiddle" />
+						<!--{?.option.title1}-->{.option.title1}:<!--{ / }-->{.option.option1}-->
+						<!--{?.option.option2 }{?.option.title2}-->{.option.title2}:<!--{ / }-->{.option.option2}<!--{ / }-->
+						<!--{?.option.option3 }{?.option.title3}-->{.option.title3}:<!--{ / }-->{.option.option3}<!--{ / }-->
+						<!--{?.option.option4 }{?.option.title4}-->{.option.title4}:<!--{ / }-->{.option.option4}<!--{ / }-->
+						<!--{?.option.option5 }{?.option.title5}-->{.option.title1}:<!--{ / }-->{.option.option5}<!--{ / }-->
+						{/}
+						{?.suboption}
+						<img src="../images/common/icon_add.gif" align="absmiddle" />
+						<span class="desc">{.suboption.title}:{.suboption.suboption}</span>
+						{/}
+					</div>
+				</td>
+			</tr>
+			</table>
+		</td>
+		<td class="right pdr5">{=number_format(.ea)}</td>
+		<td class="center">
+			{.coupon_serial}
+			&nbsp;&nbsp;
+			<span class="color80 insert_coupon_serial" style="cursor:pointer;" couponSerial="{.coupon_serial}">[넣기]</span>
+			<span class="color80 coupon_use_history_btn" style="cursor:pointer;" couponSerial="{.coupon_serial}" exportCode="{.export_code}">[사용내역]</span>
+		</td>
+		<td class="right pdr5">
+			{=number_format(.coupon_value)}
+			{?.coupon_value_type == 'price'}원{:}회{/}
+		</td>
+		<td class="right pdr5">
+			{=number_format(.coupon_remain_value)}
+			{?.coupon_value_type == 'price'}원{:}회{/}
+		</td>
+		<td class="right pdr5">
+			<div><input type="text" name="email[{.export_code}]" value="{.recipient_email}" />
+			<span class="btn small cyanblue"><button type="button" class="resend_email" exportcode="{.export_code}">보내기</button></span></div>
+			<div><input type="text" name="sms[{.export_code}]" value="{.recipient_cellphone}" />
+			<span class="btn small cyanblue"><button type="button" class="resend_sms" exportcode="{.export_code}">보내기</button></span></div>
+		</td>
+	</tr>
+<!-- { / } -->
+	</tbody>
+	</table>
+</div>
+<div style="width:100%;margin:20px 0;height:1px;background-color:#b4b4b4;"></div>
+<div style="width:100%;">
+	<input type="text" name="use_coupon_serial" id="use_coupon_serial" value="쿠폰번호 입력" onblur="blurCouponSerial(this);" onclick="focusCouponSerial(this);" title="쿠폰번호 입력" maxlength="16" orderSeq="{order_seq}" />
+	<span class="btn large gray"><button type="button" class="use_coupon_confirm">쿠폰번호인증 ▶</button></span>
+</div>
+
+<div id="coupon_use_info" class="hide">
+	<form name="frmCoupon" method="post" action="../export_process/usecoupon" target="actionFrame" onsubmit="return useCouponSubmit(this);">
+	<input type="hidden" name="export_code" value="" />
+	<input type="hidden" name="coupon_serial" value="" />
+	<div class="coupon_info_text">√ 쿠폰번호 : <span id="coupon_info_serial"></span></div>
+	<div class="coupon_info_text">
+		√ 유효기간 : <span id="coupon_start"></span> ~ <span id="coupon_end"></span>
+	</div>
+	<div class="coupon_value_line coupon_info_text">
+		√ 현재상태 : 총 <span id="coupon_value"></span><span class="coupon_value_unit"></span> 중
+		<span id="coupon_remain_value"></span><span class="coupon_value_unit"></span> 사용 가능
+	</div>
+	<div class="coupon_info_text">√ 쿠폰사용 :
+		<input type="text" name="use_coupon_value" id="use_coupon_value" />
+		<span class="coupon_value_unit"></span>
+		<select name="use_coupon_area" id="use_coupon_area">
+			<option value="">사용장소(매장)</option>
+			<option value="direct">직접입력</option>
+		</select>
+		<span id="use_coupon_area_direct_area" class="hide"><input type="text" name="use_coupon_area_direct" id="use_coupon_area_direct" /></span>
+		<input type="text" name="use_coupon_memo" id="use_coupon_memo" value="필요한 경우 메모를 남기세요" onblur="blurCouponSerial(this);" onclick="focusCouponSerial(this);" title="필요한 경우 메모를 남기세요"  />
+	</div>
+	<div class="coupon_info_text">
+		√ 확인코드 : 	<input type="text" name="manager_code" id="manager_code" maxlength="16" />
+	</div>
+	<div class="coupon_use_btn_area">
+		<div>위 쿠폰의 사용을 확인하시겠습니까?</div>
+		<div>
+			<span class="btn large red"><button type="submit" class="use_coupon_btn">쿠폰 사용확인</button></span>
+		</div>
+	</div>
+	</form>
+</div>
+<div id="coupon_use_list_lay"></div>
+<div id="coupon_send_list_lay"></div>
+

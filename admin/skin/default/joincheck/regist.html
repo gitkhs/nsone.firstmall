@@ -1,0 +1,640 @@
+{ #layout_header }
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+
+	$("input[name='ck_type']").bind("click",function(){
+		if($(this).val() == 'stamp' || $(this).val() == 'login') {
+			//$('.ck_typelay').show();
+			$('#calenderlay').show();
+			$('#commentlay').hide();
+		}else if($(this).val() == 'comment'){
+			//$('.ck_typelay').show();
+			$('#calenderlay').hide();
+			$('#commentlay').show();
+		}else{
+			//$('.ck_typelay').show();
+			$('#calenderlay').show();
+			$('#commentlay').hide();
+		}
+	});
+
+	<!--{ ? joincheck.check_type }-->
+	$("input[name='ck_type'][value='{joincheck.check_type}']").attr('checked',true);
+	<!--{ ? joincheck.check_type == 'stamp' || joincheck.check_type == 'login' }-->
+		$('#calenderlay').show();
+		$('#commentlay').hide();
+	<!--{: joincheck.check_type == 'comment' }-->
+		$('#calenderlay').hide();
+		$('#commentlay').show();
+	<!--{:}-->
+		$('#calenderlay').hide();
+		$('#commentlay').hide();
+	<!--{ / }-->
+	<!--{:}-->
+		$('#calenderlay').show();
+		$('#commentlay').hide();
+	<!--{ / }-->
+
+
+	var shopName = "{joincheck.shopName}";
+	<!--{? joincheck.check_SMS}-->
+	var str = "{ joincheck.check_SMS }";
+	$("#span_1").html(chkByte(str));
+	<!--{:}-->
+	$("#span_1").html(chkByte("["+shopName+"]"+ "출석이벤트 적립금지급,마이페이지 확인"));
+	<!--{ / }-->
+
+	//기본으로 1달선언
+		<!--{? !joincheck.start_date}-->
+		$("input[name='sdate']").val(getDate(0));
+		<!--{/}-->
+		<!--{? !joincheck.end_date}-->
+		$("input[name='edate']").val(getDate(-30));
+		<!--{/}-->
+		$(".select_date").click(function() {
+			switch($(this).attr("id")) {
+				case 'today' :
+					$("input[name='sdate']").val(getDate(0));
+					$("input[name='edate']").val(getDate(0));
+					break;
+				case '3day' :
+					$("input[name='sdate']").val(getDate(0));
+					$("input[name='edate']").val(getDate(-3));
+					break;
+				case '1week' :
+					$("input[name='sdate']").val(getDate(0));
+					$("input[name='edate']").val(getDate(-7));
+					break;
+				case '1month' :
+					$("input[name='sdate']").val(getDate(0));
+					$("input[name='edate']").val(getDate(-30));
+					break;
+				case '3month' :
+					$("input[name='sdate']").val(getDate(0));
+					$("input[name='edate']").val(getDate(-90));
+					break;
+				default :
+					$("input[name='sdate']").val('');
+					$("input[name='edate']").val('');
+					break;
+			}
+		});
+
+
+	$("form #imgDownload").live("click",function(){
+		var src = $(this).attr("src");
+		actionFrame.location.href = "../../common/download?downfile="+escape(src);
+	});
+
+	$('#emoney').keypress(function(event){
+		  if (event.which && (event.which  > 47 && event.which  < 58 || event.which == 8)) {
+		  } else {
+		    event.preventDefault();
+		  }
+		});
+
+	$('#cl_count_c').keypress(function(event){
+		  if (event.which && (event.which  > 47 && event.which  < 58 || event.which == 8)) {
+		  } else {
+		    event.preventDefault();
+		  }
+		});
+
+	$('#cl_count_s').keypress(function(event){
+
+		  if (event.which && (event.which  > 47 && event.which  < 58 || event.which == 8)) {
+		  } else {
+		    event.preventDefault();
+		  }
+		});
+
+	$("#cl_count_c").focus(function(){
+		$('#cl_type_c').attr('checked','true');
+	});
+	$("#cl_count_s").focus(function(){
+		$('#cl_type_s').attr('checked','true');
+	});
+
+
+	$("select[name='reserve_select']").live("change",function(){
+		span_controller('reserve');
+	});
+
+	$("select[name='point_select']").live("change",function(){
+		span_controller('point');
+	});
+	span_controller('reserve');
+	span_controller('point');
+
+});
+
+
+	//입력된 값 byte로 표시하기
+	function fnCut(obj, spanID, strLen) // str은 inputbox에 입력된 문자열이고,lengths는 제한할 문자수 이다.
+	{
+		var len = 0;
+	    var str=obj.value;
+
+	    len = chkByte(str);
+	    document.getElementById(spanID).innerHTML = len;
+	}
+	 // 문자를 byte로 변경 해주는 스크립트
+	function chkByte(str){
+		var cnt = 0;
+		for(i=0;i<str.length;i++) {
+			cnt += str.charCodeAt(i) > 128 ? 2 : 1;
+			if(str.charCodeAt(i)==10) cnt++;
+		}
+		return cnt;
+	}
+
+	 //중단 or 재개 하기
+	function changeStop_btn(str){
+
+		 jcRegist.mode_stop.value = str;
+		 jcRegist.submit();
+	}
+
+	function jc_view_btn(str,sz1,sz2){
+
+			popup(str,sz1,sz2);
+	}
+
+	function jc_cpurl_btn(seq){
+		var str= "http://{_SERVER.HTTP_HOST}/joincheck/joincheck_view?seq="+seq;
+		if(window.clipboardData){
+			window.clipboardData.setData("TEXT",str);
+			alert("복사되었습니다.");
+		}else{
+			temp = prompt("Ctrl+C를 눌러 복사하세요", str);
+		}
+
+	}
+
+
+
+function span_controller(name){
+	var reserve_y = $("span[name='"+name+"_y']");
+	var reserve_d = $("span[name='"+name+"_d']");
+	var value = $("select[name='"+name+"_select'] option:selected").val();
+	if(value==""){
+		reserve_y.hide();
+		reserve_d.hide();
+	}else if(value=="year"){
+		reserve_y.show();
+		reserve_d.hide();
+	}else if(value=="direct"){
+		reserve_y.hide();
+		reserve_d.show();
+	}
+}
+</script>
+
+<form name="jcRegist" id="jcRegist" method="post" enctype="multipart/form-data" action="../joincheck_process" target="actionFrame">
+<!--{ ? joincheck.joincheck_seq }-->
+<input type="hidden" name="mode" value="joincheck_modify" />
+<input type="hidden" name="mode_stop" value="" />
+<input type="hidden" name="joincheck_seq" value="{joincheck.joincheck_seq}" />
+<!--{:}-->
+<input type="hidden" name="mode" value="joincheck_write" />
+<!--{/}-->
+	<!-- 페이지 타이틀 바 : 시작 -->
+	<div id="page-title-bar-area">
+		<div id="page-title-bar">
+
+			<!-- 타이틀 -->
+			<div class="page-title">
+			<!--{ ? joincheck.joincheck_seq }-->
+				<h2>{=getstrcut(joincheck.title,20)} </h2>
+			<!--{ : }-->
+				<h2>출석체크 만들기</h2>
+			<!--{ / }-->
+			</div>
+
+			<!-- 좌측 버튼 -->
+			<ul class="page-buttons-left">
+				<li><span class="btn large white"><button type="button" onclick="document.location.href='/admin/joincheck/catalog?{query_string}';">출석체크리스트<span class="arrowright"></span></button></span></li>
+				<!--{ ? joincheck.check_state == 'stop' }-->
+				<li><span class="btn large white"><button type="button"  name="joincheck_state_ing"  id="joincheck_state_ing" onclick="changeStop_btn('ing')" mode_stop="">재개하기<span class="arrowright"></span></button></span></li>
+				<!--{ : joincheck.status == '진행 중' }-->
+				<li><span class="btn large white"><button type="button"  name="joincheck_state_stop"  id="joincheck_state_stop" onclick="changeStop_btn('stop')" mode_stop="stop">중단하기<span class="arrowright"></span></button></span></li>
+				<!--{ / }-->
+			</ul>
+
+			<!-- 우측 버튼 -->
+			<ul class="page-buttons-right">
+				<!--{ ? joincheck.joincheck_seq }-->
+				<li><span class="btn large white"><input type="button" name="manager_cpurl_btn" value="URL 복사" onclick="jc_cpurl_btn({joincheck.joincheck_seq})" /><span class="arrowright"></span></span></li>
+				<li><span class="btn large white"><a href="http://{_SERVER.HTTP_HOST}/joincheck/joincheck_view?seq={joincheck.joincheck_seq}" target="_blank">사용자 보기</a></span></li>
+				<!--{ / }-->
+				<li><span class="btn large black"><button type="submit" name="joincheck_write_btn" id="joincheck_write_btn"  >저장하기<span class="arrowright"></span></button></span></li>
+			</ul>
+		</div>
+	</div>
+	<!-- 페이지 타이틀 바 : 끝 -->
+	<!-- 서브메뉴 바디 : 시작-->
+<div >
+
+	<div class="item-title">기본정보 <!--span class="helpicon" title="출석체크 이벤트 기본정보를 설정해 주세요."></span--></div>
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+			<col width="80%" />
+		</colgroup>
+		<thead class="hide">
+		<tr>
+			<th class="its-th-align center" colspan="2">기본정보 </th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">출석체크 명</th>
+			<td class="its-td">
+				{? joincheck.joincheck_seq }
+					<input type="text" name="ch_title" id="ch_title" size="40" maxlength="20" value="{joincheck.title}" class="line">
+				{:}
+					<input type="text" name="ch_title" id="ch_title" size="40"  maxlength="20" value="" title="영문, 숫자, 언더스코어(_), 하이픈(-) 가능"  class="line" />
+				{/}
+				(20자 이내 입력)
+			</td>
+		</tr>
+		<!--{ ? joincheck.joincheck_seq }-->
+		<tr>
+			<th class="its-th-align center">출석체크 시작일</th>
+			<td class="its-td">
+			<!--{ ? joincheck.status=='진행 전' || joincheck.start_date == '0000-00-00'}-->
+			<input type="text" name="sdate" id="sdate" value="{joincheck.start_date}" class="datepicker line"  maxlength="10" size="10" readonly/>
+			<!--{:}-->
+			<input type="hidden" name="sdate" id="sdate" value="{joincheck.start_date}">
+			{joincheck.start_date}
+			<!--{/}-->
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">출석체크 종료일</th>
+			<td class="its-td">
+			<!--{ ? joincheck.status=='진행 전' || joincheck.end_date == '0000-00-00' }-->
+			<input type="text" name="edate" id="edate" value="{joincheck.end_date}" class="datepicker line" maxlength="10" size="10" readonly />
+			<!--{:}-->
+			<input type="hidden" name="edate" id="edate" value="{joincheck.end_date}">
+			{joincheck.end_date}
+			<!--{/}-->
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">상태</th>
+			<td class="its-td">{joincheck.status}
+			</td>
+		</tr>
+		<!--{:}-->
+		<tr>
+			<th class="its-th-align center">출석체크 기간</th>
+			<td class="its-td">
+				<input type="text" name="sdate" id="sdate" value="{joincheck.start_date}" class="datepicker line"  maxlength="10" size="10" readonly />
+				&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+				<input type="text" name="edate" id="edate" value="{joincheck.end_date}" class="datepicker line" maxlength="10" size="10" readonly />
+				&nbsp;&nbsp;
+				<span class="btn small"><input type="button"  id="3day" value="3일간" class="select_date" /></span>
+				<span class="btn small"><input type="button"  id="1week" value="일주일" class="select_date" /></span>
+				<span class="btn small"><input type="button"  id="1month" value="1개월" class="select_date" /></span>
+			</td>
+		</tr>
+		<!--{ / }-->
+		<!--{ ? !joincheck.joincheck_seq }-->
+		<tr>
+			<th class="its-th-align center">출석체크</th>
+			<td class="its-td">
+			1.출석을 체크하는 방법을 설정합니다.<br/>
+			<input type="radio" name="ck_type" id="ck_type1" value="stamp" {?  joincheck.check_type == 'stamp' || !joincheck.check_type}checked {:}  {/}/> 스탬프형 출석체크 : 출석체크 버튼을 통해 체크<br/>
+			<input type="radio" name="ck_type" id="ck_type2" value="comment" {?  joincheck.check_type == 'comment'}checked {:} {/}/> 댓글형 출석 체크 : 댓글을 달 때 체크<br/>
+			한 페이지에 댓글 수
+			 <select  class="custom-select-box-multi" name="com_list"  id="display_quantity">
+					<option id="dp_qty10" value="1" {? joincheck.comment_list == 1 } selected{/} >1개씩</option>
+					<option id="dp_qty50" value="3" {? joincheck.comment_list == 3 } selected{/} >3개씩</option>
+					<option id="dp_qty100" value="5" {? joincheck.comment_list == 5 } selected{/} {?!joincheck.comment_list} selected {/} >5개씩</option>
+					<option id="dp_qty200" value="10" {? joincheck.comment_list == 10 } selected{/}>10개씩</option>
+					<option id="dp_qty200" value="20" {? joincheck.comment_list == 20 } selected{/} >20개씩</option>
+			</select>
+			 노출  <br/>
+			<input type="radio" name="ck_type" id="ck_type3" value="login" {? joincheck.check_type == 'login'}checked {:}  {/}/> 로그인형 출석 체크: 쇼핑몰 로그인 시 자동으로 출석 체크<br/>
+			<br/>
+			 2.달성 조건을 설정합니다.	 <br/>
+			 <input type="radio" id="cl_type_c" name="cl_type" value="count" {? !joincheck.joincheck_seq || joincheck.check_clear_type  == 'count'}checked {:}  {/}/> 일정 횟수 달성형 : 이벤트 기간 동안
+			 <input type="text" name="cl_count_c" id="cl_count_c" value="10" class="line" size=4 value="{? joincheck.check_clear_type  == 'count'} {joincheck.check_clear_count}{:} {/}" onclick=""/>
+				 회 출석체크 하면 달성(연속아니어도 됨)<br/>
+			 <input type="radio" id="cl_type_s" name="cl_type" value="straight" {? joincheck.check_clear_type  == 'straight'}checked {:} {/}/> 연속 출석 달성형 : 이벤트 기간 동안
+			 <input type="text" name="cl_count_s" id="cl_count_s" value="10" class="line" size=4 value="{? joincheck.check_clear_type  == 'straight'} {joincheck.check_clear_count}{:} {/}" onclick=""/>
+			 	회 연속 출석체크 하면 달성<br/>
+			 <br/>
+			 3. 혜택을 설정합니다.<br/>
+			 달성자에게 적립금
+
+
+			 <input type="text" name="emoney" size=8 id="emoney" class="line" value="{? joincheck.emoney} {joincheck.emoney}{:}0{/}"/>
+			 원. 지급 적립금의 유효기간은 <select name="reserve_select"  >
+						<option value="">제한하지 않음</option>
+						<option value="year" {?joincheck.reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+						<option value="direct" {?joincheck.reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+					</select>
+					<span name="reserve_y" class="hide">→ 지급연도 + <input type="text" name="reserve_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{joincheck.reserve_year}" />년 12월 31일</span>
+					<span name="reserve_d" class="hide">→ <input type="text" name="reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{joincheck.reserve_direct}" />개월</span>
+			 <br>
+			 <span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+			 달성자에게 포인트
+			 <input type="text" name="point" size=8 id="point" class="line" value="{? joincheck.point} {joincheck.point}{:}0{/}"/>
+			 p. 지급 포인트의 유효기간은 <select name="point_select"  {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/} >
+						<option value="">제한하지 않음</option>
+						<option value="year" {?joincheck.point_select=='year'}selected{/}>제한 - 12월31일</option>
+						<option value="direct" {?joincheck.point_select=='direct'}selected{/}>제한 - 직접입력</option>
+					</select>
+					<span name="point_y" class="hide">→ 지급연도 + <input type="text" name="point_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{joincheck.point_year}" />년 12월 31일</span>
+					<span name="point_d" class="hide">→ <input type="text" name="point_direct" class="line onlynumber" style="text-align:right" size="3" value="{joincheck.point_direct}" />개월</span>
+			</span>
+
+			 <br/>
+			</td>
+		</tr>
+		<!--{:}-->
+		<tr>
+			<th class="its-th-align center">출석 체크 방법 <br/>(1일 1회)</th>
+			<td class="its-td">
+			<!--{? joincheck.status == '진행 전' || joincheck.check_type == 'stamp'}-->
+			<label><input type="radio" name="ck_type" id="ck_type1" value="stamp" {?  joincheck.check_type == 'stamp' || !joincheck.check_type}checked {:}  {/}/> 스탬프형 출석체크 : 출석체크 버튼을 통해 체크</label><br/>
+			<!--{/}-->
+			<!--{? joincheck.status == '진행 전' || joincheck.check_type == 'comment'}-->
+			<label><input type="radio" name="ck_type" id="ck_type2" value="comment" {?  joincheck.check_type == 'comment'}checked {:} {/}/> 댓글형 출석 체크 : 댓글을 달 때 체크</label><br/>
+			한 페이지에 댓글 수
+			 <select  class="custom-select-box-multi" name="com_list"  id="display_quantity">
+					<option id="dp_qty10" value="1" {? joincheck.comment_list == 1 } selected{/} >1개씩</option>
+					<option id="dp_qty50" value="3" {? joincheck.comment_list == 3 } selected{/} >3개씩</option>
+					<option id="dp_qty100" value="5" {? joincheck.comment_list == 5 } selected{/} >5개씩</option>
+					<option id="dp_qty200" value="10" {? joincheck.comment_list == 10 } selected{/} >10개씩</option>
+					<option id="dp_qty200" value="20" {? joincheck.comment_list == 20 } selected{/} >20개씩</option>
+			</select>
+			 노출  <br/>
+			 <!--{/}-->
+			 <!--{? joincheck.status == '진행 전' || joincheck.check_type == 'login'}-->
+			<label><input type="radio" name="ck_type" id="ck_type3" value="login" {? joincheck.check_type == 'login'}checked {:}  {/}/> 로그인형 출석 체크: 쇼핑몰 로그인 시 자동으로 출석 체크</label><br/>
+			<br/>
+			<!--{/}-->
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">달성 조건 </th>
+			<td class="its-td">
+			<!--{? joincheck.status == '진행 전' || joincheck.check_clear_type == 'count'}-->
+			<input type="radio" id="cl_type_c" name="cl_type" value="count" {? !joincheck.joincheck_seq || joincheck.check_clear_type  == 'count'}checked {:}  {/}/> 일정 횟수 달성형 : 이벤트 기간 동안
+			<input type="text" name="cl_count_c" size=4  class="line" value="{? joincheck.check_clear_type  == 'count'} {joincheck.check_clear_count}{:} {/}" onclick=""/>
+				 회 출석체크 하면 달성(연속아니어도 됨)<br/>
+			<!--{/}-->
+			<!--{? joincheck.status == '진행 전' || joincheck.check_clear_type == 'straight'}-->
+			 <input type="radio" id="cl_type_s" name="cl_type" value="straight" {? joincheck.check_clear_type  == 'straight'}checked {:} {/}/> 연속 출석 달성형 : 이벤트 기간 동안
+			 <input type="text" name="cl_count_s" size=4  class="line" value="{? joincheck.check_clear_type  == 'straight'} {joincheck.check_clear_count}{:} {/}" />
+			 	회 연속 출석체크 하면 달성
+			<!--{/}-->
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">달성 혜택 </th>
+			<td class="its-td">
+			달성자에게 적립금
+			<!--{? joincheck.status == '진행 전' }-->
+			<input type="text" name="emoney"  class="line" size=8 value="{? joincheck.emoney} {joincheck.emoney}{:}0{/}" />
+			<!--{:}-->
+			<input type="hidden" name="emoney"  value="{joincheck.emoney}" />
+			&nbsp;&nbsp;&nbsp;&nbsp;<B>{joincheck.emoney}</B>
+			<!--{/}-->
+			 원.   지급 적립금의 유효기간은 <select name="reserve_select">
+						<option value="">제한하지 않음</option>
+						<option value="year" {?joincheck.reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+						<option value="direct" {?joincheck.reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+					</select>
+					<span name="reserve_y" class="hide">→ 지급연도 + <input type="text" name="reserve_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{joincheck.reserve_year}" />년 12월 31일</span>
+					<span name="reserve_d" class="hide">→ <input type="text" name="reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{joincheck.reserve_direct}" />개월</span><br>
+
+			<span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+				달성자에게 포인트
+				<!--{? joincheck.status == '진행 전' }-->
+				<input type="text" name="point"  class="line" size=8 value="{? joincheck.point} {joincheck.point}{:}0{/}" />
+				<!--{:}-->
+				<input type="hidden" name="point"  value="{joincheck.point}" />
+				&nbsp;&nbsp;&nbsp;&nbsp;<B>{joincheck.point}</B>
+				<!--{/}-->
+				 p. 지급 포인트의 유효기간은 <select name="point_select"  {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/} >
+							<option value="">제한하지 않음</option>
+							<option value="year" {?joincheck.point_select=='year'}selected{/}>제한 - 12월31일</option>
+							<option value="direct" {?joincheck.point_select=='direct'}selected{/}>제한 - 직접입력</option>
+						</select>
+						<span name="point_y" class="hide">→ 지급연도 + <input type="text" name="point_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{joincheck.point_year}" />년 12월 31일</span>
+						<span name="point_d" class="hide">→ <input type="text" name="point_direct" class="line onlynumber" style="text-align:right" size="3" value="{joincheck.point_direct}" />개월</span>
+			</span>
+			</td>
+		</tr>
+		<!--{/}-->
+		<tr>
+			<th class="its-th-align center">출석체크 메시지</th>
+			<td class="its-td">
+			<table>
+				<tr>
+					<td style="padding-top:10px">출석체크 시 : <br/></td>
+					<td><input type="text" name="check_it" id="check_it"  class="line" size="100" {?joincheck.check_it} value="{joincheck.check_it}" {:}  value="감사합니다! 출석 체크를 하셨습니다. 내일 또 부탁드립니다."{/} title="" /><br/>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:10px">이미 출석 체크를 했을 때 : <br/></td>
+					<td><input type="text" name="check_already" id="check_already" class="line" size="100" {?joincheck.check_already} value="{joincheck.check_already}" {:}  value="오늘 이미 하셨습니다. 내일 참여 부탁드립니다."{/} title="" /><br/>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:10px">혜택 지급 시 메세지 : <br/></td>
+					<td><input type="text" name="check_complete" id="check_complete" class="line" size="100" {?joincheck.check_complete} value="{joincheck.check_complete}" {:} value="[{joincheck.shopName}]출석체크 이벤트에 참여해 주셔서 감사합니다. 적립금{\emoney}원, 포인트 {\point}P을 지급해 드렸습니다." {/} title="" /><br/>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:10px; padding-bottom:10px">혜택 지급 시 SMS : <br/></td>
+					<td><input type="text" name="check_SMS" id="check_SMS" size="100" class="line" {?joincheck.check_SMS} value="{joincheck.check_SMS}" {:} value= "[{joincheck.shopName}]출석체크 이벤트 혜택 지급. MY페이지 확인요망"{/} onkeyup="fnCut(this, 'span_1', 80)" /> ( <span id="span_1">?</span> / 80 Byte )<br/>
+					</td>
+				</tr>
+			</table>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+
+	<div class="item-title">출석체크 화면 설정 <!--span class="helpicon" title="출석체크 화면을 설정해 주세요."></span--></div>
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+			<col width="80%" />
+		</colgroup>
+		<thead class="hide">
+		<tr>
+			<th class="its-th-align center" colspan="2">출석체크 화면설정 </th>
+		</tr>
+		</thead>
+
+		<tbody id="calenderlay" class="hide" >
+		<tr>
+			<th class="its-th-align center">체크 캘린더</th>
+			<td class="its-td">
+				<table width=80%>
+				<tr>
+					<td align=center >
+						<label for="stamp_basic"><img src="/data/joincheck/skin/stamp_basic.jpg" name="ch_skin1"  width="300 px" height="350 px" onclick="jc_view_btn('/data/joincheck/skin/stamp_basic.jpg','540','660')"  style="border:1px solid #000000"/>
+						<br/><span class="small btn black"><input type="button"  onclick="jc_view_btn('/data/joincheck/skin/stamp_basic.jpg','540','660')" value="샘플이미지 크게 보기"></span></label>
+					</td>
+					<td align=center>
+						<label for="stamp_simple"><img src="/data/joincheck/skin/stamp_simple.jpg" name="ch_skin2" width="300 px" height="350 px" onclick="jc_view_btn('/data/joincheck/skin/stamp_simple.jpg','540','660')" style="border:1px solid #000000"/>
+						<br/><span class="small btn black"><input type="button"  onclick="jc_view_btn('/data/joincheck/skin/stamp_simple.jpg','540','660')" value="샘플이미지 크게 보기"></span></label>
+					</td>
+				<tr>
+				<tr>
+					<td align=center>
+						<input type="radio" name="ch_skin" id="stamp_basic" value="stamp_basic" {? joincheck.skin == 'stamp_basic' || !joincheck.skin } checked {:}  {/} /><label for="stamp_basic"> Basic 형</label>
+					</td>
+					<td align=center>
+						<input type="radio" name="ch_skin" id="stamp_simple" value="stamp_simple" {? joincheck.skin == 'stamp_simple'} checked {:}  {/} /><label for="stamp_simple"> Simple 형</label>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">체크 도장</th>
+			<td class="its-td">
+				<table width=80%>
+				<tr>
+					<td align=center>
+					<label for="basic">
+					<img src="/data/joincheck/stamp/stamp_basic_attend.gif" name="basic" >
+					<img src="/data/joincheck/stamp/stamp_basic_absent.gif" name="basic" >
+					</label>
+					</td>
+					<td align=center>
+					<label for="simple">
+					<img src="/data/joincheck/stamp/stamp_simple_attend.gif" name="basic" >
+					<img src="/data/joincheck/stamp/stamp_simple_absent.gif" name="basic" >
+					</label>
+					</td>
+				<tr>
+				<tr>
+					<td align=center>
+						<input type="radio" name="stamp_skin" id="basic" value="basic" {? joincheck.stamp_skin == 'basic' || !joincheck.stamp_skin} checked {:}  {/} /><label for="basic"> Basic 형</label>
+					</td>
+					<td align=center>
+						<input type="radio" name="stamp_skin" id="simple" value="simple" {? joincheck.stamp_skin == 'simple'} checked {:}  {/} /><label for="simple"> Simple 형</label>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center"> 베너이미지</th>
+			<td class="its-td">
+			<table width="80%">
+				<tr>
+					<td colspan="3">출석 체크 안내 배너는 아이 디자인을 통해 원하는 화면에 배너 이미지를 넣으시면 됩니다.<br/>
+					이미지는 직접 제작하시거나 아래의 이미지 다운로드를 받으셔서 사용하시면 됩니다.<br/>
+					</td>
+				</tr>
+				<tr>
+					<td align=center>
+						<img src="/data/joincheck/banner_cute.gif" name="barner_img1" >
+					</td>
+					<td align=center>
+						<img src="/data/joincheck/banner_simple.gif" name="barner_img2" >
+					</td>
+					<td align=center>
+						<img src="/data/joincheck/banner_stamp.gif" name="barner_img3" >
+					</td>
+
+				<tr>
+				<tr >
+					<td align=center>
+						<span class="btn large gray"><button type="button" id="imgDownload" src="/data/joincheck/banner_cute.gif">다운로드</button></span>
+					</td>
+					<td align=center>
+						<span class="btn large gray"><button type="button" id="imgDownload" src="/data/joincheck/banner_simple.gif">다운로드</button></span>
+					</td>
+					<td align=center>
+						<span class="btn large gray"><button type="button" id="imgDownload" src="/data/joincheck/banner_stamp.gif">다운로드</button></span>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</tbody>
+
+		<tbody id="commentlay" class="hide" >
+		<tr>
+			<th class="its-th-align center">댓글</th>
+			<td class="its-td">
+				<table width=80%>
+				<tr>
+					<td align=center>
+						<label for="comment_basic"><img src="/data/joincheck/skin/comment_basic.jpg" name="chc_skin1" width="300px" height="350px" onclick="jc_view_btn('/data/joincheck/skin/comment_basic.jpg','670','690')" style="border:1px solid #000000"/>
+						<br/><span class="small btn black"><input type="button"  onclick="jc_view_btn('/data/joincheck/skin/comment_basic.jpg','670','690')" value="샘플이미지 크게 보기"></span></label>
+					</td>
+					<td align=center>
+						<label for="comment_simple"><img src="/data/joincheck/skin/comment_simple.jpg" name="chc_skin2" width="300px" height="350px" onclick="jc_view_btn('/data/joincheck/skin/comment_simple.jpg','670','690')" style="border:1px solid #000000"/>
+						<br/><span class="small btn black"><input type="button"  onclick="jc_view_btn('/data/joincheck/skin/comment_simple.jpg','670','690')" value="샘플이미지 크게 보기"></span></label>
+					</td>
+				<tr>
+				<tr>
+					<td align=center>
+						<input type="radio" name="chc_skin" id="comment_basic" value="comment_basic" {? joincheck.skin == 'comment_basic' || !joincheck.skin }checked {:}  {/} /><label for="comment_basic"> Basic 형</label>
+					</td>
+					<td align=center>
+						<input type="radio" name="chc_skin" id="comment_simple" value="comment_simple" {? joincheck.skin == 'comment_simple'}checked {:}  {/} /><label for="comment_simple"> Simple 형</label>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">베너이미지</th>
+			<td class="its-td">
+				<table width="80%">
+				<tr>
+					<td colspan="3">출석 체크 안내 배너는 아이 디자인을 통해 원하는 화면에 배너 이미지를 넣으시면 됩니다.<br/>
+					이미지는 직접 제작하시거나 아래의 이미지 다운로드를 받으셔서 사용하시면 됩니다.<br/>
+					</td>
+				</tr>
+				<tr>
+					<td align=center>
+						<img src="/data/joincheck/banner_cute.gif" name="barner_img1">
+					</td>
+					<td align=center>
+						<img src="/data/joincheck/banner_simple.gif" name="barner_img2" >
+					</td>
+					<td align=center>
+						<img src="/data/joincheck/banner_stamp.gif" name="barner_img3" >
+					</td>
+
+				<tr>
+				<tr >
+					<td align=center>
+						<span class="btn large gray"><button type="button" id="imgDownload" src="/data/joincheck/banner_cute.gif">다운로드</button></span>
+					</td>
+					<td align=center>
+						<span class="btn large gray"><button type="button" id="imgDownload" src="/data/joincheck/banner_simple.gif">다운로드</button></span>
+					</td>
+					<td align=center>
+						<span class="btn large gray"><button type="button" id="imgDownload" src="/data/joincheck/banner_stamp.gif">다운로드</button></span>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+<!-- 서브메뉴 바디 : 끝-->
+	<!--### 필수옵션 미리보기 -->
+<div id="popPreviewOpt" class="hide"></div>
+</form>
+
+
+{ #layout_footer }

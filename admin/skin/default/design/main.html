@@ -1,0 +1,36 @@
+{ #layout_header_popup }
+
+<script>
+
+var front_go_sec = 2; // n초후 이동
+var front_go_timer = setInterval("front_go()",front_go_sec*1000);
+
+function front_go(){
+	$("#progress_bar").stop(true,true).show();
+	document.location.href="../design/front_action?frontUrl={frontUrl}";	
+}
+
+function front_go_stop(){
+	$("#progress_bar").fadeOut();
+	clearInterval(front_go_timer);
+}
+
+</script>
+
+
+<div class="pd40 center">
+	<div class="pdt30"><img src="../images/design/gate_i_txt01.gif" alt="실제 사용자 화면에서 바로 디자인 하세요!" /></div>
+	<div class="pdt30"><img src="../images/design/gate_i_txt02.gif" alt="디자인환경으로 이동합니다." /></div>
+	<div class="pdt20">
+		<a href="#" onclick="front_go_stop()"><img src="../images/design/gate_i_pause.gif" hspace="1" /></a>
+		<a href="#" onclick="front_go()"><img src="../images/design/gate_i_play.gif" hspace="1" /></a>
+	</div>
+	<div class="pdt10" style="height:9px"><img src="../images/design/img_progress_bar.gif" id="progress_bar" height="9" width="185" /></div>
+	
+	<div style="text-align:center; margin-top:40px">
+		<img src="../images/design/eyedesign_bridge_img.jpg" />
+	</div>
+	
+</div>
+
+{ #layout_footer_popup }

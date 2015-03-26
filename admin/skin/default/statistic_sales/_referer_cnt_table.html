@@ -1,0 +1,24 @@
+<table width="100%" class="simpledata-table-style" style="margin:auto;">
+<thead>
+<tr>
+	<th width="4%"></th>
+	<th></th>
+{ @ table_title }
+	<th>{.value_}</th>
+{ / }
+	<th width="7%">합계</th>
+</tr>
+</thead>
+<tbody>
+{ @ statlist }
+<tr>
+	<td class="ctd"><input type="checkbox" name="cntCode[]" value="{.key_}" titleName="{.key_}" {?.index_==0}checked{/} /></td>
+	<td class="ctd">{.key_}</td>
+	{ @ .list }
+	<td class="rtd">{=number_format(..cnt)}</td>
+	{ / }
+	<td class="rtd">{=number_format(.total_cnt)}</td>
+</tr>
+{ / }
+</tbody>
+</table>

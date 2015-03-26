@@ -1,0 +1,78 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	EditorJSLoader.ready(function(Editor) {
+		DaumEditorLoader.init(".daumeditor");
+	});
+
+	$("select[name='selectEmail']").live("change", function(){
+		if($(this).val()){
+			$.get('../member_process/logmail?seq='+$(this).val(), function(response) {
+				var data = eval(response)[0];
+				$("#title").val(data.title);
+				Editor.switchEditor($("#contents").data("initializedId"));
+				Editor.modify({"content" : data.contents});
+			});
+		}else{
+			$("#title").val('');
+			Editor.switchEditor($("#contents").data("initializedId"));
+			Editor.modify({"content" : " "});
+		}
+	});
+
+	$("#send_submit").click(function(){
+		if (Editor.getContent()=="<p><br></p>") {
+			openDialogAlert('내용 항목은 필수입니다.','400','140');
+			return false;
+		}
+		submitEditorForm(document.emailFrm);
+	});
+});
+</script>
+
+<form name="emailFrm" id="emailFrm" method="post" target="actionFrame" action="../member_process/email_pop">
+<input type="hidden" name="member_seq" value="{member_seq}"/>
+<input type="hidden" name="email" value="{email}"/>
+
+<table width="100%" class="info-table-style">
+<tbody>
+<tr>
+	<th class="its-th-align">이메일 전송 {? !email_chk }[보유 이메일 건수 : {=number_format(mail_count)}건]{ / }</th>
+</tr>
+</tbody>
+</table>
+
+
+<table class="info-table-style" style="width:100%">
+<colgroup>
+	<col width="15%" />
+	<col />
+</colgroup>
+<tbody>
+<tr>
+	<td class="its-td-align center">
+		<select name="selectEmail" style="width:90%;">
+			<option value="">= 최근 발송한 이메일 선택 =</option>
+			{@ loop }
+			<option value="{.seq}">{.subject} [{.regdate}]</option>
+			{ / }
+		</select>
+	</td>
+</tr>
+<tr>
+	<td class="its-td-align center">
+		<input type="text" name="title" id="title" value="" style="width:90%" title="제목을 입력해주세요."/>
+	</td>
+</tr>
+<tr>
+	<td class="its-td-align center">
+		<textarea name="contents" id="contents" class="daumeditor" style="width:80%" title="내용을 입력해 주세요."></textarea>
+	</td>
+</tr>
+</tbody>
+</table>
+
+<div style="width:100%;text-align:center;padding-top:10px;">
+<span class="btn large cyanblue"><button {? isdemo.isdemo } type="button"  {isdemo.isdemojs1} {:} type="submit"  id="send_submit" {/} >확인</button></span>
+</div>
+
+</form>

@@ -1,0 +1,154 @@
+{ #layout_header }
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$('#search_submit').click(function (){
+		smsFrmSubmit();
+	});
+
+	if ("{chk}" != ''){
+		smsFrmSubmit();
+	}
+});
+
+function smsFrmSubmit ()
+{
+	if ("{chk}" == '')
+	{
+		alert('SMS를 먼저 신청하신 후 이용하시기 바랍니다.');
+		return false;
+	}
+	$('#gabiaSMSFrm').attr('action', 'http://firstmall.kr/payment_firstmall/sms_account_log.php');
+	$('#gabiaSMSFrm').attr('target', 'gabiaSMS');
+	$('#gabiaSMSFrm').submit();
+}
+</script>
+
+<style>
+.ctab {border-top:1px solid #d6d6d6;border-right:1px solid #d6d6d6;border-bottom:1px solid #d6d6d6;width:150px;line-height:30px;text-align:center;background-color:#eeeeee;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#757575;}
+.ctab-on {border-top:1px solid #d6d6d6;border-bottom:1px solid #ffffff;border-right:1px solid #d6d6d6;width:150px;line-height:30px;text-align:center;background-color:#ffffff;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;}
+</style>
+
+
+<form name="memberForm" id="memberForm" method="post" target="actionFrame" action="../member_process/sms_auth">
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>SMS 발송 관리</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<!--
+			<li><span class="btn large icon"><button><span class="arrowleft"></span>이동버튼</button></span></li>
+			<li><span class="btn large icon"><button><span class="arrowleft"></span>이동버튼</button></span></li>
+			-->
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button   {? isdemo.isdemo }  type="button" {isdemo.isdemojs1} {:} type="submit" {/}>저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 상단 단계 링크 : 시작 -->
+<div class="left" id="rn_join">
+	<br style="line-height:20px;" />
+
+	<div style="position:absolute;">
+	<table cellpadding="0" cellspacing="0">
+		<td class="ctab t1"><span class="hand" onclick="location.href='curation';">개인맞춤형알림</span></td>
+		<td class="ctab t2"><span class="hand" onclick="location.href='sms_history?sc_gb=PERSONAL';">SMS 발송내역</span></td>
+		<td class="ctab t3"><span class="hand" onclick="location.href='email_history?sc_gb=PERSONAL';">이메일 발송내역</span></td>
+		<td class="ctab-on t4"><span class="hand" onclick="location.href='sms_setting';">세팅및충전</span></td>
+		<td class="ctab t4"><span class="hand" onclick="location.href='curation_log';">로그데이터</span></td>
+	</tr>
+	</table>
+	</div>
+
+	<table height="32" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #d6d6d6;">
+	<tr>
+		<td align="center"></td>
+	</tr>
+	</table>
+
+
+	<br style="line-height:20px;" />
+</div>
+<!-- 상단 단계 링크 : 끝 -->
+
+
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<div class="item-title">개인 맞춤형 알림 SMS/EMAIL</div>
+
+<div class="clearbox">
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="15%" />
+			<col />
+		</colgroup>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">개인 맞춤형 알림 SMS/EMAIL</th>
+			<td class="its-td-align left" style="padding-left:10px;">
+			{? sms_id }
+				{sms_id}
+			{ : }
+				개인 맞춤형 알림이 필요합니다. 개인 맞춤형 알림을 만들어 주세요!
+				개인 맞춤형 알림은 가비아 홈페이지 > 마이가비아 > 쇼핑몰관리에서 만들 수 있습니다.
+			{ / }
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+<br style="line-height:16px;" />
+
+
+<div class="item-title">개인 맞춤형 알림 SMS/EMAIL 인증번호</div>
+
+<div class="clearbox">
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="15%" />
+			<col />
+		</colgroup>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">개인 맞춤형 알림 SMS/EMAIL 발송용 인증번호</th>
+			<td class="its-td-align left" style="padding-left:10px;">
+			<!--
+				<div style="color:red;">2012-05-14 17:21에 SMS 인증번호가 확인되었습니다.</div>
+			-->
+				<input type="password" name="sms_auth" value="{sms_auth}" size="70"/>
+
+				<div class="description">
+				※ 상기 입력란에 MY가비아>쇼핑몰관리에서 등록한 개인 맞춤형 알림 SMS/EMAIL 발송용 인증번호를 입력 해 주세요. (최초 1회)<br>
+				※ 상기 입력란에 개인 맞춤형 알림 SMS/EMAIL 발송용 인증번호가 입력되어 있어야만 자동으로 SMS/EMAIL가 발송됩니다.<br>
+				※ 개인 맞춤형 알림 SMS/EMAIL의 보안을 강화하기 위해 정기적으로 개인 맞춤형 알림 SMS/EMAIL 발송용 인증번호 변경을 권장 드립니다.<br>
+				<span class='btn small cyanblue center'><button type='button' onclick="window.open('https://firstmall.kr/ec_hosting/customer/display_view.php?seq=2519&cate=','','');">개인 맞춤형 알림 SMS/EMAIL 발송용 인증번호에 대한 메뉴얼 보기</button></span>
+				</div>
+
+
+				<!--div class="description">
+				바로가기 클릭시 가비아로그인이 필요하며, 쇼핑몰관리페이지에서 SMS인증번호를 발급받아야하는 쇼핑몰도메인 '서비스관리>SMS서비스-관리'를 클릭하시면 됩니다.
+				</div-->
+
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+</form>
+
+{ #layout_footer }

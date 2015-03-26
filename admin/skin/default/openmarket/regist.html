@@ -1,0 +1,164 @@
+{ #layout_header }
+<style type="text/css">
+.notice-text {color:red;}
+.px_infomation		{ margin-top:20px;line-height:25px; text-align:center;color:#fff;font-weight:bold;
+					border:1px solid #9a1a2f; background-color:#bb2d33;cursor:pointer;margin-bottom:40px;
+					background: -ms-linear-gradient(bottom, #c23b44 5%, #af2423 100%);
+					background: linear-gradient(to bottom, #c23b44 5%, #af2423 100%);}
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	// 반드시 정독하셔야 하는 자주하는 질문 팝업
+	$("div.px_infomation").click(function(){
+		$.ajax({
+			type: "get",
+			url: "notice_pop",
+			data: {'type':'info'},
+			success: function(result){
+				$("#px_infomation").html(result);
+				openDialog("다중 판매마켓 - 반드시 정독하셔야 하는 자주하는 질문", "px_infomation", {"width":"80%","height":"870"});
+			}
+		});
+	});
+
+	$('#search_submit').click(function (){
+		openmarketLogFrmSubmit();
+	});
+
+	if ("{LINKAGE_SERVICE}" != ''){
+		openmarketLogFrmSubmit();
+	}
+
+});
+
+function openmarketLogFrmSubmit ()
+{
+	$('#gabiaOpenmarketLogFrm').attr('action', 'http://firstmall.kr/payment_firstmall/openmarket_account_log.php');
+	$('#gabiaOpenmarketLogFrm').attr('target', 'gabiaOpenmarketLog');
+	$('#gabiaOpenmarketLogFrm').submit();
+
+	$("#gabiaOpenmarketLog").css("width",$("#top_table").css("width"));
+}
+
+function openFirstmallRegistLayer(){
+	$('#firstmallRegistLayer iframe').attr('src','http://firstmall.kr/myshop/openmarket/openmarket_pay.php?param={param}&firstmall=yes');
+	openDialog('다중판매환경 통합관리 신청','firstmallRegistLayer',{'width':800});
+	$('#firstmallRegistLayer.ui-dialog-content').css({'padding':0,'overflow':'hidden'});
+}
+
+function openFirstmallExtendLayer(){
+	$('#firstmallExtendLayer iframe').attr('src','http://firstmall.kr/myshop/openmarket/openmarket_extend.php?param={param}&firstmall=yes');
+	openDialog('다중판매환경 통합관리 연장','firstmallExtendLayer',{'width':800});
+	$('#firstmallExtendLayer.ui-dialog-content').css({'padding':0,'overflow':'hidden'});
+}
+</script>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>판매마켓 신청</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<div class="px_infomation">
+	반드시 정독하셔야 하는 자주하시는 질문
+</div>
+
+<div class="item-title">STEP 1. 다중판매환경 통합관리 신청/연장</div>
+<table width="100%" class="info-table-style">
+<colgroup>
+	<col width="15%" />
+	<col width="60%" />
+	<col />
+</colgroup>
+<tr>
+	<th class="its-th-align">만료 기간</th>
+	<td class="its-td">
+		{?LINKAGE_SERVICE && linkage_service}
+			{=substr(linkage_service.expire_date,0,10)}
+			<span class="btn small cyanblue"><a href="#" onclick="openFirstmallExtendLayer()">연장</a></span>
+		{:}
+			<span class="btn small cyanblue"><a href="#" onclick="openFirstmallRegistLayer()">신청</a></span>
+		{/}
+	</td>
+</tr>
+</table>
+
+<br style="line-height:20px;" />
+
+<div class="pdl20 notice-text">
+	<div>※주의 : ※ 독립몰Plus+ 외부호스팅, 입점몰Plus+ 외부호스팅 사용불가</div>
+</div>
+
+<div class="item-title">STEP 2. 연동업체 계정 신청 <span class="btn small cyanblue"><a href="http://www.shoplinker.co.kr/member/?pageType=join&local=firstmall" target="_blank">연동업체 바로가기</a></span></div>
+<div class="pdl20">
+	- 본 서비스를 이용하기 위해서는 판매마켓 연동업체(샵링커) 계정 신청을 해야 합니다.<br />
+	- 퍼스트몰 회원을 위한 사용료 파격 할인 이벤트가 제공 중입니다.  사용료 확인 및 연동업체 결제 하셔야 합니다. 
+</div>
+
+<div class="item-title">STEP 3. 판매마켓 관리자 설정</div>
+<div class="pdl20">
+	1. 퍼스트몰 관리자 로그인 > 판매마켓 > 02. 판매마켓 설정 클릭<br />
+	연동업체로 상품정보를 일괄 전송합니다. 최초 1회에만 일괄 전송 버튼을 클릭하며이후 자동으로 전송/수집 됩니다.<br />
+	<br />
+	2. 퍼스트몰 관리자 로그인 > 판매마켓 > 03. 카테고리 매칭<br />
+	카테고리 매칭이 되지 않은 상품은 판매마켓으로 전송되지 않습니다.<br />
+	또한 판매마켓 연동업체(샵링커) 관리 환경에서 판매하실 마켓을 필히 설정 하셔야 합니다.<br />
+	<br />
+	※ 상단의 매뉴얼 바로보기 클릭 시 설정 방법에 대해 자세히 알려드립니다.
+</div>
+
+<form name="gabiaOpenmarketLogFrm" id="gabiaOpenmarketLogFrm" method="post">
+<input type="hidden" name="param" value="{param}">
+<div class="item-title">
+	다중판매환경 통합관리 신청/연장 내역
+	{? LINKAGE_SERVICE }
+	<select name="year">
+		<?php
+		$year	= date('Y');
+		for($y=2002; $y<=$year; $y++)
+		{
+		?>
+		<option value="<?=$y?>"<?=($year == $y) ? " selected" : ""?>><?=$y?></option>
+		<?php
+		}
+		?>
+	</select>
+
+	<span class="btn small gray"><button type="button" id="search_submit">검색</button>
+	{/}
+</div>
+</form>
+
+{? LINKAGE_SERVICE }
+<div class="clearbox">
+<table width="96%" border="0" cellspacing="0" cellpadding="0" align="center">
+<tr>
+	<td>
+		<iframe name="gabiaOpenmarketLog" id="gabiaOpenmarketLog" style="width:100%;height:700px;" frameborder="0"></iframe>
+	</td>
+</tr>
+</table>
+</div>
+{ / }
+
+<div id="px_infomation" class="hide"></div>
+
+<div id='firstmallRegistLayer' class='hide'><iframe name='firstmallRegistFrame' width='100%' height='700' frameborder='0' src='/main/blank'></iframe></div>
+<div id='firstmallExtendLayer' class='hide'><iframe name='firstmallExtendFrame' width='100%' height='700' frameborder='0' src='/main/blank'></iframe></div>
+
+{ #layout_footer }

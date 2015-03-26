@@ -1,0 +1,1052 @@
+{ #layout_header }
+<style>
+span.goods_name {display:inline-block;white-space:nowrap;overflow:hidden;width:150px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+.price {padding-right:5px;text-align:right}
+div.left {float:left;padding-right:10px}
+span.option {padding-right:10px;}
+
+div.status_change_msg {display:none; padding:5px; line-height:20px;}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	// 별표 설정
+	$("span.list-important").bind("click",function(){
+		var param = "?no="+$(this).attr('id');
+		if( $(this).hasClass('checked') ){
+			$(this).removeClass('checked');
+			param += "&val=0";
+			$.get('important'+param,function(data) {});
+		}else{
+			$(this).addClass('checked');
+			param += "&val=1";
+			$.get('important'+param,function(data) {});
+		}
+	});
+
+	$("input.refund_adjust_input").bind('change',function(){
+		account_refund_price();
+	});
+
+	$.get('../member/sms_pop?cellphone={data_order.order_cellphone}', function(data) {
+		$('#sms_form').html(data);
+	});
+
+	account_refund_price();
+
+	load_order_info();
+
+	{?data_refund.status=='complete'}
+    $("input,select,textarea",$("form[name='refundForm']")).each(function(){
+    	$(this).attr("readonly",true).attr("disabled",true);
+    });
+
+	$("input.couponsalebtn").attr("readonly",false).attr("disabled",false);
+	$("input.promotioncodesalebtn").attr("readonly",false).attr("disabled",false);
+    {/}
+
+    /* 환불수단에 따른 안내 */
+	$("select[name='refund_method']").change(function(){
+		{?data_refund.status!='complete'}
+			if($(this).val() == "cash"){
+				$("input[name='refund_emoney']").val(0);
+				$("input[name='refund_cash']").val($("input[name='final_refund_price']").val());
+				$(".emoney_refund_cell").hide();
+			}else{
+				$(".emoney_refund_cell").show();
+			}
+			account_refund_price();
+		{/}
+
+		$(".refund_method_desc").hide();
+
+		if($(this).val() == "bank"){
+			$(".plus_refund_cell").show();
+		}else{
+			$(".plus_refund_cell").hide();
+		}
+			$("." + $(this).val() + "_desc").show();
+		$("select[name='status']").change();
+	}).change();
+
+    /* 환불상태에 따른 안내 */
+	$("select[name='status']").change(function(){
+		$("div.status_change_msg").hide();
+		if($(this).val()=='{data_refund.status}'){
+			$("div.status_change_msg[curStatus='{data_refund.status}']").show();
+			$("div.status_change_msg").css('border','2px solid #ff6633');
+		}else{
+			if($(this).val()=='complete'){
+				$("div.status_change_msg[refundMethod='"+$("select[name='refund_method']").val()+"'][newStatus='"+$(this).val()+"']").show();
+				$("div.status_change_msg .status_change_msg_price").html(comma(num($("input[name='refund_price']").val())));
+			}else{
+				$("div.status_change_msg[newStatus='"+$(this).val()+"']").show();
+			}
+			$("div.status_change_msg").css('border','3px solid #3399ff');
+		}
+	});
+	$("select[name='status']").val("{data_refund.status}").change();
+
+	<!--{? !data_refund.userid }-->
+	// 비회원은 적립금환불,이머니환불 불가
+	$("input[name='refund_emoney'], input[name='refund_cash']").attr('readonly',true);
+	if(num($("input[name='refund_emoney']").val())==0 && num($("input[name='refund_cash']").val())==0) $(".emoney_refund_cell").hide();
+	<!--{ / }-->
+});
+
+function load_order_info(){
+	$.get('../order/view?no={data_refund.order_seq}&mode=refund_view&refund_code={data_refund.refund_code}', function(data) {
+		$('#order_info').html(data);
+	});
+}
+
+function reset_minus_price(){
+	var frm = document.refundForm;
+
+	if	(frm.tot_member_sale.value)			frm.tot_member_sale.value			= 0;
+	if	(frm.tot_coupon_sale.value)			frm.tot_coupon_sale.value			= 0;
+	if	(frm.tot_fblike_sale.value)			frm.tot_fblike_sale.value			= 0;
+	if	(frm.tot_mobile_sale.value)			frm.tot_mobile_sale.value			= 0;
+	if	(frm.tot_referer_sale.value)		frm.tot_referer_sale.value			= 0;
+	if	(frm.tot_promotion_code_sale.value)	frm.tot_promotion_code_sale.value	= 0;
+	if	(frm.adjust_use_coupon.value)		frm.adjust_use_coupon.value			= 0;
+	if	(frm.adjust_use_promotion.value)	frm.adjust_use_promotion.value		= 0;
+	if	(frm.adjust_use_cash.value)			frm.adjust_use_cash.value			= 0;
+	if	(frm.adjust_use_enuri.value)		frm.adjust_use_enuri.value			= 0;
+	if	(frm.adjust_use_emoney.value)		frm.adjust_use_emoney.value			= 0;
+
+	account_refund_price();
+}
+
+function account_refund_price(){
+	var frm = document.refundForm;
+
+	// 환불예상금액
+	var plus_price		= 0;
+	plus_price			+= num(frm.tot_price.value);
+	plus_price			+= num(frm.tot_refund_goods_shipping_cost.value);
+	plus_price			+= num(frm.refund_shipping_cost.value);
+	var minus_price		= 0;
+	minus_price			+= num(frm.tot_member_sale.value);
+	minus_price			+= num(frm.tot_coupon_sale.value);
+	minus_price			+= num(frm.tot_fblike_sale.value);
+	minus_price			+= num(frm.tot_mobile_sale.value);
+	minus_price			+= num(frm.tot_referer_sale.value);
+	minus_price			+= num(frm.tot_promotion_code_sale.value);
+	if(frm.adjust_use_coupon)		minus_price	+= num(frm.adjust_use_coupon.value);
+	if(frm.adjust_use_promotion)	minus_price += num(frm.adjust_use_promotion.value);
+	if(frm.adjust_use_cash)			minus_price += num(frm.adjust_use_cash.value);
+	if(frm.adjust_use_enuri)		minus_price += num(frm.adjust_use_enuri.value);
+	{? gift_order == 'y'}
+	if(frm.adjust_use_emoney)		plus_price += num({data_order.emoney});
+	{:}
+	if(frm.adjust_use_emoney)		minus_price += num(frm.adjust_use_emoney.value);
+	{/}
+
+	// 수동 계산금액 체크
+	/*
+	if	(plus_price < minus_price){
+		openDialogAlert("환불 처리금액이 0보다 작아질 수 없습니다.",400,140,function(){
+			reset_minus_price();
+		});
+		return;
+	}
+	*/
+
+	var refund_expected_price	= plus_price - minus_price;
+
+	// 조정환불금액
+	var adjust_refund_price = num($("input[name='adjust_refund_price']").val());
+
+	// 최종환불금액
+	var final_refund_price = refund_expected_price+adjust_refund_price;
+
+	// 적립금지급 금액(적립금)
+	var refund_emoney = num($("input[name='refund_emoney']").val());
+
+	// 캐시지급 금액(이머니)
+	var refund_cash = num($("input[name='refund_cash']").val());
+
+	// 환불 조정금액 체크
+	if	(final_refund_price < 0){
+		/*
+		openDialogAlert("환불금액이 0보다 작아질 수 없습니다.",400,140,function(){
+			$("input[name='adjust_refund_price']").val('0');
+			$("input[name='adjust_refund_price']").focus();
+			adjust_refund_price = 0;
+			final_refund_price = refund_expected_price+adjust_refund_price;
+		});
+		*/
+		adjust_refund_price = 0;
+		final_refund_price = refund_expected_price+adjust_refund_price;
+	}else{
+		if(refund_emoney>final_refund_price) {
+			refund_emoney = final_refund_price;
+			$("input[name='refund_emoney']").val(refund_emoney)
+		}
+
+		if(refund_cash>final_refund_price) {
+			refund_cash = final_refund_price;
+			$("input[name='refund_cash']").val(refund_cash)
+		}
+
+		// 적립금지급 최대값 제한
+		if(final_refund_price-refund_cash < refund_emoney) {
+			$("input[name='refund_emoney']").val(final_refund_price-refund_cash);
+			refund_emoney = final_refund_price-refund_cash;
+		}
+
+		// 이머니지급 최대값 제한
+		if(final_refund_price-refund_emoney < refund_cash) {
+			$("input[name='refund_cash']").val(final_refund_price-refund_emoney);
+			refund_cash = final_refund_price-refund_emoney;
+		}
+	}
+
+	// 환불 처리금액
+	{?data_refund.status=='complete'}
+		var refund_price = {data_refund.refund_price};
+	{:}
+		var refund_price = final_refund_price-refund_emoney-refund_cash;
+	{/}
+
+	// 시스템 계산금액
+	var str_system_price = 0;
+	str_system_price += num(frm.tot_price.value);
+	str_system_price += num(frm.tot_refund_goods_shipping_cost.value);
+	str_system_price -= num(frm.tot_member_sale.value);
+	str_system_price -= num(frm.tot_coupon_sale.value);
+	str_system_price -= num(frm.tot_fblike_sale.value);
+	str_system_price -= num(frm.tot_mobile_sale.value);
+	str_system_price -= num(frm.tot_referer_sale.value);
+	str_system_price -= num(frm.tot_promotion_code_sale.value);
+	str_system_price += num(frm.refund_shipping_cost.value);
+
+	// 총 조정금액
+	var str_adjust_price = 0;
+	if(frm.adjust_use_coupon) str_adjust_price += num(frm.adjust_use_coupon.value);
+	if(frm.adjust_use_promotion) str_adjust_price += num(frm.adjust_use_promotion.value);
+	if(frm.adjust_use_emoney) str_adjust_price += num(frm.adjust_use_emoney.value);
+	if(frm.adjust_use_cash) str_adjust_price += num(frm.adjust_use_cash.value);
+	if(frm.adjust_use_enuri) str_adjust_price += num(frm.adjust_use_enuri.value);
+
+	$(".str_system_price").html(setComma(str_system_price));
+	$(".str_adjust_price").html(setComma(str_adjust_price*-1));
+	$(".str_refund_expected_price").html(setComma(refund_expected_price));
+	if($("select[name='refund_method']").val() == "cash"){
+		$(".str_refund_price").html(setComma(refund_cash));
+	}else{
+		$(".str_refund_price").html(setComma(refund_price));
+	}
+
+	if(refund_expected_price) $(".str_refund_expected_price").html(setComma(refund_expected_price));
+	else $(".str_refund_expected_price").parent().html('기타');
+
+
+	$("input[name='final_refund_price']").val(final_refund_price);
+	$("input[name='refund_emoney']").attr("max",final_refund_price);
+	$("input[name='refund_cash']").attr("max",final_refund_price);
+	$("input[name='refund_price']").val(refund_price);
+}
+
+function restoreCoupon(download_seq){
+	openDialogConfirm('정말로 쿠폰을 복원하시겠습니까?',400,140,function(){
+		$.get('restore_used_coupon?download_seq='+download_seq, function(msg) {
+			openDialogAlert(msg,400,140,function(){
+				top.document.location.reload();//load_order_info();
+			});
+		});
+	});
+}
+
+function restorePromotioncode(download_seq){
+	openDialogConfirm('정말로 프로모션코드을 복원하시겠습니까?',400,140,function(){
+		$.get('restore_used_promotioncode?download_seq='+download_seq, function(msg) {
+			openDialogAlert(msg,400,140,function(){
+				top.document.location.reload();//load_order_info();
+			});
+		});
+	});
+}
+
+
+function refundSubmit(){
+
+	var refund_price = $("input[name='refund_price']").val();
+
+	if(refund_price<0){
+		openDialogAlert("환불 처리금액이 0보다 작아질 수 없습니다.",400,140,function(){
+			$("input[name='adjust_refund_price']").focus();
+			account_refund_price();
+		});
+		return false;
+	}
+
+	/* 올앳 결제취소시 파라미터 암호화 스크립트 처리 */
+	<!--{ ? config_system.pgCompany == 'allat' }-->
+	var refund_value = document.refundForm.refund_method.value;
+	if(refund_value=='card' || refund_value=='escrow_account' || refund_value=='account' || refund_value=='cellphone'){
+
+		document.refundForm.action = "/common/allat_enc";
+		document.refundForm.allat_amt.value = document.refundForm.refund_price.value;
+		switch(document.refundForm.refund_method.value){
+			case "card": 		document.refundForm.allat_pay_type.value = "CARD"; break;
+			case "account": 	document.refundForm.allat_pay_type.value = "ABANK"; break;
+			case "escrow_account": 	document.refundForm.allat_pay_type.value = "ABANK"; break;
+			case "cellphone": 	document.refundForm.allat_pay_type.value = "HP"; break;
+		}
+
+	}else{
+		document.refundForm.action = "/admin/refund_process/save";
+	}
+	<!--{ / }-->
+
+	return true;
+}
+
+</script>
+
+<!--{ ? config_system.pgCompany == 'allat' }-->
+	<script language="JavaScript" charset='utf-8' src='https://tx.allatpay.com/common/AllatPayRE.js'></script>
+<!--{ / }-->
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>
+
+			<!--{ ? data_refund.important }-->
+			<!--<span class="icon-star-gray hand checked list-important" id="important_{data_refund.refund_seq}"></span>&nbsp;&nbsp;-->
+			<!--{ : }-->
+			<!--<span class="icon-star-gray hand list-important" id="important_{data_refund.refund_seq}"></span>&nbsp;&nbsp;-->
+			<!--{ / }-->
+			<span class="bold fx16"  style="background-color:yellow">{data_refund.refund_code}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<span class="bold fx16 blue" style="background-color:yellow">{data_refund.mstatus}</span>
+			</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large icon"><button type="button" onclick="location.href='catalog';"><span class="arrowleft"></span>환불리스트</button></span></li>
+		</ul>
+
+		<!-- 우측 버튼
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button name="save_refund" id="save_refund">저장하기</button></span></li>
+		</ul>
+		-->
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<div class="center">
+	<div>
+		<!--
+		<select class="custom-select-box">
+			<option value="">프린트</option>
+			<option value="">주문내역서(거래명세서)</option>
+			<option value="">간이영수증</option>
+		</select>
+		 -->
+	</div>
+</div>
+
+<!-- 주문정보 테이블 : 시작 -->
+<div id="order_info"></div>
+
+<br style="line-height:20px;" />
+<!-- 주문 상세 내역 -->
+
+<!--
+	# $summaryModeClass
+	# 주문리스트에서 보는 요약모드면 'summary-mode'
+	# 주문상세화면에서 볼때에는 ''
+-->
+{ ? data_refund_item }
+<table class="order-view-table" width="100%" border=0>
+	<colgroup>
+		<col width="300" />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+	</colgroup>
+	<thead class="oth">
+		<tr>
+			<th rowspan="2" class="dark" colspan="2">환불신청 상품</th>
+			<th rowspan="2" class="dark">환불수량</th>
+			<th rowspan="2" class="dark">사유</th>
+			<th rowspan="2" class="dark">환불접수 일시</th>
+			<th rowspan="2" class="dark">환불완료 일시</th>
+			<th rowspan="2" class="dark">처리자</th>
+			<th colspan="2" class="dark">진행상태</th>
+		</tr>
+		<tr>
+			<th class="dark">환불</th>
+			<th class="dark">반품</th>
+		</tr>
+	</thead>
+
+	<tbody class="otb">
+		<!--{ @ data_refund_item }-->
+		<tr class="order-item-row">
+			<td class="info" colspan="2">
+				<div class="left">
+					<a href='/goods/view?no={.goods_seq}' target='_blank'><span class="order-item-image"><img class="small_goods_image" src="{.image}" /></span>
+					<span class="goods_name">{? .cancel_type == '1' }<span class="order-item-cancel-type " >[청약철회불가]</span> {/}{=character_limiter(.goods_name,41)}</span></a>
+
+					<div class="desc" style="padding-left:40px;">
+						<!--{ ? .option1 || .option2 || .option3 || .option4 || .option5 }-->
+							<!--{ ? .opt_type == 'opt' }-->
+						<img src="../images/common/icon_option.gif" />
+							<!--{ / }-->
+							<!--{ ? .opt_type == 'sub' }-->
+						<img src="../images/common/icon_add.gif" />
+							<!--{ / }-->
+						<!--{ / }-->
+						<!--{ ? .option1 }-->
+							<span class="option">{.title1} : {.option1}</span>
+						<!--{ / }-->
+						<!--{ ? .option2 }-->
+						<span class="option">{.title2} : {.option2}</span>
+						<!--{ / }-->
+						<!--{ ? .option3 }-->
+						<span class="option">{.title3} : {.option3}</span>
+						<!--{ / }-->
+						<!--{ ? .option4 }-->
+						<span class="option">{.title4} : {.option4}</span>
+						<!--{ / }-->
+						<!--{ ? .option5 }-->
+						<span class="option">{.title5} : {.option5}</span>
+						<!--{ / }-->
+
+						{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+					</div>
+					<!--{ ? .inputs }-->
+					<div class="desc" style="padding-left:40px;">
+						<!--{ @ .inputs }-->
+							<!--{ ? ..key_ > 0 }--><br /><!--{ / }-->
+						<img src="../images/common/icon_input.gif" />
+							<!--{ ? ..title }-->{..title}:<!--{ / }-->
+						{..value}
+							<!--{ / }-->
+					</div>
+					<!--{ / }-->
+					<!--{ ? .goods_kind =='coupon' }-->
+					<div  class="desc" style="padding-left:40px;" >
+						{? .coupon_serial }<span class="order-item-coupon-serial" >쿠폰번호:{.coupon_serial}</span><br/>{/}
+						{? .cancel_memo }
+							{=nl2br(.cancel_memo)}
+						{:}
+							{ ?.goods_kind =='coupon' && .social_start_date && .social_end_date }<span class="order-item-coupon-date" >유효기간:{.social_start_date}~{.social_end_date}</span><br/>{ / }
+						<div class="goods-coupon-use-return">사용제한 : {.couponinfo.coupon_use_return}</div>
+						<div class="goods-coupon-cancel-day">취소 마감시간 : {.couponinfo.socialcp_cancel_refund_day}</div>
+						{/}
+					</div>
+					<!--{ / }-->
+					</div>
+				</div>
+			</td>
+			<td class="info center">{.ea}</td>
+			<!--{ ? .index_ == 0 }-->
+			<td class="info center" rowspan="{=count(data_refund_item)}">{data_refund.mrefund_type}</td>
+			<td class="info center" rowspan="{=count(data_refund_item)}">{data_refund.regist_date}</td>
+			<td class="info center" rowspan="{=count(data_refund_item)}">
+				<!--{ ? data_refund.status == 'complete' }-->
+				{data_refund.refund_date}
+				<!--{/}-->
+			</td>
+			<td class="info center" rowspan="{=count(data_refund_item)}">{data_refund.manager_name}</td>
+			<td class="info center" rowspan="{=count(data_refund_item)}">{data_refund.mstatus}</td>
+			<td class="info center" rowspan="{=count(data_refund_item)}">{data_refund.returns_status}</td>
+			<!--{ / }-->
+		</tr>
+		<!--{ / }-->
+
+		<tr class="order-item-row">
+			<th class="dark pd10" align="right" style="padding-right:5px;" colspan="2">소계</th>
+			<th class="dark" align="center"><strong>{tot.ea} ({tot.goods_cnt}종)</strong></th>
+			<th class="dark" colspan="6"></th>
+		</tr>
+	</tbody>
+
+</table>
+{ : }
+<table class="order-view-table" width="100%" border=0>
+	<colgroup>
+		<col width="300" />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+	</colgroup>
+	<thead class="oth">
+		<tr>
+			<th rowspan="2" class="dark" colspan="2">환불신청 상품</th>
+			<th rowspan="2" class="dark">환불수량</th>
+			<th rowspan="2" class="dark">사유</th>
+			<th rowspan="2" class="dark">환불접수 일시</th>
+			<th rowspan="2" class="dark">환불완료 일시</th>
+			<th rowspan="2" class="dark">처리자</th>
+			<th colspan="2" class="dark">진행상태</th>
+		</tr>
+		<tr>
+			<th class="dark">환불</th>
+			<th class="dark">반품</th>
+		</tr>
+	</thead>
+
+	<tbody class="otb">
+
+		<tr class="order-item-row">
+			<td class="info" colspan="2">
+			</td>
+			<td class="info center"></td>
+
+			<td class="info center">기타</td>
+			<td class="info center">{data_refund.regist_date}</td>
+			<td class="info center">
+
+				{data_refund.refund_date}
+
+			</td>
+			<td class="info center">{data_refund.manager_name}</td>
+			<td class="info center">{data_refund.mstatus}</td>
+			<td class="info center">{data_refund.returns_status}</td>
+
+		</tr>
+
+
+	</tbody>
+
+</table>
+{ / }
+<div style="height:5px;"></div>
+
+<form name="refundForm" method="post" action="../refund_process/save" onsubmit="return refundSubmit()" target="actionFrame">
+<input type="hidden" name="refund_code" value="{_GET.no}" />
+<input type="hidden" name="tot_price" value="{tot.price}" />
+<input type="hidden" name="tot_refund_goods_shipping_cost" value="{tot.refund_goods_shipping_cost}" />
+<input type="hidden" name="tot_member_sale" value="{tot.member_sale}" />
+<input type="hidden" name="tot_coupon_sale" value="{tot.coupon_sale}" />
+<input type="hidden" name="tot_fblike_sale" value="{tot.fblike_sale}" />
+<input type="hidden" name="tot_mobile_sale" value="{tot.mobile_sale}" />
+<input type="hidden" name="tot_referer_sale" value="{tot.referer_sale}" />
+<input type="hidden" name="tot_promotion_code_sale" value="{tot.promotion_code_sale}" />
+<input type="hidden" name="order_shipping_cost" value="{data_order.real_shipping_cost}" />
+<input type="hidden" name="refund_shipping_cost" value="{tot.refund_shipping_cost}" />
+<input type="hidden" name="order_coupon_sale" value="{data_order.coupon_sale}" />
+<input type="hidden" name="order_emoney" value="{data_order.emoney}" />
+<input type="hidden" name="order_enuri" value="{data_order.enuri}" />
+<input type="hidden" name="cancel_type" value="{data_refund.cancel_type}" />
+<input type="hidden" name="return_reserve" value="{?data_refund.refund_type=='return'}{tot.return_reserve}{/}" />
+<input type="hidden" name="return_point" value="{?data_refund.refund_type=='return'}{tot.return_point}{/}" />
+
+<!--{ ? config_system.pgCompany == 'allat' }-->
+<input type='hidden' name='actionUrl'		value='/admin/refund_process/save' />
+<input type='hidden' name='allat_shop_id'	value='{pg.mallCode}' />
+<input type='hidden' name='allat_order_no'	value='{data_order.order_seq}' />
+<input type='hidden' name='allat_seq_no'	value='{data_order.pg_transaction_number}' />
+
+<input type='hidden' name='allat_amt'		value='' />
+<input type='hidden' name='allat_pay_type'	value='' />
+
+<input type='hidden' name='allat_enc_data'	value='' />
+<input type='hidden' name='allat_opt_pin'	value='NOVIEW' />
+<input type='hidden' name='allat_opt_mod'	value='WEB' />
+<input type='hidden' name='allat_test_yn'	value='N' />
+<!--{ / }-->
+
+<!--{ ? config_system.pgCompany == 'kspay' }-->
+<input type=hidden name="storeid"		value="{pg.mallId}">
+<input type=hidden name="storepasswd"	value="{pg.mallPass}">
+<input type=hidden name="authty"		value="{data_order.kspay_authty}">
+<input type=hidden name="trno" size=15 maxlength=12 value="{data_order.pg_transaction_number}">
+<!--{ / }-->
+
+<table class="info-table-style" width="100%" >
+	<col width="25%" />
+	<col width="25%" />
+	<col width="25%" />
+	<col width="25%" />
+	<tr>
+		{?data_refund.refund_method=='cash'}
+		<th class="its-th-align">환불방법</th>
+		<td class="its-td-align center">이머니 환불</td>
+		{:}
+		<th class="its-th-align">계좌정보</th>
+		<td class="its-td-align center">{data_refund.bank_name} {data_refund.bank_account} {data_refund.bank_depositor}</td>
+		{/}
+		<th class="its-th-align">상세사유</th>
+		<td class="its-td-align center">
+			<div class="pd5"><textarea name="refund_reason" style="width:96%;" rows="2">{=htmlspecialchars(data_refund.refund_reason)}</textarea></div>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align">처리내역로그</th>
+		<td class="its-td" colspan="3">
+			<textarea  class="wp95 line" rows="3" readOnly="readOnly">{ @process_log }[{.regist_date}] [{.actor}] {.title}{=chr(10)}{ / }</textarea>
+		</td>
+	</tr>
+</table>
+
+<div style="height:20px;"></div>
+
+<div class="item-title">환불금액 계산 및 환불처리</div>
+<!--{ ? refund_items }-->
+<table class="order-view-table" width="100%" border="0">
+<colgroup>
+	<col width="200" />
+	<col />
+	<col />
+	<col />
+	<col />
+	<col />
+	<col />
+	<col />
+</colgroup>
+<thead class="oth">
+	<tr>
+		<th class="dark" rowspan="2">상품</th>
+		<th class="dark" colspan="9">자동 계산</th>
+		<th class="dark" colspan="5">수동 계산</th>
+		<th class="dark"></th>
+	</tr>
+	<tr>
+		<th class="dark">수량</th>
+		<th class="dark">상품 금액</th>
+		<th class="dark">배송비</th>
+		<th class="dark">회원등급<br />할인</th>
+		<th class="dark">상품쿠폰<br />할인</th>
+		<th class="dark">좋아요<br />할인</th>
+		<th class="dark">모바일<br />할인</th>
+		<th class="dark">유입처<br />할인</th>
+		<th class="dark">코드할인</th>
+		<th class="dark">배송비쿠폰<br />할인</th>
+		<th class="dark">배송비코드<br />할인</th>
+		<th class="dark">적립금<br />사용</th>
+		<th class="dark">이머니<br />사용</th>
+		<th class="dark">에누리<br />할인</th>
+		<th class="dark">환불예상금액</th>
+	</tr>
+</thead>
+
+<tbody class="otb">
+<!--{ @ refund_shipping_items }-->
+	<!--{ @ .value_ }-->
+		<tr class="order-item-row">
+			<td class="info">
+				<a href='/goods/view?no={..goods_seq}' target='_blank'><span class="order-item-image"><img class="small_goods_image" src="{..image}" /></span>
+			<span class="goods_name">{? ..cancel_type == '1' }<span class="order-item-cancel-type " >[청약철회불가]</span> {/}{=character_limiter(..goods_name,41)}</span></a>
+
+					<div class="desc" style="padding-left:40px;">
+						<!--{ ? ..option1 || ..option2 || ..option3 || ..option4 || ..option5 }-->
+							<!--{ ? ..opt_type == 'opt' }-->
+						<img src="../images/common/icon_option.gif" />
+							<!--{ / }-->
+							<!--{ ? ..opt_type == 'sub' }-->
+						<img src="../images/common/icon_add.gif" />
+							<!--{ / }-->
+						<!--{ / }-->
+						<!--{ ? ..option1 }-->
+							<span class="option">{..title1} : {..option1}</span>
+						<!--{ / }-->
+						<!--{ ? ..option2 }-->
+						<span class="option">{..title2} : {..option2}</span>
+						<!--{ / }-->
+						<!--{ ? ..option3 }-->
+						<span class="option">{..title3} : {..option3}</span>
+						<!--{ / }-->
+						<!--{ ? ..option4 }-->
+						<span class="option">{..title4} : {..option4}</span>
+						<!--{ / }-->
+						<!--{ ? ..option5 }-->
+						<span class="option">{..title5} : {..option5}</span>
+						<!--{ / }-->
+							{? ..goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {..goods_code}]</div>{/}
+					</div>
+					<!--{ ? ..inputs }-->
+					<div class="desc" style="padding-left:40px;">
+						<!--{ @ ..inputs }-->
+							<!--{ ? ...key_ > 0 }--><br /><!--{ / }-->
+						<img src="../images/common/icon_input.gif" />
+							<!--{ ? ...title }-->{...title}:<!--{ / }-->
+						{...value}
+							<!--{ / }-->
+					</div>
+					<!--{ / }-->
+			</td>
+			<td class="info right">{=number_format(..ea)}</td>
+			<td class="info right">{=number_format(..price)}</td>
+		<!--{ ? ..index_ == 0 }-->
+			<td class="info right"{ ? preg_match('/^goods/', .key_) }style="color:#ff9966;"{ / }" rowspan="{..shipping_row_cnt}">
+				{ ? .key_ == 'coupon' }SMS, EMAIL
+				{ : .key_ == 'gift' }사은품
+				{ : }
+					<div>
+					{ ? ..international == 'international' }해외{ / }
+					{ ? preg_match('/^goods/', .key_) }
+						{ ? ..international == 'international' }<br/>{ / }개별배송
+					{ / }
+					</div>
+
+					<div>
+					{ ? data_order.shipping_method == 'quick' }퀵서비스
+					{ : data_order.shipping_method == 'direct' }직접수령
+					{ : data_order.shipping_method == 'postpaid' }택배(착불)
+					{ : }택배(선불){ / }
+					</div>
+
+					{ ? .key_ == 'shop' && ..shippings['basic_cost'] > 0 }
+						<div>{=number_format(..shippings['basic_cost'])}</div>
+					{ : preg_match('/^goods/', .key_) && ..shippings['goods_cost'] > 0 }
+						<div>{=number_format(..shippings['goods_cost'])}</div>
+					{ : data_order.shipping_method == 'delivery' }<div>무료배송</div>{ / }
+
+					{ ? .key_ == 'shop' && ..shippings['basic_add_cost'] > 0 }
+						<div>+{=number_format(..shippings['basic_add_cost'])}</div>
+					{ : preg_match('/^goods/', .key_) && ..shippings['goods_add_cost'] > 0 }
+						<div>+{=number_format(..shippings['goods_add_cost'])}</div>
+					{ / }
+				{ / }
+			</td>
+		<!--{ / }-->
+			<td class="info right {? ..goods_kind == 'coupon'  && ..index_ != 0} hide {/}"   {? ..goods_kind == 'coupon'  && ..index_ == 0 } rowspan="{..shipping_row_cnt}" {/}>{=number_format(..member_sale)}</td>
+			<td class="info right {? ..goods_kind == 'coupon'  && ..index_ != 0} hide {/}"   {? ..goods_kind == 'coupon'  && ..index_ == 0 } rowspan="{..shipping_row_cnt}" {/}>
+				{=number_format(..coupon_sale)}
+				<!--{ ? ..download_seq }-->
+					<!--{? ..restore_used_coupon_refund }-->
+					<span class="btn small orange"><input type="button" value="복원완료"  /></span>
+					<!--{ : }-->
+					<span class="btn small cyanblue "><input type="button" class="couponsalebtn" value="복원" onclick="restoreCoupon('{..download_seq}')" /></span>
+					<!--{ / }-->
+				<!--{ / }-->
+			</td>
+			<td class="info right {? ..goods_kind == 'coupon'  && ..index_ != 0} hide {/}"   {? ..goods_kind == 'coupon'  && ..index_ == 0 } rowspan="{..shipping_row_cnt}" {/}>{=number_format(..fblike_sale)}</td>
+			<td class="info right {? ..goods_kind == 'coupon'  && ..index_ != 0} hide {/}"   {? ..goods_kind == 'coupon'  && ..index_ == 0 } rowspan="{..shipping_row_cnt}" {/}>{=number_format(..mobile_sale)}</td>
+			<td class="info right {? ..goods_kind == 'coupon'  && ..index_ != 0} hide {/}"   {? ..goods_kind == 'coupon'  && ..index_ == 0 } rowspan="{..shipping_row_cnt}" {/}>{=number_format(..referer_sale)}</td>
+			<td class="info right {? ..goods_kind == 'coupon'  && ..index_ != 0} hide {/}"   {? ..goods_kind == 'coupon'  && ..index_ == 0 } rowspan="{..shipping_row_cnt}" {/}>{=number_format(..promotion_code_sale)}
+				<!--{ ? ..promotion_code_seq }-->
+					<!--{? ..restore_used_promotioncode_refund }-->
+					<span class="btn small orange"><input type="button" value="복원완료"  /></span>
+					<!--{ : }-->
+					<span class="btn small cyanblue  "><input type="button"  class="promotioncodesalebtn" value="복원" onclick="restorePromotioncode('{..promotion_code_seq}')" /></span>
+					<!--{ / }-->
+				<!--{ / }-->
+			</td>
+			<!--{ ? .index_ == 0 &&  ..index_==0  }-->
+			<td class="info right" rowspan="{=count(data_refund_item)}">
+				{=number_format(data_order.coupon_sale)}
+				<!--{? data_order.download_seq }-->
+					<!--{? data_order.restore_used_coupon_refund }-->
+					<span class="btn small red"><input type="button" value="복원완료"  /></span>
+					<!--{ : }-->
+					<span class="btn small cyanblue "><input type="button"  class="couponsalebtn" value="복원" onclick="restoreCoupon('{data_order.download_seq}')" /></span>
+					<!--{ / }-->
+				<!--{ / }-->
+			</td>
+			<td class="info right" rowspan="{=count(data_refund_item)}">
+				{=number_format(data_order.shipping_promotion_code_sale)}
+				<!--{ ? data_order.shipping_promotion_code_seq}-->
+					<!--{? data_order.restore_used_promotioncode_refund }-->
+					<span class="btn small red"><input type="button" value="복원완료"  /></span>
+					<!--{ : }-->
+					<span class="btn small cyanblue "><input type="button"  class="promotioncodesalebtn"  value="복원" onclick="restorePromotioncode('{data_order.shipping_promotion_code_seq}')" /></span>
+					<!--{ / }-->
+				<!--{ / }-->
+			</td>
+			<td class="info right" rowspan="{=count(data_refund_item)}">{=number_format(data_order.emoney)}</td>
+			<td class="info right" rowspan="{=count(data_refund_item)}">{=number_format(data_order.cash)}</td>
+			<td class="info right" rowspan="{=count(data_refund_item)}">{=number_format(data_order.enuri)}</td>
+			<td class="info right" rowspan="{=count(data_refund_item)}"></td>
+			<!--{ / }-->
+		</tr>
+		<!--{ / }-->
+		<!--{ / }-->
+
+		<tr class="order-item-row">
+			<th class="dark right"></th>
+			<th class="dark right">{=number_format(tot.ea)}</th>
+			<th class="dark right">{=number_format(tot.price)}</th>
+			<th class="dark right">+{=number_format(tot.refund_shipping_cost+tot.refund_goods_shipping_cost)}</th>
+			<th class="dark right">{=number_format(tot.member_sale*-1)}</th>
+			<th class="dark right">{=number_format(tot.coupon_sale*-1)}</th>
+			<th class="dark right">{=number_format(tot.fblike_sale*-1)}</th>
+			<th class="dark right">{=number_format(tot.mobile_sale*-1)}</th>
+			<th class="dark right">{=number_format(tot.referer_sale*-1)}</th>
+			<th class="dark right">{=number_format(tot.promotion_code_sale*-1)}</th>
+			<th class="dark right">- <input type="text" size="5" maxlength="10" name="adjust_use_coupon" value="{data_refund.adjust_use_coupon}" class="line onlynumber refund_adjust_input" max="{data_order.coupon_sale}" /></th>
+			<th class="dark right">- <input type="text" size="5" maxlength="10" name="adjust_use_promotion" value="{data_refund.adjust_use_promotion}" class="line onlynumber refund_adjust_input" max="{=(data_order.shipping_promotion_code_sale)}" /></th>
+			<th class="dark right">- <input type="text" size="5" maxlength="10" name="adjust_use_emoney" value="{data_refund.adjust_use_emoney}" class="line onlynumber refund_adjust_input" max="{=(data_order.emoney+0)}" /></th>
+			<th class="dark right">- <input type="text" size="5" maxlength="10" name="adjust_use_cash" value="{data_refund.adjust_use_cash}" class="line onlynumber refund_adjust_input" max="{=(data_order.cash+0)}" /></th>
+			<th class="dark">- <input type="text" size="5" maxlength="10" name="adjust_use_enuri" value="{data_refund.adjust_use_enuri}" class="line onlynumber refund_adjust_input" max="{=(data_order.enuri+0)}" /></th>
+			<th class="dark right"><span class="blue"><b><span class="str_refund_expected_price"></span></b></span></th>
+		</tr>
+		<tr class="hide"><td colspan="16">&nbsp;</td><tr>
+		<tr class="order-item-row">
+			<th class="dark" colspan="2"></th>
+			<th class="dark" colspan="8"><span class="blue"><b><span class="str_system_price"></span></b></span></th>
+			<th class="dark" colspan="5"><span class="blue"><b><span class="str_adjust_price"></span></b></span></th>
+			<th class="dark"></th>
+		</tr>
+		<tr class="order-item-row">
+			<th class="dark" colspan="2"></th>
+			<th class="dark" colspan="8">환불 상품별 환불금액이 계산됨</th>
+			<th class="dark" colspan="5">부분 환불일 경우 관리자께서 환불금액을 조정할 수 있음</th>
+			<th class="dark"></th>
+		</tr>
+
+	</tbody>
+
+</table>
+<!--{ / }-->
+<div style="height:25px;"></div>
+
+<table align="center">
+<tr>
+	<td>
+		<table width="95%" align="center" style="margin:auto">
+		<tr>
+			<td valign="top">
+				<table class="info-table-style" width="100%">
+				<tr>
+					<th class="its-th-align">환불예상금액</th>
+					<th class="its-th-align">환불조정금액 <span class="helpicon" title="환불의 귀책사유가 쇼핑몰(판매자)측에 없을 경우 (예: 구매자 변심 환불)<br />환불로 인하여 발생하는 각종 비용을 차감하여 환불금액을 조정할 수 있습니다."></span></th>
+					<th class="its-th-align">최종환불금액</th>
+				</tr>
+				<tr>
+					<td class="its-td-align center"><span class="red"><b><span class="str_refund_expected_price"></span>원</b></span></td>
+					<td class="its-td-align center"><input type="text" size="5" maxlength="10" name="adjust_refund_price" value="{data_refund.adjust_refund_price}" class="line onlynumber_signed refund_adjust_input" /> 원</td>
+					<td class="its-td-align center"><input type="text" size="5" maxlength="10" name="final_refund_price" value="0" class="line onlynumber refund_adjust_input" /> 원</td>
+				</tr>
+				</table>
+			</td>
+			<td width="15" align="center">=</td>
+			<td valign="top">
+
+				<table class="info-table-style" width="100%">
+				<col width="500" />
+				<col width="30" />
+				<col width="240" />
+				<col width="140" />
+				<tr>
+					<th class="its-th-align">
+						<div class="relative">
+							<div class="absolute" style="width:470px; text-align:center; top:-25px;">
+								<div class="refund_method_desc bank_desc fx11 red hide">소비자에게 무통장으로 ↓아래 환불금액을 입금</div>
+								<div class="refund_method_desc card_desc fx11 red hide">↓아래 환불금액을 신용카드로 자동 취소 처리함</div>
+								<div class="refund_method_desc manual_desc fx11 red hide">사용하는 전자결제(PG)사 어드민을 통해 직접 결제 취소</div>
+							</div>
+						</div>
+						<select name="refund_method">
+						<!--{ ? data_order.payment=='card' }-->
+							<option value="{data_order.payment}" {?data_refund.refund_method==data_order.payment}selected{/}>(자동) {data_order.mpayment} 결제취소</option>
+						<!--{ : data_order.payment!='bank' && data_order.payment!='virtual' && data_order.payment!='escrow_virtual' && data_order.payment!='card' && data_refund.cancel_type!='partial' }-->
+							<option value="{data_order.payment}" {?data_refund.refund_method==data_order.payment}selected{/}>{data_order.mpayment} {data_refund.mcancel_type}</option>
+						<!--{ / }-->
+						<!--{ ? data_order.payment!='bank' && data_order.payment!='virtual' && data_order.payment!='escrow_virtual' }-->
+							<option value="manual" {?data_refund.refund_method=='manual'}selected{/}>전자결제(PG)사 어드민 결제 취소</option>
+						<!--{ / }-->
+							<option value="bank" {?data_refund.refund_method=='bank'}selected{/}>무통장 환불</option>
+							{?cash_use!='N'}<option value="cash" {?data_refund.refund_method=='cash'}selected{/}>이머니(캐쉬) 환불</option>{/}
+						</select>
+					</th>
+					<th class="its-td-align emoney_refund_cell plus_refund_cell " rowspan="2">&nbsp;+&nbsp;</th>
+					<th class="its-th-align emoney_refund_cell" nowrap>적립금 환불</th>
+					{?cash_use!='N'}<th class="its-th-align emoney_refund_cell coupon_cash_desc" nowrap>이머니 환불</th>{/}
+				</tr>
+				<tr>
+					<td class="its-td-align center">
+						<div class="refund_method_desc bank_desc fx11 red hide">소비자에게 무통장으로 ↓아래 환불금액을 입금하세요.</div>
+						<div class="refund_method_desc card_desc fx11 red hide">↓아래 환불금액을 신용카드로 자동 취소 처리합니다.</div>
+						<div class="refund_method_desc manual_desc fx11 red hide">사용하는 전자결제(PG)사 어드민을 통해 직접 결제 취소를 하였을 경우에만 선택하세요</div>
+						<span class="red"><b><span class="str_refund_price"></span>원</b></span>
+						<input type="hidden" name="refund_price" value="{data_refund.refund_price}" />
+						<div id="result_lay"></div>
+					</td>
+					<td class="its-td-align emoney_refund_cell center" nowrap>
+						<!--{ ? data_refund.status!='complete' && data_refund.cancel_type =='full' }-->
+						<input type="text" size="5" maxlength="10" name="refund_emoney" class="line onlynumber refund_adjust_input" value="{data_order.emoney}" />원
+						<!--{ : }-->
+						<input type="text" size="5" maxlength="10" name="refund_emoney" class="line onlynumber refund_adjust_input" value="{data_refund.refund_emoney}" />원
+						<!--{ / }-->
+						(유효기간:<input type="text" name="refund_emoney_limit_date" id="refund_emoney_limit_date" value="{data_refund.refund_emoney_limit_date}" class="datepicker line"  maxlength="10" size="10" />)
+					</td>
+					{?cash_use!='N'}
+					<td class="its-td-align emoney_refund_cell center" nowrap>
+						<!--{ ? data_refund.status!='complete' && data_refund.cancel_type =='full' }-->
+						<input type="text" size="5" maxlength="10" name="refund_cash" class="line onlynumber refund_adjust_input" value="{data_order.cash}" />원
+						<!--{ : }-->
+						<input type="text" size="5" maxlength="10" name="refund_cash" class="line onlynumber refund_adjust_input" value="{data_refund.refund_cash}" />원
+						<!--{ / }-->
+					</td>
+					{/}
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+		<div style="height:10px;"></div>
+
+		<table class="info-table-style" width="350" style="margin:auto;">
+		<tr>
+			<td class="its-td">
+				<b>회수(차감)할 적립금 : {=number_format(tot.return_reserve)}원</b><br />
+				<b>회수(차감)할 포인트 : {=number_format(tot.return_point)}원</b><br />
+				※ 환불상품이 배송완료시 지급된 적립금+포인트 : {=number_format(tot.reserve_sum+tot.point_sum)}원<br />
+				※
+				<!--{ ? data_refund.member_seq }-->
+					{?members.type=='개인'}<img src="../images/common/icon/icon_personal.gif" />
+					{:members.type=='기업'}<img src="../images/common/icon/icon_besiness.gif" />{/}
+					{data_refund.user_name}
+					<!--{ ? members.rute == 'facebook' //facebook 회원인경우 }-->
+						(<a href="/admin/member/detail?member_seq={data_refund.member_seq}" target="_blank"><span style="color:#d13b00;"><img src="../images/board/icon/sns_f0.gif" align="absmiddle">{members.email}</span>/<span class="blue">{data_refund.group_name}}</span></a>)
+					<!--{ : }-->
+						(<a href="/admin/member/detail?member_seq={data_refund.member_seq}" target="_blank"><span style="color:#d13b00;">{data_refund.userid}</span>/<span class="blue">{data_refund.group_name}</span></a>)
+					<!--{ / }-->
+				<!--{ : }-->
+				<img src="../images/common/icon/icon_personal.gif" /> {data_refund.user_name}(<span class="desc">비회원</span>)
+				<!--{ / }-->
+
+				현재 보유 적립금 : {=number_format(data_refund.emoney)}원<br />
+			</td>
+		</tr>
+		</table>
+
+		<div style="height:10px;"></div>
+
+		{?data_refund.status=='complete'}
+			<table align="center" style="margin:auto;">
+			<tr>
+				<td>
+					<input type="hidden" name="status" value="complete" />
+					<select disabled readonly>
+					<option value="complete">환불 완료</option>
+					</select>
+				</td>
+				<td width="10"></td>
+				<td>
+					해당 환불건의 처리가 완료된 상태입니다.
+				</td>
+			</tr>
+			</table>
+		{:}
+			<table align="center" style="margin:auto;">
+			<tr>
+				<td valign="top">
+					<select name="status" onchange="if(this.value=='complete'){$('.status_complete_msg').show();}else{$('.status_complete_msg').hide();}">
+						<option value="request">환불 신청</option>
+						<option value="ing">환불 처리중</option>
+						<option value="complete">환불 완료</option>
+					</select>
+				</td>
+				<td width="10"></td>
+				<td class="status_change_msg_cell" valign="top">
+					<div class="status_change_msg" newStatus="request">환불상태만 환불 신청으로 업데이트됩니다. 실제로 환불 처리가 되지 않습니다.</div>
+					<div class="status_change_msg" newStatus="ing">환불상태만 환불 처리 중으로 업데이트됩니다. 실제로 환불 처리가 되지 않습니다.</div>
+					<div class="status_change_msg" refundMethod="bank" newStatus="complete">
+						환불상태를 처리완료로 업데이트하고 실제로 환불 처리가 됩니다.<br />
+						최종환불금액이 <span class="status_change_msg_price"></span>원이 맞습니까?<br />
+						<span class="red">
+							(수동) 무통장으로 무통장 환불금액만큼 입금해 주십시오.<br />
+							(자동) 적립금으로 적립금 환불금액만큼 되돌려 드립니다.<br />
+						</span>
+						★ 환불완료 처리 후에는 환불금액과 환불방법을 수정할 수 없습니다.
+					</div>
+					<div class="status_change_msg" refundMethod="card" newStatus="complete">
+						환불상태를 처리완료로 업데이트하고 실제로 환불 처리가 됩니다.<br />
+						최종환불금액이 <span class="status_change_msg_price"></span>원이 맞습니까?<br />
+						<span class="red">
+							(자동) 카드결제 환불금액만큼 카드결제를 취소합니다.<br />
+							(자동) 적립금으로 적립금 환불금액만큼 되돌려 드립니다.<br />
+						</span>
+						★ 환불완료 처리 후에는 환불금액과 환불방법을 수정할 수 없습니다.
+					</div>
+					<div class="status_change_msg" refundMethod="manual" newStatus="complete">
+						환불상태를 처리완료로 업데이트하고 실제로 환불 처리가 됩니다.<br />
+						최종환불금액이 <span class="status_change_msg_price"></span>원이 맞습니까?<br />
+						<span class="red">
+							(자동) 적립금으로 적립금 환불금액만큼 되돌려 드립니다.<br />
+							(수동) 전자결제(PG)사 어드민페이지에서 직접 결제 취소를 하셨습니까?<br />
+						</span>
+						★ 환불완료 처리 후에는 환불금액과 환불방법을 수정할 수 없습니다.
+					</div>
+					<div class="status_change_msg" curStatus="request">환불이 신청된 상태입니다. 실제로 환불 처리가 되지 않았습니다.</div>
+					<div class="status_change_msg" curStatus="ing">환불처리 중인 상태입니다. 실제로 환불처리가 되지 않았습니다.</div>
+					<div class="status_change_msg" curStatus="complete">해당 환불건의 처리가 완료된 상태입니다.</div>
+				</td>
+				<td width="10" class="status_complete_msg hide" valign="top"></td>
+				<td valign="top"><span class="btn large black"><input type="submit" value="확인" /></span></td>
+			</tr>
+			</table>
+		{/}
+
+	</td>
+</tr>
+</table>
+
+</form>
+
+<div style="height:20px;"></div>
+
+<table width="900" style="margin:auto">
+<col width="39%" /><col /><col width="59%" />
+<tr>
+	<td valign="top">
+		<table class="order-detail-table" width="900" style="margin:auto; border-left:2px solid #ccc; border-right:2px solid #ccc;">
+		<tbody class="odt-head">
+			<tr>
+				<th>관리자 메모</th>
+			</tr>
+		</tbody>
+		<tbody class="odt-body">
+		<tr>
+			<td class="odt-body-cell" valign="top">
+				<form name="frm_admin_memo" method="post" action="../refund_process/admin_memo?seq={data_refund.refund_seq}" target="actionFrame">
+				<div style="position:relative;width:100%">
+				<div style="position:absolute;top:-39px;left:92%;">
+				<span class="btn small cyanblue"><button type="submit">변경</button></span>
+				</div>
+				</div>
+				<textarea class="odt-memo-textarea line" name="admin_memo">{data_refund.admin_memo}</textarea>
+				</form>
+			</td>
+		</tr>
+		</tbody>
+		</table>
+	</td>
+	<td></td>
+	<td valign="top">
+		<table class="order-detail-table" width="900" style="margin:auto; border-left:2px solid #ccc; border-right:2px solid #ccc;">
+		<tbody class="odt-head">
+			<tr>
+				<th>SMS 전송</th>
+			</tr>
+		</tbody>
+		<tbody class="odt-body">
+		<tr>
+			<td class="odt-body-cell" valign="top">
+				<div id="sms_form"></div>
+			</td>
+		</tr>
+		</tbody>
+		</table>
+
+	</td>
+</tr>
+</table>
+
+<script>apply_input_style();</script>
+
+{ #layout_footer }

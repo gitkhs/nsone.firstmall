@@ -1,0 +1,15 @@
+{#layout_header_popup}
+
+<form name="flashmagicForm" method="post">
+<input type="hidden" name="code" value="{config_system.service.code}" />
+<input type="hidden" name="shopSno" value="{config_system.shopSno}" />
+<input type="hidden" name="domain" value="{_SERVER.HTTP_HOST}" />
+<input type="hidden" name="return_url" value="{return_url}" />
+</form>
+
+<script>
+document.flashmagicForm.action="http://flashmagic.firstmall.kr";
+document.flashmagicForm.submit();
+</script>
+
+{#layout_footer_popup}

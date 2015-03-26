@@ -1,0 +1,606 @@
+<script type="text/javascript">
+$(document).ready(function() {
+
+	// 바로열기
+	$(".btn-direct-open").toggle(function(){
+		var nextTr = $(this).parent().parent().next();
+		var goods_seq = $(this).parent().parent().find("input[type='checkbox']").val();
+		$.get('batch_option_view?mode=view&no='+goods_seq, function(data) {
+			nextTr.find('div.option_info').html(data);
+		});
+		nextTr.removeClass('hide');
+		$(this).addClass("opened");
+
+		$(this).parent().parent().find(".option_td input,select").each(function(){
+			$(this).attr('disabled',true);
+			$(this).attr('readonly',true);
+		});
+
+	},function(){
+		var nextTr = $(this).parent().parent().next();
+		nextTr.find('div.order_info').html('');
+		nextTr.addClass('hide');
+		$(this).removeClass("opened");
+
+		$(this).parent().parent().find(".option_td input,select").each(function(){
+			$(this).attr('disabled',false);
+			$(this).attr('readonly',false);
+		});
+	});
+
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','add_category1','');
+	$("select[name='add_category1']").live("change",function(){
+		category_admin_select_load('add_category1','add_category2',$(this).val());
+		category_admin_select_load('add_category2','add_category3',"");
+		category_admin_select_load('add_category3','add_category4',"");
+	});
+	$("select[name='add_category2']").live("change",function(){
+		category_admin_select_load('add_category2','add_category3',$(this).val());
+		category_admin_select_load('add_category3','add_category4',"");
+	});
+	$("select[name='add_category3']").live("change",function(){
+		category_admin_select_load('add_category3','add_category4',$(this).val());
+	});
+
+	category_admin_select_load('','move_category1','');
+	$("select[name='move_category1']").live("change",function(){
+		category_admin_select_load('move_category1','move_category2',$(this).val());
+		category_admin_select_load('move_category2','move_category3',"");
+		category_admin_select_load('move_category3','move_category4',"");
+	});
+	$("select[name='move_category2']").live("change",function(){
+		category_admin_select_load('move_category2','move_category3',$(this).val());
+		category_admin_select_load('move_category3','move_category4',"");
+	});
+	$("select[name='move_category3']").live("change",function(){
+		category_admin_select_load('move_category3','move_category4',$(this).val());
+	});
+
+	category_admin_select_load('','copy_category1','');
+	$("select[name='copy_category1']").live("change",function(){
+		category_admin_select_load('copy_category1','copy_category2',$(this).val());
+		category_admin_select_load('copy_category2','copy_category3',"");
+		category_admin_select_load('copy_category3','copy_category4',"");
+	});
+	$("select[name='copy_category2']").live("change",function(){
+		category_admin_select_load('copy_category2','copy_category3',$(this).val());
+		category_admin_select_load('copy_category3','copy_category4',"");
+	});
+	$("select[name='copy_category3']").live("change",function(){
+		category_admin_select_load('copy_category3','copy_category4',$(this).val());
+	});
+
+
+	/* 브랜드 불러오기 */
+	brand_admin_select_load('','add_brand1','');
+	$("select[name='add_brand1']").live("change",function(){
+		brand_admin_select_load('add_brand1','add_brand2',$(this).val());
+		brand_admin_select_load('add_brand2','add_brand3',"");
+		brand_admin_select_load('add_brand3','add_brand4',"");
+	});
+	$("select[name='add_brand2']").live("change",function(){
+		brand_admin_select_load('add_brand2','add_brand3',$(this).val());
+		brand_admin_select_load('add_brand3','add_brand4',"");
+	});
+	$("select[name='add_brand3']").live("change",function(){
+		brand_admin_select_load('add_brand3','add_brand4',$(this).val());
+	});
+
+	brand_admin_select_load('','move_brand1','');
+	$("select[name='move_brand1']").live("change",function(){
+		brand_admin_select_load('move_brand1','move_brand2',$(this).val());
+		brand_admin_select_load('move_brand2','move_brand3',"");
+		brand_admin_select_load('move_brand3','move_brand4',"");
+	});
+	$("select[name='move_brand2']").live("change",function(){
+		brand_admin_select_load('move_brand2','move_brand3',$(this).val());
+		brand_admin_select_load('move_brand3','move_brand4',"");
+	});
+	$("select[name='move_brand3']").live("change",function(){
+		brand_admin_select_load('move_brand3','move_brand4',$(this).val());
+	});
+
+	brand_admin_select_load('','copy_brand1','');
+	$("select[name='copy_brand1']").live("change",function(){
+		brand_admin_select_load('copy_brand1','copy_brand2',$(this).val());
+		brand_admin_select_load('copy_brand2','copy_brand3',"");
+		brand_admin_select_load('copy_brand3','copy_brand4',"");
+	});
+	$("select[name='copy_brand2']").live("change",function(){
+		brand_admin_select_load('copy_brand2','copy_brand3',$(this).val());
+		brand_admin_select_load('copy_brand3','copy_brand4',"");
+	});
+	$("select[name='copy_brand3']").live("change",function(){
+		brand_admin_select_load('copy_brand3','copy_brand4',$(this).val());
+	});
+	$("select[name='target_modify']").bind("change",function(){
+		check_target_modify();
+	});
+	
+	/* 지역 불러오기 */
+	location_admin_select_load('','add_location1','');
+	$("select[name='add_location1']").live("change",function(){
+		location_admin_select_load('add_location1','add_location2',$(this).val());
+		location_admin_select_load('add_location2','add_location3',"");
+		location_admin_select_load('add_location3','add_location4',"");
+	});
+	$("select[name='add_location2']").live("change",function(){
+		location_admin_select_load('add_location2','add_location3',$(this).val());
+		location_admin_select_load('add_location3','add_location4',"");
+	});
+	$("select[name='add_location3']").live("change",function(){
+		location_admin_select_load('add_location3','add_location4',$(this).val());
+	});
+
+	location_admin_select_load('','move_location1','');
+	$("select[name='move_location1']").live("change",function(){
+		location_admin_select_load('move_location1','move_location2',$(this).val());
+		location_admin_select_load('move_location2','move_location3',"");
+		location_admin_select_load('move_location3','move_location4',"");
+	});
+	$("select[name='move_location2']").live("change",function(){
+		location_admin_select_load('move_location2','move_location3',$(this).val());
+		location_admin_select_load('move_location3','move_location4',"");
+	});
+	$("select[name='move_location3']").live("change",function(){
+		location_admin_select_load('move_location3','move_location4',$(this).val());
+	});
+
+	location_admin_select_load('','copy_location1','');
+	$("select[name='copy_location1']").live("change",function(){
+		location_admin_select_load('copy_location1','copy_location2',$(this).val());
+		location_admin_select_load('copy_location2','copy_location3',"");
+		location_admin_select_load('copy_location3','copy_location4',"");
+	});
+	$("select[name='copy_location2']").live("change",function(){
+		location_admin_select_load('copy_location2','copy_location3',$(this).val());
+		location_admin_select_load('copy_location3','copy_location4',"");
+	});
+	$("select[name='copy_location3']").live("change",function(){
+		location_admin_select_load('copy_location3','copy_location4',$(this).val());
+	});
+	$("select[name='target_modify']").bind("change",function(){
+		check_target_modify();
+	});
+
+	check_target_modify();
+
+});
+
+function check_target_modify()
+{
+	$("tbody.if_category").addClass("hide");
+	$("tbody.if_brand").addClass("hide");
+	$("tbody.if_location").addClass("hide");
+	var target_str = $("select[name='target_modify'] option:selected").val();
+	if( target_str == 'category' ){
+		$("tbody.if_category").removeClass("hide");
+	}
+	if( target_str == 'brand' ){
+		$("tbody.if_brand").removeClass("hide");
+	}
+	if( target_str == 'location' ){
+		$("tbody.if_location").removeClass("hide");
+	}
+}
+
+</script>
+
+<br class="table-gap" />
+
+<table class="list-table-style" cellspacing="0">
+	<colgroup>
+		<col width="15%" /><!--대상 상품-->
+		<col width="15%" /><!--검색 조건-->
+		<col /><!--아래와 같이 업데이트-->
+		<col width="80" /><!--결과-->
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>대상 상품</th>
+		<th>검색 조건</th>
+		<th>
+		<select name="target_modify" >
+			<option value="category" style="background-color:blue;color:white">카테고리</option>
+			<option value="brand" style="background-color:red;color:white">브랜드</option>
+			<option value="location" style="background-color:red;color:white">지역</option>
+		</select>
+		를 아래와 같이 업데이트
+		</th>
+		<th>결과</th>
+	</tr>
+	</thead>
+	<tbody class="ltb if_category">
+		<tr class="list-row" style="height:70px;">
+			<td align="center" rowspan="10">
+			검색된 상품에서  →
+			<select name="modify_list_category" class="modify_list">
+				<option value="choice">선택 </option>
+				<option value="all">전체 </option>
+			</select>
+			</td>
+			<td align="center">-</td>
+			<td>
+			<label>
+			<input type="radio" name="search_category_mode" value="add" checked />
+			</label>
+			<select class="line" name="add_category1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+			<select class="line" name="add_category2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+			<select class="line" name="add_category3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+			<select class="line" name="add_category4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+			카테고리에 연결합니다.
+			<div class="blue">상품에 연결된 카테고리가 없었으면 연결되는 카테고리가 대표카테고리가 됩니다.</div>
+			</td>
+			<td align="center">
+			연결
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+
+			<td align="center" class="blue">카테고리로 검색해야만 가능</td>
+			<td>
+			<label>
+			<input type="radio" name="search_category_mode" value="move" />
+			기존 카테고리와의 연결을 해제하고
+			</label>
+			<select class="line" name="move_category1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+			<select class="line" name="move_category2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+			<select class="line" name="move_category3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+			<select class="line" name="move_category4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+			카테고리에 연결합니다.
+			<div class="blue">해제되는 카테고리가 대표카테고리였으면 연결되는 카테고리가 대표카테고리가 됩니다.</div>
+			</td>
+			<td align="center">
+			이동
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+			<td align="center">-</td>
+			<td>
+			<label>
+			<input type="radio" name="search_category_mode" value="copy" />
+			상품을 복사해서
+			</label>
+			<select class="line" name="copy_category1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+			<select class="line" name="copy_category2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+			<select class="line" name="copy_category3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+			<select class="line" name="copy_category4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+			카테고리에 연결합니다.
+			<div class="blue">복사된 신규상품에 연결되는 카테고리는 당연히 대표카테고리가 됩니다.</div>
+			</td>
+			<td align="center">
+			복사
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+			<td align="center" class="blue">카테고리로 검색해야만 가능</td>
+			<td>
+			<label>
+			<input type="radio" name="search_category_mode" value="del" />
+			카테고리로 검색된 상품의 해당 카테고리만 연결을 해제합니다.
+			</label>
+			<div class="blue">단, 카테고리가 대표카테고리이면 연결을 해제하지 않습니다.</div>
+			</td>
+			<td align="center">
+			부분해제
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+			<td align="center">-</td>
+			<td>
+			<label>
+			<input type="radio" name="search_category_mode" value="all_del" />
+			모든 카테고리와의 연결을 해제합니다.
+			</label>
+			<div class="blue">즉, 해당 상품은 미분류 상품이 됩니다.</div>
+			</td>
+			<td align="center">
+			전체해제
+			</td>
+		</tr>
+	</tbody>
+
+	<tbody class="ltb if_brand">
+		<tr class="list-row" style="height:70px;">
+			<td align="center" rowspan="5">
+			검색된 상품에서  →
+			<select name="modify_list_brand" class="modify_list">
+				<option value="choice">선택 </option>
+				<option value="all">전체 </option>
+			</select>
+			</td>
+			<td align="center">-</td>
+			<td>
+			<label>
+			<input type="radio" name="search_brand_mode" value="add" checked />
+			</label>
+			<select class="line" name="add_brand1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+			<select class="line" name="add_brand2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+			<select class="line" name="add_brand3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+			<select class="line" name="add_brand4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+			브랜드에 연결합니다.
+			<div class="red">상품에 연결된 브랜드가 없었으면 연결되는 브랜드가 대표브랜드가 됩니다.</div>
+			</td>
+			<td align="center">
+			연결
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+
+			<td align="center" style="color:red">브랜드로 검색해야만 가능</td>
+			<td>
+			<label>
+			<input type="radio" name="search_brand_mode" value="move" />
+			기존 브랜드와의 연결을 해제하고
+			</label>
+			<select class="line" name="move_brand1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+			<select class="line" name="move_brand2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+			<select class="line" name="move_brand3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+			<select class="line" name="move_brand4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+			브랜드에 연결합니다.
+			<div class="red">해제되는 브랜드가 대표브랜드였으면 연결되는 브랜드가 대표브랜드가 됩니다.</div>
+			</td>
+			<td align="center">
+			이동
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+			<td align="center">-</td>
+			<td>
+			<label>
+			<input type="radio" name="search_brand_mode" value="copy" />
+			상품을 복사해서
+			</label>
+			<select class="line" name="copy_brand1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+			<select class="line" name="copy_brand2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+			<select class="line" name="copy_brand3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+			<select class="line" name="copy_brand4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+			브랜드에 연결합니다.
+			<div class="red">복사된 신규상품에 연결되는 브랜드는 당연히 대표브랜드가 됩니다.</div>
+			</td>
+			<td align="center">
+			복사
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+			<td align="center" style="color:red">브랜드로 검색해야만 가능</td>
+			<td>
+			<label>
+			<input type="radio" name="search_brand_mode" value="del" />
+			브랜드로 검색된 상품의 해당 브랜드만 연결을 해제합니다.
+			</label>
+			<div class="red">단, 브랜드가 대표브랜드이면 연결을 해제하지 않습니다.</div>
+			</td>
+			<td align="center">
+			부분해제
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+			<td align="center">-</td>
+			<td>
+			<label>
+			<input type="radio" name="search_brand_mode" value="all_del" />
+			모든 브랜드와의 연결을 해제합니다.
+			</label>
+			<div class="red">즉, 해당 상품은 미분류 상품이 됩니다.</div>
+			</td>
+			<td align="center">
+			전체해제
+			</td>
+		</tr>
+	</tbody>
+	<tbody class="ltb if_location">
+		<tr class="list-row" style="height:70px;">
+			<td align="center" rowspan="5">
+			검색된 상품에서  →
+			<select name="modify_list_location" class="modify_list">
+				<option value="choice">선택 </option>
+				<option value="all">전체 </option>
+			</select>
+			</td>
+			<td align="center">-</td>
+			<td>
+			<label>
+			<input type="radio" name="search_location_mode" value="add" checked />
+			</label>
+			<select class="line" name="add_location1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+			<select class="line" name="add_location2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+			<select class="line" name="add_location3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+			<select class="line" name="add_location4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+			지역에 연결합니다.
+			<div class="red">상품에 연결된 지역이 없었으면 연결되는 지역이 대표지역이 됩니다.</div>
+			</td>
+			<td align="center">
+			연결
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+
+			<td align="center" style="color:red">지역으로 검색해야만 가능</td>
+			<td>
+			<label>
+			<input type="radio" name="search_location_mode" value="move" />
+			기존 지역과의 연결을 해제하고
+			</label>
+			<select class="line" name="move_location1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+			<select class="line" name="move_location2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+			<select class="line" name="move_location3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+			<select class="line" name="move_location4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+			지역에 연결합니다.
+			<div class="red">해제되는 지역이 대표지역였으면 연결되는 지역이 대표지역이 됩니다.</div>
+			</td>
+			<td align="center">
+			이동
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+			<td align="center">-</td>
+			<td>
+			<label>
+			<input type="radio" name="search_location_mode" value="copy" />
+			상품을 복사해서
+			</label>
+			<select class="line" name="copy_location1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+			<select class="line" name="copy_location2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+			<select class="line" name="copy_location3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+			<select class="line" name="copy_location4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+			지역에 연결합니다.
+			<div class="red">복사된 신규상품에 연결되는 지역는 당연히 대표지역이 됩니다.</div>
+			</td>
+			<td align="center">
+			복사
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+			<td align="center" style="color:red">지역으로 검색해야만 가능</td>
+			<td>
+			<label>
+			<input type="radio" name="search_location_mode" value="del" />
+			지역으로 검색된 상품의 해당 지역만 연결을 해제합니다.
+			</label>
+			<div class="red">단, 지역이 대표지역이면 연결을 해제하지 않습니다.</div>
+			</td>
+			<td align="center">
+			부분해제
+			</td>
+		</tr>
+		<tr class="list-row" style="height:70px;">
+			<td align="center">-</td>
+			<td>
+			<label>
+			<input type="radio" name="search_location_mode" value="all_del" />
+			모든 지역과의 연결을 해제합니다.
+			</label>
+			<div class="red">즉, 해당 상품은 미분류 상품이 됩니다.</div>
+			</td>
+			<td align="center">
+			전체해제
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<br class="table-gap" />
+
+<ul class="left-btns clearbox">
+	<li><div style="margin-top:rpx;">
+	<!--{ ? search_yn == 'y' }-->
+	검색 <b>{=number_format(page.totalcount)}</b> 개
+	<!--{ : }-->
+	총 <b>{=number_format(page.totalcount)}</b> 개</div>
+	<!--{ / }-->
+	</li>
+	<li><span class="desc">※ 이용방법 : [검색하기]버튼으로 검색 후 상품정보를 조건 업데이트 하세요!</span></li>
+</ul>
+
+<div class="fr">
+	<div class="clearbox">
+		<ul class="right-btns clearbox">
+		<li><select class="custom-select-box-multi" name="orderby">
+			<option value="goods_seq" {?orderby=='goods_seq'}selected{/}>최근등록순</option>
+			<option value="goods_name" {?orderby=='goods_name'}selected{/}>상품명순</option>
+			<option value="page_view" {?orderby=='page_view'}selected{/}>페이지뷰순</option>
+		</select></li>
+		<li><select  class="custom-select-box-multi" name="perpage">
+			<option id="dp_qty10" value="10" {? perpage == 10 } selected{/} >10개씩</option>
+			<option id="dp_qty50" value="50" {? perpage == 50 } selected{/} >50개씩</option>
+			<option id="dp_qty100" value="100" {? perpage == 100 } selected{/} >100개씩</option>
+			<option id="dp_qty200" value="200" {? perpage == 200 } selected{/} >200개씩</option>
+		</select></li>
+	</ul>
+	</div>
+</div>
+<br style="line-height:2px;" />
+<table class="list-table-style" cellspacing="0" border="0" >
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="30" /><!--체크-->
+		<col width="30" /><!--중요-->
+		<col width="40" /><!--번호-->
+		<col width="40" /><!--이벤트-->
+		<col width="60" /><!--상품이미지-->
+		<col /><!--상품명-->
+		<col width="40" /><!--옵션-->
+		<col width="20%" /><!--대표 카테고리-->
+		<col width="20%" /><!--대표 브랜드-->
+		<col width="20%" /><!--대표 지역-->
+
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th><input type="checkbox" id="chkAll" /></th>
+		<th><span class="icon-star-gray {?sc.orderby=='favorite_chk' && sc.sort=='desc'}checked{/}" id="order_star"></span></th>
+		<th>번호</th>
+		<th>이벤트</th>
+		<th colspan="2">상품명</th>
+		<th>옵션</th>
+		<th>대표 카테고리</th>
+		<th>대표 브랜드</th>
+		<th>대표 지역</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+	<!--{? loop }-->
+	<!--{@ loop }-->
+		<tr class="list-row" style="height:70px;">
+			<td align="center"><input type="checkbox" class="chk" name="goods_seq[]" value="{.goods_seq}" /></td>
+			<td align="center"><span class="icon-star-gray star_select {.favorite_chk}" goods_seq="{.goods_seq}"></span></td>
+			<td align="center">{page.totalcount - ._no + 1}</td>
+			<td align="center">{?.event_seq}<a href="../event/regist?event_seq={.event_seq}" target="_blank" style="color:blue">{.event_seq}</a>{:}-{/}</td>
+			<td align="center"><a href="/goods/view?no={.goods_seq}" target="_blank"><img src="{=viewImg(.goods_seq,'thumbView')}" width="50"></a></td>
+			<td align="left" style="padding-left:10px;"><a href="../goods/regist?no={.goods_seq}" target="_blank">{=getstrcut(.goods_name,80)}</a> <div style="padding-top:5px;">{.catename}</div>
+			{? .tax=='exempt' }<div style="color:red;">[비과세]</div>{ / }</td>
+			<td align="center"><span class="btn-direct-open"><span class="hide">바로열기</span></span></td>
+			<td style="padding-left:5px;">
+				{ @.category }
+				{ ? !..link }
+				<div style="color:gray">{=implode(' > ',..category_name)}</div>
+				{ : }
+				<div ><strong>{=implode(' > ',..category_name)}</strong></div>
+				{ / }
+				{ / }
+			</td>
+			<td style="padding-left:10px;">
+				{ @.brand }
+				{ ? !..link }
+				<div style="color:gray">{=implode(' > ',..brand_name)}</div>
+				{ : }
+				<div ><strong>{=implode(' > ',..brand_name)}</strong></div>
+				{ / }
+				{ / }
+			</td>
+			<td style="padding-left:10px;">
+				{ @.location }
+				{ ? !..link }
+				<div style="color:gray">{=implode(' > ',..location_name)}</div>
+				{ : }
+				<div ><strong>{=implode(' > ',..location_name)}</strong></div>
+				{ / }
+				{ / }
+			</td>
+		</tr>
+		<tr class="order-list-summary-row hide">
+			<td colspan="10" class="order-list-summary-row-td"><div class="option_info"></div></td>
+		</tr>
+	<!--{ / }-->
+	<!--{ : }-->
+	<tr class="list-row">
+		<td align="center" colspan="10">
+			<!--{ ? search_text }-->
+			'{search_text}' 검색된 상품이 없습니다.
+			<!--{:}-->
+			등록된 상품이 없습니다.
+			<!--{/}-->
+		</td>
+	</tr>
+	<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+
+</table>
+<!-- 주문리스트 테이블 : 끝 -->

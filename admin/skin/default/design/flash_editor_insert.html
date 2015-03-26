@@ -1,0 +1,122 @@
+{#layout_header_popup}
+
+<script src="/app/javascript/plugin/editor/js/popup.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript">
+$(function(){
+	initEmbeder();
+	load_flash_list();
+});
+
+function initEmbeder() {
+	var _opener = PopupUtil.getOpener();
+	if(!_opener) {
+		alert('잘못된 경로로 접근하셨습니다.');
+		return;
+	}
+
+	var _embeder = getEmbeder('media');
+	window.execEmbed = _embeder.embedHandler;
+}
+
+// 코드 삽입 완료 후
+function done() {
+	var _data = {};
+	_data.code = $("#inserttag").html();
+	if (typeof(execEmbed) == 'undefined') { //Virtual Function
+		return;
+	}
+	executeAfterDataCheck(_data, function(){
+		execEmbed(_data);
+		closeWindow();
+	});
+}
+
+function executeAfterDataCheck(data, successHandler) {
+	if (data.code) {
+		successHandler();
+	} else {
+		alert("삽입할 플래시매직을 선택 해 주세요.");
+	}
+}
+
+/* 플래시 선택 */
+function editor_insert_flash(flash_seq){
+	var tag_flash = "{" + "=showDesignFlash("+ flash_seq +")" + "}";
+	$("#inserttag").html(tag_flash);
+	done();
+}
+
+/* 플래시목록 불러오기 */
+function load_flash_list(){
+ 	/* 리스트 호출 */
+	$("#flashListTable table.dlts-inner-table tbody").load("../design/get_flash_editor_list_html?page={_GET.page}");
+}
+</script>
+<link rel="stylesheet" href="/app/javascript/plugin/editor/css/popup.css" type="text/css"  charset="utf-8"/>
+<style>
+	#flashPreviewContainer {width:500px; margin:auto; min-2013-05-29:20px; padding:10px;  border:1px solid #ddd; text-align:center;}
+	.design-list-table-style {border:2px solid #333; border-collapse:collapse;}
+	.design-list-table-style th.dlts-th {background-color:#ededed; height:30px;}
+	.design-list-table-style td.dlts-td {background-color:#ffffff; height:22px; padding:4px 0;}
+	.design-list-table-style th.left,
+	.design-list-table-style td.left {text-indent:15px;}
+	.design-list-table-style th.right,
+	.design-list-table-style td.right {padding-right:10px;}
+	.design-list-table-style div.dlts-body {max-height:550px; overflow:auto;}
+	.design-list-table-style div.dlts-body table.dlts-inner-table {border-collapse:collapse;}
+	.design-list-table-style div.dlts-body table.dlts-inner-table td {border-top:1px solid #d3d3d3;}
+</style>
+<div id="wrapper"  >
+	<div class="body">
+		<!-- 서브메뉴 탭 : 시작 -->
+		{ #editor_menu }
+		<!-- 서브메뉴 탭 : 끝 -->
+
+		<div id="inserttag" class="hide"></div>
+		<table id="flashListTable" class="design-list-table-style" width="100%">
+			<colgroup>
+				<col width="55" />
+				<col width="150" />
+				<col width="" />
+				<col width="220" />
+			</colgroup>
+			<thead>
+			<tr>
+				<th class="dlts-th center">번호</th>
+				<th class="dlts-th center">만든 날짜</th>
+				<th class="dlts-th center">스타일명 (플래시크기)</th>
+				<th class="dlts-th center">삽입</th>
+			</tr>
+			</thead>
+			<tr>
+				<td colspan="4">
+					<div class="dlts-body">
+					<table width="100%" class="dlts-inner-table">
+					<colgroup>
+						<col width="55" />
+						<col width="160" />
+						<col width="" />
+						<col width="220" />
+					</colgroup>
+					<tbody>
+					</tbody>
+					</table>
+					</div>
+				</td>
+			</tr>
+		</table>
+
+		<div style="height:3px"></div>
+	</div>
+
+	<!-- 페이징 -->
+	<div id="flashpagin" align="center"  class="paging_navigation" ></div>
+	<!-- 페이징 -->
+	</div>
+
+	<div class="footer">
+		<p><a href="#" onclick="closeWindow();" title="닫기" class="close">닫기</a></p>
+	</div>
+</div>
+{#layout_footer_popup}

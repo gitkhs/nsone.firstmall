@@ -1,0 +1,49 @@
+<script>
+var arrSkinInfo = {};
+</script>
+
+<table class="skin-setting-table" border="0" cellpadding="0" cellspacing="0">
+<colgroup>
+	<col width="" />
+	<col width="" />
+	<col width="160" />
+	<col width="140" />
+	<col width="120" />
+	<col width="220" />
+</colgroup>
+<tr>
+	<td class="sst-sub-title">선택</td>
+	<td class="sst-sub-title">스킨명 (폴더명)</td>
+	<td class="sst-sub-title">현재 상태</td>
+	<td class="sst-sub-title">미리보기</td>
+	<td class="sst-sub-title">일시</td>
+	<td class="sst-sub-title">백업 / 복사 / 이름변경 / 삭제</td>
+</tr>
+<!--{ @ my_skin_list }-->
+<tr>
+	<td class="sst-row">
+		<input type="radio" name="skin_chk" value="{.skin}" <!--{ ? _GET.checkedSkin == .skin }-->checked<!--{ / }--> />
+		<script>
+		arrSkinInfo["{.skin}"] = {=json_encode(my_skin_list)}[{.index_}];
+		</script>
+	</td>
+	<td class="sst-row left">
+		<div class="sst-skin-name">{.name} ({.skin})</div>
+	</td>
+	<td class="sst-row">
+		{=implode(" / ",my_skin_list_icon[.index_])}
+	</td>
+	<td class="sst-row">
+		<span class="btn small"><a href="{?skinPrefix == 'mobile'}http://{mobileDomain}{:}/{/}?previewSkin={.skin}" target="_top">미리보기</a></span>
+		<span class="btn small"><a href="{?skinPrefix == 'mobile'}http://{mobileDomain}{:}/{/}?previewSkin={.skin}" target="_blank">새창보기</a></span>
+	</td>
+	<td class="sst-row"><div class="sst-skin-regdate">{.regdate}</div></td>
+	<td class="sst-row" >
+		<span class="btn small"><input type="button" value="백업"  {? isdemo.isdemo } {isdemo.isdemojs1} {:}  onclick="backup_skin('{.skin}')" {/}/></span>
+		<span class="btn small"><input type="button" value="복사"  {? isdemo.isdemo } {isdemo.isdemojs1} {:}  onclick="copy_skin('{.skin}')"{/} /></span>
+		<span class="btn small"><input type="button" value="이름변경"  {? isdemo.isdemo } {isdemo.isdemojs1} {:} onclick="rename_skin('{.skin}','{.name}')"{/}  /></span>
+		<span class="btn small"><input type="button" value="삭제"  {? isdemo.isdemo } {isdemo.isdemojs1} {:} onclick="delete_skin('{.skin}')" {/} /></span>
+	</td>
+</tr>
+<!--{ / }-->
+</table>

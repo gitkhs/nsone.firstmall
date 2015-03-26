@@ -1,0 +1,65 @@
+@charset "UTF-8";
+
+#pager{
+	text-align:center;
+	vertical-align:bottom;
+	white-space:nowrap; *zoom:1;margin-top:10px;text-align:center;
+}
+#pager p{
+	margin:10px 0 0 0;
+	padding:0;
+	vertical-align:bottom;
+}
+#pager p span{
+/*	width:14px;
+	height:13px;*/
+	padding:3px 8px;
+	margin:5px 3px;
+	cursor:pointer;
+	font-weight:bold;
+}
+#pager p span.page-number{
+	margin:2px 3px;
+	line-height: 200%;
+	font-size:13px;
+}
+#pager p span.pgCurrent{
+	margin:2px 3px;
+	line-height: 200%;
+	font-weight:bold; 
+	font-size:13px;
+	color:red;vertical-align:middle;border:1px solid #c8c8c8;
+}
+#pager p span.first{
+	background:url("../images/common/icon_paging_first.gif")  repeat-x;height:22px; width:22px;
+}
+#pager p span.prev{
+	background:url("../images/common/icon_paging_prev.gif")  repeat-x;height:22px; width:22px;
+}
+#pager p span.next{
+	background:url("../images/common/icon_paging_next.gif")  repeat-x;height:22px; width:22px;
+}
+#pager p span.last{
+	background:url("../images/common/icon_paging_end.gif")  repeat-x;height:22px; width:22px;
+}
+
+/* 페이징 네비게이션 */
+.paging_navigation {white-space:nowrap; *zoom:1;margin-top:10px;text-align:center; }
+.paging_navigation:after {display:block; content:""; clear:both;}
+.paging_navigation a {display:inline-block; padding:0px; min-width:25px; height:22px;line-height:22px; font-weight:bold; vertical-align:middle; font-family:'돋움',Dotum,AppleGothic,sans-serif;font-size:11px;color:#605f60; text-align:center;}
+.paging_navigation a:hover {/*background-color:#eee;*/ color:#f30;}
+.paging_navigation a.on {background-color:#eee; color:#f30;}
+.paging_navigation a.red {color:red;}
+
+.paging_navigation .prev{background:url('../images/common/icon_paging_prev.gif') repeat-x; height:22px; width:22px; margin:0 2px;}
+.paging_navigation .prev span {display:none}
+.paging_navigation .next{background:url('../images/common/icon_paging_next.gif') repeat-x; height:22px; width:22px; margin:0 2px;}
+.paging_navigation .next span {display:none}
+
+.paging_navigation .first{background:url('../images/common/icon_paging_first.gif') repeat-x; height:22px;width:22px;}
+.paging_navigation .first span {display:none}
+.paging_navigation .end{background:url('../images/common/icon_paging_end.gif') repeat-x; height:22px;width:22px;}
+.paging_navigation .end span {display:none}
+.paging_navigation .last{background:url('../images/common/icon_paging_end.gif') repeat-x; height:22px;width:22px;}
+.paging_navigation .last span {display:none}
+ 

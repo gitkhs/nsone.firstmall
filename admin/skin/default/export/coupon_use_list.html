@@ -1,0 +1,46 @@
+<style type="text/css">
+.color80 {color:#808080;}
+.coupon_info_text {margin:20px 0;font-size:20px;line-height:25px;font-weight:bold;}
+#coupon_use_info { width:100%;margin-top:10px;}
+#use_coupon_serial {width:300px;height:22px;border:2px solid #7b7b7b;font-size:20px;color:#6c6c6c;text-align:center;}
+#use_coupon_value {width:100px;height:22px;border:2px solid #7b7b7b;font-size:20px;color:red;font-weight:bold;text-align:center;}
+#use_coupon_area_direct {width:100px;height:22px;border:2px solid #7b7b7b;font-size:20px;color:#6c6c6c;}
+#use_coupon_memo {width:350px;height:22px;border:2px solid #7b7b7b;font-size:20px;color:#6c6c6c;}
+#use_coupon_area {height:34px;border:2px solid #7b7b7b;font-size:20px;color:#6c6c6c;}
+/**.coupon_use_btn {margin-top:20px;text-align:center;line-height:28px;}**/
+#coupon_remain_value {color:red;}
+</style>
+<div id="coupon_use_info">
+	<div class="coupon_info_text">√ 쿠폰번호 : {export.coupon_serial}</div>
+	<div class="coupon_info_text">
+		√ 현재상태 : 총 {=number_format(export.coupon_value)}{export.coupon_value_unit}중
+		<span id="coupon_remain_value">{=number_format(export.coupon_remain_value)}{(export.coupon_value_unit)}</span>
+		사용 가능
+	</div>
+</div>
+<div style="width:100%;margin-top:10px;">
+	<table width="100%" class="simpledata-table-style">
+	<thead>
+	<tr>
+		<th>쿠폰 사용 확인 일시</th>
+		<th>쿠폰 사용 값어치</th>
+		<th>쿠폰 사용 장소(매장)/수수료</th>
+		<th>메모</th>
+		<th>확인코드</th>
+		<th>매장정보</th>
+	</tr>
+	</thead>
+	<tbody>
+<!-- { @ export.history } -->
+	<tr>
+		<td class="center">{.regist_date}</td>
+		<td class="right pdr5">{=number_format(.coupon_use_value)}{export.coupon_value_unit}</td>
+		<td class="center">{.coupon_use_area}/{=number_format(.address_commission)}%</td>
+		<td class="left pdl5">{.coupon_use_memo}</td>
+		<td class="center">{.confirm_user_serial}</td>
+		<td class="center">{?.confirm_user}{.confirm_user}{:}{.manager_id}{/}</td>
+	</tr>
+<!-- { / } -->
+	</tbody>
+	</table>
+</div>

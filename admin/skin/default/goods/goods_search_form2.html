@@ -1,0 +1,308 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','',function(){
+		<!--{?sc.category1}-->
+		$("select[name='category1']").val('{_GET.category1}').change();
+		<!--{/}-->
+	});
+	$("select[name='category1']").live("change",function(){
+		category_admin_select_load('category1','category2',$(this).val(),function(){
+			<!--{?sc.category2}-->
+			$("select[name='category2']").val('{_GET.category2}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").live("change",function(){
+		category_admin_select_load('category2','category3',$(this).val(),function(){
+			<!--{?sc.category3}-->
+			$("select[name='category3']").val('{_GET.category3}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category3']").live("change",function(){
+		category_admin_select_load('category3','category4',$(this).val(),function(){
+			<!--{?sc.category4}-->
+			$("select[name='category4']").val('{_GET.category4}').change();
+			<!--{/}-->
+		});
+	});
+
+	$("select[name='s_category1']").live("change",function(){
+		category_admin_select_load('s_category1','s_category2',$(this).val(),function(){
+			<!--{?sc.category2}-->
+			$("select[name='s_category2']").val('{_GET.category2}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='s_category2']").live("change",function(){
+		category_admin_select_load('s_category2','s_category3',$(this).val(),function(){
+			<!--{?sc.category3}-->
+			$("select[name='s_category3']").val('{_GET.category3}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('s_category3','s_category4',"");
+	});
+	$("select[name='s_category3']").live("change",function(){
+		category_admin_select_load('s_category3','s_category4',$(this).val(),function(){
+			<!--{?sc.category4}-->
+			$("select[name='s_category4']").val('{_GET.category4}').change();
+			<!--{/}-->
+		});
+	});
+	////////////////////////////
+
+	/* 브랜드 불러오기 */
+	brand_admin_select_load('','brands1','',function(){
+		<!--{?sc.brands1}-->
+		$("select[name='brands1']").val('{_GET.brands1}').change();
+		<!--{/}-->
+	});
+	$("select[name='brands1']").live("change",function(){
+		brand_admin_select_load('brands1','brands2',$(this).val(),function(){
+			<!--{?sc.brands2}-->
+			$("select[name='brands2']").val('{_GET.brands2}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('brands2','brands3',"");
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("select[name='brands2']").live("change",function(){
+		brand_admin_select_load('brands2','brands3',$(this).val(),function(){
+			<!--{?sc.brands3}-->
+			$("select[name='brands3']").val('{_GET.brands3}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("select[name='brands3']").live("change",function(){
+		brand_admin_select_load('brands3','brands4',$(this).val(),function(){
+			<!--{?sc.brands4}-->
+			$("select[name='brands1']").val('{_GET.brands1}').change();
+			<!--{/}-->
+		});
+	});
+
+	$("select[name='s_brands1']").live("change",function(){
+		brand_admin_select_load('s_brands1','s_brands2',$(this).val(),function(){
+			<!--{?sc.brands2}-->
+			$("select[name='s_brands2']").val('{_GET.brands2}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('s_brands2','s_brands3',"");
+		brand_admin_select_load('s_brands3','s_brands4',"");
+	});
+	$("select[name='s_brands2']").live("change",function(){
+		brand_admin_select_load('s_brands2','s_brands3',$(this).val(),function(){
+			<!--{?sc.brands3}-->
+			$("select[name='s_brands3']").val('{_GET.brands3}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('s_brands3','s_brands4',"");
+	});
+	$("select[name='s_brands3']").live("change",function(){
+		brand_admin_select_load('s_brands3','s_brands4',$(this).val(),function(){
+			<!--{?sc.brands4}-->
+			$("select[name='s_brands4']").val('{_GET.brands4}').change();
+			<!--{/}-->
+		});
+	});
+
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+	$("#search_set").click(function(){
+		category_admin_select_load('','s_category1','',function(){
+			<!--{?sc.category1}-->
+			$("select[name='s_category1']").val('{_GET.category1}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('','s_brands1','',function(){
+			<!--{?sc.brands1}-->
+			$("select[name='s_brands1']").val('{_GET.brands1}').change();
+			<!--{/}-->
+		});
+		var title = '기본검색 설정<span style="font-size:11px; margin-left:26px;"> - 아래서 원하는 검색조건을 설정하여 편하게 쇼핑몰을 운영하세요</span>';
+		openDialog(title, "search_detail_dialog", {"width":"800","height":"300"});
+	});
+
+	$("#get_default_button").click(function(){
+		$.getJSON('get_search_default', function(result) {
+			for(var i=0;i<result.length;i++){
+				if(result[i][0].search(/goodsStatus\[[0-9]+\]/) != -1 || result[i][0].search(/goodsView\[[0-9]+\]/) != -1){
+					//alert(result[i][0]+" : "+result[i][1]);
+					if(result[i][1]=='normal') $("input[name='goodsStatus[]']").eq(0).attr("checked",true);
+					else if(result[i][1]=='runout') $("input[name='goodsStatus[]']").eq(1).attr("checked",true);
+					else if(result[i][1]=='unsold') $("input[name='goodsStatus[]']").eq(2).attr("checked",true);
+					else if(result[i][1]=='look') $("input[name='goodsView[]']").eq(0).attr("checked",true);
+					else if(result[i][1]=='notLook') $("input[name='goodsView[]']").eq(1).attr("checked",true);
+				}else if(result[i][0]=='regist_date'){
+					if(result[i][1] == 'today'){
+						set_date('{=date('Y-m-d')}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3day'){
+						set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '7day'){
+						set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '1mon'){
+						set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3mon'){
+						set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}');
+					}
+				}
+				$("*[name='"+result[i][0]+"']",document.memberForm).val(result[i][1]);
+			}
+		});
+	});
+
+
+	$(".star_select").click(function(){
+		var status = "";
+		if($(this).hasClass("checked")){
+			$(this).removeClass("checked");
+			status = "none";
+		}else{
+			$(this).addClass("checked");
+			status = "checked";
+		}
+
+		$.ajax({
+			type: "get",
+			url: "../goods/set_favorite",
+			data: "status="+status+"&goods_seq="+$(this).attr("goods_seq"),
+			success: function(result){
+				//alert(result);
+			}
+		});
+	});
+
+	// 매입처/입점사 검색선택
+	$("input[name='provider_base']").bind('change',function(){
+		if($(this).is(":checked")){
+			$("select[name='provider_seq']").attr('disabled',true);
+		}else{
+			$("select[name='provider_seq']").removeAttr('disabled');
+		}
+	}).change();
+});
+
+function set_date(start,end){
+	$("input[name='sdate']").val(start);
+	$("input[name='edate']").val(end);
+}
+</script>
+<div class="search-form-container">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table>
+			<tr>
+				<td width="500">
+					<table class="sf-keyword-table">
+					<tr>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{_GET.keyword}" title="사은품명, 상품코드" /></td>
+						<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td><span class="btn small"><input type="button" value="기본검색적용" id="get_default_button" name="get_default_button"/></span></td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td><span class="icon-arrow-down" style="cursor:pointer;" id="search_set">기본검색설정</span></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+
+	<table class="search-form-table" id="serch_tab">
+	<tr id="goods_search_form" style="display:block;">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<colgroup>
+				<col width="80" />
+				<col width="170" />
+				<col width="80" />
+				<col width="170" />
+				<col width="80" />
+				<col width="170" />
+			</colgroup>
+			<tr>
+				<th><select name="date_gb" class="search_select">
+						<option value="regist_date" {?sc.date_gb=='regist_date'}selected{/}>등록일</option>
+						<option value="update_date" {?sc.date_gb=='update_date'}selected{/}>수정일</option>
+					</select></th>
+				<td colspan="5">
+					<input type="text" name="sdate" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button" value="오늘" id="today" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="전체" id="all" name="select_date"/></span>
+				</td>
+			</tr>
+			<tr>
+				<th><input type="hidden" name="price_gb" value="consumer_price"/>정상가</th>
+				<td colspan="5">
+					<input type="text" name="sprice" value="{_GET.sprice}" size="7" class="line input-box-default-text" /> - <input type="text" name="eprice" value="{_GET.eprice}" size="7" class="line input-box-default-text" />
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<b>재고수량</b>
+					<input type="text" name="sstock" value="{_GET.sstock}" size="7" class="line input-box-default-text" /> - <input type="text" name="estock" value="{_GET.estock}" size="7" class="line input-box-default-text" />
+				</td>
+			</tr>
+
+			<tr>
+				<th>상태</th>
+				<td colspan="5">
+					<label><input type="checkbox" name="goodsStatus[]" value="normal" {?sc.goodsStatus && in_array('normal',sc.goodsStatus)}checked{/}/>정상</label>
+					<label><input type="checkbox" name="goodsStatus[]" value="runout" {?sc.goodsStatus && in_array('runout',sc.goodsStatus)}checked{/}/>품절</label>
+					<label><input type="checkbox" name="goodsStatus[]" value="purchasing" {?sc.goodsStatus && in_array('purchasing',sc.goodsStatus)}checked{/}/>재고확보중</label>
+					<label><input type="checkbox" name="goodsStatus[]" value="unsold" {?sc.goodsStatus && in_array('unsold',sc.goodsStatus)}checked{/}/>판매중지</label>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<b>노출</b>
+					<label><input type="checkbox" name="goodsView[]" value="look" {?sc.goodsView && in_array('look',sc.goodsView)}checked{/}/>보임<label>
+					<label><input type="checkbox" name="goodsView[]" value="notLook" {?sc.goodsView && in_array('notLook',sc.goodsView)}checked{/}/>안보임<label>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>

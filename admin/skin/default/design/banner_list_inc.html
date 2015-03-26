@@ -1,0 +1,50 @@
+{ @ banner_list }
+	<tr>
+		<td class="dlts-td center"><input type="checkbox" name="delete_banner_seq[]" value="{.banner_seq}" /> {.banner_seq}</td>
+		<td class="dlts-td center">{.skin} 스킨</td>
+		<td class="dlts-td center">{=substr(.regdate,0,10)}</td>
+		<td class="dlts-td center">
+			<span class="admin_comment" banner_seq="{.banner_seq}">{.name}</span>
+		</td>
+		<td class="dlts-td center">
+			{=styles[.style].name}
+		</td>
+		<td class="dlts-td center">
+			<div class="relative">
+			{?designWorkingSkin==.skin}
+			<span id="tag_banner_{.banner_seq}"></span> <span class="btn small"><input type="button" value="태그복사" id="copy_banner_{.banner_seq}" /></span>
+			{/}
+			</div>
+		</td>
+		<td class="dlts-td center">
+			{?designWorkingSkin==.skin}
+			<span class="btn small red"><input type="button" value="선택" onclick="select_banner('{.banner_seq}','{.platform}')" /></span>
+			<span class="btn small"><input type="button" value="수정" onclick="edit_banner('{.banner_seq}')" /></span>
+			{/}
+		</td>
+	</tr>
+	{?designWorkingSkin==.skin}
+	<script type="text/javascript">
+	
+		var tag_banner = "{" + "=showDesignBanner({.banner_seq})" + "}";
+		$("#tag_banner_{.banner_seq}").text(tag_banner);
+		
+		var tagCopyClipIdx = tagCopyClips.length;
+		tagCopyClips[tagCopyClipIdx] = new ZeroClipboard.Client();
+		tagCopyClips[tagCopyClipIdx].setHandCursor( true );
+		tagCopyClips[tagCopyClipIdx].setCSSEffects( true );
+		tagCopyClips[tagCopyClipIdx].setText(tag_banner);	
+		tagCopyClips[tagCopyClipIdx].addEventListener( 'complete', function(client, text) {
+			alert("플래시 태그가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+		} );
+		tagCopyClips[tagCopyClipIdx].glue('copy_banner_{.banner_seq}');
+		
+		$("#ZeroClipboardMovie_"+(tagCopyClipIdx+1)).parent().css({
+				'left' : $("#copy_banner_{.banner_seq}").position().left,
+				'top' : $("#copy_banner_{.banner_seq}").position().top
+		});
+		
+		$("#copy_banner_{.banner_seq}").after($("#ZeroClipboardMovie_"+(tagCopyClipIdx+1)).parent());
+	</script>
+	{/}
+{ / }

@@ -1,0 +1,305 @@
+@charset "UTF-8";
+
+/*
+	Document	: buttons.css
+	Created on	: 10. 12. 18 오후 3:35
+	Author		: Nexist
+	Description	: 버튼 스타일을 잡습니다.
+*/
+#buttons{padding:50px;text-align:center}
+
+/* 버튼 설정 */
+.btn,
+.btn input ,
+.btn a ,
+.btn button {display:inline-block;overflow:visible;position:relative;margin:0;padding:0;border:0;background:url('../images/common/btnBg.gif') no-repeat;font-size:12px;font-family:'dotum';color:#333 !important;text-decoration:none !important;vertical-align:top;white-space:nowrap;cursor:pointer}
+.btn {vertical-align:middle}
+.btn-plus button {display:inline-block;width:12px;height:12px;overflow:visible;position:relative;margin:0;padding:0;border:0;background:url('../images/common/icon_plus.gif') no-repeat;cursor:pointer}
+.btn-minus button {display:inline-block;width:12px;height:12px;overflow:visible;position:relative;margin:0;padding:0;border:0;background:url('../images/common/icon_minus.gif') no-repeat;cursor:pointer}
+/* //버튼 설정 */
+
+/* 사이즈 설정 */
+.small{padding-right:1px; background-position:right 0; height:20px !important;vertical-align:middle}
+.medium{padding-right:1px; background-position:right -100px; height:25px !important;vertical-align:middle}
+.large{padding-right:1px; background-position:right -200px; height:30px !important;vertical-align:middle}
+/* //사이즈 설정 */
+
+/* 디테일 */
+.small a,.small input,.small button{height:17px;padding:3px 7px 0;background-position:0 0;font-size:11px;line-height:15px !important;letter-spacing:-1px}
+.medium a,.medium input,.medium button{height:20px;padding:5px 10px 0;background-position:0 -100px;font-size:12px;line-height:18px !important;font-weight:bold;letter-spacing:-1px}
+.large a,.large input,.large button{height:25px;padding:7px 10px 0;background-position:0 -200px;font-size:12px;line-height:20px !important;font-weight:bold;letter-spacing:-1px}
+.small input,.small button {height:20px;padding:0 7px;font-size:11px;line-height:20px !important}
+.medium input,.medium button {height:25px;padding:0 10px 0 13px;line-height:25px !important}
+.large input,.large button{height:31px;padding:0 13px;line-height:31px !important}
+
+
+/* //디테일 */
+
+/* 페이지 버튼 */
+.btn .page{padding:4px 9px 0;font-size:12px !important;font-weight:700;color:#666;letter-spacing:-2px}
+/* //페이지 버튼 */
+
+/* 오버시 */
+.small:hover{background-position:right -50px}
+.medium:hover{background-position:right -150px}
+.large:hover{background-position:right -250px}
+.small:hover a,.small:hover input,.small:hover button{background-position:0 -50px;color:#ff3232}
+.medium:hover a,.medium:hover input,.medium:hover button{background-position:0 -150px;color:#ff3232}
+.large:hover a,.large:hover input,.large:hover button{background-position:0 -250px;color:#ff3232}
+
+
+
+/* //오버시 */
+
+/* 컬러 설정 */
+.small.black{background-position:right -350px}
+.medium.black{background-position:right -450px}
+.large.black{background-position:right -550px}
+
+.small.black a,.small.black input,.small.black button{background-position:0 -350px;color:#FFF !important}
+.medium.black a,.medium.black input,.medium.black button{background-position:0 -450px;color:#FFF !important}
+.large.black a,.large.black input,.large.black button{background-position:0 -550px;color:#FFF !important}
+.small.black input,.small.black button{color:#FFF !important}
+.medium.black input,.medium.black button{color:#FFF !important}
+.large.black input,.large.black button{color:#FFF !important}
+
+.small.black:hover{background-position:right -400px}
+.medium.black:hover{background-position:right -500px}
+.large.black:hover{background-position:right -600px}
+.small.black:hover a,.small.black:hover input,.small.black:hover button{background-position:0 -400px;color:#DDD !important}
+.medium.black:hover a,.medium.black:hover input,.medium.black:hover button{background-position:0 -500px;color:#DDD !important}
+.large.black:hover a,.large.black:hover input,.large.black:hover button{background-position:0 -600px;color:#DDD !important}
+
+.small.cyanblue{background-position:right -650px}
+.medium.cyanblue{background-position:right -750px}
+.large.cyanblue{background-position:right -850px}
+
+.small.cyanblue a,.small.cyanblue input,.small.cyanblue button{background-position:0 -650px;color:#FFF !important}
+.medium.cyanblue a,.medium.cyanblue input,.medium.cyanblue button{background-position:0 -750px;color:#FFF !important}
+.large.cyanblue a,.large.cyanblue input,.large.cyanblue button{background-position:0 -850px;color:#FFF !important}
+.small.cyanblue input,.small.cyanblue button{color:#FFF !important}
+.medium.cyanblue input,.medium.cyanblue button{color:#FFF !important}
+.large.cyanblue input,.large.cyanblue button{color:#FFF !important}
+
+.small.cyanblue:hover{background-position:right -700px}
+.medium.cyanblue:hover{background-position:right -800px}
+.large.cyanblue:hover{background-position:right -900px}
+.small.cyanblue:hover a,.small.cyanblue:hover input{background-position:0 -700px;color:#EEE}
+.medium.cyanblue:hover a,.medium.cyanblue:hover input{background-position:0 -800px;color:#EEE}
+.large.cyanblue:hover a,.large.cyanblue:hover input{background-position:0 -900px;color:#EEE}
+
+.small.red{background-position:right -950px}
+.medium.red{background-position:right -1050px}
+.large.red{background-position:right -1150px}
+
+.small.red a,.small.red input,.small.red button{background-position:0 -950px;color:#FFF !important}
+.medium.red a,.medium.red input,.medium.red button{background-position:0 -1050px;color:#FFF !important}
+.large.red a,.large.red input,.large.red button{background-position:0 -1150px;color:#FFF !important}
+.small.red input,.small.red button{color:#FFF !important}
+.medium.red input,.small.red button{color:#FFF !important}
+.large.red input,.small.red button{color:#FFF !important}
+
+.small.red:hover{background-position:right -1000px}
+.medium.red:hover{background-position:right -1100px}
+.large.red:hover{background-position:right -1200px}
+.small.red:hover a,.small.red:hover input,.small.red:hover button{background-position:0 -1000px;color:#EEE}
+.medium.red:hover a,.medium.red:hover input,.medium.red:hover button{background-position:0 -1100px;color:#EEE}
+.large.red:hover a,.large.red:hover input,.large.red:hover button{background-position:0 -1200px;color:#EEE}
+
+.small.orange{background-position:right -1648px}
+.medium.orange{background-position:right -1748px}
+.large.orange{background-position:right -1848px}
+
+.small.orange a,.small.orange input,.small.orange button{background-position:0 -1648px;color:#FFF !important}
+.medium.orange a,.medium.orange input,.medium.orange button{background-position:0 -1748px;color:#FFF !important}
+.large.orange a,.large.orange input,.large.orange button{background-position:0 -1848px;color:#FFF !important}
+.small.orange input,.small.orange button{color:#FFF !important}
+.medium.orange input,.small.orange button{color:#FFF !important}
+.large.orange input,.small.orange button{color:#FFF !important}
+
+.small.orange:hover{background-position:right -1598px}
+.medium.orange:hover{background-position:right -1698px}
+.large.orange:hover{background-position:right -1798px}
+.small.orange:hover a,.small.orange:hover input,.small.orange:hover button{background-position:0 -1598px;color:#EEE}
+.medium.orange:hover a,.medium.orange:hover input,.medium.orange:hover button{background-position:0 -1698px;color:#EEE}
+.large.orange:hover a,.large.orange:hover input,.large.orange:hover button{background-position:0 -1798px;color:#EEE}
+
+.small.green{background-position:right -1951px}
+.medium.green{background-position:right -2051px}
+.large.green{background-position:right -2151px}
+
+.small.green a,.small.green input,.small.green button{background-position:0 -1951px;color:#FFF !important}
+.medium.green a,.medium.green input,.medium.green button{background-position:0 -2051px;color:#FFF !important}
+.large.green a,.large.green input,.large.green button{background-position:0 -2151px;color:#FFF !important}
+.small.green input,.small.green button{color:#FFF !important}
+.medium.green input,.small.green button{color:#FFF !important}
+.large.green input,.small.green button{color:#FFF !important}
+
+.small.green:hover{background-position:right -1901px}
+.medium.green:hover{background-position:right -2001px}
+.large.green:hover{background-position:right -2101px}
+.small.green:hover a,.small.green:hover input,.small.green:hover button{background-position:0 -1901px;color:#EEE}
+.medium.green:hover a,.medium.green:hover input,.medium.green:hover button{background-position:0 -2001px;color:#EEE}
+.large.green:hover a,.large.green:hover input,.large.green:hover button{background-position:0 -2101px;color:#EEE}
+
+
+.btn.grayarrow {padding:0 15px; background-position:right -1240px}
+.btn.grayarrow a,.btn.grayarrow input,.btn.grayarrow button{background-position:0 -1240px;letter-spacing:-1px;height:20px;padding:2px 7px 0;font-size:11px;line-height:20px; color:#333;}
+.btn.grayarrow:hover {background-position:right -1240px}
+.btn.grayarrow:hover a,.btn.grayarrow:hover input,.btn.grayarrow:hover button{background-position:0 -1240px;}
+
+.btn.bluearrow {padding:0 15px; background-position:right -1270px}
+.btn.bluearrow a,.btn.bluearrow input,.btn.bluearrow button{background-position:0 -1270px;letter-spacing:-1px;height:20px;padding:2px 7px 0;font-size:11px;line-height:20px; color:#fff !important}
+.btn.bluearrow:hover {background-position:right -1270px}
+.btn.bluearrow:hover a,.btn.bluearrow:hover input,.btn.bluearrow:hover button{background-position:0 -1270px; color:#eee !important}
+
+.btn.bluegray {padding-right:2px; background-position:right -1300px}
+.btn.bluegray a,.btn.bluegray input,.btn.bluegray button{background-position:0 -1300px;letter-spacing:-1px;height:27px;padding:2px 7px 0;font-size:11px;line-height:25px; color:#fff !important}
+.btn.bluegray:hover {background-position:right -1300px}
+.btn.bluegray:hover a,.btn.bluegray:hover input,.btn.bluegray:hover button{background-position:0 -1300px; color:#eee !important}
+
+.btn.bluegreen {padding-right:2px; background-position:right -1337px}
+.btn.bluegreen a,.btn.bluegreen input,.btn.bluegreen button{background-position:0 -1337px;letter-spacing:-1px;height:33px;padding:0px 7px 0;font-size:11px;line-height:25px; color:#333 !important}
+
+.btn.emboss {padding-right:4px; background-position:right -1380px}
+.btn.emboss a,.btn.emboss input,.btn.emboss button{background-position:-1px -1380px;letter-spacing:-1px;height:37px; padding-left:2px;font-size:11px;line-height:23px; color:#333 !important}
+.btn.emboss.selected {background-position:right -1427px}
+.btn.emboss.selected a,.btn.emboss.selected input,.btn.emboss.selected button {background-position:-1px -1427px}
+
+.btn.lightblue {padding-right:2px; background-position:right -1476px}
+.btn.lightblue a,.btn.lightblue input,.btn.lightblue button{background-position:0 -1476px;letter-spacing:-1px;height:20px;padding:0px 7px 0;font-size:11px;line-height:20px; color:#333 !important}
+.btn.lightblue:hover {padding-right:2px; background-position:right -1507px}
+.btn.lightblue:hover a,.btn.lightblue:hover  input,.btn.lightblue:hover  button{background-position:0 -1507px;letter-spacing:-1px;height:20px;padding:0px 7px 0;font-size:11px;line-height:20px; color:#333 !important}
+
+.btn.smallemboss {padding-right:4px; background-position:right -2200px}
+.btn.smallemboss a,.btn.smallemboss input,.btn.smallemboss button{background-position:-1px -2200px;letter-spacing:-1px;height:28px; padding-left:2px;font-size:11px;line-height:23px; color:#333 !important}
+.btn.smallemboss.selected {background-position:right -2249px}
+.btn.smallemboss.selected a,.btn.smallemboss.selected input,.btn.smallemboss.selected button {background-position:-1px -2249px}
+
+.small.deepgreen{background-position:right -2299px}
+.medium.deepgreen{background-position:right -2399px}
+.large.deepgreen{background-position:right -2499px}
+.small.deepgreen a,.small.deepgreen input,.small.deepgreen button{background-position:0 -2299px;color:#FFF !important}
+.medium.deepgreen a,.medium.deepgreen input,.medium.deepgreen button{background-position:0 -2399px;color:#FFF !important}
+.large.deepgreen a,.large.deepgreen input,.large.deepgreen button{background-position:0 -2499px;color:#FFF !important}
+.small.deepgreen input,.small.deepgreen button{color:#FFF !important}
+.medium.deepgreen input,.small.deepgreen button{color:#FFF !important}
+.large.deepgreen input,.small.deepgreen button{color:#FFF !important}
+.small.deepgreen:hover{background-position:right -2349px}
+.medium.deepgreen:hover{background-position:right -2449px}
+.large.deepgreen:hover{background-position:right -2549px}
+.small.deepgreen:hover a,.small.deepgreen:hover input,.small.deepgreen:hover button{background-position:0 -2349px;color:#EEE}
+.medium.deepgreen:hover a,.medium.deepgreen:hover input,.medium.deepgreen:hover button{background-position:0 -2449px;color:#EEE}
+.large.deepgreen:hover a,.large.deepgreen:hover input,.large.deepgreen:hover button{background-position:0 -2549px;color:#EEE}
+
+.small.deepblue{background-position:right -2599px}
+.medium.deepblue{background-position:right -2699px}
+.large.deepblue{background-position:right -2799px}
+.small.deepblue a,.small.deepblue input,.small.deepblue button{background-position:0 -2599px;color:#FFF !important}
+.medium.deepblue a,.medium.deepblue input,.medium.deepblue button{background-position:0 -2699px;color:#FFF !important}
+.large.deepblue a,.large.deepblue input,.large.deepblue button{background-position:0 -2799px;color:#FFF !important}
+.small.deepblue input,.small.deepblue button{color:#FFF !important}
+.medium.deepblue input,.small.deepblue button{color:#FFF !important}
+.large.deepblue input,.small.deepblue button{color:#FFF !important}
+.small.deepblue:hover{background-position:right -2649px}
+.medium.deepblue:hover{background-position:right -2749px}
+.large.deepblue:hover{background-position:right -2849px}
+.small.deepblue:hover a,.small.deepblue:hover input,.small.deepblue:hover button{background-position:0 -2649px;color:#EEE}
+.medium.deepblue:hover a,.medium.deepblue:hover input,.medium.deepblue:hover button{background-position:0 -2749px;color:#EEE}
+.large.deepblue:hover a,.large.deepblue:hover input,.large.deepblue:hover button{background-position:0 -2849px;color:#EEE}
+
+.small.violet{background-position:right -2899px}
+.medium.violet{background-position:right -2999px}
+.large.violet{background-position:right -3099px}
+.small.violet a,.small.violet input,.small.violet button{background-position:0 -2899px;color:#FFF !important}
+.medium.violet a,.medium.violet input,.medium.violet button{background-position:0 -2999px;color:#FFF !important}
+.large.violet a,.large.violet input,.large.violet button{background-position:0 -3099px;color:#FFF !important}
+.small.violet input,.small.violet button{color:#FFF !important}
+.medium.violet input,.small.violet button{color:#FFF !important}
+.large.violet input,.small.violet button{color:#FFF !important}
+.small.violet:hover{background-position:right -2949px}
+.medium.violet:hover{background-position:right -3049px}
+.large.violet:hover{background-position:right -3149px}
+.small.violet:hover a,.small.violet:hover input,.small.violet:hover button{background-position:0 -2949px;color:#EEE}
+.medium.violet:hover a,.medium.violet:hover input,.medium.violet:hover button{background-position:0 -3049px;color:#EEE}
+.large.violet:hover a,.large.violet:hover input,.large.violet:hover button{background-position:0 -3149px;color:#EEE}
+
+.small.pink{background-position:right -3199px}
+.medium.pink{background-position:right -3299px}
+.large.pink{background-position:right -3399px}
+.small.pink a,.small.pink input,.small.pink button{background-position:0 -3199px;color:#FFF !important}
+.medium.pink a,.medium.pink input,.medium.pink button{background-position:0 -3299px;color:#FFF !important}
+.large.pink a,.large.pink input,.large.pink button{background-position:0 -3399px;color:#FFF !important}
+.small.pink input,.small.pink button{color:#FFF !important}
+.medium.pink input,.small.pink button{color:#FFF !important}
+.large.pink input,.small.pink button{color:#FFF !important}
+.small.pink:hover{background-position:right -3249px}
+.medium.pink:hover{background-position:right -3349px}
+.large.pink:hover{background-position:right -3449px}
+.small.pink:hover a,.small.pink:hover input,.small.pink:hover button{background-position:0 -3249px;color:#EEE}
+.medium.pink:hover a,.medium.pink:hover input,.medium.pink:hover button{background-position:0 -3349px;color:#EEE}
+.large.pink:hover a,.large.pink:hover input,.large.pink:hover button{background-position:0 -3449px;color:#EEE}
+
+.small.gray{background-position:right -3499px}
+.medium.gray{background-position:right -3599px}
+.large.gray{background-position:right -3699px}
+.small.gray a,.small.gray input,.small.gray button{background-position:0 -3499px;color:#FFF !important}
+.medium.gray a,.medium.gray input,.medium.gray button{background-position:0 -3599px;color:#FFF !important}
+.large.gray a,.large.gray input,.large.gray button{background-position:0 -3699px;color:#FFF !important}
+.small.gray input,.small.gray button{color:#FFF !important}
+.medium.gray input,.small.gray button{color:#FFF !important}
+.large.gray input,.small.gray button{color:#FFF !important}
+.small.gray:hover{background-position:right -3549px}
+.medium.gray:hover{background-position:right -3649px}
+.large.gray:hover{background-position:right -3749px}
+.small.gray:hover a,.small.gray:hover input,.small.gray:hover button{background-position:0 -3549px;color:#EEE}
+.medium.gray:hover a,.medium.gray:hover input,.medium.gray:hover button{background-position:0 -3649px;color:#EEE}
+.large.gray:hover a,.large.gray:hover input,.large.gray:hover button{background-position:0 -3749px;color:#EEE}
+
+
+
+/* //컬러 설정 */
+
+/* 아이콘설정(A태그에만 적용) */
+.icon a{vertical-align:middle;}
+.icon-right a {padding-right:5px;}
+.medium .plus{width:20px;height:14px;background-position:0px -300px; vertical-align:middle; margin-top:-3px;}
+.large  .plus{width:20px;height:14px;background-position:0px -300px; vertical-align:middle;}
+.medium .pencle{width:20px;height:14px;background-position:-30px -300px; vertical-align:middle; margin-top:-3px;}
+.large  .pencle{width:20px;height:14px;background-position:-30px -300px; vertical-align:middle;}
+.medium .minus{width:20px;height:14px;background-position:-60px -300px; vertical-align:middle; margin-top:-3px;}
+.large  .minus{width:20px;height:14px;background-position:-60px -300px; vertical-align:middle;}
+.medium .check{width:20px;height:14px;background-position:-90px -300px; vertical-align:middle; margin-top:-3px;}
+.large  .check{width:20px;height:14px;background-position:-90px -300px; vertical-align:middle;}
+.medium .people{width:20px;height:14px;background-position:-120px -300px; vertical-align:middle; margin-top:-3px;}
+.large  .people{width:20px;height:14px;background-position:-120px -300px; vertical-align:middle;}
+.medium .config{width:20px;height:14px;background-position:-150px -300px; vertical-align:middle; margin-top:-3px;}
+.large  .config{width:20px;height:14px;background-position:-150px -300px; vertical-align:middle;}
+.medium .search{width:20px;height:14px;background-position:-180px -300px; vertical-align:middle; margin-top:-3px;}
+.large  .search{width:20px;height:14px;background-position:-180px -300px; vertical-align:middle;}
+.large  .arrowleft{background:url('../images/common/btn_arrow_l.gif') no-repeat;width:15px;height:12px;vertical-align:middle; background-position:0px 1px;}
+.large  .arrowright{background:url('../images/common/btn_arrow_r.gif') no-repeat;width:15px;height:12px;vertical-align:middle; background-position:10px 1px;}
+.small  .checkleft{margin-left:-3px;background:url('../images/common/icon_check.gif') no-repeat;width:13px;height:7px;vertical-align:middle;}
+/* //아이콘설정 */
+
+
+
+/* Drop */
+
+.drop {background-position:0 -1240px}
+.drop.hover,
+.drop:hover{background-position:0 -1271px}
+.drop.hover a,.drop.hover input,
+.drop:hover a,.drop:hover input {background-position:right -1271px;color:#fff !important;}
+.drop a,.drop input{height:20px;padding:3px 20px 2px 10px;background-position:right -1240px;font-size:11px;line-height:15px;letter-spacing:-1px; font-weight:normal;}
+.drop a {padding:0px 20px 0px 10px; line-height:20px;}
+
+/* Drop 확장형(a태그만 사용가능) */
+.drop_multi_main {background-position:0 -1240px}
+.drop_multi_main:hover{background-position:0 -1271px}
+.drop_multi_main:hover a{background-position:right -1271px;color:#fff !important;}
+.drop_multi_main a {height:20px;padding:0px 5px 0px 10px; line-height:20px;background:none;font-size:11px;letter-spacing:-1px; font-weight:normal;}
+.drop_multi_sub {background:url('../images/common/select_bg_back.gif') no-repeat; background-position:right 0px}
+.drop_multi_sub:hover{background-position:right -20px}
+.drop_multi_sub:hover a{background-position:right -1271px;color:#fff !important;}
+.drop_multi_sub a {height:20px;padding:0px 20px 0px 0px; line-height:20px;background-position:right -1240px;font-size:11px;line-height:15px;letter-spacing:-1px; font-weight:normal;}

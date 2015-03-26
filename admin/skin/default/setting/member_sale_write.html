@@ -1,0 +1,653 @@
+<!-- 회원설정 : 등급 -->
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$("button[name='submit_btn']").click(function(){
+		$("#gradefrm").submit();
+	});
+
+	$("form#gradefrm button#exceptIssueGoodsButton").bind("click",function(){
+		//if($("input:radio[name='point_use']:checked").val()=='N') return;
+		set_goods_list("exceptIssueGoodsSelect","exceptIssueGoods");
+	});
+	$("#exceptIssueGoods").sortable();
+	$("#exceptIssueGoods").disableSelection();
+
+	// SALE
+	$("form#gradefrm button#issueGoodsButton").bind("click",function(){
+		//if($("input:radio[name='sale_use']:checked").val()=='N') return;
+		set_goods_list("issueGoodsSelect","issueGoods");
+	});
+
+	$("button[name='cancel_btn']").bind("click",function(){
+		closeDialog('gradePopup');
+	});
+
+
+
+	$("#issueGoods").sortable();
+	$("#issueGoods").disableSelection();
+
+});
+
+
+function calcu_month(){
+	var start_month		= $("select[name='start_month']").val();
+	var chg_term		= $("select[name='chg_term']").val();
+	var chg_day			= $("select[name='chg_day']").val();
+	var chk_term		= $("select[name='chk_term']").val();
+	var keep_term		= $("select[name='keep_term']").val();
+	var chg_text		= "";
+	var chk_text		= "";
+	var keep_text		= "";
+	var month			= 0;
+	var for_type		= 0;
+	month = (start_month=='13') ? 1 : parseInt(start_month);
+	for_type = Math.round(12/parseInt(chg_term));
+	for(var i=0;i<for_type;i++){
+		if(i!=0){
+			month = chg_month('calcu', month, chg_term, 0);
+		}
+		chg_text += month+"월 "+chg_day+"일<br>";
+
+		var chk_month = chg_month('chk', month, chk_term, 1);
+		var chk_month2 = chg_month('chk', (parseInt(month)+parseInt(chk_term)), chk_term, 0);
+		chk_text += chk_month+"월 01일 ~ "+chk_month2+"월 31일<br>";
+
+		var keep_month	= chg_month('add', month, keep_term, 0);
+		var keep_day	= (chg_day=='1') ? '31' : '14';
+		keep_text += month+"월 "+chg_day+"일 ~ "+keep_month+"월 "+keep_day+"일<br>";
+	}
+	$("#chg_text").html(chg_text);
+	$("#chk_text").html(chk_text);
+	$("#keep_text").html(keep_text);
+}
+
+function chg_month(type, month, alpha, prev){
+	var r_month = 0;
+	if(type=='add'){
+		r_month = parseInt(month) + parseInt(alpha);
+		r_month = r_month - 1;
+		if(r_month>12) r_month = r_month - 12;
+	}else if(type=='chk'){
+		r_month = parseInt(month) - parseInt(alpha) - 1;
+		r_month = r_month + prev;
+		if(r_month<1) r_month = 12 + r_month;
+	}else if(type=='calcu'){
+		r_month = parseInt(month) + parseInt(alpha);
+		if(r_month>12) r_month = r_month - 12;
+	}
+	return r_month;
+}
+
+function set_goods_list(displayId,inputGoods){
+	$.ajax({
+		type: "get",
+		url: "../goods/select",
+		data: "page=1&inputGoods="+inputGoods+"&displayId="+displayId,
+		success: function(result){
+			$("div#"+displayId).html(result);
+		}
+	});
+	openDialog("상품 검색", displayId, {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+}
+
+$(function () {
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','');
+	$("select[name='category1']").bind("change",function(){
+		category_admin_select_load('category1','category2',$(this).val());
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").bind("change",function(){
+		category_admin_select_load('category2','category3',$(this).val());
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category3']").bind("change",function(){
+		category_admin_select_load('category3','category4',$(this).val());
+	});
+
+	$("button#issueCategoryButton").bind("click",function(){
+		//if($("input:radio[name='sale_use']:checked").val()=='N') return;
+		var obj;
+		var category;
+		var categoryCode;
+
+		obj = $("select[name='category1']");
+		if(obj.val()){
+			category = $("select[name='category1'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='category2']");
+		if(obj.val()){
+			category += " > " + $("select[name='category2'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='category3']");
+		if(obj.val()){
+			category += " > " + $("select[name='category3'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		var obj = $("select[name='category4']");
+		if(obj.val()){
+			category += " > " + $("select[name='category4'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+
+		if(category){
+			if($("input[name='issueCategoryCode[]'][value='"+categoryCode+"']").length == 0){
+				var tag = "<div style='padding:5px;'><span style='display:inline-block;width:300px'>"+category+"</span>";
+				tag += "<span class='btn-minus'><button type='button' class='delCategory'></button></span>";
+				tag += "<input type='hidden' name='issueCategoryCode[]' value='"+categoryCode+"' /></div>";
+				$("div#issueCategory").append(tag);
+			}
+		}
+	});
+
+	category_admin_select_load('','exceptCategory1','');
+	$("select[name='exceptCategory1']").bind("change",function(){
+		category_admin_select_load('exceptCategory1','exceptCategory2',$(this).val());
+		category_admin_select_load('exceptCategory2','exceptCategory3',"");
+		category_admin_select_load('exceptCategory3','exceptCategory4',"");
+	});
+	$("select[name='exceptCategory2']").bind("change",function(){
+		category_admin_select_load('exceptCategory2','exceptCategory3',$(this).val());
+		category_admin_select_load('exceptCategory3','exceptCategory4',"");
+	});
+	$("select[name='exceptCategory3']").bind("change",function(){
+		category_admin_select_load('exceptCategory3','exceptCategory4',$(this).val());
+	});
+
+	$("button#exceptIssueCategoryButton").bind("click",function(){
+		//if($("input:radio[name='point_use']:checked").val()=='N') return;
+		var obj;
+		var category;
+		var categoryCode;
+
+		obj = $("select[name='exceptCategory1']");
+		if(obj.val()){
+			category = $("select[name='exceptCategory1'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='exceptCategory2']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory2'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='exceptCategory3']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory3'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		var obj = $("select[name='exceptCategory4']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory4'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+
+		if(category){
+			if($("input[name='exceptIssueCategoryCode[]'][value='"+categoryCode+"']").length == 0){
+				var tag = "<div style='padding:5px;'><span style='display:inline-block;width:300px'>"+category+"</span>";
+				tag += "<span class='btn-minus'><button type='button' class='delCategory'></button></span>";
+				tag += "<input type='hidden' name='exceptIssueCategoryCode[]' value='"+categoryCode+"' /></div>";
+				$("div#exceptIssueCategory").append(tag);
+			}
+		}
+	});
+
+	$("form#gradefrm button.delCategory").live("click",function(){
+		$(this).parent().parent().remove();
+	});
+
+
+});
+
+function span_controller(name, seq){
+	var reserve_y = $("span[name='"+name+"_y["+seq+"]']");
+	var reserve_d = $("span[name='"+name+"_d["+seq+"]']");
+	var value = $("select[name='"+name+"_select["+seq+"]'] option:selected").val();
+	if(value==""){
+		reserve_y.hide();
+		reserve_d.hide();
+	}else if(value=="year"){
+		reserve_y.show();
+		reserve_d.hide();
+	}else if(value=="direct"){
+		reserve_y.hide();
+		reserve_d.show();
+	}
+}
+
+</script>
+<form name="gradefrm" id="gradefrm" method="post" target="actionFrame" action="../setting_process/member_sale_write">
+<table width="100%" class="info-table-style">
+<col width="80" /><col width="80" />{ @ loop }<col width="" />{/}
+<tr>
+	<th class="its-th-align center">세트명</td>
+	<td class="its-td-align left" colspan="{gcount+1}" style="padding-left:5px;">
+	<input type="text" name="sale_title" value="{sale_title}" size="80" title="할인율 타이틀" >
+	<label class="hide"><input type="checkbox" name="defualt_yn" value="y" checked="checked"> 이 세트를 기본값으로 사용</label>
+	<!--
+	<label><input type="checkbox" name="defualt_yn" value="y" {? defualt_yn == "y"}checked{/}> 이 세트를 기본값으로 사용</label>
+	-->
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center" rowspan="2" colspan="2">세트종류</th>
+	<th class="its-th-align" colspan="{gcount}">등급</th>
+</tr>
+<tr>
+{ @ loop }
+	<th class="its-th-align center">{.group_name}</th>
+{ / }
+</tr>
+{ ? data }
+{ @ data }
+<input type="hidden" name="sale_seq" value="{.sale_seq}">
+<tr>
+	<td rowspan="4" class="its-td-align center">추가할인</td>
+	<td class="its-td-align center">조건 <span class="helpicon" title="{상품 할인가(판매가) x 수량}+{좌동}+…{좌동}의 합이 얼마 이상일 때만 추가할인"></span></td>
+	{ @ .loop }
+	<td class="its-td-align" style="padding-left:5px;">
+		<label><input type="radio" name="sale_use[{..group_seq}]" value="N" {? .value_[..group_seq].sale_use == "N" || .value_[..group_seq].sale_use == "" || ..group_seq == 0 }checked{/}> 조건없음</label>
+		<br>
+		<span { ?..group_seq == 0 }class="hide"{ / }>
+		<label><input type="radio" name="sale_use[{..group_seq}]" value="Y" {? .value_[..group_seq].sale_use == "Y" && ..group_seq != 0 }checked{/}>
+		<input type="text" name="sale_limit_price[{..group_seq}]" class="line onlynumber right" size="6" value="{.value_[..group_seq].sale_limit_price}"/>원 이상 구매
+		</span>
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">할인 <span class="helpicon" title="상품 할인가(판매가) x 수량 x % = 추가할인 금액"></span></td>
+	{ @ .loop }
+	<td class="its-td-align" style="padding-left:5px;">
+		<input type="text" name="sale_price[{..group_seq}]" class="line onlynumber right" size="6" value="{ ? .value_[..group_seq].sale_price }{.value_[..group_seq].sale_price }{:}0{/}"/>
+		<select name="sale_price_type[{..group_seq}]">
+			<option value="WON" {? .value_[..group_seq].sale_price_type == "WON"}selected{/}>원</option>
+			<option value="PER" {? .value_[..group_seq].sale_price_type == "PER"}selected{/}>%</option>
+		</select> 할인</span>
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">추가옵션 <span class="helpicon" title="추가상품 할인가(판매가) x 수량 x % = 추가할인 금액"></span></td>
+	{ @ .loop }
+	<td class="its-td-align" style="padding-left:5px;">
+		<input type="text" name="sale_option_price[{..group_seq}]" class="line onlynumber right" size="6" value="{ ? .value_[..group_seq].sale_option_price}{.value_[..group_seq].sale_option_price}{:}0{/}"/>
+		<select name="sale_option_price_type[{..group_seq}]">
+			<option value="WON" {? .value_[..group_seq].sale_option_price_type == "WON"}selected{/}>원</option>
+			<option value="PER" {? .value_[..group_seq].sale_option_price_type == "PER"}selected{/}>%</option>
+		</select> 할인</span>
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">예외</td>
+	<td class="its-td-align" style="padding-left:5px;" colspan="{gcount}">
+		<table>
+			<tr>
+				<td>
+					<div id="sale_select_goods">
+					<div>
+						<span class="btn small gray"><button type="button" id="issueGoodsButton">제외 상품 등록</button></span>
+						<span class="desc">노출순서변경</span> <span class="helpicon" title="상품을 마우스로 드래그&드랍해서 조정합니다."></span>
+					</div>
+					<div class="clearbox" style="height:5px;"></div>
+					<div id="issueGoods">
+					<!--{ @ .issuegoods }-->
+					<!--{ ? ..type == 'sale' }-->
+					<div class='goods' style='float:left;'>
+					<div align='center' class='image'>
+						<img class="goodsThumbView" alt="" src="{=viewImg(..goods_seq,'thumbView')}" width="50" height="50">
+					</div>
+					<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{..goods_name}</div>
+					<div align='center' class='price'>{=number_format(..price)}</div>
+					<input type='hidden' name='issueGoods[]' value='{..goods_seq}' />
+					<input type="hidden" name="issueGoodsSeq[{..goods_seq}]" value="{..issuegoods_seq}" />
+					</div>
+					<!--{ / }-->
+					<!--{ / }-->
+					</div>
+					<div id="issueGoodsSelect" class="hide"></div>
+					</div>
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<!-- 제외 카테고리 -->
+					<div id="sale_select_category">
+					<div>
+					<select class="line" name="category1">
+						<option value="">1차 카테고리</option>
+					</select>
+					<select class="line" name="category2">
+						<option value="">2차 카테고리</option>
+					</select>
+					<select class="line" name="category3">
+						<option value="">3차 카테고리</option>
+					</select>
+					<select class="line" name="category4">
+						<option value="">4차 카테고리</option>
+					</select>
+					<span class="btn small gray"><button type="button" id="issueCategoryButton">제외 카테고리 등록</button></span>
+					</div>
+					<div id="issueCategory">
+					<!--{ @ .issuecategorys }-->
+					<!--{ ? ..type == 'sale' }-->
+					<div style='padding:5px;'>
+					<span style='display:inline-block;width:300px'>{..title}</span>
+					<span class='btn-minus'><button type='button' class='delCategory'></button></span>
+					<input type='hidden' name='issueCategoryCode[]' value='{..category_code}' />
+					<input type="hidden" name="issueCategoryCodeSeq[{..category_code}]" value="{..issuecategory_seq}" />
+					</div>
+					<!--{ / }-->
+					<!--{ / }-->
+					</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+
+<tr>
+	<td rowspan="4" class="its-td-align center">추가적립</td>
+	<td class="its-td-align center">조건 <span class="helpicon" title="{상품 할인가(판매가) x 수량}+{좌동}+…{좌동}의 합이 얼마 이상일 때만 추가적립"></span></td>
+	{ @ .loop }
+	<td class="its-td-align" style="padding-left:5px;">
+		<label><input type="radio" name="point_use[{..group_seq}]" value="N" {? .value_[..group_seq].point_use == "N" || .value_[..group_seq].point_use == "" || ..group_seq == 0 }checked{/}> 조건없음</label>
+		<br>
+
+		<span { ?..group_seq == 0 }class="hide"{ / }>
+		<label><input type="radio" name="point_use[{..group_seq}]" value="Y" {? .value_[..group_seq].point_use == "Y" && ..group_seq != 0 }checked{/}>
+		<input type="text" name="point_limit_price[{..group_seq}]" class="line onlynumber right" size="6" value="{.value_[..group_seq].point_limit_price}"/>원 이상 구매
+		</span>
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">포인트 <span class="helpicon" title="실 결제금액 x % = 추가포인트 금액"></span></td>
+	{ @ .loop }
+	<td class="its-td-align" style="padding-left:5px;" >
+		 <input {?..group_seq==0}disabled="disabled"{/} type="text" name="point_price[{..group_seq}]" class="line onlynumber right" size="6" value="{.value_[..group_seq].point_price}" {? reserve.point_use != "Y"}disabled{/}/><input type="hidden" name="point_price_type[{..group_seq}]"  value="PER">%
+		<!--select name="point_select[{..group_seq}]" onchange="span_controller('point', '{..group_seq}');">
+			<option value="">제한없음</option>
+			<option value="year" {? .value_[..group_seq].point_select=='year'}selected{/}>제한 - 12월31일</option>
+			<option value="direct" {? .value_[..group_seq].point_select=='direct'}selected{/}>제한 - 직접입력</option>
+		</select>
+		<span name="point_y[{..group_seq}]" class="hide"><br>→ 지급연도 + <input type="text" name="point_year[{..group_seq}]" class="line onlynumber" style="text-align:right" size="3" maxlength='3'  value="{.value_[..group_seq].point_year}" />년 12월 31일</span>
+		<span name="point_d[{..group_seq}]" class="hide"><br>→ <input type="text" name="point_direct[{..group_seq}]" class="line onlynumber" style="text-align:right" size="3" value="{.value_[..group_seq].point_direct}" />개월</span-->
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">적립금 <span class="helpicon" title="실 결제금액 x % = 추가적립금 금액"></span></td>
+	{ @ .loop }
+	<td class="its-td-align" style="padding-left:5px;">
+		 <input {?..group_seq==0}disabled="disabled"{/} type="text" name="reserve_price[{..group_seq}]" class="line onlynumber right" size="6" value="{.value_[..group_seq].reserve_price}"/><input type="hidden" name="reserve_price_type[{..group_seq}]" value="PER">%
+		<!--select name="reserve_select[{..group_seq}]" onchange="span_controller('reserve', '{..group_seq}');">
+			<option value="">제한없음</option>
+			<option value="year" {? .value_[..group_seq].reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+			<option value="direct" {? .value_[..group_seq].reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+		</select>
+		<span name="reserve_y[{..group_seq}]" class="hide"><br>→ 지급연도 + <input type="text" name="reserve_year[{..group_seq}]" class="line onlynumber" style="text-align:right" size="3" maxlength='3'  value="{.value_[..group_seq].reserve_year}" />년 12월 31일</span>
+		<span name="reserve_d[{..group_seq}]" class="hide"><br>→ <input type="text" name="reserve_direct[{..group_seq}]" class="line onlynumber" style="text-align:right" size="3" value="{.value_[..group_seq].reserve_direct}" />개월</span-->
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">예외</td>
+	<td class="its-td-align" style="padding-left:5px;" colspan="{gcount}">
+		<table>
+			<tr>
+				<td>
+					<div id="point_select_goods">
+					<div>
+						<span class="btn small gray"><button type="button" id="exceptIssueGoodsButton">제외 상품 등록</button></span>
+						<span class="desc">노출순서변경</span> <span class="helpicon" title="상품을 마우스로 드래그&드랍해서 조정합니다."></span>
+					</div>
+					<div class="clearbox" style="height:5px;"></div>
+					<div id="exceptIssueGoods">
+					<!--{ @ .issuegoods }-->
+					<!--{ ? ..type == 'emoney' }-->
+					<div class='goods' style='float:left;'>
+					<div align='center' class='image'>
+						<img class="goodsThumbView" alt="" src="{=viewImg(..goods_seq,'thumbView')}" width="50" height="50">
+					</div>
+					<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{..goods_name}</div>
+					<div align='center' class='price'>{=number_format(..price)}</div>
+					<input type='hidden' name='exceptIssueGoods[]' value='{..goods_seq}' />
+					<input type="hidden" name="exceptIssueGoodsSeq[{..goods_seq}]" value="{..issuegoods_seq}" />
+					</div>
+					<!--{ / }-->
+					<!--{ / }-->
+					</div>
+					<div id="exceptIssueGoodsSelect" class="hide"></div>
+					</div>
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<!-- 제외 카테고리 -->
+					<div id="point_select_category">
+					<div>
+					<select class="line" name="exceptCategory1">
+						<option value="">1차 카테고리</option>
+					</select>
+					<select class="line" name="exceptCategory2">
+						<option value="">2차 카테고리</option>
+					</select>
+					<select class="line" name="exceptCategory3">
+						<option value="">3차 카테고리</option>
+					</select>
+					<select class="line" name="exceptCategory4">
+						<option value="">4차 카테고리</option>
+					</select>
+					<span class="btn small gray"><button type="button" id="exceptIssueCategoryButton">제외 카테고리 등록</button></span>
+					</div>
+					<div id="exceptIssueCategory">
+					<!--{ @ .issuecategorys }-->
+					<!--{ ? ..type == 'emoney' }-->
+					<div style='padding:5px ;'>
+					<span style='display:inline-block;width:300px'>{..title}</span>
+					<span class='btn-minus'><button type='button' class='delCategory'></button></span>
+					<input type='hidden' name='exceptIssueCategoryCode[]' value='{..category_code}' />
+					<input type="hidden" name="exceptIssueCategoryCodeSeq[{..category_code}]" value="{..issuecategory_seq}" />
+					</div>
+					<!--{ / }-->
+					<!--{ / }-->
+					</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+{ / }
+
+{ : }
+
+<tr>
+	<td rowspan="4" class="its-td-align center">추가할인</td>
+	<td class="its-td-align center">조건 <span class="helpicon" title="{상품 할인가(판매가) x 수량}+{좌동}+…{좌동}의 합이 얼마 이상일 때만 추가할인"></span></td>
+	{ @ loop }
+	<td class="its-td-align" style="padding-left:5px;">
+		<label><input type="radio" name="sale_use[{.group_seq}]" value="N" checked> 조건없음</label>
+		<br>
+		<label><input type="radio" name="sale_use[{.group_seq}]" value="Y">
+		<input type="text" name="sale_limit_price[{.group_seq}]" class="line onlynumber right" size="6" value=""/>원 이상 구매
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">할인 <span class="helpicon" title="상품 할인가(판매가) x 수량 x % = 추가할인 금액"></span></td>
+	{ @ loop }
+	<td class="its-td-align" style="padding-left:5px;">
+		<input type="text" name="sale_price[{.group_seq}]" class="line onlynumber right" size="6" value=""/>
+		<select name="sale_price_type[{.group_seq}]">
+			<option value="WON">원</option>
+			<option value="PER" selected>%</option>
+		</select> 할인</span>
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">추가옵션 <span class="helpicon" title="추가상품 할인가(판매가) x 수량 x % = 추가할인 금액"></span></td>
+	{ @ loop }
+	<td class="its-td-align" style="padding-left:5px;">
+		<input type="text" name="sale_option_price[{.group_seq}]" class="line onlynumber right" size="6" value=""/>
+		<select name="sale_option_price_type[{.group_seq}]">
+			<option value="WON">원</option>
+			<option value="PER" selected>%</option>
+		</select> 할인</span>
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">예외</td>
+	<td class="its-td-align" style="padding-left:5px;" colspan="{gcount}">
+		<table>
+			<tr>
+				<td>
+					<div id="sale_select_goods">
+					<div>
+						<span class="btn small gray"><button type="button" id="issueGoodsButton">제외 상품 등록</button></span>
+						<span class="desc">노출순서변경</span> <span class="helpicon" title="상품을 마우스로 드래그&드랍해서 조정합니다."></span>
+					</div>
+					<div class="clearbox" style="height:5px;"></div>
+					<div id="issueGoods">
+					</div>
+					<div id="issueGoodsSelect" class="hide"></div>
+					</div>
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<!-- 제외 카테고리 -->
+					<div id="sale_select_category">
+					<div>
+					<select class="line" name="category1">
+						<option value="">1차 카테고리</option>
+					</select>
+					<select class="line" name="category2">
+						<option value="">2차 카테고리</option>
+					</select>
+					<select class="line" name="category3">
+						<option value="">3차 카테고리</option>
+					</select>
+					<select class="line" name="category4">
+						<option value="">4차 카테고리</option>
+					</select>
+					<span class="btn small gray"><button type="button" id="issueCategoryButton">제외 카테고리 등록</button></span>
+					</div>
+					<div id="issueCategory">
+					</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+
+<tr>
+	<td rowspan="4" class="its-td-align center">추가적립</td>
+	<td class="its-td-align center">조건 <span class="helpicon" title="{상품 할인가(판매가) x 수량}+{좌동}+…{좌동}의 합이 얼마 이상일 때만 추가적립"></span></td>
+	{ @ loop }
+	<td class="its-td-align" style="padding-left:5px;">
+		<label><input type="radio" name="point_use[{.group_seq}]" value="N" checked> 조건없음</label>
+		<br>
+		<label><input type="radio" name="point_use[{.group_seq}]" value="Y">
+		<input type="text" name="point_limit_price[{.group_seq}]" class="line onlynumber right" size="6" value=""/>원 이상 구매
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">포인트 <span class="helpicon" title="실 결제금액 x % = 추가포인트 금액"></span></td>
+	{ @ loop }
+	<td class="its-td-align" style="padding-left:5px;">
+		 <input type="text" name="point_price[{.group_seq}]" class="line onlynumber right" size="6" value="" {? reserve.point_use != "Y"}disabled{/}/><input type="hidden" name="point_price_type[{.group_seq}]" value="PER">%
+		<!--select name="point_select[{.group_seq}]" onchange="span_controller('point', '{.group_seq}');">
+			<option value="">제한없음</option>
+			<option value="year" {?data.point_select=='year'}selected{/}>제한 - 12월31일</option>
+			<option value="direct" {?data.point_select=='direct'}selected{/}>제한 - 직접입력</option>
+		</select>
+		<span name="point_y[{.group_seq}]" class="hide"><br>→ 지급연도 + <input type="text" name="point_year[{.group_seq}]" class="line onlynumber" style="text-align:right" size="3" maxlength='3'  value="" />년 12월 31일</span>
+		<span name="point_d[{.group_seq}]" class="hide"><br>→ <input type="text" name="point_direct[{.group_seq}]" class="line onlynumber" style="text-align:right" size="3" value="" />개월</span-->
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">적립금 <span class="helpicon" title="실 결제금액 x % = 추가적립금 금액"></span></td>
+	{ @ loop }
+	<td class="its-td-align" style="padding-left:5px;">
+		 <input type="text" name="reserve_price[{.group_seq}]" class="line onlynumber right" size="6" value="" /><input type="hidden" name="reserve_price_type[{.group_seq}]" value="PER">%
+		<!--select name="reserve_select[{.group_seq}]" onchange="span_controller('reserve', '{.group_seq}');">
+			<option value="">제한없음</option>
+			<option value="year" >제한 - 12월31일</option>
+			<option value="direct" >제한 - 직접입력</option>
+		</select>
+		<span name="reserve_y[{.group_seq}]" class="hide"><br>→ 지급연도 + <input type="text" name="reserve_year[{.group_seq}]" class="line onlynumber" style="text-align:right" size="3" maxlength='3'  value="" />년 12월 31일</span>
+		<span name="reserve_d[{.group_seq}]" class="hide"><br>→ <input type="text" name="reserve_direct[{.group_seq}]" class="line onlynumber" style="text-align:right" size="3" value="" />개월</span-->
+	</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">예외</td>
+	<td class="its-td-align" style="padding-left:5px;" colspan="{gcount}">
+		<table>
+			<tr>
+				<td>
+					<div id="point_select_goods">
+					<div>
+						<span class="btn small gray"><button type="button" id="exceptIssueGoodsButton">제외 상품 등록</button></span>
+						<span class="desc">노출순서변경</span> <span class="helpicon" title="상품을 마우스로 드래그&드랍해서 조정합니다."></span>
+					</div>
+					<div class="clearbox" style="height:5px;"></div>
+					<div id="exceptIssueGoods">
+					</div>
+					<div id="exceptIssueGoodsSelect" class="hide"></div>
+					</div>
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<!-- 제외 카테고리 -->
+					<div id="point_select_category">
+					<div>
+					<select class="line" name="exceptCategory1">
+						<option value="">1차 카테고리</option>
+					</select>
+					<select class="line" name="exceptCategory2">
+						<option value="">2차 카테고리</option>
+					</select>
+					<select class="line" name="exceptCategory3">
+						<option value="">3차 카테고리</option>
+					</select>
+					<select class="line" name="exceptCategory4">
+						<option value="">4차 카테고리</option>
+					</select>
+					<span class="btn small gray"><button type="button" id="exceptIssueCategoryButton">제외 카테고리 등록</button></span>
+					</div>
+					<div id="exceptIssueCategory">
+					</div>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+{ / }
+
+</table>
+</form>
+<br>
+	<div><p align="center"><span class="btn large deepblue"><button name="submit_btn" class="submit_btn">저장하기</button></span> <span class="btn large deepblue"><button id="cancel_btn" name="cancel_btn">취소<span class="arrowright"></span></button></span></p></div>
+
+<br>
+<br>

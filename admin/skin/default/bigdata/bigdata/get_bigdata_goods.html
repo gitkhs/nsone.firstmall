@@ -1,0 +1,100 @@
+<style type="text/css">
+#designDisplay_{kind} .goodsDisplayImageWrap {position:relative;}
+#designDisplay_{kind} .goodsDisplayImageSlide {position:absolute;right:0px;top:50%;margin-top:-14px;}
+#designDisplay_{kind} .goodsDisplayImageOveray1 {display:none; position:absolute;left:0px;top:100%;margin-top:-20px;width:100%;height:20px;}
+#designDisplay_{kind} .goodsDisplayImageOveray1Bg {background-color:#000000;color:#fff;opacity:0.3;position:absolute;left:0;top:0;width:100%;height:20px}
+#designDisplay_{kind} .goodsDisplayImageOveray1Text {color:#fff;font-size:11px;font-weight:bold;text-align:center;position:absolute;overflow:hidden;white-space:nowrap;line-height:20px;left:0;top:0;width:100%}
+#designDisplay_{kind} .goodsDisplayQuickShopping {}
+#designDisplay_{kind} table.quick_shopping_container {border-collapse:collapse;table-layout:fixed}
+#designDisplay_{kind} table.quick_shopping_container td {height:14px;text-align:center;border:1px solid #e5e5e5;background-color:#fff;font-size:11px;letter-spacing:-1px}
+</style>
+<script type="text/javascript" src="/app/javascript/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/app/javascript/jquery/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery.slides.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery.activity-indicator-1.0.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+	$('#designDisplay_{kind}_slide').slides({
+		container: 'slides_container',
+		play: 3000,
+		pause: 2500,
+		next: '{kind}_next',
+		prev: '{kind}_prev',
+		hoverPause: true,
+		autoHeight:false,
+		generatePagination: false,
+		effect: 'slide',
+		slidesLoaded: function() {
+			$('#designDisplay_{kind}_slide .slide').width($('#designDisplay_{kind}_slide .slides_container').width());
+			$('#designDisplay_{kind}_slide .slide').css('min-height','180');
+			$('#designDisplay_{kind}_slide .slides_container').css('min-height',$('#designDisplay_{kind}_slide .slide').height()+45);
+
+			$('#designDisplay_{kind}_slide img').each(function(){
+				if(parseInt($('#designDisplay_{kind}_slide .slides_container').css('min-height'))<$(this).closest('.slide').height()){
+					$('#designDisplay_{kind}_slide .slides_container').css('min-height',$(this).closest('.slide').height()+45);
+				}
+			});
+
+		}
+	});
+});
+</script>
+<div id='designDisplay_{kind}' class='designGoodsRelationDisplay'>
+	<div><font face="arial black, 돋움" size="2"><b></b></font></div>
+	<br style="line-height:10px;" />
+	<div id="designDisplay_{kind}_slide"  class="">
+		<table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed">
+		<tr>
+			<td width="30" align="left"><a href="#" class="{kind}_prev"><img src="/data/skin/default/images/design/slide-arrow-prev.png" /></a></td>
+			<td>
+				<div class="slides_container">
+					<div class="slide slidefirst" >
+						<table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;">
+						<tr>
+							<!--{ @ goods }-->
+							<td valign="top" style="padding:0 20px;">
+								<table class="goodsDisplayItemWrap" width="100%" align="center" cellpadding="0" cellspacing="0" border="0">
+								<tr>
+									<td align="center" width="150" height="180">
+										<span class="goodsDisplayImageWrap" style="max-width:150px;max-height:180px;overflow:hidden;" version="20141110"><img src="{.image}" width="150" onerror="this.src='/data/skin/default/images/common/noimage.gif';this.style.height='180px';" /></a></span>
+									</td>
+								</tr>
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td align="center"><span style="color:#000000;font-weight:normal;text-decoration:none;">{.goods_name}</span></td>
+								</tr>
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td align="center">
+										<span style="color:#000000;font-weight:normal;text-decoration:none;">{=number_format(.price)} 원</span>
+									</td>
+								</tr>
+								<tr><td height="6"></td></tr>
+								<tr>
+									<td align="center">
+										<u class="hand" style="font-size:11px;color:#0094e1;" onclick="location.replace('preview?no={.goods_seq}');">다른 사람은 뭘살까?</u>
+									</td>
+								</tr>
+								</table>
+							</td>
+								<!--{ ? ( ( .index_ + 1 ) % count_w ) == 0 && count(goods) > .index_ + 1 }-->
+						</tr>
+						</table>
+					</div>
+					<div class="slide">
+						<table width="100%" border="0">
+						<tr>
+								<!--{ / }-->
+
+							<!--{ / }-->
+						</tr>
+						</table>
+					</div>
+				</div>
+			</td>
+			<td width="30" align="right"><a href="#" class="{kind}_next"><img src="/data/skin/default/images/design/slide-arrow-next.png" /></a></td>
+		</tr>
+		<tr><td height="10"></td></tr>
+		</table>
+	</div>
+</div>

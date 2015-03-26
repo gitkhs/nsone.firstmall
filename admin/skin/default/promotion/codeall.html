@@ -1,0 +1,30 @@
+{? showTopPromotion(null,layout_config.width)//전체프로모션(null), 가로사이즈  }
+<table width="{=(layout_config.width)}" height="45"  align="{layout_config.align}" cellpadding="0" cellspacing="0" border="0" >
+<tr>
+	<td valign="top">
+		<style>
+		.header_promo {position:relative; height:40px; width:{=(layout_config.width)}px; margin:auto; border:1px solid #c6c6c6;}
+		.header_promo .promo_prev {position:absolute; left:10px; top:10px;z-index:100;}
+		.header_promo .promo_next {position:absolute; right:10px; top:10px;z-index:100;}
+		.header_promo .promo_list {width:{=(layout_config.width)}px; white-space:nowrap;list-style:none;}
+		.header_promo .promo_list li {float:left;list-style:none;display:inline-block; width:{=(layout_config.width)}px; height:40px; line-height:40px; text-align:center; font-size:16px; font-family:dotum; font-weight:bold; color:#fff; letter-spacing:-1px;}
+		</style>
+		<div class="header_promo relative">
+			<div class="promo_prev prev "><a href="#" class=""><img src="../images/common/promo_arrow_prev.png" /></a></div>
+			<div class="promo_next next "><a href="#" class=""><img src="../images/common/promo_arrow_next.png" /></a></div>
+			<div class="promo_list slides_container ">
+				{=showTopPromotion(null,layout_config.width)}
+			</div>
+			<script>
+				$('.header_promo').slides({
+					preload: true,
+					play: 3000,
+					generateNextPrev: false,
+					generatePagination: false
+				});
+			</script>
+		</div>
+</td>
+</tr>
+</table>
+{/}

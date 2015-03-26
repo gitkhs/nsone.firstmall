@@ -1,0 +1,367 @@
+{#layout_header_popup}
+
+<link rel="stylesheet" id="quick_design_css" type="text/css" href="{cssPath}?time={=time()}" />
+<script type="text/javascript" src="/app/javascript/plugin/jquery.colorpicker.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-color-picker.js"></script>
+
+<script>
+$(function(){
+
+	$("input[name='color_header_t1']").val(rgb2hex($("#layout_header a").css('color')));
+	$("input[name='color_header_b1']").val(rgb2hex($("#layout_header").css('background-color')));
+
+	$("input[name='color_subtitle_t1']").val(rgb2hex($(".sub_title_bar h2").css('color')));
+	$("input[name='color_subtitle_b1']").val(rgb2hex($(".sub_title_bar").css('background-color')));
+	$("input[name='color_subtitle_b2']").val(rgb2hex($(".sub_title_bar").css('border-bottom-color')));
+
+	$("input[name='color_btnimportant_t1']").val(rgb2hex($(".btn_important_large").css('color')));
+	$("input[name='color_btnimportant_b1']").val(rgb2hex($(".btn_important_large").css('background-color')));
+	$("input[name='color_btnimportant_b2']").val(rgb2hex($(".btn_important_large").css('border-bottom-color')));
+	
+	$("input[name='color_btnnormal_t1']").val(rgb2hex($(".btn_normal_large").css('color')));
+	$("input[name='color_btnnormal_b1']").val(rgb2hex($(".btn_normal_large").css('background-color')));
+	$("input[name='color_btnnormal_b2']").val(rgb2hex($(".btn_normal_large").css('border-bottom-color')));
+	
+	$("input[name='color_btncancel_t1']").val(rgb2hex($(".btn_cancel_large").css('color')));
+	$("input[name='color_btncancel_b1']").val(rgb2hex($(".btn_cancel_large").css('background-color')));
+	$("input[name='color_btncancel_b2']").val(rgb2hex($(".btn_cancel_large").css('border-bottom-color')));
+	
+	$("input[name='color_btnblack_t1']").val(rgb2hex($(".btn_black_large").css('color')));
+	$("input[name='color_btnblack_b1']").val(rgb2hex($(".btn_black_large").css('background-color')));
+	$("input[name='color_btnblack_b2']").val(rgb2hex($(".btn_black_large").css('border-bottom-color')));
+	
+	$("input[name='color_btn_t1']").val(rgb2hex($(".btn_style").css('color')));
+	$("input[name='color_btn_b1']").val(rgb2hex($(".btn_style").css('background-color')));
+	$("input[name='color_btn_b2']").val(rgb2hex($(".btn_style").css('border-bottom-color')));
+	
+	/* 컬러피커 */
+	$(".colorpicker").customColorPicker({'hide':true});
+
+	$(".colorpicker").change(function(){
+		quickDesignFormSubmit('view');
+	});
+
+	var defaultThemeSet = false;
+	$(".themeTabs").click(function(){
+		var themeKey = $(this).attr('theme');
+		$(".themeTabs").not(this).css({'opacity':'0.4','text-decoration':'none','font-weight':'normal'});
+		$(this).css({'opacity':'1','text-decoration':'underline','font-weight':'bold'});
+	
+		if(themeKey){
+			if(defaultThemeSet) $(".themeItem[theme!='"+themeKey+"']").hide();
+			$(".themeItem[theme='"+themeKey+"']").show();
+			$(".themeItem[theme='"+themeKey+"']").eq(0).click();
+
+			if($(".themeItem[theme='"+themeKey+"']").length>2 || !defaultThemeSet){
+				$(".themeScrollLeftBtn, .themeScrollRightBtn").show();
+			}else{
+				$(".themeScrollLeftBtn, .themeScrollRightBtn").hide();
+			}
+		}else{
+			$(".themeItem").show();
+			$(".themeItem").eq(0).click();
+			$(".themeScrollLeftBtn, .themeScrollRightBtn").show();
+		}
+		$(".themeItemsContainer").scrollLeft(0);
+
+		if(!defaultThemeSet){
+			defaultThemeSet=true;
+		}
+
+	});
+
+	$(".themeItem").click(function(){
+		var themeValue = $(this).attr('themeValue');
+		$(".themeItemCurrent").removeClass("themeItemCurrent");
+		$(this).addClass("themeItemCurrent");
+		$("form[name='quick_design_form'] input[name='theme']").val(themeValue);
+	});
+
+	$(".themeScrollLeftBtn, .themeScrollRightBtn").click(function(){
+		var themeKey = $(".themeItemCurrent").attr('theme');
+		var currentIdx = $(".themeItem:visible").index($(".themeItemCurrent"));
+		
+		if($(this).hasClass("themeScrollLeftBtn")){
+			currentIdx--;
+			if(currentIdx<0) currentIdx=$(".themeItem:visible").length-1;
+		}
+		if($(this).hasClass("themeScrollRightBtn")){
+			currentIdx++;
+			if(currentIdx>=$(".themeItem:visible").length) currentIdx=0;
+		}
+
+		if(currentIdx>=2){
+			var scrollLeftSum = 0;
+			for(var i=0;i<=currentIdx-2;i++){
+				scrollLeftSum += $(".themeItem:visible").eq(currentIdx).outerWidth();
+			}
+			
+			$(".themeItemsContainer").stop(true).animate({'scrollLeft':scrollLeftSum});
+		}else{
+			$(".themeItemsContainer").stop(true).animate({'scrollLeft':0});
+		}
+
+		$(".themeItem:visible").eq(currentIdx).click();
+	});
+
+	$(".themeTabs").eq(0).click();
+
+	$(".themeItemsContainer").fadeIn();
+});
+
+function quickDesignFormSubmit(mode){
+	var frm = document.quick_design_form;
+	frm.mode.value=mode;
+	frm.submit();
+}
+
+function rgb2hex(rgb){
+	if(rgb==undefined || rgb=='transparent' || !rgb) return '';
+	rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+	return "#" +
+	("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+	("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+	("0" + parseInt(rgb[3],10).toString(16)).slice(-2);
+}
+</script>
+
+<style>
+#layout_header {height:40px; width:140px; line-height:40px; text-align:center; font-size:10px; font-weight:bold; font-family:"arial","dotum";}
+.sub_title_bar {width:140px;}
+
+.tapbox { overflow:hidden; position:relative; }
+.tapbox .title {position:relative; z-index:2; line-height:40px; font-size:12px;font-family:gulim;font-weight:bold;color:#fff; text-align:center;}
+.tapbox .title a {font-size:12px;font-family:gulim;font-weight:bold;color:#fff;}
+
+.rb { z-index:1; position:absolute; right:0; bottom:0; width:100%; height:100%; background:url(../images/common/tab_darkgray.gif) no-repeat right bottom;}
+.lb { z-index:1; position:absolute; left:0; bottom:0; width:15px; height:100%; margin-right:15px; background:url(../images/common/tab_darkgray.gif) no-repeat left bottom;}
+.rt { z-index:1; position:absolute; right:0; top:0; height:52px; width:100%; background:url(../images/common/tab_darkgray.gif) no-repeat right top;}
+.lt { z-index:1; position:absolute; left:0; top:0; height:52px; width:15px; background:url(../images/common/tab_darkgray.gif) no-repeat left top;}
+
+.tapbox .titleoff {position:relative; z-index:2; line-height:40px; font-size:12px;font-family:gulim;font-weight:bold;color:#848484; text-align:center;}
+.tapbox .titleoff a {font-size:12px;font-family:gulim;font-weight:bold;color:#848484;}
+.rboff { position:absolute; right:0; bottom:0; width:100%; height:100%; background:url(../images/common/tab_gray.gif) no-repeat right bottom;}
+.lboff { position:absolute; left:0; bottom:0; width:15px; height:100%; margin-right:15px; background:url(../images/common/tab_gray.gif) no-repeat left bottom;}
+.rtoff { position:absolute; right:0; top:0; height:52px; width:100%; background:url(../images/common/tab_gray.gif) no-repeat right top;}
+.ltoff { position:absolute; left:0; top:0; height:52px; width:15px; background:url(../images/common/tab_gray.gif) no-repeat left top;}
+
+.themeTabs {cursor:pointer; padding-top:10px; padding-bottom:5px; width:60px;}
+.themeItemsContainer {width:805px; font-size:0px; margin:auto; overflow:hidden; white-space:nowrap; display:none; text-align:center; margin-top:7px; padding-top:20px; border-top:1px solid #f4f1f0}
+.themeItem {display:inline-block; padding:0 10px; cursor:pointer; text-align:center;}
+.themeItem img {border:3px solid #fff}
+.themeItemCurrent img {border:3px solid #000 !important}
+.themeScrollLeftBtn {position:absolute; left:10px; top:-220px; cursor:pointer}
+.themeScrollRightBtn {position:absolute; right:10px; top:-220px; cursor:pointer}
+</style>
+
+<div class="pdl10 pdr10">
+	<div style="padding-top:15px; border-bottom:2px solid #333">
+		<table align="center" cellpadding="0" cellspacing="0" border="0" >
+		<tr>
+		<td >
+			<div class="tapbox" style="width:260px;height:36px;text-align:center">
+				<span class="rb{? _GET.kind == 'direct' && _GET.kind}off{/}"></span>
+				<span class="lb{? _GET.kind == 'direct' && _GET.kind}off{/}"></span>
+				<span class="rt{? _GET.kind == 'direct' && _GET.kind}off{/}"></span>
+				<span class="lt{? _GET.kind == 'direct' && _GET.kind}off{/}"></span>
+				<div class="title{? _GET.kind == 'direct' && _GET.kind}off{/} hand"  onclick="document.location.href='?tpl_path={=urlencode(_GET.tpl_path)}&kind=theme'">▼ 테마로 세팅하기</div>
+			</div>
+		</td>
+		<td width="1" height="36px">&nbsp;</td>
+		<td >
+			<div class="tapbox" style="width:260px;height:36px;">
+				<span class="rb{? (_GET.kind != 'direct' && _GET.kind) || !_GET.kind}off{/}"></span>
+				<span class="lb{? (_GET.kind != 'direct' && _GET.kind) || !_GET.kind}off{/}"></span>
+				<span class="rt{? (_GET.kind != 'direct' && _GET.kind) || !_GET.kind}off{/}"></span>
+				<span class="lt{? (_GET.kind != 'direct' && _GET.kind) || !_GET.kind}off{/}"></span>
+				<div class="title{? (_GET.kind != 'direct' && _GET.kind) || !_GET.kind}off{/} hand"  onclick="document.location.href='?tpl_path={=urlencode(_GET.tpl_path)}&kind=direct'">▼ 직접 세팅하기</div>
+			</div>
+		</td>
+		</table>
+	</div>
+
+	<!--{?_GET.kind != 'direct'}-->
+		<table align="center" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+		<td class="themeTabs center">
+			<img src="../images/design/m_q_c_all.gif" vspace="7" />
+			<div class="fx11">전체</div>
+		</td>
+		<!--{@themes}-->
+			<td class="themeTabs center" theme="{.key_}" style="color:{.color};">
+				<img src="../images/design/m_q_c_{.key_}.gif" vspace="7" />
+				<div class="fx11">{.name}</div>
+			</td>
+		<!--{/}-->
+		</tr>
+		</table>
+		<div class="themeItemsContainer clearbox">
+			<!--{@themes}-->
+			<!--{@.childs}-->
+				<span class="themeItem" theme="{.key_}" themeValue="{..value_}"><img src="../images/design/m_q_{..value_}.jpg" /></span>			
+			<!--{/}-->
+			<!--{/}-->
+		</div>
+		<div class="relative">
+			<div class="themeScrollLeftBtn"><img src="../images/design/m_q_arw_l.gif" /></div>
+			<div class="themeScrollRightBtn"><img src="../images/design/m_q_arw_r.gif" /></div>
+		</div>
+		<form name="quick_design_form" action="../design_process/mobile_quick_design" method="post" target="actionFrame" onsubmit="loadingStart()">
+			<input type="hidden" name="tpl_path" value="{_GET.tpl_path}" />
+			<input type="hidden" name="skin" value="{designWorkingSkin}" />
+			<input type="hidden" name="kind" value="theme" />
+			<input type="hidden" name="mode" value="save" />
+			<input type="hidden" name="theme" value="" />
+			<div class="pdt20 center">
+				현재 디자인작업용 스킨(<span class="red">{designWorkingSkin}</span>)에 적용하시겠습니까?
+			</div>
+			<div class="pdt20 center">
+				<span class="btn large cyanblue"><input type="button" value="적용" onclick="quickDesignFormSubmit('save')" /></span>
+			</div>
+		</form>
+
+	<!--{/}-->
+	<!--{?_GET.kind == 'direct'}-->
+	<div class="clearbox pdt20">
+		<div class="fl" style="padding-left:40px;"><img src="../images/design/m_quick_sample.gif" /></div>
+		<div class="fr">
+			<form name="quick_design_form" action="../design_process/mobile_quick_design" method="post" target="actionFrame" onsubmit="loadingStart()">
+			<input type="hidden" name="tpl_path" value="{_GET.tpl_path}" />
+			<input type="hidden" name="skin" value="{designWorkingSkin}" />
+			<input type="hidden" name="kind" value="direct" />
+			<input type="hidden" name="mode" value="save" />
+			<table class="info-table-style" width="590" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<th class="its-th-align bold">적용 부분</th>
+				<th class="its-th-align bold">샘플</th>
+				<th class="its-th-align bold" colspan="2">현재 세팅 변경</th>
+			</tr>
+			
+			<tr>
+				<td class="its-td" rowspan="2">페이지 상단 / 검색창</td>
+				<td class="its-td" rowspan="2">
+					<div id="layout_header">
+						<h1><a>Firstmall</a></h1>
+					</div>
+				</td>
+				<td class="its-th-sub-align pdl10">텍스트</td>
+				<td class="its-td"><input type="text" name="color_header_t1" value="" class="colorpicker" /></td>
+			</tr>
+			<tr>
+				<td class="its-th-sub-align pdl10">바탕</td>
+				<td class="its-td"><input type="text" name="color_header_b1" value="" class="colorpicker" /></td>
+			</tr>
+
+			<tr>
+				<td class="its-td" rowspan="2">페이지 타이틀</td>
+				<td class="its-td" rowspan="2">
+					<div class="sub_title_bar">
+						<h2>상품상세</h2>
+					</div>
+				</td>
+				<td class="its-th-sub-align pdl10">텍스트</td>
+				<td class="its-td"><input type="text" name="color_subtitle_t1" value="" class="colorpicker" /></td>
+			</tr>
+			<tr>
+				<td class="its-th-sub-align pdl10">바탕/라인</td>
+				<td class="its-td">
+					<input type="text" name="color_subtitle_b1" value="" class="colorpicker" />
+					<input type="text" name="color_subtitle_b2" value="" class="colorpicker" />
+				</td>
+			</tr>
+
+			<tr>
+				<td class="its-td" rowspan="2">페이지 하단 버튼<br /><span class="orange">확인/저장/바로구매/결제 등</span></td>
+				<td class="its-td" rowspan="2">
+					<button type="button" class="btn_important_large" style="width:140px">바로구매</button>
+				</td>
+				<td class="its-th-sub-align pdl10">텍스트</td>
+				<td class="its-td"><input type="text" name="color_btnimportant_t1" value="" class="colorpicker" /></td>
+			</tr>
+			<tr>
+				<td class="its-th-sub-align pdl10">바탕/그림자</td>
+				<td class="its-td">
+					<input type="text" name="color_btnimportant_b1" value="" class="colorpicker" />
+					<input type="text" name="color_btnimportant_b2" value="" class="colorpicker" />
+				</td>
+			</tr>
+
+			<tr>
+				<td class="its-td" rowspan="2">페이지 하단 버튼<br /><span class="orange">장바구니/전체선택 등</span></td>
+				<td class="its-td" rowspan="2">
+					<button type="button" class="btn_normal_large" style="width:140px">장바구니</button>
+				</td>
+				<td class="its-th-sub-align pdl10">텍스트</td>
+				<td class="its-td"><input type="text" name="color_btnnormal_t1" value="" class="colorpicker" /></td>
+			</tr>
+			<tr>
+				<td class="its-th-sub-align pdl10">바탕/그림자</td>
+				<td class="its-td">
+					<input type="text" name="color_btnnormal_b1" value="" class="colorpicker" />
+					<input type="text" name="color_btnnormal_b2" value="" class="colorpicker" />
+				</td>
+			</tr>
+
+			<tr>
+				<td class="its-td" rowspan="2">페이지 하단 버튼<br /><span class="orange">취소/뒤로/이전페이지 등</span></td>
+				<td class="its-td" rowspan="2">
+					<button type="button" class="btn_cancel_large" style="width:140px">취소</button>
+				</td>
+				<td class="its-th-sub-align pdl10">텍스트</td>
+				<td class="its-td"><input type="text" name="color_btncancel_t1" value="" class="colorpicker" /></td>
+			</tr>
+			<tr>
+				<td class="its-th-sub-align pdl10">바탕/그림자</td>
+				<td class="its-td">
+					<input type="text" name="color_btncancel_b1" value="" class="colorpicker" />
+					<input type="text" name="color_btncancel_b2" value="" class="colorpicker" />
+				</td>
+			</tr>
+
+			<tr>
+				<td class="its-td" rowspan="2">상품상세페이지 하단 버튼<br /><span class="orange">찜/장바구니 등</span></td>
+				<td class="its-td" rowspan="2">
+					<button type="button" class="btn_black_large" style="width:140px">장바구니</button>
+				</td>
+				<td class="its-th-sub-align pdl10">텍스트</td>
+				<td class="its-td"><input type="text" name="color_btnblack_t1" value="" class="colorpicker" /></td>
+			</tr>
+			<tr>
+				<td class="its-th-sub-align pdl10">바탕/그림자</td>
+				<td class="its-td">
+					<input type="text" name="color_btnblack_b1" value="" class="colorpicker" />
+					<input type="text" name="color_btnblack_b2" value="" class="colorpicker" />
+				</td>
+			</tr>
+
+			<tr>
+				<td class="its-td" rowspan="2">그외 일반 버튼<br /><span class="orange">우편번호찾기/목록버튼 등</span></td>
+				<td class="its-td" rowspan="2">
+					<button type="button" class="btn_style" style="width:140px">우편번호찾기</button>
+				</td>
+				<td class="its-th-sub-align pdl10">텍스트</td>
+				<td class="its-td"><input type="text" name="color_btn_t1" value="" class="colorpicker" /></td>
+			</tr>
+			<tr>
+				<td class="its-th-sub-align pdl10">바탕/라인</td>
+				<td class="its-td">
+					<input type="text" name="color_btn_b1" value="" class="colorpicker" />
+					<input type="text" name="color_btn_b2" value="" class="colorpicker" />
+				</td>
+			</tr>
+			
+			
+			</table>
+
+			<div class="pdt20 center">
+				현재 디자인작업용 스킨(<span class="red">{designWorkingSkin}</span>)에 적용하시겠습니까?
+			</div>
+			<div class="pdt20 center"><span class="btn large cyanblue"><input type="button" value="적용" onclick="quickDesignFormSubmit('save')" /></span></div>
+
+
+			</form>
+		</div>
+	</div>
+<!--{/}-->
+
+{#layout_footer_popup}

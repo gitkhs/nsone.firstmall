@@ -1,0 +1,586 @@
+{ #layout_header }
+<script type="text/javascript">
+$(function(){
+	$(".btnRestriction").on("click",function(){
+		$.get('../member/sms_restriction?first=1&mode=board', function(data) {
+		  	$('#restrictionPopup').html(data);
+			openDialog("발송시간 제한 설정","restrictionPopup",{"width":"700","height":"300"});
+		});
+	});
+});
+</script>
+<style>
+table.list-table-style-board {width:100%; table-layout:fixed; letter-spacing:0px;}
+table.list-table-style-board thead.lth th {height:28px; border-top:1px solid #7f8180; border-bottom:1px solid #7f8180; font-weight:normal;  border-left:1px solid #ccc;}
+table.list-table-style-board thead.lth tr.double-row th {background:#eee;}
+table.list-table-style-board thead.lth tr.double-row:nth-child(2) th {border-top:0px}
+table.list-table-style-board tbody.ltb tr.list-title-row td.list-title-row-td {border-top:1px solid #eaeaea; border-bottom:2px solid #3a4452;}
+table.list-table-style-board tbody.ltb tr.list-row {}
+table.list-table-style-board tbody.ltb tr.list-row td {height:35px; border-bottom:1px solid #e3e3e3}
+</style>
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>게시판 리스트</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn small orange"><button type="button" name="manager_editor" id="manager_editor_btn"  >안내) 허용 도메인/파일</button></span></li>
+			<li><span class="btn large black"><button type="button" name="manager_write_btn{service_limit}" id="manager_write_btn{service_limit}"  >게시판생성<span class="arrowright"></span></button></span></li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+<!-- 게시판리스트검색폼 : 시작 -->
+<div class="search-form-container" style="position:relative;">
+	<form name="boardsearch" id="boardsearch" >
+	<input type="hidden" name="perpage"  id="perpage" value="{perpage}" />
+		<div style="width:100%;text-align:Center;">
+		<table class="search-form-table">
+		<tr>
+			<td>
+				<table>
+				<tr>
+					<td width="500">
+						<table class="sf-keyword-table">
+						<tr>
+							<td class="sfk-td-txt"><input type="text" name="search_text" id="search_text" value="{_GET.search_text}" title="게시판아이디,게시판명" /></td>
+							<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+
+		<table class="search-form-table">
+		<tr>
+			<td>
+				<table class="sf-option-table">
+				<tr>
+					<th>스킨</th>
+					<td>
+						{@ skinlist }
+							<label for="skin{.key_}"><input type="checkbox" name="skin[]" class="skin" id="skin{.key_}" value="{.key_}" {? is_array(_GET.skin) }{? in_array( .key_ , _GET.skin) } checked=checked {/} {/}/>{.value_}</label>&nbsp;&nbsp;
+						{/}
+						&nbsp;<span class="icon-check hand" id='typecheckedall'><b>전체</b></span>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+		</div>
+		<div  style="position:absolute;right:10px;top:55px;"><span class="btn small cyanblue"><button type="button" class="btnRestriction">SMS 발송시간 제한 설정({? sms_rest_board == "y"}현재사용{:}현재미사용{/})</button></span></div>
+	</form>
+</div>
+<!-- 게시판리스트검색폼 : 끝 -->
+<ul class="left-btns clearbox">
+	<li><select class="custom-select-box-multi" id="multichkec" >
+		<option value="true">전체선택</option>
+		<option value="false">전체해제</option>
+		</select>
+	</li>
+	<li><select class="custom-select-box-multi" id="managermulticmode" >
+		<option value="boardmanager_multi_delete">선택삭제</option>
+		</select>
+	</li>
+	<li>
+	<div style="margin-top:rpx;">
+	검색 <b>{=number_format(sc.searchcount)}</b> 개
+	/ 총 <b>{=number_format(sc.totalcount)}</b> 개
+	<!--{? service_limit && config_system.service.max_board_cnt}-->
+	/ <b>{=number_format(config_system.service.max_board_cnt)}</b> 개까지 가능)
+	<!--{/}-->
+	</div>
+	</li>
+</ul>
+<ul class="right-btns clearbox">
+<li><select  class="custom-select-box-multi" id="display_quantity">
+	<option id="dp_qty10" value="10" {? perpage == 10 } selected{/} >10개씩</option>
+	<option id="dp_qty20" value="20" {? perpage == 20 } selected{/} >20개씩</option>
+	<option id="dp_qty30" value="30" {? perpage == 30 } selected{/} >30개씩</option>
+	<option id="dp_qty50" value="50" {? perpage == 50 } selected{/} >50개씩</option>
+</select></li>
+</ul>
+<!-- 게시핀리스트테이블 : 시작 -->
+
+	<table class="list-table-style-board " border="0" cellspacing="0"  style="width:100%">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="20" />
+		<col width="40" />
+		<col width="40" />
+		<col width="170" />
+		<col width="150" />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col width="70" />
+		<col width="70" />
+		<col width="70" />
+		<col width="70" />
+		<col width="130" />
+	</colgroup>
+	<thead class="lth">
+	<tr class="double-row" >
+		<th rowspan="2"><input type="checkbox" name="checkboxAll" value="" id="checkboxAll" /></th>
+		<th rowspan="2" >번호</th>
+		<th rowspan="2" >구분</th>
+		<th rowspan="2" >게시판명</th>
+		<th rowspan="2" >게시판아이디</th>
+		<th colspan="4" >사용자 권한</th>
+		<th rowspan="2" >스킨</th>
+		<th rowspan="2" >게시글수</th>
+		<th rowspan="2" >화면보기</th>
+		<th rowspan="2" >게시글</th>
+		<th rowspan="2" >관리</th>
+	</tr>
+	<tr class="double-row" >
+		<th>읽기</th>
+		<th>작성</th>
+		<th>답글</th>
+		<th>댓글</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb otb" >
+		<!-- 리스트데이터 : 시작 -->
+		{? loop }
+			{@ loop }
+			{? service_code!='P_STOR' && .id == 'store_review'}
+			{: service_code!='P_STOR' && .id == 'store_reservation'}
+			{: service_code=='P_STOR' && .id == 'bulkorder'}
+			{: service_code=='P_STOR' && .id == 'goods_review'}
+			{: service_code=='P_STOR' && .id == 'goods_qna'}
+			{:}
+			<tr class="list-row">
+				<td align="center"><input type="checkbox" {? !.managerdeletebtn } disabled="disabled" {/} name="del[]" value="{.id}" class="checkeds"  /></td>
+				<td align="center">{.number}</td>
+				<td align="center">{.typetitle}</td>
+				<td align="left">&nbsp;{.name}</td>
+				<td align="left">&nbsp;<a href="./manager_write?id={.id}" ><b class="hand blue">{.id}</a></td>
+				<td  align="center">{.configvalread}</td>
+				<td  align="center">{.configvalwrite}</td>
+				<td  align="center">{.configvalreply}</td>
+				<td  align="center">{.configvalcmt}</td>
+				<td align="center">{.skintitle}</td>
+				<td align="center">{.totalnum}</td>
+				<td align="center">
+				{? !(.id=='gs_seller_qna' || .id=='gs_seller_notice') }
+				<span class="btn small cyanblue valign-middle"><input type="button" onclick="window.open('{.userurl}', '', ''); return false;" value="사용자보기" /></span>
+				{/}
+				</td>
+				<td align="center"><span class="btn small cyanblue valign-middle"><input type="button" onclick="document.location.href='{.dataurl}';" value="게시글보기" /></span></td>
+				<td align="left" nowrap>
+					{.managermodifybtn}
+					{.managercopybtn}
+					{.managerdeletebtn}
+				</td>
+			</tr>
+			{/}
+			{/}
+		{:}
+			<tr class="list-row">
+				<td colspan="15" align="center">
+					{ ? search_text }
+						'{search_text}' 검색된 게시판이 없습니다.
+					{:}
+						등록된 게시판이 없습니다.
+					{/}
+				</td>
+			<tr>
+		{/}
+
+	</tbody>
+	<!-- 리스트 : 끝 -->
+</table>
+<!-- 게시판리스트 테이블 : 끝 -->
+
+<!-- 페이징 -->
+{? pagin }
+<table align="center" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td  align="center">&nbsp;</td>
+</tr>
+</table>
+<div class="paging_navigation "  style="margin:auto;">{pagin} </div>
+{:}
+<table align="center" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td  align="center">&nbsp;</td>
+</tr>
+</table>
+{/}
+
+
+
+{? service_code=='P_FREE'}
+<div id="BulkorderService" class="hide">
+<div  >
+		<table width="100%">
+		<tr>
+		<td align="left">
+			무료몰Plus+에서는 지원하지 않는 기능입니다. <br />
+			프리미엄몰+ 또는 독립몰+로 업그레이드 하시면 대량구매게시판을 이용 가능합니다.
+		</td>
+		</tr>
+		<tr>
+		<td align="center"><br /><br />
+		<img src="../images/common/btn_upgrade.gif" class="hand" onclick="serviceUpgrade();" align="absmiddle" />
+		</td>
+		</tr>
+		</table>
+	</div>
+</div>
+{/}
+
+<div id="BoadService" class="hide">
+<div  >
+		<table width="100%">
+		<tr>
+		<td align="left">
+			홈페이지샵 / 무료몰+ : 기본 5개 (게시판 추가 시 1개당 2,200원, 최초 1회 결제로 기간 관계 없이 계속 이용)<br />
+			프리미엄몰+ 또는 독립몰+로 업그레이드 하시면 게시판을 무제한 이용 가능합니다.
+		</td>
+		</tr>
+		<tr>
+		<td align="center"><br /><br />
+		<span class="btn large gray"><input type="button" id="board_charge" value="추가 신청 >"></span>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<img src="../images/common/btn_upgrade.gif" class="hand" onclick="serviceUpgrade();" align="absmiddle" />
+		</td>
+		</tr>
+		</table>
+	</div>
+	<br style="line-height:20px;" />
+</div>
+
+
+
+<div  id="boardiframeuselay"  class="hide" >
+	<div style="border:0px #dddddd solid;padding:3px;width:95%;line-height:20px;">
+	<table width="100%" >
+		<tbody >
+			<tr >
+				<td width="130">iframe 허용 도메인 </td>
+				<td >
+				<textarea rows="3"    readonly style="width:100%;overflow:auto;">youtube.com,naver.com,daum.net,vimeo.com,ustream.tv,smartucc.kr</textarea>
+				</td>
+			</tr>
+			<tr >
+				<td >허용 파일확장자 </td>
+				<td >
+				<textarea rows="4"    readonly style="width:100%;overflow:auto;">txt,hwp,docx,docm,doc,ppt,pptx,pptm,pps,ppsx,xls,xlsx,xlsm,xlam,xla,ai,psd,eps,pdf,ods,ogg,mp4,avi,wmv,zip,rar,tar,7z,tbz,tgz,lzh,gz,dwg</textarea>
+				</td>
+			</tr>
+			<tr >
+				<td >허용 이미지확장자 </td>
+				<td >
+				<textarea rows="3"   readonly style="width:100%;overflow:auto;">jpg,jpeg,png,gif,bmp,tif,pic,ai,psd,eps,dwg </textarea>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	</div>
+</div>
+{? service_limit }
+<div id="BoadService" class="hide">
+<div  >
+		<table width="100%">
+		<tr>
+		<td align="left">
+			홈페이지샵 / 무료몰+ : 기본 5개 (게시판 추가 시 1개당 2,200원, 최초 1회 결제로 기간 관계 없이 계속 이용)<br />
+			프리미엄몰+ 또는 독립몰+로 업그레이드 하시면 게시판을 무제한 이용 가능합니다.
+		</td>
+		</tr>
+		<tr>
+		<td align="center"><br /><br />
+		<span class="btn large gray"><input type="button" id="board_charge" value="추가 신청 >"></span>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<img src="../images/common/btn_upgrade.gif" class="hand" onclick="serviceUpgrade();" align="absmiddle" />
+		</td>
+		</tr>
+		</table>
+	</div>
+	<br style="line-height:20px;" />
+</div>
+{/}
+
+<div id="boardmanagercopyPopup" class="hide">
+	<form name="BoardManagerCopy" id="BoardManagerCopy" method="post" action="../boardmanager_process"  target="actionFrame">
+	<input type="hidden" name="mode" id="" value="boardmanager_copy" />
+	<input type="hidden" name="idck" id="idck" value="" />
+	<div align="center">
+		<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+			<col width="80%" />
+		</colgroup>
+		<thead class="hide">
+		<tr>
+			<th class="its-th-align center" colspan="4">기본정보</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">게시판 아이디</th>
+			<td class="its-td">
+				<input type="text" name="id" id="new_id" size="40" value="{id}" title="영문, 숫자, 언더스코어(_), 하이픈(-) 가능" remote="../boardmanager_process?mode=boardmanager_idck" />
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">게시판명</th>
+			<td class="its-td">
+				<input type="text" name="name" id="new_name" class="line" size="45" title="쌍따옴표(&quot;)를 제외한 모든문자 사용가능합니다." value="{name}"   {? id && nameread } readonly="readonly" {/} />
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">설정복사</th>
+			<td class="its-td">
+				<select name="copyid" id="copyid" >
+				{@ boardmanagerlist }
+					<option value="{.id}" >{=getstrcut(.name, 20)} ({=number_format(.totalnum)}) </option>
+				{/}
+				</select>
+			</td>
+		</tr>
+		</tbody>
+		</table>
+	</div>
+	<div style="padding:10px 0 0 0" align="center"><span class="btn medium"><input type="submit" value="게시판복사" id="boardmanagercopysave" name="boardmanagermainsave" /></span></div>
+	</form>
+</div>
+
+
+<div id="boardPaymentPopup" class="hide"></div>
+<div id="restrictionPopup" class="hide"></div>
+
+<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"></script>
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" charset="euc-kr"></script>
+<script type="text/javascript" src="/app/javascript/js/admin-board.js?v=20141105"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$("#manager_editor_btn").click(function() {
+		openDialog("안내)허용 도메인/파일", "boardiframeuselay", {"width":"570","height":"300","show" : "fade","hide" : "fade"});
+	});
+
+	$("#boardiframeusesave").click(function(){
+		var editor_secu_domain = $("#editor_secu_domain").val();
+		var editor_secu_file = $("#editor_secu_file").val();
+		var editor_secu_image = $("#editor_secu_image").val();
+
+		$.ajax({
+				'url' : '../boardmanager_process/boardiframeusesave',
+				'data' : {'editor_secu_domain':editor_secu_domain,'editor_secu_file':editor_secu_file,'editor_secu_image':editor_secu_image},
+				'type' : 'post',
+				'dataType': 'json',
+				'success' : function(res){
+					if(res.result == true ){
+						alert(res.msg);
+						document.location.reload();
+					}else{
+						alert(res.msg);
+					}
+				}
+			});
+	});
+
+	$(":input[name=boarddelete]").click(function(){
+		var board_name = $(this).attr('board_name');
+		if(confirm("삭제된 게시글과 댓글은 복구할 수 없습니다.\n정말로 [" + board_name +"]을(를) 삭제하시겠습니까? ")) {
+			var id = $(this).attr('board_id');
+			$.ajax({
+				'url' : '../boardmanager_process',
+				'data' : {'mode':'boardmanager_delete', 'delid':id},
+				'type' : 'post',
+				'dataType': 'json',
+				'success': function(data) {
+					if(data.result == true){
+						alert(" [" + board_name +"]을(를) 삭제하였습니다!");
+						document.location.reload();
+					}
+				}
+			});
+		}
+	});
+
+	$('select#managermulticmode').change(function() {
+		var mode = $(this).val();
+		var delidar = '';
+		$('.checkeds').each(function(e, el) {
+			if( $(el).attr('checked') == 'checked' ){
+				delidar += $(el).val() + ",";
+			}
+		});
+		if(!delidar){
+			alert('게시판을 선택해 주세요.');
+			return false;
+		}
+		if(mode == 'boardmanager_multi_delete' ){//다중삭제시
+			if(confirm("삭제된 게시글과 댓글은 복구할 수 없습니다.\n정말로 선택된 게시판을 삭제하시겠습니까? ")) {
+				var id = $(this).attr('board_id');
+				$.ajax({
+					'url' : '../boardmanager_process',
+					'data' : {'mode':'boardmanager_multi_delete', 'delidar':delidar},
+					'type' : 'post',
+					'dataType': 'json',
+					'success' : function(data) {
+						alert("게시판 [" + data.num +"]개를 성공적으로 삭제하였습니다!");
+						document.location.reload();
+					}
+				});
+			}
+		}
+	});
+
+	$("input[name=boardmanagercopysave]").click(function(){
+		var boardid = $('#new_id');
+		var boardname = $('#new_name');
+		$('#BoardManagerCopy').validate({
+			onkeyup: false,
+			rules: {
+				id: { required:true, remote:{type:'post',url:'../boardmanager_process?mode=boardmanager_idck'}},
+				name: { required:true}
+			},
+			messages: {
+				id: { required:'아이디를 입력해 주세요.', remote: '아이디가 중복되었습니다.'},
+				name: { required:'게시판명을 입력해 주세요.'}
+			},
+			errorPlacement: function(error, element) {
+				error.appendTo(element.parent());
+			},
+			submitHandler: function(f) {
+				var board_id_ck = /^[a-z0-9_-]{3,20}$/; // 아이디 검사식
+				if (board_id_ck.test(boardid.val()) != true) { // 아이디 검사
+					alert('유효한 게시판 아이디를 입력해 주세요.');
+					boardid.focus();
+					return false;
+				}
+
+				if (boardname.val().length < 3) { // 게시판명 검사
+					alert('3자리이상 게시판명을 입력해 주세요.');
+					boardname.focus();
+					return false;
+				}
+
+				if (containsChars(boardname,"\"")) {
+					alert('쌍따옴표(\") 를 제거후 게시판명으로 입력해 주세요.');
+					boardname.focus();
+					return false;
+				}
+				f.submit();
+			}
+		});
+
+		$('#id').after('<strong></strong>');
+		// #boardid 인풋에서 onkeyup 이벤트가 발생하면
+		boardid.keyup( function() {
+			var s = $(this).next('strong'); // strong 요소를 변수에 할당
+			if (boardid.val().length == 0) { // 입력 값이 없을 때
+				s.text(''); // strong 요소에 포함된 문자 지움
+			} else if (boardid.val().length < 3) { // 입력 값이 3보다 작을 때
+				s.text('너무 짧아요.'); // strong 요소에 문자 출력
+			} else if (boardid.val().length > 20) { // 입력 값이 16보다 클 때
+				s.text('너무 길어요.'); // strong 요소에 문자 출력
+			}
+		});
+
+		$('#BoardManagerCopy').submit();
+	});
+
+	$("input[name=boardmanagercopybtn]").click(function(){
+		$('#BoardManagerCopy')[0].reset();//초기화
+		var board_id		= $(this).attr('board_id');
+		var board_name	= $(this).attr('board_name');
+		$("#copyid").val(board_id);
+		$("#new_id").attr('title','영문, 숫자, 언더스코어(_), 하이픈(-) 가능');
+		$("#new_name").attr('title','쌍따옴표(&quot;)를 제외한 모든문자 사용가능합니다.');
+		openDialog("게시판 복사 <span class='desc'>빠르게 게시판을 생성합니다.</span>", "boardmanagercopyPopup", {"width":600,"height":250});
+	});
+
+	$('#typecheckedall').live('click', function() {
+		$("input[name='skin_type[]']").attr('checked',true);
+	});
+
+	// 게시판 등록
+	$('#manager_write_btn').live('click', function() {
+		$("#search_text").focus();//검색
+		var queryString = $('#boardsearch').formSerialize();
+		document.location.href='./manager_write?'+queryString;
+	});
+
+	// 게시판 등록(무료몰인경우 생성불가
+	$('#manager_write_btnY').live('click', function() {
+		{?config_system.service.max_board_cnt && use_board_cnt >=config_system.service.max_board_cnt}
+		openDialog("게시판 이용 안내<span class='desc'></span>", "BoadService", {"width":650,"height":200});
+		{/}
+	});
+
+	// 무료몰인경우 대량구매게시판불가
+	$("input[name=bulkorder_free_btn]").live('click', function() {
+		{? service_code=='P_FREE'}
+		openDialog("대량구매게시판 이용 안내<span class='desc'></span>", "BulkorderService", {"width":600,"height":200});
+		{/}
+	});
+
+
+	// 게시판 수정
+	$("input[name=manager_modify_btn]").live("click", function() {
+		$("#search_text").focus();//검색
+		var board_id = $(this).attr("board_id");
+		var board_name = $(this).attr("board_name");
+		var queryString = $('#boardsearch').formSerialize();
+		document.location.href='./manager_write?'+queryString+'&id='+board_id;
+        //boardaddFormDialog('./manager_write?id='+board_id, '90%', '700', board_name + ' 게시판 수정');
+	});
+
+	// 체크박스 색상
+	$("input[type='checkbox'][name='del[]']").live('change',function(){
+		if($(this).is(':checked')){
+			$(this).closest('tr').addClass('checked-tr-background');
+		}else{
+			$(this).closest('tr').removeClass('checked-tr-background');
+		}
+	}).change();
+
+	$('#board_charge').live('click', function (){
+		$.get('board_payment', function(data) {
+		  	$('#boardPaymentPopup').html(data);
+			openDialog("게시판 추가 신청", "boardPaymentPopup", {"width":"800","height":"650"});
+		});
+	});
+
+});
+
+
+	/**
+	 * 입력값에 특정 문자(chars)가 있는지 체크
+	 * 특정 문자를 허용하지 않으려 할 때 사용
+	 * ex) if (containsChars(form.name,"^%$#@~;")) {
+	 *         alert("이름 필드에는 특수 문자를 사용할 수 없습니다.");
+	 *     }
+	 */
+	 function containsChars(input,chars) {
+		 for (var inx = 0; inx < input.val().length; inx++) {
+			if (chars.indexOf(input.val().charAt(inx)) != -1)
+				return true;
+		 }
+		 return false;
+	 }
+</script>
+
+{#emoneyform}
+
+{ #layout_footer }

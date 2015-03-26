@@ -1,0 +1,79 @@
+<style>
+.zipcodeResult { cursor:pointer }
+</style>
+<div class="search-form-container" >
+
+<table class="search-form-table">
+<tr>
+	<td>
+		<table>
+		<tr>
+			<td>
+				<table class="sf-keyword-table">
+				<tr>
+					<td class="sfk-td-txt"><input type="text" name="dong" value="{dong}" title="읍/면/동" /></td>
+					<td class="sfk-td-btn"><button type="button" id="zipcodeSearchButton"><span>검색</span></button></td>
+				</tr>
+				</table>
+			</td>				
+		</tr>
+		</table>
+	</td>
+</tr>
+</table>
+
+</div>
+<div class="slc-body" style="padding:5px 0 0 0">	
+	<table width="100%" class="simplelist-table-style" id="searchResult">
+	<col width="20%" /><col width="80%" />
+	<tr>		
+		<th>우편번호</th>
+		<th>주소</th>
+	</tr>
+	<!--{ @loop }-->
+	<tr class="zipcodeResult">
+		<td align="center">{.ZIPCODE}</td>
+		<td align="center">{.ADDRESSVIEW}<div style="display:none">{.ADDRESS}</div></td>
+	</tr>
+	<!--{ / }-->
+	<!--{ ? !loop }-->
+	<tr>
+		<td colspan="2" align="center"><strong>읍/면/동</strong>을 검색해주세요.</td>
+	</tr>
+	<!--{ / }-->
+	</table>
+</div>
+<script type="text/javascript">
+function getZipcodeResult(zipcodeFlag){
+	var url = '/admin/common/zipcode';		
+	$.get(url,{'dong':$(':input[name=dong]').val(), 'zipcodeFlag':zipcodeFlag} , function(data) {
+		$("#"+zipcodeFlag+"Id").html(data);
+	});		
+}
+$(document).ready(function() {
+
+	$("#zipcodeSearchButton").live("click",function(){
+		getZipcodeResult('{zipcodeFlag}');
+	});	
+
+	$(':input[name=dong]').keyup(function(e) {
+		if(e.keyCode == 13){
+			getZipcodeResult('{zipcodeFlag}');
+		}
+	});
+	$(".zipcodeResult").live("click",function(){
+		var zip = $(this).children().html();
+		var zipArr = zip.split('-');		
+		<!--{ ? preg_match('/_/',zipcodeFlag) }-->		
+		$(":input[name='{zipcodeFlag}address']").val( $(this).children().eq(1).children().html() );
+		$(":input[name='{zipcodeFlag}zipcode[]']").eq(0).val(zipArr[0]);
+		$(":input[name='{zipcodeFlag}Zipcode[]']").eq(1).val(zipArr[1]);
+		<!--{ : }-->
+		$(":input[name='{zipcodeFlag}Address']").val( $(this).children().eq(1).children().html() );
+		$(":input[name='{zipcodeFlag}Zipcode[]']").eq(0).val(zipArr[0]);
+		$(":input[name='{zipcodeFlag}Zipcode[]']").eq(1).val(zipArr[1]);
+		<!--{ / }-->
+		closeDialog('{zipcodeFlag}Id')
+	});
+});
+</script>

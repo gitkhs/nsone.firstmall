@@ -1,0 +1,1610 @@
+{ #layout_header }	
+
+<script type="text/javascript">
+var info_item_config = {
+	'brand_title'	: ['kind','font_decoration','wrapper'],
+	'goods_name'	: ['kind','font_decoration'],
+	'summary'		: ['kind','font_decoration'],
+	'consumer_price': ['kind','font_decoration','postfix'/*,'zoomicon'*/],
+	'price'			: ['kind','font_decoration','postfix'/*,'zoomicon'*/],
+	'sale_price'	: ['kind','font_decoration','postfix'/*,'zoomicon'*/],
+	'count'			: ['kind','buy_count','time_count'],
+	'fblike'		: ['kind','fblike'],
+	'icon'			: ['kind','list_icon_desc','list_icon_cpn','list_icon_freedlv','list_icon_video'],
+	'status_icon'	: ['kind','status_icon_desc','status_icon_runout','status_icon_purchasing','status_icon_unsold'],
+	'score'			: ['kind','score_desc'],
+	'color'			: ['kind','color_desc']
+};
+</script>
+
+<script type="text/javascript" src="/app/javascript/plugin/jquery.colorpicker.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-color-picker.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-font-decoration.js"></script>
+<script type="text/javascript" src="/app/javascript/js/base64.js"></script>
+<script type="text/javascript" src="/app/javascript/js/goods-display.js?v={=date('Ymd')}"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+
+<script>
+var displayTabGoodsContainerClone;
+$(function(){
+	displayTabGoodsContainerClone = $(".displayTabGoodsContainer").last().clone();
+	displayTabGoodsContainerClone.find(".daumeditor").removeClass('daumeditor').addClass('daumeditorClone');
+});
+</script>
+
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+
+<script type="text/javascript">
+$(function () {
+
+	/* 컬러피커 */
+	$(".colorpicker").customColorPicker();
+
+	/* 추천상품 노출개수 합계 표시 */
+	$("input[name='recommend_count_w'],input[name='recommend_count_h']").bind('keyup change',function(){
+		var count_w = parseInt($("input[name='recommend_count_w']").val());
+		var count_h = parseInt($("input[name='recommend_count_h']").val());
+		if(!count_w) count_w = 0;
+		if(!count_h) count_h = 0;
+		$("#recommend_count_total").html(count_w*count_h);
+	}).change();
+
+	/* 추천상품 스타일별 가로출력수 고정 설정 */
+	$("input[name='recommend_style']").live('change',function(){
+		$("input[name='recommend_count_w']").removeAttr('readOnly');
+		if($(this).is(":checked")){
+			{@styles}
+				if($(this).val()=="{.key_}"){
+					{?.count_w}
+						if($("input[name='recommend_count_w']").val()=='') $("input[name='recommend_count_w']").val("{.count_w}");
+					{/}
+					{?.count_w_fixed}
+					$("input[name='recommend_count_w']").val("{.count_w}").attr('readOnly',true);
+					{/}
+
+					$("input[name='recommend_count_w']").change();
+				}
+			{/}
+		}
+	}).change();
+
+	/* 노출개수 합계 표시 */
+	$("input[name='list_count_w'],input[name='list_count_h'],input[name='list_count_w_lattice_b']").bind('change',function(){
+		var count_w = parseInt($("input[name='list_count_w']").val());
+		var count_w_lattice_b = parseInt($("input[name='list_count_w_lattice_b']").val());
+		var count_h = parseInt($("input[name='list_count_h']").val());
+		if(!count_w) {count_w = {styles['lattice_a']['count_w']}; $("input[name='list_count_w']").val(count_w);}
+		if(!count_w_lattice_b) {count_w_lattice_b = {styles['lattice_b']['count_w']}; $("input[name='list_count_w_lattice_b']").val(count_w_lattice_b);}
+		if(!count_h) {count_h = 1; $("input[name='list_count_h']").val(count_h);}
+
+		if(num(count_w)*num(count_h) < num(count_w_lattice_b)){
+			count_w_lattice_b = num(count_w)*num(count_h);
+			$("input[name='list_count_w_lattice_b']").val(count_w_lattice_b);
+		}
+
+		$(".list_count_total").html(count_w*count_h);
+		$("span.list_count_h_lattice_b").html(Math.ceil(count_w*count_h/count_w_lattice_b));
+		$("span.list_count_h_list").html(count_w*count_h);
+		$("span.list_count_w_rolling").html(count_w);
+		$("span.list_count_h_rolling").html(count_h);
+	}).eq(0).change();
+
+	/* 상품선택 버튼 */
+	$("button#recommendDisplayGoodsButton").bind("click",function(){
+		set_goods_list("recommendDisplayGoodsSelect","recommendDisplayGoods");
+		parent.$("body").css("overflow-y","hidden");
+	});
+	$("#recommendDisplayGoods").sortable();
+	$("#recommendDisplayGoods").disableSelection();
+
+	/* 컬러피커 */
+	$(".colorpicker").customColorPicker();
+
+	$("input[name='use_top_html']").change(function(){
+		if($(this).is(":checked")){
+			$(".use_top_html_division").removeAttr('disabled').show();
+		}else{
+			$(".use_top_html_division").attr('disabled',true).hide();
+		}
+		$(document).resize();
+	}).change();
+
+	$("input[name='use_recommend']").change(function(){
+		if($(this).is(":checked")){
+			$(".use_recommend_division").show().removeAttr('disabled');
+		}else{
+
+			$(".use_recommend_division").hide().attr('disabled',true);
+		}
+		$(document).resize();
+	}).change();
+
+	changeFileStyle();
+
+	{? skinConfiguration.category_navigation_type }
+		$("input[name='navigation_depth'][value='{skinConfiguration.category_navigation_type}']").attr("checked",true).change();
+		var category_navigation_count_w = "{skinConfiguration.category_navigation_count_w}".split("|");
+		$("input[name='navigation_{skinConfiguration.category_navigation_type}_w[]']").each(function(i){
+			$(this).val(category_navigation_count_w[i]);
+		});
+	{ / }
+	{? skinConfiguration.category_navigation_brand_count_w }
+		$("input[name='naviation_category_brand_w']").val("{skinConfiguration.category_navigation_brand_count_w}");
+	{ / }
+	
+	/* 탭 만들기 버튼 */
+	$("#btnDisplayTabPopup").click(function(){
+		$(".displayTabMakePopupInner").show().appendTo($("#displayTabMakePopup"));
+		openDialog("탭 만들기", "#displayTabMakePopup", {"width":"700","height":"500","show" : "fade","hide" : "fade"});
+	});
+	
+	var makeTabSampleHtml = function(){
+		if($(".displayTabMakeInputs input[name='popup_tab_title[]']").length>1){
+			var displayTabKind = $("input[name='popup_tab_design_kind']:checked").val();
+			var displayTabType = displayTabKind=='image' ? 'displayTabTypeImage' : $("input[name='popup_tab_design_type']:checked").val();
+
+			var html = '<input type="hidden" name="tab_design_type" value="'+displayTabType+'" />';
+			html += '<ul class="'+displayTabType+'" style="display:inline-block;vertical-align:middle">';
+			$(".displayTabMakeInputs input[name='popup_tab_title[]']").each(function(i){
+				if(i==0)	html += '<li class="current">';
+				else		html += '<li>';
+				html += '<input type="hidden" name="tab_title[]" value="'+$(this).val()+'" />';
+				html += $(this).val()+'</li>';
+			});
+			html += '</ul>';
+			$(".strTab").show();
+
+			if(displayTabKind=='image'){
+				html += '<span class="fx11 red">이미지 타입은 미리보기를 지원하지 않습니다.</span>';
+				$(".displayTabContainer").html(html);
+				$(".displayTabContainer ."+displayTabType).hide();
+			}else{
+				$(".displayTabContainer").html(html);
+			}
+
+
+		}else{
+			$(".strTab").hide();
+			$(".displayTabContainer").html("<span class='desc'>탭 없음</span>");
+		}
+
+		if($(".displayTabMakeInputs").length>$(".displayTabGoodsContainer").length){
+			var makeCnt = $(".displayTabMakeInputs").length-$(".displayTabGoodsContainer").length;
+			for(var i=0;i<makeCnt;i++){
+				var tabIdx = $(".displayTabGoodsContainer").length;
+				var clone = displayTabGoodsContainerClone.clone();
+				clone.find(".daumeditorClone").addClass('daumeditor').removeClass('daumeditorClone');
+				clone.attr("tabIdx",tabIdx);
+				clone.find(".strTabIdx").html(comma(tabIdx+1));
+				clone.find(".displayGoods").attr("id","displayGoods"+tabIdx);
+				clone.find(".displayCriteria").attr("id","displayCriteria"+tabIdx);
+				$(".displayTabGoodsContainer").last().after(clone);
+				$(".ui-widget-overlay").height($(document).height());
+				$(".displayGoods",clone).sortable();
+				$(".displayGoods",clone).disableSelection();
+
+				$("select.contents_type",clone).trigger('change');
+
+				DaumEditorLoader.init(".daumeditor");
+			}
+		}else{
+			$(".displayTabGoodsContainer:gt("+($(".displayTabMakeInputs").length-1)+")").remove();
+		}
+
+		$(".displayTabMakeImages").each(function(i){
+			$(".strMakeTabIdx",this).html(i+1);
+		});
+
+		$(".displayTabList").each(function(){
+			$(".tabPlusBtn:gt(0)",this).hide();
+			$(".tabMinusBtn",this).hide();
+			$(".tabMinusBtn:gt(0)",this).show();
+		});
+
+		setCriteriaDescription();
+	};
+	$("input[name='popup_tab_title[]']").live('change keyup',function(){makeTabSampleHtml();});
+	$("input[name='popup_tab_design_type']").live('change',function(){makeTabSampleHtml();});
+	$(".tabPlusBtn").live('click',function(){
+		$(".displayTabMakeInputs:last-child").after($(".displayTabMakeInputs:last-child").clone());
+		$(".displayTabMakeImages:last-child").after($(".displayTabMakeImages:last-child").clone());
+
+		makeTabSampleHtml();
+	});
+	$(".tabMinusBtn").live('click',function(){
+		if($(this).closest(".displayTabMakeInputs").length){
+			var tabIdx = $(".displayTabMakeInputs").index($(this).closest(".displayTabMakeInputs"));
+		}else{
+			var tabIdx = $(".displayTabMakeImages").index($(this).closest(".displayTabMakeImages"));
+		}
+
+		$(".displayTabMakeInputs").eq(tabIdx).remove();
+		$(".displayTabMakeImages").eq(tabIdx).remove();
+
+		makeTabSampleHtml();
+	});
+	$("input[name='popup_tab_design_kind']").change(function(){
+		if($(this).is(":checked")){
+			if($(this).val()=='image'){
+				$(".displayTabKindWrapImage").show();
+				$(".displayTabKindWrapText").hide();
+			}else{
+				$(".displayTabKindWrapImage").hide();
+				$(".displayTabKindWrapText").show();
+				if($("input[name='popup_tab_design_type']:checked").val()=='displayTabTypeImage'){
+					$("input[name='popup_tab_design_type']").eq(0).attr("checked",true);
+				}
+			}
+		}
+		makeTabSampleHtml();
+	}).change();
+	makeTabSampleHtml();
+
+	/* 조건 선택 버튼 */
+	$("button.displayCriteriaButton").live("click",function(){
+		var displayResultId = "displayCriteria" + $(this).closest(".displayTabGoodsContainer").attr("tabIdx");
+		var criteria = $(this).closest(".displayTabGoodsContainer").find(".displayCriteria").val();
+		openDialog("조건 선택", "#displayGoodsSelectPopup", {"width":"99%","show" : "fade","hide" : "fade"});
+		set_goods_list("displayGoodsSelect",displayResultId,'criteria',criteria);
+	});
+	/* 상품 검색 버튼 */
+	$("button.displayGoodsButton").live("click",function(){
+		var displayResultId = "displayGoods" + $(this).closest(".displayTabGoodsContainer").attr("tabIdx");
+		openDialog("상품 검색", "#displayGoodsSelectPopup", {"width":"99%","show" : "fade","hide" : "fade"});
+		set_goods_list("displayGoodsSelect",displayResultId,'goods','');
+	});
+
+	$(".displayGoods").sortable();
+	$(".displayGoods").disableSelection();
+
+	$("select.contents_type").live('change',function(){
+		$(this).closest(".displayTabGoodsContainer").find(".displayTabAutoTypeContainer").hide();
+		$(this).closest(".displayTabGoodsContainer").find(".displayTabAutoTypeContainer[type='"+$(this).val()+"']").show();
+	}).change();
+	
+	/* 저장버튼 */
+	$("form[name='categoryRecommendSettingForm']").submit(function(){
+		$("input[name='auto_goods_seqs[]']").each(function(i){
+			var arr = new Array();
+			$("input[name='displayGoods"+i+"[]']",$(this).closest(".displayTabGoodsContainer")).each(function(){
+				arr.push($(this).val());
+			});
+			$(this).val(arr.join(','));
+		});
+
+		if($("input[name='recommend_style']:checked").val()=='rolling_h' && $("input[name='tab_title[]']").length>1){
+			openDialogAlert("수평롤링형에는 탭을 사용할 수 없습니다.",400,140,function(){});			
+			return false;			
+		}
+
+		if($("input[name='recommend_style']:checked").val()=='rolling_h' && $("select[name='contents_type[]']").eq(0).val()=='text'){
+			openDialogAlert("수평롤링형에는 직접입력노출을 사용할 수 없습니다.",400,140,function(){});
+			return false;
+		}
+
+		$(".displayTabMakePopupInner").hide().appendTo($("form[name='categoryRecommendSettingForm']"));
+
+		submitEditorForm(this);
+
+		return false;
+
+	});
+
+});
+
+
+function set_goods_list(displayId,inputGoods,type,criteria){
+	$.ajax({
+		type: "get",
+		url: "../goods/select",
+		data: "innerMode=2&type="+type+"&containerHeight=230&page=1&inputGoods="+inputGoods+"&displayId="+displayId+"&displayKind=category&criteria="+encodeURIComponent(criteria)+"&prefix=recommend_",
+		success: function(result){
+			$("div#"+displayId).html(result);
+			$("#"+displayId+"Container").show();
+		}
+	});
+}
+
+
+function formMove(gb, no){
+	classCont(no);
+	
+	$(".formDivisionContainer").hide();
+	$(".formDivisionContainer[gb='"+gb+"']").show();
+}
+
+function classCont(no){
+	$(".mtabon-left").addClass("mtab-left");
+	$(".mtabon").addClass("mtab");
+	$(".mtabon-right").addClass("mtab-right");
+	$(".mtabon-left").removeClass("mtabon-left");
+	$(".mtabon").removeClass("mtabon");
+	$(".mtabon-right").removeClass("mtabon-right");
+
+	$(".tl"+no).addClass("mtabon-left");
+	$(".tc"+no).addClass("mtabon");
+	$(".tr"+no).addClass("mtabon-right");
+}
+
+</script>
+
+<style>
+.mtab-left {background:url('../images/common/tab_mem_bg_left.gif');width:4px;height:38px;}
+.mtab-right {background:url('../images/common/tab_mem_bg_right.gif');width:4px;height:38px;}
+.mtab {padding:0 5px; background:url('../images/common/tab_mem_bg_center.gif');font-size:12px;font-family:Dotum;font-weight:bold;color:#757575;padding-top:5px;}
+.mtabon-left {background:url('../images/common/tab_mem_bg_left_on.gif');width:5px;height:38px;}
+.mtabon-right {background:url('../images/common/tab_mem_bg_right_on.gif');width:5px;height:38px;}
+.mtabon {padding:0 5px; background:url('../images/common/tab_mem_bg_center_on.gif');font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;padding-top:5px;}
+
+.ctab {border-top:1px solid #d6d6d6;border-right:1px solid #d6d6d6;border-bottom:1px solid #d6d6d6;width:100px;line-height:30px;text-align:center;background-color:#eeeeee;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#757575;}
+.ctab-on {border-top:1px solid #d6d6d6;border-bottom:1px solid #ffffff;border-right:1px solid #d6d6d6;width:100px;line-height:30px;text-align:center;background-color:#ffffff;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;}
+
+.formDivisionContainer {padding-top:10px;}
+
+#displayTabMakePopup {display:none;}
+#displayTabMakePopup .displayTabMakeInputs {padding-top:5px}
+#displayTabMakePopup .tabPlusBtn,
+#displayTabMakePopup .tabMinusBtn {cursor:pointer}
+#displayTabMakePopup .displayTabDivisionLine {padding-top:12px; padding-left:10px; border-top:1px solid #e5e5e5}
+#displayTabMakePopup .displayTabKindWrap {*zoom:1; padding:10px;}
+#displayTabMakePopup .displayTabKindWrap:after {display:block; clear:both; content:""}
+#displayTabMakePopup .displayTabKindWrap li {float:left; padding-right:20px;}
+
+ul.displayTabType1 {*zoom:1; border-bottom:none; border-left:1px solid #ddd;}
+ul.displayTabType1:after {content:""; display:block; clear:both;}
+ul.displayTabType1 li {float:left; background-color:#efefef; color:#858585; font-size:11px; padding:0 50px; height:22px; line-height:22px; text-align:center; border-top:1px solid #d6d6d6; border-right:1px solid #d6d6d6; cursor:default;}
+ul.displayTabType1 li.current {background-color:#313642; color:#fff; border-top:1px solid #313642; border-right:1px solid #313642;}
+
+ul.displayTabType3 {*zoom:1; border-bottom:none; border-left:1px solid #ddd;}
+ul.displayTabType3:after {content:""; display:block; clear:both;}
+ul.displayTabType3 li {float:left; background-color:#efefef; color:#858585; font-size:11px; padding:0 50px; height:22px; line-height:22px; text-align:center; border-top:1px solid #d6d6d6; border-right:1px solid #d6d6d6; cursor:default;}
+ul.displayTabType3 li.current {background-color:#727c8a; color:#fff; border-top:1px solid #727c8a; border-right:1px solid #727c8a;}
+
+ul.displayTabType4 {*zoom:1; border-bottom:none; border-left:1px solid #ddd;}
+ul.displayTabType4:after {content:""; display:block; clear:both;}
+ul.displayTabType4 li {float:left; background-color:#e0e6f7; color:#8190b5; font-size:11px; padding:0 50px; height:22px; line-height:22px; text-align:center; border-top:1px solid #c9d0e7; border-right:1px solid #c9d0e7; cursor:default;}
+ul.displayTabType4 li.current {background-color:#4b69b1; color:#fff; border-top:1px solid #4b69b1; border-right:1px solid #4b69b1;}
+
+ul.displayTabType5 {*zoom:1; border-bottom:none; border-left:1px solid #ddd;}
+ul.displayTabType5:after {content:""; display:block; clear:both;}
+ul.displayTabType5 li {float:left; background-color:#fce8f5; color:#d783bb; font-size:11px; padding:0 50px; height:22px; line-height:22px; text-align:center; border-top:1px solid #eccbde; border-right:1px solid #eccbde; cursor:default;}
+ul.displayTabType5 li.current {background-color:#e08ac3; color:#fff; border-top:1px solid #e08ac3; border-right:1px solid #e08ac3;}
+
+ul.displayTabType6 {*zoom:1; border-bottom:none; border-left:1px solid #ddd;}
+ul.displayTabType6:after {content:""; display:block; clear:both;}
+ul.displayTabType6 li {float:left; background-color:#f9f0d7; color:#ba9857; font-size:11px; padding:0 50px; height:22px; line-height:22px; text-align:center; border-top:1px solid #decfa4; border-right:1px solid #decfa4; cursor:default;}
+ul.displayTabType6 li.current {background-color:#c99a32; color:#fff; border-top:1px solid #c99a32; border-right:1px solid #c99a32;}
+
+ul.displayTabType7 {*zoom:1; border-bottom:none; border-left:1px solid #ddd;}
+ul.displayTabType7:after {content:""; display:block; clear:both;}
+ul.displayTabType7 li {float:left; background-color:#eef5e2; color:#88a845; font-size:11px; padding:0 50px; height:22px; line-height:22px; text-align:center; border-top:1px solid #cddab7; border-right:1px solid #cddab7; cursor:default;}
+ul.displayTabType7 li.current {background-color:#85a849; color:#fff; border-top:1px solid #85a849; border-right:1px solid #85a849;}
+
+ul.displayTabType2 {*zoom:1; padding:10px 0;}
+ul.displayTabType2:after {content:""; display:block; clear:both;}
+ul.displayTabType2 li {float:left; padding:0 20px; height:12px; line-height:12px; font-size:12px; text-align:center; color:#959595; border-left:1px solid #e1e1e1; cursor:default;}
+ul.displayTabType2 li:first-child {border-left:none}
+ul.displayTabType2 li.current {color:#000;}
+
+table.quick_shopping_container {border-collapse:collapse; table-layout:fixed; cursor:pointer}
+table.quick_shopping_container td {height:14px; text-align:center; border:1px solid #e5e5e5; background-color:#fff; font-size:11px; letter-spacing:-1px;}
+</style>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>카테고리 페이지 한꺼번에 꾸미기</h2>
+		</div>
+		
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large white"><button type="button" onclick="document.location.href='/admin/category/catalog';">카테고리 관리로 돌아가기<span class="arrowright"></span></button></span></li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 상단 단계 링크 : 시작 -->
+<div class="pdt30 center">
+	<div style="border-bottom:2px solid #52ADCA; height:36px;">
+		<table cellpadding="0" cellspacing="0" align="center">
+		<tr>			
+			<td class="mtabon-left tl2"></td>
+			<td class="mtabon tc2"><span class="hand" onclick="formMove('design',2);">카테고리 페이지에서 디자인 영역</span></td>
+			<td class="mtabon-right tr2"></td>
+			<td width="15"></td>
+			<td class="mtab-left tl3"></td>
+			<td class="mtab tc3"><span class="hand" onclick="formMove('recommend',3);">카테고리 페이지에서 추천상품 영역</span></td>
+			<td class="mtab-right tr3"></td>
+			<td width="15"></td>
+			<td class="mtab-left tl1"></td>
+			<td class="mtab tc1"><span class="hand" onclick="formMove('navigation',1);">카테고리 페이지에서 {?service_code=='P_FREE'}네비게이션{:}검색{/} 영역</span></td>
+			<td class="mtab-right tr1"></td>
+			<td width="15"></td>
+			<td class="mtab-left tl4"></td>
+			<td class="mtab tc4"><span class="hand" onclick="formMove('category',4);">카테고리 페이지에서 상품 영역</span></td>
+			<td class="mtab-right tr4"></td>
+		</tr>
+		</table>
+	</div>
+	
+
+</div>
+<!-- 상단 단계 링크 : 끝 -->
+
+
+<div class="formDivisionContainer" gb="design">
+
+	<div class="pd10 center">
+		[안내] 카테고리 페이지의 디자인 영역은 <a href="#sample_design" class="goSampleImage"><span class="bold red">이 곳</span></a>입니다.
+	</div>
+	
+	<form name="categoryDesignSettingForm" method="post" target="actionFrame" action="../category_process/batch_design_setting">
+	<input type="hidden" name="mode" value="design" />
+	
+	<div class="pdl10 pdr10">
+		<textarea name="top_html" class="daumeditor" contentHeight="150"></textarea>
+	</div>
+	
+	<div class="center pdt30">위의 세팅값을 1차부터 4차까지 전체 카테고리에 적용합니다.</div>
+	<div class="center pdt10"><span class="btn large red"><input type="button" value="실행하기 " onclick="loadingStart();submitEditorForm(document.categoryDesignSettingForm);" /></span></div>
+	</form>
+	
+	<div class="pdt30 center">
+		<a name="sample_design"></a>
+		↓ 아래 이미지는 카테고리 페이지의 영역 안내를 위한 샘플입니다.<br />
+		<img src="../images/common/batch_design_setting_sample_design.gif" vspace="5" />
+	</div>
+</div>
+<div class="formDivisionContainer hide" gb="recommend">
+
+	<div class="pd10 center">
+		[안내] 카테고리 페이지의 추천상품 영역은 <a href="#sample_recommend" class="goSampleImage"><span class="bold red">이 곳</span></a>입니다.
+	</div>
+	
+	<form name="categoryRecommendSettingForm" method="post" target="actionFrame" action="../category_process/batch_design_setting">
+	<input type="hidden" name="mode" value="recommend" />
+	
+	<table width="100%" class="info-table-style use_recommend_division">
+	<col width="160" />
+	<tbody>
+	<tr>
+		<td class="its-th">
+		스타일
+		</td>
+		<td class="its-td" colspan="2">
+			<div class="imageCheckboxContainer">
+				{@styles}
+					{?.index_ && .index_%4==0}<br />{/}
+					<div class="imageCheckboxItem"><label><input type="radio" name="recommend_style" value="{.key_}" {?.index_==0}checked="checked"{/} /><img src="../images/design/img_display_{.key_}.gif" title="{.name}" /></label></div>
+				{/}
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">노출 개수</th>
+		<td class="its-td left" colspan="2">
+			가로 <input type="text" name="recommend_count_w" value="4" class="line" size="2" maxlength="2" />개
+			X 세로 <input type="text" name="recommend_count_h" value="1" class="line" size="2" maxlength="2" />개
+			= 총 <b><span id="recommend_count_total"></span></b> 개 상품
+		</td>
+	</tr>
+	</tbody>
+	<!-- 상품디스플레이 꾸미기 영역 : 시작 -->
+	<tbody class="goodsDisplayDecorationContainer">
+	<input type="hidden" name="recommend_info_settings" class="info_settings" value='{}' />
+	<input type="hidden" name="recommend_image_decoration" class="image_decoration" value="" />
+	<tr>
+		<th class="its-th">이미지 사이즈</th>
+		<td class="its-td left">
+			<select name="recommend_image_size" class="image_size">
+			{@goodsImageSizes}
+				<option value="{.key_}" width="{.width}" height="{.height}" {?.key_=='list2'}selected="selected"{/} >{.value_.name}</option>
+			{/}
+			</select>
+		</td>
+		<td rowspan="2" class="its-td" style="padding:0px;">
+			<table class="goodsDisplayImageTable" width="220" align="center" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td valign="top" class="pd10">
+					<table class="goodsDisplayItemWrap" width="100%" align="right" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td><a href="javascript:;"><span class="goodsDisplayImageWrap" goodsInfo="{=base64_encode(json_encode(sampleGoodsInfo))}"><img src="../images/design/img_effect_sample.gif" width="100%" designElement /></span></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">
+			이미지 꾸미기
+			<span class="btn small orange"><input type="button" value="안내) 상품 정보 노출" onclick="top.openDialogPopup('상품 정보 노출','goodsDisplayDescLayer',{'url':'/admin/design/display_desc_layer','width':950})" /></span>
+		</th>
+		<td class="its-td left">
+			<div class="clearbox">
+
+				<!-- 테두리 -->
+				<table class="image_decoration_table fl" width="50%" height="130">
+				<tr>
+					<td height="25" valign="top">
+						<input type="checkbox" class="use_image_border image_decorate_chk" /> 테두리
+						<input type="text" value="#ffffff" class="image_border1 colorpicker" />
+						<input type="text" value="0" size="3" maxlength="2" class="image_border1_width line input-text-small onlynumber" />px
+						→
+						<input type="text" value="#000000" class="image_border colorpicker" />
+						<input type="text" value="0" size="3" maxlength="2" class="image_border_width line input-text-small" />px
+
+					</td>
+				</tr>
+				<tr>
+					<td valign="top"><img src="../images/design/img_effect_rollover_border.gif" /></td>
+				</tr>
+				</table>
+
+				<!-- 투명도 -->
+				<table class="image_decoration_table fl" width="50%" height="130">
+				<tr>
+					<td height="25" valign="top">
+						<input type="checkbox" class="use_image_opacity image_decorate_chk"  /> 투명도
+						<input type="text" value="" size="4" maxlength="3" class="image_opacity line input-text-small" />% <span class="desc">(0%투명도없음)</span>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top"><img src="../images/design/img_effect_rollover_opacity.gif" /></td>
+				</tr>
+				</table>
+				
+				<!-- 아이콘 -->
+				<table class="image_decoration_table fl" width="50%" height="90">
+				<tr>
+					<td height="25" valign="top">
+						<input type="checkbox" class="use_image_icon image_decorate_chk" />
+
+						<input type="hidden" class="image_icon" value="icon_best{='.png'}" />
+						<img src="/data/icon/goodsdisplay/icon_best.png" border="0" class="image_icon_select hand" align="absmiddle">
+
+						<span class="relative">
+							<select class="image_icon_location">
+								<option value="left">좌측상단</option>
+								<option value="right">우측상단</option>
+							</select>
+							<select class="image_icon_over">
+								<option value="n">고정</option>
+								<option value="y">오버 시</option>
+							</select>
+						
+							<div class="absolute desc" style="left:0px; top:25px;">
+								<img src="../images/design/img_effect_itxt.gif" />
+							</div>
+						</span>
+					</td>
+				</tr>
+				</table>
+				
+				<!-- 보내기,찜하기 버튼 -->
+				<table class="image_decoration_table fl" width="50%" height="90">
+				<tr>
+					<td height="25" valign="top">
+						<input type="checkbox" class="use_image_send image_decorate_chk" />
+
+						<input type="hidden" class="image_send" value="icon_send{='.png'}" />
+						<img src="/data/icon/goodsdisplay/send/icon_send.png" border="0" class="image_send_select hand" align="absmiddle">
+
+						<select class="image_send_location">
+							<option value="right" selected="selected">우측상단</option>
+							<option value="left">좌측상단</option>
+						</select>
+						<select class="image_send_over">
+							<option value="n" selected="selected">고정</option>
+							<option value="y">오버 시</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">
+						<input type="checkbox" class="use_image_zzim image_decorate_chk" />
+
+						<input type="hidden" class="image_zzim" value="icon_zzim{='.png'}" />
+						<img src="/data/icon/goodsdisplay/zzim/icon_zzim.png" border="0" class="image_zzim_select hand" align="absmiddle">
+
+						<input type="hidden" class="image_zzim_on" value="icon_zzim_on{='.png'}" />
+						<img src="/data/icon/goodsdisplay/zzim_on/icon_zzim_on.png" border="0" class="image_zzim_on_select hand" align="absmiddle">
+						
+						<img src="../images/design/img_effect_itxt.gif" />
+					</td>
+				</tr>
+				</table>
+
+				<!-- 오버레이 -->
+				<table class="image_decoration_table fl" width="50%" height="120">
+				<tr>
+					<td valign="top">
+						<span class="fl"><input type="checkbox" class="use_image_overay image_decorate_chk" />&nbsp;</span>
+						<span class="fl">
+							<div class="image_overay_text hide"><input type="text" class="image_overay1_text line input-text-small" value="" style="width:90px" /></div>
+							<select class="image_overay1 mt3">
+								<option value="">직접입력</option>
+								<option value="brand_title">브랜드명</option>
+								<option value="goods_name">상품명</option>
+								<option value="consumer_price">정가</option>
+								<option value="price">판매가</option>
+								<option value="sale_price">(혜택적용)판매가</option>
+								<option value="count">판매수량,남은시간</option>
+								<option value="discount">정가→판매가</option>
+								<option value="sale_discount">정가→(혜택적용)판매가</option>
+								<option value="related_goods">관련상품보기</option>
+							</select>
+						</span>
+						<span class="fl">&nbsp; → &nbsp;</span>
+						<span class="fl">
+							<div class="image_overay_text hide"><input type="text" class="image_overay2_text line input-text-small" value="{=htmlspecialchars(list_image_decorations->image_overay2_text)}" size="10" style="width:90px" /></div>
+							<select class="image_overay2 mt3">
+								<option value="">직접입력</option>
+								<option value="brand_title">브랜드명</option>
+								<option value="goods_name">상품명</option>
+								<option value="consumer_price">정가</option>
+								<option value="price">판매가</option>
+								<option value="sale_price">(혜택적용)판매가</option>
+								<option value="count">판매수량,남은시간</option>
+								<option value="discount">정가→판매가</option>
+								<option value="sale_discount">정가→(혜택적용)판매가</option>
+								<option value="related_goods">관련상품보기</option>
+							</select>
+						</span>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top"><img src="../images/design/img_effect_rollover_text.gif" vspace="4" /></td>
+				</tr>
+				</table>
+				
+				<!-- 이미지더보기 버튼 -->
+				<table class="image_decoration_table fl" width="50%" height="160">
+				<tr>
+					<td height="25" valign="top">
+						<input type="checkbox" class="use_image_slide image_decorate_chk" />
+
+						<input type="hidden" class="image_slide" value="icon_slide{='.png'}" />
+						<img src="/data/icon/goodsdisplay/slide/icon_slide.png" border="0" class="image_slide_select hand" align="absmiddle">
+
+						상품 이미지를 
+						<select class="image_slide_type">
+							<option value="bottom" selected="selected">가로형</option>
+							<option value="right">세로형</option>
+						</select>
+						으로 바로 확인
+						<img src="../images/design/img_effect_rollover_h.gif" vspace="5" class="image_slide_sample_bottom" />
+						<img src="../images/design/img_effect_rollover_v.gif" vspace="5" class="image_slide_sample_right hide" />
+					</td>
+				</tr>
+				</table>
+				
+				<!-- 빠른 쇼핑 버튼 -->
+				<table class="image_decoration_table fl" width="50%" height="60">
+				<tr>
+					<td width="20" valign="top">
+						<input type="checkbox" class="use_quick_shopping image_decorate_chk" />
+
+						<input type="hidden" name="quick_shopping" value="['newwin','quickview','send','zzim']" />
+					</td>
+					<td valign="top">
+						<table class="quick_shopping_container" style="width:150px; margin-bottom:3px;"><tr></tr></table>
+						<span class="desc" style="color:#f6731b">이미지를 클릭하면 변경 가능</span>
+					</td>
+				</tr>
+				</table>
+
+				<!-- 상품 후면컷 버튼 -->
+				<table class="image_decoration_table fl" width="50%" height="60">
+				<tr>
+					<td width="20" valign="top">
+						<input type="checkbox" class="use_seconde_image image_decorate_chk"/>
+					</td>
+					<td valign="top">
+						첫번째 컷 → 두번째 컷
+					</td>
+				</tr>
+				<tr>
+					<td valign="top" colspan="2"><img src="../images/design/img_effect_rollover_2cut.gif" /></td>
+				</tr>
+				</table>
+
+			</div>
+
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">
+			상품 정보 <img src="../images/design/icon_design_plus.gif" align="absmiddle" onclick="add_new_info_item(this)" class="hand" />
+			<br />
+			<span class="desc">노출순서변경</span> <span class="helpicon" title="마우스로 드래그&드랍해서 조정합니다."></span>
+		</th>
+		<td class="its-td left" colspan="2">
+		 	<div class="pd5">
+		 	<label><input type="radio" name="recommend_text_align" class="text_align" value="left" title="좌측정렬" />좌측정렬</label>
+		 	<label><input type="radio" name="recommend_text_align" class="text_align" value="center" title="중앙정렬" checked="checked" />중앙정렬</label>
+		 	<label><input type="radio" name="recommend_text_align" class="text_align" value="right" title="우측정렬" />우측정렬</label>
+		 	</div>
+
+		 	<div class="info_item_container"></div>
+
+		 	<div class="info_item_default info_item hide" style="min-height:30px">
+		 		<img src='../images/common/icon_move.gif' align='absmiddle' style="margin-left:5px" class="move" />
+		 		<img src="../images/design/icon_design_minus.gif" align="absmiddle" onclick="remove_info_item(this)" class="hand" />
+
+		 		<span class="info_item_cell_kind info_item_cell">
+		 			<select class="info_item_kind info_item_selector">
+			 			<option value="brand_title">브랜드명</option>
+			 			<option value="goods_name">상품명</option>
+			 			<option value="summary">짧은 설명</option>
+			 			<option value="consumer_price">정가</option>
+			 			<option value="price">판매가</option>
+			 			<option value="sale_price">(혜택적용)판매가</option>
+			 			<option value="count">판매수량,남은시간</option>
+						<option value="fblike">좋아요</option>
+						<option value="icon">아이콘</option>
+						<option value="status_icon">상태 아이콘</option>
+						<option value="score">상품평</option>
+						<option value="color">컬러 옵션</option>
+			 		</select>
+		 		</span>
+
+		 		<span class="info_item_cell_font_decoration info_item_cell">
+		 			<input type="text" value="" class="info_item_font_decoration info_item_selector customFontDecoration" />
+		 		</span>
+
+		 		<span class="info_item_cell_postfix info_item_cell">
+			 		<select class="info_item_postfix info_item_selector">
+			 			<option value="원">원</option>
+			 			<option value="won">won</option>
+			 			<option value=""></option>
+			 		</select>
+		 		</span>
+
+				<span class="info_item_cell_wrapper info_item_cell">
+			 		<select class="info_item_wrapper info_item_selector">
+			 			<option value="">= 괄호 =</option>
+			 			<option value="[]">[]</option>
+			 			<option value="()">()</option>
+			 			<option value="<>">&lt;&gt;</option>
+			 			<option value="{}">{}</option>
+			 		</select>
+		 		</span>
+
+				<span class="info_item_cell_fblike info_item_cell">
+					<label><input type="radio" name="fblike" class="info_item_fblike info_item_selector" value="0"  /><img src="../images/design/img_display_like01.gif" title="like1" /></label>
+					<label><input type="radio" name="fblike" class="info_item_fblike info_item_selector" value="1"  /><img src="../images/design/img_display_like02.gif" title="like2" /></label>
+				</span>
+
+				<span class="info_item_cell_list_icon_desc info_item_cell"  >
+					<label><input type="checkbox" checked disabled /> 상품아이콘</label>
+				</span>
+				<!--
+				<span class="info_item_cell_list_icon_cpn info_item_cell ml5"  >
+					<label><input type="checkbox" name="list_icon_cpn" class="info_item_list_icon_cpn info_item_selector" value="1"  /> 쿠폰 <img src="/data/icon/goods_status/icon_list_cpn.gif" align="absmiddle" /></label>
+				</span>
+				<span class="info_item_cell_list_icon_freedlv info_item_cell ml5"  >
+					<label><input type="checkbox" name="list_icon_freedlv" class="info_item_list_icon_freedlv info_item_selector" value="1"  /> 무료배송 <img src="/data/icon/goods_status/icon_list_freedlv.gif" align="absmiddle" /></label>
+				</span>
+				-->
+				<span class="info_item_cell_list_icon_video info_item_cell ml5"  >
+					<label><input type="checkbox" name="list_icon_video" class="info_item_list_icon_video info_item_selector" value="1"  /> 동영상 <img src="/data/icon/goods_status/icon_list_video.gif" align="absmiddle" /></label>
+				</span>
+
+				<span class="info_item_cell_status_icon_runout info_item_cell"  >
+					<label><input type="checkbox" name="status_icon_runout" class="info_item_status_icon_runout info_item_selector" value="1"  /> 품절 <img src="/data/icon/goods_status/icon_list_soldout.gif" align="absmiddle" /></label>
+				</span>
+				<span class="info_item_cell_status_icon_purchasing info_item_cell ml5"  >
+					<label><input type="checkbox" name="status_icon_purchasing" class="info_item_status_icon_purchasing info_item_selector" value="1"  /> 재고확보중 <img src="/data/icon/goods_status/icon_list_warehousing.gif" align="absmiddle" /></label>
+				</span>
+				<span class="info_item_cell_status_icon_unsold info_item_cell ml5"  >
+					<label><input type="checkbox" name="status_icon_unsold" class="info_item_status_icon_unsold info_item_selector" value="1"  /> 판매중지 <img src="/data/icon/goods_status/icon_list_stop.gif" align="absmiddle" /></label>
+				</span>
+
+				<span class="info_item_cell_status_icon_desc info_item_cell helpicon ml5" title="해당 상품 디스플레이에 있는 상품의 상태가<br />품절, 재고확보중, 판매중지일 때 체크된 아이콘이 나타납니다."></span>
+				
+				<span class="info_item_cell_buy_count info_item_cell">
+					<label><input type="checkbox" name="buy_count" class="info_item_buy_count info_item_selector" value="1"  /> 현재 11,905개 구매</label>
+				</span>
+				
+				<span class="info_item_cell_time_count info_item_cell">
+					<label><input type="checkbox" name="time_count" class="info_item_time_count info_item_selector" value="1"  /> 남은시간 : 05일  10:22:43</label>
+				</span>
+				
+				<span class="info_item_cell_score_desc info_item_cell desc">
+					상품평 노출 : (예시) &nbsp;<font style="font-weight:bold; color:#fff; background-color:#ee6600; padding:0 3px; font-family:tahoma">4.5</font> <font color="#eeaa00">★★★★</font><font color="#999999">★</font> 상품평 (<span class="red">16</span>)
+				</span>
+				
+				<span class="info_item_cell_color_desc info_item_cell desc">
+					컬러표 노출 : (예시) &nbsp;<font color="#54a6ad">■</font> <font color="#74a6bd">■</font> <font color="#74b6ed">■</font> <font color="#a476bd">■</font>
+				</span>
+
+		 		<input type="text" name="recommend_info_setting[]" value="" class="info_setting hide" disabled="disabled" />
+		 	</div>
+
+
+		</td>
+	</tr>
+	</tbody>
+	<!-- 상품디스플레이 꾸미기 영역 : 끝 -->
+	<tr>
+		<th class="its-th">
+		탭 <span class="btn small cyanblue"><button type="button" id="btnDisplayTabPopup">만들기</button></span>
+		</th>
+		<td class="its-td left" colspan="2">
+			<div class="displayTabContainer"></div>
+			<div id="displayTabMakePopup">
+				<div class="displayTabMakePopupInner">
+
+					<ul class="displayTabKindWrap">
+						<li><label><input type="radio" name="popup_tab_design_kind" value="text" checked /> 텍스트 탭 만들기</label></li>
+						<li><label><input type="radio" name="popup_tab_design_kind" value="image" /> 이미지로 탭 만들기</label></li>
+					</ul>
+
+					<div class="displayTabKindWrapText">
+						<div class="displayTabDivisionLine">
+							<b>탭 스타일</b>
+							<div class="pdt5">
+								<label><input type="radio" name="popup_tab_design_type" value="displayTabType1" checked />&nbsp;
+								<ul class="displayTabType1" style="display:inline-block;vertical-align:middle">
+									<li class="current">탭1</li>
+									<li>탭2</li>
+									<li>탭3</li>
+									<li>탭4</li>
+								</ul>
+								</label>
+							</div>
+							<div class="pdt5">
+								<label><input type="radio" name="popup_tab_design_type" value="displayTabType3" />&nbsp;
+								<ul class="displayTabType3" style="display:inline-block;vertical-align:middle">
+									<li class="current">탭1</li>
+									<li>탭2</li>
+									<li>탭3</li>
+									<li>탭4</li>
+								</ul>
+								</label>
+							</div>
+							<div class="pdt5">
+								<label><input type="radio" name="popup_tab_design_type" value="displayTabType4" />&nbsp;
+								<ul class="displayTabType4" style="display:inline-block;vertical-align:middle">
+									<li class="current">탭1</li>
+									<li>탭2</li>
+									<li>탭3</li>
+									<li>탭4</li>
+								</ul>
+								</label>
+							</div>
+							<div class="pdt5">
+								<label><input type="radio" name="popup_tab_design_type" value="displayTabType5" />&nbsp;
+								<ul class="displayTabType5" style="display:inline-block;vertical-align:middle">
+									<li class="current">탭1</li>
+									<li>탭2</li>
+									<li>탭3</li>
+									<li>탭4</li>
+								</ul>
+								</label>
+							</div>
+							<div class="pdt5">
+								<label><input type="radio" name="popup_tab_design_type" value="displayTabType6" />&nbsp;
+								<ul class="displayTabType6" style="display:inline-block;vertical-align:middle">
+									<li class="current">탭1</li>
+									<li>탭2</li>
+									<li>탭3</li>
+									<li>탭4</li>
+								</ul>
+								</label>
+							</div>
+							<div class="pdt5">
+								<label><input type="radio" name="popup_tab_design_type" value="displayTabType7" />&nbsp;
+								<ul class="displayTabType7" style="display:inline-block;vertical-align:middle">
+									<li class="current">탭1</li>
+									<li>탭2</li>
+									<li>탭3</li>
+									<li>탭4</li>
+								</ul>
+								</label>
+							</div>
+							<div class="pdt5">
+								<label><input type="radio" name="popup_tab_design_type" value="displayTabType2" />&nbsp;
+								<ul class="displayTabType2" style="display:inline-block;vertical-align:middle">
+									<li class="current">탭1</li>
+									<li>탭2</li>
+									<li>탭3</li>
+									<li>탭4</li>
+								</ul>
+								</label>
+							</div>
+						</div>
+						<br />
+						<div class="displayTabDivisionLine">
+							<b>탭 명칭</b>
+							<div class="displayTabList">
+								<div class="displayTabMakeInputs">
+									<input type="text" name="popup_tab_title[]" value="" size="35" maxlength="15" /> <img src="../images/design/icon_design_plus.gif" align="absmiddle" class="tabPlusBtn" /><img src="../images/design/icon_design_minus.gif" align="absmiddle" class="tabMinusBtn" />
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="displayTabKindWrapImage">
+						<table width="100%" class="info-table-style displayTabList">
+						<tr>
+							<th class="its-th" width="30"></th>
+							<th class="its-th-align center">탭 활성 이미지</th>
+							<th class="its-th-align center">탭 비활성 이미지</th>
+							<th class="its-th-align center" width="65">추가/삭제</th>
+						</tr>
+						<tr class="displayTabMakeImages">
+							<td class="its-td-align center">탭 <span class="strMakeTabIdx">1</div></td>
+							<td class="its-td-align center">
+								<div>
+									<input type="text" name="tab_title_img[]" value="" class="hide" />
+									<input type="file" name="new_tab_title_img[]" size="20" />
+								</div>
+							</td>
+							<td class="its-td-align center">
+								<div>
+									<input type="text" name="tab_title_img_on[]" value="}" class="hide" />
+									<input type="file" name="new_tab_title_img_on[]" size="20" />
+								</div>
+							</td>
+							<td class="its-td-align center"><img src="../images/design/icon_design_plus.gif" align="absmiddle" class="tabPlusBtn" /><img src="../images/design/icon_design_minus.gif" align="absmiddle" class="tabMinusBtn" /></td>
+						</tr>
+						</table>
+					</div>
+
+					<div class="pdt20 center">
+						<span class="btn small cyanblue"><button type="button" onclick="closeDialog('displayTabMakePopup')">확인</button></span>
+					</div>
+				</div>
+			</div>
+		</td>
+	</tr>
+	<tbody class="displayTabGoodsContainer" tabIdx="0">
+	<tr>
+		<th class="its-th">
+			<span class="strTab">[탭 <span class="strTabIdx">1</span>]</span><br />
+			<select name="contents_type[]" class="contents_type">
+			<option value="auto" selected>상품 자동 노출</option>
+			<option value="select">선택 상품 노출</option>
+			<option value="text">직접입력 노출</option>
+			</select>
+		</th>
+		<td class="its-td left" colspan="2">
+
+			<div class="displayTabAutoTypeContainer" type="auto">
+				<span class="btn small gray"><button type="button" class="displayCriteriaButton">조건 선택</button></span>
+
+				<div class="clearbox" style="height:5px;"></div>
+
+				<input type='hidden' class="displayCriteria" id="displayCriteria0" name='auto_criteria[]' value="selectGoodsStatus[]=normal,selectGoodsView=look,auto_order=newly,auto_term_type=relative,auto_term=7" />
+
+				<div class="displayCriteriaDesc pdt10"></div>
+			</div>
+			<div class="displayTabAutoTypeContainer" type="select">
+				<span class="btn small gray"><button type="button" class="displayGoodsButton">상품 검색</button></span>
+				<span class="desc">↓ 아래의 상품을 드래그하여 노출순서를 변경할 수도 있습니다.</span>
+
+				<div class="clearbox" style="height:5px;"></div>
+				<input type='hidden' name='auto_goods_seqs[]' />
+
+				<div id="displayGoods0" class="displayGoods"></div>
+			</div>
+			<div class="displayTabAutoTypeContainer" type="text">
+				데스크탑/태블릿用
+				<textarea name="tab_contents[]" style="width:100%" contentHeight="150px" class="daumeditor hide" tinyMode="1"></textarea><br />
+				모바일用
+				<textarea name="tab_contents_mobile[]" style="width:100%" contentHeight="150px" class="daumeditor hide" tinyMode="1"></textarea>
+			</div>
+
+		</td>
+	</tr>
+	</tbody>
+	</table>
+	
+	<div class="center pdt30">위의 세팅값을 1차부터 4차까지 전체 카테고리에 적용합니다.</div>
+	<div class="center pdt10"><span class="btn large red"><input type="submit" value="실행하기" onclick="loadingStart()" /></span></div>
+	</form>
+	
+	<div class="pdt30 center">
+		<a name="sample_recommend"></a>
+		↓ 아래 이미지는 카테고리 페이지의 영역 안내를 위한 샘플입니다.<br />
+		<img src="../images/common/batch_design_setting_sample_recommend.gif" vspace="5" />
+	</div>
+</div>
+
+<div class="formDivisionContainer hide" gb="navigation">
+
+	<div class="pd10 center">
+		[안내] 카테고리 페이지의 {?service_code=='P_FREE'}네비게이션{:}검색{/} 영역은 <a href="#sample_navigation" class="goSampleImage"><span class="bold red">이 곳</span></a>입니다.
+	</div>
+	
+	<form name="categoryNavigationSettingForm" method="post" target="actionFrame" action="../category_process/batch_design_setting">
+	<input type="hidden" name="mode" value="navigation" />
+	<table width="100%" class="info-table-style">
+	<col width="160" />
+	<tr>
+		<th class="its-th">카테고리 페이지<br />네비게이션에서<br />해당 카테고리</th>
+		<td class="its-td">
+		
+			<div class="pd5"></div>
+			
+			<div><label><input type="radio" name="navigation_depth" value="single" checked="checked"/> 현재 차수의 다음 차수만 보여줌. 단, 하위가 없을 경우 현재 차수를 보여줌</label></div>
+			<table border="0" cellpadding="0" cellspacing="5">
+			<tr>
+				<td align="center">
+					<img src="../images/design/img_category_1_2.gif" vspace="5" /><br />
+					가로 <input type="text" name="navigation_single_w[]" value="4" size="2" maxlength="2" />개
+				</td>
+				<td width="20"></td>
+				<td align="center">
+					<img src="../images/design/img_category_2_3.gif" vspace="5" /><br />
+					가로 <input type="text" name="navigation_single_w[]" value="4" size="2" maxlength="2" />개
+				</td>
+				<td width="20"></td>
+				<td align="center">
+					<img src="../images/design/img_category_3_4.gif" vspace="5" /><br />
+					가로 <input type="text" name="navigation_single_w[]" value="4" size="2" maxlength="2" />개
+				</td>
+				<td width="20"></td>
+				<td align="center">
+					<img src="../images/design/img_category_4_4.gif" vspace="5" /><br />
+					가로 <input type="text" name="navigation_single_w[]" value="4" size="2" maxlength="2" />개
+				</td>
+			</tr>
+			</table>
+			
+			<div class="pd10"></div>
+			
+			<div><label><input type="radio" name="navigation_depth" value="double" /> 현재 차수의 다음 차수와 다다음 차수를 보여줌. 단, 하위가 없을 경우 현재 차수를 보여줌</label></div>
+			<table border="0" cellpadding="0" cellspacing="5">
+			<tr>
+				<td align="center">
+					<img src="../images/design/img_category_1_2_3.gif" vspace="5" /><br />
+					가로 <input type="text" name="navigation_double_w[]" value="4" size="2" maxlength="2" />개
+				</td>
+				<td width="20"></td>
+				<td align="center">
+					<img src="../images/design/img_category_2_3_4.gif" vspace="5" /><br />
+					가로 <input type="text" name="navigation_double_w[]" value="4" size="2" maxlength="2" />개
+				</td>
+				<td width="20"></td>
+				<td align="center">
+					<img src="../images/design/img_category_3_4.gif" vspace="5" /><br />
+					가로 <input type="text" name="navigation_double_w[]" value="4" size="2" maxlength="2" />개
+				</td>
+				<td width="20"></td>
+				<td align="center">
+					<img src="../images/design/img_category_4_4.gif" vspace="5" /><br />
+					가로 <input type="text" name="navigation_double_w[]" value="4" size="2" maxlength="2" />개
+				</td>
+			</tr>
+			</table>
+			
+			<div class="pd10"></div>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">카테고리 페이지<br />네비게이션에서<br />해당 카테고리의 브랜드</th>
+		<td class="its-td">
+			가로 <input type="text" name="naviation_category_brand_w" value="4" size="2" maxlength="2" /> 개
+		</td>
+	</tr>
+	</table>
+	
+	<div class="center pdt30">위의 세팅값을 1차부터 4차까지 전체 카테고리에 적용합니다.</div>
+	<div class="center pdt10"><span class="btn large red"><input type="submit" value="실행하기" onclick="loadingStart()" /></span></div>
+	</form>
+	
+	<div class="pdt30 center">
+		<a name="sample_navigation"></a>
+		↓ 아래 이미지는 카테고리 페이지의 영역 안내를 위한 샘플입니다.<br />
+		<img src="../images/common/batch_design_setting_sample_navigation.gif" vspace="5" />
+	</div>
+	
+</div>
+
+<div class="formDivisionContainer hide" gb="category">
+
+	<div class="pd10 center">
+		[안내] 카테고리 페이지의 상품 영역은 <a href="#sample_category" class="goSampleImage"><span class="bold red">이 곳</span></a>입니다.
+	</div>
+	
+	<form name="categoryCategorySettingForm" method="post" target="actionFrame" action="../category_process/batch_design_setting">
+	<input type="hidden" name="mode" value="category" />
+	
+	<table width="100%" class="info-table-style">
+	<col width="160" />
+	<tr>
+		<td class="its-th">
+		기본 스타일
+		</td>
+		<td class="its-td" colspan="2">
+			<div class="imageCheckboxContainer">
+				{@styles}
+					{?.index_ && .index_%4==0}<br />{/}
+					{?.key_!='rolling_h'}
+					<div class="imageCheckboxItem"><label><input type="radio" name="list_style" value="{.key_}" {?.index_==0}checked="checked"{/} /><img src="../images/design/img_display_{.key_}.gif" title="{.name}" /></label></div>
+					{/}
+				{/}
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">노출 개수</th>
+		<td class="its-td left" colspan="2">
+			<table>
+			<col width="80" /><col /><col width="30" /><col width="90" /><col />
+			<tr>
+				<td height="24">격자형A</td>
+				<td>가로 <input type="text" name="list_count_w" value="4" class="line" size="2" maxlength="2" />개</td>
+				<td align="center">X</td>
+				<td>세로 <input type="text" name="list_count_h" value="4" class="line" size="2" maxlength="3" />개</td>
+				<td>= 총 <b><span class="list_count_total"></span></b> 개 상품</td>
+			</tr>
+			<tr>
+				<td height="24">격자형B</td>
+				<td>가로 <input type="text" name="list_count_w_lattice_b" value="2" class="line" size="2" maxlength="2" />개</td>
+				<td align="center">X</td>
+				<td>세로 <span class="list_count_h_lattice_b"></span>개</td>
+				<td>= 총 <b><span class="list_count_total"></span></b> 개 상품</td>
+			</tr>
+			<tr>
+				<td height="24">리스트형</td>
+				<td>가로 1개</td>
+				<td align="center">X</td>
+				<td>세로 <span class="list_count_h_list"></span>개</td>
+				<td>= 총 <b><span class="list_count_total"></span></b> 개 상품</td>
+			</tr>
+			<tr class="hide">
+				<td height="24">수평롤링형</td>
+				<td>가로 <span class="list_count_w_rolling"></span>개</td>
+				<td align="center">X</td>
+				<td>롤링 <span class="list_count_h_rolling"></span>개</td>
+				<td>= 총 <b><span class="list_count_total"></span></b> 개 상품</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<!-- 상품디스플레이 꾸미기 영역 : 시작 -->
+	<tbody class="goodsDisplayDecorationContainer">
+	<input type="hidden" name="list_info_settings" class="info_settings" value='{}' />
+	<input type="hidden" name="list_image_decoration" class="image_decoration" value="" />
+	<tr>
+		<th class="its-th">이미지 사이즈</th>
+		<td class="its-td left">
+			<select name="list_image_size" class="image_size">
+			{@goodsImageSizes}
+				<option value="{.key_}" width="{.width}" height="{.height}" {?.key_=='list2'}selected="selected"{/} >{.value_.name}</option>
+			{/}
+			</select>
+		</td>
+		<td rowspan="2" class="its-td" style="padding:0px;">
+			<table class="goodsDisplayImageTable" width="220" align="center" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td valign="top" class="pd10">
+					<table class="goodsDisplayItemWrap" width="100%" align="right" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td><a href="javascript:;"><span class="goodsDisplayImageWrap" goodsInfo="{=base64_encode(json_encode(sampleGoodsInfo))}"><img src="../images/design/img_effect_sample.gif" width="100%" designElement /></span></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">
+			이미지 꾸미기
+			<span class="btn small orange"><input type="button" value="안내) 상품 정보 노출" onclick="top.openDialogPopup('상품 정보 노출','goodsDisplayDescLayer',{'url':'/admin/design/display_desc_layer','width':950})" /></span>
+		</th>
+		<td class="its-td left">
+			<div class="clearbox">
+
+				<!-- 테두리 -->
+				<table class="image_decoration_table fl" width="50%" height="130">
+				<tr>
+					<td height="25" valign="top">
+						<input type="checkbox" class="use_image_border image_decorate_chk" /> 테두리
+						<input type="text" value="#ffffff" class="image_border1 colorpicker" />
+						<input type="text" value="0" size="3" maxlength="2" class="image_border1_width line input-text-small onlynumber" />px
+						→
+						<input type="text" value="#000000" class="image_border colorpicker" />
+						<input type="text" value="0" size="3" maxlength="2" class="image_border_width line input-text-small" />px
+
+					</td>
+				</tr>
+				<tr>
+					<td valign="top"><img src="../images/design/img_effect_rollover_border.gif" /></td>
+				</tr>
+				</table>
+
+				<!-- 투명도 -->
+				<table class="image_decoration_table fl" width="50%" height="130">
+				<tr>
+					<td height="25" valign="top">
+						<input type="checkbox" class="use_image_opacity image_decorate_chk"  /> 투명도
+						<input type="text" value="" size="4" maxlength="3" class="image_opacity line input-text-small" />% <span class="desc">(0%투명도없음)</span>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top"><img src="../images/design/img_effect_rollover_opacity.gif" /></td>
+				</tr>
+				</table>
+				
+				<!-- 아이콘 -->
+				<table class="image_decoration_table fl" width="50%" height="90">
+				<tr>
+					<td height="25" valign="top">
+						<input type="checkbox" class="use_image_icon image_decorate_chk" />
+
+						<input type="hidden" class="image_icon" value="icon_best{='.png'}" />
+						<img src="/data/icon/goodsdisplay/icon_best.png" border="0" class="image_icon_select hand" align="absmiddle">
+
+						<span class="relative">
+							<select class="image_icon_location">
+								<option value="left">좌측상단</option>
+								<option value="right">우측상단</option>
+							</select>
+							<select class="image_icon_over">
+								<option value="n">고정</option>
+								<option value="y">오버 시</option>
+							</select>
+						
+							<div class="absolute desc" style="left:0px; top:25px;">
+								<img src="../images/design/img_effect_itxt.gif" />
+							</div>
+						</span>
+					</td>
+				</tr>
+				</table>
+				
+				<!-- 보내기,찜하기 버튼 -->
+				<table class="image_decoration_table fl" width="50%" height="90">
+				<tr>
+					<td height="25" valign="top">
+						<input type="checkbox" class="use_image_send image_decorate_chk" />
+
+						<input type="hidden" class="image_send" value="icon_send{='.png'}" />
+						<img src="/data/icon/goodsdisplay/send/icon_send.png" border="0" class="image_send_select hand" align="absmiddle">
+
+						<select class="image_send_location">
+							<option value="right" selected="selected">우측상단</option>
+							<option value="left">좌측상단</option>
+						</select>
+						<select class="image_send_over">
+							<option value="n" selected="selected">고정</option>
+							<option value="y">오버 시</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top">
+						<input type="checkbox" class="use_image_zzim image_decorate_chk" />
+
+						<input type="hidden" class="image_zzim" value="icon_zzim{='.png'}" />
+						<img src="/data/icon/goodsdisplay/zzim/icon_zzim.png" border="0" class="image_zzim_select hand" align="absmiddle">
+
+						<input type="hidden" class="image_zzim_on" value="icon_zzim_on{='.png'}" />
+						<img src="/data/icon/goodsdisplay/zzim_on/icon_zzim_on.png" border="0" class="image_zzim_on_select hand" align="absmiddle">
+						
+						<img src="../images/design/img_effect_itxt.gif" />
+					</td>
+				</tr>
+				</table>
+
+				<!-- 오버레이 -->
+				<table class="image_decoration_table fl" width="50%" height="120">
+				<tr>
+					<td valign="top">
+						<span class="fl"><input type="checkbox" class="use_image_overay image_decorate_chk" />&nbsp;</span>
+						<span class="fl">
+							<div class="image_overay_text hide"><input type="text" class="image_overay1_text line input-text-small" value="" style="width:90px" /></div>
+							<select class="image_overay1 mt3">
+								<option value="">직접입력</option>
+								<option value="brand_title">브랜드명</option>
+								<option value="goods_name">상품명</option>
+								<option value="consumer_price">정가</option>
+								<option value="price">판매가</option>
+								<option value="sale_price">(혜택적용)판매가</option>
+								<option value="count">판매수량,남은시간</option>
+								<option value="discount">정가→판매가</option>
+								<option value="sale_discount">정가→(혜택적용)판매가</option>
+								<option value="related_goods">관련상품보기</option>
+							</select>
+						</span>
+						<span class="fl">&nbsp; → &nbsp;</span>
+						<span class="fl">
+							<div class="image_overay_text hide"><input type="text" class="image_overay2_text line input-text-small" value="{=htmlspecialchars(list_image_decorations->image_overay2_text)}" size="10" style="width:90px" /></div>
+							<select class="image_overay2 mt3">
+								<option value="">직접입력</option>
+								<option value="brand_title">브랜드명</option>
+								<option value="goods_name">상품명</option>
+								<option value="consumer_price">정가</option>
+								<option value="price">판매가</option>
+								<option value="sale_price">(혜택적용)판매가</option>
+								<option value="count">판매수량,남은시간</option>
+								<option value="discount">정가→판매가</option>
+								<option value="sale_discount">정가→(혜택적용)판매가</option>
+								<option value="related_goods">관련상품보기</option>
+							</select>
+						</span>
+					</td>
+				</tr>
+				<tr>
+					<td valign="top"><img src="../images/design/img_effect_rollover_text.gif" vspace="4" /></td>
+				</tr>
+				</table>
+				
+				<!-- 이미지더보기 버튼 -->
+				<table class="image_decoration_table fl" width="50%" height="160">
+				<tr>
+					<td height="25" valign="top">
+						<input type="checkbox" class="use_image_slide image_decorate_chk" />
+
+						<input type="hidden" class="image_slide" value="icon_slide{='.png'}" />
+						<img src="/data/icon/goodsdisplay/slide/icon_slide.png" border="0" class="image_slide_select hand" align="absmiddle">
+
+						상품 이미지를 
+						<select class="image_slide_type">
+							<option value="bottom" selected="selected">가로형</option>
+							<option value="right">세로형</option>
+						</select>
+						으로 바로 확인
+						<img src="../images/design/img_effect_rollover_h.gif" vspace="5" class="image_slide_sample_bottom" />
+						<img src="../images/design/img_effect_rollover_v.gif" vspace="5" class="image_slide_sample_right hide" />
+					</td>
+				</tr>
+				</table>
+				
+				<!-- 빠른 쇼핑 버튼 -->
+				<table class="image_decoration_table fl" width="50%" height="60">
+				<tr>
+					<td width="20" valign="top">
+						<input type="checkbox" class="use_quick_shopping image_decorate_chk" />
+
+						<input type="hidden" name="quick_shopping" value="['newwin','quickview','send','zzim']" />
+					</td>
+					<td valign="top">
+						<table class="quick_shopping_container" style="width:150px; margin-bottom:3px;"><tr></tr></table>
+						<span class="desc" style="color:#f6731b">이미지를 클릭하면 변경 가능</span>
+					</td>
+				</tr>
+				</table>
+
+				<!-- 상품 후면컷 버튼 -->
+				<table class="image_decoration_table fl" width="50%" height="60">
+				<tr>
+					<td width="20" valign="top">
+						<input type="checkbox" class="use_seconde_image image_decorate_chk"/>
+					</td>
+					<td valign="top">
+						첫번째 컷 → 두번째 컷
+					</td>
+				</tr>
+				<tr>
+					<td valign="top" colspan="2"><img src="../images/design/img_effect_rollover_2cut.gif" /></td>
+				</tr>
+				</table>
+
+			</div>
+
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">
+			상품 정보 <img src="../images/design/icon_design_plus.gif" align="absmiddle" onclick="add_new_info_item(this)" class="hand" />
+			<br />
+			<span class="desc">노출순서변경</span> <span class="helpicon" title="마우스로 드래그&드랍해서 조정합니다."></span>
+		</th>
+		<td class="its-td left">
+		 	<div class="pd5">
+		 	<label><input type="radio" name="list_text_align" class="text_align" value="left" title="좌측정렬" />좌측정렬</label>
+		 	<label><input type="radio" name="list_text_align" class="text_align" value="center" title="중앙정렬" checked="checked" />중앙정렬</label>
+		 	<label><input type="radio" name="list_text_align" class="text_align" value="right" title="우측정렬" />우측정렬</label>
+		 	</div>
+
+		 	<div class="info_item_container"></div>
+
+		 	<div class="info_item_default info_item hide" style="min-height:30px">
+		 		<img src='../images/common/icon_move.gif' align='absmiddle' style="margin-left:5px" class="move" />
+		 		<img src="../images/design/icon_design_minus.gif" align="absmiddle" onclick="remove_info_item(this)" class="hand" />
+
+		 		<span class="info_item_cell_kind info_item_cell">
+		 			<select class="info_item_kind info_item_selector">
+			 			<option value="brand_title">브랜드명</option>
+			 			<option value="goods_name">상품명</option>
+			 			<option value="summary">짧은 설명</option>
+			 			<option value="consumer_price">정가</option>
+			 			<option value="price">판매가</option>
+			 			<option value="sale_price">(혜택적용)판매가</option>
+			 			<option value="count">판매수량,남은시간</option>
+						<option value="fblike">좋아요</option>
+						<option value="icon">아이콘</option>
+						<option value="status_icon">상태 아이콘</option>
+						<option value="score">상품평</option>
+						<option value="color">컬러 옵션</option>
+			 		</select>
+		 		</span>
+
+		 		<span class="info_item_cell_font_decoration info_item_cell">
+		 			<input type="text" value="" class="info_item_font_decoration info_item_selector customFontDecoration" />
+		 		</span>
+
+		 		<span class="info_item_cell_postfix info_item_cell">
+			 		<select class="info_item_postfix info_item_selector">
+			 			<option value="원">원</option>
+			 			<option value="won">won</option>
+			 			<option value=""></option>
+			 		</select>
+		 		</span>
+
+				<span class="info_item_cell_wrapper info_item_cell">
+			 		<select class="info_item_wrapper info_item_selector">
+			 			<option value="">= 괄호 =</option>
+			 			<option value="[]">[]</option>
+			 			<option value="()">()</option>
+			 			<option value="<>">&lt;&gt;</option>
+			 			<option value="{}">{}</option>
+			 		</select>
+		 		</span>
+
+				<span class="info_item_cell_fblike info_item_cell">
+					<label><input type="radio" name="fblike" class="info_item_fblike info_item_selector" value="0"  /><img src="../images/design/img_display_like01.gif" title="like1" /></label>
+					<label><input type="radio" name="fblike" class="info_item_fblike info_item_selector" value="1"  /><img src="../images/design/img_display_like02.gif" title="like2" /></label>
+				</span>
+
+				<span class="info_item_cell_list_icon_desc info_item_cell"  >
+					<label><input type="checkbox" checked disabled /> 상품아이콘</label>
+				</span>
+				<!--
+				<span class="info_item_cell_list_icon_cpn info_item_cell ml5"  >
+					<label><input type="checkbox" name="list_icon_cpn" class="info_item_list_icon_cpn info_item_selector" value="1"  /> 쿠폰 <img src="/data/icon/goods_status/icon_list_cpn.gif" align="absmiddle" /></label>
+				</span>
+				<span class="info_item_cell_list_icon_freedlv info_item_cell ml5"  >
+					<label><input type="checkbox" name="list_icon_freedlv" class="info_item_list_icon_freedlv info_item_selector" value="1"  /> 무료배송 <img src="/data/icon/goods_status/icon_list_freedlv.gif" align="absmiddle" /></label>
+				</span>
+				-->
+				<span class="info_item_cell_list_icon_video info_item_cell ml5"  >
+					<label><input type="checkbox" name="list_icon_video" class="info_item_list_icon_video info_item_selector" value="1"  /> 동영상 <img src="/data/icon/goods_status/icon_list_video.gif" align="absmiddle" /></label>
+				</span>
+
+				<span class="info_item_cell_status_icon_runout info_item_cell ml10"  >
+					<label><input type="checkbox" name="status_icon_runout" class="info_item_status_icon_runout info_item_selector" value="1"  />품절</label>
+				</span>
+				<span class="info_item_cell_status_icon_purchasing info_item_cell ml5"  >
+					<label><input type="checkbox" name="status_icon_purchasing" class="info_item_status_icon_purchasing info_item_selector" value="1"  />재고확보중</label>
+				</span>
+				<span class="info_item_cell_status_icon_unsold info_item_cell ml5"  >
+					<label><input type="checkbox" name="status_icon_unsold" class="info_item_status_icon_unsold info_item_selector" value="1"  />판매중지</label>
+				</span>
+
+				<span class="info_item_cell_status_icon_desc info_item_cell helpicon ml5" title="해당 상품 디스플레이에 있는 상품의 상태가<br />품절, 재고확보중, 판매중지일 때 체크된 아이콘이 나타납니다."></span>
+				
+				<span class="info_item_cell_buy_count info_item_cell">
+					<label><input type="checkbox" name="buy_count" class="info_item_buy_count info_item_selector" value="1"  /> 현재 11,905개 구매</label>
+				</span>
+				
+				<span class="info_item_cell_time_count info_item_cell">
+					<label><input type="checkbox" name="time_count" class="info_item_time_count info_item_selector" value="1"  /> 남은시간 : 05일  10:22:43</label>
+				</span>
+				
+				<span class="info_item_cell_score_desc info_item_cell desc">
+					상품평 노출 : (예시) &nbsp;<font style="font-weight:bold; color:#fff; background-color:#ee6600; padding:0 3px; font-family:tahoma">4.5</font> <font color="#eeaa00">★★★★</font><font color="#999999">★</font> 상품평 (<span class="red">16</span>)
+				</span>
+				
+				<span class="info_item_cell_color_desc info_item_cell desc">
+					컬러표 노출 : (예시) &nbsp;<font color="#54a6ad">■</font> <font color="#74a6bd">■</font> <font color="#74b6ed">■</font> <font color="#a476bd">■</font>
+				</span>
+
+		 		<input type="text" name="list_info_setting[]" value="" class="info_setting hide" disabled="disabled" />
+		 	</div>
+
+
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">상품 노출</th>
+		<td class="its-td" colspan="2">
+			<table class="info-table-style" width="95%">
+				<col width="100" />
+				<tr>
+					<td class="its-th-align center">상태</td>
+					<td class="its-td">
+						<label class="pdl10"><input type="checkbox" name="list_goods_status[]" value="normal" checked="checked" /> 정상</label>
+						<label class="pdl10"><input type="checkbox" name="list_goods_status[]" value="runout" checked="checked" /> 품절</label>
+						<label class="pdl10"><input type="checkbox" name="list_goods_status[]" value="purchasing" checked="checked" /> 재고확보중</label>
+						<label class="pdl10"><input type="checkbox" name="list_goods_status[]" value="unsold" checked="checked" /> 판매중지</label>
+					</td>
+				</tr>
+				<tr>
+					<td class="its-th-align center">기본 정렬</td>
+					<td class="its-td">
+						{@orders}
+							<label class="mr5">
+							<input type="radio" name="list_default_sort" value="{.key_}" {?.index_==0}checked="checked"{/}/>
+							{.value_}
+							</label>
+						{/}
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	</tbody>
+	</table>
+	
+	<div class="center pdt30">위의 세팅값을 1차부터 4차까지 전체 카테고리에 적용합니다.</div>
+	<div class="center pdt10"><span class="btn large red"><input type="submit" value="실행하기" onclick="loadingStart()" /></span></div>
+	</form>
+	
+	<div class="pdt30 center">
+		↓ 아래 이미지는 카테고리 페이지의 영역 안내를 위한 샘플입니다.<br />
+		<img src="../images/common/batch_design_setting_sample_category.gif" vspace="5" />
+		<a name="sample_category"></a>
+	</div>
+</div>
+
+<!-- 아이콘 선택 -->
+<div id="displayImageIconPopup" class="hide">
+	<form enctype="multipart/form-data" method="post" action="../design_process/display_icon_upload" target="actionFrame">
+	<input type="hidden" name="uniqueKey" value="" />
+	<input type="hidden" name="subPath" value="" />
+	<ul></ul>
+	<div class="clearbox"></div>
+	<div style="padding-top:15px;">
+	<input type="file" name="displayImageIconImg" /> <span class="btn small black"><button type="submit">추가</button></span>
+	</div>
+	</form>
+</div>
+
+<!-- 이미지꾸미기 퀵바 아이콘 팝업 -->
+<div id="displayQuickIconPopup" class="hide">
+	<form enctype="multipart/form-data" method="post" action="../design_process/display_quick_icon_upload" target="actionFrame">
+	<input type="hidden" name="uniqueKey" value="" />
+
+	<table align="center">
+	<col width="30" /><col width="50" /><col /> 
+	<tr>
+		<td><input type="checkbox" name="quick_shopping_icon[]" value="newwin" /></td>
+		<td><img class="quick_shopping_icon_img" src="/data/icon/goodsdisplay/quick_shopping/thumb_newwin.gif"></td>
+		<td><input name="quick_shopping_icon_newwin" class="input-box-default-text" type="file" value="" /></td>
+	</tr>
+	<tr>
+		<td><input type="checkbox" name="quick_shopping_icon[]" value="quickview" /></td>
+		<td><img class="quick_shopping_icon_img" src="/data/icon/goodsdisplay/quick_shopping/thumb_quickview.gif"></td>
+		<td><input name="quick_shopping_icon_quickview" class="input-box-default-text" type="file" value="" /></td>
+	</tr>
+	<tr>
+		<td><input type="checkbox" name="quick_shopping_icon[]" value="send" /></td>
+		<td><img class="quick_shopping_icon_img" src="/data/icon/goodsdisplay/quick_shopping/thumb_send.gif"></td>
+		<td><input name="quick_shopping_icon_send" class="input-box-default-text" type="file" value="" /></td>
+	</tr>
+	<tr>
+		<td rowspan="2"><input type="checkbox" name="quick_shopping_icon[]" value="zzim" /></td>
+		<td><img class="quick_shopping_icon_img" src="/data/icon/goodsdisplay/quick_shopping/thumb_zzim.gif"></td>
+		<td><input name="quick_shopping_icon_zzim" class="input-box-default-text" type="file" value="" /></td>
+	</tr>
+	<tr>
+		<td><img class="quick_shopping_icon_img" src="/data/icon/goodsdisplay/quick_shopping/thumb_zzim_on.gif"></td>
+		<td><input name="quick_shopping_icon_zzim_on" class="input-box-default-text" type="file" value="" /></
+	</tr>
+	</table>
+	
+	<div class="pdt10 center">
+		<span class="btn small black"><button type="submit">추가</button></span>
+	</div>
+	</form>
+</div>
+
+<div id="displayGoodsSelectPopup">
+	<div id="displayGoodsSelect"></div>
+</div>
+
+{ #layout_footer }

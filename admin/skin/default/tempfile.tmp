@@ -1,0 +1,907 @@
+{ #layout_header }
+
+<script type="text/javascript">
+// SEARCH FOLDER 
+function showSearch(){
+	if($("#goods_search_form").css('display')=='none'){
+		$("#goods_search_form").show();
+		$.cookie("goods_list_folder", "folded");
+	}else{
+		$("#goods_search_form").hide();
+		$.cookie("goods_list_folder", "unfolded");
+	}
+}
+
+
+$(document).ready(function() {
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','',function(){
+		<!--{?sc.category1}-->
+		$("select[name='category1']").val('{_GET.category1}').change();
+		<!--{/}-->
+	});
+	$("select[name='category1']").live("change",function(){
+		category_admin_select_load('category1','category2',$(this).val(),function(){
+			<!--{?sc.category2}-->
+			$("select[name='category2']").val('{_GET.category2}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").live("change",function(){
+		category_admin_select_load('category2','category3',$(this).val(),function(){
+			<!--{?sc.category3}-->
+			$("select[name='category3']").val('{_GET.category3}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category3','category4',"");
+	});			
+	$("select[name='category3']").live("change",function(){
+		category_admin_select_load('category3','category4',$(this).val(),function(){
+			<!--{?sc.category4}-->
+			$("select[name='category4']").val('{_GET.category4}').change();
+			<!--{/}-->
+		});
+	});
+
+	category_admin_select_load('','s_category1','',function(){
+		<!--{?sc.category1}-->
+		$("select[name='s_category1']").val('{_GET.category1}').change();
+		<!--{/}-->
+	});
+	$("select[name='s_category1']").live("change",function(){
+		category_admin_select_load('s_category1','s_category2',$(this).val(),function(){
+			<!--{?sc.category2}-->
+			$("select[name='s_category2']").val('{_GET.category2}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='s_category2']").live("change",function(){
+		category_admin_select_load('s_category2','s_category3',$(this).val(),function(){
+			<!--{?sc.category3}-->
+			$("select[name='s_category3']").val('{_GET.category3}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('s_category3','s_category4',"");
+	});			
+	$("select[name='s_category3']").live("change",function(){
+		category_admin_select_load('s_category3','s_category4',$(this).val(),function(){
+			<!--{?sc.category4}-->
+			$("select[name='s_category4']").val('{_GET.category4}').change();
+			<!--{/}-->
+		});
+	});	
+	////////////////////////////
+	
+	/* 브랜드 불러오기 */
+	brand_admin_select_load('','brands1','',function(){
+		<!--{?sc.brands1}-->
+		$("select[name='brands1']").val('{_GET.brands1}').change();
+		<!--{/}-->
+	});
+	$("select[name='brands1']").live("change",function(){
+		brand_admin_select_load('brands1','brands2',$(this).val(),function(){
+			<!--{?sc.brands2}-->
+			$("select[name='brands2']").val('{_GET.brands2}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('brands2','brands3',"");
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("select[name='brands2']").live("change",function(){
+		brand_admin_select_load('brands2','brands3',$(this).val(),function(){
+			<!--{?sc.brands3}-->
+			$("select[name='brands3']").val('{_GET.brands3}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('brands3','brands4',"");
+	});			
+	$("select[name='brands3']").live("change",function(){
+		brand_admin_select_load('brands3','brands4',$(this).val(),function(){
+			<!--{?sc.brands4}-->
+			$("select[name='brands1']").val('{_GET.brands1}').change();
+			<!--{/}-->
+		});
+	});
+
+	brand_admin_select_load('','s_brands1','',function(){
+		<!--{?sc.brands1}-->
+		$("select[name='s_brands1']").val('{_GET.brands1}').change();
+		<!--{/}-->
+	});
+	$("select[name='s_brands1']").live("change",function(){
+		brand_admin_select_load('s_category1','s_category2',$(this).val(),function(){
+			<!--{?sc.brands2}-->
+			$("select[name='s_brands2']").val('{_GET.brands2}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('s_brands2','s_brands3',"");
+		brand_admin_select_load('s_brands3','s_brands4',"");
+	});
+	$("select[name='s_brands2']").live("change",function(){
+		brand_admin_select_load('s_brands2','s_brands3',$(this).val(),function(){
+			<!--{?sc.brands3}-->
+			$("select[name='s_brands3']").val('{_GET.brands3}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('s_brands3','s_brands4',"");
+	});			
+	$("select[name='s_brands3']").live("change",function(){
+		brand_admin_select_load('s_brands3','s_brands4',$(this).val(),function(){
+			<!--{?sc.brands4}-->
+			$("select[name='s_brands4']").val('{_GET.brands4}').change();
+			<!--{/}-->
+		});
+	});
+	
+
+
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+	$("#search_set").click(function(){
+		var title = '기본검색 설정<span style="font-size:11px; margin-left:26px;"> - 아래서 원하는 검색조건을 설정하여 편하게 쇼핑몰을 운영하세요</span>';
+		openDialog(title, "search_detail_dialog", {"width":"800","height":"300"});
+	});
+	
+	$("#get_default_button").click(function(){
+		$.getJSON('get_search_default', function(result) {			 
+			for(var i=0;i<result.length;i++){
+				if(result[i][0]=='goodsStatus[0]' || result[i][0]=='goodsView[0]'){
+					//alert(result[i][0]+" : "+result[i][1]); 
+					if(result[i][1]=='normal') $("input[name='goodsStatus[]']").eq(0).attr("checked",true);
+					else if(result[i][1]=='runout') $("input[name='goodsStatus[]']").eq(1).attr("checked",true);
+					else if(result[i][1]=='unsold') $("input[name='goodsStatus[]']").eq(2).attr("checked",true);
+					else if(result[i][1]=='look') $("input[name='goodsView[]']").eq(0).attr("checked",true);
+					else if(result[i][1]=='notLook') $("input[name='goodsView[]']").eq(1).attr("checked",true);
+				}else if(result[i][0]=='regist_date'){
+					if(result[i][1] == 'today'){
+						set_date('{=date('Y-m-d')}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3day'){
+						set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '7day'){
+						set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '1mon'){
+						set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3mon'){
+						set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}');
+					}	
+				}
+				$("*[name='"+result[i][0]+"']",document.memberForm).val(result[i][1]);
+			}			
+		});
+	});
+
+
+	$(".star_select").click(function(){
+		var status = "";
+		if($(this).hasClass("checked")){
+			$(this).removeClass("checked");
+			status = "none";
+		}else{
+			$(this).addClass("checked");
+			status = "checked";
+		}
+
+		$.ajax({
+			type: "get",
+			url: "../goods/set_favorite",
+			data: "status="+status+"&goods_seq="+$(this).attr("goods_seq"),
+			success: function(result){			
+				//alert(result);
+			}
+		});
+	});
+
+	$("#order_star").click(function(){
+		var status = "";
+		if($(this).hasClass("checked")){
+			$(this).removeClass("checked");
+			status = "asc";
+		}else{
+			$(this).addClass("checked");
+			status = "desc";
+		}
+		location.href = "../goods/catalog?orderby=favorite_chk&sort="+status;
+	});
+
+
+	$("#delete_btn").click(function(){
+		<!--{? !auth }-->
+		alert("권한이 없습니다.");
+		return;
+		<!--{ / }-->
+
+		var cnt = $("input:checkbox[name='goods_seq[]']:checked").length;
+		if(cnt<1){
+			alert("삭제할 상품을 선택해 주세요."); 
+			return;
+		}else{
+			var queryString = $("#goodsForm").serialize();
+			if(!confirm("선택한 상품을 삭제 시키겠습니까? ")) return;
+			$.ajax({
+				type: "get",
+				url: "../goods_process/goods_delete",
+				data: queryString,
+				success: function(result){			
+					//alert(result);
+					location.reload();
+				}
+			});
+		}
+	});
+
+	$("#chkAll").click(function(){
+		if($(this).attr("checked")){
+			$(".chk").attr("checked",true).change();
+		}else{
+			$(".chk").attr("checked",false).change();
+		}
+	});
+
+	$(".manager_copy_btn").click(function(){
+		
+		<!--{? !auth }-->
+		alert("권한이 없습니다.");
+		return;
+		<!--{ / }-->
+
+		if(!confirm("이 상품을 복사해서 상품을 등록하시겠습니까?")) return;
+
+		$.ajax({
+			type: "get",
+			url: "../goods_process/goods_copy",
+			data: "goods_seq="+$(this).attr("goods_seq"),
+			success: function(result){			
+				//alert(result);
+				location.reload();
+			}
+		});
+	});
+	
+	// 체크박스 색상
+	$("input[type='checkbox'][name='goods_seq[]']").live('change',function(){
+		if($(this).is(':checked')){
+			$(this).closest('tr').addClass('checked-tr-background');
+		}else{
+			$(this).closest('tr').removeClass('checked-tr-background');
+		}
+	}).change();
+	
+
+	$("button[name='down_list']").click(function(){
+		//window.open("/admin/order/download_list","","");
+		location.href = "/admin/goods/download_write";
+	});
+
+
+	$("button[name='excel_down']").click(function(){
+		if(!$("#excel_type").val()){
+			alert("양식을 선택 해 주세요.");
+			return;
+		}
+		//var search = location.search;
+		//search = search.substring(1,search.length);
+		//actionFrame.location.href="/admin/goods_process/excel_down?type="+$("#excel_type").val()+"&"+search;
+		if($("#excel_type").val()=='select'){
+			var cnt = $("input:checkbox[name='goods_seq[]']:checked").length;
+			if(cnt<1){
+				alert("다운로드 할 상품을 선택해 주세요."); 
+				return;
+			}
+		}
+
+		var queryString = $("#goodsForm").serialize();
+		actionFrame.location.href="/admin/goods_process/excel_down?"+queryString;
+	});
+
+
+	// export_upload
+	$("button[name='upload_excel']").live("click",function(){
+		openDialog("상품일괄등록/수정 <span class='desc'></span>", "export_upload", {"width":"600","height":"500","show" : "fade","hide" : "fade"});
+	});
+
+});
+
+function set_date(start,end){	
+	$("input[name='sdate']").val(start);
+	$("input[name='edate']").val(end);
+}
+
+function goodsView(seq){
+	$("input[name='no']").val(seq);
+	var search = location.search;
+	search = search.substring(1,search.length);
+	$("input[name='query_string']").val(search);
+	$("form[name='goodsForm']").attr('action','regist');
+	$("form[name='goodsForm']").submit();
+}
+</script>
+
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>상품 리스트</h2>
+		</div>
+		
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		<!--
+			<li><span class="btn large icon"><button><span class="arrowleft"></span>상품리스트</button></span></li>			
+			--> 
+		</ul>
+		
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large"><button name="upload_excel"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 상품일괄등록/수정 
+</button></span></li>
+
+			<li><span class="btn large black"><button onclick="location.href='regist';">상품등록하기<span class="arrowright"></span></button></span></li>
+			<!--
+			<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+			-->
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<form name="goodsForm" id="goodsForm">
+<input type="hidden" name="query_string"/>
+<input type="hidden" name="no" />
+
+<!-- 주문리스트 검색폼 : 시작 -->
+<div class="search-form-container">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table>
+			<tr>
+				<td width="500">
+					<table class="sf-keyword-table">
+					<tr>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{_GET.keyword}" title="상품명, 상품코드" /></td>
+						<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td><span class="btn small"><input type="button" value="기본검색적용" id="get_default_button" name="get_default_button"/></span></td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td><span class="icon-arrow-down" style="cursor:pointer;" id="search_set">기본검색설정</span></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+
+	<table class="search-form-table" id="serch_tab">
+	<tr id="goods_search_form" style="display:block;">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<colgroup>
+				<col width="80" />
+				<col width="170" />
+				<col width="80" />
+				<col width="170" />
+				<col width="80" />
+				<col width="230" />
+			</colgroup>
+			<tr>
+				<th>카테고리</th>
+				<td colspan="7">
+					<select class="line" name="category1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="category2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="category3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="category4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+			</tr>
+			<tr>
+				<th>브랜드</th>
+				<td colspan="7">
+					<select class="line" name="brands1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="brands2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="brands3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="brands4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+			</tr>
+			<tr>
+				<th><select name="date_gb" class="search_select">
+						<option value="regist_date" {?sc.date_gb=='regist_date'}selected{/}>등록일</option>
+						<option value="update_date" {?sc.date_gb=='update_date'}selected{/}>수정일</option>
+					</select></th>
+				<td colspan="7">
+					<input type="text" name="sdate" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button" value="오늘" id="today" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="전체" id="all" name="select_date"/></span>
+				</td>
+			</tr>
+			<tr>
+				<th><select name="price_gb" class="search_select">
+						<option value="consumer_price" {?sc.price_gb=='consumer_price'}selected{/}>정상가</option>
+						<option value="price" {?sc.price_gb=='price'}selected{/}>할인가</option>
+					</select></th>
+				<td>
+					<input type="text" name="sprice" value="{_GET.sprice}" size="7" class="line onlynumber"/> - <input type="text" name="eprice" value="{_GET.eprice}" size="7" class="line onlynumber"/>
+				</td>
+				<th>재고수량</th>
+				<td>
+					<input type="text" name="sstock" value="{_GET.sstock}" size="7" class="line onlynumber"/> - <input type="text" name="estock" value="{_GET.estock}" size="7" class="line onlynumber"/>
+				</td>
+				<th>페이지뷰</th>
+				<td>
+					<input type="text" name="spage_view" value="{_GET.spage_view}" class="line onlynumber" size="7"/> - <input type="text" name="epage_view" value="{_GET.epage_view}" class="line onlynumber" size="7"/>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<!--
+				<th>매입처</th>
+				<td>
+					<select name=""></select>
+				</td>
+				<th>판매처</th>
+				<td>
+					<select name=""></select>
+				</td>
+				-->
+				<th>모델명</th>
+				<td>
+					<select name="model" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ model }
+							{? .contents }
+						<option value="{.contents}" {?sc.model==.contents}selected{/}>{.contents}</option>
+							{ / }
+						{ / }
+					</select>
+				</td>
+				<th>브랜드</th>
+				<td>
+					<select name="brand" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ brand }
+						<option value="{.contents}" {?sc.brand==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>상태</th>
+				<td>	
+					<label><input type="checkbox" name="goodsStatus[]" value="normal" {?sc.goodsStatus && in_array('normal',sc.goodsStatus)}checked{/}/>정상<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="runout" {?sc.goodsStatus && in_array('runout',sc.goodsStatus)}checked{/}/>품절<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="purchasing" {?sc.goodsStatus && in_array('purchasing',sc.goodsStatus)}checked{/}/>재고확보중<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="unsold" {?sc.goodsStatus && in_array('unsold',sc.goodsStatus)}checked{/}/>판매중지<label>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<th>제조사</th>
+				<td>
+					<select name="manufacture" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ manufacture }
+						<option value="{.contents}" {?sc.manufacture==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>원산지</th>
+				<td>
+					<select name="orign" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ orign }
+						<option value="{.contents}" {?sc.orign==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>노출</th>
+				<td>
+					<label><input type="checkbox" name="goodsView[]" value="look" {?sc.goodsView && in_array('look',sc.goodsView)}checked{/}/>보임<label>
+					<label><input type="checkbox" name="goodsView[]" value="notLook" {?sc.goodsView && in_array('notLook',sc.goodsView)}checked{/}/>안보임<label>
+				</td>
+				<th>과세/비과세</th>
+				<td>
+					<label><input type="checkbox" name="taxView[]" value="tax" {?sc.taxView && in_array('tax',sc.taxView)}checked{/}/>과세<label>
+					<label><input type="checkbox" name="taxView[]" value="exempt" {?sc.taxView && in_array('exempt',sc.taxView)}checked{/}/>비과세<label>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<!-- 주문리스트 검색폼 : 끝 -->
+
+<div class="clearbox">
+	<ul class="right-btns clearbox">
+		<li><select class="custom-select-box-multi" name="orderby" onchange="document.goodsForm.submit();">
+			<option value="goods_seq" {?orderby=='goods_seq'}selected{/}>최근등록순</option>
+			<option value="goods_name" {?orderby=='goods_name'}selected{/}>상품명순</option>
+			<option value="page_view" {?orderby=='page_view'}selected{/}>페이지뷰순</option>
+		</select></li>
+		<li><select  class="custom-select-box-multi" name="perpage" onchange="document.goodsForm.submit();">
+			<option id="dp_qty10" value="10" {? perpage == 10 } selected{/} >10개씩</option>
+			<option id="dp_qty50" value="50" {? perpage == 50 } selected{/} >50개씩</option>
+			<option id="dp_qty100" value="100" {? perpage == 100 } selected{/} >100개씩</option>
+			<option id="dp_qty200" value="200" {? perpage == 200 } selected{/} >200개씩</option>
+		</select></li>
+	</ul>
+</div>
+
+<ul class="left-btns clearbox">	
+	<li><div style="margin-top:rpx;">검색 <b>{=number_format(page.totalcount)}</b> 개 / 총 <b>{=number_format(page.all_count)}</b> 개</div></li>
+</ul>
+
+<div class="fr">
+	<div class="clearbox">
+		<ul class="right-btns clearbox">
+			<li>	
+				<select class="custom-select-box-multi" name="excel_type" id="excel_type">
+					<option value="">양식선택</option>
+					<option value="select">선택 다운로드</option>
+					<option value="search">검색 다운로드</option>
+				</select>
+				<span class="btn small"><button type="button" name="excel_down"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 다운로드</button></span>
+				<span class="btn small"><button type="button" name="down_list"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 다운로드 양식</button></span>
+			</li>
+		
+		</ul>
+	</div>
+</div>
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="30" />
+		<col width="30" />
+		<col width="40" />
+		<col width="60" />
+		<col />
+
+		<col width="90" />
+		<col width="90" />
+		<col width="70" />
+		<col width="70" />
+		<col width="40" />
+
+		<col width="60" />
+		<col width="100" />
+		<col width="100" />
+		<col width="60" />
+		<col width="40" />
+
+		<col width="100" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th><input type="checkbox" id="chkAll" /></th>
+		<th><span class="icon-star-gray {?sc.orderby=='favorite_chk' && sc.sort=='desc'}checked{/}" id="order_star"></span></th>
+		<th>번호</th>
+		<th colspan="2">상품명</th>
+
+		<th>정가</th>
+		<th>할인가</th>
+		<th>재고(가용)</th>
+		<th>개별 배송비</th>
+		<th>구매</th>
+
+		<th>페이지뷰</th>
+		<th>등록일</th>
+		<th>수정일</th>
+		<th>상태</th>
+		<th>노출</th>
+
+		<th>관리</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+{? loop }
+	{@ loop }	
+		<tr class="list-row" style="height:70px;">
+			<td align="center"><input type="checkbox" class="chk" name="goods_seq[]" value="{.goods_seq}" /></td>
+			<td align="center"><span class="icon-star-gray star_select {.favorite_chk}" goods_seq="{.goods_seq}"></span></td>
+			<td align="center">{page.totalcount - ._no + 1}</td>
+			<td align="center"><a href="/goods/view?no={.goods_seq}" target="_blank"><img src="{=viewImg(.goods_seq,'thumbView')}" width="50"></a></td>
+			<td align="left" style="padding-left:10px;"><a href="/goods/view?no={.goods_seq}" target="_blank">{=getstrcut(.goods_name,80)}</a> <div style="padding-top:5px;">{.catename}</div>
+			{? .tax=='exempt' }<div style="color:red;">[비과세]</div>{ / }</td>
+			<td align="center">{=number_format(.consumer_price)}</td>
+			<td align="center">{=number_format(.price)}</td>
+			<td align="center">
+				<!--{?.stock<0}-->
+				<span style='color:red'>{=number_format(.stock)}</span>
+				<!--{:}-->
+				{=number_format(.stock)}
+				<!--{/}-->
+				<!--{?.rstock<0}-->
+				(<span style='color:red'>{=number_format(.rstock)}</span>)
+				<!--{:}-->
+				({=number_format(.rstock)})
+				<!--{/}-->
+			</td>
+			<td align="center">{?.unlimit_shipping_price}{=number_format(.unlimit_shipping_price)}{:}-{/}</td>
+			<td align="center"><a href="/admin/order/catalog?goods_seq={.goods_seq}">조회</a></td>
+			<td align="center">{=number_format(.page_view)}</td>
+			<td align="center">{.regist_date}</td>
+			<td align="center">{.update_date}</td>
+			<td align="center">{.goods_status_text}</td>
+			<td align="center">{.goods_view_text}</td>
+			<td align="center">
+				<span class="btn small valign-middle"><input type="button" name="manager_modify_btn" value="수정" goods_seq="{.goods_seq}" onclick="goodsView('{.goods_seq}');"/></span> 
+				<span class="btn small valign-middle"><input type="button" class="manager_copy_btn" value="복사" goods_seq="{.goods_seq}"/></span></td>
+		</tr>
+	{ / }
+{ : }
+	<tr class="list-row">
+		<td align="center" colspan="16">
+			{ ? search_text }
+				'{search_text}' 검색된 상품이 없습니다.
+			{:}
+				등록된 상품이 없습니다.
+			{/}
+		</td>
+	</tr>
+{ / }
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+</table>
+<!-- 주문리스트 테이블 : 끝 -->
+<div class="clearbox">
+	<ul class="left-btns">
+		<li>
+			<span class="btn small gray"><button type="button" id="delete_btn">삭제</button></span>
+		</li>
+	</ul>
+</div>
+
+
+<br style="line-height:10px;" />
+
+</form>
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">
+<!--{ ? page.prev }-->
+<a href="?page={page.page.prev}&amp;{page.page.querystring}"><span class="prev" />◀ 이전 </span></a>
+<!--{ / }-->
+<!--{ @ page.page }-->
+<!--{ ? page.nowpage ==  .value_ }-->
+<a class="on red">{.value_ }</a>&nbsp;
+<!--{ : }-->
+<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>&nbsp;
+<!--{ / }-->
+<!--{ / }-->
+<!--{ ? page.next }-->
+<a href="?page={page.next}&amp;{page.querystring}"><span class="next " />다음 ▶</span></a>
+<!--{ / }-->
+</div>
+
+
+
+
+<div class="hide" id="search_detail_dialog">
+<form name="set_search_detail" method="post" action="set_search_default" target="actionFrame">
+<div id="contents">
+	<table class="search-form-table" id="serch_tab">
+	<tr id="goods_search_form" style="display:block;">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th>카테고리</th>
+				<td colspan="7">
+					<select class="line" name="s_category1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="s_category2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="s_category3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="s_category4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+			</tr>
+			<tr>
+				<th>브랜드</th>
+				<td colspan="7">
+					<select class="line" name="s_brands1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="s_brands2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="s_brands3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="s_brands4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+			</tr>
+			<tr>
+				<th><select name="date_gb" class="search_select_pop">
+						<option value="regist_date" {?sc.date_gb=='regist_date'}selected{/}>등록일</option>
+						<option value="update_date" {?sc.date_gb=='update_date'}selected{/}>수정일</option>
+					</select></th>
+				<td colspan="7">
+					<label class="search_label"><input type="radio" name="regist_date" value="today" checked="checked" /> 오늘</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3day" /> 3일간</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="7day" /> 일주일</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="1mon" /> 1개월</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3mon" /> 3개월</label>
+				</td>
+			</tr>
+			<tr>
+				<th><select name="price_gb" class="search_select_pop">
+						<option value="consumer_price" {?sc.price_gb=='consumer_price'}selected{/}>정상가</option>
+						<option value="price" {?sc.price_gb=='price'}selected{/}>할인가</option>
+					</select></th>
+				<td>
+					<input type="text" name="sprice" value="{_GET.sprice}" size="5" class="line onlynumber" /> - <input type="text" name="eprice" value="{_GET.eprice}" size="5" class="line onlynumber"/>
+				</td>
+				<th>재고수량</th>
+				<td>
+					<input type="text" name="sstock" value="{_GET.sstock}" size="5" class="line onlynumber"/> - <input type="text" name="estock" value="{_GET.estock}" size="5" class="line onlynumber"/>
+				</td>
+				<th>페이지뷰</th>
+				<td>
+					<input type="text" name="spage_view" value="{_GET.spage_view}" class="line onlynumber" size="5"/> - <input type="text" name="epage_view" value="{_GET.epage_view}" class="line onlynumber" size="5"/>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<!--
+				<th>매입처</th>
+				<td>
+					<select name=""></select>
+				</td>
+				<th>판매처</th>
+				<td>
+					<select name=""></select>
+				</td>
+				-->
+				<th>모델명</th>
+				<td>
+					<select name="model" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ model }
+						<option value="{.contents}" {?sc.model==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>브랜드</th>
+				<td>
+					<select name="brand" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ brand }
+						<option value="{.contents}" {?sc.brand==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>상태</th>
+				<td colspan="3">	
+					<label><input type="checkbox" name="goodsStatus[]" value="normal" {?sc.goodsStatus && in_array('normal',sc.goodsStatus)}checked{/}/>정상<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="runout" {?sc.goodsStatus && in_array('runout',sc.goodsStatus)}checked{/}/>품절<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="purchasing" {?sc.goodsStatus && in_array('purchasing',sc.goodsStatus)}checked{/}/>재고확보중<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="unsold" {?sc.goodsStatus && in_array('unsold',sc.goodsStatus)}checked{/}/>판매중지<label>
+				</td>
+			</tr>
+			<tr>
+				<th>제조사</th>
+				<td>
+					<select name="manufacture" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ manufacture }
+						<option value="{.contents}" {?sc.manufacture==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>원산지</th>
+				<td>
+					<select name="orign" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ orign }
+						<option value="{.contents}" {?sc.orign==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>노출</th>
+				<td>
+					<label><input type="checkbox" name="goodsView[]" value="look" {?sc.goodsView && in_array('look',sc.goodsView)}checked{/}/>보임<label>
+					<label><input type="checkbox" name="goodsView[]" value="notLook" {?sc.goodsView && in_array('notLook',sc.goodsView)}checked{/}/>안보임<label>
+				</td>
+				<th>과세/비과세</th>
+				<td>
+					<label><input type="checkbox" name="taxView[]" value="tax" {?sc.taxView && in_array('tax',sc.taxView)}checked{/}/>과세<label>
+					<label><input type="checkbox" name="taxView[]" value="exempt" {?sc.taxView && in_array('exempt',sc.taxView)}checked{/}/>비과세<label>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<div align="center" style="padding-top:10px;">
+	<span class="btn large black">
+		<button type="submit">저장하기<span class="arrowright"></span></button>
+	</span>
+</div>
+</form>
+</div>
+
+
+
+<div id="export_upload" class="hide">
+<form name="excelRegist" id="excelRegist" method="post" action="../goods_process/excel_upload" enctype="multipart/form-data"  target="actionFrame">
+
+	<div class="clearbox"></div>
+	<div class="item-title">상품 일괄 등록 및 수정</div>
+	<table class="info-table-style" style="width:100%">
+	<colgroup>
+		<col width="20%" />
+		<col width="80%" />	
+	</colgroup>			
+	<tr>				
+		<th class="its-th-align center">일괄수정</th>
+		<td class="its-td">
+			<input type="file" name="excel_file" id="excel_file" style="height:20px;"/>
+		</td>
+	</tr>
+	</table>
+
+	<div style="width:100%;text-align:center;padding-top:10px;">
+	<span class="btn large cyanblue"><button id="upload_submit">확인</button></span>
+	</div>
+
+	<div style="padding:15px;"></div>
+
+	<div style="padding-left:10px;font-size:12px;">
+		* 상품을 일괄 등록하거나 수정할 때 엑셀 양식을  먼저 다운로드 받은 후에 이용하면 됩니다.(xls 양식) <br/>
+		<div style="padding:3px;"></div>
+		* 일괄 등록과 수정의 구분은 고유값 필드에 있는 값의 유무로 판단합니다.(고유값 필드에 값이 있으면 수정, 없으면 등록입니다.)<br/>
+		<div style="padding:3px;"></div>	
+		* 상품 옵션은 옵션마다 1개의 행을 차지합니다.(옵션을 등록한 이후에 엑셀을 다운로드 받아서 보면 이해하기 편합니다.)<br/>
+		<div style="padding:3px;"></div>
+		* 옵션 항목에는 옵션값만 입력해야 하며 상품 공통 정보를 입력하면 안됩니다. 상품 공통 정보 항목도 옵션값을 입력하면 안됩니다. <br/>
+	</div>
+
+	<div style="padding:15px;"></div>
+
+
+</form>
+</div>
+
+{ #layout_footer }

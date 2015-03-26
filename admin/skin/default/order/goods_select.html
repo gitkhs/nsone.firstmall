@@ -1,0 +1,204 @@
+<script type="text/javascript">
+function keyMoveSelectedItem(e){	
+
+	if($("div#targetList div.selectedGoods").length){
+		var sArr = new Array();						
+		if(event.keyCode == '38'){ // up			
+			$("div#{_GET.displayId} div#targetList div.targetGoods").each(function(idx){
+				if( $(this).hasClass("selectedGoods") ){										
+					idx--;
+					if( idx >= 0 ){
+						$("div#{_GET.displayId} div#targetList div.targetGoods").eq(idx).before( $(this) );
+					}											
+				}
+			});	
+			select_{_GET.displayId}.apply_layer();		
+			document.body.focus();
+			return false;
+		}
+		if(event.keyCode == '40'){ // down
+			var i = 0;
+			$("div#{_GET.displayId} div#targetList div.targetGoods").each(function(idx){
+				if( $(this).hasClass("selectedGoods") ){
+					sArr[i] = idx;
+					i++;
+				}					
+			});									
+			for(var i=sArr.length-1;i>=0;i--){								
+				var idx = sArr[i];										
+				var obj = $("div#{_GET.displayId} div#targetList div.targetGoods").eq(idx);								
+				idx++;					
+				if( idx < $("div#{_GET.displayId} div#targetList div.targetGoods").length ){
+					$("div#{_GET.displayId} div#targetList div.targetGoods").eq(idx).after( obj );
+				}
+			}	
+			select_{_GET.displayId}.apply_layer();	
+			document.body.focus();
+			return false;
+		}
+		
+	}	
+}
+
+document.onkeydown = function(e){return keyMoveSelectedItem(e);};
+
+function targetGoods_click(obj){
+	obj.toggleClass('selectedGoods');	
+}
+
+$(document).ready(function() {
+	
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','selectCategory1','');
+	$("div#{_GET.displayId} select[name='selectCategory1']").bind("change",function(){
+		category_admin_select_load('selectCategory1','selectCategory2',$(this).val());
+		category_admin_select_load('selectCategory2','selectCategory3',"");
+		category_admin_select_load('selectCategory3','selectCategory4',"");
+	});
+	$("div#{_GET.displayId} select[name='selectCategory2']").bind("change",function(){
+		category_admin_select_load('selectCategory2','selectCategory3',$(this).val());
+		category_admin_select_load('selectCategory3','selectCategory4',"");
+	});
+				
+	$("div#{_GET.displayId} select[name='selectCategory3']").bind("change",function(){
+		category_admin_select_load('selectCategory3','selectCategory4',$(this).val());
+	});	
+	
+	/* 이벤트 선택 */
+	$("div#{_GET.displayId} select[name='selectEvent']").bind("change",function(){
+		event_admin_select_load('selectEvent','selectEventBenefits',$(this).val());
+	});
+	
+	/* 이벤트 검색폼 활성화 */
+	var regExp = /^(.*)\/event[0-9]{7}\.html$/;
+	if(regExp.test($("input[name='template_path']").val())){
+		$(".searchFormItemEvent").show();
+		$(".searchFormItemNormal").hide();
+	}
+	
+	
+	$("div#{_GET.displayId} div.targetGoods").live('dblclick',function(event){
+		$(this).remove();
+		select_{_GET.displayId}.apply_layer();
+	});
+/*
+	
+	$("div#{_GET.displayId} div.targetGoods").live(function(event){
+		if( $(this).hasClass('selectedGoods') ){			
+			$(this).removeClass('selectedGoods');
+		}else{
+			$(this).addClass('selectedGoods');
+		}
+	});
+
+	*/	
+	
+});
+</script>
+<style>
+.selectedGoods{ background-color:#e7f2fc; }
+.targetGoods {padding:4px; overflow:hidden; cursor:pointer}
+.targetGoods .image {padding-right:4px;} 
+.targetGoods .name {display:block; width:300px; overflow:hidden; white-space:nowrap;}
+</style>
+<div>
+<div id="goodsSelectorSearch" class="search-form-container" style="border:1px solid #ccc;">
+
+<form action="../goods/select_list" method="get" target="select_{_GET.displayId}">
+	<input type="hidden" name="inputGoods" value="{_GET.inputGoods}" />
+	<input type="hidden" name="displayId" value="{_GET.displayId}" />
+	<input type="hidden" name="adminOrder" value="Y" />
+	<input type="hidden" name="ordertype" value="{_GET.ordertype}" />
+	<input type="hidden" name="member_seq" value="{_GET.member_seq}" />
+	<input type="hidden" name="goodsView" value="look" />
+	
+
+	<div align="center">
+	<table class="sf-keyword-table" style="width:500px;">
+	<tr>
+		<td class="sfk-td-txt"><input type="text" name="selectGoodsName" value="" title="상품명(매입상품명), 상품코드"  /></td>
+		<td class="sfk-td-btn"><button type="submit" id="selectSearchButton"><span>검색</span></button></td>
+	</tr>
+	</table>
+	</div>	
+	<div class="searchFormItemEvent hide" style="padding-top:5px;" align="center">
+		<strong>이벤트 : </strong>
+		<select name="selectEvent">
+		<option value="">이벤트 선택</option>
+		{@eventData}
+		<option value="{.event_seq}">[{.status}] {.title}</option>
+		{/}
+		</select>
+		<select name="selectEventBenefits"  class="hide"></select>
+	</div>
+	<div class="searchFormItemNormal" style="padding-top:5px;" align="center">
+		<strong>카테고리 : </strong>
+		<select name="selectCategory1" style="width:100px">
+		<option value="">1차 카테고리</option>
+		</select>
+		<select name="selectCategory2" style="width:100px">
+		<option value="">2차 카테고리</option>
+		</select>
+		<select name="selectCategory3" style="width:100px">
+		<option value="">3차 카테고리</option>
+		</select>
+		<select name="selectCategory4" style="width:100px">
+		<option value="">4차 카테고리</option>
+		</select>
+		&nbsp;&nbsp;&nbsp;&nbsp;
+		<strong>판매가격 : </strong><input type="text" name="selectStartPrice" size="6" value="" class="onlynumber"  />원부터 ~
+		<input type="text" name="selectEndPrice" size="6" value="" class="onlynumber"  />원까지
+	</div>
+	<div class="searchFormItemNormal" style="padding-top:5px;" align="center">
+		<span style="display:inline-block;width:300px;">
+		<strong>상태 : </strong>	
+		<label><input type="radio" name="goodsStatus" value="" checked="checked" />전체</label>
+		<label><input type="radio" name="goodsStatus" value="normal" />정상</label>
+		<label><input type="radio" name="goodsStatus" value="runout" />품절</label>
+		<label><input type="radio" name="goodsStatus" value="unsold" />판매중지</label>
+		</span>
+ 		<strong>정렬  </strong>			
+		<select name="sort">		
+			<option value="0">최근 등록순↓</option>
+			<option value="1">최근 등록순↑</option>
+			<option value="2">구매량↓</option>
+			<option value="3">구매량↑</option>
+			<option value="4">페이지뷰↓</option>
+			<option value="5">페이지뷰↑</option>
+			<option value="6">리뷰수↓</option>
+			<option value="7">리뷰수↑</option>
+		</select>		
+		</span>
+	</div>
+</form>
+</div>
+<div style="height:5px;"></div>
+<table style="width:100%">
+<col>
+<col width="5">
+<col width="50%">
+<tr>
+	<td valign="top">	
+	<div style="background-color:#f1f1f1; font-weight:normal;border-collapse:collapse; border:1px solid #aaa;height:30px; line-height:15px;padding:4px;">검색된 상품 리스트<div><span class="desc">상품을 클릭하면 장바구니에 추가됩니다.</span></div></div>	
+	<iframe width="100%" height="{containerHeight}" frameborder="0" src="../goods/select_list?inputGoods={_GET.inputGoods}&displayId={_GET.displayId}&init=Y&adminOrder=Y&ordertype={_GET.ordertype}&member_seq={_GET.member_seq}&goodsView=look" name="select_{_GET.displayId}"></iframe>
+	</td>
+	<td></td>
+	<td valign="top">
+	<div style="background-color:#f1f1f1; font-weight:normal;border-collapse:collapse; border:1px solid #aaa;height:30px; line-height:15px;padding:4px;">선택된 상품 리스트 <br /> <span class="desc">선택 상품 삭제는 장바구니 리스트에서 삭제 기능을 통하여  삭제하실 수 있습니다.</span></div>
+
+	<div id="targetList" style="height:{containerHeight}px;overflow:auto;"></div>
+
+	</td>
+</tr>
+{?_GET.innerMode=='1'}
+<tr>
+	<td colspan="2" align="right" class="pdt5">
+		<span class="btn small"><input type="button" value="닫기" onclick="$('#{_GET.displayId}').empty();$('#{_GET.displayId}Container').hide();" /></span>
+	</td>
+</tr>
+{/}
+<tr>
+
+</table>
+
+</div>

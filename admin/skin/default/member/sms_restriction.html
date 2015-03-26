@@ -1,0 +1,88 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#btnRestrictionConfig").click(function(){
+		$("#restrictionForm").attr("action","../member_process/sms_restriction");
+		$("#restrictionForm").submit();
+	}); 
+	$(".adminck").on("click",function(){
+		var no = $(this).attr("no");
+		$("#sys_"+no).attr("checked",$(this).is(":checked"));
+	});
+});
+</script>
+<div style="line-height:20px;font-size:12px;">
+	주문접수 등의 자동 문자 발송 설정이 되었을 때 <br />
+	아래의 행위가 설정된 심야시간에 발생할 경우 해당 문자는 설정된 오전 시간에 자동으로 발송됩니다.
+</div>
+<form name="restrictionForm" id="restrictionForm" method="post" action="" target="actionFrame">
+<input type="hidden" name="mode" value="{=_GET['mode']}">
+<br style="line-height:14px;">
+	<table class="info-table-style" style="width:100%">
+		<!-- 테이블 헤더 : 시작 -->
+		{? _GET['mode'] != "board" }
+		<colgroup>
+			<col width="15%" />
+			<col width="35%" />
+			<col width="25%" />
+			<col width="25%" />
+		</colgroup>
+		<tbody class="lth">
+		{@ restriction_item}
+			
+			{@ .value_ }
+			{? (service_code != 'P_FREE' && service_code != 'P_PREM') || ((service_code == 'P_FREE' || service_code == 'P_PREM') && .key_ != 'coupon')}
+			{? ..use == 'y' }
+		<tr class="list-row">
+			{? ori_key != .key_ }
+			<td rowspan="{=.usecnt}" class="its-td-align center">{=restriction_title[.key_]}</td>
+			<!--{ = this->assign( 'ori_key', .key_ ) }-->
+			{ / }
+			<td class="its-td-align"><span class="pdl10">{=restriction_title[..key_]}</span></td>
+			<td class="its-td-align center" style="background-color:#fff9ce;">{? ..ac_admin != ""}<label><input type="checkbox" name="{=..key_}" no="{.index_}{..index_}" class="adminck" {=sms_rest[..key_]} value="checked"> 관리자 처리 </label>{/}</td>
+			<td class="its-td-align center" style="background-color:#fff9ce;">{? ..ac_system != ""}<label><input type="checkbox" name="system_{=..key_}" id="sys_{.index_}{..index_}" disabled  {=sms_rest[..key_]}> 시스템 자동 처리</label>{/}</td>
+		</tr>
+			{ / }
+			{ / }
+			{ / }
+		{ / }
+		</tbody>
+		{ : }
+		<colgroup>
+			<col width="50%" />
+			<col width="50%" />
+		</colgroup>
+		<tr class="list-row">
+			<td class="its-td-align center" style="background-color:#fff9ce;"><label><input type="checkbox" name="board_toadmin" {=sms_rest['board_toadmin']} value="checked"> 사용자가 글 작성 시 → 관리자에게 문자 발송</label></td>
+			<td class="its-td-align center" style="background-color:#fff9ce;"><label><input type="checkbox" name="board_touser" {=sms_rest['board_touser']} value="checked"> 관리자가 답글(댓글) 작성시 → 고객에게 문자 발송</label></td>
+		</tr>
+		{ / }
+	</table>
+<br style="line-height:14px;">
+<div style="line-height:20px;font-size:12px;">
+	위에서 체크한 해당 행위가 
+	<select name="{=config_field[0]}">
+	{@ loop_config_time }
+	<option value="{.value_}" {=selected.config_time_s[.value_]}>{.value_}시</option>
+	{ / }
+	</select>
+	 ~ 
+	<select name="{=config_field[1]}">
+	{@ loop_config_time }
+	<option value="{.value_}" {=selected.config_time_e[.value_]}>{.value_}시</option>
+	{ / }
+	</select>
+	사이에 발생하면
+</div>
+<div style="line-height:20px;font-size:12px;margin-top:3px;">
+	해당 문자를 08 + 
+	<select name="{=config_field[2]}">
+	{@ loop_reserve_time }
+	<option value="{.key_}" {=selected.reserve_time[.key_]}>{.value_}</option>
+	{ / }
+	</select>이후 부터 순차적으로 자동 발송합니다.
+</div>
+	
+<div class="center" style="padding:15px;"><span class="btn large black"><button  type="button"  id="btnRestrictionConfig">확인</button></span></div>
+
+<br style="line-height:20px;">
+</form>

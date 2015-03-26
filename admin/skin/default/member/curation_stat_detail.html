@@ -1,0 +1,191 @@
+
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/common.css" />
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/layout.css?20131119" />
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/buttons.css" />
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/page.css" />
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/jqueryui/black-tie/jquery-ui-1.8.16.custom.css" />
+<script type="text/javascript" src="/app/javascript/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/app/javascript/jquery/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/app/javascript/js/common.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		
+		$("[name='select_date2']").click(function() {
+			switch($(this).attr("id")) {
+				case 'today' :
+					$("input[name='start_date2']").val(getDate(0));
+					$("input[name='end_date2']").val(getDate(0));
+					break;
+				case '3day' :
+					$("input[name='start_date2']").val(getDate(3));
+					$("input[name='end_date2']").val(getDate(0));
+					break;
+				case '1week' :
+					$("input[name='start_date2']").val(getDate(7));
+					$("input[name='end_date2']").val(getDate(0));
+					break;
+				case '1month' :
+					$("input[name='start_date2']").val(getDate(30));
+					$("input[name='end_date2']").val(getDate(0));
+					break;
+				case '3month' :
+					$("input[name='start_date2']").val(getDate(90));
+					$("input[name='end_date2']").val(getDate(0));
+					break;
+				default :
+					$("input[name='start_date2']").val('');
+					$("input[name='end_date2']").val('');
+					break;
+			}
+		});
+
+		$("#btn_submit2").click(function(){
+			$("#log_detail").submit();
+		});
+	});
+</script>
+
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<form name="log_detail" id="log_detail">
+<div class="clearbox">
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="15%" />
+			<col />
+		</colgroup>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">발송구분</th>
+			<td class="its-td-align left" style="padding-left:10px;">
+				<select name="sc_kind">
+				<option value="">전체</option>
+				<!--{@ curationmn }-->
+				<option value="{.name}" {? .name == sc.sc_kind} selected{/}>{.title}</option>
+				<!--{ / }-->
+				</select>
+
+				<select name='sc_type'>
+				<option value="">전체</option>
+				<option value="SMS" {? sc.sc_type=='SMS'}selected{/}>SMS</option>
+				<option value="EMAIL" {? sc.sc_type=='EMAIL'}selected{/}>EMAIL</option>
+				</select>
+
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">검색어</th>
+			<td class="its-td-align left" style="padding-left:10px;">
+				<input type="text" name="sc_keyword" value="{sc.sc_keyword}" class="line"  maxlength="30" size="30" />
+			</td>
+		</tr>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">발송일</th>
+			<td class="its-td-align left" style="padding-left:10px;">
+				<input type="text" name="start_date2" value="{sc.start_date2}" class="datepicker line"  maxlength="10" size="10" />
+				&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+				<input type="text" name="end_date2" value="{sc.end_date2}" class="datepicker line" maxlength="10" size="10" />
+				&nbsp;&nbsp;
+				<span class="btn small"><input type="button" value="오늘" id="today" name="select_date2"/></span>
+				<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date2"/></span>
+				<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date2"/></span>
+				<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date2"/></span>
+				<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date2"/></span>
+				<span class="btn small"><input type="button" value="전체" id="all" name="select_date2"/></span>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+<div style="width:100%;text-align:center;padding-top:10px;">
+<span class="btn large gray"><button type="button" id="btn_submit2">검색</button></span>
+</div>
+</form>
+
+<div class="item-title" style="width:92%"><span>{=detail_title}</span></div>
+
+<br style="line-height:5px;" />
+
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="info-table-style" style="width:100%">
+<!-- 테이블 헤더 : 시작 -->
+<colgroup>
+	<col width="5%" />
+	<col width="6%" />
+	<col width="13%" />
+	<col width="28%" />
+	<col width="12%" />
+	<col width="6%" />
+	<col width="6%" />
+	<col width="6%" />
+	<col width="7%" />
+	<col width="7%" />
+	<col width="4%" />
+</colgroup>
+<thead class="lth">
+<tr>
+	<th rowspan="2" class="its-th-align center">No</th>
+	<th rowspan="2" class="its-th-align center">매체</th>
+	<th rowspan="2" class="its-th-align center">발송일시<br />유입일시</th>
+	<th rowspan="2" class="its-th-align center">문자 발송 내용</th>
+	<th rowspan="2" class="its-th-align center">회원아이디<br />수신처</th>
+	<th rowspan="2" class="its-th-align center">유입환경</th>
+	<th colspan="5" class="its-th-align center">유입 후 2일 동안 활동내역</th>
+</tr>
+<tr>
+	<th class="its-th-align center">로그인</th>
+	<th class="its-th-align center">상품뷰</th>
+	<th class="its-th-align center">장바구니</th>
+	<th class="its-th-align center">위시리스트</th>
+	<th class="its-th-align center">구매</th>
+</tr>
+</thead>
+<!-- 테이블 헤더 : 끝 -->
+	<tbody class="ltb otb" >
+{? loop }
+	{@ loop }
+		<!-- 리스트타이틀(주문상태 및 버튼) : 시작 -->
+		<tr>
+			<td class="its-td-align center">{.number}</td>
+			<td class="its-td-align center">{.inflow_type}</td>
+			<td class="its-td-align center">{.send_date}<br />{.inflow_date}</td>
+			<td class="its-td-align left" style="height:55px;"><span style="line-height:14px;padding-left:10px;">{.to_msg}</span></td>
+			<td class="its-td-align center">{.userid}<br />{.to_reception}</td>
+			<td class="its-td-align center">{.access_type}</td>
+			<td class="its-td-align center">{.login_cnt}회</td>
+			<td class="its-td-align center">{.goodsview_cnt}회</td>
+			<td class="its-td-align center">{.cart_cnt}회</td>
+			<td class="its-td-align center">{.wish_cnt}회</td>
+			<td class="its-td-align center">{.order_cnt}회</td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+	{ / }
+{ : }
+		<!-- 리스트타이틀(주문상태 및 버튼) : 시작 -->
+		<tr class="list-row">
+			<td class="its-td-align center" colspan="11">
+				{ ? search_text }
+					'{search_text}' 검색된 데이터가 없습니다.
+				{:}
+					데이터가 없습니다.
+				{/}
+			</td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+{ / }
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+</table>
+<!-- 주문리스트 테이블 : 끝 -->
+
+
+<br style="line-height:16px;" />
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{pagin}</div>
+
+
+<br style="line-height:16px;" />

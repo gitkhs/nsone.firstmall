@@ -1,0 +1,101 @@
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script> 
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/lib/util/dialog.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/theme/cobalt.css">
+<script src="/app/javascript/plugin/codemirror/lib/codemirror.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/xml/xml.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/javascript/javascript.js"></script>
+<script src="/app/javascript/plugin/codemirror/lib/util/dialog.js"></script>
+<script src="/app/javascript/plugin/codemirror/lib/util/search.js"></script>
+<script src="/app/javascript/plugin/codemirror/lib/util/searchcursor.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/css/css.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/htmlembedded/htmlembedded.js"></script>
+<script type="text/javascript"> 
+var originalSourceTextareaObj;
+var originalSourceTextareaObjall;
+$(function(){
+	// Textarea Obj
+	var originalSourceTextareaObjall = document.getElementById("originalSourceTextareaall");
+	originalSourceEditorObjall = CodeMirror.fromTextArea(originalSourceTextareaObjall, {
+		mode: "default",
+		lineNumbers: true,
+		lineWrapping :true,
+		theme: 'cobalt',
+		onCursorActivity: function() {
+			originalSourceEditorObjall.setLineClass(originalSourceEditorActiveLineall, null);
+			originalSourceEditorActiveLineall = originalSourceEditorObjall.setLineClass(originalSourceEditorObjall.getCursor().line, "originalSourceEditorActiveLineall");
+		},
+		onKeyEvent: function(editor, e){
+			if(!e.ctrlKey && e.keyCode!=122) e.target.blur();
+		}
+	});
+
+	// 커서라인 강조
+	var originalSourceEditorActiveLineall = originalSourceEditorObjall.setLineClass(0, "originalSourceEditorActiveLineall");
+
+	// Textarea Obj
+	var originalSourceTextareaObj = document.getElementById("originalSourceTextarea");
+	originalSourceEditorObj = CodeMirror.fromTextArea(originalSourceTextareaObj, {
+		mode: "default",
+		lineNumbers: true,
+		lineWrapping :true,
+		theme: 'cobalt',
+		onCursorActivity: function() {
+			originalSourceEditorObj.setLineClass(originalSourceEditorActiveLine, null);
+			originalSourceEditorActiveLine = originalSourceEditorObj.setLineClass(originalSourceEditorObj.getCursor().line, "originalSourceEditorActiveLine");
+		},
+		onKeyEvent: function(editor, e){
+			if(!e.ctrlKey && e.keyCode!=122) e.target.blur();
+		}
+	});
+
+	// 커서라인 강조
+	var originalSourceEditorActiveLine = originalSourceEditorObj.setLineClass(0, "originalSourceEditorActiveLine");
+
+	var tagCopyClips = [];
+	tagCopyClips[0] = new ZeroClipboard.Client();
+	tagCopyClips[0].setHandCursor( true );
+	tagCopyClips[0].setCSSEffects( true );
+	tagCopyClips[0].addEventListener( 'complete', function(client, text) {
+		alert("주소가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+	} );
+	tagCopyClips[0].setText($("#originalSourceTextareaallorgin").val());
+	tagCopyClips[0].glue('promocodeallhtml_btn');
+
+	tagCopyClips[1] = new ZeroClipboard.Client();
+	tagCopyClips[1].setHandCursor( true );
+	tagCopyClips[1].setCSSEffects( true );
+	tagCopyClips[1].addEventListener( 'complete', function(client, text) {
+		alert("주소가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+	} );
+	tagCopyClips[1].setText($("#originalSourceTextareaorgin").val());
+	tagCopyClips[1].glue('promocodehtml_btn');
+});
+</script> 
+
+<div >
+	{? type == 'all' }
+		<div style="padding:5px;">
+			<table  class="info-table-style" width="100%" align="center">
+			<col width="140" />
+			<tr>
+				<td class="its-th">전체 쿠폰 치환코드 <span class="btn small" ><input type="button" id="couponallhtml_btn" value="소스복사" /></span> </th>
+			</tr>
+			</table>
+			<div id="originalSourceTextareaContainerall"><textarea id="originalSourceTextareaall">{=htmlspecialchars(couponcodehtml)}</textarea></div>
+			<textarea id="originalSourceTextareaallorgin" class="hide">{couponcodehtml}</textarea> 
+		</div>
+	{:}
+		<div style="padding:5px;">
+			<table  class="info-table-style" width="100%" align="center">
+			<col width="140" />
+			<tr>
+				<td class="its-th">해당 쿠폰만 치환코드 <span class="btn small" ><input type="button" id="couponhtml_btn" value="소스복사" /></span> </th>
+			</tr>
+			</table>
+			<div id="originalSourceTextareaContainer"><textarea id="originalSourceTextarea">{=htmlspecialchars(couponcodehtml)}</textarea></div>
+			<textarea id="originalSourceTextareaorgin" class="hide">{couponcodehtml}</textarea>
+		</div>
+	{/}
+</div>

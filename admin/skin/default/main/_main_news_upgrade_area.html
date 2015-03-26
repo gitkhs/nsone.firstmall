@@ -1,0 +1,11 @@
+<ul class="pd5">
+<!--{? mainNewsUpgradeList }-->
+	<!--{@ mainNewsUpgradeList }-->
+	<li style="position:relative;"><a href="{.link.value}" target="_blank">{=getstrcut(strip_tags(.title.value),27)}</a>
+	<div class="date">{=date('m.d',strtotime(.pubDate.value))}</div>
+	</li>
+	<!--{ / }-->
+<!--{ : }-->
+	<li style="position:relative;padding-top:20px;text-align:center;"><a href="#" target="_blank">업그레이드 내역이 없습니다.</a></li>
+<!--{ / }-->
+</ul>

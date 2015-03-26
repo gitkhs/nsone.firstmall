@@ -1,0 +1,470 @@
+{ #layout_header }
+<style>
+.goods_name {display:inline-block;white-space:nowrap;overflow:hidden;width:290px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+.search_label 	{display:inline-block;width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+span.step_title { font-weight:normal;padding-right:5px }
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".all-check").toggle(function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',true);	
+	},function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',false);
+	});
+	
+	
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+	$("#search_set").click(function(){
+		openDialog("기본검색 설정", "search_detail_dialog", {"width":"800","height":"300"});
+	});
+	
+	$("#get_default_button").click(function(){
+		$.getJSON('get_search_default', function(result) {			 
+			for(var i=0;i<result.length;i++){
+				if(result[i][0]=='goodsStatus[0]' || result[i][0]=='goodsView[0]'){
+					//alert(result[i][0]+" : "+result[i][1]); 
+					if(result[i][1]=='normal') $("input[name='goodsStatus[]']").eq(0).attr("checked",true);
+					else if(result[i][1]=='runout') $("input[name='goodsStatus[]']").eq(1).attr("checked",true);
+					else if(result[i][1]=='unsold') $("input[name='goodsStatus[]']").eq(2).attr("checked",true);
+					else if(result[i][1]=='look') $("input[name='goodsView[]']").eq(0).attr("checked",true);
+					else if(result[i][1]=='notLook') $("input[name='goodsView[]']").eq(1).attr("checked",true);
+				}else if(result[i][0]=='regist_date'){
+					if(result[i][1] == 'today'){
+						set_date('{=date('Y-m-d')}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3day'){
+						set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '7day'){
+						set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '1mon'){
+						set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3mon'){
+						set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}');
+					}	
+				}
+				$("*[name='"+result[i][0]+"']",document.memberForm).val(result[i][1]);
+			}			
+		});
+	});
+
+
+	$("#order_star").click(function(){
+		var status = "";
+		if($(this).hasClass("checked")){
+			$(this).removeClass("checked");
+			status = "asc";
+		}else{
+			$(this).addClass("checked");
+			status = "desc";
+		}
+		location.href = "../goods/catalog?orderby=favorite_chk&sort="+status;
+	});
+
+	// 선택한 환불건 삭제
+	$(".reverse_return").bind("click",function(){
+		var st = '.return_code_' + $(this).attr('id');
+		var return_code = new Array();
+		$(st+":checked").each(function(idx){
+			return_code[idx] = 'code[]='+$(this).val();
+		});
+
+		var mstatus = $(this).attr('id')=='request' ? '신청' : '처리중';
+
+		if(return_code.length > 0){
+			openDialogConfirm('선택한 반품 '+mstatus+'건을<br />정말 삭제하시겠습니까?',400,160,function(){
+				var str = return_code.join('&');
+				$.ajax({
+					type: "POST",
+					url: "../returns_process/batch_reverse_return",
+					data: str,
+					success: function(result){
+						openDialogAlert(result,600,200,function(){
+							document.location.reload();
+						});
+					}
+				});
+			});
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+
+	// 체크박스 색상
+	$("input[type='checkbox'][name='return_code[]']").live('change',function(){
+		if($(this).is(':checked')){
+			$(this).closest('tr').addClass('checked-tr-background');
+		}else{
+			$(this).closest('tr').removeClass('checked-tr-background');
+		}
+	}).change();
+
+
+});
+
+function set_date(start,end){	
+	$("input[name='sdate']").val(start);
+	$("input[name='edate']").val(end);
+}
+
+//주문한 sns 계정 정보 확인
+function snsdetailview(m,snscd,mem_seq,no){
+
+	var disp = $("div#snsdetailPopup"+no).css("display");
+	$(".snsdetailPopup").hide();
+
+	var obj	= $("div#snsdetailPopup"+no);
+	if(obj.html() == ''){
+		$.get('../member/sns_detail?snscd='+snscd+'&member_seq='+mem_seq+'&no='+no, function(data) {
+			obj.html(data);
+		});
+	}
+
+	if(disp == "none"){ obj.show(); }
+}
+</script>
+
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<a href="../setting/order" target="_blank"><img src="../images/common/btn_now_prcs.gif" align="absmiddle" style="margin-left:-115px;" /></a>
+			<h2>반품 리스트</h2>
+		</div>
+		
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+		
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<form name="orderForm" id="orderForm">
+
+<!-- 주문리스트 검색폼 : 시작 -->
+<div class="search-form-container">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table>
+			<tr>
+				<td width="600">
+					<table class="sf-keyword-table">
+					<tr>
+						<td width="100" align="center">
+							<select name="keyword_type" style="width:94px;">
+							<option value="">통합검색</option>
+							<option value="ref.return_code">반품코드</option>
+							<option value="ord.order_seq">주문번호</option>
+							<option value="ord.order_user_name">주문자명</option>
+							<option value="ord.depositor">입금자명</option>
+							<option value="mem.userid">아이디</option>
+							</select>
+							<script>$("select[name='keyword_type']").val("{_GET.keyword_type}");</script>
+						</td>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{_GET.keyword}" title="반품코드, 아이디, 회원명, 주문자명, 수령자명, 상품명(매입상품명), 상품코드" /></td>
+						<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+
+	<table class="search-form-table" id="serch_tab">
+	<tr id="goods_search_form" style="display:block;">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<colgroup>
+				<col width="80" />
+				<col width="" />
+			</colgroup>
+			<tr>
+				<th>
+					<select name="date_field">
+					<option value="ref.regist_date" {?_GET.date_field=='ref.regist_date' || !_GET.date_field}selected{/}>반품신청일</option>
+					<option value="ref.return_date" {?_GET.date_field=='ref.return_date'}selected{/}>반품완료일</option>
+					</select>
+				</th>
+				<td>
+					<input type="text" name="sdate" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button" value="오늘" id="today" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="전체" id="all" name="select_date"/></span>
+				</td>
+			</tr>
+			<tr>
+				<th>상태</th>
+				<td>				
+					<label class="search_label"><input type="checkbox" name="return_status[]" value="request" {?_GET.return_status && in_array('request',_GET.return_status)}checked{/}/>반품신청</label>
+					<label class="search_label"><input type="checkbox" name="return_status[]" value="ing" {?_GET.return_status && in_array('ing',_GET.return_status)}checked{/}/>반품처리중</label>
+					<label class="search_label"><input type="checkbox" name="return_status[]" value="complete" {?_GET.return_status && in_array('complete',_GET.return_status)}checked{/}/>반품완료</label>	
+					
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<!-- 주문리스트 검색폼 : 끝 -->
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="3%" />	
+		<col width="3%" />	
+		<col width="12%" />
+		<col width="12%" />
+		<col width="14%" />
+		<col width="4%" />
+		<col width="4%" />
+		<col width="4%" />
+		<col width="4%" />
+		<col width="4%" />
+		<col width="4%" />
+		<col width="4%" />
+		<col width="4%" />
+		<col width="3%" />
+		<col width="10%" />
+		<col width="6%" />
+		<col width="6%" />
+	</colgroup>
+	<thead class="lth">
+	<tr class="double-row th">
+		<th rowspan="2">삭제</th>
+		<th rowspan="2">번호</th>
+		<th rowspan="2">반품 접수 일시</th>
+		<th rowspan="2">주문번호</th>		
+		<th rowspan="2">주문자</th>
+		<th rowspan="2">결제</th>
+		<th rowspan="2">주문<br />수량</th>
+		<th colspan="2">반품 종류</th>
+		<th colspan="3">반품 사유</th>
+		<th rowspan="2">처리자</th>
+		<th rowspan="2">회수</th>
+		<th rowspan="2">처리완료 일시</th>
+		<th colspan="2">처리 상태</th>
+	</tr>
+	<tr class="double-row th">
+		<th>반품</th>
+		<th>맞교환</th>
+		<th>오배송</th>
+		<th>하자</th>
+		<th>변심</th>
+		<th>환불</th>				
+		<th>반품</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+		<!--{ ? !record }-->
+		<tr class="list-row">
+			<td colspan="17" align="center">검색어가 없거나 검색 결과가 없습니다.</td>
+		</tr>
+		<!--{ : }-->	
+		<!--{ @ record }-->		
+		<!--{ ? .start }-->		
+		<!-- 리스트타이틀(주문상태 및 버튼) : 시작 -->
+		<tr class="list-title-row">
+			<td colspan="17" class="list-title-row-td">
+				<div class="relative">
+					<div class="ltr-title">
+					<!--{ ? .status == 'request' }-->
+					<span class="small_group">{=arr_return_status[.status]}</span> <span class="helpicon" title="반품신청을 처리하세요."></span>
+					<!--{ : .status == 'ing' }-->
+					<span class="small_group">{=arr_return_status[.status]}</span> <span class="helpicon" title="반품처리를 완료하세요."></span>
+					<!--{ : .status == 'complete' }-->
+					<span class="small_group">{=arr_return_status[.status]}</span> <span class="helpicon" title="반품처리가 완료되었습니다."></span>
+					<!--{ / }-->
+					</div>
+					<ul class="left-btns clearbox">
+						{?.status != 'complete'}
+						<li><span class="btn small"><input type="button" value="선택삭제" class="reverse_return" id="{.status}" /></span></li>
+						{/}
+					</ul>
+				</div>
+			</td>
+		</tr>
+		<!-- 리스트타이틀(주문상태 및 버튼) : 끝 -->
+		<!--{ / }-->		
+		<tr class="list-row">
+			<td align="center">
+				{?.status != 'complete'}
+				<input type="checkbox" name="return_code[]" class="return_code_{.status}" value="{.return_code}" order_seq="{.order_seq}" />
+				{/}
+			</td>
+			<td align="center">{.no}</td>
+			<td align="center"><a href="./view?no={.return_code}"><span class="hand blue bold">{.regist_date}</span></a></td>
+			<td align="center"><a href="../order/view?no={.order_seq}"><span class="hand blue">{.order_seq}</span></a></td>			
+			<td align="left">
+				<!--{ ? .member_seq }-->
+				<div>
+					{?.member_type=='개인'}<img src="../images/common/icon/icon_personal.gif" />
+					{:.member_type=='기업'}<img src="../images/common/icon/icon_besiness.gif" />{/}
+					{.order_user_name}
+					{? .sns_rute }
+						<span>(<img src="../images/sns/sns_{=substr(.sns_rute,0,1)}0.gif" align="absmiddle" snscd="{.sns_rute}" mem_seq="{.member_seq}" no="{=.step}{=.key_}" onclick="snsdetailview('open','{.sns_rute}','{.member_seq}','{=.step}{=.key_}')" class="btnsnsdetail hand">/<span class="blue">{.group_name}</span>)
+						<div id="snsdetailPopup{=.step}{.key_}" class="snsdetailPopup absolute hide" style="margin-left:73px;margin-top:-16px;"></div>
+						</span>
+					{ : }
+					<!--{ ? .mbinfo_rute == 'facebook' //facebook 회원인경우 }-->
+						(<a href="/admin/member/detail?member_seq={.member_seq}" target="_blank"><span style="color:#d13b00;"><img src="../images/board/icon/sns_f0.gif" align="absmiddle">{.mbinfo_email}</span>/<span class="blue">{.group_name}</span></a>)
+					<!--{ : }-->
+						(<a href="/admin/member/detail?member_seq={.member_seq}" target="_blank"><span style="color:#d13b00;">{.userid}</span>/<span class="blue">{.group_name}</span></a>)
+					<!--{ / }-->
+					{ / }
+				</div>
+				<!--{ : }-->
+				<img src="../images/common/icon/icon_personal.gif" /> {.order_user_name} (<span class="desc">비회원</span>)
+				<!--{ / }-->
+			</td>
+			<td align="center">
+				<!--{ ? .pg == 'kakaopay' }-->
+				<span class="icon-pay-{.pg}"><span>{.pg}</span></span>
+				<!--{ : }-->
+				<span class="icon-pay-{.payment}"><span>{.mpayment}</span></span>
+				<!--{ / }-->
+			</td>
+			<td align="center">{=(.option_ea+.suboption_ea)}</td>
+			<td align="center">{?.return_type=='return'}{.return_ea_sum}{:}0{/}</td>
+			<td align="center">{?.return_type=='exchange'}{.return_ea_sum}{:}0{/}</td>			
+			<td align="center">{.shop_reason_cnt}</td>
+			<td align="center">{.goods_reason_cnt}</td>
+			<td align="center">{.user_reason_cnt}</td>			
+			<td align="center">{.mname}</td>
+			<td align="center">{.return_ea}</td>
+			<td align="center">{?. return_date }{.return_date}{ : }&nbsp;{/}</td>
+			<td align="center">{.mrefund_status}</td>
+			<td align="center">{.mstatus}</td>			
+		</tr>
+		<tr class="list-row hide">
+			<td colspan="17" class="list-end-row-td"><div class="detail"></div></td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+		<!--{ ? .end }-->	
+		<!-- 합계 : 시작 -->
+		<tr class="list-end-row">
+			<td height="50" colspan="6" class="list-end-row-td right bold">합계</td>
+			<td class="list-end-row-td" align="center">{=number_format(tot[.status]['order_ea'])}</td>
+			<td class="list-end-row-td" align="center">{=number_format(tot[.status]['return'])}</td>
+			<td class="list-end-row-td" align="center">{=number_format(tot[.status]['exchange'])}</td>
+			
+			<td class="list-end-row-td" align="center">{=number_format(tot[.status]['shop_reason_cnt'])}</td>
+			<td class="list-end-row-td" align="center">{=number_format(tot[.status]['goods_reason_cnt'])}</td>
+			<td class="list-end-row-td" align="center">{=number_format(tot[.status]['user_reason_cnt'])}</td>
+			<td class="list-end-row-td">&nbsp;</td>
+			<td class="list-end-row-td" align="center">{tot[.status]['return_ea']}</td>
+			<td colspan="3" class="list-end-row-td">&nbsp;</td>			
+		</tr>
+		<!-- 합계 : 끝 -->
+		<!--{ / }-->		
+		<!--{ / }-->
+		<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+</table>
+<!-- 주문리스트 테이블 : 끝 -->
+
+</form>
+
+<div class="hide" id="search_detail_dialog">
+<form name="set_search_detail" method="post" action="set_search_default" target="actionFrame">
+<div id="contents">
+	<table class="search-form-table" id="serch_tab">
+	<tr id="goods_search_form" style="display:block;">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<colgroup>
+				<col width="80" />
+				<col width="" />
+			</colgroup>
+			<tr>
+				<th><select name="date_gb" class="search_select">
+						<option value="regist_date" {?_GET.date_gb=='regist_date'}selected{/}>반품신청일</option>
+						<option value="return_date" {?_GET.date_gb=='return_date'}selected{/}>반품완료일</option>
+					</select></th>
+				<td>
+					<input type="text" name="sdate" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button" value="오늘" id="today" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="전체" id="all" name="select_date"/></span>
+				</td>
+			</tr>
+			<tr>
+				<th>상태</th>
+				<td>				
+					<label class="search_label"><input type="checkbox" name="return_status[]" value="request" {?_GET.return_status && in_array('request',_GET.return_status)}checked{/}/>반품신청</label>
+					<label class="search_label"><input type="checkbox" name="return_status[]" value="ing" {?_GET.return_status && in_array('ing',_GET.return_status)}checked{/}/>반품처리중</label>
+					<label class="search_label"><input type="checkbox" name="return_status[]" value="complete" {?_GET.return_status && in_array('complete',_GET.return_status)}checked{/}/>반품완료</label>	
+					
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<div align="center" style="padding-top:10px;">
+	<span class="btn large black">
+		<button type="submit">저장하기<span class="arrowright"></span></button>
+	</span>
+</div>
+</form>
+</div>
+
+{ #layout_footer }

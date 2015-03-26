@@ -1,0 +1,95 @@
+<div class="sub_title_bar">
+	<h2>{manager.name}</a></h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../../../images/design/btn_back.png" /></a>
+</div>
+
+<div class="bbstopbox">
+	<div class="pright">
+		{? manager.auth_write != '[admin]' }
+		<span id="boad_write_btn{manager.isperm_write}" board_id="{boardid}" fileperm_read="{manager.fileperm_write}" class="btn_style black hand">글쓰기</span>
+		{/}
+		<span class="btn_style black hand boad_search_btn_m" >검색 ▼</span>
+	</div>
+</div>
+
+<div class="bbssearchbox" {?!_GET.search_text}style="display:none"{/}>
+	<form name="boardsearch" id="boardsearch" >
+	<input type="hidden" name="id" value="{_GET.id}" >
+	<input type="hidden" name="popup" value="{_GET.popup}" >
+	<input type="hidden" name="iframe" value="{_GET.iframe}" >
+	<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+	<input type="hidden" name="perpage" id="perpage" value="{_GET.perpage}" >
+	<input type="hidden" name="page" id="page" value="{_GET.page}" >
+	<input type="hidden" name="category" id="category" value="{_GET.category}" >
+	<input type="text" name="search_text" id="search_text" value="{_GET.search_text}" title="이 게시판 검색" /><input type="image" src="../../../images/design/btn_search_s.png" />
+	</form>
+</div>
+
+<style type="text/css">
+.bbsview_division { padding:10px 0 !important; border:none;}
+.bbsview_top {padding:0 10px; height:30px; line-height:30px; }
+.content { padding:10px; }
+.cmt_division {border-top:1px solid #e6e6e6;}
+.cmt_area { padding:10px; }
+.cmt_reply { padding-left:20px; }
+.cmt_contents { padding-top:0px; padding-bottom:10px; border-bottom:0px solid #e6e6e6; min-height:30px; }
+.modify_contents { font-size:14px; color:#767575; cursor:pointer; }
+.delete_contents { font-size:14px; color:#767575; cursor:pointer; }
+.reply_stat td { height:25px; font-size:12px;}
+.reply_stat td:first-child { border-right:1px solid #BDBDBD; }
+</style>
+<div id="bbslist">
+	<div class="bbsview_top clearbox">
+		<ul class="bbslist_ul_style">
+		<li>
+				<span class="hand " viewlink="{boardurl->view}{seq}"  viewtype="{manager.viewtype}"  pagetype="{pagetype}"  board_seq="{seq}" board_id="{_GET.id}">
+					<div class="bus_subject">
+						<span>
+						<a>{iconmobile}{iconaward}{blank}{category} {subject_real}
+							<span class="comment_{seq}">
+								{iconimage}{iconfile}{iconvideo}
+								{? iconnew }
+									<img src="../../../images/icon/icon_new.png" title="new" align="absmiddle" >
+								{/}
+								{iconhot}{iconhidden} {scorelay}
+							</span>
+						</a>
+						</span>
+					</div>
+					<span class="bus_record_info">
+					<span class="cell" >{name}</span>
+					<span class="cell">{=date('H:i',strtotime(date))}</span>
+					<span class="cell">조회 {=number_format(hit)}</span>
+					<span class="cellhand round_btn right boad_view_btn_m{isperm_read}" board_seq="{seq}" board_id="{boardid}" alt="본문보기">
+						<a>본문보기</a>
+					</span>
+					</span>
+				</span>
+			</li>
+		</ul>
+	</div>
+</div>
+<div class="bbsview_division">
+	<!--{? managerview.auth_recommend_use == 'Y' }-->
+	<!-- 게시글평가 -->
+	<div class="scorelay"  style="margin: 15px 0 5px">{#scoreskin}</div>
+	<!-- 게시글평가 -->
+	<!--{/}-->  
+
+	<!-- 댓글 영역 -->
+	<!--{? commentlay == 'Y' || comment > 0 // 댓글 사용여부, 댓글수 }-->
+	<!-- 코멘트부분 -->
+	<a name="cmtlist "></a>
+	<div class="comment"  id="comment_container" style="margin: 15px 0 5px">{#commentskin}</div>
+	<!-- 코멘트부분 -->
+	<!--{/}-->
+</div>
+
+<!-- 컨트롤 폼 : 시작 -->
+<form name="writeform" id="writeform" method="post" action="{=sslAction('../board_process')}" target="comentFrame">
+<input type="hidden" name="board_id" id="board_id" value="{_GET.id}" />
+<input type="hidden" name="iframe" value="{_GET.iframe}" >
+<input type="hidden" name="delseq" id="seq" value="" />
+<input type="hidden" name="real_name" id="real_name" value="" />
+</form>
+<!-- 컨트롤 폼 : 끝 -->

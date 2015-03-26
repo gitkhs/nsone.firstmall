@@ -1,0 +1,261 @@
+<!DOCTYPE HTML>
+{#layout_header_popup}
+
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/lib/util/dialog.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/theme/neat.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/theme/elegant.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/theme/night.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/theme/monokai.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/theme/cobalt.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/theme/eclipse.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/theme/rubyblue.css">
+
+<script src="/app/javascript/plugin/codemirror/lib/codemirror.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/xml/xml.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/javascript/javascript.js"></script>
+<script src="/app/javascript/plugin/codemirror/lib/util/dialog.js"></script>
+<script src="/app/javascript/plugin/codemirror/lib/util/search.js"></script>
+<script src="/app/javascript/plugin/codemirror/lib/util/searchcursor.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/css/css.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/htmlembedded/htmlembedded.js"></script>
+
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+
+<script>
+var sourceTextareaObj;
+$(function(){
+	
+	{?code_mode!='css'}
+	tagCopyClips = new ZeroClipboard.Client();
+	tagCopyClips.setHandCursor( true );
+	tagCopyClips.setCSSEffects( true );
+	tagCopyClips.addEventListener( 'complete', function(client, text) {
+		alert("주소가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+	} );
+	tagCopyClips.destroy();
+	tagCopyClips.setText("{source_url}");	
+	tagCopyClips.glue('source_url_copy');
+	{/}
+	
+	parent.DM_window_title_set("center","{layout_config.tpl_desc}({layout_config.tpl_path}) ");
+	
+	//$("body").css('overflow','hidden');
+	
+	// 검색어
+	var searchKeyword = "{searchKeyword}";
+	
+	// 키 바인딩
+	CodeMirror.keyMap.pcDefault["Ctrl-S"] = function(cm) {
+		if(cm.getTextArea().getAttribute('id')=='sourceTextarea'){
+			sourceFormSubmitSet(0);
+			sourceEditorObj.save();
+			sourceTextareaObj.form.submit();
+		}
+	};
+	
+	// Textarea Obj 
+	var sourceTextareaObj = document.getElementById("sourceTextarea");
+
+	// 에디터 생성
+	sourceEditorObj = CodeMirror.fromTextArea(sourceTextareaObj, {
+		mode: "{code_mode}",
+		lineNumbers: true,
+		lineWrapping :true,
+		keyMap:'default',
+		theme: 'default',
+		indentUnit: 4,
+		tabSize: 4,
+		onChange: function(){
+			sourceeditor_edited_mark_on();
+		},
+		onCursorActivity: function() {
+			sourceEditorObj.setLineClass(sourceEditorActiveLine, null);
+			sourceEditorActiveLine = sourceEditorObj.setLineClass(sourceEditorObj.getCursor().line, "sourceEditorActiveLine");
+		},
+		extraKeys: {
+			"F11": function() {
+				var scroller = sourceEditorObj.getScrollerElement();
+				if (scroller.className.search(/\bCodeMirror-sourceEditor-fullscreen\b/) === -1) {
+					scroller.className += " CodeMirror-sourceEditor-fullscreen";
+					sourceEditorObj.refresh();
+				} else {
+					scroller.className = scroller.className.replace(" CodeMirror-sourceEditor-fullscreen", "");
+					sourceEditorObj.refresh();
+				}
+			},
+			"Esc": function() {
+				var scroller = sourceEditorObj.getScrollerElement();
+				if (scroller.className.search(/\bCodeMirror-fullscreen\b/) !== -1) {
+					scroller.className = scroller.className.replace(" CodeMirror-sourceEditor-fullscreen", "");
+					sourceEditorObj.refresh();
+				}
+			}
+		}
+	});
+	
+	// 커서라인 강조
+	var sourceEditorActiveLine = sourceEditorObj.setLineClass(0, "sourceEditorActiveLine");
+	
+	// 검색어 찾아가기
+	if(searchKeyword.length>1){
+		var searchKeywordRow = null;
+		for (var cursor = sourceEditorObj.getSearchCursor(searchKeyword); cursor.findNext();){
+			var_dump(cursor);
+			sourceEditorObj.markText(cursor.from(), cursor.to(), "CodeMirror-searching")
+			if(searchKeywordRow==null){
+				searchKeywordRow = cursor.from().line;
+				sourceEditorObj.setCursor(sourceEditorObj.lineInfo(searchKeywordRow));
+			}else{
+				searchKeywordRow = cursor.from().line;
+			}
+		}		
+	}
+	
+	$("#btnViewOriginalSource").live("click",function(){
+		source_view_popup('original','{tpl_path}');
+	});
+	
+});
+
+/* 수정중 표시 */
+function sourceeditor_edited_mark_on(){
+	$(".source_edited_mark",parent.document).show();
+	$(".source_edited_mark").show();
+}
+
+/* 수정중 표시 제거 */
+function sourceeditor_edited_mark_off(){
+	$(".source_edited_mark",parent.document).hide();
+	$(".source_edited_mark").hide();
+}
+
+/* 백업소스보기 */
+function source_view_popup(mode,tpl_path){
+	window.open("../design/source_view_popup?mode="+mode+"&tpl_path="+encodeURIComponent(tpl_path),"source_view","width=800,height=550,scrollbars=0,resizable=1");
+}
+
+function sourceFormSubmitSet(reload){
+	if(reload){
+		document.source.reload.value=1;
+	}else{
+		document.source.reload.value=0;
+	}
+}
+
+/*
+ 
+ sourceEditorObj.save() : sourceEditorObj -> textarea
+ sourceEditorObj.setValue(textarea.value) : textarea -> sourceEditorObj
+ 
+*/
+</script>
+
+<style type="text/css">
+	.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black;}
+	.CodeMirror-scroll {height: 450px;}
+	.CodeMirror-sourceEditor-fullscreen {
+		display: block;
+		position: fixed;
+		top: 0px;
+		left: 0px;
+		width: 100%;
+		height: 100%;
+		z-index: 9999 !important;
+		border: 0px;
+		background-color:#fff;
+	}
+	
+	.sourceEditorActiveLine {background: #f0f0f0 !important;}
+
+</style>
+
+<script>
+$(function(){
+	$("select[name='select_css_file']").change(function(){
+		$("span.select_css_desc").html($("option:selected",this).attr('desc'));
+	}).change();
+	$("input.select_css_button").click(function(){
+		parent.DM_window_sourceeditor($("select[name='select_css_file']").val());
+	});
+
+	$("#title_btns").appendTo(parent.$(".DMWTTextRight").empty()).show();
+	
+});
+
+</script>
+
+<div id="title_btns" class="hide">
+	<span class="btn small" onclick="popup('/admin/design/gabia_webftp',980, 690)"><button type="button">FTP</button></span>
+	<span class="btn small" onclick="$('#css_editor_btn').click();"><button type="button">CSS</button></span>
+<!-- 	<span class="btn small"><a href="/admin/design/codes" target="_blank">치환CODE</a></span> -->
+</div>
+
+<table class="info-table-style" width="100%" align="center">
+<col width="15%" /><col width="25%" /><col width="15%" /><col width="45%" />
+<!--{ ? css_files }-->
+<tr>
+	<td class="its-th">다른 CSS 파일 열기</th>
+	<td class="its-td" colspan="3">
+		<select name="select_css_file">
+		<!--{ @ css_files }-->
+		<option value="{.path}" desc="{.desc}" {?.current}selected{/}>{.filename}</option>
+		<!--{ / }-->
+		</select>
+		<span class="btn small"><input type="button" class="select_css_button" value="편집" /></span>
+		<span class="desc select_css_desc"></span>
+	</td>
+</tr>
+<!--{ / }-->
+<tr>
+	<td class="its-th">파일설명</th>
+	<td class="its-td">{layout_config.tpl_desc}</td>
+	<td class="its-th">파일경로</th>
+	<td class="its-td">
+	<span class="source_edited_mark" style="display:none">*</span>{skin}/{layout_config.tpl_path}
+		<span class="btn small"><input type="button" value="원본소스보기" id="btnViewOriginalSource" /></span>
+		{?code_mode!='css'}
+		<span class="btn small"><input type="button" id="source_url_copy" value="주소복사" /></span>
+		{/}
+	</td>
+</tr>
+<tr>
+	<td class="its-th">백업파일 <span class="helpicon" title="최근 저장된 5개의 파일을 백업합니다."></span></th>
+	<td class="its-td" colspan="3">
+		{@backup_files}
+			 <span class="btn small"><input type="button" value="{=date('Y-m-d H:i:s',.value_.time)}" onclick="source_view_popup('backup','{.value_.path}')"/></span>
+		{/}
+	</td>
+</tr>
+</table>
+
+<form name="source" action="../design_process/sourceeditor_save" target="actionFrame" method="post">
+<input type="hidden" name="skin" value="{skin}" />
+<input type="hidden" name="tpl_path" value="{tpl_path}" />
+<input type="hidden" name="reload" value="" />
+
+<div id="sourceTextareaContainer"><textarea id="sourceTextarea" name="tpl_source">{=htmlspecialchars(tpl_source)}</textarea></div>
+
+<br />
+
+<table align="center" style="margin:auto;">
+<tr>
+	<td>
+		<div class="desc"><span class="red">저장 후 HTML편집창 닫힘</span></div>
+		<div class="pdt5 center"><span class="btn large cyanblue"><input type="submit" value="저장" onclick="sourceFormSubmitSet(1)" /></span></div>
+	</td>
+	<td width="30"></td>
+	<td>
+		<div class="desc"><span class="red">저장 후 HTML편집창 유지</span></div>
+		<div class="pdt5 center"><span class="btn large cyanblue"><input type="submit" value="저장" onclick="sourceFormSubmitSet(0)" /></span></div>
+	</td>
+</tr>
+</table>
+
+
+</form>
+
+
+{#layout_footer_popup}

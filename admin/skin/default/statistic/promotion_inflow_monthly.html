@@ -1,0 +1,140 @@
+{ #layout_header }
+  
+<!--[if lt IE 9]><script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/excanvas.min.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/jquery.jqplot.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.barRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.pointLabels.min.js"></script>
+    
+<link class="include" rel="stylesheet" type="text/css" href="/app/javascript/plugin/jqplot/jquery.jqplot.min.css" />
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+	
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+		
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>프로모션 통계</h2>
+		</div>
+		
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<div class="sub-layout-container body-height-resizing">
+	
+	{#promotion_menu}
+	
+	<!-- 서브메뉴 바디 : 시작-->
+	<div class='slc-body-wrap'>
+		<div class="slc-body">
+		
+			<div class="clearbox">
+				<div class="item-title fl" style="margin-left:25px;">월별 유입 <span class="helpicon" title="어떤 경로를 통해 유입되어서 회원 가입 및 매출이 발생했는지에 대한 자료를 보여 드립니다."></span></div>
+				<div class="fr pd20"><span class="btn medium"><input type="button" value="광고 매체 추가" onclick="openAddInflowRootLayer()" /></span></div>
+			</div>
+					
+			<div style="width:800px; margin:auto;">
+				
+				<br style="line-height:10px" />
+				
+				<form>
+					<div align="center">
+						<select name="year">
+						<option value="">= 연도 선택 =</option>
+						{@range(date('Y'),2010)}
+							<option value="{.value_}" {?_GET.year==.value_}selected{/}>{.value_} 년</option>
+						{/}
+						</select>
+				
+						<span class="btn small"><input type="submit" value="검색" /></span>
+					</div>
+				</form>
+				
+				<br style="line-height:30px" />
+				
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="center" valign="top">
+						<span class="bold fx16">방문자</span>
+						<div id="promotion_inflow_monthly_visitor"></div>
+					</td>
+				</tr>
+				</table>
+				
+				<br style="line-height:50px" />
+				
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="center" valign="top">
+						<span class="bold fx16">회원가입</span>
+						<div id="promotion_inflow_monthly_join"></div>
+					</td>
+				</tr>
+				</table>
+				
+				<br style="line-height:50px" />
+				
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="center" valign="top">
+						<span class="bold fx16">구매건수</span>
+						<div id="promotion_inflow_monthly_ordercnt"></div>
+					</td>
+				</tr>
+				</table>
+				
+				<br style="line-height:50px" />
+				
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="center" valign="top">
+						<span class="bold fx16">구매금액</span> <span class="desc">(단위:천원)</span>
+						<div id="promotion_inflow_monthly_orderprice"></div>
+					</td>
+				</tr>
+				</table>
+				
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<script class="code" type="text/javascript">
+var seqIndex = 0;
+var seqList = [
+     ["#promotion_inflow_monthly_visitor","promotion_inflow_monthly_visitor?year={_GET.year}"],
+     ["#promotion_inflow_monthly_join","promotion_inflow_monthly_join?year={_GET.year}"],
+     ["#promotion_inflow_monthly_ordercnt","promotion_inflow_monthly_ordercnt?year={_GET.year}"],
+     ["#promotion_inflow_monthly_orderprice","promotion_inflow_monthly_orderprice?year={_GET.year}"]
+];
+       	
+$(document).ready(function(){
+	ajaxLoadSeqs();
+});
+
+function ajaxLoadSeqs(){
+	if(seqIndex<seqList.length){
+		$.ajax({
+			"url" : seqList[seqIndex][1],
+			"global" : false,
+			"success" : function(res){
+				$(seqList[seqIndex][0]).html(res);	
+				seqIndex++;
+				ajaxLoadSeqs();
+			}		
+		});
+	}
+}
+</script>
+
+{ #layout_footer }

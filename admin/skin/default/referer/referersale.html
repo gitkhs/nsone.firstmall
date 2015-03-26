@@ -1,0 +1,480 @@
+{ #layout_header }
+<style type="text/css">
+span.divcostper	{ color:red; }
+.selectedseller	{width:100%;height:100px;text-align:left;overflow-x:hidden;}
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$("input[name='duplicationUse']").click(function(){
+		if	($(this).attr('checked'))	$('.duplicationuselay').removeClass('gray');
+		else							$('.duplicationuselay').addClass('gray');
+	});
+
+	$("form#detailForm input[name='issue_type']").bind("click",function(){
+		if($(this).val() == 'issue') {
+			$('.issuetypelay').show();
+			$('#issuesgoodslay').show();
+			$('#exceptgoodslay').hide();
+			$('#issuescategorylay').show();
+			$('#exceptcategorylay').hide();
+		}else if($(this).val() == 'except'){
+			$('.issuetypelay').show();
+			$('#issuesgoodslay').hide();
+			$('#exceptgoodslay').show();
+
+			$('#issuescategorylay').hide();
+			$('#exceptcategorylay').show();
+		}else{
+			$('.issuetypelay').hide();
+			$('#issuesgoodslay').hide();
+			$('#exceptgoodslay').hide();
+			$('#issuescategorylay').hide();
+			$('#exceptcategorylay').hide();
+		}
+	});
+
+	$("form#detailForm button#issueGoodsButton").bind("click",function(){
+		set_goods_list("issueGoodsSelect","issueGoods");
+	});
+	$("#issueGoods").sortable();
+	$("#issueGoods").disableSelection();
+
+	$("form#detailForm button#exceptIssueGoodsButton").bind("click",function(){
+		set_goods_list("exceptIssueGoodsSelect","exceptIssueGoods");
+	});
+	$("#exceptIssueGoods").sortable();
+	$("#exceptIssueGoods").disableSelection();
+
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','');
+	$("select[name='category1']").bind("change",function(){
+		category_admin_select_load('category1','category2',$(this).val());
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").bind("change",function(){
+		category_admin_select_load('category2','category3',$(this).val());
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category3']").bind("change",function(){
+		category_admin_select_load('category3','category4',$(this).val());
+	});
+
+
+	$("button#issueCategoryButton").bind("click",function(){
+		var obj;
+		var category;
+		var categoryCode;
+
+		obj = $("select[name='category1']");
+		if(obj.val()){
+			category = $("select[name='category1'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='category2']");
+		if(obj.val()){
+			category += " > " + $("select[name='category2'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='category3']");
+		if(obj.val()){
+			category += " > " + $("select[name='category3'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='category4']");
+		if(obj.val()){
+			category += " > " + $("select[name='category4'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+
+		if(category){
+			if($("input[name='issueCategoryCode[]'][value='"+categoryCode+"']").length == 0){
+				var tag = "<div style='padding:5px;'><span style='display:inline-block;width:300px'>"+category+"</span>";
+				tag += "<span class='btn-minus'><button type='button' class='delCategory'></button></span>";
+				tag += "<input type='hidden' name='issueCategoryCode[]' value='"+categoryCode+"' /></div>";
+				$("div#issueCategory").append(tag);
+			}
+		}
+	});
+
+	category_admin_select_load('','exceptCategory1','');
+	$("select[name='exceptCategory1']").bind("change",function(){
+		category_admin_select_load('exceptCategory1','exceptCategory2',$(this).val());
+		category_admin_select_load('exceptCategory2','exceptCategory3',"");
+		category_admin_select_load('exceptCategory3','exceptCategory4',"");
+	});
+	$("select[name='exceptCategory2']").bind("change",function(){
+		category_admin_select_load('exceptCategory2','exceptCategory3',$(this).val());
+		category_admin_select_load('exceptCategory3','exceptCategory4',"");
+	});
+	$("select[name='exceptCategory3']").bind("change",function(){
+		category_admin_select_load('exceptCategory3','exceptCategory4',$(this).val());
+	});
+
+	$("button#exceptIssueCategoryButton").bind("click",function(){
+		var obj;
+		var category;
+		var categoryCode;
+
+		obj = $("select[name='exceptCategory1']");
+		if( obj.val()) {
+			category = $("select[name='exceptCategory1'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='exceptCategory2']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory2'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='exceptCategory3']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory3'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='exceptCategory4']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory4'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+
+		if(category){
+			if($("input[name='exceptIssueCategoryCode[]'][value='"+categoryCode+"']").length == 0){
+				var tag = "<div style='padding:5px;'><span style='display:inline-block;width:300px'>"+category+"</span>";
+				tag += "<span class='btn-minus'><button type='button' class='delCategory'></button></span>";
+				tag += "<input type='hidden' name='exceptIssueCategoryCode[]' value='"+categoryCode+"' /></div>";
+				$("div#exceptIssueCategory").append(tag);
+			}
+		}
+	});
+
+	$("form#detailForm button.delCategory").live("click",function(){
+		$(this).parent().parent().remove();
+	});
+
+	$(".referer-url-chk-btn").bind('click', function(){
+		var refererurl		= $("input[name='refererUrl']").val();
+		var url_type		= $("select[name='refererUrlType'] option:selected").val();
+		var sdate			= $("input[name='issueDate[]']").eq(0).val();
+		var edate			= $("input[name='issueDate[]']").eq(1).val();
+		// 유입경로 URL이 있는지 확인
+		if	(!refererurl){
+			openDialogAlert("유입경로 URL을 입력해 주세요.", 300, 150, function(){});
+			return;
+		}
+		// 유효기간이 있는지 확인
+		if	(!sdate || !edate){
+			openDialogAlert("유효기간을 입력해 주세요.", 300, 150, function(){});
+			return;
+		}
+		var param			= "referer_url="+refererurl+"&url_type="+url_type+"&sdate="+sdate+"&edate="+edate;
+
+		$.ajax({
+			type: "get",
+			url: "./chkRefererUrl",
+			data: param,
+			success: function(result){
+				if	(result == 'no'){
+					openDialogAlert("중복된 유입경로 URL입니다.", 300, 150, function(){
+						$("input[name='refererUrl']").val('');
+						$("input[name='refererUrl']").focus();
+					});
+				}else if	(result == 'error_date'){
+					openDialogAlert("유효기간 시작일이 종료일보다 크게 입력되었습니다.", 400, 150, function(){});
+				}else if	(result == 'ok'){
+					openDialogAlert("사용가능한 유입경로 URL입니다.", 300, 150, function(){});
+				}else{
+					openDialogAlert("유입경로나 유효기간 정보가 올바르지 않습니다.", 300, 150, function(){
+						$("input[name='refererUrl']").val('');
+						$("input[name='refererUrl']").focus();
+					});
+				}
+			}
+		});
+	});
+
+});
+
+function set_goods_list(displayId,inputGoods){
+	$.ajax({
+		type: "get",
+		url: "../goods/select",
+		data: "page=1&inputGoods="+inputGoods+"&displayId="+displayId,
+		success: function(result){
+			$("div#"+displayId).html(result);
+		}
+	});
+	openDialog("상품 검색", displayId, {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+}
+</script>
+
+<!--{ ? referer.referersale_seq }-->
+<form name="detailForm" id="detailForm" method="post" action="../referer_process/modify" target="actionFrame">
+<input type="hidden" name="referersaleSeq" value="{referer.referersale_seq}" />
+<!--{ : }-->
+<form name="detailForm" id="detailForm" method="post" action="../referer_process/regist" target="actionFrame">
+<!--{ / }-->
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area"  class="gray-bar">
+	<div id="page-title-bar">
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large white"><button type="button" onclick="document.location.href='../referer/catalog';">유입경로할인리스트<span class="arrowright"></span></button></span></li>
+		</ul>
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>유입경로할인 { ? referer.referersale_seq }수정{:}만들기{/} </h2>
+		</div>
+		<!-- 우측 버튼 -->
+
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+
+<div style="height:20px;"></div>
+<div class="item-title">기본정보</div>
+<table class="info-table-style" style="width:100%" >
+<colgroup>
+	<col width="15%"/>
+	<col width="35%"/>
+	<col width="15%"/>
+	<col width="35%"/>
+</colgroup>
+<tbody>
+<tr>
+	<th class="its-th">생성일</th>
+	<td class="its-td">
+		{? referer.regist_date }{ referer.regist_date }{ : }{=date("Y-m-d H:i:s")}{ / }
+	</td>
+	<th class="its-th">수정일</th>
+	<td class="its-td">
+		{? referer.update_date }{referer.update_date}{ : }{=date("Y-m-d H:i:s")}{ / }
+	</td>
+</tr>
+
+<tr>
+	<th class="its-th">유입경로명</th>
+	<td class="its-td">
+	{? referer.referersale_seq }{referer.referersale_name}
+	{:}<input type="text" class="line" name="refererName" value="{referer.referersale_name}" />{/}
+	</td>
+	<th class="its-th">유입경로설명</th>
+	<td class="its-td">
+	{? referer.referersale_seq }{referer.referersale_desc}
+	{:}<input type="text" class="line" size="50" name="refererDesc" value="{referer.referersale_desc}" />{/}
+	</td>
+</tr>
+<tr>
+	<th class="its-th">유입경로 URL</th>
+	<td class="its-td" colspan="3">
+	http://{? referer.referersale_seq }{referer.referersale_url}
+		{?referer.url_type == 'like'}를 포함할 때 할인{:}와 일치할 때 할인{/}
+		<input type="hidden" name="refererUrl" value="{referer.referersale_url}" />
+		<input type="hidden" name="refererUrlType" value="{referer.url_type}" />
+	{:}
+		<input type="text" class="line" size="70" name="refererUrl" value="{referer.referersale_url}" />
+		<select name="refererUrlType">
+			<option value="equal">←좌측의 경로와 일치할 때 할인</option>
+			<option value="like">←좌측의 경로를 포함할 때 할인</option>
+		</select>
+		<span class="btn small white referer-url-chk-btn"><button type="button">중복확인</button></span>
+	{/}
+	</td>
+</tr>
+<tr>
+	<th class="its-th">혜택
+		<div>
+			<span class="btn small orange addsaleGuideBtn "><button type="button" class="hand" >안내) 추가 혜택 적용 범위</button></span>
+		</div>
+	</th>
+	<td class="its-td" colspan="3">
+	<div  style="float:left;margin-left:5px;">
+		<div style="padding:5px 0 0 0;">
+			<label><input type="radio" name="saleType" id="saleType0" value="percent" { ? referer.sale_type != 'won' }checked="checked"{/} /> 상품 할인가(판매가) x 수량1개의 
+			<input type="text" name="percentGoodsSale" size="3" maxlength="3" class="line onlynumber right" value="{referer.percent_goods_sale}" />% 할인,
+			<span>최대 <input type="text" name="maxPercentGoodsSale" size="5" value="{referer.max_percent_goods_sale}" class="onlynumber right"/>원</span></label>
+		</div>
+		<div style="padding:5px 0 0 0;">
+			<label><input type="radio" name="saleType" id="saleType1" value="won" { ? referer.sale_type == 'won' }checked="checked"{/} />
+			<input type="text" name="wonGoodsSale" size="6" class="line onlynumber right" value="{referer.won_goods_sale}" />원 할인</label>
+		</div>
+	</div>
+	<!--div style="right;margin-left:360px;">
+		<div style="padding:10px 0 0 0;">
+			<label><input type="checkbox" name="duplicationUse" value="1" {? referer.duplication_use == 1 }checked="checked"{/} /> 중복할인</label>
+			<div class="duplicationuselay {? referer.duplication_use != 1 }gray{/}" >
+				- 상품 수량에 중복할인 : A상품10,000원x10개 - (10%할인x10개) = 90,000원<br />
+				- 상품 종류에 중복할인 : A상품10,000원x10개 - (10%할인x10개) + B상품10,000원x10개 - (10%할인x10개) = 180,000원
+			</div>
+		</div>
+	</div-->
+	<div style="clear: both"></div>
+	</td>
+</tr>
+
+<tr>
+	<th class="its-th">유효 기간</th>
+	<td class="its-td" colspan="3">
+		<input type="text" name="issueDate[]" value="{referer.issue_startdate}" class="datepicker line"  maxlength="10" size="10" />~<input type="text" name="issueDate[]" value="{referer.issue_enddate}" class="datepicker line"  maxlength="10" size="10" />
+	</td>
+</tr>
+<tr>
+	<th class="its-th">사용제한 - 금액</th>
+	<td class="its-td" colspan="3">
+		<span class="red">&#123;상품 할인가(판매가) x 수량&#125;+&#123;좌동&#125;+&#123;좌동&#125;</span>…이<input type="text" name="limitGoodsPrice" size="6" value="{referer.limit_goods_price}" class="onlynumber right" />원 이상일 때 유입경로 할인 적용
+	</td>
+</tr>
+
+<tr>
+	<th class="its-th">사용제한 - 상품/카테고리</th>
+	<td class="its-td" colspan="3">
+		<table class="info-table-style" style="width:100%">
+		<tbody>
+		<tr>
+			<th class="its-th"><input type="radio" name="issue_type" id="issue_type0" value="all" {? referer.issue_type != 'issue' && referer.issue_type != 'except' }checked="checked"{/} > <label for="issue_type0">전체상품에 적용</label></th>
+			<th class="its-th"><input type="radio" name="issue_type" id="issue_type1" value="issue" {? referer.issue_type == 'issue' }checked="checked"{/} > <label for="issue_type1">특정 상품/카테고리에서만 적용</label></th>
+			<th class="its-th"><input type="radio" name="issue_type" id="issue_type2" value="except" {? referer.issue_type == 'except' }checked="checked"{/} > <label for="issue_type2">특정 상품/카테고리에서는 미적용</label></th>
+		</tr>
+		<tr class="issuetypelay">
+			<td colspan="3" class="its-td" >
+				<div id="issuesgoodslay" {? referer.issue_type != 'issue' }class="hide"{/}>
+					<div style="margin:10px;" >
+						<div>
+							<span class="btn small gray"><button type="button" id="issueGoodsButton">상품 등록</button></span>
+							<span class="desc">노출순서변경</span> <span class="helpicon" title="상품을 마우스로 드래그&드랍해서 조정합니다."></span>
+						</div>
+						<div class="clearbox" style="height:5px;"></div>
+						<div id="issueGoods" >
+						<!--{ @ issuegoods }-->
+							<!--{ ? .type == 'issue' }-->
+							<div class='goods fl move'>
+								<div align='center' class='image'>
+									<img class="goodsThumbView" alt="" src="{.image}" width="50" height="50">
+								</div>
+								<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+								<div align='center' class='price'>{=number_format(.price)}</div>
+								<input type="hidden" name='issueGoods[]' value='{.goods_seq}' />
+								<input type="hidden" name="issueGoodsSeq[{.goods_seq}]" value="{.issuegoods_seq}" />
+							</div>
+							<!--{ / }-->
+						<!--{ / }-->
+						</div>
+						<div id="issueGoodsSelect" class="hide"></div>
+					</div>
+				</div>
+				<div style="clear: both"></div>
+				<div id="issuescategorylay"  {? referer.issue_type != 'issue' }class="hide"{/}>
+					<div  style="margin:10px;">
+						<div>
+							<select class="line" name="category1">
+								<option value="">1차 카테고리</option>
+							</select>
+							<select class="line" name="category2">
+								<option value="">2차 카테고리</option>
+							</select>
+							<select class="line" name="category3">
+								<option value="">3차 카테고리</option>
+							</select>
+							<select class="line" name="category4">
+								<option value="">4차 카테고리</option>
+							</select>
+							<span class="btn small gray"><button type="button" id="issueCategoryButton">카테고리 등록</button></span>
+						</div>
+						<div id="issueCategory" >
+						<!--{ @ issuecategorys }-->
+							<!--{ ? .type == 'issue' }-->
+							<div style='padding:5px;'>
+								<span style='display:inline-block;width:300px'>{.category}</span>
+								<span class='btn-minus'><button type='button' class='delCategory'></button></span>
+								<input type="hidden" name='issueCategoryCode[]' value='{.category_code}' />
+								<input type="hidden" name="issueCategoryCodeSeq[{.category_code}]" value="{.issuecategory_seq}" />
+							</div>
+							<!--{ / }-->
+						<!--{ / }-->
+						</div>
+					</div>
+				</div>
+
+				<div style="clear: both"></div>
+				<div id="exceptgoodslay" {? referer.issue_type != 'except' }class="hide"{/}>
+					<div  style="margin:10px;">
+						<div>
+							<span class="btn small gray"><button type="button" id="exceptIssueGoodsButton">예외 상품 등록</button></span>
+							<span class="desc">노출순서변경</span> <span class="helpicon" title="상품을 마우스로 드래그&드랍해서 조정합니다."></span>
+						</div>
+						<div class="clearbox" style="height:5px;"></div>
+						<div id="exceptIssueGoods">
+						<!--{ @ issuegoods }-->
+							<!--{ ? .type == 'except' }-->
+							<div class='goods fl move'>
+								<div align='center' class='image'>
+									<img class="goodsThumbView" alt="" src="{.image}" width="50" height="50">
+								</div>
+								<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+								<div align='center' class='price'>{=number_format(.price)}</div>
+								<input type="hidden" name='exceptIssueGoods[]' value='{.goods_seq}' />
+								<input type="hidden" name="exceptIssueGoodsSeq[{.goods_seq}]" value="{.issuegoods_seq}" />
+							</div>
+							<!--{ / }-->
+						<!--{ / }-->
+						</div>
+						<div id="exceptIssueGoodsSelect" class="hide"></div>
+					</div>
+				</div>
+
+				<div style="clear: both"></div>
+
+				<div id="exceptcategorylay" {? referer.issue_type != 'except' }class="hide"{/}>
+					<div  style="margin:10px;">
+						<div>
+							<select class="line" name="exceptCategory1">
+								<option value="">1차 카테고리</option>
+							</select>
+							<select class="line" name="exceptCategory2">
+								<option value="">2차 카테고리</option>
+							</select>
+							<select class="line" name="exceptCategory3">
+								<option value="">3차 카테고리</option>
+							</select>
+							<select class="line" name="exceptCategory4">
+								<option value="">4차 카테고리</option>
+							</select>
+							<span class="btn small gray"><button type="button" id="exceptIssueCategoryButton">예외 카테고리 등록</button></span>
+						</div>
+						<div id="exceptIssueCategory">
+						<!--{ @ issuecategorys }-->
+							<!--{ ? .type == 'except' }-->
+							<div style='padding:5px;'>
+								<span style='display:inline-block;width:300px'>{.category}</span>
+								<span class='btn-minus'><button type='button' class='delCategory'></button></span>
+								<input type="hidden" name='exceptIssueCategoryCode[]' value='{.category_code}' />
+								<input type="hidden" name="exceptIssueCategoryCodeSeq[{.category_code}]" value="{.issuecategory_seq}" />
+							</div>
+							<!--{ / }-->
+						<!--{ / }-->
+						</div>
+					</div>
+				</div>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+</tbody>
+</table>
+<div style="height:30px;"></div>
+</form>
+
+<!-- { ? service_code == 'P_FREE' || !isplusfreenot } -->
+<script type="text/javascript">
+$(function(){
+	openDialog('쇼핑몰 업그레이드 안내<span class=\'desc\'></span>', 'nofreeService', {'width':600,'height':200,"noClose":true});
+});
+</script>
+<!-- { / } -->
+
+{ #layout_footer }

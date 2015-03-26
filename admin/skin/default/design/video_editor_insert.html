@@ -1,0 +1,152 @@
+{#layout_header_popup}
+
+<script src="/app/javascript/plugin/editor/js/popup.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript">
+$(function(){
+	initEmbeder();
+	load_video_list();
+});
+
+function initEmbeder() {
+	var _opener = PopupUtil.getOpener();
+	if(!_opener) {
+		alert('잘못된 경로로 접근하셨습니다.');
+		return;
+	}
+
+	var _embeder = getEmbeder('media');
+	window.execEmbed = _embeder.embedHandler;
+}
+
+// 코드 삽입 완료 후
+function done() {
+	var _data = {};
+	_data.code = $("#inserttag").html();
+	if (typeof(execEmbed) == 'undefined') { //Virtual Function
+		return;
+	}
+	executeAfterDataCheck(_data, function(){
+		execEmbed(_data);
+		closeWindow();
+	});
+}
+
+function executeAfterDataCheck(data, successHandler) {
+	if (data.code) {
+		successHandler();
+	} else {
+		alert("삽입할 동영상을 선택 해 주세요.");
+	}
+}
+
+/* 동영상 선택 */
+function editor_insert_video(video_seq,vwidth, vheight){
+	if(vwidth){
+		var tag_video = "{" + "=showDesignVideo("+ video_seq +",\""+ vwidth +"X"+ vheight +"\")" + "}";
+	}else{
+		var tag_video = "{" + "=showDesignVideo("+ video_seq +")" + "}";
+	}
+	$("#inserttag").html(tag_video);
+	done();
+}
+
+/* 동영상목록 불러오기 */
+function load_video_list(){
+	/* 리스트 호출 */
+	$("#videoListTable table.dlts-inner-table tbody").load("../design/get_video_editor_list_html?page={_GET.page}&upkind={_GET.upkind}");
+}
+
+</script>
+
+<link rel="stylesheet" href="/app/javascript/plugin/editor/css/popup.css" type="text/css"  charset="utf-8"/>
+<style>
+	#videoPreviewContainer {width:500px; margin:auto; min-height:20px; padding:10px;  border:0px solid #ddd; text-align:center;}
+
+	.design-list-table-style {border:2px solid #333; border-collapse:collapse;}
+	.design-list-table-style th.dlts-th {background-color:#ededed; height:30px;}
+	.design-list-table-style td.dlts-td {background-color:#ffffff; height:22px; padding:4px 0;}
+	.design-list-table-style th.left,
+	.design-list-table-style td.left {text-indent:15px;}
+	.design-list-table-style th.right,
+	.design-list-table-style td.right {padding-right:10px;}
+	.design-list-table-style div.dlts-body {max-height:550px; overflow:auto;}
+	.design-list-table-style div.dlts-body table.dlts-inner-table {border-collapse:collapse;}
+	.design-list-table-style div.dlts-body table.dlts-inner-table td {border-top:1px solid #d3d3d3;}
+</style>
+<div id="wrapper"  >
+	<div class="body">
+
+	<!-- 서브메뉴 탭 : 시작 -->
+	{ #editor_menu }
+	<!-- 서브메뉴 탭 : 끝 -->
+
+	<div id="inserttag" class="hide"></div>
+
+
+	<form name="videoManagerForm" action="?" method="get" >
+		<table class="info-table-style" width="100%" align="center">
+		<col width="140" />
+		<tr>
+			<th class="its-th">구분</th>
+			<td class="its-td left">
+				<label class="search_label"><input type="radio" name="upkind" value="all" {? !_GET.upkind || _GET.upkind=='all' } checked="checked" {/}/> 전체</label>
+				<label class="search_label"><input type="radio" name="upkind" value="goods" {? _GET.upkind=='goods' } checked="checked" {/}/> 상품</label>
+				<label class="search_label"><input type="radio" name="upkind" value="board" {? _GET.upkind=='board' } checked="checked" {/}/> 게시판</label>
+				<label class="search_label"><input type="radio" name="upkind" value="design" {? _GET.upkind=='design' } checked="checked" {/}/> 동영상</label>
+			</td>
+			<td class="its-td left"><span class="btn medium cyanblue"><input type="submit" value="검색" /></span></td>
+		</tr>
+		</table>
+		<div style="height:15px"></div>
+	</form>
+
+	<table id="videoListTable" class="design-list-table-style" width="100%" border="0">
+		<colgroup>
+			<col width="55" />
+			<col width="150" />
+			<col width="160" />
+			<col width="150" />
+			<col width="150" />
+			<col width="100" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="dlts-th center">번호</th>
+			<th class="dlts-th center">구분</th>
+			<th class="dlts-th center">동영상</th>
+			<th class="dlts-th center">만든 날짜</th>
+			<th class="dlts-th center">관리자용타이틀<br/>플레이시간<br/>인코딩품질, 크기</th>
+			<th class="dlts-th center">삽입</th>
+		</tr>
+		</thead>
+		<tr>
+			<td colspan="6">
+				<div class="dlts-body">
+				<table width="100%" class="dlts-inner-table">
+				<colgroup>
+				<col width="55" />
+				<col width="150" />
+				<col width="160" />
+				<col width="150" />
+				<col width="150" />
+				<col width="100" />
+				</colgroup>
+				<tbody>
+				</tbody>
+				</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+
+	<!-- 페이징 -->
+	<div id="videopagin" align="center"  class="paging_navigation" >{videopagin}</div>
+	<!-- 페이징 -->
+	</div>
+
+	<div class="footer">
+		<p><a href="#" onclick="closeWindow();" title="닫기" class="close">닫기</a></p>
+	</div>
+</div>
+{#layout_footer_popup}

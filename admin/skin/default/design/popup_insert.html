@@ -1,0 +1,171 @@
+{#layout_header_popup}
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+
+
+<script type="text/javascript">
+
+/* 태그복사버튼 객체 목록 */
+var tagCopyClips = [];
+
+$(function(){	
+	{?template_path}
+	parent.DM_window_title_set("left","<a href=\"javascript:;\" onmousedown=\"DM_window_sourceeditor('{template_path}')\">◀ HTML소스보기</a>");
+	{/}
+	parent.DM_window_title_set("center","{layout_config.tpl_desc}({layout_config.tpl_path})에 선택한 ");
+	load_popup_list();
+});
+
+/* 페이지  언로드시 태그복사버튼 제거() */
+document.body.onunload=function(){
+	delete_copy_clips();	// __flash__removeCallback 관련 오류 방지
+};
+
+/* 팝업목록 불러오기 */
+function load_popup_list(){
+	$("#popupListTable table.dlts-inner-table tbody").load("../design/get_popup_list_html");
+}
+
+/* 태그복사버튼 삭제 */
+function delete_copy_clips(){
+	for(var i=0;i<tagCopyClips.length;i++) if(tagCopyClips[i]) tagCopyClips[i].destroy();
+}
+
+function select_popup(popup_seq,image,contents_type){
+	$("#popupAdminComment").text($(".admin_comment[popup_seq='"+popup_seq+"']").text());
+	
+	if(contents_type=='image'){
+		$("#popupPreview").attr("src","/data/popup/"+image);
+		$("#popupPreviewContainer").show();
+	}else{
+		$("#popupPreviewContainer").hide();
+	}
+	
+	$("form[name='popupManagerForm'] input[name='popup_seq']").val(popup_seq);
+}
+
+function edit_popup(popup_seq){
+	parent.DM_window_popup_edit('{template_path}',popup_seq);
+}
+
+function copy_popup(popup_seq){
+	openDialogConfirm('팝업을 복사하시겠습니까?',400,140,function(){
+		loadingStart();
+		$("iframe[name='actionFrame']").attr('src','../design_process/copy_popup?popup_seq=' + popup_seq);	
+	});
+}
+
+function delete_popup(){
+	var popup_seqs = new Array();
+	$("input[name='delete_popup_seq[]']:checked").each(function(){
+		popup_seqs.push($(this).val());
+	});
+	
+	if(popup_seqs.length){
+		openDialogConfirm('팝업을 삭제하시겠습니까?',400,140,function(){
+			loadingStart();
+			$("iframe[name='actionFrame']").attr('src','../design_process/delete_popup?popup_seqs=' + encodeURIComponent(popup_seqs.join(',')));	
+		});
+	}else{
+		openDialogAlert('삭제할 팝업을 선택해주세요',400,140);
+	}
+}
+</script>
+
+<style>
+	#popupPreviewContainer {width:500px; margin:auto; min-height:20px; padding:10px;  border:1px solid #ddd; text-align:center;}
+	#popupAdminComment {padding-left:15px}
+</style>
+
+<div style="height:15px"></div>
+
+<div id="popupPreviewContainer" class="hide">
+	<img src="" id="popupPreview" style="max-height:300px; max-width:300px;" />
+</div>
+
+<div style="height:15px"></div>
+
+<div style="padding:10px;">
+
+	<form name="popupManagerForm" action="../design_process/popup_insert" method="post" target="actionFrame">
+	<input type="hidden" name="template_path" value="{template_path}" />
+	<input type="hidden" name="popup_seq" value="" />
+	
+	<table class="design-simple-table-style" width="100%" align="center">
+	<col width="160" />
+	<tr>
+		<th class="dsts-th">
+		삽입 팝업
+		</th>
+		<td class="dsts-td">
+			<div id="popupAdminComment"></div>
+		</td>
+	</tr>
+	</table>
+	
+	<div style="height:15px"></div>
+	
+	<div class="center">
+		<span class="btn medium cyanblue"><input type="submit" value="적용" /></span>
+	</div>
+
+	</form>
+	
+	<div style="height:15px"></div>
+	
+	<table id="popupListTable" class="design-list-table-style" width="100%">
+		<colgroup>
+			<col width="55" />
+			<col width="140" />
+			<col width="140" />
+			<col width="" />
+			<col width="150" />
+			<col width="190" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="dlts-th left" colspan="4">
+				<b>팝업 리스트</b> <span class="desc" style="font-weight:normal;"> - 어느 페이지에서도 팝업을 재활용하여 넣을 수 있습니다!</span>
+			</th>
+			<th class="dlts-th right" colspan="2">
+				<span class="btn small black"><input type="button" value="팝업 만들기" onclick="edit_popup()" /></span>
+			</th>
+		</tr>
+		<tr>
+			<th class="dlts-th center">번호</th>
+			<th class="dlts-th center">스타일</th>
+			<th class="dlts-th center">만든 날짜</th>
+			<th class="dlts-th center">관리용코멘트<br />타이틀(상태)</th>
+			<th class="dlts-th center">치환코드</th>
+			<th class="dlts-th center">관리</th>
+		</tr>
+		</thead>
+		<tr>
+			<td colspan="6">
+				<div class="dlts-body">
+				<table width="100%" class="dlts-inner-table">
+				<colgroup>
+					<col width="55" />
+					<col width="140" />
+					<col width="140" />
+					<col width="" />
+					<col width="150" />
+					<col width="190" />
+				</colgroup>
+				<tbody>
+				</tbody>
+				</table>				
+				</div>
+			</td>
+		</tr>
+	</table>
+	
+	<div style="height:3px"></div>
+	
+	<span class="btn small"><button onclick="delete_popup()"><input type="checkbox" checked onclick="return false;" style="width:10px ;height:10px;vertical-align:middle"/> 삭제</button></span>
+	
+	
+
+</div>
+
+{#layout_footer_popup}

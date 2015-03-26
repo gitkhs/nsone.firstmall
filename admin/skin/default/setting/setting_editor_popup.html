@@ -1,0 +1,12 @@
+<form name="frm_setting_editor" action="../setting_process/setting_editor" method="post" target="actionFrame">
+<div>아래의 설정은 공통 설정입니다.</div>
+<div class="pdt10">
+	<label><input type="radio" name="editor_type" value="html" {? config_setting_editor.type != 'editor'}checked{/} /> HTML로 봅니다. (상품등록/수정 페이지 로딩속도 개선)</label>
+</div>
+<div class="pdt5">
+	<label><input type="radio" name="editor_type" value="editor" {? config_setting_editor.type == 'editor'}checked{/} /> 에디터로 봅니다. (상품설명 이미지 용량이 큰 경우 상품등록/수정 페이지 로딩속도 저하)</label>
+</div>
+<div style="padding:10px;" class="center">
+<span class="btn large black"><button type="submit" class="addDeliveryCost">확인</button></span>
+</div>
+</form>

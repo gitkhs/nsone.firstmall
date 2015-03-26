@@ -1,0 +1,155 @@
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" charset="utf8"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery_pagination/jquery.pager.js" charset="utf8"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#submitbtn").click(function() {
+		getDownAjaxList();
+	});
+	$(".select_date").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+	$("#download_search_text").click( function(){
+		if($(this).val() == "관리자 아이디" ){
+			$(this).val('');
+		}
+	});
+
+	getDownAjaxList();
+});
+
+/**
+ * 상품을 ajax로 검색한다.
+ * @param int page 페이지번호
+ */
+function getDownAjaxList(page) {
+	var pageNumber = page ? page : 1;
+	$("#getpage").val(pageNumber);
+	var queryString = $('#downloadsearch').formSerialize();
+	var perpage = 10;
+	$.ajax({
+		type: 'post',
+		//url: '/admin/promotion/downloadlist',
+		url: '/admin/setting/manager_member_downloadlist',
+		data: queryString + '&perpage=' + perpage,
+		dataType: 'json',
+		success: function(data) {
+			$('#ajaxTable').html(data.content);
+			$('#searchcount').html(setComma(data.searchcount));
+			$('#totalcount').html(setComma(data.totalcount));
+			$('#nowpage').html(setComma(data.nowpage));
+			$('#total_page').html(setComma(data.total_page));
+			$("#pager").pager({ pagenumber: data.page, pagecount: data.pagecount, buttonClickCallback: pageClick });
+		}
+	});
+}
+
+/**
+ * 페이징 클릭시 페이지를 로딩한다.
+ * @param int page 페이지번호
+ */
+function pageClick(page) {
+	$("#getpage").val(page);
+	getDownAjaxList(page);
+}
+
+</script>
+<!-- 서브 레이아웃 영역 : 시작 -->
+
+<!-- 리스트검색폼 : 시작 -->
+<div class="search-form-container">
+	<form name="downloadsearch" id="downloadsearch" >
+	<input type="hidden" name="page" id="getpage" value="{_GET.page}" >
+	<table class="search-form-table">
+	<tr>
+		<td width="500">
+			<table class="sf-keyword-table">
+				<td class="sfk-td-txt"><input type="text" name="search_text" id="download_search_text" value="{? _GET.search_text && _GET.search_text != '관리자 아이디' }{_GET.search_text}{:}관리자 아이디{/}" title="관리자 아이디" /></td>
+				<td class="sfk-td-btn"><button type="button" id="submitbtn"><span>검색</span></button></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<td>
+					<input type="text" name="sdate" id="sdate_down" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" id="edate_down" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button"  id="today" value="오늘" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="3day" value="3일간" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="1week" value="일주일" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="1month" value="1개월" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="3month" value="3개월" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="select_date_all"  value="전체" class="select_date"  /></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</form>
+	</table>
+</div>
+<!-- 리스트검색폼 : 끝 -->
+
+<ul class="left-btns clearbox">
+	<li><div style="margin-top:rpx;">검색 <span id="searchcount" style="color:#000000; font-size:11px; font-weight: bold">{sc.searchcount}</span>/총 <span id="totalcount" style="color:#000000; font-size:11px; font-weight: bold">{sc.totalcount}</span>개(현재 <span id="nowpage"></span>/총 <span id="total_page" >{sc.total_page}</span>페이지)</div></li>
+</ul>
+
+<div class="clearbox"></div>
+<div >
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="15%" />
+			<col />
+			<col width="15%" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align center">관리자</th>
+			<th class="its-th-align center">내용</th>
+			<th class="its-th-align center">다운로드일시</th>
+		</tr>
+		</thead>
+		<tbody id="ajaxTable"></tbody>
+	</table>
+</div>
+
+<!-- 서브 레이아웃 영역 : 끝 -->
+
+<!-- 페이징 -->
+<table align="center" border="0" cellpadding="0" cellspacing="0"  width="100%">
+<tr>
+	<td align="center" ><div id="pager" style='clear: both'></div></td>
+</tr>
+</table>

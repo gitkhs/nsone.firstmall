@@ -1,0 +1,108 @@
+<script type="text/javascript">
+//본인인증:휴대폰
+function phonePopup(){
+	var url = "../member_process/realnamecheck?realnametype=phone";
+	window.open(url, 'popupChk', 'width=500, height=550, top=100, left=100, fullscreen=no, menubar=no, status=no, toolbar=no, titlebar=yes, location=no, scrollbar=no');
+}
+
+//아이핀 실명인증
+function ipinPopup(){
+	var url = "../member_process/realnamecheck?realnametype=ipin";
+	window.open(url, 'popupIPIN2', 'width=450, height=550, top=100, left=100,fullscreen=no, menubar=no status=no, toolbar=no, titlebar=yes, location=no, scrollbar=no');
+}
+
+//안심체크 실명인증
+function checkPopup(){
+	var url = "../member_process/realnamecheck?realnametype=check";
+	window.open(url, 'niceID_popup', 'width=500, height=550, toolbar=no,directories=no,scrollbars=no,resizable=no,status=no,menubar=no,top=0,left=0,location=no');
+}
+</script>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td height="30"></td>
+</tr>
+<tr>
+	<td width="40"></td>
+	<td align="left">
+	<!-- 타이틀 -->
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr><td><img src="../images/design/tit_join.gif" /></td></tr>
+	<tr><td height="10"></td></tr>
+	<tr><td><span class="desc">회원이 되셔서 회원등급할인/할인쿠폰/적립금 등 다양한 서비스를 받으세요.</span></td></tr>
+	</table>
+	<div style="height:40px"></div>
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td>
+				<table border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td valign="top" align="left" height="15"><img src="../images/design/join_stit_certify.gif"/></td>
+					<td width="8"></td>
+					<td valign="bottom" align="right"><span class="desc">회원가입을 위해 아래의 <b>본인확인 인증절차</b>를 진행해 주세요.</span></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr><td height="6"></td></tr>
+		<tr><td height="2" bgcolor="545454"></td></tr>
+		<tr><td height="20"></td></tr>
+		<tr><td height="16"></td></tr>
+	</table>
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="small">
+	<tr>
+	{? realnameinfo.useRealnamephone=='Y' //휴대폰본인인증}
+		<td width="33%" valign="top" style="padding:20px 10px; border:2px solid #e2e2e2">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr><td align="center" height="65" ><img src="../images/common/join_img_phone.gif"></td></tr>
+				<tr><td height="10"></td></tr>
+				<tr><td height="1" bgcolor="#eaeaea"></td></tr>
+				<tr><td height="10"></td></tr>
+				<tr><td align="center">휴대폰번호와 이름을 사용하여 <br/>본인확인을 합니다.</td></tr>
+				<tr><td height="5"></td></tr>
+				<tr><td align="center"><a href="javascript:phonePopup();"><img src="../images/common/join_btn_check_phone.gif"></a></td></tr>
+			</table>
+		</td>
+		{? realnameinfo.useRealname=='Y' || realnameinfo.useIpin=='Y'}<td>&nbsp;</td>{/}
+	{/}
+	{? realnameinfo.useIpin=='Y' }
+			<td width="{? realnameinfo.useRealnamephone=='Y'}33%{:}50%{/}" valign="top" style="padding:20px 10px; border:2px solid #e2e2e2">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr><td align="center" height="65"><img src="../images/common/join_img_ipin.gif"></td></tr>
+					<tr><td height="10"></td></tr>
+					<tr><td height="1" bgcolor="#eaeaea"></td></tr>
+					<tr><td height="10"></td></tr>
+					<tr><td align="center">주민등록번호 대신 사용하는 <br/>사이버 신원확인번호입니다.</td></tr>
+					<tr><td height="5"></td></tr>
+					<tr><td align="center"><a href="javascript:ipinPopup();"><img src="../images/common/join_btn_ipin.gif"></a></td></tr>
+				</table>
+			</td>
+	{/}
+	{? realnameinfo.useRealname=='Y' }
+			{? realnameinfo.useRealnamephone=='Y' || realnameinfo.useIpin=='Y'}<td>&nbsp;</td>{/}
+			<td width="{? realnameinfo.useRealnamephone=='Y'}33%{:}50%{/}" valign="top" style="padding:20px 10px; border:2px solid #e2e2e2">
+
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr><td align="center" height="65"><img src="../images/common/join_img_chek.gif"></td></tr>
+					<tr><td height="10"></td></tr>
+					<tr><td height="1" bgcolor="#eaeaea"></td></tr>
+					<tr><td height="10"></td></tr>
+					<tr><td align="center">주민등록번호 대신 이름, 생년월일, 성별, 유선전화 또는 주소로 인증합니다.</td></tr>
+					<tr><td height="5"></td></tr>
+					<tr><td align="center"><a href="javascript:checkPopup();"><img src="../images/common/join_btn_chek.gif"></a></td></tr>
+				</table>
+			</td>
+	{ / }
+	</tr>
+	</table>
+
+	<div style="height:40px"></div>
+
+	<div class="description">
+	* 본인확인이 되지 않는 경우 아래의 본인확인기관에 본인인증 등록을 요청할 수 있습니다. 한국신용정보㈜ 1588-2486 <br>
+	* 타인의 개인정보를 부정하게 사용하는 경우 3년 이하의 징역 또는 1천만원 이하의 벌금에 처해질 수 있습니다.
+	</div>
+
+	</td>
+	<td width="40"></td>
+</tr>
+</table>

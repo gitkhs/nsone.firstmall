@@ -1,0 +1,118 @@
+{#layout_header_popup}
+
+<script type="text/javascript" src="/app/javascript/plugin/jquery.colorpicker.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-color-picker.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-font-decoration.js"></script>
+<script type="text/javascript" src="/app/javascript/js/base64.js"></script>
+<script type="text/javascript" src="/app/javascript/js/goods-display.js?v={=date('Ymd')}"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+
+<script type="text/javascript">
+$(function(){
+	{? template_path }
+	parent.DM_window_title_set("left","<a href=\"javascript:;\" onmouseup=\"DM_window_sourceeditor('{template_path}')\">◀ 상품디스플레이 영역의 HTML소스보기</a>");
+	parent.DM_window_title_set("title","{layout_config.tpl_desc}({layout_config.tpl_path})에 선택한 상품디스플레이 변경");
+	{/}
+
+	/* 저장버튼 */
+	$("form[name='displayManagerForm']").submit(function(){
+		$("input[name='auto_goods_seqs[]']").each(function(i){
+			var arr = new Array();
+			$("input[name='displayGoods"+i+"[]']",$(this).closest(".displayTabGoodsContainer")).each(function(){
+				arr.push($(this).val());
+			});
+			$(this).val(arr.join(','));
+		});
+
+		submitEditorForm(this);
+
+		return false;
+	});
+
+	/* 상품 검색 버튼 */
+	$("button.displayGoodsButton").live("click",function(){
+		var displayResultId = "displayGoods" + $(this).closest(".displayTabGoodsContainer").attr("tabIdx");
+		openDialog("상품 검색", "#displayGoodsSelectPopup", {"width":"99%","show" : "fade","hide" : "fade"});
+		set_goods_list("displayGoodsSelect",displayResultId,'goods','');
+	});
+
+	$(".displayGoods").sortable();
+	$(".displayGoods").disableSelection();
+
+	$(".btn_recomm").click(function() {
+		//parent.DM_window_image_edit("{_GET['designTplPath']}","{_GET['designImgSrc']}","{_GET['designImgSrcOri']}","{_GET['designImageLabel']}","{_GET['link']}","{_GET['elementType']}","{_GET['target']}","{_GET['viewSrc']}");
+		var title = '이미지 변경';
+		var designImageLabel = "{_GET['designImageLabel']}";
+		var link = "{_GET['link']}";
+		parent.DM_window(title,1000,600,'/admin/design/image_edit?designTplPath='+"{_GET['designTplPath']}"+'&designImgSrc='+"{_GET['designImgSrc']}"+'&designImgSrcOri='+"{_GET['designImgSrcOri']}"+'&designImageLabel='+encodeURIComponent(designImageLabel)+'&link='+encodeURIComponent(link)+'&elementType='+"{_GET['elementType']}"+'&target='+"{_GET['target']}"+'&viewSrc='+"{_GET['viewSrc']}"+'&recommGoods=Y');
+	});
+});
+
+function set_goods_list(displayId,inputGoods,type,criteria){
+	$.ajax({
+		type: "get",
+		url: "../goods/select",
+		data: "innerMode=2&type="+type+"&containerHeight=230&page=1&inputGoods="+inputGoods+"&displayId="+displayId+"&displayKind={data.kind}&criteria="+encodeURIComponent(criteria),
+		success: function(result){
+			$("div#"+displayId).html(result);
+			$("#"+displayId+"Container").show();
+		}
+	});
+}
+</script>
+
+<form name="displayManagerForm" action="../design_process/recomm_goods_edit" method="post" target="actionFrame" enctype="multipart/form-data">
+<input type="hidden" name="template_path" value="{template_path}" />
+
+<div style="padding:15px;">
+	<span class="btn_recomm red fr fx12 pdr5 hand"><strong>추천상품 이미지 변경하기 ></strong></span>
+	<table class="design-simple-table-style" width="100%" align="center">
+	<col width="120" />
+	<!-- 상품디스플레이 꾸미기 영역 : 끝 -->
+
+		<tbody class="displayTabGoodsContainer" tabIdx="0">
+		<tr>
+			<th class="dsts-th">선택 상품 노출</th>
+			<td class="dsts-td left" colspan="2">
+
+				<div class="displayTabAutoTypeContainer" type="select">
+					<span class="btn small gray"><button type="button" class="displayGoodsButton">상품 검색</button></span>
+					<span class="desc">↓ 아래의 상품을 드래그하여 노출순서를 변경할 수도 있습니다.</span>
+
+					<div class="clearbox" style="height:5px;"></div>
+					<input type='hidden' name='auto_goods_seqs[]' />
+
+					<div id="displayGoods0" class="displayGoods">
+						<!--{ @ display_item }-->
+						<div class='goods fl move'>
+						<div align='center' class='image'><img src="{.image}" class="goodsThumbView" width="50" height="50" alt="{=htmlspecialchars(.goods_name)}" onerror="this.src='../images/common/noimage_list.gif'" /></div>
+						<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{=htmlspecialchars(.goods_name)}</div>
+						<div align='center' class='price'>{=number_format(.price)}</div>
+						<!--input type='hidden' name='displayGoods{.index_}[]' value='{.goods_seq}' /-->
+						<input type='hidden' name='displayGoods0[]' value='{.goods_seq}' />
+						</div>
+						<!--{/}-->
+					</div>
+				</div>
+
+			</td>
+		</tr>
+		</tbody>
+	</table>
+
+	<div style="height:15px"></div>
+
+	<div class="center">
+		<span class="btn medium cyanblue"><input type="submit" value="적용" /></span>
+	</div>
+
+</div>
+
+</form>
+
+<div id="displayGoodsSelectPopup">
+	<div id="displayGoodsSelect"></div>
+</div>
+
+{#layout_footer_popup}

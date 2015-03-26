@@ -1,0 +1,113 @@
+<div class="sub_title_bar">
+	<h2>회원가입</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.gif" /></a>
+</div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td height="30"></td>
+</tr>
+<tr>
+	<td width="40"></td>
+	<td>
+		<!-- 본문내용 시작 -->
+
+			<!-- 타이틀 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td><img src="../images/design/tit_join.gif" /></td></tr>
+			<tr><td height="10"></td></tr>
+			<tr><td><span class="desc">회원이 되셔서 회원등급할인/할인쿠폰/적립금 등 다양한 서비스를 받으세요</span></td></tr>
+			</table>
+
+			<!-- Welcome 이미지 -->
+			<div align="center" style="padding:30px 0 0 0;"><img src="../images/design/img_welcome.gif" /></div>
+			<!--{? emoneyapp.emoneyJoin > 0 || emoneyapp.emoneyInvitees > 0 || couponmember.coupon_seq}-->
+			<table align="center" border="0" cellpadding="0" cellspacing="0">
+			<tr><td>
+				<div style="margin-top:10px;margin-bottom:0px;width:500px;font-family:dotum;font-weight:bold;font-color:#00000;" align="center" >
+					<div style="border:1.5px solid #c3c3c3;"></div>
+						<div style="padding:5px 0px;text-align:center;font-color:#5e5e5e;line-height:12px;">
+							<!--{? fb_invite }-->
+								<font style="letter-spacing:-1px;"><!--{fb_invite.user_name}--></font><font style="color:#5e5e5e">님으로부터 초대받으셨습니다.</font><br>
+							<!--{/}-->
+							<!--{? emoneyapp.emoneyJoin > 0 || emoneyapp.emoneyInvitees > 0 || couponmember.coupon_seq }-->
+							<div style="margin-top:12px;"><font style="font-weight:bold;"><h1>신규회원을 위한 혜택을 놓치지 마세요!</h1></font></div>
+							<!--{/}-->
+						</div>
+					<div align="center" style="margin-top:12px;margin-left:95px;text-align:left;">
+						<!--{? emoneyapp.emoneyJoin > 0 }-->
+							- 적립금 : <font style="color:#c40000"><!--{=number_format(emoneyapp.emoneyJoin)}--></font>원<br>
+						{/}-->
+						<!--{? emoneyapp.emoneyInvitees > 0 && fb_invite}-->
+							- 추가 적립금 <font style="color:#c40000"><!--{=number_format(emoneyapp.emoneyInvitees)}--></font>원 <br>
+						<!--{/}-->
+						{? couponmemberarray }
+						- <b>가입쿠폰</b> : 
+							{@ couponmemberarray }
+								<span style="font:1.2em Verdana; color:#c40000; font-weight:bold; letter-spacing:-1px">
+								{? .type == 'member_shipping' }
+									{? .shipping_type == 'free'}{? .limit_goods_price_title}{.limit_goods_price_title}{/} 배송비 무료</span>(최대{.max_percent_shipping_sale}원)
+									{:}배송비 {=number_format(.won_shipping_sale)}</span>원
+									{/}
+								{:}
+									{? .sale_type == 'percent' }{.percent_goods_sale}</span>%
+									{:}{=number_format(.won_goods_sale)}</span>원
+									{/}
+								{/}	{? count(couponmemberarray)-1 > .index_ },&nbsp;&nbsp;{/}
+							{/}
+						할인 쿠폰
+						{/} 
+					</div>
+					<div style="border:1.5px solid #c3c3c3;margin-top:10px;margin-bottom:10px;"></div>
+				</div>
+			</td>
+			</tr>
+			</table>
+			<!--{/}-->
+
+			<!-- //일반적인 가입 폼 :: 쇼핑몰ID만 이용할 경우 시작 -- >
+				<table align="center" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td width="220"><a href="agreement?join_type=member"><img src="../images/common/btn_join_personal.gif" alt="일반회원"></a></td>
+						<td width="40">&nbsp;</td>
+						<td width="220"><a href="agreement?join_type=business"><img src="../images/common/btn_join_business.gif" alt="기업회원"></a></td>
+					</tr>
+				</table>
+			<!-- //일반적인 가입 폼 :: 쇼핑몰ID만 이용할 경우 끝 -->
+
+			<!-- //SNS 가입폼 : SNS이용할 경우시작 -->
+				<table align="center" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					{? joinform.join_type!='business_only'}
+					<td width="220"><a href="agreement?join_type=member"><img src="../images/common/btn_join_personal.gif" alt="일반회원"></a></td>
+					{/}
+					{? joinform.join_type !='member_only' }
+					<td width="40">&nbsp;</td>
+					<td width="220"><a href="agreement?join_type=business"><img src="../images/common/btn_join_business.gif" alt="기업회원"></a></td>
+					{/}
+				</tr>
+				{? joinform.use_f }
+				<tr><td colspan="3" height="10px"></td></tr>
+				<tr>
+					{? joinform.join_type!='business_only' }
+					<td width="220"><a href="{? !( strstr(_SERVER.HTTP_HOST,'.firstmall.kr') || _SERVER.HTTP_HOST==APP_DOMAIN ) }http://{config_system.subDomain}/member/{/}agreement?join_type=fbmember"><img src="../images/design/btn_join_fb_person.gif" alt="일반회원 facebook 가입"></a></td>
+					{/}
+					{? joinform.join_type!='member_only'}
+					<td width="40">&nbsp;</td>
+					<td width="220"><a href="{? !( strstr(_SERVER.HTTP_HOST,'.firstmall.kr') || _SERVER.HTTP_HOST==APP_DOMAIN ) }http://{config_system.subDomain}/member/{/}agreement?join_type=fbbusiness"><img src="../images/design/btn_join_fb_business.gif" alt="기업회원 facebook 가입"></a></td>
+					{/}
+				</tr>
+				{/}
+				</table>
+			<!-- //SNS 가입폼 : SNS이용할 경우 끝 -->
+			</form>
+
+		<!-- 본문내용 끝 -->
+	</td>
+	<td width="40"></td>
+</tr>
+</table>
+
+	</td>
+	<td width="40"></td>
+</tr>
+</table>

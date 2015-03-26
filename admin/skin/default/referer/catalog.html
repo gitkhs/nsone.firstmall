@@ -1,0 +1,215 @@
+{ #layout_header }
+<script>
+$(function(){
+
+	$(".select_date").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+	$("button#regist").live('click', function(){
+		{ ? service_code == 'P_FREE' || service_code=='P_STOR' || !isplusfreenot }
+		openDialog('쇼핑몰 업그레이드 안내<span class=\'desc\'></span>', 'nofreeService', {'width':600,'height':200});
+		{ : }
+		location.href	= './referersale';
+		{ / }
+	});
+
+	$("input[name='modify_btn']").each(function(){
+		$(this).click(function(){
+			location.href	= './referersale?no='+$(this).attr('referersaleSeq');
+		});
+	});
+
+	$("input[name='delete_btn']").each(function(){
+		$(this).click(function(){
+			if	(confirm("정말로 삭제하시겠습니까?")){
+				actionFrame.location.href	= '../referer_process/delete_referer?no='+$(this).attr('referersaleSeq');
+			}
+		});
+	});
+
+	$('#display_quantity').bind('change', function() {
+		$("#perpage").val($(this).val());
+		$("#referersearch").submit();
+	});
+
+});
+</script>
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar"  >
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2><span class="darkgray">유입경로할인 리스트</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button type="button" id="regist">유입경로할인 만들기</button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+
+<!-- 리스트검색폼 : 시작 -->
+<div class="search-form-container">
+	<form name="referersearch" id="referersearch" method="get">
+	<input type="hidden" name="perpage" id="perpage" value="{_GET.perpage}" >
+	<input type="hidden" name="page" id="page" value="{_GET.page}" >
+	<table class="search-form-table" width="500">
+	<tr>
+		<td>
+			<table class="sf-keyword-table">
+			<tr>
+				<td class="sfk-td-txt" ><input type="text" name="search_text" id="search_text" value="{_GET.search_text}" title="유입경로명, 유입경로URL" /></td>
+				<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th><span class="icon-arrow-down">생성일</span></th>
+				<td>
+					<input type="text" name="sdate" id="sdate" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" id="edate" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button"  id="today" value="오늘" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="3day" value="3일간" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="1week" value="일주일" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="1month" value="1개월" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="3month" value="3개월" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="select_date_all"  value="전체" class="select_date"  /></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	</form>
+</div>
+<!-- 리스트검색폼 : 끝 -->
+
+<ul class="left-btns clearbox">
+	<li>
+		<div style="margin-top:5px;">
+			검색 <b>{=number_format(page.totalcount)}</b> 개 / 총 <b>{=number_format(page.total)}</b> 개
+		</div>
+	</li>
+</ul>
+<ul class="right-btns clearbox">
+	<li>
+		<select  class="custom-select-box-multi" name="perpage"  id="display_quantity">
+			<option id="dp_qty10" value="10" {? _GET.perpage == 10 } selected{/} >10개씩</option>
+			<option id="dp_qty50" value="50" {? _GET.perpage == 50 } selected{/} >50개씩</option>
+			<option id="dp_qty100" value="100" {? _GET.perpage == 100 } selected{/} >100개씩</option>
+			<option id="dp_qty200" value="200" {? _GET.perpage == 200 } selected{/} >200개씩</option>
+		</select>
+	</li>
+</ul>
+
+<div class="clearbox"></div>
+
+<div class="clearbox">
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="3%" />
+			<col width="8%" />
+			<col width="14%" />
+			<col width="12%" />
+			<col width="15%" />
+			<col width="10%" />
+			<col width="14%" />
+			<col width="9%" />
+			<col width="9%" />
+			<col width="15%" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align center">번호</th>
+			<th class="its-th-align center">생성일</th>
+			<th class="its-th-align center">유입경로명</th>
+			<th class="its-th-align center">제한금액</th>
+			<th class="its-th-align center">유입경로 URL</th>
+			<th class="its-th-align center">유효기간</th>
+			<th class="its-th-align center">혜택<br/>(현재 부담비율)</th>
+			<th class="its-th-align center">관리</th>
+		</tr>
+		</thead>
+		<tbody class="ltb">
+		{? list }
+			{@ list }
+				<tr>
+				<td class="its-td-align center">{.number}</td>
+				<td class="its-td-align center">{.date}</td>
+				<td class="its-td-align left pdl5">
+					<a href="../referer/referersale?no={.referersale_seq}"><div class="bold blue">{.referersale_name}</div></a>
+					<div class="desc">{.referersale_desc}</div>
+				</td>
+				<td class="its-td-align right pdr5">
+					{.limit_goods_price}원 이상 구매 시 
+				</td>
+				<td class="its-td-align pdl5">{.referersale_url}</td>
+				<td class="its-td-align center">{.validdate}</td>
+				<td class="its-td-align right"><b>{.salepricetitle}</b></td>
+				<td class="its-td-align center" nowrap="nowrap" >
+					<span class="btn small gray"><input type="button" name="modify_btn" referersaleSeq="{.referersale_seq}"  value="수정" /></span>
+					{ ? !.order_seq }
+					<span class="btn small gray"><input type="button" name="delete_btn" referersaleSeq="{.referersale_seq}"  value="삭제" /></span>
+					{ / }
+				</td>
+			</tr>
+			{/}
+		{:}
+			<tr  >
+				<td class="its-td-align center" colspan="8">
+					{ ? search_text }'{search_text}' 검색된 유입경로할인이 없습니다.
+					{:}등록된 유입경로할인이 없습니다.{/}
+				</td>
+			</tr>
+		{/}
+		</tbody>
+	</table>
+</div>
+
+<!-- 서브 레이아웃 영역 : 끝 -->
+
+<br style="line-height:10px;" />
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{paging}</div>
+
+{ #layout_footer }

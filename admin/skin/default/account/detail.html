@@ -1,0 +1,443 @@
+{ #layout_header }
+<script type="text/javascript">
+
+$(document).ready(function() {
+	
+
+	$(".salescost_admin_open").click(function(){
+		var sales_list	= $(this).parent().children("span.salescost_admin_detail").text();
+		var sales_array	= sales_list.split('|');
+		var tdNum		= 0;
+		$(".admin_salescost_td").each(function(){
+			$(this).text(sales_array[tdNum]);
+			tdNum++;
+		});
+
+		openDialog("통신판매중계자 부담금액", "admin_salescost", {"width":"60%","height":200});
+	});
+
+	$(".salescost_provider_open").click(function(){
+		var sales_list	= $(this).parent().children("span.salescost_provider_detail").text();
+		var sales_array	= sales_list.split('|');
+		var tdNum		= 0;
+		$(".provider_salescost_td").each(function(){
+			$(this).text(sales_array[tdNum]);
+			tdNum++;
+		});
+
+		openDialog("판매입점사 부담금액", "provider_salescost", {"width":"30%","height":200});
+	});
+
+});
+
+
+//주문한 sns 계정 정보 확인
+function snsdetailview(m,snscd,mem_seq,no){
+
+	var disp = $("div#snsdetailPopup"+no).css("display");
+	$(".snsdetailPopup").hide();
+
+	var obj	= $("div#snsdetailPopup"+no);
+	if(obj.html() == ''){
+		$.get('../member/sns_detail?snscd='+snscd+'&member_seq='+mem_seq+'&no='+no, function(data) {
+			obj.html(data);
+		});
+	}
+
+	if(disp == "none"){ obj.show(); }
+}
+
+
+</script>
+<style>
+.price {text-align:right;word-break:break-all;width:70px;}
+.rate {text-align:right;word-break:break-all;width:50px;}
+</style>
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li>				
+			<span class="btn large">
+			<button id="account_list" type="button" onclick="location.href='./catalog';">정산리스트<span class="arrowright"></span></button>
+			</span>				
+			</li>
+		</ul>
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2><span class="darkgray">{data_provider.provider_name} 정산 상세(대기) {=implode('~',data_provider.period)}</span></h2>
+		</div>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<div class="center">
+	<br style="line-height:30px;" />
+</div>
+
+<table width="100%" height="25" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td align="right"><span class="btn small"><input type="button" value="엑셀출력" onclick="divExcelDownload('정산상세','#account_detail_table')" /></span></td>
+</tr>
+</table>
+
+<div id="account_detail_table">
+	<table width="100%" class="info-table-style">
+	<thead>
+	<tr>
+		<th class="its-th-align" rowspan="2"></th>		
+		<th class="its-th-align" rowspan="2">주문번호<br/>출고번호<br/>(환불번호)<br/>(반품번호)</th>	
+		<th class="its-th-align" rowspan="2" width="70">상태<br/>배송완료일<br/>(환불일)<br/>(반품일)</th>	
+		<th class="its-th-align" rowspan="2">상품</th>
+		<th class="its-th-align" rowspan="2" width="30">수량</th>
+		<th class="its-th-align" rowspan="2">주문자</th>
+		<th class="its-th-align" rowspan="2" width="50">결제방법</th>
+		
+		<th class="its-th-align" colspan="4">판매</th>
+		<th class="its-th-align" colspan="2">할인공제</th>
+		<th class="its-th-align blue" rowspan="2">마진<br/>금액</th>
+		<th class="its-th-align red" rowspan="2">정산<br/>금액</th>
+	</tr>
+	<tr>
+		<th class="its-th-align">상품<br/>금액</th>
+		<th class="its-th-align blue">통신판매<br/>중계자<br/>수수료</th>
+		<th class="its-th-align red">판매 입점사</th>
+		<th class="its-th-align red">배송비</th>
+		<th class="its-th-align blue">통신판매<br/>중계자</th>
+		<th class="its-th-align red">판매<br/>입점사</th>
+	</tr>
+	</thead>
+
+	<tbody>
+
+	<tr style='background-color:#ccffff'>
+		<td class="its-td-align right bold" colspan="4">합계&nbsp;</td>
+		<td class="its-td-align center bold">{=number_format(tot.ea)}</td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align price bold">{=number_format(tot.price)}</td>		
+		<td class="its-td-align price bold blue">{=number_format(tot.fee)}</td>
+		<td class="its-td-align price bold red">{=number_format(tot.price-tot.fee)}</td>
+		<td class="its-td-align price bold red"></td>		
+		<td class="its-td-align price bold blue">{=number_format(tot.tot_salescost_admin)}</td>
+		<td class="its-td-align price bold red">{=number_format(tot.tot_salescost_provider)}</td>
+		<td class="its-td-align price bold blue">{=number_format(tot.margin)}<br/>({tot.margin_percent}%)</td>
+		<td class="its-td-align price bold red">{=number_format(tot.account_price)}</td>
+	</tr>
+
+	<!--{ @ loop }-->
+	<tr>
+		<td class="its-td-align center">{.index_+1}</td>
+
+
+		<td class="its-td-align center">
+		<a href="../order/view?no={.order_seq}" target="_blank"><span class="order-step-color-{.status} bold" style="font-size:8pt">{.order_seq}</span></a>
+		<div><a href="../export/view?no={.export_code}" target="_blank"><span class="hand bold order-step-color-{.status}">{.export_code}</span></a></div>	
+		</td>	
+		<td class="its-td-align center" style="font-size:8pt">{.mstep}<br/>{.shipping_date}</td>
+		<td class="its-td-align center">
+			<a href="../goods/regist?no={.goods_seq}" target="_blank"  style="font-size:8pt">{.goods_name}</a>
+			<div class="desc">
+			{.option1}
+			{.option2}
+			{.option3}
+			{.option4}
+			{.option5}
+			</div>
+			<div  class="desc">{.suboption}</div>
+		</td>
+		<td class="its-td-align center" width="30">{=number_format(.ea)}</td>
+		<td class="its-td-align center">
+		<!--{ ? .member_seq }-->
+		<div>
+			{?.member_type=='개인'}<img src="../images/common/icon/icon_personal.gif" />
+			{:.member_type=='기업'}<img src="../images/common/icon/icon_besiness.gif" />{/}
+			{.order_user_name}
+			{? .sns_rute }
+				<span>(<img src="../images/sns/sns_{=substr(.sns_rute,0,1)}0.gif" align="absmiddle" snscd="{.sns_rute}" mem_seq="{.member_seq}" no="{=.step}{=.key_}" onclick="snsdetailview('open','{.sns_rute}','{.member_seq}','{=.step}{=.key_}')" class="btnsnsdetail hand">/<span class="blue">{.group_name}</span>)
+				<div id="snsdetailPopup{=.step}{.key_}" class="snsdetailPopup absolute hide" style="margin-left:73px;margin-top:-16px;"></div>
+				</span>
+			{ : }
+			<!--{ ? .mbinfo_rute == 'facebook' //facebook 회원인경우 }-->
+				<a href="../member/detail?member_seq={.member_seq}" target="_blank">
+				<span style="color:#6c6c6c;"><img src="../images/board/icon/sns_f0.gif" align="absmiddle">{.userid}</span>
+				<br/><span class="darkgray">{.group_name}</span>
+				</a>
+			<!--{ : }-->
+				<a href="../member/detail?member_seq={.member_seq}" target="_blank">
+				<br/><span style="color:#6c6c6c;font-size:8pt">{.userid}</span>
+				<br/><span class="darkgray">{.group_name}</span>
+				</a>
+			<!--{ / }-->
+					{ / }
+		</div>
+		<!--{ : }-->
+		<img src="../images/common/icon/icon_personal.gif" />{.order_user_name}
+		<br/><span class="desc">비회원</span>
+		<!--{ / }-->
+		</td>
+		<td class="its-td-align center">
+		{=substr(.mpayment,0,3)}
+		{? .admin_order }/ 관{ / }
+		</td>
+		<td class="its-td-align price">{=number_format(.price)}</td>
+		<td class="its-td-align price blue">{=number_format(.fee)}</td>
+		<td class="its-td-align price red">{=number_format(.price-.fee)}</td>
+		<td class="its-td-align price red">{=number_format(.shipping_cost + .goods_shipping_cost)}</td>
+		<td class="its-td-align price blue">
+			<span class="blue salescost_admin_open hand">{=number_format(.tot_salescost_admin)}</span>
+			<span class="blue except_divExcel salescost_admin_detail hide">{=number_format(.admin_coupon_sale)}|{=number_format(.member_sale)}|{=number_format(.fblike_sale)}|{=number_format(.mobile_sale)}|{=number_format(.admin_promotion_sale)}|{=number_format(.admin_referer_sale)}|{=number_format(.enuri)}|{=number_format(.cash)}|{=number_format(.emoney)}</span>
+		</td>
+		<td class="its-td-align price red">
+			<span class="red salescost_provider_open hand">{=number_format(.tot_salescost_provider)}</span>
+			<span class="red except_divExcel salescost_provider_detail hide">{=number_format(.salescost_provider_coupon)}|{=number_format(.salescost_provider_promotion)}|{=number_format(.salescost_provider_referer)}</span>
+		</td>
+
+		<td class="its-td-align price blue">{=number_format(.margin)}<br/>({.margin_percent}%)</td>
+		<td class="its-td-align price red">{=number_format(.account_price)}</td>
+	</tr>
+	<!--{ / }-->
+	<!--{ ? loop }-->
+	<tr style='background-color:#ffcc99'>		
+		
+		<td class="its-td-align center"></td>	
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align right">소계</td>
+		<td class="its-td-align center" >{=number_format(tot_export.ea)}</td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align price">{=number_format(tot_export.price)}</td>
+		<td class="its-td-align price blue">{=number_format(tot_export.fee)}</td>
+		<td class="its-td-align price red">{=number_format(tot_export.price-tot_export.fee)}</td>
+		<td class="its-td-align price red">{=number_format(tot_export.shipping_cost + tot_export.goods_shipping_cost)}</td>		
+		<td class="its-td-align price blue">{=number_format(tot_export.tot_salescost_admin)}</td>
+		<td class="its-td-align price red">{=number_format(tot_export.tot_salescost_provider)}</td>
+		<td class="its-td-align price blue">{=number_format(tot_export.margin)}<br/>({tot_export.margin_percent}%)</td>
+		<td class="its-td-align price red">{=number_format(tot_export.account_price)}</td>
+	</tr>
+	<!--{ / }-->
+	<!--{ @ loop2 }-->
+	<tr>
+		<td class="its-td-align center">{.index_+1}</td>
+		<td class="its-td-align center">
+		<a href="../order/view?no={.order_seq}" target="_blank"><span class="order-step-color-{.status} bold">{.order_seq}</span></a>
+		<div><a href="../return/view?no={.return_code}" target="_blank"><span class="hand bold order-step-color-{.status}">{.return_code}</span></a></div>	
+		</td>		
+		<td class="its-td-align center" style="font-size:8pt">반품완료<br/>{.return_date}</td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center">
+		<!--{ ? .member_seq }-->
+		<div>
+			{?.member_type=='개인'}<img src="../images/common/icon/icon_personal.gif" />
+			{:.member_type=='기업'}<img src="../images/common/icon/icon_besiness.gif" />{/}
+			{.order_user_name}
+			<!--{ ? .mbinfo_rute == 'facebook' //facebook 회원인경우 }-->
+				<a href="../member/detail?member_seq={.member_seq}" target="_blank">
+				<span style="color:#6c6c6c;"><img src="../images/board/icon/sns_f0.gif" align="absmiddle">{.userid}</span>
+				<br/><span class="darkgray">{.group_name}</span>
+				</a>
+			<!--{ : }-->
+				<a href="../member/detail?member_seq={.member_seq}" target="_blank">
+				<br/><span style="color:#6c6c6c;font-size:8pt">{.userid}</span>
+				<br/><span class="darkgray">{.group_name}</span>
+				</a>
+			<!--{ / }-->
+		</div>
+		<!--{ : }-->
+		<img src="../images/common/icon/icon_personal.gif" />{.order_user_name}
+		<br/><span class="desc">비회원</span>
+		<!--{ / }-->
+		</td>
+		<td class="its-td-align center">{=substr(.mpayment,0,3)}{? .admin_order }/ 관{ / }</td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>		
+		<td class="its-td-align price red">{=number_format(.return_shipping_price)}</td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+	</tr>
+	<!--{ / }-->
+	<!--{ ? loop2 }-->
+	<tr style='background-color:#ffcc99'>			
+		<td class="its-td-align center"></td>	
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align right">소계</td>
+		<td class="its-td-align center">{=number_format(tot_return.ea)}</td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center red">{=number_format(tot_return.return_shipping_price)}</td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align price "></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align price red">{=number_format(tot_return.account_price)}</td>
+	</tr>
+	<!--{ / }-->
+	<!--{ @ loop3 }-->
+	<tr style='background-color:'>
+		<td class="its-td-align center">{.index_+1}</td>
+		<td class="its-td-align center">
+		<a href="../order/view?no={.order_seq}" target="_blank"><span class="order-step-color-{.status} bold">{.order_seq}</span></a>
+		<div><a href="../refund/view?no={.refund_code}" target="_blank"><span class="hand bold order-step-color-{.status}">{.refund_code}</span></a></div>
+		</td>	
+		<td class="its-td-align center" style="font-size:8pt">환불완료<br/>{.refund_date}</td>
+		<td class="its-td-align center">
+			<a href="../goods/regist?no={.goods_seq}" target="_blank">{.goods_name}</a>
+			<div class="desc">
+			{.option1}
+			{.option2}
+			{.option3}
+			{.option4}
+			{.option5}
+			</div>
+			<div  class="desc">{.suboption}</div>
+		</td>
+		<td class="its-td-align center">{=number_format(.ea)}</td>
+		<td class="its-td-align center">
+		<!--{ ? .member_seq }-->
+		<div>
+			{?.member_type=='개인'}<img src="../images/common/icon/icon_personal.gif" />
+			{:.member_type=='기업'}<img src="../images/common/icon/icon_besiness.gif" />{/}
+			{.order_user_name}
+			<!--{ ? .mbinfo_rute == 'facebook' //facebook 회원인경우 }-->
+				<a href="../member/detail?member_seq={.member_seq}" target="_blank">
+				<span style="color:#6c6c6c;"><img src="../images/board/icon/sns_f0.gif" align="absmiddle">{.userid}</span>
+				<br/><span class="darkgray">{.group_name}</span>
+				</a>
+			<!--{ : }-->
+				<a href="../member/detail?member_seq={.member_seq}" target="_blank">
+				<br/><span style="color:#6c6c6c;font-size:8pt">{.userid}</span>
+				<br/><span class="darkgray">{.group_name}</span>
+				</a>
+			<!--{ / }-->
+		</div>
+		<!--{ : }-->
+		<img src="../images/common/icon/icon_personal.gif" />{.order_user_name}
+		<br/><span class="desc">비회원</span>
+		<!--{ / }-->
+		</td>
+		<td class="its-td-align center">{=substr(.mpayment,0,3)}{? .admin_order }/ 관{ / }</td>
+
+		<td class="its-td-align price">-{=number_format(.price)}</td>
+		<td class="its-td-align price blue">{=number_format(.fee)}</td>
+		<td class="its-td-align price red">{=number_format(.price-.fee)}</td>
+		<td class="its-td-align center"></td>		
+		<td class="its-td-align price"></td>
+		<td class="its-td-align price"></td>
+		<td class="its-td-align price"></td>
+		<td class="its-td-align price red">
+		{ ? .account_price != 0 }-{=number_format(.account_price)}{ : }0{ / }		
+		</td>
+	</tr>
+	<!--{ / }-->
+	<!--{ ? loop3 }-->
+	<tr style='background-color:#ffcc99'>		
+		<td class="its-td-align center"></td>	
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align right">소계</td>
+		<td class="its-td-align center" >{=number_format(tot_refund.ea)}</td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align price">{=number_format(tot_refund.price)}</td>	
+		<td class="its-td-align price blue">{=number_format(tot_refund.fee)}</td>
+		<td class="its-td-align price red">{=number_format(tot_refund.price-tot_refund.fee)}</td>
+		<td class="its-td-align price"></td>
+		<td class="its-td-align rate"></td>
+		<td class="its-td-align price"></td>
+		<td class="its-td-align price"></td>
+		<td class="its-td-align price red">{=number_format(tot_refund.account_price)}</td>
+	</tr>
+	<!--{ / }-->
+	<tr style='background-color:#ccffff'>
+		<td class="its-td-align right bold" colspan="4">합계&nbsp;</td>
+		<td class="its-td-align center bold">{=number_format(tot.ea)}</td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align center"></td>
+		<td class="its-td-align price bold">{=number_format(tot.price)}</td>		
+		<td class="its-td-align price bold blue">{=number_format(tot.fee)}</td>
+		<td class="its-td-align price bold red">{=number_format(tot.price-tot.fee)}</td>
+		<td class="its-td-align price bold"></td>		
+		<td class="its-td-align price bold blue">{=number_format(tot.tot_salescost_admin)}</td>
+		<td class="its-td-align price bold red">{=number_format(tot.tot_salescost_provider)}</td>
+		<td class="its-td-align price bold blue">{=number_format(tot.margin)}<br/>({tot.margin_percent}%)</td>
+		<td class="its-td-align price bold red">{=number_format(tot.account_price)}</td>
+	</tr>
+	</tbody>
+	</table>
+</div>
+
+<div id="admin_salescost" class="hide">
+	<table width="100%" class="info-table-style">
+	<colgroup>
+		<col width="" /><!-- 쿠폰 -->
+		<col width="" /><!-- 등급 -->
+		<col width="" /><!-- 좋아요 -->
+		<col width="" /><!-- 모바일 -->
+		<col width="" /><!-- 코드 -->
+		<col width="" /><!-- 유입처 -->
+		<col width="" /><!-- 에누리 -->
+		<col width="" /><!-- 적립금 -->
+		<col width="" /><!-- 이머니 -->
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="its-th-align">쿠폰</th>
+		<th class="its-th-align">등급</th>
+		<th class="its-th-align">좋아요</th>
+		<th class="its-th-align">모바일</th>
+		<th class="its-th-align">코드</th>
+		<th class="its-th-align">유입처</th>
+		<th class="its-th-align">에누리</th>
+		<th class="its-th-align">적립금</th>
+		<th class="its-th-align">이머니</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td class="its-td-align price pdr5 admin_salescost_td"></td>
+		<td class="its-td-align price pdr5 admin_salescost_td"></td>
+		<td class="its-td-align price pdr5 admin_salescost_td"></td>
+		<td class="its-td-align price pdr5 admin_salescost_td"></td>
+		<td class="its-td-align price pdr5 admin_salescost_td"></td>
+		<td class="its-td-align price pdr5 admin_salescost_td"></td>
+		<td class="its-td-align price pdr5 admin_salescost_td"></td>
+		<td class="its-td-align price pdr5 admin_salescost_td"></td>
+		<td class="its-td-align price pdr5 admin_salescost_td"></td>
+	</tr>
+	</tbody>
+	</table>
+</div>
+
+<div id="provider_salescost" class="hide">
+	<table width="100%" class="info-table-style">
+	<colgroup>
+		<col width="" /><!-- 쿠폰 -->
+		<col width="" /><!-- 코드 -->
+		<col width="" /><!-- 유입처 -->
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="its-th-align">쿠폰</th>
+		<th class="its-th-align">코드</th>
+		<th class="its-th-align">유입처</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td class="its-td-align price pdr5 provider_salescost_td"></td>
+		<td class="its-td-align price pdr5 provider_salescost_td"></td>
+		<td class="its-td-align price pdr5 provider_salescost_td"></td>
+	</tr>
+	</tbody>
+	</table>
+</div>
+
+{ #layout_footer }

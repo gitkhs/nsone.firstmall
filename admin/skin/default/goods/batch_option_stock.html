@@ -1,0 +1,60 @@
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="40" />
+		<col width="30" />
+		<col /><!--옵션-->
+		<col width="120" /><!--재고-->
+		<col width="155" /><!--재고연동판매-->
+		<col width="180" /><!--상태-->
+		<col width="100" /><!--노출-->
+	<!--{ @ loop }-->
+	<tr style="height:30px;">
+		<td></td>
+		<td>
+		<input type="radio" name="detail_default_option[{.goods_seq}]" value="{.option_seq}" {?.default_option=='y'}checked{ / } />
+		</td>
+		<td>
+		<span class="detail_default_option_select hand">
+		<!--{ ? .option_divide_title[0] }-->
+		{.option_divide_title[0]} :
+		<!--{ / }-->
+		{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+		{.option1}
+		<!--{ ? .option2 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[1] }-->
+		{.option_divide_title[1]} :
+		<!--{ / }-->
+		{.option2}
+		<!--{ / }-->
+		<!--{ ? .option3 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[2] }-->
+		{.option_divide_title[2]} :
+		<!--{ / }-->
+		{.option3}
+		<!--{ / }-->
+		<!--{ ? .option4 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[3] }-->
+		{.option_divide_title[3]} :
+		<!--{ / }-->
+		{.option4}
+		<!--{ / }-->
+		<!--{ ? .option5 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[4] }-->
+		{.option_divide_title[4]} :
+		<!--{ / }-->
+		{.option5}
+		<!--{ / }-->
+		</span>
+		</td>
+		<td align="left" class="pdl5"><input type="text" name="detail_stock[{.option_seq}]" size="5" value="{.stock}" style="text-align:right" class="input_stock onlynumber" /> ({.able_stock})</td>
+		<td align="center">&nbsp;</td>
+		<td align="center">&nbsp;</td>
+		<td align="center">&nbsp;<input type="hidden" name="option_seq[{.option_seq}]" value="{.goods_seq}" /></td>
+	</tr>
+	<!--{ / }-->
+</table>

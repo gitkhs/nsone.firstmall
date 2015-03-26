@@ -1,0 +1,263 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	// 아이콘 일괄변경
+	$("#btn_all_icon").bind("click",function(){
+		change_all_checkbox('batch_icon','input_icon');
+	});
+
+	/* 아이콘 개별삭제 */
+	$(".iconViewTable button.iconDel").live("click",function(){
+		if(!confirm("정말로 아이콘을 삭제하시겠습니까?")) return;
+		var goods_seq = $(this).attr('goods_seq');
+		var icon_seq = $(this).attr('icon_seq');
+		$.ajax({
+			type: "get",
+			url: "../goods_process/goods_icon_del",
+			data: "icon_seq="+icon_seq+"&goods_seq="+goods_seq,
+			success: function(result){
+				if(result){
+					if( $("#iconViewTable_"+goods_seq+" tbody tr").length > 0) {
+						$("#iconViewTable_"+goods_seq+"_"+icon_seq).remove();
+					}
+					alert('이 상품의 아이콘을 정상적으로 삭제하였습니다.');
+				}else{
+					alert('상품의 아이콘 삭제가 실패하였습니다.');
+					return false;
+				}
+			}
+		});
+	});
+
+
+	$(".iconstartDate").addClass('datepicker');
+	$(".iconendDate").addClass('datepicker');
+	setDatepicker();
+
+
+	$("#batch_iconstartDate").addClass('datepicker');
+	setDatepicker($("#batch_iconstartDate"));
+	$("#batch_iconendDate").addClass('datepicker');
+	setDatepicker($("#batch_iconendDate"));
+
+
+});
+
+
+function change_all_checkbox(input_class_name,class_name)
+{
+	$("." + class_name).each(function(){
+		if( $(this).parent().parent().parent().parent().parent().parent().find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+			$(this).attr('checked',false);
+		}
+	});
+
+	$("." + input_class_name).each(function(){
+		var batch_obj = $(this);
+		if(batch_obj.attr('checked') == 'checked'){
+			$("." + class_name).each(function(){
+				if( $(this).parent().parent().parent().parent().parent().parent().find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+					if( $(this).val() == batch_obj.val() ){
+						$(this).attr('checked',true);
+					}
+				}
+			});
+		}
+	});
+}
+
+
+</script>
+<br class="table-gap" />
+<table class="list-table-style" cellspacing="0">
+	<colgroup>
+		<col width="15%" /><!--대상 상품-->
+		<col  /><!--아래와 같이 업데이트-->
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>대상 상품</th>
+		<th colspan="2">아이콘을 아래와 같이 업데이트  </th>
+	</tr>
+	</thead>
+
+	<tbody class="ltb">
+		<tr class="list-row" style="height:70px;">
+			<td align="center" class="td">
+			검색된 상품에서  →
+			<select name="modify_list"  class="modify_list">
+				<option value="choice">선택 </option>
+				<option value="all">전체 </option>
+			</select>
+			</td>
+			<td class="pdt20 pdb20">
+				<table width="100%" cellpadding="0"  cellspacing="0" style="border:0px;">
+				<colgroup>
+					<col width="22%" />
+					<col  />
+				</colgroup>
+				<!--
+				<tr>
+					<td><label><input type="checkbox" name="batch_goodsIconCode_yn" value="1" /> 선택(전체)상품의 아이콘을 아래와 같이 일괄 변경합니다</label></td>
+				</tr>-->
+				<tr>
+					<td>[아이콘 선택] : 다중 선택 가능
+					<span style="display:inline-block;width:100%">
+					<ul>
+					<!--{ @ r_goods_icon }-->
+					<li style="float:left;width:100px;height:20px;text-align:left;overflow:hidden;margin-left:10px;">
+						<label>
+						<NOBR>
+						<input type="checkbox" name="batch_goodsIconCode[{.codecd}]" value="{.codecd}" class="batch_icon" />
+						<img src="/data/icon/goods/{.codecd}.gif" align='absmiddle' height='15' border="0">
+						</NOBR>
+						</label>
+					</li>
+					<!--{ / }-->
+					</ul>
+					</span></td>
+				</tr>
+				<tr>
+					<td>[기간 선택]
+					<span style="display:inline-block;width:100%;margin-left:10px;">
+					<input type="text" name="batch_iconstartDate" value="" class="line" id="batch_iconstartDate" maxlength="10" size="10" />~
+					<input type="text" name="batch_iconendDate" value="" class="line " id="batch_iconendDate"   maxlength="10" size="10" />
+					(미설정 시 노출 지속)
+					</span></td>
+				</tr>
+			</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+
+<br class="table-gap" />
+
+<ul class="left-btns clearbox">
+	<li><div style="margin-top:rpx;">
+	<!--{ ? search_yn == 'y' }-->
+	검색 <b>{=number_format(page.totalcount)}</b> 개
+	<!--{ : }-->
+	총 <b>{=number_format(page.totalcount)}</b> 개</div>
+	<!--{ / }-->
+	</li>
+	<li><span class="desc">※ 이용방법 : [검색하기]버튼으로 검색 후 상품정보를 조건 업데이트 하세요!</span></li>
+</ul>
+
+<div class="fr">
+	<div class="clearbox">
+		<ul class="right-btns clearbox">
+		<li><select class="custom-select-box-multi" name="orderby">
+			<option value="goods_seq" {?orderby=='goods_seq'}selected{/}>최근등록순</option>
+			<option value="goods_name" {?orderby=='goods_name'}selected{/}>상품명순</option>
+			<option value="page_view" {?orderby=='page_view'}selected{/}>페이지뷰순</option>
+		</select></li>
+		<li><select  class="custom-select-box-multi" name="perpage">
+			<option id="dp_qty10" value="10" {? perpage == 10 } selected{/} >10개씩</option>
+			<option id="dp_qty50" value="50" {? perpage == 50 } selected{/} >50개씩</option>
+			<option id="dp_qty100" value="100" {? perpage == 100 } selected{/} >100개씩</option>
+			<option id="dp_qty200" value="200" {? perpage == 200 } selected{/} >200개씩</option>
+		</select></li>
+	</ul>
+	</div>
+</div>
+
+<br style="line-height:2px;" />
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="30" /><!--체크-->
+		<col width="30" /><!--중요-->
+		<col width="40" /><!--번호-->
+		<col width="40" /><!--이벤트-->
+		<col width="60" /><!--상품이미지-->
+		<col  /><!--상품명-->
+		<col width="500" /><!--아이콘-->
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th><input type="checkbox" id="chkAll" /></th>
+		<th><span class="icon-star-gray {?sc.orderby=='favorite_chk' && sc.sort=='desc'}checked{/}" id="order_star"></span></th>
+		<th>번호</th>
+		<th>이벤트</th>
+		<th colspan="2">상품명</th>
+		<th>아이콘(날짜 변경 및 삭제 가능)</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+	<!--{? loop }-->
+	<!--{@ loop }-->
+		<tr class="list-row" style="height:70px;">
+			<td align="center"><input type="checkbox" class="chk" name="goods_seq[]" value="{.goods_seq}" /></td>
+			<td align="center"><span class="icon-star-gray star_select {.favorite_chk}" goods_seq="{.goods_seq}"></span></td>
+			<td align="center">{page.totalcount - ._no + 1}</td>
+			<td align="center">{?.event_seq}<a href="../event/regist?event_seq={.event_seq}" target="_blank" style="color:blue">{.event_seq}</a>{:}-{/}</td>
+			<td align="center"><a href="/goods/view?no={.goods_seq}" target="_blank"><img src="{=viewImg(.goods_seq,'thumbView')}" width="50"></a></td>
+			<td align="left" style="padding-left:10px;">
+				{? .tax=='exempt' && .cancel_type == '1'}
+					<div>
+					<span style="color:red;" class="left" >[비과세]</span>
+					<span class="order-item-cancel-type left" >[청약철회불가]</span>
+					</div>
+				{: .tax=='exempt' }
+					<div>
+					<span style="color:red;" class="left" >[비과세]</span>
+					</div>
+				{: .cancel_type == '1'}
+					<div>
+					<span class="order-item-cancel-type left" >[청약철회불가]</span>
+					</div>
+				{/}
+			{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+			<a href="../goods/regist?no={.goods_seq}" target="_blank">{.goods_name}</a> <div style="padding-top:5px;">{.catename}</div>
+			</td>
+			<td align="center">
+				<table class="info-table-style iconViewTable" id="iconViewTable_{.goods_seq}" style="width:100%">
+				<colgroup>
+					<col /><!-- 아이콘 -->
+					<col width="50%" /><!-- 노출기간 (미설정 시 노출 지속) -->
+					<col width="8%" /><!-- 삭제 -->
+				</colgroup>
+
+				<tbody>
+				<!--{ @ .icons }-->
+					<tr id="iconViewTable_{.goods_seq}_{..icon_seq}">
+						<td class="its-td-align center">
+							<img src="/data/icon/goods/{..codecd}.gif" border="0" class="goodsIcon hand" align="absmiddle">
+						</td>
+						<td class="its-td">
+							<input type="hidden" name="iconSeq[{.goods_seq}][]" value="{..icon_seq}" />
+							<span>
+							<input type="text" name="iconstartDate[{.goods_seq}][{..icon_seq}]" value="{..start_date}" class="line iconstartDate" icon_seq="{..icon_seq}"  goods_seq="{.goods_seq}" maxlength="10" size="10" />~
+							<input type="text" name="iconendDate[{.goods_seq}][{..icon_seq}]" value="{..end_date}" class="line iconendDate" icon_seq="{..icon_seq}"  goods_seq="{.goods_seq}" maxlength="10" size="10" />
+							</span>
+						</td>
+						<td class="its-td-align center"><span class="btn-minus"><button type="button" class="iconDel" icon_seq="{..icon_seq}"  goods_seq="{.goods_seq}" > </button></span></td>
+					</tr>
+				<!--{ / }-->
+				</table>
+			</td>
+		</tr>
+		<tr class="order-list-summary-row hide">
+			<td colspan="8" class="order-list-summary-row-td"><div class="option_info"></div></td>
+		</tr>
+	<!--{ / }-->
+	<!--{ : }-->
+	<tr class="list-row">
+		<td align="center" colspan="8">
+			<!--{ ? search_text }-->
+				'{search_text}' 검색된 상품이 없습니다.
+			<!--{:}-->
+				등록된 상품이 없습니다.
+			<!--{/}-->
+		</td>
+	</tr>
+	<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+</table>
+<!-- 주문리스트 테이블 : 끝 -->

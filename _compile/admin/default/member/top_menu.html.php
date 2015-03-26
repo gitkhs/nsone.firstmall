@@ -1,0 +1,46 @@
+<?php /* Template_ 2.2.6 2015/01/27 13:35:25 /www/nsone_firstmall_kr/admin/skin/default/member/top_menu.html 000002863 */ ?>
+<style> 
+	.ctab {border-top:1px solid #d6d6d6;border-right:1px solid #d6d6d6;border-bottom:1px solid #d6d6d6;width:170px;line-height:30px;text-align:center;background-color:#eeeeee;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#757575;}
+	.ctab-on {border-top:1px solid #d6d6d6;border-bottom:1px solid #ffffff;border-right:1px solid #d6d6d6;width:170px;line-height:30px;text-align:center;background-color:#ffffff;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;}
+</style>
+
+<!-- 상단 단계 링크 : 시작 -->
+<div class="left" id="rn_join">
+	<br style="line-height:20px;" />
+	
+	<div style="position:absolute;">
+	<table cellpadding="0" cellspacing="0">
+	<tr>
+<?php if($_GET['sc_gb']=="PERSONAL"){?>
+		<td class="ctab<?php echo $TPL_VAR["tab1"]?> t1"><span class="hand" onclick="location.href='curation';">고객 리마인드 설정</span></td>
+		<td class="ctab<?php echo $TPL_VAR["tab2"]?> t2"><span class="hand" onclick="location.href='curation_history_sms';">리마인드 SMS 발송내역</span></td>
+		<td class="ctab<?php echo $TPL_VAR["tab3"]?> t3"><span class="hand" onclick="location.href='curation_history_email';">리마인드 Email 발송내역</span></td>
+		<td class="ctab<?php echo $TPL_VAR["tab4"]?> t4"><span class="hand" onclick="location.href='curation_stat?first=1';">리마인드 유입 통계</span></td>
+		<td class="ctab<?php echo $TPL_VAR["tab5"]?> t5"><span class="hand" onclick="location.href='sms_charge?sc_gb=PERSONAL';">SMS충전(통합)</span></td>
+		<td class="ctab<?php echo $TPL_VAR["tab6"]?> t6" style="width:200px;"><span class="hand" onclick="location.href='sms_auth?sc_gb=PERSONAL';">SMS 발송키 등록(통합)</span></td>
+<?php }else{?>
+		<td class="ctab<?php echo $TPL_VAR["tab1"]?> t1"><span class="hand" onclick="formMoveSub('sms',1);">SMS자동발송</span></td>
+		<td class="ctab<?php echo $TPL_VAR["tab2"]?> t2"><span class="hand" onclick="formMoveSub('sms_charge',2);">SMS충전(통합)</span></td>
+		<td class="ctab<?php echo $TPL_VAR["tab3"]?> t3"><span class="hand" onclick="formMoveSub('sms_history',3);">SMS발송내역</span></td>
+		<td class="ctab<?php echo $TPL_VAR["tab4"]?> t4" style="width:200px;"><span class="hand" onclick="formMoveSub('sms_auth',4);">SMS 발송키 등록(통합)</span></td>
+<?php }?>
+	</tr>
+	</table>
+	</div>
+	<table height="32" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #d6d6d6;">
+	<tr>
+		<td align="center"></td>
+	</tr>
+	</table>
+
+</div>
+<!-- 상단 단계 링크 : 끝 -->
+
+<script type="text/javascript">
+function formMoveSub(gb, no){
+	$(".ctab-on").addClass("ctab");
+	$(".ctab-on").removeClass("ctab-on");
+	$(".t"+no).addClass("ctab-on");
+	location.href = gb;
+}
+</script>

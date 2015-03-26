@@ -1,0 +1,261 @@
+<!--{ ? uri_string()!='main/index' }-->
+<style>
+#goodsSearchForm {}
+#goodsSearchForm table.gsf-category-title {font-size:12px;}
+#goodsSearchForm table.gsf-category-table {border-collapse:collapse;}
+#goodsSearchForm table.gsf-category-table th.gsfc-th {border:1px solid #dbdbdb; padding:0 5px 0 12px; height:30px; line-height:30px; background-color:#f5f5f5; font-weight:normal; color:#000;}
+#goodsSearchForm table.gsf-category-table td.gsfc-td {border:1px solid #dbdbdb;}
+#goodsSearchForm table.gsf-category-table th.gsfc-th input[name='search_text'] {width:140px; text-indent:5px; height:20px; line-height:20px; border:1px solid #aaa; border-right:none;}
+#goodsSearchForm table.gsf-category-list {table-layout:fixed; margin:14px 0;}
+#goodsSearchForm table.gsf-category-list td {padding:7px 0 7px 16px;}
+#goodsSearchForm table.gsf-category-list td a {color:#676767; font-size:11px;}
+
+#goodsSearchForm table.gsf-category-double-list {table-layout:fixed; }
+#goodsSearchForm table.gsf-category-double-list th {padding:20px 16px; text-align:left; font-weight:bold; color:#4e4e4e; font-size:11px;}
+#goodsSearchForm table.gsf-category-double-list td {padding:15px;}
+#goodsSearchForm table.gsf-category-double-list td,
+#goodsSearchForm table.gsf-category-double-list th {border-top:1px solid #e9e9e9}
+#goodsSearchForm table.gsf-category-double-list tr:first-child td,
+#goodsSearchForm table.gsf-category-double-list tr:first-child th {border-top:none;}
+#goodsSearchForm table.gsf-category-double-list td a {color:#676767; font-size:11px;}
+#goodsSearchForm table.gsf-category-double-list table.gsf-category-list {table-layout:fixed; margin:0px; border-left:1px solid #e9e9e9;}
+#goodsSearchForm table.gsf-category-double-list table.gsf-category-list td {padding:4px 20px; border:0px;}
+#goodsSearchForm table.gsf-category-double-list table.gsf-category-list td a {color:#676767; font-size:11px;}
+
+#goodsSearchForm table.gsf-main-table {border-collapse:collapse; border:1px solid #dbdbdb; border-top:none;}
+#goodsSearchForm table.gsf-main-table th.gsfm-th,
+#goodsSearchForm table.gsf-main-table td.gsfm-td {min-height:34px; line-height:34px; border-top:1px solid #dbdbdb; font-size:11px;}
+#goodsSearchForm table.gsf-main-table th.gsfm-th {color:#333; width:94px; text-align:left; text-indent:16px;}
+#goodsSearchForm table.gsf-main-table th.gsfm-td a {color:#676767;}
+
+#goodsSearchForm ul.gsfm-prices {display:inline-block; *zoom:1; border-top:1px solid #e1e1e1; border-right:1px solid #e1e1e1; border-bottom:1px solid #c1c1c1;}
+#goodsSearchForm ul.gsfm-prices:after {content:""; display:block; clear:both}
+#goodsSearchForm ul.gsfm-prices li {float:left; width:75px; border-left:1px solid #e1e1e1; background-color:#f9f9f9; height:18px; line-height:18px; text-align:center; cursor:pointer}
+#goodsSearchForm ul.gsfm-prices li:hover {color:#000}
+#goodsSearchForm ul.gsfm-prices li.selected {background-color:#fff; color:#000; font-weight:bold;}
+#goodsSearchForm input[name='start_price'] {height:18px; line-height:18px; padding:0 2px; border:1px solid #c1c1c1}
+#goodsSearchForm input[name='end_price'] {height:18px; line-height:18px; padding:0 2px; border:1px solid #c1c1c1}
+
+#goodsSearchForm ul.gsfm-brands {display:inline-block; *zoom:1; width:95%}
+#goodsSearchForm ul.gsfm-brands:after {content:""; display:block; clear:both}
+#goodsSearchForm ul.gsfm-brands li {float:left; width:{=99/category_navigation_brand_count_w}%}
+#goodsSearchForm div.gsfm-brands-more {position:absolute; right:7px; top:7px; cursor:pointer}
+
+#goodsSearchForm ul.gsfm-colors {display:inline-block; *zoom:1;}
+#goodsSearchForm ul.gsfm-colors:after {content:""; display:block; clear:both}
+#goodsSearchForm ul.gsfm-colors li {float:left; margin-right:4px;}
+#goodsSearchForm ul.gsfm-colors li span {display:block; width:12px; height:12px; border:1px dotted #c1c1c1; cursor:pointer}
+#goodsSearchForm ul.gsfm-colors li span:hover {border-style:dotted; border-color:#000}
+#goodsSearchForm ul.gsfm-colors li span.selected {border-style:solid; border-color:#000}
+
+</style>
+
+<script>
+$(function(){
+	
+	var formObj = $("form[name='goodsSearchForm']");
+	
+	// 가격대 선택
+	$("#goodsSearchForm ul.gsfm-prices li").each(function(i){
+		$(this).click(function(){
+			setSearchFormParam('start_price',$(this).attr('start_price'));
+			setSearchFormParam('end_price',$(this).attr('end_price'));
+			formObj.submit();
+		});
+		{? sc.start_price || sc.end_price}
+			if(num($(this).attr('start_price'))==num('{sc.start_price}') && num($(this).attr('end_price'))==num('{sc.end_price}')){
+				$(this).addClass('selected');	
+			}
+		{: !sc.start_price && !sc.end_price}
+			if(i==0) $(this).addClass('selected');	
+		{/}
+	});
+	
+	// 브랜드 선택
+	$("#goodsSearchForm ul.gsfm-brands li input").bind('change',function(i){
+		formObj.submit();
+	});
+	$("#goodsSearchForm ul.gsfm-brands li input:checked").closest("li").prependTo($("#goodsSearchForm ul.gsfm-brands"));
+	if($("#goodsSearchForm ul.gsfm-brands").height()>34){
+		$("#goodsSearchForm div.gsfm-brands-more").show();
+	}else{
+		$("#goodsSearchForm div.gsfm-brands-more").hide();
+	}
+	$("#goodsSearchForm ul.gsfm-brands").css({
+		'height' : '34px',
+		'overflow' : 'hidden'
+	});
+	$("#goodsSearchForm div.gsfm-brands-more").bind('click',function(){
+		if($("#goodsSearchForm ul.gsfm-brands").css('height')!='34px'){
+			$("#goodsSearchForm ul.gsfm-brands").css({
+				'height' : '34px',
+				'overflow' : 'hidden'
+			});
+		}else{
+			$("#goodsSearchForm ul.gsfm-brands").css({
+				'height' : 'auto',
+				'overflow' : 'show'
+			});
+		}
+	});
+	
+	// 색상 선택
+	$("#goodsSearchForm ul.gsfm-colors li span").bind('click',function(i){
+		if($(this).hasClass('selected')){
+			setSearchFormParam('color','');
+		}else{
+			setSearchFormParam('color',$(this).attr('color'));
+		}
+		
+		formObj.submit();
+	});
+	
+	$("#goodsSearchForm input[name='insearch']").bind('change',function(){
+		if($(this).is(":checked")){
+			$("#goodsSearchForm textarea[name='old_search_text']").removeAttr("disabled");
+		}else{
+			$("#goodsSearchForm textarea[name='old_search_text']").attr("disabled",true);
+		}
+	}).change();
+	
+});
+
+function setSearchFormParam(name,value){
+	var formObj = $("form[name='goodsSearchForm']");
+	if(!formObj.find("input[name='"+name+"'],select[name='"+name+"']").length){
+		formObj.prepend("<input type='hidden' name='"+name+"' value='"+value+"' />");
+	}
+	formObj.find("input[name='"+name+"']").val(value);
+}
+
+</script>
+
+
+<form name="goodsSearchForm">
+{?_GET.code}<input type="hidden" name="code" value="{=htmlspecialchars(_GET.code)}" />{/}
+{?_GET.category_code}<input type="hidden" name="category_code" value="{=htmlspecialchars(_GET.category_code)}" />{/}
+{?_GET.brand_code}<input type="hidden" name="brand_code" value="{=htmlspecialchars(_GET.brand_code)}" />{/}	
+{?_GET.color}<input type="hidden" name="color" value="{=htmlspecialchars(_GET.color)}" />{/}
+{?_GET.tpl}<input type="hidden" name="tpl" value="{=htmlspecialchars(_GET.tpl)}" />{/}
+
+<textarea name="old_search_text" class="hide">{=htmlspecialchars(old_search_text)}</textarea>
+
+<table class="gsf-category-table" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<th class="gsfc-th left">
+		<div class="fleft gsf-category-title">
+			{?categoryData}
+				<b><a href="?code={_GET.code}">{categoryData.title}</a></b>
+			{/}
+		</div>
+		<div class="fright">
+			{?sc.search_text && page.totalcount>1}
+			&nbsp;<label><input type="checkbox" name="insearch" value="1" {?_GET.insearch}checked{/} /> 결과 내 재검색</label>
+			{/}
+			&nbsp;<input type="text" name="search_text" value="{=htmlspecialchars(sc.search_text)}" /><input type="image" src="../images/common/btn_srch_depth.gif" />	
+		</div>
+	</th>
+</tr>
+<tr>
+	<td class="gsfc-td" colspan="2">
+		{?category_navigation_type=='single'}
+		<table class="gsf-category-list" width="100%" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<!--{@childCategoryList}-->
+			<!--{ ? .index_ && .index_%category_navigation_count_w==0}--></tr><tr><!--{ / }-->
+				<!--{?kind=='category'}-->
+				<td><a href="{.link}" {?sc.category_code==.category_code}class="bold"{/}>{.title}</a></td>
+				<!--{:kind=='brand'}-->
+				<td><a href="{.link}" {?sc.brand_code==.category_code}class="bold"{/}>{.title}</a></td>
+				<!--{:kind=='location'}-->
+				<td><a href="{.link}" {?sc.location_code==.location_code}class="bold"{/}>{.title}</a></td>
+				<!--{:kind=='search'}-->
+				<td><a href="{.link}" {?sc.category_code==.category_code}class="bold"{/}>{.title}</a></td>
+				<!--{:}-->
+				<td><a href="{.link}" {?sc.category_code==.category_code}class="bold"{/}>{.title}</a></td>
+				<!--{/}-->			
+			<!--{/}-->
+		</tr>
+		</table>
+		{:}
+		<table class="gsf-category-double-list" width="100%" border="0" cellpadding="0" cellspacing="0">
+		<!--{@childCategoryList}-->
+		<tr>
+			<th width="20%">
+				<a href="{.link}">{.title}</a>
+			</th>
+			<td>
+				<table class="gsf-category-list" width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>{@ range(1, category_navigation_count_w) }<td width="{=(100/category_navigation_count_w)}%" style="height:0px;"></td>{/}</tr>
+				<tr>
+					<!--{@.childs}-->
+						<!--{ ? ..index_ && ..index_%category_navigation_count_w==0}--></tr><tr><!--{ / }-->
+						<!--{?kind=='category'}-->
+						<td><a href="{..link}" {?sc.category_code==..category_code}class="bold"{/}>{..title}</a></td>
+						<!--{:kind=='brand'}-->
+						<td><a href="{..link}" {?sc.brand_code==..category_code}class="bold"{/}>{..title}</a></td>
+						<!--{:kind=='location'}-->
+						<td><a href="{..link}" {?sc.location_code==..location_code}class="bold"{/}>{..title}</a></td>
+						<!--{:kind=='search'}-->
+						<td><a href="{..link}" {?sc.category_code==..category_code}class="bold"{/}>{..title}</a></td>
+						<!--{:}-->
+						<td><a href="{..link}" {?sc.category_code==..category_code}class="bold"{/}>{..title}</a></td>
+						<!--{/}-->			
+					<!--{/}-->
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<!--{/}-->
+		</table>
+		{/}
+	</td>
+</tr>
+</table>
+<table class="gsf-main-table" width="100%" border="0" cellpadding="0" cellspacing="0">
+<col width="80" /><col />
+<!--{?kind!='brand' && childBrandList}-->
+<tr>
+	<th class="gsfm-th">브랜드</th>
+	<td class="gsfm-td relative">
+		
+		<ul class="gsfm-brands">
+			<!--{@childBrandList}-->
+			<li><label><input type="checkbox" name="brands[]" value="{.category_code}" {?in_array(.category_code,sc.brands)}checked{/} /> <span {?in_array(.category_code,sc.brands)}class="bold"{/}>{.title}</span></label></li>	
+			<!--{/}-->
+		</ul>
+		<div class="gsfm-brands-more"><img src="../images/common/btn_cate_more.gif" /></div>
+		
+	</td>
+</tr>
+<!--{/}-->
+<!--{?childColorList}-->
+<tr>
+	<th class="gsfm-th">컬러별</th>
+	<td class="gsfm-td">
+		<ul class="gsfm-colors">
+		<!--{@childColorList}-->
+		<li><span color="{.value_}" {?.value_==sc.color}class="selected"{/} style="background-color:{.value_}"></span></li>
+		<!--{/}-->
+		</ul>
+	</td>
+</tr>
+<!--{/}-->
+<tr>
+	<th class="gsfm-th">가격대</th>
+	<td class="gsfm-td">
+		<ul class="gsfm-prices">
+			<li>전체</li>
+			<!--{@priceList}-->
+			<li start_price="{.min}" end_price="{.max}">{.title}</li>
+			<!--{/}-->
+		</ul>
+		&nbsp;&nbsp;
+		<input type="text" name="start_price" value="{=htmlspecialchars(sc.start_price)}" class="onlynumber" size="10" />원 ~ 
+		<input type="text" name="end_price" value="{=htmlspecialchars(sc.end_price)}" class="onlynumber" size="10" />원
+		<input type="image" src="../images/common/btn_srch_terms.gif" />
+	</td>
+</tr>
+</table>
+</form>	
+<!--{ / }-->

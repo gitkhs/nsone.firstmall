@@ -1,0 +1,98 @@
+<style type="text/css">
+table.simpledata-table-style td.ctd { height:30px;text-align:center; }
+table.simpledata-table-style td.ltd { height:50px;text-align:left; padding-left:5px;vertical-align:top; }
+table.simpledata-table-style td.rtd { text-align:right; padding-right:5px; }
+.chartBlock	{width:1000px; margin:auto;}
+.tableBlock	{width:1200px; margin:auto;}
+.sub_title	{width:100%;text-align:center;color:#000;margin:15px 0;font-size:15px;font-weight:bold;}
+span.add_info {font-size:11px;color:#838383;font-weight:normal;}
+div.redFont	{color:red;}
+</style>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td align="right" valign="bottom"><span class="btn small"><input type="button" value="엑셀출력" onclick="divExcelDownload('주요통계요약','#summary_table')" /></span></td>
+</tr>
+</table>
+
+<br style="line-height:10px" />
+
+<div id="summary_table">
+	<table width="100%" class="simpledata-table-style" style="margin:auto;">
+	<colgroup>
+		<col />
+		<col width="22%" />
+		<col width="22%" />
+		<col width="22%" />
+		<col width="22%" />
+	</colgroup>
+	<thead>
+	<tr>
+		<th></th>
+		<th>전월 평균</th>
+		<th>지난주(7일) 평균</th>
+		<th>어제</th>
+		<th>오늘</th>
+	</tr>
+	</thead>
+	<tbody>
+	{ @ tableData }
+	<tr>
+		<td class="ctd">{ .title }</td>
+		{ ? .index_ > 4 && statistic_summary_detail_limit == 'Y' }
+			{ ? .index_ == 5 }
+		<td class="ctd" rowspan="7" colspan="4">
+			<img src="../images/common/btn_upgrade.gif" style="cursor:pointer;" onclick="window.open('http://firstmall.kr/ec_hosting/addservice/frelocate.php?p=upgrade&s=P_FREE');" />
+		</td>
+			{ / }
+		{ : }
+		{ ? isset(.mStr) }
+		<td class="ltd">
+			{ ? .best == 'mPer' }{ .mStr }{ : }{= str_replace('class="redFont"', '', .mStr) }{ / }
+		</td>
+		{ : }
+		<td class="rtd">
+			{ ? .best == 'mPer' }<font color="red">{ / }
+				{= number_format(.mPer) } ({= number_format(.mTotal, 1) })
+			{ ? .best == 'mPer' }</font>{ / }
+		</td>
+		{ / }
+		{ ? isset(.wStr) }
+		<td class="ltd">
+			{ ? .best == 'wPer' }{ .wStr }{ : }{= str_replace('class="redFont"', '', .wStr) }{ / }
+		</td>
+		{ : }
+		<td class="rtd">
+			{ ? .best == 'wPer' }<font color="red">{ / }
+				{= number_format(.wPer) } ({= number_format(.wTotal, 1) })
+			{ ? .best == 'wPer' }</font>{ / }
+		</td>
+		{ / }
+		{ ? isset(.bStr) }
+		<td class="ltd">
+			{ ? .best == 'bTotal' }{ .bStr }{ : }{= str_replace('class="redFont"', '', .bStr) }{ / }
+		</td>
+		{ : }
+		<td class="rtd">
+			{ ? .best == 'bTotal' }<font color="red">{ / }
+				{= number_format(.bTotal) }
+			{ ? .best == 'bTotal' }</font>{ / }
+		</td>
+		{ / }
+		{ ? isset(.nStr) }
+		<td class="ltd">
+			{ ? .best == 'Total' }{ .nStr }{ : }{= str_replace('class="redFont"', '', .nStr) }{ / }
+		</td>
+		{ : }
+		<td class="rtd">
+			{ ? .best == 'Total' }<font color="red">{ / }
+				{= number_format(.Total) }
+			{ ? .best == 'Total' }</font>{ / }
+		</td>
+		{ / }
+		{ / }
+	</tr>
+	{ / }
+	</tbody>
+	</table>
+</div>

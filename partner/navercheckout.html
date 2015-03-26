@@ -1,0 +1,83 @@
+<!--{ ? mobileMode }-->
+	<!--{ ? navercheckout.use=='test' }-->
+	<script type="text/javascript" src="{http_protocol}://test-checkout.naver.com/customer/js/mobile/checkoutButton.js" charset="UTF-8"></script>
+	<!--{ : }-->
+	<script type="text/javascript" src="{http_protocol}://checkout.naver.com/customer/js/mobile/checkoutButton.js" charset="UTF-8"></script>
+	<!--{ / }-->
+<!--{ : }-->
+	<script type="text/javascript" src="{http_protocol}://checkout.naver.com/customer/js/checkoutButton2.js" charset="UTF-8"></script>
+<!--{ / }-->
+<script type="text/javascript" >
+
+function navercheckout_submit(shippingType){
+	var f = $("form[name='goodsForm']");
+	f.attr("action","../partner/navercheckout?mode=direct&shippingType="+shippingType);
+	f[0].submit();
+	f.attr("action","../order/add");
+	closeDialog('navercheckout_postpaid');
+}
+
+function buy_nc(){
+	{? use_postpaid }
+		openDialog('Naver Checkout','navercheckout_postpaid', {"width":"400","height":"150"});
+	{:}
+		navercheckout_submit('PAYED');
+	{/}
+}
+function not_buy_nc(){
+	alert("죄송합니다. NAVER Checkout으로 구매가 불가한 상품입니다.\n재고, 판매사항등을 살펴주세요");
+}
+function wishlist_nc(url){
+	// 네이버 체크아웃으로 찜 정보를 등록하는 가맹점 페이지 팝업 창 생성.
+	// 해당 페이지에서 찜 정보 등록 후 네이버 체크아웃 찜 페이지로 이동.
+	var f = $("form[name='goodsForm']");
+	f.attr("action","../partner/navercheckout_zzim");
+	<!--{ ? mobileMode }-->
+	f.attr("target","_self");
+	<!--{ : }-->
+	window.open("/data/index.php","zzim","scrollbars=yes,width=400,height=267");
+	f.attr("target","zzim");
+	<!--{ / }-->
+	f[0].submit();
+	f.attr("target","actionFrame");
+	f.attr("action","../order/add");
+	return false;
+}
+</script>
+<div id="nhn_btn">
+	<script type="text/javascript" >
+	//<![CDATA[
+	try{
+		nhn.CheckoutButton.apply({
+			BUTTON_KEY:"{navercheckout.button_key}", // 체크아웃에서 할당받은 버튼 KEY를 입력하세요.
+			<!--{ ? mobileMode }-->
+			TYPE: "MA", // 템플릿을 확인하시고 원하는 타입의 버튼을 선택
+			COLOR: 1, // 버튼의 색 설정
+			<!--{ : }-->
+			TYPE: "B", // 템플릿을 확인하시고 원하는 타입의 버튼을 선택
+			COLOR: 1, // 버튼의 색 설정
+			<!--{ / }-->
+			COUNT: 2, // 버튼 개수 설정. 구매하기 버튼(장바구니 페이지)만 있으면 1, 찜하기 버튼(상품 상세페이지)과 함께 있으면 2 를 입력한다.
+			{ ? goods.goods_status == 'runout' || goods.goods_status == 'unsold' }
+			ENABLE: "N", // 품절등과 같은 이유에 따라 버튼을 비활성화할 필요가 있을 경우
+			BUY_BUTTON_HANDLER: not_buy_nc, // 구매하기 버튼 이벤트 Handler 함수 등록, 품절인 경우 not_buy_nc 함수 사용
+			{ : }
+			ENABLE: "Y", // 품절등과 같은 이유에 따라 버튼을 비활성화할 필요가 있을 경우
+			BUY_BUTTON_HANDLER: buy_nc, // 구매하기 버튼 이벤트 Handler 함수 등록, 품절인 경우 not_buy_nc 함수 사용
+			{ / }
+			//BUY_BUTTON_LINK_URL:"../partner/navercheckout?mode=direct", // 구매정보연도 페이지 링크 주소 (필요한 경우만 사용)
+			WISHLIST_BUTTON_HANDLER:wishlist_nc, // 찜하기 버튼 이벤트 Handler 함 수 등록
+			//WISHLIST_BUTTON_LINK_URL:"../partner/navercheckout_zzim", // 찜하기 연동 페이지 팝업링크 주소
+			"":""
+		});
+	}catch(e){
+	}
+	//]]></script>
+	{?navercheckout.use=='test'}<div style="color:red">※ 네이버 체크아웃 테스트모드입니다</div>{/}
+</div>
+<div id="navercheckout_postpaid" class="center hide">
+	배송비결제 방법을 선택해주세요.<br /><br />
+	<span class="btn large black"><input type="button" onclick="navercheckout_submit('PAYED');" value="선결제" /></span>
+	<span class="btn large black"><input type="button" onclick="navercheckout_submit('ONDELIVERY');" value="착불" /></span>
+	<span class="btn large"><input type="button" onclick="closeDialog('navercheckout_postpaid');" value="취소" /></span>
+</div>

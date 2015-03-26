@@ -1,0 +1,1765 @@
+{ #layout_header_popup }
+
+<script type="text/javascript" src="/app/javascript/js/admin-goodsRegist.js?v=20140317"></script>
+<script type="text/javascript" src="/app/javascript/js/admin-goodsaddlayer.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery.colorpicker.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-color-picker.js"></script>
+<!--{ ? mode == 'view' || mode == 'chgPolicy' }-->
+<script  type="text/javascript">
+function helpicon_style(){
+	/* 툴팁 */
+	$(".helpicon, .help", window.parent.document).each(function(){
+
+		var options = {
+			className: 'tip-darkgray',
+			bgImageFrameSize: 8,
+			alignTo: 'target',
+			alignX: 'right',
+			alignY: 'center',
+			offsetX: 10,
+			allowTipHover: false,
+			slide: false,
+			showTimeout : 0
+		}
+
+		if($(this).attr('options')){
+			var customOptions = eval('('+$(this).attr('options')+')');
+			for(var i in customOptions){
+				options[i] = customOptions[i];
+			}
+		}
+
+		$(this).poshytip(options);
+	});
+}
+
+//
+function socialcpinputtype() {
+	{? _GET.socialcp_input_type }
+	var socialcp_input_type = '{_GET.socialcp_input_type}';
+	{:}
+		var socialcp_input_type = $("input[name='socialcp_input_type']:checked", window.parent.document).val();
+	{/}
+	if(socialcp_input_type) {
+		var couponinputsubtitle = '';
+		$(".couponinputtitle").show();
+		if( socialcp_input_type == 'price' ) {
+			couponinputsubtitle = '금액';
+		}else{
+			couponinputsubtitle = '횟수';
+		}
+		$(".couponinputsubtitle").text(couponinputsubtitle);
+	}
+}
+
+</script>
+<div id="suboptionLayer">
+	<table class="info-table-style" style="width:100%">
+		<input type="hidden" name="suboptionAddPopup" value="y" />
+	<thead>
+	<tr>
+		<th class="its-th-align center" colSpan="4">추가옵션<br/><span class="desc">[옵션코드]</span></th>
+		<th class="its-th-align center" rowSpan="2">매입가</th>
+		<th class="its-th-align center" rowSpan="2">매입율</th>
+		<th class="its-th-align center {? !_GET.socialcp_input_type }hide{/} couponinputtitle" rowspan="2">쿠폰1장→값어치<br/><span class="couponinputsubtitle">{? _GET.socialcp_input_type =='price' }금액{:}횟수{/}</span></th>
+		<th class="its-th-align center" rowSpan="2">정가(소비자가)</th>
+		<th class="its-th-align center" rowSpan="2">마진 / 할인가(판매가)</th>
+		<th class="its-th-align center" rowSpan="2">할인율</th>
+		<th class="its-th-align center" rowSpan="2">부가세</th>
+		<th class="its-th-align center" rowSpan="2">재고(가용)</th>
+		<th class="its-th-align center" rowspan="2">
+			지급 적립금
+			<div style="color:#999999;" class="point_text">
+				※지급 포인트(P)는
+				<u id="policy_str" style="color:#ff6600;">
+				<!--{ ? suboptions[0].tmp_policy == 'goods' || tmp_policy == 'goods' }-->개별정책<!--{:}-->통합정책<!--{/}-->
+				</u>
+				이 자동적용됨
+			</div>
+		</th>
+	</tr>
+	<tr>
+		<th class="its-th-align center">추가혜택</th>
+		<th class="its-th-align center">필수여부</th>
+		<th class="its-th-align center">옵션명</th>
+		<th class="its-th-align center">옵션값</th>
+	</tr>
+	</thead>
+	<tbody>
+	<!--{ @ suboptions }-->
+	<!--{ @ .value_ }-->
+	<!--{ ? !config_goods.suboption_view_count || config_goods.suboption_view_count > ..suboptions_cnt || islimit != 'limit' }-->
+	<tr class="suboptionTr">
+		<td class="its-td-align center">
+		<input type="hidden" name="suboptionSeq[]" value="{..suboption_seq}" />
+		<!--{? ..key_ == 0 }-->
+			<!--{? ..sub_sale == 'y' }-->Y<!--{ : }-->N<!--{ / }-->
+		<!--{ / }-->
+		</td>
+
+		<td class="its-td-align center">
+		<!--{? ..key_ == 0 }-->
+			<!--{? ..sub_required == 'y' }-->Y<!--{ : }-->N<!--{ / }-->
+		<!--{ / }-->
+		</td>
+		<td class="its-td-align center subOptionTitle">
+		<!--{? ..key_ == 0 }-->
+			{..suboption_title}
+		<!--{ / }-->
+		</td>
+		<td class="its-td-align center">{..suboption}
+			{? ..suboption_code }<br/>[{..suboption_code}]{/}
+			<!--{? ..newtype }-->
+				<br/>
+				<!--{? ..newtype == 'color' }-->
+					<div class="colorPickerBtn colorhelpicon helpicon1"  opttype="{..suboption_type}"  style="background-color:{..color}" ></div>
+				<!--{: ..newtype == 'address'  }-->
+					<span class="addrhelpicon helpicon" opttype="{..suboption_type}"  title="{? ..zipcode }[{..zipcode}] {..address} {..addressdetail} {:}지역 정보가 없습니다.{/} {? ..biztel}업체 연락처:{..biztel}{/}">지역</span>
+				<!--{: ..newtype == 'date'  }-->
+					<span class="codedatehelpicon helpicon" opttype="{..suboption_type}"  title="{? ..codedate && ..codedate !='0000-00-00' }{..codedate} {:}날짜 정보가 없습니다.{/}">날짜</span>
+				<!--{: ..newtype == 'dayinput'  }-->
+					<span class="dayinputhelpicon helpicon" opttype="{..suboption_type}"  title="{? ..sdayinput && ..fdayinput }{..sdayinput} ~ {..fdayinput} {:}수동기간 정보가 없습니다.{/}">수동기간</span>
+				<!--{: ..newtype == 'dayauto'  }-->
+					<span class="dayautohelpicon helpicon" opttype="{..suboption_type}"  title="{? ..dayauto_type }'결제확인' {..dayauto_type_title} {..sdayauto}일 {? ..dayauto_type == 'day' }이후{/}부터 + {..fdayauto}일{..dayauto_day_title} {:}자동기간 정보가 없습니다.{/}">자동기간</span>
+				<!--{ / }-->
+			<!--{ / }-->
+		</td>
+		<td class="its-td-align center">{=number_format(..supply_price)}
+		<input type="hidden" name="subSupplyPrice[]" style="text-align: right;" class="line onlynumber" size="10" value="{..supply_price}" /></td>
+		<td style="padding-right: 10px;" class="its-td-align right">{=number_format(..supplyRate)}%</td>
+		<td class="its-td-align center {? !_GET.socialcp_input_type }hide{/} couponinputtitle">
+		<input type="hidden" name="subcoupon_input[]" style="text-align: right;" class="line onlynumber"  size="10" value="{..coupon_input}" />
+		{=number_format(..coupon_input)}
+		</td>
+		<td class="its-td-align center">
+		<input type="hidden" name="subConsumerPrice[]" style="text-align: right;" class="line onlynumber"  size="10" value="{..consumer_price}" />
+		{=number_format(..consumer_price)}
+		</td>
+		<td class="its-td-align center pricetd">
+				<input type="hidden" name="subPrice[]" style="text-align: right;" class="line onlynumber" size="10" value="{..price}" />
+			{=number_format(..net_profit)} / <span class="priceSpan">{=number_format(..price)}</span>
+		</td>
+		<td style="padding-right: 10px;" class="its-td-align right">
+			{=number_format(..discountRate)}%
+		</td>
+		<td style="padding-right: 10px;" class="its-td-align right suboptions_tax">
+			<!--{ ? goodsTax == 'exempt' || goods.tax == 'exempt' }-->0<!--{ : }-->
+			{=number_format(..tax)}
+			<!--{ / }-->
+		</td>
+		<td class="its-td-align center">
+		<input type="hidden" name="subStock[]" style="text-align: right;" class="line onlynumber" size="5" value="{..stock}" />
+		{=number_format(..stock)} / {=number_format(..stock - ..reservation15)}
+		</td>
+		<td class="its-td-align center">
+			<!--{? ..reserve_unit == 'won' }-->
+			{=number_format(..reserve)}원
+			<!--{ : }-->
+			{=number_format(..reserve_rate)}% ({=number_format(..reserve)}원)
+			<!--{ / }-->
+		</td>
+	</tr>
+	<!--{ / }-->
+	<!--{ / }-->
+	<!--{ / }-->
+	</tbody>
+	</table>
+</div>
+
+
+<div id="preview_suboption" style="display:none;">
+	{ ? suboptions }
+	<table class="goods_option_table" width="100%" cellpadding="0" cellspacing="5" border="0">
+	{ @ suboptions }
+	<tr>
+		<th>{.value_[0]['suboption_title']}</th>
+		<td><select style='width:200px;'><option>- 선택 -</option>
+		{ @ .value_ }
+			<option>{..suboption}</option>
+		{/}
+		</select><td>
+	</tr>
+	{/}
+	</table>
+	{/}
+</div>
+
+
+<script type="text/javascript">
+{ ? reload == 'y' }
+	location.replace('?mode=view&tmp_seq={tmp_seq}&tmp_policy={tmp_policy}&goodsTax={goodsTax}&goods_seq={goods_seq}&socialcp_input_type={_GET.socialcp_input_type}&islimit={islimit}');
+	socialcpinputtype();
+{ : }
+			{ ? suboptions }
+				$("input[name='tmp_suboption_seq']", parent.document).val('{tmp_seq}');
+				$("#suboptionLayer", parent.document).html($("#suboptionLayer").html());
+				$("#preview_suboption", parent.document).html($("#preview_suboption").html());
+			{ : }
+				$("input[name='tmp_suboption_seq']", parent.document).val('');
+				$("#suboptionLayer", parent.document).html('');
+				$("#preview_suboption", parent.document).html('');
+			{ / }
+			helpicon_style();
+			socialcpinputtype();
+{ / }
+	//parent.calulate_option_price();
+	parent.calulate_subOption_price();
+	$("input[name='supplyPrice[]']").bind("blur",function(){parent.calulate_option_price();});
+	$("input[name='consumerPrice[]']").bind("blur",function(){parent.calulate_option_price();});
+	$("input[name='price[]']").bind("blur",function(){parent.calulate_option_price();});
+	$("input[name='reserveRate[]']").bind("blur",function(){parent.calulate_option_price();});
+	$("select[name='reserveUnit[]']").bind("change",function(){parent.calulate_option_price();});
+	$("input[name='reserve[]']").bind("blur",function(){parent.calulate_option_price();});
+	$("input[name='subReserveRate[]']").bind("blur",function(){parent.calulate_subOption_price();});
+	$("select[name='subReserveUnit[]']").bind("change",function(){parent.calulate_subOption_price();});
+	$("input[name='subReserve[]']").bind("blur",function(){parent.calulate_subOption_price();});
+	$("input[name='tax']").bind("click",function(){parent.calulate_option_price();});
+
+	$("input[name='subReserveRate[]']").bind("blur",function(){parent.calulate_subOption_price();});
+	$("select[name='subReserveUnit[]']").bind("change",function(){parent.calulate_subOption_price();});
+	$("input[name='subReserve[]']").bind("blur",function(){parent.calulate_subOption_price();});
+	$("input[name='subSupplyPrice[]']").bind("blur",function(){parent.calulate_subOption_price();});
+	$("input[name='subConsumerPrice[]']").bind("blur",function(){parent.calulate_subOption_price();});
+	$("input[name='subPrice[]']").bind("blur",function(){parent.calulate_subOption_price();});
+
+</script>
+<!--{ : }-->
+<script type="text/javascript">
+$(document).ready(function(){
+	calulate_subOption_price();
+	subreserve_policy();
+	socialcpinputtype();
+	$("input[name='subReserveRate[]']").bind("blur",function(){calulate_subOption_price();});
+	$("select[name='subReserveUnit[]']").bind("change",function(){calulate_subOption_price();});
+	$("input[name='subReserve[]']").bind("blur",function(){calulate_subOption_price();});
+	$("input[name='subSupplyPrice[]']").bind("blur",function(){calulate_subOption_price();});
+	$("input[name='subConsumerPrice[]']").bind("blur",function(){calulate_subOption_price();});
+	$("input[name='subPrice[]']").bind("blur",function(){calulate_subOption_price();});
+
+	// 옵션 세로로 삭제
+	$(".removeOptionCell").live("click", function(){
+		suboptionFrame.location.href='../goods_process/remove_option_tmp_column?tmp_seq='+$(this).attr('tmpSeq')+'&depth='+$(this).attr('oDepth');
+	});
+
+	// 적립금 정책
+	$("select[name='reserve_policy']").live("change", function(){
+		chgReservePolicy();
+	});
+
+	$(".colorpicker").customColorPicker();
+	// 매입가
+	$("input[name='subSupplyPrice[]']").each(function(){
+		$(this).live("blur", function(){
+			calculrate_option($("input[name='subSupplyPrice[]']").index(this));
+		});
+	});
+
+	// 정가(소비자가)
+	$("input[name='subConsumerPrice[]']").each(function(){
+		$(this).live("blur", function(){
+			calculrate_option($("input[name='subConsumerPrice[]']").index(this));
+		});
+	});
+
+	// 판매가
+	$("input[name='subPrice[]']").each(function(){
+		$(this).live("blur", function(){
+			calculrate_option($("input[name='subPrice[]']").index(this));
+		});
+	});
+
+	// 적립금
+	$("input[name='subReserveRate[]']").each(function(){
+		$(this).live("blur", function(){
+			calculrate_reserve($("input[name='subReserveRate[]']").index(this));
+		});
+	});
+
+	// 적립금 단위
+	$("select[name='subReserveUnit[]']").each(function(){
+		$(this).live("change", function(){
+			calculrate_reserve($("select[name='subReserveUnit[]']").index(this));
+		});
+	});
+
+	// 옵션 추가 ---------------------------->
+	$("#addCellOption").live("click",function(){
+		openDialog("추가구성옵션", "subOptDialog", {"width":"1150","height":"500","show" : "fade","hide" : "fade"});
+		$("input[name='optionMakeDepth']").val('{=count(options[0].option_divide_title)+1}');
+		$("input[name='optionName']").val('');
+		$("input[name='optionPrice']").val('');
+	});
+
+	// 서브옵션 만들기폼 추가
+	$("#addSuboptionMake").bind("click",function(){
+		var objTr = $(this).parents("tr");//$(this).parent().parent().parent();
+		var objTb = $(this).parents("tbody");//$(this).parent().parent().parent().parent();
+
+		$( objTr.find("input[name='suboptionMakesdayinput[]']") ).datepicker( "destroy" );
+		$( objTr.find("input[name='suboptionMakefdayinput[]']") ).datepicker( "destroy" );
+
+		var clone = objTr.clone();
+		clone.find("#addSuboptionMake").attr("id","").addClass("delSuboptionMake");
+		clone.find("span.btnplusminus").removeClass("btn-plus");
+		clone.find("span.btnplusminus").addClass("btn-minus");
+		clone.find("input[name='suboptionMakesdayinput[]']").attr("id","addoptionMakesdayinput"+(objTb.find("tr").index()+1));
+		clone.find("input[name='suboptionMakefdayinput[]']").attr("id","addoptionMakefdayinput"+(objTb.find("tr").index()+1));
+		setDatepicker(clone.find("input[name='suboptionMakesdayinput[]']"));
+		setDatepicker(clone.find("input[name='suboptionMakefdayinput[]']"));
+		objTb.append(clone);
+
+		//폼초기화(직접입력)형식
+		clone.find("select[name='suboptionMakeId[]'] option[value='direct']").attr("selected",true);
+		goodssuboptiondirectdefault(clone);
+		clone.find(".goodssuboptionlay").hide();
+		clone.find(".etcContents").show();
+		setDefaultText();
+	});
+
+	/* 옵션삭제하기  */
+	$(".delSuboptionButton").live("click",function(){
+		if( $(this).closest("tr.suboptionTr").parent().children("tr.suboptionTr").length > 0 ){
+			$idx	= $(".delSuboptionButton").index(this);
+			$nidx	= parseInt($idx) + 1;
+			if	($(this).attr('ltype') == 'm' && $(".delSuboptionButton").eq($nidx).attr('ltype') == 's'){
+				$(".subSale_td").eq($nidx).html($(".subSale_td").eq($idx).html());
+				$(".subRequired_td").eq($nidx).html($(".subRequired_td").eq($idx).html());
+				$(".suboptTitle_td").eq($nidx).html($(".suboptTitle_td").eq($idx).html());
+				$(".delSuboptionButton").eq($nidx).attr('ltype', 'm');
+			}
+			$(this).closest("tr.suboptionTr").remove();
+		}
+	});
+
+	/* 옵션만들기 폼 삭제하기 */
+	$(".delSuboptionMake").live("click",function(){
+		$(this).parents("tr").remove();//$(this).parent().parent().parent().remove();
+	});
+
+	/* 옵션직접입력 선택시 */
+	$("select[name='suboptionMakeId[]']").live("change",function(){
+		if( $(this).val() == 'direct'){//직접입력
+			goodssuboptiondirectdefault($(this).parents("tr"));
+		}else{//상품코드 옵션선택시
+			goodssuboptionspecialselect($(this), $(this).parents("tr"));
+		}
+		goodssuboptioncode($(this));//추가정보 >> 필수옵션코드추가
+	});
+
+	//필수옵션 > 직접입력 >> 특수정보 선택시
+	$("select[name='suboptionMakespecial[]']").live("change",function() {
+		goodssuboptionspecialform($(this), $(this).parents("tr"));
+	});
+
+	/* 옵션 >> 추가된 코드 선택시 레이어띄우기 */
+	$(".goodssuboptionbtn").live("click",function(){
+		var layerid = $(this).attr("layerid");
+		var label_type = $(this).attr("label_type");
+		var label_newtype = $(this).attr("label_newtype");
+		var codeform_seq = $(this).attr("codeform_seq");
+		var label_title = $(this).attr("label_title");
+		var idx = $(this).parents("tr").index();
+		$("#"+layerid).find(".gdsuboptidx").val(idx);
+
+		//설정 변경시 및 최초값설정
+		var goodssuboptioncodetitlejoin = $("div#subOptDialog input[name='suboptionMakeCode[]']").eq(idx).val();
+		if( goodssuboptioncodetitlejoin ) {//수정시 설정값셋팅
+			var goodssuboptioncodetitlear = goodssuboptioncodetitlejoin.split(',');
+		}
+		$("#"+layerid).find("input[name='goodssuboption[]']").each(function(){
+			if( goodssuboptioncodetitlejoin ) {
+				$(this).attr("checked",false);
+				for (var i=0;i<goodssuboptioncodetitlear.length;i++){
+					if(!goodssuboptioncodetitlear[i]) continue;
+					if( goodssuboptioncodetitlear[i] == $(this).val() ) {
+						$(this).attr("checked",true);
+						break;
+					}
+				}
+			}else if( !goodssuboptioncodetitlejoin && $(this).attr("default") == 'checked' ) {
+				$(this).attr("checked",true);
+			}else{
+				$(this).attr("checked",false);
+			}
+		});
+
+		if(label_newtype == 'address'){
+			openDialog(label_title, layerid, {"width":"800","height":"400","show" : "fade","hide" : "fade"});
+		}else if(label_newtype == 'dayinput'  || label_newtype == 'dayauto' ){
+			openDialog(label_title, layerid, {"width":"550","height":"400","show" : "fade","hide" : "fade"});
+		}else{
+			openDialog(label_title, layerid, {"width":"300","height":"400","show" : "fade","hide" : "fade"});
+		}
+	});
+
+	/* 옵션 >> 추가코드선택 후 적용하기 */
+	$(".GoodsSubOptionCodeApply").live("click",function(){
+		var codeform_seq = $(this).attr("codeform_seq");
+		var label_type = $(this).attr("label_type");
+		var label_newtype = $(this).attr("label_newtype");
+		var label_id = $(this).attr("label_id");
+		var layer_id = $(this).attr("layer_id");
+
+		var gdsuboptcodeval = new Array();
+		var gdsuboptcodetitle = new Array();
+
+		var gdsuboptcolor = new Array();
+		var gdsuboptzipcode = new Array();
+		var gdsuboptaddress = new Array();
+		var gdsuboptaddressdetail = new Array();
+
+		var biztel = new Array();
+		var codedate = new Array();
+		var sdayinput = new Array();
+		var fdayinput = new Array();
+		var dayautotype = new Array();
+		var sdayauto = new Array();
+		var fdayauto = new Array();
+		var dayautoday = new Array();
+
+		$(this).parents("tr").parent().find("input[name='goodssuboption[]']").each(function(i){
+			if ( $(this).is(':checked') == true  ) {
+				gdsuboptcodeval.push($(this).val());//code
+				gdsuboptcodetitle.push($(this).attr("label_value"));
+
+				gdsuboptcolor.push($(this).attr("label_color"));
+				gdsuboptzipcode.push($(this).attr("label_zipcode"));
+				gdsuboptaddress.push($(this).attr("label_address"));
+				gdsuboptaddressdetail.push($(this).attr("label_addressdetail"));
+
+				biztel.push($(this).attr("label_biztel"));
+				codedate.push($(this).attr("label_codedate"));
+				sdayinput.push($(this).attr("label_sdayinput"));
+				fdayinput.push($(this).attr("label_fdayinput"));
+				dayautotype.push($(this).attr("label_dayauto_type"));
+				sdayauto.push($(this).attr("label_sdayauto"));
+				fdayauto.push($(this).attr("label_fdayauto"));
+				dayautoday.push($(this).attr("label_dayauto_day"));
+			}
+		});
+
+		var gdsuboptcodevaljoin = gdsuboptcodeval.join(',');
+		var gdsuboptcodetitlejoin = gdsuboptcodetitle.join(',');
+
+		var gdsuboptcolorjoin = gdsuboptcolor.join(',');
+		var gdsuboptzipcodejoin = gdsuboptzipcode.join(',');
+		var gdsuboptaddressjoin = gdsuboptaddress.join(',');
+		var gdsuboptaddressdetailjoin = gdsuboptaddressdetail.join(',');
+
+		var bizteljoin = biztel.join(',');
+		var codedatejoin = codedate.join(',');
+		var sdayinputjoin = sdayinput.join(',');
+		var fdayinputjoin = fdayinput.join(',');
+		var dayautotypejoin = dayautotype.join(',');
+		var sdayautojoin = sdayauto.join(',');
+		var fdayautojoin = fdayauto.join(',');
+		var dayautodayjoin = dayautoday.join(',');
+
+		var gdsuboptidx = $(this).parents("table").find(".gdsuboptidx").val();
+
+		$("div#subOptDialog input[name='suboptionMakeType[]']").eq(gdsuboptidx).val(label_type);
+		$("div#subOptDialog input[name='suboptionMakeCode[]']").eq(gdsuboptidx).val(gdsuboptcodevaljoin);
+
+		$("div#subOptDialog input[name='suboptionMakenewtype[]']").eq(gdsuboptidx).val(label_newtype);
+		$("div#subOptDialog input[name='suboptionMakecolor[]']").eq(gdsuboptidx).val(gdsuboptcolorjoin);
+		$("div#subOptDialog input[name='suboptionMakezipcode[]']").eq(gdsuboptidx).val(gdsuboptzipcodejoin);
+		$("div#subOptDialog input[name='suboptionMakeaddress[]']").eq(gdsuboptidx).val(gdsuboptaddressjoin);
+		$("div#subOptDialog input[name='suboptionMakeaddressdetail[]']").eq(gdsuboptidx).val(gdsuboptaddressdetailjoin);
+
+		$("div#subOptDialog input[name='suboptionMakebiztel[]']").eq(gdsuboptidx).val(bizteljoin);
+		$("div#subOptDialog input[name='suboptionMakecodedate[]']").eq(gdsuboptidx).val(codedatejoin);
+		$("div#subOptDialog input[name='suboptionMakesdayinput[]']").eq(gdsuboptidx).val(sdayinputjoin);
+		$("div#subOptDialog input[name='suboptionMakefdayinput[]']").eq(gdsuboptidx).val(fdayinputjoin);
+		$("div#subOptDialog select[name='suboptionMakedayauto_type[]'] option[value='"+dayautotypejoin+"']").eq(gdsuboptidx).attr("selected",true);
+		$("div#subOptDialog input[name='suboptionMakesdayauto[]']").eq(gdsuboptidx).val(sdayautojoin);
+		$("div#subOptDialog input[name='suboptionMakefdayauto[]']").eq(gdsuboptidx).val(fdayautojoin);
+		$("div#subOptDialog select[name='suboptionMakedayauto_day[]'] option[value='"+dayautodayjoin+"']").eq(gdsuboptidx).attr("selected",true);
+
+		$("div#subOptDialog input[name='suboptionMakeValue[]']").eq(gdsuboptidx).val(gdsuboptcodetitlejoin);
+		//$("div#subOptDialog input[name='suboptionMakeValue[]']").eq(gdsuboptidx).attr("readonly",true);
+		$("div#subOptDialog input[name='suboptionMakeValue[]']").eq(gdsuboptidx).show();
+
+		var obj = $("div#subOptDialog input[name='suboptionMakePrice[]']").eq(gdsuboptidx);
+		var sArr = gdsuboptcodetitlejoin.split(',');
+		var tArr = new Array();
+		for(var i = 0;i<sArr.length;i++){
+			tArr.push(0);
+		}
+		obj.val(tArr.join(','));
+
+		if( label_newtype == 'dayauto' ) {
+			socialcpdayautoreview( $("div#subOptDialog div.suboptionMakenewdayauto").eq(gdsuboptidx) );
+		}
+
+		closeDialog(layer_id);
+	});
+
+	/* 옵션만들기 초기가격 넣기*/
+	$("div#subOptDialog input[name='suboptionMakeValue[]']").live("blur",function(){
+		var tmp = optReplace($(this).val());
+		if	(tmp){
+			$(this).val(tmp);
+
+			var obj = $(this).parents("tr").find("input[name='suboptionMakePrice[]']");
+			var sArr = $(this).val().split(',');
+			var tArr = obj.val().split(',');
+			var tArrNew = new Array();
+			for(var i = 0;i<sArr.length;i++){
+				if(tArr[i]){
+					tArrNew[i] = tArr[i];
+				}else{
+					tArrNew[i] = 0;
+				}
+			}
+			obj.val(tArrNew.join(','));
+
+		}
+	});
+
+	/* 옵션가격 일괄 적용 */
+	$("button#suboptionBatch").bind("click",function(){
+		batch_suboption_price();
+		calulate_subOption_price();
+	});
+
+	$("#btn_goods_option_list").live("click",function(){
+		openDialog("옵션정보 가져오기", "option_newlist", {"width":"800","height":"880","show" : "fade","hide" : "fade"});
+	});
+
+	$("#btn_goods_special_list").live("click",function(){
+		openDialog("특수 정보 활용 안내", "special_newlist", {"width":"760","height":"816","show" : "fade","hide" : "fade"});
+	});
+
+	// 자주사용하는 옵션 가져오기
+	$("#frequentlytypesuboptbtn").live("click",function(){
+		var add_goods_seq = $("select[name='frequentlytypesubopt']").find("option:selected").val();
+		if( add_goods_seq<=0 ){
+			alert("옵션정보를 가져올 상품을 선택해 주세요!");
+			return false;
+		}
+
+		var goods_name = $("select[name='frequentlytypesubopt']").find("option:selected").text();
+		openDialogConfirm('정말로  ['+goods_name+'] 상품의 <br/>추가구성옵션 정보를 가져오시겠습니까?',400,200,function() {
+			opener.openSettingSubOptionnew(add_goods_seq);
+		});
+	});
+
+	$("input[name='optionValue']").live("blur", function(){
+		var valStr		= $(this).val();
+		if	(valStr){
+			var priceStr	= valStr.replace(/[^,]*/ig, '0');
+			priceStr		= priceStr.replace(/[0]{2,}/g, '0');
+			$("input[name='optionPrice']").val(priceStr);
+		}
+	});
+	//<----------------- 옵션 세로로 추가
+
+	{ ? reload == 'y' }
+	location.replace('?tmp_seq={tmp_seq}&tmp_policy={tmp_policy}&goodsTax={goodsTax}&goods_seq={goods_seq}&socialcp_input_type={_GET.socialcp_input_type}');
+	{ / }
+
+
+	//수정불가
+	$(".input-box-default-text-code").live('keydown change focusin selectstart',function(){
+		$(this).blur();
+		return false;
+	});
+
+	//옵션 생성하기 버튼
+	$("#gdsuboptioncodemakebtn").live("click", function() {
+		var optName = new Array();
+		var optionType = new Array();
+		var optValue = new Array();
+		var tmp;
+
+		$("#subOptDialog table tbody tr").each(function(idx){
+			optionType[idx] = $(this).find("select[name='suboptionMakeId[]'] option:selected").val();
+
+			tmp = $(this).find("input[name='suboptionMakeName[]']").val();
+			if( tmp == $(this).find("input[name='suboptionMakeName[]']").attr("title") ){
+				optName = new Array();
+				return false;
+			}else{
+				optName[idx] = tmp.split(',');
+			}
+
+			tmp = $(this).find("input[name='suboptionMakeValue[]']").val();
+			if( tmp == $(this).find("input[name='suboptionMakeValue[]']").attr("title") ){
+				optValue = new Array();
+				return false;
+			}else{
+				optValue[idx] = tmp.split(',');
+			}
+
+		});
+
+		if(optName.length<1){
+			openDialogAlert("추가 옵션명을 정확히 입력해주세요.",400,140,function(){
+				$("#subOptDialog input[name='suboptionMakeName[]']").filter(function(){
+					return $(this).val().length==0;
+				}).eq(0).focus();
+			});
+			return false;
+		}
+
+		if(optValue.length<1){
+			openDialogAlert("추가 옵션명을 정확히 입력해주세요.",400,140,function(){
+				$("#subOptDialog input[name='suboptionMakeValue[]']").filter(function(){
+					return $(this).val().length==0;
+				}).eq(0).focus();
+			});
+					return false;
+		}
+
+		/* 옵션명 공백 체크 */
+		for(var i=0;i<optName.length;i++){
+			for(var j=0;j<optName[i].length;j++){
+				if(optName[i][j].length==0) {
+					openDialogAlert("추가 옵션명을 입력해주세요.",400,140,function(){
+						$("#subOptDialog input[name='suboptionMakeName[]']").filter(function(){
+							return $(this).val().length==0;
+						}).eq(0).focus();
+					});
+					return false;
+				}
+			}
+		}
+
+		/* 옵션값 공백 체크 */
+		for(var i=0;i<optValue.length;i++){
+			for(var j=0;j<optValue[i].length;j++){
+				if(optValue[i][j].length==0) {
+					openDialogAlert("추가 옵션값을 입력해주세요.",400,140,function(){
+						$("#subOptDialog input[name='suboptionMakeValue[]']").filter(function(){
+							return $(this).val().length==0;
+						}).eq(0).focus();
+					});
+					return false;
+				}
+			}
+		}
+
+		$("#suboptionMakeForm").submit();
+	});
+
+	//직접입력 > 색상
+	$(".colorhelpicon").live("click",function(){
+		if($(this).attr("opttype") ){
+			$("#gdoptdirectmodifylay input").val();
+			var opttblobj = $(this).parents("tr");
+			var opttblidx = opttblobj.index();
+			$("#goodsoptiondirectmodifybtn").attr("opttblidx",opttblidx);
+			$("#goodsoptiondirectmodifybtn").attr("newtype","color");
+			$("#gdoptdirectmodifylay div.goodsoptiondirectlay").hide();
+			$("#gdoptdirectmodifylay div.colordateaddresslay").show();
+			$("#gdoptdirectmodifylay div.colorlay").show();
+			$("#gdoptdirectmodifylay div.datelay").hide();
+			$("#gdoptdirectmodifylay div.addresslay").hide();
+			$($("#gdoptdirectmodifylay input[name='direct_color']")).customColorPicker("destroy");
+			$("#gdoptdirectmodifylay input[name='direct_color']").val(opttblobj.find("input[name='suboptcolor[]']").val());
+			$($("#gdoptdirectmodifylay input[name='direct_color']")).customColorPicker();
+			//helpicon_style();
+			openDialog("색상 변경", "gdoptdirectmodifylay", {"width":"450","height":"300","show" : "fade","hide" : "fade"});
+		}
+	});
+
+	//직접입력 > 지역
+	$(".addrhelpicon").live("click",function(){
+		if($(this).attr("opttype")){
+			$("#gdoptdirectmodifylay input").val();
+			var opttblobj = $(this).parents("tr");
+			var opttblidx = opttblobj.index();
+			$("#goodsoptiondirectmodifybtn").attr("opttblidx",opttblidx);
+			$("#goodsoptiondirectmodifybtn").attr("newtype","address");
+			$("#gdoptdirectmodifylay div.goodsoptiondirectlay").hide();
+			$("#gdoptdirectmodifylay div.colordateaddresslay").show();
+			$("#gdoptdirectmodifylay div.addresslay").show();
+			$("#gdoptdirectmodifylay div.colorlay").hide();
+			$("#gdoptdirectmodifylay div.datelay").hide();
+			var zipcode = new Array()
+			zipcode = opttblobj.find("input[name='suboptzipcode[]']").val().split("-");
+			$("#gdoptdirectmodifylay input.direct_zipcode1").val(zipcode[0]);
+			$("#gdoptdirectmodifylay input.direct_zipcode2").val(zipcode[1]);
+			$("#gdoptdirectmodifylay input[name='direct_address']").val(opttblobj.find("input[name='suboptaddress[]']").val());
+			$("#gdoptdirectmodifylay input[name='direct_addressdetail']").val(opttblobj.find("input[name='suboptaddressdetail[]']").val());
+			$("#gdoptdirectmodifylay input[name='direct_biztel']").val(opttblobj.find("input[name='suboptbiztel[]']").val());
+			//helpicon_style();
+			openDialog("지역 변경", "gdoptdirectmodifylay", {"width":"450","height":"300","show" : "fade","hide" : "fade"});
+		}
+	});
+	//직접입력 > 날짜
+	$(".codedatehelpicon").live("click",function(){
+		if($(this).attr("opttype")){
+			$("#gdoptdirectmodifylay input").val();
+			var opttblobj = $(this).parents("tr");
+			var opttblidx = opttblobj.index();
+			$("#goodsoptiondirectmodifybtn").attr("opttblidx",opttblidx);
+			$("#goodsoptiondirectmodifybtn").attr("newtype","date");
+			$("#gdoptdirectmodifylay div.goodsoptiondirectlay").hide();
+			$("#gdoptdirectmodifylay div.colordateaddresslay").show();
+			$("#gdoptdirectmodifylay div.datelay").show();
+			$("#gdoptdirectmodifylay div.colorlay").hide();
+			$("#gdoptdirectmodifylay div.addresslay").hide();
+			$("#gdoptdirectmodifylay input[name='direct_codedate']").val(opttblobj.find("input[name='codedate[]']").val());
+			//helpicon_style();
+			openDialog("날짜 변경", "gdoptdirectmodifylay", {"width":"450","height":"300","show" : "fade","hide" : "fade"});
+		}
+	});
+	//직접입력 > 수동기간
+	$(".dayinputhelpicon").live("click",function(){
+		if($(this).attr("opttype")){
+			var opttblobj = $(this).parents("tr");
+			var opttblidx = opttblobj.index();
+			$("#goodsoptiondirectmodifybtn").attr("opttblidx",opttblidx);
+			$("#goodsoptiondirectmodifybtn").attr("newtype","dayinput");
+			$("#gdoptdirectmodifylay div.goodsoptiondirectlay").hide();
+			$("#gdoptdirectmodifylay div.colordateaddresslay").hide();
+			$("#gdoptdirectmodifylay div.dayinputlay").show();
+			openDialog("수동기간 변경", "gdoptdirectmodifylay", {"width":"350","height":"150","show" : "fade","hide" : "fade"});
+		}
+	});
+	//직접입력 > 자동기간
+	$(".dayautohelpicon").live("click",function(){
+		if($(this).attr("opttype") ){
+			var opttblobj = $(this).parents("tr");
+			var opttblidx = opttblobj.index();
+			$("#goodsoptiondirectmodifybtn").attr("opttblidx",opttblidx);
+			$("#goodsoptiondirectmodifybtn").attr("newtype","dayauto");
+			$("#gdoptdirectmodifylay div.goodsoptiondirectlay").hide();
+			$("#gdoptdirectmodifylay div.colordateaddresslay").hide();
+			$("#gdoptdirectmodifylay div.dayautolay").show();
+			openDialog("자동기간 변경", "gdoptdirectmodifylay", {"width":"350","height":"150","show" : "fade","hide" : "fade"});
+		}
+	});
+
+	//직접입력 개별수정버튼클릭시
+	$("#goodsoptiondirectmodifybtn").live("click",function(){
+		var newtype = $(this).attr("newtype");
+		var opttblidx = $(this).attr("opttblidx");
+		goodsoptiondirectmodify(opttblidx, newtype);
+	});
+
+
+    // 우편번호 검색
+    $(".direct_zipcode_btn").live("click",function(){
+		openDialogZipcode('direct_');
+    });
+
+	$("div#subOptDialog select.suboptionMakedayauto_type").live("change",function(){
+		if( $(this).find("option:selected").val() == 'day' ) {
+			var suboptionMakenewdayautolaytitle = "이후";
+		}else{
+			var suboptionMakenewdayautolaytitle = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+		}
+		$(this).parent().find(".suboptionMakenewdayautolaytitle").html(suboptionMakenewdayautolaytitle);
+		socialcpdayautoreview($(this).parents("div.suboptionMakenewdayauto"));
+	});
+
+	$("div#subOptDialog select.suboptionMakedayauto_day").live("change",function(){
+		socialcpdayautoreview($(this).parents("div.suboptionMakenewdayauto"));
+	});
+
+	//자동기간 예시 미리보기
+	$("div#subOptDialog span.optionMakenewdayautolayrealdateBtn").live("click",function() {
+		socialcpdayautoreview( $(this).parents("div.suboptionMakenewdayauto") );
+	});
+
+	{ ? !suboptions }
+		$("#frequentlay").hide();
+	{/}
+
+});
+
+
+//특수옵션 > 자동기간 미리보기
+function socialcpdayautoreview(opttblobj) {
+	opttblobj.find(".optionMakenewdayautolayrealdate").html('');
+	var dayauto_type = 'month';
+	dayauto_type = opttblobj.find(".suboptionMakedayauto_type option:selected").val();
+
+	var sdayauto = '0';
+	sdayauto = opttblobj.find(".optionMakesdayauto").val();
+
+	var fdayauto = '0';
+	fdayauto = opttblobj.find(".optionMakefdayauto").val();
+
+	var dayauto_day = 'day';
+	dayauto_day = opttblobj.find(".suboptionMakedayauto_day option:selected").val();
+
+	if( !sdayauto || !sdayauto ){
+		alert("기간 자동일자를 정확히 입력해 주세요.");
+		return false;
+	}
+
+	$.ajax({
+		'url' : '../setting_process/goods_dayauto_setting',
+		'data' : {'dayauto_type':dayauto_type,'dayauto_day':dayauto_day,'sdayauto':sdayauto,'fdayauto':fdayauto},
+		'dataType' : 'json',
+		'success' : function(res){
+			opttblobj.find(".optionMakenewdayautolayrealdate").html(res.social_start_date+"~"+res.social_end_date);
+		}
+	});
+
+}
+
+//
+function socialcpinputtype() {
+	{? _GET.socialcp_input_type }
+	var socialcp_input_type = '{_GET.socialcp_input_type}';
+	{:}
+		var socialcp_input_type = $("input[name='socialcp_input_type']:checked", window.opener.document).val();
+	{/}
+
+	if(socialcp_input_type) {
+		var couponinputsubtitle = '';
+		$(".couponinputtitle").show();
+		if( socialcp_input_type == 'price' ) {
+			couponinputsubtitle = '금액';
+		}else{
+			couponinputsubtitle = '횟수';
+		}
+		$("#socialcpuseopen").val(socialcp_input_type);
+		$(".couponinputsubtitle").text(couponinputsubtitle);
+	}
+
+	//과세/부가세 체크
+	{? _GET.goodsTax }
+	var goodsTax = '{_GET.goodsTax}';
+	{:}
+		var goodsTax = $("input[name='tax']:checked", window.opener.document).val();
+	{/}
+	$(".goodsTax").val(goodsTax);
+
+}
+
+function helpicon_style(){
+	/* 툴팁 */
+	$(".helpicon, .help").each(function(){
+
+		var options = {
+			className: 'tip-darkgray',
+			bgImageFrameSize: 8,
+			alignTo: 'target',
+			alignX: 'right',
+			alignY: 'center',
+			offsetX: 10,
+			allowTipHover: false,
+			slide: false,
+			showTimeout : 0
+		}
+
+		if($(this).attr('options')){
+			var customOptions = eval('('+$(this).attr('options')+')');
+			for(var i in customOptions){
+				options[i] = customOptions[i];
+			}
+		}
+
+		$(this).poshytip(options);
+	});
+}
+
+//직접입력 > 개별수정레이어창에서 수정하기
+function goodsoptiondirectmodify(opttblidx, newtype) {
+	var opttblobj = $("div#suboptionLayer tr.suboptionTr").eq(opttblidx);
+	switch(newtype){
+		case "color":
+			var optcolor = $("#gdoptdirectmodifylay input[name='direct_color']").val();
+			opttblobj.find("input[name='suboptcolor[]']").val(optcolor);
+			opttblobj.find("div.colorhelpicon").css("background-color",optcolor);
+			opttblobj.find("div.colorhelpicon").attr("title", "[색상]을 클릭하여 변경할 수 있습니다.");
+			$(opttblobj.find("div.colorhelpicon")).customColorPicker(optcolor);
+		break;
+		case "address":
+			var direct_zipcode1 = $("#gdoptdirectmodifylay input.direct_zipcode1").val();
+			var direct_zipcode2 = $("#gdoptdirectmodifylay input.direct_zipcode2").val();
+			var optaddress = $("#gdoptdirectmodifylay input[name='direct_address']").val();
+			var optaddressdetail = $("#gdoptdirectmodifylay input[name='direct_addressdetail']").val();
+			var optbiztel = $("#gdoptdirectmodifylay input[name='direct_biztel']").val();
+			opttblobj.find("input[name='suboptaddressdetail[]']").val(optaddressdetail);
+			opttblobj.find("input[name='suboptbiztel[]']").val(optbiztel);
+			opttblobj.find("input[name='suboptaddress[]']").val(optaddress);
+			opttblobj.find("input[name='suboptzipcode[]']").val(direct_zipcode1+"-"+direct_zipcode2);
+			opttblobj.find("span.addrhelpicon").attr("title","["+direct_zipcode1+"-"+direct_zipcode2+"] "+optaddress +" "+ optaddressdetail + " 업체 연락처:"+ optbiztel +"<br/>[지역]을 클릭하여 변경할 수 있습니다.");
+		break;
+		case "date":
+			var codedate = $("#gdoptdirectmodifylay input[name='direct_codedate']").val();
+			opttblobj.find("input[name='codedate[]']").val(codedate);
+			opttblobj.find("span.codedatehelpicon").attr("title",codedate + "<br/>[날짜]를 클릭하여 변경할 수 있습니다.");
+		break;
+	}
+	helpicon_style();
+	closeDialog("gdoptdirectmodifylay");
+}
+
+//옵션 >> 직접입력시 초기화
+function goodssuboptiondirectdefault(objparent) {
+	objparent.find("input[name='suboptionMakeName[]']").removeClass("input-box-default-text-code");
+	objparent.find("input[name='suboptionMakeValue[]']").removeClass("input-box-default-text-code");
+	//objparent.find("input[name='suboptionMakeName[]']").val('');
+	//objparent.find("input[name='suboptionMakeCode[]']").val('');
+	//objparent.find("input[name='suboptionMakeValue[]']").val('');
+	//objparent.find("input[name='suboptionMakePrice[]']").val('');
+
+	objparent.find("input[name='suboptionMakeName[]']").val('예) 사이즈').attr("title","예) 사이즈");
+	objparent.find("input[name='suboptionMakeValue[]']").val('예) 90, 95, 100').attr("title","예) 90, 95, 100");
+	objparent.find("input[name='suboptionMakeCode[]']").val('');
+	objparent.find("input[name='suboptionMakePrice[]']").val('0,0,0').attr("title","0,0,0");
+
+	objparent.find("input[name='suboptionMakenewtype[]']").val('');
+	objparent.find("input[name='suboptionMakecolor[]']").val('');
+	objparent.find("input[name='suboptionMakezipcode[]']").val('');
+	objparent.find("input[name='suboptionMakeaddress[]']").val('');
+	objparent.find("input[name='suboptionMakeaddressdetail[]']").val('');
+
+	objparent.find("input[name='suboptionMakebiztel[]']").val('');
+	objparent.find("input[name='suboptionMakesdayinput[]']").val('');
+	objparent.find("input[name='suboptionMakefdayinput[]']").val('');
+	objparent.find("input[name='suboptionMakedayauto_type[]'] option[value='']").attr("selected",true);
+	objparent.find("input[name='suboptionMakesdayauto[]']").val('');
+	objparent.find("input[name='suboptionMakefdayauto[]']").val('');
+	objparent.find("input[name='suboptionMakedayauto_day[]'] option[value='']").attr("selected",true);
+
+	objparent.find("input[name='suboptionMakeValue[]']").removeAttr("readonly");
+	objparent.find("input[name='suboptionMakeName[]']").removeAttr("readonly");
+	objparent.find("select[name='suboptionMakespecial[]']").removeAttr("disabled");
+	objparent.find("select[name='suboptionMakespecial[]']").removeAttr("readonly");
+	objparent.find("select[name='suboptionMakespecial[]'] option[value='']").attr("selected",true);
+	objparent.find("input[name='suboptionMakeName[]']").show();
+	objparent.find("input[name='suboptionMakeValue[]']").show();
+
+	objparent.find(".suboptionMakeSpecial").hide();
+	objparent.find(".suboptionMakeSpecialsub").hide();
+	//objparent.find(".suboptionMakelayout").show();
+}
+
+//옵션정보 가져오기시 중복체크
+function goodssuboptionspecialselect(obj, objparent) {
+	var parentidx = objparent.index();//현재위치
+	var goodsoptionspecialdate = 0;
+	var goodsoptionspecial = 0;
+	var label_newtype = obj.find("option:selected").attr("label_newtype");
+	var optionMakeIdval = obj.find("option:selected").val();
+	var label_newtype_length = objparent.parent().find("select[name='suboptionMakespecial[]']").length;
+
+	if( label_newtype_length > 1 ) {
+		objparent.parent().find("select[name='suboptionMakespecial[]']").each( function() {
+			var selidx = $(this).parents("tr").index();//alert(parentidx + "-->" + selidx);//
+			if( parentidx != selidx && $(this).val() ) {
+				if( $(this).find("option:selected") ) {
+					if( label_newtype == $(this).val() )  goodsoptionspecial++;//중복불가
+
+					if( $(this).val() == 'date' ||  $(this).val() == 'dayauto'  ||  $(this).val() == 'dayinput' )goodsoptionspecialdate++;
+				}
+			}
+	});
+	}
+
+	objparent.find("input[name='suboptionMakeValue[]']").val('').attr("title","");
+	objparent.find("input[name='suboptionMakePrice[]']").val('').attr("title","");
+
+	objparent.find(".suboptionMakeSpecial").hide();
+	objparent.find(".suboptionMakeSpecialsub").hide();
+	//objparent.find(".suboptionMakelayout").show();
+
+	var label_newtype = obj.find("option:selected").attr("label_newtype");
+	//objparent.find("input[name='suboptionMakeName[]']").addClass("input-box-default-text-code");
+	//objparent.find("input[name='suboptionMakeValue[]']").addClass("input-box-default-text-code");
+	objparent.find("input[name='suboptionMakeName[]']").val(obj.children("option:selected").attr("label_title"));
+	//objparent.find("input[name='suboptionMakeName[]']").attr("readonly",true);
+	objparent.find("select[name='suboptionMakespecial[]']").attr("disabled",true);
+	objparent.find("input[name='suboptionMakeValue[]']").hide();
+
+	if( label_newtype != 'none') {
+		objparent.find("select[name='suboptionMakespecial[]'] option[value='"+label_newtype+"']").attr("selected",true);
+	}else{
+		objparent.find("select[name='suboptionMakespecial[]'] option[value='']").attr("selected",true);
+	}
+
+	if(label_newtype) {
+		objparent.find(".suboptionMakeSpecial").show();
+		objparent.find(".suboptionMakeSpecialsub").hide();
+		switch(label_newtype){
+			case 'color':			objparent.find(".suboptionMakeColor").show();break;
+			case 'address':		objparent.find(".suboptionMakeaddress").show();break;
+			case 'date':			objparent.find(".suboptionMakedate").show();break;
+			case 'dayinput':	objparent.find(".suboptionMakedayinput").show();break;
+			case 'dayauto':	objparent.find(".suboptionMakenewdayauto").show();break;
+		}
+	}else{
+		objparent.find(".suboptionMakeSpecial").hide();
+		objparent.find(".suboptionMakeSpecialsub").hide();
+	}
+	setDefaultText();
+	setDatepicker();
+
+
+	return true;
+}
+//옵션 > 직접입력 >> 특수정보 선택시
+function goodssuboptionspecialform(obj, objparent) {
+	var parentidx = objparent.index();//현재위치
+	var specialform = obj.val();
+	var goodsoptionspecial = 0;
+	var goodsoptionspecialdate = 0;
+	var label_newtype = specialform;
+	var label_newtype_length = objparent.parent().find("select[name='suboptionMakespecial[]']").length;
+	if( label_newtype_length > 1 ) {
+		objparent.parent().find("select[name='suboptionMakespecial[]']").each( function() {
+			var selidx = $(this).parents("tr").index();//alert(parentidx + "-->" + selidx);//
+			if(parentidx == selidx && label_newtype == $(this).val()) {//본인추가
+				goodsoptionspecial++;//중복불가
+				return true;
+			}
+
+			if( parentidx != selidx && $(this).val()){
+				if( $(this).find("option:selected"))  {
+					if( label_newtype == $(this).val() )  goodsoptionspecial++;//중복불가
+					if( $(this).val() == 'date' ||  $(this).val() == 'dayauto'  ||  $(this).val() == 'dayinput' ) goodsoptionspecialdate++;
+				}
+			}
+		});
+	}
+	var valuetitle = "예) 90, 95, 100";
+	objparent.find("input[name='suboptionMakeValue[]']").val("").attr("title","");
+	objparent.find("input[name='suboptionMakeCode[]']").val('');
+	if( specialform == 'date' ) {
+		valuetitle = "예) 12월 31일 20시 공연";
+		objparent.find("input[name='suboptionMakeName[]']").val('예) 공연일시').attr("title","예) 공연일시");
+		objparent.find("input[name='suboptionMakePrice[]']").val('0').attr("title","0");
+	}
+	else if( specialform == 'dayauto' ){
+		valuetitle = "사용 기간을 안내 하세요.";
+		objparent.find("input[name='suboptionMakeName[]']").val('예) 사용기간').attr("title","예) 사용기간");
+		objparent.find("input[name='suboptionMakePrice[]']").val('0').attr("title","0");
+	}
+	else if( specialform == 'dayinput' ){
+		valuetitle = "사용 기간을 안내 하세요.";
+		objparent.find("input[name='suboptionMakeName[]']").val('예) 사용기간').attr("title","예) 사용기간");
+		objparent.find("input[name='suboptionMakePrice[]']").val('0').attr("title","0");
+	}
+	else if( specialform == 'color' ){
+		valuetitle = "예) 블랙, 화이트, 그레이";
+		objparent.find("input[name='suboptionMakeName[]']").val('예) 색상').attr("title","예) 색상");
+		objparent.find("input[name='suboptionMakePrice[]']").val('0,0,0').attr("title","0,0,0");
+	}
+	else if( specialform == 'address' ){
+		valuetitle = "예) 분당점, 삼평점, 판교점";
+		objparent.find("input[name='suboptionMakeName[]']").val('예) 사용지점').attr("title","예) 사용지점");
+		objparent.find("input[name='suboptionMakePrice[]']").val('0,0,0').attr("title","0,0,0");
+	}else{
+		objparent.find("input[name='suboptionMakeName[]']").val('예) 사이즈').attr("title","예) 사이즈");
+		objparent.find("input[name='suboptionMakePrice[]']").val('0,0,0').attr("title","0,0,0");
+	}
+
+	objparent.find("input[name='suboptionMakeValue[]']").val(valuetitle);
+	objparent.find("input[name='suboptionMakeValue[]']").attr("title",valuetitle);
+
+	if(specialform){
+		objparent.find(".suboptionMakeSpecial").show();
+		objparent.find(".suboptionMakeSpecialsub").hide();
+		//objparent.find(".suboptionMakelayout").hide();
+		switch(specialform){
+			case 'color':			objparent.find(".suboptionMakeColor").show();break;
+			case 'address':		objparent.find(".suboptionMakeaddress").show();break;
+			case 'date':			objparent.find(".suboptionMakedate").show();break;
+			case 'dayinput':	objparent.find(".suboptionMakedayinput").show();break;
+			case 'dayauto':	objparent.find(".suboptionMakenewdayauto").show();break;
+		}
+		objparent.find("input[name='suboptionMakenewtype[]']").val(specialform);
+		setDefaultText();
+		setDatepicker();
+	}else{
+		objparent.find("input[name='suboptionMakenewtype[]']").val('');
+		objparent.find(".suboptionMakeSpecial").hide();
+		objparent.find(".suboptionMakeSpecialsub").hide();
+		objparent.find("select[name='suboptionMakeId[]'] option[value='direct']").attr("selected",true);
+		//objparent.find(".suboptionMakelayout").show();
+		return;
+	}
+}
+
+//옵션 >> 옵션코드추가
+function goodssuboptioncode(obj){
+	obj.parent().parent().find(".goodssuboptionlay").hide();
+	obj.parent().parent().find(".etcContents").show();
+	obj.parent().parent().find(".suboptionMakeType").val('');
+	var selectecttitle = obj.find("option:selected").val();
+	if(  selectecttitle.substr(0,14) == 'goodssuboption'){
+		obj.parent().parent().find(".suboptionMakeType").val(selectecttitle);
+		obj.parent().parent().find(".goodssuboptionlay").show();
+		obj.parent().parent().find(".goodssuboptionsublay").hide();
+		obj.parent().parent().find(".etcContents").hide();
+		obj.parent().parent().find("."+selectecttitle).show();
+	}
+}
+
+/* 컬러피커 */
+function colorpickerlay(){
+	$(".colorpicker").customColorPicker();
+}
+
+function optReplace(str){
+	var tmp = "";
+	tmp = str.replace(/\"/gi, "");
+	return tmp;
+}
+
+function chgReservePolicy(){
+	var policy			= $("select[name='reserve_policy'] option:selected").val();
+	var idx				= 0;
+
+	$("input[name='reserveRate[]']").each(function(){
+		if	(policy == 'shop'){
+			$("input[name='reserveRate[]']").eq(idx).attr('readonly',true).addClass('input-box-default-text-code');
+			$("input[name='reserveUnit[]']").eq(idx).attr('readonly',true).addClass('input-box-default-text-code');
+			$("input[name='reserve[]']").eq(idx).attr('readonly',true).addClass('input-box-default-text-code');
+		}else{
+			$("input[name='reserveRate[]']").eq(idx).attr('readonly',false).removeClass('input-box-default-text-code');
+			$("input[name='reserveUnit[]']").eq(idx).attr('readonly',false).removeClass('input-box-default-text-code');
+			$("input[name='reserve[]']").eq(idx).attr('readonly',false).removeClass('input-box-default-text-code');
+		}
+		idx++;
+	});
+}
+
+function subreserve_policy(){
+	{? tmp_policy == 'shop' }
+		{ ? default_reserve_percent }
+		$("input[name='reserveRate[]']").val({default_reserve_percent});
+		$("select[name='reserveUnit[]'] option[value='percent']").attr('selected',true);
+		calulate_option_price();
+
+		$("input[name='subReserveRate[]']").val({default_reserve_percent});
+		$("select[name='subReserveUnit[]'] option[value='percent']").attr('selected',true);
+		calulate_subOption_price();
+		{ / }
+
+		$("input[name='reserveRate[]'], select[name='reserveUnit[]'], input[name='reserve[]'], input[name='subReserveRate[]'], select[name='subReserveUnit[]'], input[name='subReserve[]']").attr('readonly',true).css('opacity',0.5);
+		$("select[name='reserveUnit[]'] option[value!='percent'], select[name='subReserveUnit[]'] option[value!='percent']").attr('disabled',true);
+	{:}
+		$("input[name='reserveRate[]'], select[name='reserveUnit[]'], input[name='reserve[]'], input[name='subReserveRate[]'], select[name='subReserveUnit[]'], input[name='subReserve[]']").removeAttr('readonly').css('opacity',1);
+		$("select[name='reserveUnit[]'] option[value!='percent'], select[name='subReserveUnit[]'] option[value!='percent']").removeAttr('disabled');
+	{/}
+}
+
+function calculrate_option(idx){
+	var supplyPrice		= $("input[name='subSupplyPrice[]']").eq(idx).val();
+	var consumerPrice	= $("input[name='subConsumerPrice[]']").eq(idx).val();
+	var price			= $("input[name='subPrice[]']").eq(idx).val();
+	var supplyRate		= 0;
+	var net_profit		= price - supplyPrice;
+	var discountRate	= 0;
+	var tax				= 0;
+	if	(supplyPrice > 0 && consumerPrice > 0)
+		supplyRate		= Math.floor((supplyPrice / consumerPrice) * 100);
+	if	(consumerPrice > 0 && price > 0)
+		discountRate	= 100 - Math.floor((price / consumerPrice) * 100);
+	if	(price > 0){
+		{?goodsTax == 'exempt'}
+		tax				= 0;
+		{:}
+		tax				= Math.floor(price - (price / 1.1));
+		{/}
+		calculrate_reserve(idx);
+	}
+
+	$(".subSupplyRate").eq(idx).html(supplyRate + '%');
+	$(".sub_net_profit").eq(idx).html(net_profit);
+	$(".subDiscountRate").eq(idx).html(discountRate + '%');
+	$(".subTax").eq(idx).html(tax);
+}
+
+function calculrate_reserve(idx){
+	var price			= $("input[name='subPrice[]']").eq(idx).val();
+	var reserve_rate	= $("input[name='subReserveRate[]']").eq(idx).val();
+	var reserve_unit	= $("select[name='subReserveUnit[]'] option:selected").eq(idx).val();
+	var reserve			= reserve_rate;
+	if	(reserve_unit == 'percent')
+		reserve			= Math.floor(price * (reserve_rate * 0.01));
+
+	$("input[name='subReserve[]']").eq(idx).val(reserve);
+}
+
+function setTmpSeq(){
+	var tmp_frequently = ($("input[name='frequently']:checked"))?$("input[name='frequently']:checked").val():0;
+	opener.setSubOptionTmp('{tmp_seq}',tmp_frequently);
+	self.close();
+}
+</script>
+<style type="text/css">
+body {overflow-x:hidden;}
+.input-box-default-text-code {border:1px solid #ccc; background-color:#f6f6f6; color:#999 !important;}
+.input-box-default-text-code option {background-color:#f6f6f6; color:#999; }
+.top_title	{width:100%;background:url('../images/design/win_tbl_thbg.gif') repeat-x;font-weight:bold;font-size:15px;padding:6px 0;padding-left:20px;color:#747474;}
+.top_title_memo {line-height:25px;border-bottom:1px solid #000;margin-bottom:10px;}
+.top_btn_area	{margin:5px 0;}
+.pricetd		{background-color:#ffffcc;}
+.pricetd input	{color:red;}
+</style>
+<div class="top_title">추가구성옵션</div>
+<div style="width:99%;padding:10px;">
+	<div id="suboptionLayer">
+		<div class="top_title_memo">
+			<span class="bold">자주 쓰는 상품의 옵션 가져오기</span> :
+			자주 쓰는 상품의 옵션 중에서 선택된 상품의 필수옵션 정보를 가져옵니다.
+			<br/>
+			<span class="btn small cyanblue"><button type="button">생성 및 변경</button></span> :
+			여러 개의 추가구성옵션을 생성 및 변경 할 수 있습니다. 또한 미리 등록해 놓은 옵션 정보를 가져와서 쉽고 정확하게 옵션을 등록할 수도 있습니다.
+			<br/>
+			<span class="btn-minus"><button type="button"></button></span> &nbsp; : &nbsp;
+			생성된 추가구성옵션을 기준으로 삭제할 수 있습니다.
+		</div>
+		<div class="top_btn_area">
+			<div class="left" >
+				<span id="frequentlytypesuboptlay" ><select name="frequentlytypesubopt" class="frequentlytypesubopt" >
+					<option value="0">자주 쓰는 상품의 추가구성옵션 </option>
+					{? frequentlysublist }
+						{@ frequentlysublist }
+							<option value="{.goods_seq}">{=strip_tags(.goods_name)}</option>
+						{/}
+					{/}
+				</select>을  <span class="btn small cyanblue"><button type="button" id="frequentlytypesuboptbtn" goods_seq="{goods_seq}">가져오기</button></span></span>
+				또는
+				<span class="btn small cyanblue"><button type="button" id="addCellOption" goods_seq="{goods_seq}">생성 및 변경</button></span>
+			</div>
+			<div class="cboth"></div>
+			<div class="right" style="margin-right:0px;margin-top:-20px;">
+				<span class="btn small gray"><button type="button" id="suboptionBatch">기준할인가 일괄적용</button></span>
+			</div>
+			</div>
+
+		<form name="listFrm" method="post" action="../goods_process/save_suboption_tmp" target="suboptionFrame">
+		<input type="hidden" name="tmp_policy" value="{tmp_policy}" />
+		<input type="hidden" name="goods_seq" value="{goods_seq}" />
+		<input type="hidden" name="tmp_seq" value="{tmp_seq}" />
+		<input type="hidden" name="goodsTax" class="goodsTax" value="" />
+			<table class="info-table-style" style="width:100%;">
+		<thead>
+		<tr>
+			<th class="its-th-align center" rowSpan="2"></th>
+			<th class="its-th-align center" colSpan="4">추가옵션<br/><span class="desc">옵션코드</span></th>
+			<th class="its-th-align center" rowSpan="2">매입가</th>
+			<th class="its-th-align center" rowSpan="2">매입율</th>
+				<th class="its-th-align center {? !_GET.socialcp_input_type }hide{/} couponinputtitle" rowspan="2">쿠폰1장→값어치<br/><span class="couponinputsubtitle">{? _GET.socialcp_input_type =='price' }금액{:}횟수{/}</span></th>
+			<th class="its-th-align center" rowSpan="2">정가(소비자가)</th>
+			<th class="its-th-align center" rowSpan="2">마진 / 할인가(판매가)</th>
+			<th class="its-th-align center" rowSpan="2">할인율</th>
+			<th class="its-th-align center" rowSpan="2">부가세</th>
+			<th class="its-th-align center" rowSpan="2">재고(가용)</th>
+			<th class="its-th-align center" rowspan="2">지급 적립금
+				<div style="color:#999999;" class="point_text">
+					※지급 포인트(P)는
+					<u id="policy_str" style="color:#ff6600;">
+					<!--{ ? options[0].tmp_policy == 'goods' || tmp_policy == 'goods' }-->개별정책<!--{:}-->통합정책<!--{/}-->
+					</u>
+					이 자동적용됨
+				</div>
+			</th>
+		</tr>
+		<tr>
+			<th class="its-th-align center">추가혜택<span class="helpicon" title="체크하시면 해당 추가구성옵션에 대한 구매자별 추가혜택이 적용됩니다."></span></th>
+			<th class="its-th-align center">필수여부<span class="helpicon" title="체크하시면 구매자는 해당 추가구성옵션을 선택해야만 구매할 수 있게 됩니다."></span></th>
+			<th class="its-th-align center">옵션명</th>
+			<th class="its-th-align center">옵션값</th>
+		</tr>
+		</thead>
+		<tbody>
+		<!--{ @ suboptions }-->
+		<!--{ @ .value_ }-->
+		<tr class="suboptionTr">
+			<td class="its-td-align center">
+			<input type="hidden" name="suboptionSeq[]" value="{..suboption_seq}" />
+			<span class="btn-minus"><button class="delSuboptionButton" type="button" {?..key_==0}ltype="m"{:}ltype="s"{/}></button></span>
+			</td>
+			<td class="its-td-align center subSale_td">
+			<!--{? ..key_ == 0 }-->
+			<input type="checkbox" name="subSale[]" size="10" value="{.key_}" {?..sub_sale=='y'}checked="checked"{/} />
+			<!--{ / }-->
+			</td>
+			<td class="its-td-align center subRequired_td">
+			<!--{? ..key_ == 0 }-->
+			<input type="checkbox" name="subRequired[]" size="10" value="{.key_}" {?..sub_required=='y'}checked="checked"{/} />
+			<!--{ / }-->
+			</td>
+			<td class="its-td-align center suboptTitle_td">
+			<!--{? ..key_ == 0 }-->
+					<input type="text" name="suboptTitle[]" size="10" value="{..suboption_title}"  class="line" />
+			<input type="hidden" name="suboptType[]" value="{..suboption_type}">
+			<!--{ / }-->
+			</td>
+			<td class="its-td-align center">
+				<input type="text" name="subopt[{.key_}][]" value="{..suboption}" class="line" style="width:70%;" />
+						<br/><input type="text" name="suboptCode[{.key_}][]" value="{..suboption_code}" class="line" style="width:70%;"   title="옵션코드" />
+				<!--{? ..newtype }-->
+					<br/>
+					<!--{? ..newtype == 'color' }-->
+						<div class="colorPickerBtn colorhelpicon helpicon1" opttype="{..suboption_type}"  style="background-color:{..color}" title="[색상]을 클릭하여 변경할 수 있습니다."></div>
+					<!--{: ..newtype == 'address'  }-->
+						<span class="addrhelpicon helpicon" opttype="{..suboption_type}"  title="{? ..zipcode }[{..zipcode}] {..address} {..addressdetail} {:}지역 정보가 없습니다.{/} {? ..biztel }업체 연락처:{..biztel}{/}<br/>[지역]을 클릭하여 변경할 수 있습니다.">지역</span>
+					<!--{: ..newtype == 'date'  }-->
+						<span class="codedatehelpicon helpicon" opttype="{..suboption_type}"  title="{? ..codedate && ..codedate !='0000-00-00' }{..codedate}{:}날짜 정보가 없습니다.{/} <br/>[날짜]를 클릭하여 변경할 수 있습니다.">날짜</span>
+					<!--{: ..newtype == 'dayinput'  }-->
+						<span class="dayinputhelpicon helpicon" opttype="{..suboption_type}"  title="{? ..sdayinput && ..fdayinput }{..sdayinput} ~ {..fdayinput}{:}수동기간 정보가 없습니다.{/} <br/> [생성 및 변경]에서 변경할 수 있습니다.">수동기간</span>
+					<!--{: ..newtype == 'dayauto'  }-->
+						<span class="dayautohelpicon helpicon"  opttype="{..suboption_type}" title="{? ..dayauto_type }'결제확인' {..dayauto_type_title} {..sdayauto}일 {? ..dayauto_type == 'day' }이후{/}부터 + {..fdayauto}일{..dayauto_day_title}{:}자동기간 정보가 없습니다.{/} <br/>[생성 및 변경]에서 변경할 수 있습니다.">자동기간</span>
+					<!--{ / }-->
+				<!--{ / }-->
+
+				<input type="hidden" name="suboptcolor[]" value="{..color}" />
+				<input type="hidden" name="suboptzipcode[]" value="{..zipcode}" />
+				<input type="hidden" name="suboptaddress[]" value="{..address}" />
+				<input type="hidden" name="suboptaddressdetail[]" value="{..addressdetail}" />
+				<input type="hidden" name="suboptbiztel[]" value="{..biztel}">
+
+				<input type="hidden"  name="codedate[]" value="{..codedate}">
+				<input type="hidden"  name="sdayinput[]" value="{..sdayinput}">
+				<input type="hidden"  name="fdayinput[]" value="{..fdayinput}">
+				<input type="hidden"  name="dayauto_type[]" value="{..dayauto_type}">
+				<input type="hidden"  name="sdayauto[]" value="{..sdayauto}">
+				<input type="hidden"  name="fdayauto[]" value="{..fdayauto}">
+				<input type="hidden"  name="dayauto_day[]" value="{..dayauto_day}">
+
+				<input type="hidden" name="suboptionnewtype[]" value="{..newtype}" />
+
+			</td>
+			<td class="its-td-align center">
+			<input type="text" name="subSupplyPrice[]" style="text-align: right;" class="line onlynumber" size="10" value="{..supply_price}" idx="{..index_}" />
+			</td>
+			<td style="padding-right: 10px;" class="its-td-align right subSupplyRate">{=number_format(..supplyRate)}%</td>
+					<td class="its-td-align center {? !_GET.socialcp_input_type }hide{/} couponinputtitle">
+					<input type="text" name="subcoupon_input[]" style="text-align: right;" class="line onlynumber"  size="10" value="{..coupon_input}" idx="{..index_}" />
+					</td>
+			<td class="its-td-align center">
+			<input type="text" name="subConsumerPrice[]" style="text-align: right;" class="line onlynumber"  size="10" value="{..consumer_price}" idx="{..index_}" />
+			</td>
+			<td class="its-td-align center pricetd">
+			<span class="sub_net_profit">{=number_format(..net_profit)}%</span> /
+			<input type="text" name="subPrice[]" style="text-align: right;" class="line onlynumber" size="10" value="{..price}" idx="{..index_}" />
+			</td>
+			<td style="padding-right: 10px;" class="its-td-align right subDiscountRate">{=number_format(..discountRate)}%</td>
+			<td style="padding-right: 10px;" class="its-td-align right subTax">
+				<!--{ ? goodsTax == 'exempt' }-->0<!--{ : }-->
+				{=number_format(..tax)}
+				<!--{ / }-->
+			</td>
+			<td class="its-td-align center">
+			<input type="text" name="subStock[]" style="text-align: right;" class="line onlynumber" size="5" value="{..stock}" /> ({..stock - ..reservation15})
+			</td>
+			<td class="its-td-align center ">
+				<!--{ ? goods.reserve_policy == 'goods' || tmp_policy == 'goods //개별정책' }-->
+				<input style="text-align: right;" class="line onlynumber input-box-default-text" name="subReserveRate[]" value="{..reserve_rate}" size="3" type="text" />
+				<select class="line" name="subReserveUnit[]">
+					<option value="percent" {? ..reserve_unit == 'percent' }selected{/}>%</option>
+					<option value="won" {? ..reserve_unit == 'won' }selected{/}>원</option>
+				</select>
+				<input style="text-align: right;" class="line onlynumber input-box-default-text" name="subReserve[]" value="{..reserve}" size="5" type="text"  />
+				<!--{ : }-->
+				<input style="text-align: right;" class="line onlynumber input-box-default-text input-box-default-text-code" name="subReserveRate[]" value="{.reserve_rate}" size="3" type="text" readonly/>
+				<select name="subReserveUnit[]" class="line input-box-default-text-code" readonly>
+					<option value="percent" {? ..reserve_unit == 'percent' }selected{/}>%</option>
+					<option value="won" {? ..reserve_unit == 'won' }selected{/}>원</option>
+				</select>
+				<input style="text-align: right;" class="line onlynumber input-box-default-text input-box-default-text-code" name="subReserve[]" value="{..reserve}" size="5" type="text"  readonly />
+				<!--{ / }-->
+			</td>
+		</tr>
+	<!--{ / }-->
+	<!--{ / }-->
+	</tbody>
+	</table>
+		<div class="center" style="padding:10px;" id="frequentlay">
+			이 상품의 옵션 정보를 자주 쓰는 상품의 추가구성옵션으로 사용하시겠습니까? <label><input type="checkbox" name="frequently" value="1"  {? goods.frequentlysub==1} checked="checked" {/} >예, 사용하겠습니다.</label>
+		</div>
+
+		<div class="center" style="padding:10px;">
+			<span class="btn large black"><button type="submit">적용하기</button></span>
+		</div>
+		</form>
+	</div>
+
+	<!-- 추가옵션만들기 다이얼로그 -->
+	<div id="subOptDialog" class="hide">
+		<div id="goodscodeoptionnew" >
+			 <div style="margin-bottom:10px;"  class="desc" >
+				<div>
+					▼ 옵션에 특수 정보(기간/날짜/지역/색상표)가 필요하시면 [특수 정보]를 선택하십시오.
+					<span class="btn small orange"><button type="button"  id="btn_goods_special_list"> 안내) 특수 정보 활용</button></span>
+				</div>
+				▼ 아래의 옵션정보 가져오기를 선택하면, <span style="font-weight:normal">설정>
+				<a href="../setting/goods" target="_blank"><span class=" highlight-link hand">상품 코드/정보</span></a>
+				에서 미리 등록해 놓은 옵션 정보를 쉽고 정확하게 옵션을 등록하게 됩니다.</span>
+				<span class="btn small orange"><button type="button"  id="btn_goods_option_list"> 안내) 옵션정보 가져오기</button></span>
+			</div>
+		</div>
+		<form name="suboptionMakeForm" id="suboptionMakeForm" method="post" action="../goods_process/make_suboption_tmp" target="suboptionFrame">
+		<input type="hidden" name="goods_seq" value="{goods_seq}" />
+		<input type="hidden" name="tmp_seq" value="{tmp_seq}" />
+		<input type="hidden" name="optionCode" class="line" size="55" value="" />
+		<input type="hidden" name="socialcpuseopen" id="socialcpuseopen" value="" />
+		<input type="hidden" name="goodsTax" class="goodsTax" value="" />
+		<table  class="simplelist-table-style" style="width:100%" border="0">
+			<colgroup>
+				<col width="1%" />
+				<col/>
+				<col  width="200"/>
+				<col />
+				<col width="5%" />
+			</colgroup>
+			<thead>
+				<tr>
+					<th class="its-th-align center" ></th>
+					<th class="its-th-align center">옵션정보 가져오기</th>
+					<th class="its-th-align center" >추가 옵션명  [특수정보]</th>
+					<th class="its-th-align center" >추가 옵션값은 :','(콤마)로 구분</th>
+					<th class="its-th-align center" >추가 가격은 : ','(콤마)로 구분</th>
+				</tr>
+			</thead>
+			<tbody>
+			{? sopts_loop }
+				{@ sopts_loop }
+				<tr>
+					<td class="its-td-align center">
+						{? .index_==0 }
+						<span class="btn-plus btnplusminus"><button type="button" id="addSuboptionMake"></button></span>
+						{ : }
+						<span class="btn-minus btnplusminus"><button type="button" class="delSuboptionMake"></button></span>
+						{ / }
+					</td>
+					<td class="its-td-align center">
+						<input type="hidden" name="suboptionMakeType[]" class="suboptionMakeType line" size="25" value="{.type}" />
+						<input type="hidden" name="suboptionMakeCode[]" class="suboptionMakeCode line" size="25" value="{.optcodes}" />
+
+						<input type="hidden" name="suboptionMakenewtype[]" value="{.newtype}" />
+
+						<input type="hidden" name="suboptionMakecolor[]" value="{.colors}" />
+						<input type="hidden" name="suboptionMakezipcode[]" value="{.zipcodes}" />
+						<input type="hidden" name="suboptionMakeaddress[]" value="{.addresss}" />
+						<input type="hidden" name="suboptionMakeaddressdetail[]" value="{.addressdetails}" />
+						<input type="hidden" name="suboptionMakebiztel[]" value="{.biztels}" />
+						<input type="hidden" name="suboptionMakecodedate[]" value="{.codedates}">
+
+						<select name="suboptionMakeId[]" class="line">
+							{ @ .goodssuboptionloop }
+								{? _GET.socialcp_input_type }
+									{? ..label_newtype != 'color'}
+									<option value="goodssuboption_{..codeform_seq}" label_type="{..label_type}"  codeform_seq="{..codeform_seq}" label_title="{..label_title}"   {? .code_seq == ..codeform_seq && strstr(.type,'goodssuboption_') } selected="selected" {/}   newtypeid="goodssuboption_{.index_}_{.newtype}" label_newtype="{..label_newtype}"  label_color="{..label_color}" label_zipcode="{..label_zipcode}" label_address="{..label_address}" label_addressdetail="{..label_addressdetail}"  label_biztel="{..label_biztel}"  label_codedate="{..label_codedate}"  label_sdayinput="{..label_sdayinput}" label_fdayinput="{..label_fdayinput}" label_dayauto_type="{..label_dayauto_type}" label_sdayauto="{..label_sdayauto}" label_fdayauto="{..label_fdayauto}" label_dayauto_day="{..label_dayauto_day}">{?  ..label_newtype && ..label_newtype != 'none'  }[특수]{/} {..label_title}</option>
+									{/}
+								{:}
+									{? ..label_newtype == 'color'  || !..label_newtype  || ..label_newtype == 'none' }
+										<option value="goodssuboption_{..codeform_seq}" label_type="{..label_type}"  codeform_seq="{..codeform_seq}" label_title="{..label_title}"   {? .code_seq == ..codeform_seq && strstr(.type,'goodssuboption_') } selected="selected" {/}   newtypeid="goodssuboption_{.index_}_{.newtype}" label_newtype="{..label_newtype}"  label_color="{..label_color}" label_zipcode="{..label_zipcode}" label_address="{..label_address}" label_addressdetail="{..label_addressdetail}"  label_biztel="{..label_biztel}"  label_codedate="{..label_codedate}"  label_sdayinput="{..label_sdayinput}" label_fdayinput="{..label_fdayinput}" label_dayauto_type="{..label_dayauto_type}" label_sdayauto="{..label_sdayauto}" label_fdayauto="{..label_fdayauto}" label_dayauto_day="{..label_dayauto_day}">{?  ..label_newtype && ..label_newtype != 'none'  }[특수]{/} {..label_title}</option>
+									{/}
+								{/}
+							{ / }
+							<option value="direct" {? !strstr(.type,'goodssuboption_') } selected="selected" {/}>직접입력</option>
+						</select>
+					</td>
+					<td class="its-td-align center">
+						<input type="text" name="suboptionMakeName[]" size="10" class="line " value="{.title}" />
+						{? service_code == 'P_FREE'}
+						<select name="suboptionMakespecial[]" id="goodssuboption_{.index_}_{.newtype}" class="{.newtype}select" onclick="openDialog('쇼핑몰 업그레이드 안내<span class=\'desc\'></span>', 'nofreeService', {'width':600,'height':200});">
+							<option value="" >특수정보선택</option>
+						</select>
+						{:}
+						{? .newtype && .newtype != 'none' && strstr(.type,'goodssuboption_') //상품코드는수정불가 }
+						<select name="suboptionMakespecial[]" readonly="readonly"  disabled="disabled" id="goodssuboption_{.index_}_{.newtype}" class="{.newtype}select">
+							<option value="" >특수정보선택</option>
+							{? _GET.socialcp_input_type //쿠폰상품 }
+								<option value="address"  {? .newtype == 'address' } selected="selected" {/}>지역</option>
+								<option value="date"  {? .newtype == 'date' } selected="selected" {/}>날짜</option>
+								<option value="dayauto"  {? .newtype == 'dayauto' } selected="selected" {/}>자동기간</option>
+								<option value="dayinput"  {? .newtype == 'dayinput' } selected="selected" {/}>수동기간</option>
+							{:}
+								<option value="color" {? .newtype == 'color' } selected="selected" {/}>색상</option>
+							{/}
+						</select>
+						{:}
+						<select name="suboptionMakespecial[]" id="goodssuboption_{.index_}_{.newtype}" class="{.newtype}select">
+							<option value="" >특수정보선택</option>
+							{? _GET.socialcp_input_type //쿠폰상품 }
+								<option value="address"  {? .newtype == 'address' } selected="selected" {/}>지역</option>
+								<option value="date"  {? .newtype == 'date' } selected="selected" {/}>날짜</option>
+								<option value="dayauto"  {? .newtype == 'dayauto' } selected="selected" {/}>자동기간</option>
+								<option value="dayinput"  {? .newtype == 'dayinput' } selected="selected" {/}>수동기간</option>
+							{:}
+								<option value="color" {? .newtype == 'color' } selected="selected" {/}>색상</option>
+							{/}
+						</select>
+						{/}
+						{/}
+					</td>
+					<td class="its-td-align left">
+						<span class='goodssuboptionlay '>
+						{@ .goodssuboptionloop }
+								<span class="goodssuboption_{..codeform_seq} goodssuboptionsublay  {? ((.code_seq != ..codeform_seq && strstr(.type,'goodssuboption_')) || (!strstr(.type,'goodssuboption_'))) }hide{/} "><span class="btn small black"><button type="button" class="{..label_type}btn" layerid="{..label_type}{..codeform_seq}_lay" label_type="{..label_type}"  codeform_seq="{..codeform_seq}" label_title="{..label_title}"  label_newtype="{..label_newtype}"  label_color="{..label_color}" label_zipcode="{..label_zipcode}" label_address="{..label_address}" label_addressdetail="{..label_addressdetail}"  label_biztel="{..label_biztel}"  label_codedate="{..label_codedate}"  label_sdayinput="{..label_sdayinput}" label_fdayinput="{..label_fdayinput}" label_dayauto_type="{..label_dayauto_type}" label_sdayauto="{..label_sdayauto}" label_fdayauto="{..label_fdayauto}" label_dayauto_day="{..label_dayauto_day}" >선택</button></span></span>
+						{ / }
+						</span>
+							<input type="text" name="suboptionMakeValue[]" class="line " size="45" value="{.opt}" />
+						<div class="suboptionMakeSpecial">
+							<div class="suboptionMakeSpecialsub suboptionMakeColor {? .newtype != 'color' } hide {/}">
+								<span class="desc">※ 색상표 정보는 옵션 생성 후 입력 가능합니다.</span>
+							</div>
+
+							<div class="suboptionMakeSpecialsub suboptionMakeaddress   {? .newtype != 'address' } hide {/}">
+							<span class="desc">※ 지역의 위치정보는 옵션 생성 후 입력 가능합니다.</span>
+							</div>
+
+							<div class="suboptionMakeSpecialsub suboptionMakedate  {? .newtype != 'date' } hide {/}">
+								<span class="desc">※ 날짜 지정은 옵션 생성 후 입력 가능합니다.</span>
+							</div>
+
+							<div class="suboptionMakeSpecialsub suboptionMakedayinput  {? .newtype != 'dayinput' } hide {/}">
+								<input type="text" name="suboptionMakesdayinput[]" id="addoptionMakesdayinput{.index_}" value="{.sdayinput}" class="line suboptionMakesdayinput datepicker"  maxlength="10" size="10" />
+								~
+								<input type="text" name="suboptionMakefdayinput[]"  id="addoptionMakefdayinput{.index_}"  value="{.fdayinput}" class="line suboptionMakefdayinput datepicker"  maxlength="10" size="10" />
+							</div>
+
+							<div class="suboptionMakeSpecialsub suboptionMakenewdayauto  {? .newtype != 'dayauto' } hide {/}">
+								<span> '결제확인' 후
+									<select name="suboptionMakedayauto_type[]" class="suboptionMakedayauto_type" >
+									<option value="month" {? .dayauto_type == 'month' } selected="selected" {/}>해당 월▼</option>
+									<option value="day" {? .dayauto_type == 'day' } selected="selected" {/}>해당 일▼</option>
+									<option value="next" {? .dayauto_type == 'next' } selected="selected" {/}>익월▼</option>
+									</select>
+									<input type="text" name="suboptionMakesdayauto[]"   value="{.sdayauto}" class="line optionMakesdayauto"  maxlength="10" size="2" />일 <span class="suboptionMakenewdayautolaytitle">{? .dayauto_type == 'day' }이후{/}</span>부터
+									+
+									<input type="text" name="suboptionMakefdayauto[]"  value="{.fdayauto}" class="line optionMakefdayauto"  maxlength="10" size="2" />일
+									<select name="suboptionMakedayauto_day[]" class="suboptionMakedayauto_day" >
+								<option value="day"  {? .dayauto_day == 'day' } selected="selected" {/}>동안</option>
+								<option value="end"  {? .dayauto_day == 'end' } selected="selected" {/}>이 되는 월의 말일</option>
+									</select>
+								</span>
+								<br/><span  class="hand optionMakenewdayautolayrealdateBtn"  >미리보기▶ </span><span class="optionMakenewdayautolayrealdate">{.social_start_date_end}</span>
+							</div>
+						</div>
+					</td>
+					<td class="its-td-align center">
+						<input type="text" name="suboptionMakePrice[]" class="line" size="25" value="{.price}" />
+					</td>
+				</tr>
+				{ / }
+			{ : }
+				<tr>
+					<td class="its-td-align center">
+						<span class="btn-plus btnplusminus"><button type="button" id="addSuboptionMake"></button></span>
+					</td>
+					<td class="its-td-align center">
+						<input type="hidden" name="suboptionMakeType[]" class="suboptionMakeType" value="" />
+						<input type="hidden" name="suboptionMakeCode[]" class="suboptionMakeCode" value="" />
+
+						<input type="hidden" name="suboptionMakenewtype[]" value="" />
+						<input type="hidden" name="suboptionMakecolor[]" value="" />
+						<input type="hidden" name="suboptionMakezipcode[]" value="" />
+						<input type="hidden" name="suboptionMakeaddress[]" value="" />
+						<input type="hidden" name="suboptionMakeaddressdetail[]" value="" />
+						<input type="hidden" name="suboptionMakebiztel[]" value="" />
+
+						<input type="hidden" name="suboptionMakecodedate[]" value="" />
+
+						<select name="suboptionMakeId[]" class="line">
+							{ @ goodssuboptionloop }
+								{? _GET.socialcp_input_type}
+									{? .label_newtype != 'color' //쿠폰상품 }
+										<option value="goodssuboption_{.codeform_seq}" label_type="{.label_type}"  codeform_seq="{.codeform_seq}" label_title="{.label_title}"   label_newtype="{.label_newtype}"  label_color="{.label_color}" label_zipcode="{.label_zipcode}" label_address="{.label_address}" label_addressdetail="{.label_addressdetail}"  label_biztel="{.label_biztel}"  label_codedate="{.label_codedate}"  label_sdayinput="{.label_sdayinput}" label_fdayinput="{.label_fdayinput}" label_dayauto_type="{.label_dayauto_type}" label_sdayauto="{.label_sdayauto}" label_fdayauto="{.label_fdayauto}" label_dayauto_day="{.label_dayauto_day}">{?  .label_newtype && .label_newtype != 'none'  }[특수]{/} {.label_title}</option>
+									{/}
+								{:}
+									{? .label_newtype == 'color' || !.label_newtype  || .label_newtype == 'none'  //실물상품 }
+										<option value="goodssuboption_{.codeform_seq}" label_type="{.label_type}"  codeform_seq="{.codeform_seq}" label_title="{.label_title}"   label_newtype="{.label_newtype}"  label_color="{.label_color}" label_zipcode="{.label_zipcode}" label_address="{.label_address}" label_addressdetail="{.label_addressdetail}"  label_biztel="{.label_biztel}"  label_codedate="{.label_codedate}"  label_sdayinput="{.label_sdayinput}" label_fdayinput="{.label_fdayinput}" label_dayauto_type="{.label_dayauto_type}" label_sdayauto="{.label_sdayauto}" label_fdayauto="{.label_fdayauto}" label_dayauto_day="{.label_dayauto_day}">{?  .label_newtype && .label_newtype != 'none'  }[특수]{/} {.label_title}</option>
+									{/}
+								{/}
+							{ / }
+							<option value="direct" selected>직접입력</option>
+						</select>
+					</td>
+					<td class="its-td-align center">
+						<input type="text" name="suboptionMakeName[]" size="10" class="line" value=""  title="예) 사이즈" />
+						{? service_code == 'P_FREE'}
+						<select name="suboptionMakespecial[]" onclick="openDialog('쇼핑몰 업그레이드 안내<span class=\'desc\'></span>', 'nofreeService', {'width':600,'height':200});">
+							<option value="" >특수정보선택</option>
+						</select>
+						{:}
+						<select name="suboptionMakespecial[]" >
+							<option value="" >특수정보선택</option>
+							{? _GET.socialcp_input_type}
+							<option value="address" >지역</option>
+							<option value="date" >날짜</option>
+							<option value="dayauto" >자동기간</option>
+							<option value="dayinput" >수동기간</option>
+							{:}
+								<option value="color" >색상</option>
+							{/}
+						</select>
+						{/}
+					</td>
+					<td class="its-td-align left">
+						<span class='goodssuboptionlay hide'>
+						{ @ goodssuboptionloop }
+								<span class="goodssuboption_{.codeform_seq} goodssuboptionsublay hide "><span class=" btn small black"><button type="button" class="{.label_type}btn" layerid="{.label_type}{.codeform_seq}_lay" label_type="{.label_type}"  label_id="{.label_id}"  codeform_seq="{.codeform_seq}" label_title="{.label_title}"  label_newtype="{.label_newtype}"  label_color="{.label_color}" label_zipcode="{.label_zipcode}" label_address="{.label_address}" label_addressdetail="{.label_addressdetail}"  label_biztel="{.label_biztel}"   label_codedate="{.label_codedate}"  label_sdayinput="{.label_sdayinput}" label_fdayinput="{.label_fdayinput}" label_dayauto_type="{.label_dayauto_type}" label_sdayauto="{.label_sdayauto}" label_fdayauto="{.label_fdayauto}" label_dayauto_day="{.label_dayauto_day}">선택</button></span></span>
+						{ / }
+						</span>
+						<input type="text" name="suboptionMakeValue[]" class="line" size="45" value=""  title="예) 90, 95, 100" />
+						<div class="suboptionMakeSpecial hide">
+							<div class="suboptionMakeSpecialsub suboptionMakeColor hide">
+								<span class="desc">※ 색상표 정보는 옵션 생성 후 입력 가능합니다.</span>
+							</div>
+
+							<div class="suboptionMakeSpecialsub suboptionMakeaddress  hide">
+							<span class="desc">※ 지역의 위치정보는 옵션 생성 후 입력 가능합니다.</span>
+							</div>
+
+							<div class="suboptionMakeSpecialsub suboptionMakedate hide">
+								<span class="desc">※ 날짜 지정은 옵션 생성 후 입력 가능합니다.</span>
+							</div>
+
+							<div class="suboptionMakeSpecialsub suboptionMakedayinput hide">
+								<input type="text" name="suboptionMakesdayinput[]"  id="addoptionMakesdayinput0"  value="" class="line suboptionMakesdayinput datepicker"  maxlength="10" size="10" />
+								~
+								<input type="text" name="suboptionMakefdayinput[]"  id="addoptionMakefdayinput0"  value="" class="line suboptionMakefdayinput datepicker"  maxlength="10" size="10" />
+							</div>
+							<div class="suboptionMakeSpecialsub suboptionMakenewdayauto hide">
+								<span> '결제확인' 후
+									<select name="suboptionMakedayauto_type[]" class="suboptionMakedayauto_type" >
+										<option value="month">해당 월▼</option>
+										<option value="day">해당 일▼</option>
+										<option value="next">익월▼</option>
+									</select>
+									<input type="text" name="suboptionMakesdayauto[]"  value="" class="line optionMakesdayauto"  maxlength="10" size="2" />일 <span class="suboptionMakenewdayautolaytitle"></span>부터
+									+
+									<input type="text" name="suboptionMakefdayauto[]"  value="" class="line optionMakefdayauto"  maxlength="10" size="2" />일
+									<select name="suboptionMakedayauto_day[]" class="voptionMakedayauto_day" >
+									<option value="day">동안</option>
+									<option value="end">이 되는 월의 말일</option>
+									</select>
+								</span>
+								<br/><span  class="hand optionMakenewdayautolayrealdateBtn"  >미리보기▶ </span><span class="optionMakenewdayautolayrealdate"></span>
+							</div>
+						</div>
+					</td>
+					<td class="its-td-align center">
+						<input type="text" name="suboptionMakePrice[]" class="line" size="25" value="" />
+					</td>
+				</tr>
+			{ / }
+			</tbody>
+		</table>
+		<div class="center" style="padding:10px;"><span class="btn large black"><button  type="button" id="gdsuboptioncodemakebtn">옵션 생성하기</button></span></div>
+		</form>
+	</div>
+
+	<!--{ @ goodssuboptionloop }-->
+	<div id="{.label_type}{.codeform_seq}_lay" class="hide">
+		<table width="100%" border="0" cellspacing="0" cellpadding="0" >
+
+		<tr>
+			<td  valign="top" class="center">
+				<div class="center" style="padding:10px;">
+					<span class="btn large black"><button type="button" id="{.label_type}{.codeform_seq}CodeApply" class="GoodsSubOptionCodeApply" codeform_seq="{.codeform_seq}"  label_type="{.label_type}"  label_id="{.label_id}" layer_id="{.label_type}{.codeform_seq}_lay">적용하기</button></span>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td  valign="top">
+				<table  width="100%" class="joinform-user-table info-table-style" border="1" cellspacing="3" cellpadding="0" align="center" border="0"  id=" labelTable">
+				<col  /><col   width="30%" />
+				<thead>
+				<tr>
+					<th  class="its-th center" id=" labelTh" align="center">{.label_title}</th>
+					<th  class="its-th center" id=" labelTh" align="center">코드값</th>
+				</tr>
+				</thead>
+				<tbody>
+				{@ .code_arr }
+				<tr id=" labelTr"  class=" layer ">
+					<td id=" labelTd1"  class="its-td left" nowrap="nowrap" >
+						<label><input type="checkbox" name="{.label_type}[]" class="null labelCheckbox_{.codeform_seq}"  codeform_seq="{.codeform_seq}"  label_type="{.label_type}"  label_id="{.label_id}" value="{..code}" label_value="{..value}"   label_newtype="{.label_newtype}"  label_color="{..colors}" label_zipcode="{..zipcode}" label_address="{..address}" label_addressdetail="{..addressdetail}"  label_biztel="{..biztel}"  label_codedate="{..codedate}"  label_sdayinput="{..sdayinput}" label_fdayinput="{..fdayinput}" label_dayauto_type="{..dayauto_type}" label_sdayauto="{..sdayauto}" label_fdayauto="{..fdayauto}"  label_dayauto_day="{..dayauto_day}"  {? ..default == "Y" } default="checked" {/}>
+					{..value}</label>
+					<!--{ ?.label_newtype }-->
+						<!--{ ?.label_newtype == 'color' }-->
+							→<div class="colorPickerBtn " style="background-color:{..colors}"  ></div>
+						<!--{: .label_newtype == 'address'  }-->
+							→<span class="addrhelpicon1  " alt="{? ..zipcode }[{..zipcode}] {..address} {..addressdetail}{/} {? ..biztel }업체 연락처:{..biztel}{/}"  title="{? ..zipcode }[{..zipcode}] {..address} {..addressdetail}{/} {? ..biztel }업체 연락처:{..biztel}{/}" >{? ..zipcode }[{..zipcode}] {..address} {..addressdetail}{/} {? ..biztel }업체 연락처:{..biztel}{/}</span>
+						<!--{: .label_newtype == 'date'  }-->
+							→<span class="codedatehelpicon1  " alt="{..codedate}" title="{..codedate}">{..codedate}</span>
+						<!--{: .label_newtype == 'dayinput'  }-->
+							→<span class="dayinputhelpicon1  " alt="{..sdayinput} ~ {..fdayinput}" title="{..sdayinput} ~ {..fdayinput}">{..sdayinput} ~ {..fdayinput}</span>
+						<!--{: .label_newtype == 'dayauto'  }-->
+							→<span class="dayautohelpicon1  " alt="'결제확인' {..dayauto_type_title} {..sdayauto}일 {? ..dayauto_type == 'day' }이후{/}부터 + {..fdayauto}일  {..dayauto_day_title}" title="'결제확인' {..dayauto_type_title} {..sdayauto}일 {? ..dayauto_type == 'day' }이후{/}부터 + {..fdayauto}일  {..dayauto_day_title}">결제확인' {..dayauto_type_title} {..sdayauto}일 이후부터 ~ {..fdayauto}일  {..dayauto_day_title}</span>
+						<!--{ / }-->
+					<!--{ / }-->
+					</td>
+					<td id=" labelTd2"  class="its-td center">{..code}</td>
+				</tr>
+				{/}
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td  valign="top" class="center">
+				<input type="hidden" name="gdsuboptidx" class="gdsuboptidx" value="">
+				<div class="center" style="padding:10px;">
+					<span class="btn large black"><button type="button" id="{.label_type}{.codeform_seq}CodeApply" class="GoodsSubOptionCodeApply" codeform_seq="{.codeform_seq}"  label_type="{.label_type}" label_newtype="{.label_newtype}"  label_id="{.label_id}" layer_id="{.label_type}{.codeform_seq}_lay">적용하기</button></span>
+				</div>
+			</td>
+		</tr>
+		</table>
+		<!--//입력폼 -->
+	</div>
+	<!--{ / }-->
+</div>
+
+<!--{ / }-->
+
+
+<div id="special_newlist" class="hide">
+	<img src="../images/design/img_speinfo.jpg" />
+</div>
+
+<div id="option_newlist" class="hide">
+	<img src="../images/design/img_optinfo.jpg" />
+</div>
+
+
+
+<!-- 직접입력 > 색상, 지역, 날짜  -->
+<div id="gdoptdirectmodifylay" class="hide">
+	<!-- 직접입력 > 날짜 -->
+	<div class="dayinputlay goodsoptiondirectlay hide">
+		<span class="help">수동기간은 [생성 및 변경]에서 변경할 수 있습니다.</span>
+	</div>
+
+	<!-- 직접입력 > 날짜 -->
+	<div class="dayautolay goodsoptiondirectlay hide">
+	<span class="help">자동기간은 [생성 및 변경]에서 변경할 수 있습니다.</span>
+	</div>
+
+	<div class="goodsoptiondirectlay colordateaddresslay">
+		<table width="100%" border="0" cellspacing="0" cellpadding="0" >
+		<tr>
+			<td  valign="top" class="center">
+				<div class="datelay">
+					<input type="text" name="direct_codedate" value="" class="line datepicker"  maxlength="10" size="10" />
+				</div>
+				<div class="colorlay">
+					<input type="text" name="direct_color" value="" class="line colorpickerreview colorpicker"  maxlength="10" size="10" />
+				</div>
+				<div class="addresslay">
+					<input type="text" name="direct_zipcode[]" value="" size="5" class="line direct_zipcode1" /> - <input type="text" name="direct_zipcode[]"   value="" size="5" class="line direct_zipcode2" /> <span class="btn small"><input type="button" class="direct_zipcode_btn" value="우편번호" /></span><br/>
+					<input type="text" name="direct_address" value="" size="40" class="line direct_address" /><br/>
+					<input type="text" name="direct_addressdetail"  value="" size="40" class="line direct_addressdetail" /><br/>
+					<input type="text" name="direct_biztel" value="" title="업체 연락처" size="40" class="line direct_biztel" />
+					<!-- <div >map</div> -->
+				</div>
+			</td>
+		</tr>
+		</table>
+	</div>
+
+	<div class="center" style="padding:10px;">
+		<span class="btn large black"><button type="button" id="goodsoptiondirectmodifybtn" newtype="" opttblidx="opttblidx">확인</button></span>
+	</div>
+</div>
+
+
+<iframe name="suboptionFrame" id="suboptionFrame" src="" width="100%" height="600" frameborder="0"   class="hide"></iframe>
+{ #layout_footer_popup }

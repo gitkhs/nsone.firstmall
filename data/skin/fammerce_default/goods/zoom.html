@@ -1,0 +1,63 @@
+<style>
+#goods_view	{width:{goodsImageSize.large.width}px;margin:0 auto;}
+#goods_thumbs .pagination {text-align:center;}
+#goods_thumbs .pagination li {display:inline;}
+#goods_thumbs .pagination li img {border:1px solid #fff; margin:5px 2px;}
+#goods_thumbs .pagination li.current img {border:1px solid #333;}
+</style>
+
+<div id="goods_view">
+	<div id="goods_thumbs">
+		<table align="center" cellpadding="0" cellspacing="0" style="width:{goodsImageSize.large.width}px;margin:0 auto; text-align:center;">
+			<tbody>
+			<tr>
+				<td align="center" style="padding-top:30px;">
+					<div class="slides_container" style="margin:auto; width:{goodsImageSize.large.width}px;">
+						<!--{ @ images }-->
+						<a href="#"><img src="{.large.image}" width="{goodsImageSize.large.width}" onerror="this.src='../images/common/noimage.gif'"/></a>
+						<!--{ / }-->
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td align="center" width="100">
+					<!-- 상품이미지 썸네일 -->
+					<table style="width:100%" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td width="15" align="left"><a href="#" class="prev"><img src="../images/design/btn_detail_prev.gif" /></a></td>
+						<td>
+							<ul class="pagination">
+								<!--{ @ images }-->
+								<li><a href="#"><img src="{.thumbView.image}" width="{goodsImageSize.thumbView.width}" onerror="this.src='../images/common/noimage_list.gif'"/></a></li>
+								<!--{ / }-->
+							</ul>
+						</td>
+						<td width="15" align="right"><a href="#" class="next"><img src="../images/design/btn_detail_next.gif" /></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	</div>
+</div>
+
+<script type="text/javascript">
+$("#goods_thumbs .slides_container a:gt(0)").hide();
+$(function(){
+	setTimeout(function(){
+		$("#goods_thumbs").slides({
+			preload: true,
+			preloadImage: "../images/design/loading.gif",
+			effect: "fade",
+			crossfade: true,
+			autoHeight: true,
+			generatePagination: false
+		});
+	
+		setTimeout(function(){
+			window.resizeTo(parseInt($("#goods_view").width())+100,parseInt($("#goods_view").height())+100);
+		},500);
+	},100);
+});
+</script>

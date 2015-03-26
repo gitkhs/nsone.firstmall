@@ -1,0 +1,23 @@
+<table width="800" class="simpledata-table-style" style="margin:auto;">
+<col width="25%" /><col width="25%" /><col width="25%" /><col width="25%" />
+<tr>
+	<th>시간</th>
+	<th>페이지뷰</th>
+	<th>방문자수</th>
+	<th>인당페이지뷰</th>
+</tr>
+<tr>
+	<td align="center">합계</td>
+	<td align="center"><font color="{seriesColors[0]}">{=number_format(dataForTableSum.pv)}</font></td>
+	<td align="center"><font color="{seriesColors[1]}">{=number_format(dataForTableSum.visit)}</font></td>
+	<td align="center">{dataForTableSum.pvPerVisit}</td>
+</tr>
+{@dataForTable}
+<tr>
+	<td align="center">{.key_}시</td>
+	<td align="center"><font color="{seriesColors[0]}">{=number_format(.pv)}</font></td>
+	<td align="center"><font color="{seriesColors[1]}">{=number_format(.visit)}</font></td>
+	<td align="center">{.pvPerVisit}</td>
+</tr>
+{/}
+</table>

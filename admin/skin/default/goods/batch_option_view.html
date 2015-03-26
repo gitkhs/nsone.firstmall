@@ -1,0 +1,88 @@
+<style>
+.default_option {background-color:#efefef;}
+</style>
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="70"/>
+		<col  /><!--옵션-->
+		<col width="90" /><!--현재매입가-->
+		<col width="90" /><!--정가-->
+		<col width="140" /><!--마진-->
+		<col width="50" /><!--부가세-->
+		<!--col width="90" /--><!--재고-->
+		<col width="200" /><!--지급적립금-->
+		<col width="200" /><!--배송비-->
+		<!--col width="80" /--><!--노출-->
+	<!--{ @ loop }-->
+	<!--{ ? .default_option == 'y'}-->
+	<tr style="height:30px;" class="default_option">
+	<!--{ : }-->
+	<tr style="height:30px;">
+	<!--{ / }-->
+		<td></td>
+		<td>
+		<span class="detail_default_option_select">
+		<!--{ ? .option_divide_title[0] }-->
+		{.option_divide_title[0]} :
+		<!--{ / }-->
+		{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+		{.option1}
+		<!--{ ? .option2 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[1] }-->
+		{.option_divide_title[1]} :
+		<!--{ / }-->
+		{.option2}
+		<!--{ / }-->
+		<!--{ ? .option3 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[2] }-->
+		{.option_divide_title[2]} :
+		<!--{ / }-->
+		{.option3}
+		<!--{ / }-->
+		<!--{ ? .option4 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[3] }-->
+		{.option_divide_title[3]} :
+		<!--{ / }-->
+		{.option4}
+		<!--{ / }-->
+		<!--{ ? .option5 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[4] }-->
+		{.option_divide_title[4]} :
+		<!--{ / }-->
+		{.option5}
+		<!--{ / }-->
+		</span>
+		</td>
+		<td align="right" style="padding-right:5px;">{=number_format(.supply_price)}</td>
+		<td align="right" style="padding-right:5px;">{=number_format(.consumer_price)}</td>
+		<td align="right" style="padding-right:5px;">{=number_format(.price-.supply_price)} / {=number_format(.price)}</td>
+		<td align="right" style="padding-right:5px;">{=number_format(.price*0.1)}</td>
+		<!--td align="center">{.stock} / ({.able_stock})</td-->
+		<td align="center">
+		<!--{ ? .key_ == 0 }-->
+		<!--{ ? .reserve_policy == 'shop' }
+		기본
+		<!--{ : .reserve_policy == 'goods' }
+		개별
+		{ / }
+		<!--{ / }-->
+		<!--{ ? .reserve_policy == 'goods' }-->
+		<!--{ ? .reserve_unit=='percent'}-->
+		{.reserve_rate}%
+		<!--{ : }-->
+		{.reserve}원
+		<!--{ / }-->
+		<!--{ : }-->
+		-
+		<!--{ / }-->
+		</td>
+		<td align="center">-</td>
+		<!--td align="center">-</td-->
+	</tr>
+	<!--{ / }-->
+</table>

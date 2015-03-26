@@ -1,0 +1,325 @@
+{#layout_header_popup}
+
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+
+<script>
+$(function(){
+	var thisDocument = document;
+	parent.$(".DMWTTextCenter .title").html("<select style='position:relative; z-index:10'><option value='pc'>PC</option><option value='fammerce'>페이스북PC</option></select> 버튼 Quick 디자인");
+	parent.$(".DMWTTextCenter select").change(function(){
+		thisDocument.location.replace('/admin/design/pc_quick_design?setMode='+$(this).val());
+	});
+	{?_GET.setMode}
+	parent.$(".DMWTTextCenter select").val("{_GET.setMode}");
+	{/}
+
+	/* 선택된 이미지 변경창 출력 */
+	$(".imageBtn").live("click",function(){
+		$("input[name='key']").val($(this).attr('key'));
+		$("input[name='code']").val($(this).attr('code'));
+		$("input[name='src']").val($(this).attr('src'));
+		$(".nowImage").html("<img src='"+$(this).attr('src')+"' />");
+		closeDialog("popImageChoice");
+		openDialog("이미지 변경", "popImageChoice", {"width":"570","height":"250","show" : "fade","hide" : "fade"});
+	});
+	changeFileStyle();
+
+	/* 설명 */
+	$(".imageDescriptionBtn[key='goods_view']").click(function(){
+		var selector = ".imageDescriptionLayer[type='goods_view']";
+		$(selector).children(".imageDescriptionSubLayer").hide();
+		$(selector).children(".imageDescriptionSubLayer[code='"+$(this).attr('code')+"']").show();
+		openDialog($(selector).attr('title'), selector, {"width":"600","show" : "fade","hide" : "fade"});
+	});
+
+	$(".imageDescriptionBtn[key='icon']").click(function(){
+		var selector = ".imageDescriptionLayer[type='icon']";
+		openDialog($(selector).attr('title'), selector, {"width":"800","show" : "fade","hide" : "fade"});
+	});
+
+	$(".imageDescriptionBtn").not("[key='goods_view']").not("[key='icon']").click(function(){
+		var selector = ".imageDescriptionLayer[type='etc']";
+		$(selector).children(".imageDescriptionSubLayer").hide();
+		$(selector).children(".imageDescriptionSubLayer[code='"+$(this).attr('code')+"']").show();
+		openDialog('이미지 상세 정보', selector, {"width":"800","show" : "fade","hide" : "fade"});
+	});
+
+});
+
+</script>
+
+<style>
+.imageBtn {cursor:pointer}
+.imageDescriptionBtn {cursor:pointer}
+.imageDescriptionLayer {display:none;}
+</style>
+
+<!-- 상품상태별 이미지 선택 -->
+<div id="popImageChoice" class="hide">
+	<form enctype="multipart/form-data" method="post" action="../design_process/pc_quick_design_image_upload" target="actionFrame">
+	<input type="hidden" name="key" value="" />
+	<input type="hidden" name="code" value="" />
+	<input type="hidden" name="src" value="" />
+	<table align="center" height="160">
+	<tr>
+		<td><div class="nowImage pd10"></div></td>
+		<td><input type="file" name="image" /> <span class="btn small black"><button type="submit">확인</button></span></td>
+	</tr>
+	</table>
+	</form>
+</div>
+
+<div class="pd10">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr><td height="7"></td></tr>
+	<tr>
+		<td align="left">현재 디자인작업용 스킨(<span class="red">{designWorkingSkin}</span>)의 기본 버튼과 기본 아이콘은 아래와 같습니다. 해당 이미지를 클릭하시면 변경 가능하십니다.</td>
+		<td align="right">
+			<div class="gabia-pannel" code="quick_design_images_download" />
+		</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	</table>
+	
+	<!--{@buttonImages}-->
+	<table class="info-table-style" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout:fixed">
+	<tr>
+		<th class="its-th" colspan="{.cols}">{.title}</th>
+	</tr>
+	<tr>
+		{@range(1,.cols)}
+		<td class="its-td-align center" width="{=100/.cols}%">
+			{?.buttons[..index_].filename}
+				{?.key_=='icon'}
+					<img class="imageBtn" key="{.key_}" code="{.buttons[..index_].code}" src="{iconDirectoryPath}{.buttons[..index_].filename}?{=time()}" title="{.buttons[..index_].name} 버튼 이미지 변경하기" />
+				{:}
+					<img class="imageBtn" key="{.key_}" code="{.buttons[..index_].code}" src="{buttonDirectoryPath}{.buttons[..index_].filename}?{=time()}" title="{.buttons[..index_].name} 버튼 이미지 변경하기" />
+				{/}
+			{/}
+		</td>
+		{/}
+	</tr>
+	<tr>
+		{@range(1,.cols)}
+		<td class="its-td-align center" width="{=100/.cols}%">
+			{?.buttons[..index_].name}
+			<b>{.buttons[..index_].name}</b>
+			<div class="imageDescriptionBtn" key="{.key_}" code="{.buttons[..index_].code}">
+				{?.key_=='icon'}
+					<img src="/admin/skin/default/images/design/btn_s_imgurl.gif" />
+				{:}
+					<img src="/admin/skin/default/images/design/btn_s_urlpage.gif" />
+				{/}
+			</div>
+			{/}
+		</td>
+		{/}
+	</tr>
+	</table>
+	<div style="height:20px"></div>
+	<!--{/}-->
+</div>
+
+<div class="imageDescriptionLayer" title="상품상세 페이지용 버튼" type="goods_view" style="line-height:20px">
+	<div class="imageDescriptionSubLayer" code="btn_buy">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_buy.gif<br />	
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_cart">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_cart.gif<br />	
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_wish">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_wish.gif<br />	
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_runout">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_runout.gif<br />	
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_purchasing">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_purchasing.gif<br />	
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_restock_notify">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_restock_notify.gif<br />	
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_unsold">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_unsold.gif<br />	
+	</div>
+
+	<br />
+	[사용페이지]<br />
+	http://{pcDomain}/goods/view<br /><br />
+
+	※ 상품의 상태는 [<b>정상</b>][<b>품절</b>][<b>재고확보중</b>][<b>판매중지</b>] 4개입니다.<br />
+	※ [<b>정상</b>] 상태의 버튼 : 바로구매, 장바구니담기, 위시리스트<br />
+	※ [<b>품절</b>] 상태의 버튼 : 위시리스트, 품절, 재입고알림<br />
+	※ [<b>재고확보중</b>] 상태의 버튼 : 위시리스트, 재고확보중, 재입고알림<br />
+	※ [<b>판매중지</b>] 상태의 버튼 : 판매중지<br />
+	※ 상품의 상태가 [<b>품절</b>] 또는 [<b>재고확보중</b>] 일 때는 '<b>재입고알림신청하기</b>' 기능이 동작됩니다.
+</div>
+
+<div class="imageDescriptionLayer" title="리스트 페이지용 버튼" type="icon" style="line-height:20px">
+	※ [<b>품절</b>] [<b>재고확보중</b>] [<b>판매중지</b>] 아이콘은 EYE-DESIGN > 상품디스플레이에서 [상태 아이콘]을 선택하여 노출하십시오.<br />
+	※ [<b>쿠폰</b>] [<b>무료배송</b>] [<b>동영상</b>] 아이콘은 EYE-DESIGN > 상품디스플레이에서 [아이콘]을 선택하여 노출하십시오.
+</div>
+
+<div class="imageDescriptionLayer" type="etc" style="line-height:20px">
+	<div class="imageDescriptionSubLayer" code="btn_order_all">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_order_all.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/order/cart<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_order_selected">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_order_all.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/order/cart<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_shopping_continue">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_shopping_continue.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/order/cart<br />
+	</div>
+
+	<div class="imageDescriptionSubLayer" code="btn_pay">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_pay.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/order/settle<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_order">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_order.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/order/settle<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_order_cart">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_order_cart.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/order/settle<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_shopping_continue_s">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_shopping_continue_s.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/order/complete<br />
+	</div>
+
+	<div class="imageDescriptionSubLayer" code="btn_login">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_login.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/member/login<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_login_join">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_login_join.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/member/login<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_login_idpw">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_login_idpw.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/member/login<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_order_nonmem">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_order_nonmem.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/member/login<br />
+	</div>
+
+	<div class="imageDescriptionSubLayer" code="btn_join">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_join.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/member/agreement<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_myinfo">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_myinfo.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/member/register_ok<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_go_login">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_go_login.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/member/register_ok<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_shopping">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_shopping.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/member/register_ok<br />
+	</div>
+
+	<div class="imageDescriptionSubLayer" code="btn_list">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_list.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/order/complete<br />
+		http://{pcDomain}/mypage/order_view<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_list_return">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_list_return.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/mypage/return_view<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_list_refund">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_list_refund.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/mypage/refund_view<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_ok">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_ok.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/member/register<br />
+		http://{pcDomain}/member/find<br />
+		http://{pcDomain}/mypage/withdrawal<br />
+		http://{pcDomain}/mypage/myinfo<br />
+	</div>
+	<div class="imageDescriptionSubLayer" code="btn_cancel">
+		[이미지URL]<br />
+		http://{pcDomain}/data/skin/{designWorkingSkin}/images/buttons/btn_cancel.gif<br />
+		<br />
+		[사용페이지]<br />
+		http://{pcDomain}/member/register<br />
+		http://{pcDomain}/member/find<br />
+		http://{pcDomain}/mypage/withdrawal<br />
+		http://{pcDomain}/mypage/myinfo<br />
+	</div>
+</div>
+
+{#layout_footer_popup}

@@ -1,0 +1,153 @@
+{ # layout_header_popup }
+<script>
+$(function(){
+	$("#chkAll").click(function(){
+		if($(this).is(":checked")){
+			$("input[name='goods_seq[]']").attr('checked',true);
+		}else{
+			$("input[name='goods_seq[]']").removeAttr('checked');
+		}
+	});
+});
+</script>
+<form name="goodsForm" method="post" action="../openmarket_process/send_select_goods" target="hideFrame">
+<div id="goodsSelectorList">
+
+	<!-- 주문리스트 테이블 : 시작 -->
+	<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="30" />
+		<col width="60" />
+		<col width="60" />
+		<col />
+
+		<col width="90" />
+		<col width="70" />
+		<col width="80" />
+		<col width="120" />
+		<col width="60" />
+		<col width="120" />
+		<col width="100" />
+		<col width="120" />
+	</colgroup>
+	<thead class="lth">
+	<tr> 
+		<th><input type="checkbox" id="chkAll" /></th>
+		<th>번호</th>
+		<th colspan="2">상품명</th>
+		<th>정가</th>
+		<th>할인가</th>
+		<th>재고/가용</th>
+		<th>등록일/수정일</th>
+		<th>상태</th>
+		<th>최근전송성공일</th>
+		<th>최근전송결과</th>
+		<th>최근전송일시</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+<!--{? loop }-->
+	<!--{@ loop }-->
+	<tr class="list-row" style="height:70px;">
+		<td align="center"><input type="checkbox" class="chk" name="goods_seq[]" value="{.goods_seq}" /></td>
+		<td align="center">{page.totalcount - ._no + 1}</td>
+		<td align="center"><a href="/goods/view?no={.goods_seq}" target="_blank"><img src="{=viewImg(.goods_seq,'thumbView')}" width="50"></a></td>
+		<td align="left" style="padding-left:10px;">
+
+			{? .tax=='exempt' && .cancel_type == '1'}
+				<div>
+				<span style="color:red;" class="left" >[비과세]</span>
+				<span class="order-item-cancel-type left" >[청약철회불가]</span>
+				</div>
+			{: .tax=='exempt' }
+				<div>
+				<span style="color:red;" class="left" >[비과세]</span>
+				</div>
+			{: .cancel_type == '1'}
+				<div>
+				<span class="order-item-cancel-type left" >[청약철회불가]</span>
+				</div>
+			{/}
+
+			{? .goods_code }<div ><a href="../goods/regist?no={.goods_seq}" target="_blank" class="fx11">[상품코드: {.goods_code}]</a></div>{/}
+			<a href="../goods/regist?no={.goods_seq}" target="_blank">{=getstrcut(.goods_name,80)}</a> <div style="padding-top:5px;">{.catename}</div>
+		</td>
+		<td align="right">{=number_format(.consumer_price)}&nbsp;</td>
+		<td align="right">{=number_format(.price)}&nbsp;</td>
+		<td align="right">
+			<!--{?.tot_stock<0}-->
+			<span style='color:red'>{=number_format(.tot_stock)}</span>
+			<!--{:}-->
+			{=number_format(.tot_stock)}
+			<!--{/}-->
+			<!--{?.rstock<0}-->
+			<br/>/ <span style='color:red'>{=number_format(.rstock)}</span>
+			<!--{:}-->
+			<br/>/ {=number_format(.rstock)}
+			<!--{/}-->
+		</td>
+		<td align="center">{.regist_date}<br/>{.update_date}</td>
+		<td align="center">{.goods_status_text}<br/>{.goods_view_text}</td>
+		<td align="center">{.suc_send_date}</td>
+		<td align="center">
+			{ ? .suc_send_date || .lst_send_date }
+				{ ? .lst_send_status == 'Y' }성공{ : }실패{ / }
+			{ / }
+		</td>
+		<td align="center">{.lst_send_date}</td>
+	</tr>
+	<!--{ / }-->
+<!--{ : }-->
+	<tr class="list-row">
+		<td align="center" colspan="10">
+			<!--{ ? search_text }-->
+				'{search_text}' 검색된 상품이 없습니다.
+			<!--{:}-->
+				등록된 상품이 없습니다.
+			<!--{/}-->
+		</td>
+	</tr>
+<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+	</table>
+
+	<br style="line-height:10px;" />
+
+	<!-- paging start -->
+	<div class="paging_navigation" style="margin:auto;">
+	<!--{ ? page.first }-->
+	<a href="?page={page.first}&amp;{page.querystring}">
+	<span class="first btn"></span></a>&nbsp;
+	<!--{ / }-->
+	<!--{ ? page.prev }-->
+	<a href="?page={page.prev}&amp;{page.querystring}" class="prev">
+	<span class="prev btn"></span></a>&nbsp;
+	<!--{ / }-->
+	<!--{ @ page.page }-->
+	<!--{ ? page.nowpage ==  .value_ }-->
+	<a class="on red">{.value_ }</a>&nbsp;
+	<!--{ : }-->
+	<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>&nbsp;
+	<!--{ / }-->
+	<!--{ / }-->
+	<!--{ ? page.next }-->
+	<a href="?page={page.next}&amp;{page.querystring}" class="next">
+	<span class="next btn"></span></a>&nbsp;
+	<!--{ / }-->
+	<!--{ ? page.last }-->
+	<a href="?page={page.last}&amp;{page.querystring}"><span class="end btn"></span></a>
+	<!--{ / }-->
+	</div>
+	<!-- paging end -->
+</div>
+</form>
+
+<iframe name="hideFrame" width="100%" height="600" frameborder="1" class="hide"></iframe>
+
+{ # layout_footer_popup }

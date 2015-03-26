@@ -1,0 +1,534 @@
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$(".all-check").toggle(function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',true);
+	},function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',false);
+	});
+
+	// SEARCH FOLDER
+	//if( $.cookie("member_list_folder") == "folded" ) showSearch();
+
+	// SEARCH COOKIE
+	/*
+	if( $.cookie("member_list_search") ){
+		var obj_arr = $.cookie("member_list_search").split("&");
+		//salert(obj_arr);
+		for(var i=0;i<obj_arr.length;i++){
+			var obj = obj_arr[i].split("=");
+			$("*[name='"+obj[0]+"']",document.memberForm).val([obj[1]]);
+		}
+	}
+	*/
+
+	// SEARCH FORM SETTING
+	$("#search_set").click(function(){
+		/*
+		$("#serch_tab").find(".datepicker").datepicker("destroy");
+		var html = "<div class=\"search-form-container\" style='padding:10px;'><form id='setForm'>";
+		html += $("#serch_tab").html();
+		html += "</form></div>";
+		html += "<div style=\"padding-top:10px;\" class=\"center\"><span class=\"btn large black\"><button type=\"submit\" class=\"setBtn\" onclick='settingForm();'>저장하기</button></span></div>";
+		$('#setPopup').html(html);
+		openDialog("회원리스트 조회 설정 <span class='desc'>회원리스트 조회 설정을 합니다.</span>", "setPopup", {"width":"900","height":"300"});
+		apply_input_style();
+		*/
+		$.getJSON('get_search_default', function(result) {
+			for(var i=0;i<result.length;i++){
+				$("*[name='"+result[i][0]+"']", document.set_search_detail).val([result[i][1]]);
+			}
+		});
+
+		var title = '기본검색 설정<span style="font-size:11px; margin-left:26px;"> - 아래서 원하는 검색조건을 설정하여 편하게 쇼핑몰을 운영하세요</span>';
+		openDialog(title, "search_detail_dialog", {"width":"800","height":"300"});
+	});
+
+	$("#get_default_button").click(function(){
+		$.getJSON('get_search_default', function(result) {
+			for(var i=0;i<result.length;i++){
+				//alert(result[i][0]+" : "+result[i][1]);
+				if(result[i][0]=='sms' || result[i][0]=='mailing' || result[i][0]=='business_seq' || result[i][0]=='status'){
+					$("input:radio[name='"+result[i][0]+"']").val([result[i][1]]);
+				}else if(result[i][0].search(/_date/) != -1){
+					var tmptarget	= result[i][0].replace('_date', '');
+					if(result[i][1] == 'today'){
+						set_date(tmptarget, '{=date('Y-m-d')}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3day'){
+						set_date(tmptarget, '{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '7day'){
+						set_date(tmptarget, '{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '1mon'){
+						set_date(tmptarget, '{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3mon'){
+						set_date(tmptarget, '{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}');
+					}
+					$("input:radio[name='"+result[i][0]+"']").val([result[i][1]]);
+				}
+
+				$("*[name='"+result[i][0]+"']",document.memberForm).val(result[i][1]);
+			}
+		});
+	});
+
+	$("[name='select_date']").click(function() {
+		var sdate	= "sdate";
+		var edate	= "edate";
+		var ssetdate	= '';
+		var esetdate	= '';
+		if	($(this).attr("settarget")) {
+			sdate	= $(this).attr("settarget") + "_" + sdate;
+			edate	= $(this).attr("settarget") + "_" + edate;
+		}
+		switch($(this).attr("id")) {
+			case 'today' :
+				ssetdate	= getDate(0);
+				esetdate	= getDate(0);
+				break;
+			case '3day' :
+				ssetdate	= getDate(3);
+				esetdate	= getDate(0);
+				break;
+			case '1week' :
+				ssetdate	= getDate(7);
+				esetdate	= getDate(0);
+				break;
+			case '1month' :
+				ssetdate	= getDate(30);
+				esetdate	= getDate(0);
+				break;
+			case '3month' :
+				ssetdate	= getDate(90);
+				esetdate	= getDate(0);
+				break;
+		}
+
+		if	($(this).attr("settarget") == 'anniversary'){
+			$("select[name='" + sdate + "[]']").eq(0).val(ssetdate.substr(5,2));
+			$("select[name='" + sdate + "[]']").eq(1).val(ssetdate.substr(8,2));
+			$("select[name='" + edate + "[]']").eq(0).val(esetdate.substr(5,2));
+			$("select[name='" + edate + "[]']").eq(1).val(esetdate.substr(8,2));
+		}else{
+			$("input[name='" + sdate + "']").val(ssetdate);
+			$("input[name='" + edate + "']").val(esetdate);
+		}
+	});
+
+	// ###
+	$("input:radio[name='sms']").val(['{sc.sms}']);
+	$("input:radio[name='mailing']").val(['{sc.mailing}']);
+	$("input:radio[name='business_seq']").val(['{sc.business_seq}']);
+	$("input:radio[name='status']").val(['{sc.status}']);
+
+});
+
+// SEARCH FOLDER
+function showSearch(){
+	if($("#member_search_form").css('display')=='none'){
+		$("#member_search_form").show();
+		$.cookie("member_list_folder", "folded");
+	}else{
+		$("#member_search_form").hide();
+		$.cookie("member_list_folder", "unfolded");
+	}
+}
+
+// POP SETTING FORM
+function settingForm(){
+	var set_value = $('#setForm').serialize();
+	if(set_value) $.cookie("member_list_search", set_value);
+	closeDialog("setPopup");
+	location.reload();
+}
+
+function set_date(target, start,end){
+	var starget	= target + '_sdate';
+	var etarget	= target + '_edate';
+	if	(target == 'anniversary'){
+		$("select[name='" + starget + "[]']").eq(0).val(start.substr(5,2));
+		$("select[name='" + starget + "[]']").eq(1).val(start.substr(8,2));
+		$("select[name='" + etarget + "[]']").eq(0).val(end.substr(5,2));
+		$("select[name='" + etarget + "[]']").eq(1).val(end.substr(8,2));
+	}else{
+		$("input[name='" + starget + "']").val(start);
+		$("input[name='" + etarget + "']").val(end);
+	}
+}
+
+// MEMBER DETAIL
+function viewDetail(seq){
+	//if(!$(obj).attr('member_seq')) return;
+	//location.href = "detail?member_seq="+$(obj).attr('member_seq');
+
+	$("input[name='member_seq']").val(seq);
+	$("form[name='memberForm']").attr('action','detail');
+	$("form[name='memberForm']").submit();
+}
+
+// CHECKBOX COUNT - IFRAME CONTROLLER
+function chkMemberCount(){
+	var cnt = $("input:checkbox[name='member_chk[]']:checked").length;
+	$("#container").contents().find("#selected_member").html(cnt);
+	{? amail!='Y' }
+		$("#container")[0].contentWindow.sendMemberSum();
+	{ : }
+		$("#selected_member").html(cnt);
+		sendMemberSum();
+	{ / }
+}
+
+function searchMemberCount(){
+	var cnt = $("input[name='searchcount']").val();
+	$("#container").contents().find("#search_member").html(cnt);
+	{? amail!='Y' }
+		$("#container")[0].contentWindow.sendMemberSum();
+	{ : }
+		$("#search_member").html(cnt);
+		sendMemberSum();
+	{ / }
+}
+
+function chkAll(chk, name){
+	if(chk.checked){
+		$("."+name).attr("checked",true).change();
+	}else{
+		$("."+name).attr("checked",false).change();
+	}
+	<!--{ ? preg_match('/member\/amail_send/',_SERVER.REQUEST_URI) }-->
+	// CHECKBOX COUNT
+	parent.chkMemberCount();
+	<!--{ / }-->
+
+}
+
+function select_email(seq){
+	<!--{? !auth_send }-->
+		alert("권한이 없습니다.");
+		return;
+	<!--{ / }-->
+	if(!seq) return;
+	/*
+	$("input[name='member_chk[]'][value='"+seq+"']").attr('checked',true);
+	$("input[name='type']").val('select');
+	emailFormOpen();
+	*/
+	$.get('email_pop?member_seq='+seq, function(data) {
+		$('#sendPopup').html(data);
+		openDialog("EMAIL 발송", "sendPopup", {"width":"600","height":"700"});
+	});
+}
+
+function select_sms(seq){
+	<!--{? !auth_send }-->
+		alert("권한이 없습니다.");
+		return;
+	<!--{ / }-->
+	if(!seq) return;
+	/*
+	$("input[name='member_chk[]'][value='"+seq+"']").attr('checked',true);
+	$("input[name='type']").val('select');
+	$("#container").css("height","0px");
+	$("#container").attr("src","sms_form");
+	$("#container").show();
+	*/
+	$.get('sms_pop?member_seq='+seq, function(data) {
+		$('#sendPopup').html(data);
+		openDialog("SMS 발송", "sendPopup", {"width":"600","height":"200"});
+	});
+}
+
+function emoney_pop(seq){
+	if(!seq) return;
+	$.get('emoney_detail?member_seq='+seq, function(data) {
+		$('#emoneyPopup').html(data);
+		openDialog("적립금 내역/지급 <span class='desc'>해당 회원의 적립금 내역 및 수동 지급/차감을 하실 수 있습니다.</span>", "emoneyPopup", {"width":"800","height":"700"});
+	});
+}
+
+function point_pop(seq){
+	if(!seq) return;
+	$.get('point_detail?member_seq='+seq, function(data) {
+		$('#emoneyPopup').html(data);
+		openDialog("포인트 내역/지급 <span class='desc'>해당 회원의 포인트 내역 및 수동 지급/차감을 하실 수 있습니다.</span>", "emoneyPopup", {"width":"800","height":"700"});
+	});
+}
+function cash_pop(seq){
+	if(!seq) return;
+	$.get('cash_detail?member_seq='+seq, function(data) {
+		$('#emoneyPopup').html(data);
+		openDialog("이머니 내역/지급 <span class='desc'>해당 회원의 이머니 내역.</span>", "emoneyPopup", {"width":"800","height":"700"});
+	});
+}
+
+function chgAnniversaryOption(type, standard, target){
+	if	(type == 's'){
+		if	($("select[name='anniversary_sdate[]']").eq(standard).val()){
+			if	(!$("select[name='anniversary_sdate[]']").eq(target).val())
+				$("select[name='anniversary_sdate[]']").eq(target).val('01');
+		}else{
+			if	($("select[name='anniversary_sdate[]']").eq(target).val())
+				$("select[name='anniversary_sdate[]']").eq(target).val('');
+		}
+	}else{
+		if	($("select[name='anniversary_edate[]']").eq(standard).val()){
+			if	(!$("select[name='anniversary_edate[]']").eq(target).val())
+				$("select[name='anniversary_edate[]']").eq(target).val('01');
+		}else{
+			if	($("select[name='anniversary_edate[]']").eq(target).val())
+				$("select[name='anniversary_edate[]']").eq(target).val('');
+		}
+	}
+}
+</script>
+
+<!-- 주문리스트 검색폼 : 시작 -->
+<div class="search-form-container">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table>
+			<tr>
+				<td width="500">
+					<table class="sf-keyword-table">
+					<tr>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{sc.keyword}" title="이름, 아이디, 이메일, 전화번호, 핸드폰(뒷자리4), 주소, 닉네임" /></td>
+						<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td>
+					<span id="search_set" class="icon-arrow-down" style="cursor:pointer;">기본검색설정</span>
+					<span class="btn small gray"><button type="button" id="get_default_button">적용 ▶</button></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<table class="search-form-table" id="serch_tab">
+	<tr id="member_search_form" style="display:block;">
+		<td>
+			<table class="sf-option-table">
+			<colgroup>
+				<col width="80" />
+				<col width="170" />
+				<col width="80" />
+				<col width="160" />
+				<col width="80" />
+				<col width="250" />
+			</colgroup>
+			<tr>
+				<th>가입일</th>
+				<td colspan="5">
+					<input type="text" name="regist_sdate" value="{sc.regist_sdate}" readonly class="datepicker line"  maxlength="10" size="12" />
+					<span class="gray" style="margin:0 5px;">-</span>
+					<input type="text" name="regist_edate" value="{sc.regist_edate}" readonly class="datepicker line" maxlength="10" size="12" />
+					<span style="margin-left:20px;">
+						<span class="btn small"><input type="button" value="오늘" id="today" name="select_date" settarget="regist" /></span>
+						<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date" settarget="regist" /></span>
+						<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date" settarget="regist" /></span>
+						<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date" settarget="regist" /></span>
+						<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date" settarget="regist" /></span>
+						<span class="btn small"><input type="button" value="전체" id="all" name="select_date" settarget="regist" /></span>
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<th>최종 방문일</th>
+				<td colspan="5">
+					<input type="text" name="lastlogin_sdate" value="{sc.lastlogin_sdate}" readonly class="datepicker line"  maxlength="10" size="12" />
+					<span class="gray" style="margin:0 5px;">-</span>
+					<input type="text" name="lastlogin_edate" value="{sc.lastlogin_edate}" readonly class="datepicker line" maxlength="10" size="12" />
+					<span style="margin-left:20px;">
+						<span class="btn small"><input type="button" value="오늘" id="today" name="select_date" settarget="lastlogin" /></span>
+						<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date" settarget="lastlogin" /></span>
+						<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date" settarget="lastlogin" /></span>
+						<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date" settarget="lastlogin" /></span>
+						<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date" settarget="lastlogin" /></span>
+						<span class="btn small"><input type="button" value="전체" id="all" name="select_date" settarget="lastlogin" /></span>
+						<select name="lastlogin_search_type">
+							<option value="in"{ ? sc.lastlogin_search_type == 'in'}selected{ / }>동안 방문한 회원</option>
+							<option value="out"{ ? sc.lastlogin_search_type == 'out'}selected{ / }>동안 방문 안 한 회원</option>
+						</select>
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<th>생일</th>
+				<td colspan="5">
+					<input type="text" name="birthday_sdate" value="{sc.birthday_sdate}" readonly class="datepicker line"  maxlength="10" size="12" />
+					<span class="gray" style="margin:0 5px;">-</span>
+					<input type="text" name="birthday_edate" value="{sc.birthday_edate}" readonly class="datepicker line" maxlength="10" size="12" />
+					<span style="margin-left:20px;">
+						<span class="btn small"><input type="button" value="오늘" id="today" name="select_date" settarget="birthday" /></span>
+						<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date" settarget="birthday" /></span>
+						<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date" settarget="birthday" /></span>
+						<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date" settarget="birthday" /></span>
+						<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date" settarget="birthday" /></span>
+						<span class="btn small"><input type="button" value="전체" id="all" name="select_date" settarget="birthday" /></span>
+						<label><input type="checkbox" name="birthday_year_except" value="Y" {?sc.birthday_year_except == 'Y'}checked{/}/> 연도 검색 제외</label>
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<th>기념일</th>
+				<td colspan="5">
+					<select name="anniversary_sdate[]" onchange="chgAnniversaryOption('s', 0, 1);">
+						<option value=""></option>
+					<!--{ @ m_arr }-->
+						<option value="{.value_}" {?sc.anniversary_sdate[0]==.value_ }selected{/}>{.value_}</option>
+					<!--{ / }-->
+					</select>월
+					<select name="anniversary_sdate[]" onchange="chgAnniversaryOption('s', 1, 0);">
+						<option value=""></option>
+					<!--{ @ d_arr }-->
+						<option value="{.value_}" {?sc.anniversary_sdate[1]==.value_ }selected{/}>{.value_}</option>
+					<!--{ / }-->
+					</select>일
+					<span class="gray" style="margin:0 5px;">-</span>
+					<select name="anniversary_edate[]" onchange="chgAnniversaryOption('e', 0, 1);">
+						<option value=""></option>
+					<!--{ @ m_arr }-->
+						<option value="{.value_}" {?sc.anniversary_edate[0]==.value_ }selected{/}>{.value_}</option>
+					<!--{ / }-->
+					</select>월
+					<select name="anniversary_edate[]" onchange="chgAnniversaryOption('e', 1, 0);">
+						<option value=""></option>
+					<!--{ @ d_arr }-->
+						<option value="{.value_}" {?sc.anniversary_edate[1]==.value_ }selected{/}>{.value_}</option>
+					<!--{ / }-->
+					</select>일
+					<span style="margin-left:18px;">
+						<span class="btn small"><input type="button" value="오늘" id="today" name="select_date" settarget="anniversary" /></span>
+						<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date" settarget="anniversary" /></span>
+						<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date" settarget="anniversary" /></span>
+						<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date" settarget="anniversary" /></span>
+						<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date" settarget="anniversary" /></span>
+						<span class="btn small"><input type="button" value="전체" id="all" name="select_date" settarget="anniversary" /></span>
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<th>SMS 수신</th>
+				<td>
+					<label><input type="radio" name="sms" value="" checked/> 전체</label>
+					<label><input type="radio" name="sms" value="y"/> 동의</label>
+					<label><input type="radio" name="sms" value="n"/> 거부</label>
+				</td>
+				<th>이메일 수신</th>
+				<td>
+					<label><input type="radio" name="mailing" value="" checked/> 전체</label>
+					<label><input type="radio" name="mailing" value="y"/> 동의</label>
+					<label><input type="radio" name="mailing" value="n"/> 거부</label>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<th>가입유형</th>
+				<td>
+					<label><input type="radio" name="business_seq" value="" checked/> 전체</label>
+					<label><input type="radio" name="business_seq" value="n"/> 개인</label>
+					<label><input type="radio" name="business_seq" value="y"/> 사업자</label>
+				</td>
+				<th>가입승인</th>
+				<td>
+					<label><input type="radio" name="status" value="" checked/> 전체</label>
+					<label><input type="radio" name="status" value="done"/> 승인</label>
+					<label><input type="radio" name="status" value="hold"/> 미승인</label>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<th>등급</th>
+				<td>
+					<select name="grade" style="width:100px;">
+						<option value="">전체</option>
+						{@ group_arr }
+						<option value="{.group_seq}" {?sc.grade==.group_seq}selected{/}>{.group_name}</option>
+						{ / }
+					</select>
+				</td>
+				<th>주문횟수</th>
+				<td>
+					<input type="text" name="sorder_cnt" value="{sc.sorder_cnt}" class="line onlynumber" size="5"/> ~ <input type="text" name="eorder_cnt" value="{sc.eorder_cnt}" class="line onlynumber" size="5"/>
+				</td>
+				<th>주문금액</th>
+				<td>
+					<input type="text" name="sorder_sum" value="{sc.sorder_sum}" class="line onlynumber" size="7"/> ~ <input type="text" name="eorder_sum" value="{sc.eorder_sum}" class="line onlynumber" size="7"/>
+				</td>
+			</tr>
+
+			<tr>
+				<th>적립금</th>
+				<td>
+					<input type="text" name="semoney" value="{sc.semoney}" class="line onlynumber" size="7"/> ~ <input type="text" name="eemoney" value="{sc.eemoney}" class="line onlynumber" size="7"/>
+				</td>
+				<th>이머니</th>
+				<td>
+					<input type="text" name="scash" value="{sc.scash}" class="line onlynumber" size="7"/> ~ <input type="text" name="ecash" value="{sc.ecash}" class="line onlynumber" size="7"/>
+				</td>
+				<th>포인트</th>
+				<td>
+					<input type="text" name="spoint" value="{sc.spoint}" class="line onlynumber" size="7"/> ~ <input type="text" name="epoint" value="{sc.epoint}" class="line onlynumber" size="7"/>
+				</td>
+			</tr>
+
+			<tr>
+				<th>리뷰횟수</th>
+				<td>
+					<input type="text" name="sreview_cnt" value="{sc.sreview_cnt}" class="line onlynumber" size="5"/> ~ <input type="text" name="ereview_cnt" value="{sc.ereview_cnt}" class="line onlynumber" size="5"/>
+				</td>
+				<th>방문횟수</th>
+				<td colspan="3">
+					<input type="text" name="slogin_cnt" value="{sc.slogin_cnt}" class="line onlynumber" size="5"/> ~ <input type="text" name="elogin_cnt" value="{sc.elogin_cnt}" class="line onlynumber" size="5"/>
+				</td>
+			</tr>
+			<tr>
+				<th>가입방법</th>
+				<td colspan="3">
+					<!--{ @ ruteloop }-->
+						<!--{ ? in_array(.key_,_GET.snsrute) }-->
+						<label  ><input type="checkbox" name="snsrute[]" value="{.key_}" checked="checked" /><!-- <img src="../images/common/icon/{.image}"> -->{.name}</label>
+						<!--{ : }-->
+						<label  ><input type="checkbox" name="snsrute[]" value="{.key_}" /> <!-- <img src="../images/common/icon/{.image}"> -->{.name}</label>
+						<!--{ / }-->
+					<!--{ / }-->
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+				<th>가입경로<span class="helpicon" title="어디서 유입되어 회원 가입되었는지 알 수 있습니다."></span></th>
+				<td colspan="2">
+					<select name="referer">
+						<option value="">선택하세요</option>
+						{ @ referer_list }
+						<option value="{ . referer_group_name }" { ? _GET.referer == .referer_group_name }selected{/}>{ . referer_group_name }</option>
+						{ / }
+						<option value="기타" { ? _GET.referer == '기타' }selected{/}>기타</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				{?sc.goods_seq_cond}
+				<th>상품코드</th>
+				<td colspan="2">
+					<input type="text" name="goods_seq" value="{sc.goods_seq}" size="5" />를
+					<select name="goods_seq_cond">
+						<option value="fblike" {?sc.goods_seq_cond=='fblike'}selected{/}>좋아요 한 회원</option>
+						<option value="cart" {?sc.goods_seq_cond=='cart'}selected{/}>장바구니에 담고있는 회원</option>
+						<option value="wish" {?sc.goods_seq_cond=='wish'}selected{/}>위시리스트에 담고있는 회원</option>
+					</select>
+				</td>
+				{/}
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<!-- 주문리스트 검색폼 : 끝 -->
+
+<div id="setPopup" class="hide"></div>

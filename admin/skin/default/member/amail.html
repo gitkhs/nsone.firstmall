@@ -1,0 +1,111 @@
+{ #layout_header }
+
+
+<style>
+.ctab {border-top:1px solid #d6d6d6;border-right:1px solid #d6d6d6;border-bottom:1px solid #d6d6d6;width:150px;line-height:30px;text-align:center;background-color:#eeeeee;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#757575;}
+.ctab-on {border-top:1px solid #d6d6d6;border-bottom:1px solid #ffffff;border-right:1px solid #d6d6d6;width:150px;line-height:30px;text-align:center;background-color:#ffffff;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;}
+</style>
+
+
+<form name="memberForm" id="memberForm" method="post" target="actionFrame" action="../member_process/amail">
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>이메일 대량 발송</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		<!--
+			<li><span class="btn large icon"><button><span class="arrowleft"></span>이동버튼</button></span></li>
+			<li><span class="btn large icon"><button><span class="arrowleft"></span>이동버튼</button></span></li>
+		-->
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		<!--
+			<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+		-->
+			<li><span class="btn large black"><button  {? isdemo.isdemo }  type="button" {isdemo.isdemojs1} {:} type="submit" {/}>저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+
+
+<!-- 상단 단계 링크 : 시작 -->
+<div class="left" id="rn_join">
+	<br style="line-height:20px;" />
+
+	<div style="position:absolute;">
+	<table cellpadding="0" cellspacing="0">
+		<td class="ctab-on t1"><span class="hand" onclick="location.href='amail';">이메일 대량발송 설정</span></td>
+		<td class="ctab t2"><span class="hand" onclick="location.href='amail_send';">이메일 대량발송</span></td>
+	</tr>
+	</table>
+	</div>
+	<table height="32" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #d6d6d6;">
+	<tr>
+		<td align="center"></td>
+	</tr>
+	</table>
+	<br style="line-height:20px;" />
+</div>
+<!-- 상단 단계 링크 : 끝 -->
+
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<div class="item-title" style="float:left;width:92%">이메일 대량발송 설정</div>
+<div class="clearbox">
+<table class="info-table-style" style="width:100%">
+	<colgroup>
+		<col width="15%" />
+		<col />
+	</colgroup>
+	<tbody>
+	<tr>
+		<th class="its-th-align center">이름</th>
+		<td class="its-td-align left" style="padding-left:10px;">
+			<input type="text" name="name" value="{name}" {? isdemo.isdemo } {isdemo.isdemodisabled} {/} >
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">이메일</th>
+		<td class="its-td-align left" style="padding-left:10px;">
+			<input type="text" name="email" value="{email}"  {? isdemo.isdemo } {isdemo.isdemodisabled} {/} >
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">전화번호</th>
+		<td class="its-td-align left" style="padding-left:10px;"  >
+			<input type="text" size="4" maxlength="4" name="phoneArr[0]" title=" " value="{phoneArr[0]}"  {? isdemo.isdemo } {isdemo.isdemodisabled} {/}/>
+             -
+            <input type="text" size="4" maxlength="4" name="phoneArr[1]" title=" " value="{phoneArr[1]}"  {? isdemo.isdemo } {isdemo.isdemodisabled} {/}/>
+             -
+            <input type="text" size="4" maxlength="4" name="phoneArr[2]" title=" " value="{phoneArr[2]}"  {? isdemo.isdemo } {isdemo.isdemodisabled} {/}/>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">휴대폰</th>
+		<td class="its-td-align left" style="padding-left:10px;" >
+			<input type="text" size="4" maxlength="4" name="mobileArr[0]" title=" " value="{mobileArr[0]}"  {? isdemo.isdemo } {isdemo.isdemodisabled} {/}/>
+             -
+            <input type="text" size="4" maxlength="4" name="mobileArr[1]" title=" " value="{mobileArr[1]}"  {? isdemo.isdemo } {isdemo.isdemodisabled} {/}/>
+             -
+            <input type="text" size="4" maxlength="4" name="mobileArr[2]" title=" " value="{mobileArr[2]}"  {? isdemo.isdemo } {isdemo.isdemodisabled} {/}/>
+		</td>
+	</tr>
+</table>
+</div>
+
+
+</form>
+
+
+{ #layout_footer }

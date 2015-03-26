@@ -1,0 +1,63 @@
+{#layout_header_popup}
+<script type="text/javascript">
+$(function(){	
+	{?template_path}
+	parent.DM_window_title_set("left","<a href=\"javascript:;\" onmouseup=\"DM_window_sourceeditor('{template_path}','')\">◀ 상단바 영역의 HTML소스보기</a>");
+	{/}
+});
+</script>
+
+<style>
+
+</style>
+<form name="topbarForm" action="../design_process/topBar_design" method="post" target="actionFrame">
+<div style="padding:10px;">
+	<table class="design-simple-table-style" width="100%" align="center">
+	<col width="140" />
+	<tr>
+		<th class="dsts-th">
+		전체 카테고리
+		</th>
+		<td class="dsts-td left">
+			<input type="checkbox" name="allCategory" class="edit-panel-chk" {?allcategory=='1'}checked{/}/>
+			전체 카테고리 네비게이션을 노출합니다.
+		</td>
+	</tr>
+	<tr>
+		<th class="dsts-th">
+		카테고리
+		</th>
+		<td class="dsts-td left">
+			<input type="checkbox" name="categoryChk" class="edit-panel-chk" {?category>'0'}checked{/}/>
+			<input type="text" name="category" value="{category}" class="line" size="2" /> 개의 1차 카테고리를 노출합니다. (단, 노출로 설정된 카테고리에 한함)
+		</td>
+	</tr>
+	<tr>
+		<th class="dsts-th">
+		전체 브랜드
+		</th>
+		<td class="dsts-td left">
+			<input type="checkbox" name="brand" class="edit-panel-chk" {?brand=='1'}checked{/}/>
+			전체 브랜드 네비게이션을 노출합니다.
+		</td>
+	</tr>
+	<tr>
+		<th class="dsts-th">
+		전체 지역
+		</th>
+		<td class="dsts-td left">
+			<input type="checkbox" name="location" class="edit-panel-chk" {?location=='1'}checked{/}/>
+			전체 지역 네비게이션을 노출합니다.
+		</td>
+	</tr>
+	</table>
+	
+	<div style="height:15px"></div>
+	
+	<div class="center">
+		<span class="btn medium cyanblue"><input type="submit" value="적용" /></span>
+	</div>
+
+	</form>
+</div>
+{#layout_footer_popup}

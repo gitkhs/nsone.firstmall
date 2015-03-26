@@ -1,0 +1,60 @@
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>쿠폰등록(인증)</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.gif" /></a>
+</div>
+<!-- 타이틀 -->
+<div id="main-qna-summary">
+	<table width="100%" height="30">
+	<tr>
+		<td align="left"><img src="../images/design/tit_coupon_confirmation.gif" /></td>
+		<td align="right">
+		</td>
+	</tr>
+	</table>
+	<div class="main-summary-contents"></div>
+</div>
+<div style="height:8px;"></div>
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+	<thead>
+		<tr>
+			<th colspan="3">오프라인 상에서 소지하고 계신 쿠폰을 등록 해 주세요.</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td class="cell">쿠폰 인증번호
+			&nbsp;&nbsp;&nbsp;
+			<input type="text" name="offline_serialnumber" id="offline_serialnumber" value="" style="height:24px;width:150px" maxlength="35" />
+			&nbsp;&nbsp;&nbsp;
+			<img src="../images/design/btn_coupon_reg.gif" id="offlinecouponbtn" class="hand">
+			</td>
+		</tr>
+	</tbody>
+	</table>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	//쿠폰인증받기
+	$("img#offlinecouponbtn").click(function(){
+		var offline_serialnumber = $("#offline_serialnumber").val();
+		if(offline_serialnumber){
+			$.ajax({
+				'url' : '../coupon/offlinecoupon_member',
+				'data' : {'offline_serialnumber':offline_serialnumber},
+				'type' : 'post',
+				'dataType': 'json',
+				'success': function(data) {
+					if(data.result){
+						openDialogConfirm(data.msg,'400','180',function(){document.location.href=data.returnurl});
+					}else{
+						openDialogAlert(data.msg,'400','140',function(){});
+					}
+				}
+			});
+		}else{
+			openDialogAlert('인증번호를 입력해 주세요!','400','140',function(){});
+		}
+	});
+});
+</script>

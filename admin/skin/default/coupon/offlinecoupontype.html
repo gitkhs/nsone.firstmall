@@ -1,0 +1,116 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#multicouponhelper").click(function() {
+			openDialog("다중 발급이란?", "multicouponhelperPopup", {"width":"630","height":"470"});
+	}); 
+ 
+	$("input[type='radio'][name='offlinecptype']").click(function() {
+		$(".offlinecptype").removeClass('checked-tr-background');
+		$(".tr_"+$(this).attr("id")).addClass('checked-tr-background'); 
+	});
+	
+	$(".offlinecptype").click(function() {
+		$(".offlinecptype").removeClass('checked-tr-background');
+		$(".tr_offlinecptype_"+$(this).attr("offlinecptype")).addClass('checked-tr-background'); 
+		$("input[name='offlinecptype'][value='"+$(this).attr("offlinecptype")+"']").attr('checked',true);
+	});
+	
+
+	$("#offlinecoupontypebtn").live("click",function(){ 
+		var offlinecptype = $("input[type='radio'][name='offlinecptype']:checked").val(); 
+		$("#couponType").val(offlinecptype);
+		$('.offlinecptypetr').hide();
+		$('.'+offlinecptype+'tbllay').show();
+		$("input[name='couponType'][value='"+offlinecptype+"']").attr('checked',true); 
+		if( offlinecptype == "offline_emoney" ) {
+			$("#offlinetypetitle").text("적립금"); 
+		}else{
+			$("#offlinetypetitle").text("쿠폰"); 
+		}
+		set_coupon_form();
+		$("#offlinecoupontypePopup").dialog('close');
+	});  
+
+}); 
+</script>
+<ul class="right-btns clearbox">
+	<li class="right">다중 발급이란 <span class="hand " id="multicouponhelper" align="absmiddle" ><img src="../images/common/btn_help.gif" ></span>
+	</li>
+</ul>
+<div class="clearbox"></div>
+<div >
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="40" />
+			<col />
+			<col />
+			<col  width="115" />
+			<col />
+		</colgroup>
+		<thead>
+		<tr> 
+			<th class="its-th-align center" colspan="2">종류</th>
+			<th class="its-th-align center">발급 방식</th>
+			<th class="its-th-align center">발급 주기</th>
+			<th class="its-th-align center">다중 발급</th>
+		</tr>
+		</thead>
+		<tr class="offlinecptype tr_offlinecptype_offline_coupon checked-tr-background hand" offlinecptype="offline_coupon" >
+			<td class="its-td left"><input type="radio" name="offlinecptype" value="offline_coupon" id="offlinecptype_offline_coupon"  checked="checked" ></td>
+			<td class="its-td left">인쇄용 쿠폰</label></td>
+			<td class="its-td left">오프라인으로 배포된 인증번호를 온라인에서 회원이 인증 받으면 → <span class="blue">쿠폰 자동 제공</span></td>
+			<td class="its-td left">자유</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		
+		<tr class="offlinecptype offlinecptype_offline_emoney  tr_offlinecptype_offline_emoney  hand"  offlinecptype="offline_emoney" >
+			<td class="its-td left"><input type="radio" name="offlinecptype" value="offline_emoney" id="offlinecptype_offline_emoney" > </td>
+			<td class="its-td left">인쇄용 쿠폰</label></td>
+			<td class="its-td left">오프라인으로 배포된 인증번호를 온라인에서 회원이 인증 받으면→ <span class="blue">적립금 자동 제공</span></td>
+			<td class="its-td left">자유</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr >
+			<td colspan="5" class="center"><br/>
+				<div ><span class="btn large cyanblue"><button type="button" id="offlinecoupontypebtn" >확인</button></span></div>
+			</td>
+		</tr>
+	</table> 
+	
+</div>
+<!-- 서브 레이아웃 영역 : 끝 -->
+
+<!-- 페이징 -->
+<div id="multicouponhelperPopup" class="hide">
+<div>다중 발급이란 하나의 쿠폰 종류에 여러 개의 할인 쿠폰을 구매자에게 제공할 수 있는 기능입니다.</div>
+<br/>
+
+예시)<br/>
+<div class="pdb20">
+<span class="bold">신규가입 기념 3종 쿠폰</span><br/>
+&nbsp;- 1,000원 할인 (5천원 이상 구매 시)<br/>
+&nbsp;- 10% 할인 (최대 5천원 할인)<br/>
+&nbsp;- 5,000원 할인 (5만원 이상 구매 시)<br/>
+</div>
+
+<div class="pdb20">
+<span class="bold">컴백회원 기념 3종 쿠폰</span><br/>
+&nbsp;- 1,000원 할인 (5천원 이상 구매 시)<br/>
+&nbsp;- 10% 할인 (최대 5천원 할인)<br/>
+&nbsp;- 5,000원 할인 (5만원 이상 구매 시)<br/>
+</div>
+
+<div class="pdb20">
+	<span class="bold">이달의 등급 쿠폰</span><br/>
+	&nbsp;- 1,000원 할인 (5천원 이상 구매 시) - 새내기 회원<br/>
+	&nbsp;- 2,000원 할인 (3만원 이상 구매 시) - 새내기 회원<br/>
+	&nbsp;- 1,000원 할인 (5천원 이상 구매 시) - 골드 회원<br/>
+	&nbsp;- 2,000원 할인 (3만원 이상 구매 시) - 골드 회원<br/>
+	&nbsp;- 10% 할인 (최대 1만원 할인) - 골드 회원<br/>
+	&nbsp;- 1,000원 할인 (5천원 이상 구매 시) - VIP 회원<br/>
+	&nbsp;- 2,000원 할인 (3만원 이상 구매 시) - VIP 회원<br/>
+	&nbsp;- 10% 할인 (최대 1만원 할인) - VIP 회원<br/>
+	&nbsp;- 무료 배송 (최대 2,500원 할인) - VIP 회원<br/>
+</div>
+
+</div>

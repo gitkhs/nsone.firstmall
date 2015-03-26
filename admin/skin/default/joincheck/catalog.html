@@ -1,0 +1,311 @@
+{ #layout_header }
+<style>
+.goods_name {display:inline-block;white-space:nowrap;overflow:hidden;width:290px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+.search_label 	{display:inline-block;width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+span.step_title { font-weight:normal;padding-right:5px }
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".all-check").toggle(function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',true);	
+	},function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',false);
+	});
+	
+	$("div#page-title-bar-area button#joincheckRegist").bind("click",function(){
+		location.href = "online";
+	});
+	
+	
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+	$("#search_set").click(function(){
+		openDialog("기본검색 설정", "search_detail_dialog", {"width":"800","height":"300"});
+	});
+	
+	$("#get_default_button").click(function(){
+		$.getJSON('get_search_default', function(result) {			 
+			for(var i=0;i<result.length;i++){
+				if(result[i][0]=='goodsStatus[0]' || result[i][0]=='goodsView[0]'){
+					//alert(result[i][0]+" : "+result[i][1]); 
+					if(result[i][1]=='normal') $("input[name='goodsStatus[]']").eq(0).attr("checked",true);
+					else if(result[i][1]=='runout') $("input[name='goodsStatus[]']").eq(1).attr("checked",true);
+					else if(result[i][1]=='unsold') $("input[name='goodsStatus[]']").eq(2).attr("checked",true);
+					else if(result[i][1]=='look') $("input[name='goodsView[]']").eq(0).attr("checked",true);
+					else if(result[i][1]=='notLook') $("input[name='goodsView[]']").eq(1).attr("checked",true);
+				}else if(result[i][0]=='regist_date'){
+					if(result[i][1] == 'today'){
+						set_date('{=date('Y-m-d')}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3day'){
+						set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '7day'){
+						set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '1mon'){
+						set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3mon'){
+						set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}');
+					}	
+				}
+				$("*[name='"+result[i][0]+"']",document.memberForm).val(result[i][1]);
+			}			
+		});
+	});
+
+
+	$("#order_star").click(function(){
+		var status = "";
+		if($(this).hasClass("checked")){
+			$(this).removeClass("checked");
+			status = "asc";
+		}else{
+			$(this).addClass("checked");
+			status = "desc";
+		}
+		location.href = "../joincheck/catalog?orderby=favorite_chk&sort="+status;
+	});	
+	
+
+});
+
+
+
+function set_date(start,end){	
+	$("input[name='sdate']").val(start);
+	$("input[name='edate']").val(end);
+}
+
+function jc_copy_btn(seq){	
+	var str="../joincheck_process?mode=joincheck_copy&joincheck_seq=" + seq;
+	$("iframe[name='actionFrame']").attr('src',str);
+}
+
+function jc_delete_btn(seq){
+	var chk = confirm('정말 삭제하시겠습니까?');
+	if(chk == true){
+	var str="../joincheck_process?mode=joincheck_delete&joincheck_seq=" + seq;
+	$("iframe[name='actionFrame']").attr('src',str);
+	
+	}else{
+		return;
+	}
+}
+
+function jc_view_btn(seq,sz1,sz2){
+	var str= "/joincheck/joincheck_view?seq=" + seq;
+	popup(str,sz1,sz2);	
+}
+
+function jc_cpurl_btn(seq){	
+	var str= "http://{_SERVER.HTTP_HOST}/joincheck/joincheck_view?seq="+seq;
+	if(window.clipboardData){
+		window.clipboardData.setData("TEXT",str);	
+		alert("복사되었습니다.");
+	}else{
+		temp = prompt("Ctrl+C를 눌러 복사하세요", str);
+	}	
+
+}
+</script>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>출석 체크 리스트</h2>
+		</div>
+		
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button onclick="location.href='regist'">출석체크 만들기<span class="arrowright"></span></button></span></li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<form name="joincheckForm" id="joincheckForm">
+
+<!-- 출석체크 리스트 검색폼 : 시작 -->
+<div class="search-form-container">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table>
+			<tr>
+				<td width="500">
+					<table class="sf-keyword-table">
+					<tr>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{=htmlspecialchars(sc.keyword)}" title="출석체크명" /></td>
+						<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+
+	<table class="search-form-table" id="serch_tab">
+	<tr id="goods_search_form" style="display:block;">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<colgroup>
+				<col width="80" />
+				<col width="" />
+			</colgroup>
+		
+			<tr>
+				<th>상태</th>
+				<td>				
+					<label class="search_label"><input type="checkbox" name="event_status[]" value="before" {?sc.event_status && in_array('before',sc.event_status)}checked{/}/>진행 전</label>
+					<label class="search_label"><input type="checkbox" name="event_status[]" value="ing" {?sc.event_status && in_array('ing',sc.event_status)}checked{/}/>진행 중</label>
+					<label class="search_label"><input type="checkbox" name="event_status[]" value="end" {?sc.event_status && in_array('end',sc.event_status)}checked{/}/>진행 완료</label>
+					<label class="search_label"><input type="checkbox" name="event_status[]" value="stop" {?sc.event_status && in_array('stop',sc.event_status)}checked{/}/>중지</label>	
+					
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			<tr>
+				<th>출석방법</th>
+				<td>				
+					<label class="search_label"><input type="checkbox" name="event_type[]" value="stamp" {?sc.event_type && in_array('stamp',sc.event_type)}checked{/}/>스템프형</label>
+					<label class="search_label"><input type="checkbox" name="event_type[]" value="comment" {?sc.event_type && in_array('comment',sc.event_type)}checked{/}/>댓글형</label>
+					<label class="search_label"><input type="checkbox" name="event_type[]" value="login" {?sc.event_type && in_array('login',sc.event_type)}checked{/}/>로그인형</label>						
+					
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			<tr>
+				<th>달성조건</th>
+				<td>				
+					<label class="search_label"><input type="checkbox" name="event_clear_type[]" value="count" {?sc.event_clear_type && in_array('count',sc.event_clear_type)}checked{/}/>횟수달성</label>
+					<label class="search_label"><input type="checkbox" name="event_clear_type[]" value="straight" {?sc.event_clear_type && in_array('straight',sc.event_clear_type)}checked{/}/>연속출석</label>						
+					
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<!-- 출석체크 리스트 검색폼 : 끝 -->
+
+<ul class="left-btns clearbox">
+	<li><div style="margin-top:rpx;">총 <b>{=number_format(count.total)}</b>개 이벤트 중 <b>{=number_format(page.totalcount)}</b>개 검색 <!-- (진행 중 <b>{=number_format(count.ing)}</b>, 종료 <b>{=number_format(count.end)}</b>)--></div></li>
+</ul>
+
+<!-- 출석체크 리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="40" />
+		<col />
+		<col width="100" />
+		<col width="100" />
+		<col width="70" />
+		<col width="140" />
+		<col width="70" />
+		<col width="70" />
+		<col width="140" />
+		<col width="240" />	
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>번호</th>
+		<th>출석체크명</th>
+		<th>출석체크 시작일</th>
+		<th>출석체크 종료일</th>
+		<th>출석방법</th>
+		<th>달성조건</th>
+		<th>혜택</th>
+		<th>상태</th>
+		<th>현황<br/>(총/달성/적립)</th>
+		<th>관리</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb otb" >
+{? loop }
+	{@ loop }
+		<!-- 출석체크 리스트(이벤트상태 및 버튼) : 시작 -->
+		<tr class="list-row">
+			<td align="center">{._rno}</td>
+			<td align="left" style="padding-left:5px;">{.title} 
+			<span class="btn small"><input type="button" name="manager_cpurl_btn" value="URL 복사" onclick="jc_cpurl_btn({.joincheck_seq})" /></span><br/> </td>
+			<td align="center">{.start_date}</td>
+			<td align="center">{.end_date}</td>
+			<td align="center">{.mcheck_type}</td>
+			<td align="center">{.mcheck_clear_type} {.check_clear_count}회</td>
+			<td align="right">{? .emoney }{=number_format(.emoney)} 원{: .point }{=number_format(.point)} P{/}</td>
+			<td align="center">{.status}</td>
+			<td align="center"> <a href="memberlist?joincheck_seq={.joincheck_seq}" >{.sum_count} / {.sum_clear} / {.sum_emoney}</a></td>			
+			<td align="center">
+				<span class="btn small"><a href="http://{_SERVER.HTTP_HOST}/joincheck/joincheck_view?setDesignMode=on&seq={.joincheck_seq}" target="_blank">페이지 꾸미기</a></span>
+				<span class="btn small"><input type="button" name="manager_modify_btn" value="수정" onclick="location.href='regist?joincheck_seq={.joincheck_seq}'" /></span> 
+				<span class="btn small"><input type="button" name="manager_copy_btn"  value="복사" onclick="jc_copy_btn({.joincheck_seq})" /></span>				
+				<span class="btn small"><input type="button" name="manager_delete_btn" value="삭제" onclick="jc_delete_btn({.joincheck_seq})" /></span>
+			</td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+	{ / }
+{ : }
+		<!-- 리스트타이틀(이벤트상태 및 버튼) : 시작 -->
+		<tr class="list-row">
+			<td align="center" colspan="10">
+				{ ? keyword }
+					'{keyword}' 검색된 이벤트가 없습니다.
+				{:}
+					등록된 이벤트가 없습니다.
+				{/}
+			</td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+{ / }
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+</table>
+<!-- 출석체크 리스트 테이블 : 끝 -->
+
+</form>
+
+<br style="line-height:10px;" />
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{page.html}</div>
+
+{ #layout_footer }

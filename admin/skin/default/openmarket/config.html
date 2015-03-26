@@ -1,0 +1,217 @@
+{ #layout_header }
+<style type="text/css">
+div.om-top-lay		{width:100%;text-align:center;margin:20px 0;}
+.px_infomation		{ line-height:25px; text-align:center;color:#fff;font-weight:bold;
+					border:1px solid #9a1a2f; background-color:#bb2d33;cursor:pointer;margin-bottom:40px;
+					background: -ms-linear-gradient(bottom, #c23b44 5%, #af2423 100%);
+					background: linear-gradient(to bottom, #c23b44 5%, #af2423 100%);}
+.select-linkage-company-lay {margin-bottom:40px;}
+.send-linkage-goods-lay { margin-left:30px;margin-bottom:40px; }
+.price-default-set-text-lay { margin-left:30px; }
+.cut-price-set-lay	{ width:100%;text-align:right;margin-top:10px;}
+.price-default-set-lay { width:100%;margin-top:20px;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+
+	// 반드시 정독하셔야 하는 자주하는 질문 팝업
+	$("div.px_infomation").click(function(){
+		$.ajax({
+			type: "get",
+			url: "notice_pop",
+			data: {'type':'info'},
+			success: function(result){
+				$("#px_infomation").html(result);
+				openDialog("다중 판매마켓 - 반드시 정독하셔야 하는 자주하는 질문", "px_infomation", {"width":"80%","height":"870"});
+			}
+		});
+	});
+
+	// 연동업체 신청 URL
+	$(".linkage-company-regist").click(function(){
+		var regURL	= $("select[name='linker_linkage']").find("option:selected").attr('regurl');
+		if	(regURL){
+			window.open(regURL);
+		}
+	});
+
+	{ ? !LINKAGE_SERVICE }
+	$.ajax({
+		type: "get",
+		url: "notice_pop",
+		data: {},
+		success: function(result){
+			$("#openmarket_pop_info").html(result);
+			openDialog("다중 판매마켓  서비스 안내", "openmarket_pop_info", {"width":"500","noClose":"true"});
+		}
+	});
+	{ : }
+		$(".linkage-company-regist-btn-lay").hide();
+		$("select[name='linker_linkage']").find("option[value='{linkage.linkage_seq}']").attr('selected', true);
+		chgSettingForm($("select[name='linker_linkage']"));
+	{ / }
+
+	$(".send-linkage-goods").click(function(){
+		$.ajax({
+			type: "post",
+			url: "select_send_goods",
+			data: {},
+			success: function(result){
+				$("#select_goods_lay").html(result);
+				openDialog("쇼핑몰의 상품정보를 → 판매마켓 연동 업체로 일괄 전송", "select_goods_lay", {"width":"90%","height":"700"});
+			}
+		});
+	});
+
+	$("button.src_ready_send_goods").click(function(){
+		$.ajax({
+			type: "get",
+			url: "../openmarket/src_ready_send_goods",
+			data: {},
+			success: function(result){
+				$("#src_ready_send_goods").html(result);
+				openDialog("전송 대기 상품 검색", "src_ready_send_goods", {"width":"80%","height":"600"});
+			}
+		});
+	});
+});
+
+// selectbox 변경 시 처리
+function chgSettingForm(obj){
+	var linkage_seq	= '{linkage.linkage_seq }';
+	$.ajax({
+		type: "get",
+		url: "get_mall_list",
+		data: {'seq':$(obj).val()},
+		success: function(result){
+			$(".price-default-set-lay").html(result);
+			apply_input_style();
+		}
+	});
+	if	(linkage_seq == $(obj).val())	$(".linkage-company-regist-btn-lay").hide();
+	else								$(".linkage-company-regist-btn-lay").show();
+
+
+}
+</script>
+
+
+<form name="omFrm" method="post" action="../openmarket_process/save_config" target="actionFrame">
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>판매마켓 설정</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 상단 안내 이미지 : 시작 -->
+<div class="om-top-lay">
+	<img src="../images/design/openmarket_top_img.gif" />
+</div>
+<!-- 상단 안내 이미지 : 끝 -->
+
+<div class="px_infomation">
+	반드시 정독하셔야 하는 자주하시는 질문
+</div>
+
+<!-- 설정 테이블 : 시작 -->
+<div class="om-config-lay">
+	<div class="item-title">STEP1) 판매마켓 연동 업체</div>
+	<div class="select-linkage-company-lay">
+		<table width="100%" class="info-table-style">
+		<colgroup>
+			<col width="20%" />
+			<col width="60%" />
+			<col />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align">연동 업체 정보</th>
+			<td class="its-td">
+				<input type="hidden" name="linker_name" value="{comlist[0].linkage_name}" />
+				<select name="linker_linkage" onchange="chgSettingForm(this);">
+				<!--{ ? comlist }-->
+					<!--{ @ comlist }-->
+					<option value="{.seq}" regurl="{.registURL}">{.linkage_name}</option>
+					<!--{ / }-->
+				<!--{ / }-->
+				</select>
+				<input type="text" name="linker_key" value="{linkage.linkage_code}" title="고객사코드" />
+				<input type="text" name="linker_keysub" value="{linkage.linkage_codesub}" title="사용자아이디" />
+			</td>
+			<td class="its-td linkage-company-regist-btn-lay hide">
+				<span class="btn small cyanblue"><button type="button" class="linkage-company-regist">신청하기></button></span>
+			</td>
+		</tr>
+		</thead>
+		</table>
+	</div>
+
+	<div class="item-title">STEP2) 쇼핑몰의 상품정보를 → 판매마켓 연동 업체로 일괄 전송</div>
+	<div class="send-linkage-goods-lay">
+		<table cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td>판매마켓에 판매될 상품정보가 전혀 없기 때문에 일괄 전송 기능으로 상품정보를 일괄로 보내는 <span style="color:red;">최초 1회성 기능</span>입니다.<br />
+			이후부터는 신규 상품등록 또는 등록된 상품정보 수정 시에는 상품정보가 <span style="color:red;">연동 업체로 자동 전송</span>됩니다.</td>
+			<td style="padding-left:50px;">
+				<span class="btn large cyanblue"><button type="button" class="send-linkage-goods">일괄 전송</button></span>
+				<span class="btn large red"><button type="button" class="src_ready_send_goods">전송 대기 상품 검색</button></span>
+			</td>
+		</tr>
+		</table>
+	</div>
+
+	<div class="item-title">STEP3) 판매마켓별 상품 판매가 설정</div>
+	<div class="price-default-set-text-lay">
+		단, <span style="color:red;">연동 업체 관리환경</span>에서도 <span style="color:red;">전송된 상품에 대하여 아래의 판매마켓으로 설정</span>되어 있어야만 실제 판매마켓으로 상품정보가 전송되어 판매가 가능하게 됩니다.
+	</div>
+	<div class="cut-price-set-lay">
+		<div style="text-align:right;">
+			<span class="desc">
+				<input type="checkbox" name="cut_price_use" id="cut_price_use" value="y" { ? linkage.cut_price_use == 'y' }checked{ / } />
+				<label for="cut_price_use">조정된 가격을</label> 
+				<select name="cut_price_unit">
+					<option value="10" { ? linkage.cut_price_unit == '10' }selected{ / }>일원단위</option>
+					<option value="100" { ? linkage.cut_price_unit == '100' }selected{ / }>십원단위</option>
+					<option value="1000" { ? linkage.cut_price_unit == '1000' }selected{ / }>백원단위</option>
+					<option value="10000" { ? linkage.cut_price_unit == '10000' }selected{ / }>천원단위</option>
+					<option value="100000" { ? linkage.cut_price_unit == '100000' }selected{ / }>만원단위</option>
+				</select>
+				<label for="cut_price_use">자리에서</label>
+				<select name="cut_price_type">
+					<option value="floor" { ? linkage.cut_price_type == 'floor' }selected{ / }>버림</option>
+					<option value="round" { ? linkage.cut_price_type == 'round' }selected{ / }>반올림</option>
+					<option value="ceil" { ? linkage.cut_price_type == 'ceil' }selected{ / }>올림</option>
+				</select>
+				<label for="cut_price_use">하여 절사 처리합니다.</label>
+			</span>
+		</div>
+	</div>
+
+	<div class="price-default-set-lay">
+	</div>
+</div>
+<!-- 설정 테이블 : 끝 -->
+</form>
+
+<div id="openmarket_pop_info" class="hide"></div>
+<div id="px_infomation" class="hide"></div>
+<div id="select_goods_lay" class="hide"></div>
+<div id="src_ready_send_goods" class="hide"></div>
+
+{ #layout_footer }

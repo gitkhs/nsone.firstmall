@@ -1,0 +1,42 @@
+<div>
+<ul class="red" style="list-style-type:disc;line-height:180%; " >
+	<li> 가비아 이미지 호스팅 계정 정보 입력 후 일괄 업데이트 버튼을 클릭해 주십시오.</li>
+	<li>아직 이미지 호스팅 서비스를 신청하지 않으셨다면 <span class="btn small  cyanblue "><button type="button"  onclick="window.open('https://imagehosting.gabia.com/service','imagehosting');">이미지 호스팅 신청</button></span></li>
+	<li>업로드 디렉토리에 동일한 파일이 존재하면 덮어쓰기 됩니다.</li>
+</ul>
+
+<form name="goodsImagehostingForm" id="goodsImagehostingForm">
+<input type="hidden" name="mode" id="imghostingsavemode" value="{_GET.mode}" /> 
+<input type="hidden" name="goods_seq" id="imghostingsavegoods_seq" value="" />
+<table align="center" cellpadding="5" cellspacing="10" >
+<tr>
+	<td class="right" >FTP 주소&nbsp;</td>
+	<td  class="left" >FTP://<input type="text" name="hostname" id="imghostinghostname" value="{imagehostingftp.hostnameid}" size="15"  class="line" />{imagehostingftp.gabiaimagehostingurl}</td>
+</tr>
+<tr>
+	<td class="right" >FTP ID &nbsp;&nbsp;&nbsp; </td>
+	<td  class="left" ><input type="text" name="username"  id="imghostingusername" value="" size="38"  class="line" /></td>
+</tr>
+<tr>
+	<td class="right" >FTP PWD&nbsp;</td>
+	<td  class="left" ><input type="password" name="password"  id="imghostingpassword" value=""size="38"  class="line" /></td>
+</tr> 
+<!-- <tr>
+<td class="right" >원본이미지&nbsp;</td>
+<td  class="left" > 
+<label ><input type="checkbox" name="imagedelete"  id="imagedelete" value="1" size="30"  class="line" />삭제함</label>
+</td>
+</tr> -->
+<tr>
+	<td class="right" >업로드 디렉토리</td>
+	<td  class="left" >{imagehostingftp.imagehostingdir}</td>
+</tr>
+<tr>
+	<td class="center" colspan="2" > 
+		<span class="btn large  cyanblue "><button type="button"  id="imagehostinggoodssave"  >일괄 업데이트</button></span>
+	</td>
+</tr>
+</table>
+</form>
+ 
+</div>

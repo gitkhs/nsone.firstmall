@@ -1,0 +1,27 @@
+<!--{? list_loop }-->
+	<!--{@ list_loop }-->
+<tr>
+	<td align="center">{=number_format(st_index + .index_)}</td>
+	<td align="center">{.deposit_ymd}</td>
+	<td width="180" align="center">{.order_goods_name}</td>
+	<td width="70" class="desc" align="left">
+		{?.title1}{.title1} : {.option1}<br />{/}
+		{?.title2}{.title2} : {.option2}<br />{/}
+		{?.title3}{.title3} : {.option3}<br />{/}
+		{?.title4}{.title4} : {.option4}<br />{/}
+		{?.title5}{.title5} : {.option5}<br />{/}
+	</td>
+	<td align="right">{=number_format(.supply_price)}</td>
+	<td align="right">{=number_format(.consumer_price)}</td>
+	<td align="right">{=number_format(.price)}</td>
+	<td align="right">{=number_format(.ea)}</td>
+	<td align="right" class="tdLineRight"><b>{=number_format(.goods_price)}</b></td>
+	<td align="right">{=number_format(.coupon_sale)}</td>
+	<td align="right">{=number_format(.member_sale)}</td>
+	<td align="right">{=number_format(.fblike_sale)}</td>
+	<td align="right">{=number_format(.mobile_sale)}</td>
+	<td align="right">{=number_format(.promotion_code_sale)}</td>
+	<td align="right">{=number_format(.referer_sale)}</td>
+</tr>
+	<!--{ / }-->
+<!--{ / }-->

@@ -1,0 +1,215 @@
+<style>
+.thumbnailvideo {position:absolute;z-index:5;background-position:center;background:url('../../images/common/thumb_play.png') no-repeat center center;vertical-align:middle;}
+</style>
+<div><font face="arial black, 돋움" size="2"><b>{title}</b></font></div>
+
+<!--{ ? perpage }-->
+<br style="line-height:10px;" />
+
+<div class="goods_list_top">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td align="left">
+			<span class="list_summary">TOTAL <b>{=number_format(page.totalcount)}</b> ITEMS</span>
+		</td>
+		<td align="right">
+			{?sort}
+			<span class="sort_item">
+				<!--{ @ orders }-->
+					<!--{ ? .index_ }-->
+					&nbsp;|&nbsp;
+					<!--{ / }-->
+					<!--{ ? .key_ == sort }-->
+						<a href="?sort={.key_}{sortUrlQuerystring}"><b>{.value_}</b></a>
+					<!--{ : }-->
+						<a href="?sort={.key_}{sortUrlQuerystring}">{.value_}</a>
+					<!--{ / }-->
+				<!--{ / }-->
+			</span>
+			{/}
+		</td>
+	</tr>
+	</table>
+</div>
+<!--{ / }-->
+
+<br style="line-height:10px;" />
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<!--{@grid}-->
+	<tr>
+		<!--{@.value_}-->
+			<!--{?..index_}--><td></td>{/}
+			<td width="{goodsImageSize.width}" valign="top">
+				<!--{?..value_}-->
+				<?php
+					{idx} = {.index_}*{count_w}+{..index_};
+					{moduledisplayGoods} = {displayGoodsList[idx]};
+				?>
+				<table width="100%" align="{text_align}" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<!--{? kind == 'designvideo' //동영상인경우 }-->
+						<!--{? moduledisplayGoods.file_key_w && moduledisplayGoods.uccdomain_fileurl}-->
+						<td align="{text_align}" width="{? videosize_w }{videosize_w}{:}400{/}">
+							<span class="goodsDisplayVideoWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(moduledisplayGoods))}">
+								<span class="thumbnailvideo" width="{? videosize_w }{=(videosize_w)}{:}400{/}" height="{? videosize_h }{videosize_h}{:}200{/}" ></span>
+								<embed src="{moduledisplayGoods.uccdomain_fileswf}" width="{? videosize_w }{videosize_w}{:}400{/}" height="{? videosize_h }{videosize_h}{:}200{/}"  wmode="transparent" class="hide"></embed>
+								<img src="{moduledisplayGoods.uccdomain_thumbnail}" width="{? videosize_w }{videosize_w}{:}400{/}" height="{? videosize_h }{videosize_h}{:}200{/}"onerror="this.src='../../images/common/noimage.gif'" />
+							</span>
+						</td>
+						<!--{:}-->
+						<td align="{text_align}" width="{? videosize_w }{videosize_w}{:}400{/}"><span class="goodsDisplayImageWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(moduledisplayGoods))}"><a href="/goods/view?no={moduledisplayGoods.goods_seq}" target="{target}"><img src="{moduledisplayGoods.image}" width="{? videosize_w }{videosize_w}{:}400{/}" onerror="this.src='../../images/common/noimage.gif'" /></a></span></td>
+						<!--{/}-->
+					<!--{:}-->
+					<td align="{text_align}" width="{goodsImageSize.width}"><span class="goodsDisplayImageWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(moduledisplayGoods))}"><a href="/goods/view?no={moduledisplayGoods.goods_seq}" target="{target}"><img src="{moduledisplayGoods.image}" width="{goodsImageSize.width}" onerror="this.src='../../images/common/noimage.gif'" /></a></span></td>
+					<!--{/}-->
+				</tr>
+
+				<!--{ @ info_settings.list }-->
+					<!--{? ...value_->kind == 'goods_name' }-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}"><a href="/goods/view?no={moduledisplayGoods.goods_seq}" target="{target}"><span {...value_->name_css}>{moduledisplayGoods.goods_name}</span></a></td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'summary' && moduledisplayGoods.summary}-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}"><span {...value_->name_css}>{moduledisplayGoods.summary}</span></td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'icon' && moduledisplayGoods.icons}-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td height="18" align="{text_align}">
+							<!--{ @ moduledisplayGoods.icons }-->
+							<img src="/data/icon/goods/{....value_}.gif" border="0">
+							<!--{ / }-->
+						</td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'consumer_price' && moduledisplayGoods.consumer_price > moduledisplayGoods.price }-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}">
+							<span {...value_->name_css}>
+								{=number_format(moduledisplayGoods.consumer_price)}
+								{?...value_->postfix}{...value_->postfix}{/}
+							</span>
+						</td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'price' }-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}">
+							<span {...value_->name_css}>
+								{?moduledisplayGoods.string_price}
+									{moduledisplayGoods.string_price}
+								{:}
+									{=number_format(moduledisplayGoods.price)}
+									{?...value_->postfix}{...value_->postfix}{/}
+								{/}
+							</span>
+						</td>
+					</tr>
+					<!--{/}-->
+
+
+					<!--{? ...value_->kind == 'sale_price' }-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}">
+							<span {...value_->name_css}>
+								{?moduledisplayGoods.string_price}
+									{moduledisplayGoods.string_price}
+								{:}
+									{=number_format(moduledisplayGoods.sale_price)}
+									{?...value_->postfix}{...value_->postfix}{/}
+								{/}
+							</span>
+						</td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'event_text' }-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}">
+							<span {...value_->name_css}>
+								{?is_numeric(moduledisplayGoods.event_text)}
+									{=number_format(moduledisplayGoods.event_text)}
+									{?...value_->postfix}{...value_->postfix}{/}
+								{:}
+									{moduledisplayGoods.event_text}
+								{/}
+							</span>
+						</td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'fblike' && APP_USE == 'f'  && APP_LIKE_TYPE != 'NO'}-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}">{=snsLikeButton(moduledisplayGoods.goods_seq,...value_->fblike)}</td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'status_icon' }-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}">
+							<!--{ ? ...value_->status_icon_runout && moduledisplayGoods.goods_status == 'runout' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_runout}" />
+							<!--{ / }-->
+							<!--{ ? ...value_->status_icon_purchasing && moduledisplayGoods.goods_status == 'purchasing' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_purchasing}" />
+							<!--{ / }-->
+							<!--{ ? ...value_->status_icon_unsold && moduledisplayGoods.goods_status == 'unsold' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_unsold}" />
+							<!--{ / }-->
+						</td>
+					</tr>
+					<!--{/}-->
+
+				<!--{ / }-->
+
+				</table>
+				<!--{/}-->
+			</td>
+		<!--{/}-->
+	</tr>
+	<tr>
+		<td height="30"></td>
+	</tr>
+	<!--{/}-->
+</table>
+
+<!--{ ? perpage }-->
+<div style="height:30px"></div>
+
+<table align="center" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+		<div class="paging_navigation">
+			<!--{ ? page.first }--><a href="?page={page.first}&amp;{page.querystring}" class="first">◀ 처음</a><!--{ / }-->
+			<!--{ ? page.prev }--><a href="?page={page.prev}&amp;{page.querystring}" class="prev">◀ 이전</a><!--{ / }-->
+			<!--{ @ page.page }-->
+				<!--{ ? page.nowpage ==  .value_ }-->
+					<a href="?page={.value_}&amp;{page.querystring}" class="on">{.value_ }</a>
+				<!--{ : }-->
+					<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? page.next }--><a href="?page={page.next}&amp;{page.querystring}" class="next">다음 ▶</a><!--{ / }-->
+			<!--{ ? page.last }--><a href="?page={page.last}&amp;{page.querystring}" class="last">마지막 ▶</a><!--{ / }-->
+		</div>
+	</td>
+</tr>
+</table>
+<!--{ / }-->
+

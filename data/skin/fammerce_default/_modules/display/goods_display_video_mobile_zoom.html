@@ -1,0 +1,207 @@
+<style>
+.thumbnailvideo {position:absolute;z-index:5;background-position:center;background:url('../../images/common/thumb_play.png') no-repeat center center;vertical-align:middle;}
+</style>
+<style>
+.mobileZoomContainer {position:fixed; left:0px; top:0px; width:100%; height:100%; background-color:#fff;}
+.mobileZoomContainer .mzCategoryTitle {z-index:110; position:absolute; left:0px; top:0px; width:100%; height:30px; line-height:30px; font-size:14px; font-weight:bold; color:#fff; text-align:center;}
+.mobileZoomContainer .mzCategoryTitle .mzStyleBtn {position:absolute; left:100%; top:0px; margin-left:-22px;}
+.mobileZoomContainer .mzBackground {background-color:#000;}
+.mobileZoomContainer .mzList {z-index:100; position:absolute; left:0px; top:0px; width:100%; height:100%;}
+.mobileZoomContainer .mzList li.mzListItem {display:block; width:100%; height:100%; text-align:center;}
+.mobileZoomContainer .mzList li.mzListItem img {position:relative; top:50%; max-width:100%;}
+.mobileZoomContainer .mzBottomBar {z-index:110; position:absolute; left:0px; top:100%; width:100%; min-height:60px;}
+.mobileZoomContainer .mzBottomBar .mzBackground {position:absolute; left:0px; top:0px; width:100%; height:100%;}
+.mobileZoomContainer .mzBottomBar .mzbContents  {position:absolute; left:0px; top:0px; width:100%;}
+.mobileZoomContainer .mzBottomBar .mzbGoodsName {padding-bottom:4px; color:#fff; font-weight:bold; font-size:14px;}
+.mobileZoomContainer .mzBottomBar .mzbConsumerprice {color:#fff; font-weight:bold; font-size:11px;}
+.mobileZoomContainer .mzBottomBar .mzbPrice {color:#ff4400; font-weight:bold; font-size:14px;}
+.mobileZoomContainer .mzBottomBar .mzbBtns {position:absolute; width:50px; left:100%; top:5px; margin-left:-55px;}
+.mobileZoomContainer .mzBottomBar .mzbBtnWish,
+.mobileZoomContainer .mzBottomBar .mzbBtnBuy,
+.mobileZoomContainer .mzBottomBar .mzbBtnDetail {width:48px; height:48px; background:url('../../images/design/round_button_bg.png') no-repeat; border:0px; color:#fff;}
+.mobileZoomContainer .mzLeftBtn {z-index:110; position:absolute; left:5px; top:50%; margin-top:-40px;}
+.mobileZoomContainer .mzRightBtn {z-index:110; position:absolute; left:100%; top:50%; margin-top:-40px; margin-left:-30px;}
+</style>
+
+<script>
+var screenWidth = 0;
+var screenHeight = 0;
+var nowViewMZItemIdx = 0;
+var totalMZItemCount = 0;
+
+$(function(){
+	$("#quick_layer").remove();
+	$("#wrap").hide();
+	$(".mobileZoomContainer").appendTo('body');
+	$(".mobileZoomContainer li:gt(0)").hide();
+	$(".mzBackground").css('opacity',0.7);
+
+	viewMZListItem(nowViewMZItemIdx);
+
+	totalMZItemCount = $(".mobileZoomContainer li.mzListItem").length;
+
+	if(totalMZItemCount<=1){
+		$(".mzLeftBtn, mzRightBtn").hide();
+	}
+
+	/* 이전 */
+	$(".mzLeftBtn").bind('click',function(){
+		nowViewMZItemIdx--;
+
+		if(nowViewMZItemIdx<0) {
+			if($(".paging_navigation .prev").length){
+				document.location.href=$(".paging_navigation .prev").attr('href');
+				return;
+			}else{
+				nowViewMZItemIdx = totalMZItemCount-1;
+			}
+		}
+
+		viewMZListItem(nowViewMZItemIdx);
+	});
+
+	/* 다음 */
+	$(".mzRightBtn").bind('click',function(){
+		nowViewMZItemIdx++;
+
+		if(nowViewMZItemIdx>=totalMZItemCount){
+			if($(".paging_navigation .next").length){
+				document.location.href=$(".paging_navigation .next").attr('href');
+				return;
+			}else{
+				nowViewMZItemIdx = 0;
+			}
+		}
+
+		viewMZListItem(nowViewMZItemIdx);
+	});
+
+	/* 이미지 리사이징*/
+	$(window).resize(function(){
+		screenWidth = $(".mobileZoomContainer").width();
+		screenHeight = $(".mobileZoomContainer").height();
+
+		$("li.mzListItem img").each(function(){
+			resizeMZIMage(this);
+		});
+	}).resize();
+
+});
+
+function viewMZListItem(idx){
+	if(!screenWidth){
+		screenWidth = $(".mobileZoomContainer").width();
+		screenHeight = $(".mobileZoomContainer").height();
+		setTimeout('viewMZListItem('+idx+');',300);
+		return;
+	}
+
+	var mzListItemObj = $(".mobileZoomContainer li.mzListItem").eq(nowViewMZItemIdx);
+	var goods_seq = $(".goods_seq",mzListItemObj).text();
+
+	$(".mobileZoomContainer li.mzListItem:visible").hide();
+	mzListItemObj.show();
+
+	$(".mzBottomBar .mzbGoodsName").html($(".goods_name",mzListItemObj).html());
+	if($(".goods_consumerprice",mzListItemObj).text()!='0'){
+		$(".mzBottomBar .mzbConsumerprice").html($(".goods_consumerprice",mzListItemObj).html() + '원 → ');
+	}else{
+		$(".mzBottomBar .mzbConsumerprice").html('');
+	}
+	$(".mzBottomBar .mzbPrice").html($(".goods_price",mzListItemObj).html() + ' 원');
+
+	$(".mzbBtnDetail")[0].onclick=function(){
+		document.location.href='../../goods/view?no=' + goods_seq;
+	}
+
+	resizeMZIMage($("img",mzListItemObj));
+
+	document.location.href='#' + goods_seq;
+}
+
+function resizeMZIMage(obj){
+	var imgWidth = $(obj).width();
+	var imgHeight = $(obj).height();
+
+	if(!imgWidth || !imgHeight){
+		setTimeout(function(){resizeMZIMage(obj)},300);
+		return;
+	}
+
+	if(imgWidth/imgHeight > screenWidth/screenHeight){
+		$(obj).css({
+			'width':screenWidth,
+			'height':'',
+			'top':'50%',
+			'margin-top':-(imgHeight/2)+'px'
+		});
+	}else{
+		$(obj).css({
+			'width':'',
+			'height':screenHeight,
+			'top':'0px',
+			'margin-top':'0px'
+		});
+	}
+
+	$(".mzbGoodsName").width(screenWidth-60);
+	var mzBottomBarHeight = $(".mzBottomBar .mzbContents").height()+10;
+	$(".mzBottomBar,").css({'margin-top':'-'+mzBottomBarHeight+'px'});
+	$(".mzBottomBar .mzBackground").css({'height':mzBottomBarHeight+'px'});
+
+	$(window).load(function(){
+		window.scrollTo(0,1);
+	});
+}
+</script>
+
+<!--{ ? perpage }-->
+<div class="hide">
+	{#paging}
+</div>
+<!--{ / }-->
+
+<div class="mobileZoomContainer">
+
+	{?categoryTitle}
+	<div class="mzCategoryTitle mzBackground">
+		{categoryTitle}
+		<div class="mzStyleBtn"><a href="?code={_GET.code}&page={_GET.page}"><img src="../../images/design/btn_listing_style_grid.gif" alt="작은이미지로 보기" title="작은이미지로 보기" /></a></div>
+	</div>
+	{/}
+
+	<ul class="mzList">
+	{@displayGoodsList}
+		<li class="mzListItem">
+			<a name="#{.goods_seq}"></a>
+			<span class="goods_image"><img src="{.image}" onerror="this.src='../../images/common/noimage.gif'" /></span>
+			<span class="hide goods_seq">{.goods_seq}</span>
+			<span class="hide goods_name">{.goods_name}</span>
+			<span class="hide goods_consumerprice">{=number_format(.consumer_price)}</span>
+			<span class="hide goods_price">{=number_format(.price)}</span>
+		</li>
+	{/}
+	</ul>
+
+	<div class="mzLeftBtn"><img src="../../images/design/slide-arrow-prev.png" /></div>
+	<div class="mzRightBtn"><img src="../../images/design/slide-arrow-next.png" /></div>
+
+	<div class="mzBottomBar">
+		<div class="mzBackground"></div>
+		<div class="mzbContents">
+			<div class="pdt10 pdl10">
+				<div class="mzbGoodsName">상품명</div>
+				<span class="mzbConsumerprice">소비자가</span>
+				<span class="mzbPrice">할인판매가</span>
+			</div>
+
+			<div class="mzbBtns">
+				<!--
+					<button class="mzbBtnWish">위시<br />리스트</button>
+				<button class="mzbBtnBuy">구매<br />하기</button>
+				 -->
+				<button class="mzbBtnDetail">상품<br />상세</button>
+			</div>
+		</div>
+	</div>
+</div>

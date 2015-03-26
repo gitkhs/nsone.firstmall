@@ -1,0 +1,2429 @@
+{ #layout_header }
+<script type="text/javascript">
+var file_use = 'N';
+var board_id = 'boardmanager';
+</script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js?dummy=120824"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js?dummy=120824"></script>
+<!--{? id ==  'bulkorder' }-->
+<script type="text/javascript" src="/app/javascript/js/admin-bulkorderaddlayer.js"></script>
+<!--{: id ==  'goods_review'}-->
+<script type="text/javascript">
+function set_goods_icon(){
+	$.getJSON('icon', function(data) {
+		var tag = '';
+		$("div#goodsReviewIconPopup ul li").remove();
+		for(var i=0;i<data.length;i++){
+			tag += '<li style="float:left;padding:5px 10px 5px 10px;">';
+			tag += '<input type="hidden" name="goodsReviewIconCode[]" value="'+data[i].codecd+'">';
+			tag += '<img src="{goodsreviewicon}'+data[i].codecd+'" title="'+data[i].value+'" border="0" class="hand icon"  filename="'+data[i].codecd+'">';
+			tag += '</li>';
+		}
+		$("div#goodsReviewIconPopup ul").html(tag);
+	});
+}
+
+</script>
+<script type="text/javascript" src="/app/javascript/js/admin-goodsreviewaddlayer.js"></script>
+<!--{/}-->
+<!-- 회원설정 : 가입 -->
+<style>
+/*설정구분*/
+.boardtap button {width:96px;height:30px;display:inline-block;overflow:visible;position:relative;margin:0;padding:0;border:0;background:url('../images/common/tab_bg.gif') no-repeat;text-decoration:none !important;vertical-align:middle;white-space:nowrap;}
+.boardlarge {width:96px;height:30px;padding-right:26px; background-position:right -200px;}
+.boardlarge button {font-family:'dotum';color:#fff !important;font-size:14px;line-height:20px;font-weight:bold;letter-spacing:-1px;padding:0 13px;}
+
+/*레이어팝업*/
+.layer_pop {border:3px solid #618298; background:#fff;}
+.layer_pop .tit {height:45px; font:14px Dotum; letter-spacing:-1px; font-weight:bold; color:#003775; background:#ebf4f2; border-bottom:1px solid #d8dee3; padding:0 10px; border-right:0;}
+.layer_pop .search_input {border:1px solid #cecece; height:17px;}
+.layer_pop .left {text-align:left;}
+
+.layer_pop_input th {font:11px Dotum; font-weight:bold; letter-spacing:-1px; border:0; background:#fff;}
+.layer_pop_input td {font:11px Dotum; border:0;}
+.layer_pop_input input {height:18px; line-height:15px; padding:0 3px;}
+
+/* 간단 리스트 테이블 스타일 */
+table.reviewlist-table-style {border-collapse:collapse;}
+table.reviewlist-table-style th {background:url('../images/common/th_bg_popup.gif') repeat-x; height:24px; line-height:24px; border:1px solid #c8c8c8; color:#666; font-weight:normal;}
+table.reviewlist-table-style td {padding:5px 0; border-bottom:1px solid #d7d7d7; color:#666}
+</style>
+
+<!--{? !_GET.id }-->
+<!--{/}-->
+<form name="form1" id="form1" method="post" action="../boardmanager_process"  target="actionFrame">
+<input type="hidden" name="mode" id="" value="{mode}" />
+{? seq }
+	<input type="hidden" name="seq" id="seq" value="{seq}" />
+	<input type="hidden" name="idck" id="idck" value="true" />
+<!--{:}-->
+	<input type="hidden" name="idck" id="idck" value="" />
+<!--{/}-->
+
+<!-- 페이지 타이틀 바 : 시작 t -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2 >
+				<select class="custom-select-box-multi" style="z-index:1001;" id="boardgo" onchange="if(this.value){document.location.href='./manager_write?id='+this.value;}">
+				<option value="" >게시판리스트</option>
+				<!--{@ boardmanagerlist }-->
+					<option value="{.id}" {? _GET.id == .id } selected {/} >{=getstrcut(.name, 20)} ({=number_format(.totalnum)})</option>
+				<!--{/}-->
+				</select></h2>
+			<h2><!--{? name }--> [{name}] 게시판수정<!--{:}-->게시판생성<!--{/}--></h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large white"><button type="button" onclick="document.location.href='{managerurl}';">게시판리스트<span class="arrowright"></span></button></span></li>
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		<!--{? id }-->
+			{? service_code=='P_FREE' && id == 'bulkorder' //대량구매}
+				<li><span class="btn large cyanblue valign-middle"><input type="button" name="bulkorder_free_btn" value="사용자보기" ></span></li>
+				<li><span class="btn large cyanblue valign-middle"><input type="button" name="bulkorder_free_btn"  value="게시글보기" ></span></li>
+			{:}
+				{? !(id == 'gs_seller_notice' || id == 'gs_seller_qna') }
+				<li><span class="btn large cyanblue valign-middle"><input type="button" onclick="window.open('{userurl}', '', ''); return false;"  value="사용자보기" ></span></li>
+				{/}
+				<li><span class="btn large cyanblue valign-middle"><input type="button" onclick="window.open('{dataurl}', '', ''); return false;"  value="게시글보기" ></span></li>
+			{/}
+		<!--{/}-->
+			<li><span class="btn large black"><button type="submit" name="manager_write_btn" id="manager_write_btn"  >저장하기<span class="arrowright"   ></span></button></span></li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+<!-- 서브메뉴 바디 : 시작-->
+<div >
+
+<div style="margin-top:20px;">
+	<div style="position:absolute;">
+	<span class="boardtap boardlarge" ><button type="button" >기본<img src="../images/common/icon_arw.gif" align="absmiddle" style="margin-left:12px;" /></button></span>
+	</div>
+	<table height="30" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:2px solid #727b99;">
+	<tr><td align="center"></td></tr>
+	</table>
+</div>
+	<div class="item-title">정보 <span class="helpicon" title="게시판 아이디는 게시판을 구별하는 고유한 값입니다.<br/>게시판명은 게시판 표현하는 게시판의 이름을 말합니다"></span></div>
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="10%" />
+			<col width="40%" />
+			<col width="10%" />
+			<col width="40%" />
+		</colgroup>
+		<thead class="hide">
+		<tr>
+			<th class="its-th-align center" colspan="4">정보</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">게시판 아이디</th>
+			<td class="its-td">
+				<!--{? id }-->
+					<input type="hidden" name="board_id" id="board_id" size="40" value="{id}">
+					{id}
+				<!--{:}-->
+					<input type="text" name="board_id" id="board_id" size="40" value="{id}" title="영문, 숫자, 언더스코어(_), 하이픈(-) 가능" {? id } readonly="readonly" {:}  class="line" {/} />
+				<!--{/}-->
+			</td>
+			<th class="its-th-align center">게시판명</th>
+			<td class="its-td">
+				<input type="text" name="board_name" id="board_name" class=" line" size="45" value="{=htmlspecialchars(name)}" title=" 쌍따옴표(&quot;)를 제외한 모든문자 사용가능합니다."  {? id && nameread } readonly="readonly" {/} />
+			</td>
+		</tr>
+		</tbody>
+	</table>
+
+	<div>
+		<div class="item-title">스킨 <span class="helpicon" title="쇼핑몰 화면에서 보여지는 게시판의 형태입니다.<br />게시판 특성에 따라 스킨을 설정하거나 확인할 수 있습니다"></span></div>
+		<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+		</colgroup>
+		<thead  class="hide">
+		<tr>
+			<th class="its-th-align center" colspan="2">항목</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">스킨</th>
+			<td class="its-td">
+				<!--{? useform.display.skin.use}-->
+					<!--{@ skinlist }-->
+						<table style="width:100%"  >
+						<tr >
+							<td width="114" class="cell" ><label for="skin_type{.key_}">
+								<input type="radio" name="skin[]"  id="skin_type{.key_}" value="{.key_}"  {? ( (strstr(.key_,'default') && !id) || (id && .key_ == skin ) ) } checked {/} class="skinlay" />{.value_}
+							</label>&nbsp;&nbsp;</td>
+							<td width="114" class="cell"  ><div id="skin_type_lay{.key_}" style="margin:3px;"></div></td>
+							<td class="cell" ><div id="skin_help_lay{.key_}" style="margin-left:10px;"></div></td>
+						</tr>
+						</table>
+					<!--{/}-->
+				<!--{:}-->
+					<table style="width:100%" >
+						<tr >
+							<td width="114" class="cell" >{useform.display.skin.title}</td>
+							<td width="114" class="cell"  ><div id="skin_type_lay{skin}" style="margin:3px;"></div></td>
+							<td class="cell" ><div id="skin_help_lay{skin}" style="margin-left:10px;"></div></td>
+						</tr>
+					</table>
+				<!--{/}-->
+			</td>
+			<td class="its-td"> </td>
+		</tr>
+		</table>
+	</div>
+<!--{? managerInfo.manager_yn=='Y' }-->
+	<div class="item-title">관리자권한 </div>
+	<table class="info-table-style" style="width:100%" border="1">
+		<colgroup>
+			<col width="10%" />  
+			<col width="20%" /> 
+			<col   />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align">관리자 구분</th>
+			<th class="its-th-align">관리자명(관리자ID)</th>
+			<th class="its-th-align center" >권한
+			
+		<span style="float:right;padding-right:8px;"><span class="btn small black"><button type="button" id="allClick" gb="none"><span id="click_text">전체체크</span></button></span></span>
+		</th> 
+		</tr>
+		</thead>
+		<tbody>
+		{@ managerlist }
+		<tr>
+			<td class="its-td">{? .manager_yn=='Y' }대표운영자{ : }부운영자{ / }</td> 
+			<td class="its-td"><a href="../setting/manager_reg?manager_seq={.manager_seq}" target="_blank">{.mname}(<span class="blue bold hand managerinfo"  >{.manager_id}</span>)</a> </td>
+			<td class="its-td left"> 
+			<input type="hidden" name="managerauth[{.manager_seq}]" value="{.manager_seq}"  />
+			<label><input type="checkbox" name="board_view[{.manager_seq}]" value="1" {? .board_view } checked="checked" {/}  class="authboard board_view"/> 게시물 보기</label>
+			(<label><input type="checkbox" name="board_view_pw[{.manager_seq}]" value="2" {? .board_view_pw } checked="checked"  {: !.board_view } disabled="disabled" {/} class="authboard board_view_pw" />비밀글 포함</label>)
+			→ <label><input type="checkbox" name="board_act[{.manager_seq}]" value="1"   {? .board_act } checked="checked"  {: !.board_view } disabled="disabled" {/} class="authboard board_act" />게시물 등록/답변/삭제</label>
+			</td>
+		</tr>
+		{/}
+		</tbody>
+	</table>
+<!--{/}-->
+	<div class="item-title">권한 <span class="helpicon" title="공지사항, FAQ, 1:1문의, 상품문의, 상품후기 게시판의 권한은 <br />각 게시판 특성에 최적화된 권한이 자동으로 설정되어 있습니다.<br />추가로 만들게 되는 게시판에 대해서는 읽기/쓰기/답글/댓글 권한을 자유롭게 설정할 수 있습니다"></span></div>
+	
+	<table class="info-table-style" style="width:100%" border="1">
+		<colgroup>
+			<col width="20%" />
+			<col width="20%" />
+			<col   />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align center" >항목</th>
+			<th class="its-th-align center" >사용유무</th>
+			<th class="its-th-align center" >사용자 권한</th>
+			<th class="its-th-align center" >관리환경에서 관리자 권한</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">읽기권한</th>
+			<td class="its-td-align center">
+				<!--{? useform.auth_read }-->
+					사용함
+					<input type="hidden" name="auth_read_use" id="auth_read_use" value="y" >
+				<!--{:}-->
+					<!--{? useform.display.auth_read.input }-->
+						사용함
+						<input type="hidden" name="auth_read_use" id="auth_read_use" value="y" >
+					<!--{:}-->
+						미사용 <input type="hidden" name="auth_read_use" id="auth_read_use" value="{auth_write_usey}" >
+					<!--{/}-->
+				<!--{/}-->
+			</td>
+			<td class="its-td">
+				<!--{? useform.display.auth_read.title && useform.display.auth_read.input}-->
+					 {useform.display.auth_read.title}
+					 {useform.display.auth_read.input }
+				<!--{:}-->
+					{auth_read_form}
+				<!--{/}-->
+			</td>
+			<td class="its-td" >{useform.display.admin_read}</td>
+		</tr>
+
+		<tr>
+			<th class="its-th-align center">작성권한-쓰기</th>
+			<td class="its-td-align center">
+				<!--{? useform.auth_write }-->
+					사용함
+						<input type="hidden" name="auth_write_use" id="auth_write_use" value="Y" >
+				<!--{:}-->
+					<!--{? useform.display.auth_write.title }-->
+						사용함
+						<input type="hidden" name="auth_write_use" id="auth_write_use" value="Y" >
+					<!--{:}-->
+						미사용
+						<input type="hidden" name="auth_write_use" id="auth_write_use" value="{auth_write_usey}" >
+					<!--{/}-->
+				<!--{/}-->
+			</td>
+			<!--{? (skin_type ==  'goods' && id ==  'goods_review') || id ==  'store_review' || id ==  'store_reservation' || id == 'store_gallery'}-->
+			<td class="its-td" >
+				<!--{? useform.display.auth_write.title && useform.display.auth_write}-->
+					{=useform.display.auth_write.title}
+					{useform.display.auth_write.input }
+				<!--{:}-->
+					{auth_write_form}
+				<!--{/}-->
+			</td>
+			<!--{: type ==  'A' ||  id ==  'notice' }-->
+			<td class="its-td" >
+				<!--{? useform.display.auth_write.title && useform.display.auth_write}-->
+					{=useform.display.auth_write.title}
+					{useform.display.auth_write.input }
+				<!--{:}-->
+					{auth_write_form}
+				<!--{/}-->
+			</td>
+			<!--{:}-->
+			<td class="its-td" rowspan="3">
+				<!--{? useform.display.auth_write.title && useform.display.auth_write}-->
+					{=useform.display.auth_write.title}
+					{useform.display.auth_write.input }
+				<!--{:}-->
+					{auth_write_form}
+				<!--{/}-->
+			</td>
+			<!--{/}-->
+			<td class="its-td" >{useform.display.admin_write }</td>
+		</tr>
+
+		<tr>
+			<th class="its-th-align center">작성권한-답글</th>
+			<td class="its-td-align center">
+				<!--{? useform.auth_reply }-->
+					<input type="radio" name="auth_reply_use" id="auth_reply_usey" value="Y" {? auth_reply_use == 'Y' && auth_reply_use} checked="checked" <!--{/}--> /><label for="auth_reply_usey">사용함</label>
+					<input type="radio" name="auth_reply_use" id="auth_reply_usen" value="N" {? auth_reply_use == 'N' || !auth_reply_use} checked="checked" {/} /><label for="auth_reply_usen">미사용</label>
+				<!--{:}-->
+					<!--{? useform.display.auth_reply.title }-->
+						사용함
+						<input type="hidden" name="auth_reply_usey" id="auth_reply_usey" value="Y" >
+					<!--{:}-->
+						미사용
+						<input type="hidden" name="auth_reply_usey" id="auth_reply_usey" value="{auth_write_usey}" >
+					<!--{/}-->
+				<!--{/}-->
+			</td>
+			<!--{? (skin_type ==  'goods' && id ==  'goods_review') || id ==  'notice'  || id ==  'store_reservation' || id ==  'store_gallery'}-->
+			<td class="its-td" >
+			-
+			</td>
+			<!--{: id ==  'store_review' }-->
+			<td class="its-td" >
+				{auth_write_reply_form}
+			</td>
+			<!--{: type ==  'A' }-->
+			<td class="its-td" >
+				{auth_reply_form}
+			</td>
+			<!--{/}-->
+			<td class="its-td" >{useform.display.admin_reply}</td>
+		</tr>
+
+		<tr>
+			<th class="its-th-align center">작성권한-댓글</th>
+			<td class="its-td-align center">
+				<!--{? useform.auth_cmt }-->
+					<input type="radio" name="auth_cmt_use" id="auth_cmt_usey" value="Y" {? auth_cmt_use == 'Y' && auth_cmt_use} checked="checked" {/} /><label for="auth_cmt_usey">사용함</label>
+					<input type="radio" name="auth_cmt_use" id="auth_cmt_usen" value="N" {? auth_cmt_use == 'N' || !auth_cmt_use} checked="checked" {/} /><label for="auth_cmt_usen">미사용</label>
+				<!--{:}-->
+					미사용<input type="hidden" name="auth_cmt_use" id="auth_cmt_use" value="N" >
+				<!--{/}-->
+			</td>
+			<!--{? (skin_type ==  'goods' && id ==  'goods_review') || id ==  'notice' }-->
+			<td class="its-td" >
+				{auth_write_cmt_form}
+			</td>
+			<!--{: id ==  'store_review' || id ==  'store_reservation' || id == 'store_gallery'}-->
+			<td class="its-td" >
+			</td>
+			<!--{: type ==  'A' }-->
+			<td class="its-td" >
+				{auth_cmt_form}
+			</td>
+			<!--{/}-->
+			<td class="its-td" >{useform.display.admin_cmt}</td>
+		</tr>
+
+		<tr>
+			<th class="its-th-align center">작성권한-글 평가</th>
+			<td class="its-td-align center">
+				<!--{? useform.auth_recommend }-->
+					<label for="auth_recommend_usey"><input type="radio" name="auth_recommend_use" class="auth_recommend_use"  id="auth_recommend_usey" value="Y" {? auth_recommend_use == 'Y' && auth_recommend_use} checked="checked" {/} />사용함</label>
+					<label for="auth_recommend_usen"><input type="radio" name="auth_recommend_use" class="auth_recommend_use"  id="auth_recommend_usen" value="N" {? auth_recommend_use == 'N' || !auth_recommend_use} checked="checked" {/} />미사용</label>
+				<!--{:}-->
+					미사용<input type="hidden" name="auth_recommend_use" id="auth_recommend_use" value="N" >
+				<!--{/}-->
+			</td> 
+			<td class="its-td" >
+				{auth_recommend_form}
+			</td> 
+			<td class="its-td" >{useform.display.admin_recommend}</td>
+		</tr>
+
+		<tr>
+			<th class="its-th-align center">작성권한-댓글 평가</th>
+			<td class="its-td-align center">
+				<!--{? useform.auth_cmt_recommend }-->
+					<label for="auth_cmt_recommend_usey"><input type="radio" name="auth_cmt_recommend_use"  class="auth_cmt_recommend_use"  id="auth_cmt_recommend_usey" value="Y" {? auth_cmt_recommend_use == 'Y' && auth_cmt_recommend_use} checked="checked" {/} />사용함</label>
+					<label for="auth_cmt_recommend_usen"><input type="radio" name="auth_cmt_recommend_use"  class="auth_cmt_recommend_use"   id="auth_cmt_recommend_usen" value="N" {? auth_cmt_recommend_use == 'N' || !auth_cmt_recommend_use} checked="checked" {/} />미사용</label>
+				<!--{:}-->
+					미사용<input type="hidden" name="auth_cmt_recommend_use" id="auth_cmt_recommend_use" value="N" >
+				<!--{/}-->
+			</td> 
+			<td class="its-td" >
+				{auth_cmt_recommend_form}
+			</td> 
+			<td class="its-td" >{useform.display.admin_cmt_recommend}</td>
+		</tr>
+
+		</tbody>
+	</table>
+
+<!--{? id != 'store_review'}-->
+<div style="margin-top:30px;">
+	<div style="position:absolute;">
+	<span class="boardtap boardlarge" ><button type="button" >작성<img src="../images/common/icon_arw.gif" align="absmiddle" style="margin-left:12px;" /></button></span>
+	</div>
+	<table height="30" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:2px solid #727b99;">
+	<tr><td align="center"></td></tr>
+	</table>
+</div>
+<!--{/}-->
+
+	<!--{? id !=  'store_review'}-->
+	<div class="item-title">
+		<!--{? useform.display.autowrite_use && !(id == 'notice' || id=='faq' || id=='mbqna' || id=='bulkorder' || id=='gs_seller_qna' || id=='gs_seller_notice' || id == 'store_reservation')}-->자동등록방지/비밀글/<!--{/}-->파일첨부/분류<!--{? !(id == 'notice' || id == 'faq') }-->/안내문구<!--{/}-->
+	</div>
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+			<col />
+			<col width="20%" />
+			<col />
+		</colgroup>
+		<thead   class="hide">
+		<tr>
+			<th class="its-th-align center" >항목</th>
+			<th class="its-th-align center" ></th>
+		</tr>
+		</thead>
+		<tbody>
+		<!--{? useform.display.autowrite_use && !(id == 'notice' || id=='faq' || id=='mbqna' || id=='bulkorder' || id=='gs_seller_qna' || id=='gs_seller_notice' || id == 'store_reservation')}-->
+		<tr>
+			<!--{? useform.display.autowrite_use }-->
+			<th class="its-th-align center">자동등록방지 문자</th>
+			<td class="its-td">
+				<input type="radio" name="autowrite_use" id="autowrite_usey" value="Y" {? autowrite_use == 'Y' || !autowrite_use} checked="checked" {/} /><label for="autowrite_usey">사용함</label>
+				&nbsp;&nbsp;<input type="radio" name="autowrite_use" id="autowrite_usen" value="N" {? autowrite_use == 'N' && autowrite_use} checked="checked" {/} /><label for="autowrite_usen">미사용</label>
+			</td>
+			<!--{/}-->
+			<!--{? (id == 'notice' || id=='faq' || id=='mbqna' || id=='bulkorder' || id=='gs_seller_qna' || id=='gs_seller_notice' ) }-->
+				<!--{?  id=='faq' }-->
+				<input type="hidden" name="secret_use" id="secret_usen" value="Y" >
+				<!--{:}-->
+				<input type="hidden" name="secret_use" id="secret_usen" value="N" >
+				<!--{/}-->
+			<!--{:}-->
+			<th class="its-th-align center">비밀글기능</th>
+			<td class="its-td" {? !useform.display.autowrite_use } colspan="2" {/} >
+				<input type="radio" name="secret_use" id="secret_usey" value="Y" {? secret_use == 'Y' || !secret_use} checked="checked" {/} /><label for="secret_usey">사용함(비밀글 선택)</label>
+				<input type="radio" name="secret_use" id="secret_usea" value="A" {? secret_use == 'A'  && secret_use} checked="checked" {/} /><label for="secret_usea">사용함(무조건 비밀글)</label>
+				&nbsp;&nbsp;<input type="radio" name="secret_use" id="secret_usen" value="N" {? secret_use == 'N' && secret_use} checked="checked" {/} /><label for="secret_usen">미사용</label>
+			</td>
+			<!--{/}-->
+		</tr>
+		<!--{/}-->
+		<tr>
+			<th class="its-th-align center">파일첨부</th>
+			<td class="its-td" class="its-td" colspan="3">
+				<!--{? useform.display.file_use }-->
+				<input type="radio" name="file_use" id="file_usey" value="Y" {? file_use == 'Y'} checked="checked" {/} /><label for="file_usey">사용함 </label>(<label><input type="checkbox" name="onlyimage_use" id="onlyimage_use" value="Y"  {? onlyimage_use == 'Y'} checked="checked" {/} > 이미지만</label>)
+				&nbsp;&nbsp;<input type="radio" name="file_use" id="file_usen" value="N" {? file_use == 'N' || !file_use} checked="checked" {/} /><label for="file_usen">미사용 <span class="red">(파일 및 사진 등록 불가)</span></label>
+				<!--{:}-->
+					<!--{? id == 'store_reservation' }-->
+					미사용<input type="hidden" name="file_use" id="file_usey" value="N" />
+					<!--{:}-->
+					사용함<input type="hidden" name="file_use" id="file_usey" value="Y" />
+					<!--{/}-->
+				<!--{/}-->
+			</td>
+		</tr>
+
+		<tr>
+			<th class="its-th-align center">분류</th>
+			<td class="its-td" colspan="3">
+				<div>
+					<table class="simplelist-table-style" id="BoardCategoryTable" style="width:100%">
+					<colgroup>
+						<col width="10%" />
+						<col width="60%" />
+						<col width="10%" />
+					</colgroup>
+					<thead>
+					<tr>
+						<th>순서</th>
+						<th>분류명</th>
+						<th><span class="btn-plus"><button type="button" id="boardcategoryadd" alt="분류추가하기" title="분류추가하기"></button></span></th>
+					</tr>
+					</thead>
+					<tbody>
+					<!--{? categorylist}-->
+						<!--{@ categorylist}-->
+						<tr class=" hand" >
+							<td align="center" class="hand" title="드레그후 순서변경" >↕</td>
+							<td align="center"><input type="text" name="category[]" class="line" value="{.value_}" /></td>
+							<td align="center"><span class="btn-minus"><button type="button" class="etcDel"  alt="분류삭제하기" title="분류삭제하기"></button></span></td>
+						</tr>
+						<!--{/}-->
+					<!--{:}-->
+					<!--{/}-->
+					</tbody>
+					</table>
+				</div>
+
+			<br>
+			<span class="desc">
+			- 마우스 드래그로 순서변경이 가능합니다. <br />
+			- 분류는 반드시 사용할 필요는 없으며, 등록된 게시물을 구별할 필요가 있는 게시판의 경우에만 사용하시길 권장드립니다.
+			</span>
+			</td>
+		</tr>
+
+		<!--{? !(id == 'notice' || id == 'faq' || id == 'store_gallery') }-->
+		<tr>
+			<th class="its-th-align center">PC/태블릿用 <br /> 최초 글 작성 시 안내문구</th>
+			<td class="its-td" colspan="3">
+				<div align="center" >
+					<textarea rows="10" name="content_default"   id="content_default"   class="daumeditor" contentHeight="100px"  >{content_default}</textarea>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">모바일用 <br /> 최초 글 작성 시 안내문구</th>
+			<td class="its-td" colspan="3">
+				<div align="center" >
+					<textarea rows="5" name="content_default_mobile"   id="content_default_mobile"   class="" style="width:99%;" >{content_default_mobile}</textarea>
+				</div>
+			</td>
+		</tr>
+		<!--{/}-->
+		</tbody>
+	</table>
+	<!--{/}-->
+
+	<!--{? id == 'bulkorder'}-->
+	<div class="item-title">입력항목</div>
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+			<col/>
+		</colgroup>
+		<thead   class="hide">
+		<tr>
+			<th class="its-th-align center" >항목</th>
+			<th class="its-th-align center" ></th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">입력항목</th>
+			<td class="its-td" colspan="3">
+				<table class="info-table-style" style="width:100%">
+				<colgroup>
+					<col width="20%" />
+					<col />
+				</colgroup>
+				<thead class="hide">
+				<tr>
+					<th class="its-th-align center" >항목</th>
+					<th class="its-th-align center" ></th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr>
+					<td class="its-td">
+						<label for="bulk_show_goods"><input type="checkbox" name="bulk_show[]" id="bulk_show_goods" value="[goods]" {? strstr(bulk_show,'[goods]') } checked="checked" {/}> 상품</label>
+						(<span class="bulk_totpricelay {? !strstr(bulk_show,'[goods]') }gray{/}" ><label for="bulk_totprice"><input type="checkbox" name="bulk_totprice" id="bulk_totprice" value="1" {? bulk_totprice } checked="checked" {/}> 희망 구매가격 포함)</label></span><br />
+						<label for="bulk_show_payment"><input type="checkbox" name="bulk_show[]" id="bulk_show_payment" value="[payment]"  {? strstr(bulk_show,'[payment]') }checked="checked" {/}> 결제방식</label>
+						(<span class="bulk_payment_type_alllay {? !strstr(bulk_show,'[payment]') }gray{/}" ><label for="bulk_payment_type_all"><input type="radio" name="bulk_payment_type" id="bulk_payment_type_all" value="all" checked="checked" > 사용하는 결제 방식 모두</label>, <label for="bulk_payment_type_bank"><input type="radio" name="bulk_payment_type" id="bulk_payment_type_bank" value="bank" > 무통장만</label></span>) </label><br />
+						<label for="bulk_show_typereceipt"><input type="checkbox" name="bulk_show[]" id="bulk_show_typereceipt" value="[typereceipt]"  {? strstr(bulk_show,'[typereceipt]') }checked="checked" {/}> 매출증빙 발급(설정><a href="/admin/setting/sale" target="_blank"><span class="highlight-link">매출증빙</span></a>에서 설정한 증빙 자료를 고객이 선택할 수 있습니다.)</label>
+						<div class=""><span class="btn small black"><button type="button" id="joinBtn" value="대량구매">+ 항목추가<span class="arrowright"></span></button></span> </div>
+						<table width="100%" class="joinform-user-table info-table-style">
+						<col width="150" /><col width="" /><col width="80" /><col width="80" /><col width="10" />
+						<tr>
+							<th class="its-th">입력항목</th>
+							<th class="its-th">항목설명</th>
+							<th class="its-th">사용</th>
+							<th class="its-th">필수</th>
+							<th class="its-th">&nbsp;</th>
+						</tr>
+						<tbody class="labelList_bulkorder">
+						<!--{? bulkorder_sub}-->
+							<!--{@ bulkorder_sub}-->
+							<tr class="layer{.bulkorderform_seq} hand">
+								<td class="its-td">{.label_title} </td>
+								<td class="its-td"><img src="../images/common/icon_move.gif" style="cursor:pointer"> [{.label_ctype}] {.label_desc} <span class="btn small gray"><button type="button" class="listJoinBtn" id="listJoinBtn" value="{.bulkorderform_seq}"  >수정</button></span></td>
+								<td class="its-td"><input type="checkbox" name="labelItem[user][{.bulkorderform_seq}][use]" class="bulkorder_chUse" bulkorder_ch="{.bulkorderform_seq}" value="Y" {?.used == 'Y'} checked {/}/> 사용</td>
+								<td class="its-td"><input type="checkbox" name="labelItem[user][{.bulkorderform_seq}][required]" class="bulkorder_chRequired" value="Y" {? .required == 'Y'} checked {/} /> 필수</td>
+								<td class="its-td">
+									<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][bulkorderform_seq]" value="{.bulkorderform_seq}">
+									<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][id]" value="{.label_id}">
+									<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][name]" value="{.label_title}">
+									<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][type]" value="{.label_type}">
+									<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][exp]" value="{.label_desc}">
+									<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][value]" value="{.label_value}">
+									<!--{? .bulkorderform_seq > 6}-->
+									<span class="btn-minus" onclick="deleteRow(this)"><button type="button"></button></span>
+									<!--{/}-->
+								</td>
+							</tr>
+							<!--{/}-->
+						<!--{/}-->
+						</tbody>
+						</table>
+					</td>
+				</tr>
+			</table>
+			</td>
+		</tr>
+		<!--{/}-->
+		</tbody>
+	</table>
+
+	<!--{? skin_type ==  'goods' && id ==  'goods_review'}-->
+		<div class="item-title">동영상 <span class="desc"  style="font-weight:normal">※ 동영상 기능을 사용하기 위해서는 설정> <a href="../setting/video"><span class="highlight-link hand">동영상</span></a>에서 세팅정보를 설정해 주셔야 합니다!</span>
+		</div>
+		<table class="info-table-style" style="width:100%">
+			<colgroup>
+				<col width="20%" />
+				<col/>
+			</colgroup>
+			<thead   class="hide">
+			<tr>
+				<th class="its-th-align center" >항목</th>
+				<th class="its-th-align center" ></th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<th class="its-th-align center">사용여부</th>
+				<td class="its-td" class="its-td" colspan="3">
+					<input type="radio" name="video_use" id="video_usey" value="Y" {? video_use == 'Y'} checked="checked" {/} {? !( ucc_domain && ucc_key) } onclick="alert('동영상 세팅정보를 설정해 주세요!');$('#video_usen').attr('checked',true);return false;" {/}/><label for="video_usey">사용함</label>
+					&nbsp;&nbsp;<input type="radio" name="video_use" id="video_usen" value="N" {? video_use == 'N' || !video_use} checked="checked" {/} /><label for="video_usen">미사용</label>
+				</td>
+			</tr>
+
+			<tr>
+				<th class="its-th-align center">동영상 인코딩</th>
+				<td class="its-td" class="its-td" colspan="3">
+					품질:<input type="text" name="video_type"  id="video_type"  size="3" value="{? video_type }{video_type}{:}400{/}" class="line onlynumber "   /> Kbps
+					<span class="desc">예) 200, 400(기본), 600, 800, 1000 </span>,
+					크기: <input type="text" name="video_screen[]"  id="video_screen0"  size="3" value="{? video_screen0}{video_screen0}{:}400{/}" class="line onlynumber "   /> Pixel X <input type="text" name="video_screen[]"  id="video_screen1"  size="3" value="{? video_screen1 }{video_screen1}{:}300{/}" class="line onlynumber "   />  Pixel
+					<span class="desc">예) 320X240, 400X300, 640|480, 720|480 </span>
+				</td>
+			</tr>
+
+			<tr>
+				<th class="its-th-align center">동영상 화면크기</th>
+				<td class="its-td" class="its-td" colspan="3">
+					PC/테블릿용:<input type="text" name="video_size[]"  id="video_size0"  size="3" value="{? video_size0 }{video_size0}{:}400{/}" class="line onlynumber video_size"   />pixel X <input type="text" name="video_size[]"  id="video_size1"  size="3" value="{? video_size1 }{video_size1}{:}300{/}" class="line onlynumber video_size"   />pixel,
+					모바일용:<input type="text" name="video_size_mobile[]"  id="video_size_mobile0"  size="3" value="{? video_size_mobile0 }{video_size_mobile0}{:}200{/}" class="line onlynumber video_size_mobile"   />pixel X <input type="text" name="video_size_mobile[]"  id="video_size1"  size="3" value="{? video_size_mobile1 }{video_size_mobile1}{:}150{/}" class="line onlynumber video_size_mobile"   />pixel
+					 <span class="desc" >(예: 320X240, 400X300(기본), 640X480, 720X480)</span>
+				</td>
+			</tr>
+			</tbody>
+		</table>
+
+		<div class="item-title">평가</div>
+		<table class="info-table-style" style="width:100%">
+			<colgroup>
+				<col width="20%" />
+				<col/>
+			</colgroup>
+			<thead   class="hide">
+			<tr>
+				<th class="its-th-align center" >항목</th>
+				<th class="its-th-align center" ></th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<th class="its-th-align center">
+					평가점수 및 표시방법
+					{?service_code=='P_FREE'}
+						<br /><br /><span class="desc" style="font-weight:normal">평가점수 항목 추가는 업그레이드가 필요합니다.</span> <img src='../images/common/btn_upgrade.gif' class='hand' onclick='serviceUpgrade();' align='absmiddle' />
+					{/}
+				</th>
+				<td class="its-td" width="40%">
+					<div>
+						<table class="reviewlist-table-style" id="BoardReviewCategoryTable" style="width:100%">
+						<colgroup>
+							<col width="10%" />
+							<col width="60%" />
+							<col width="10%" />
+						</colgroup>
+						<thead>
+						<tr>
+							<th>순서</th>
+							<th>평가점수 항목</th>
+							<th><span class="btn-plus"><button type="button" id="boardreviewcategoryadd" alt="평가점수추가하기" title="평가점수추가하기"></button></span></th>
+						</tr>
+						</thead>
+						<tbody>
+						<!--{? reviewcategorylist}-->
+							<!--{@ reviewcategorylist}-->
+							<tr class=" hand" >
+								<td align="center" class="hand" title="드레그후 순서변경" >↕</td>
+								<td align="center"><input type="text" name="reviewcategory[]" class="line" value="{.value_}" /></td>
+								<td align="center"><span class="btn-minus"><button type="button" class="etcDel"  alt="평가점수삭제하기" title="평가점수삭제하기"></button></span></td>
+							</tr>
+							<!--{/}-->
+						<!--{:}-->
+							<tr class=" hand" >
+								<td align="center" class="hand" title="드레그후 순서변경" >↕</td>
+								<td align="center"><input type="text" name="reviewcategory[]" class="line" value="평점" /></td>
+								<td align="center"><span class="btn-minus"><button type="button" class="etcDel"  alt="평가점수삭제하기" title="평가점수삭제하기"></button></span></td>
+							</tr>
+						<!--{/}-->
+						</tbody>
+						</table>
+					</div>
+
+				<br>
+				<span class="desc">
+				- 마우스 드래그로 순서변경이 가능합니다.
+				</span>
+				</td>
+				<td class="its-td">
+					<div style="margin-top:10px;">
+						‘평가점수 항목’마다 평가점수를<br/>
+						<input type="radio" name="goods_review_type" id="goods_review_typeimg" value="IMAGE" {? goods_review_type == 'IMAGE' || !goods_review_type} checked="checked" {/}  /><label for="goods_review_typeimg">이미지로
+						<span  id="icon_review_lay" ><img src="{icon_review_img}" id="icon_review_img" /></span> <span class="btn small black"><button type="button" id="iconReviewBtn" >[변경]</button></span> 표시합니다. (gif, jpg,jpeg, png 만 가능)
+						</label><br/><span class="desc">※ 최대값은 5개의 이미지입니다.</span>
+					</div>
+					<div>
+						<input type="radio" name="goods_review_type" id="goods_review_typeint" value="INT" {? goods_review_type == 'INT' && goods_review_type} checked="checked" {/} /><label for="goods_review_typeint">점수로 표시합니다.</label>
+						<br/><span class="desc">※ 최대값은 5점의 점수입니다.</span>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center"><br />평가정보
+					{?service_code=='P_FREE'}
+						<br /><br /><span class="desc" style="font-weight:normal">평가정보 추가는 업그레이드가 필요합니다.</span> <img src='../images/common/btn_upgrade.gif' class='hand' onclick='serviceUpgrade();' align='absmiddle' /><br /><br />
+					{/}
+					</th>
+				<td class="its-td" colspan="2">
+
+					<div class=""><span class="btn small black"><button type="button" {? isplusfreenot } id="joinBtn" {/} value="평가정보">+ 평가정보추가</button></span> <span class="desc">평가정보 스타일이 <b>[여러개 중 택1]</b>인 경우 아이콘도 함께 표시됩니다.</span></div>
+					<table width="50%" class="joinform-user-table info-table-style">
+					<col width="100" /><col width="300" /><col width="80" /><col width="80" /><col width="10" />
+					<tr>
+						<th class="its-th">평가정보</th>
+						<th class="its-th">평가정보설명</th>
+						<th class="its-th">사용</th>
+						<th class="its-th">필수</th>
+						<th class="its-th">&nbsp;</th>
+					</tr>
+					<tbody class="labelList_goodsreview">
+					<!--{? goodsreview_sub && isplusfreenot }-->
+						<!--{@ goodsreview_sub}-->
+						<tr class="layer{.bulkorderform_seq} hand">
+							<td class="its-td">{.label_title} </td>
+							<td class="its-td"><img src="../images/common/icon_move.gif" style="cursor:pointer"> [{.label_ctype}] {.label_desc} <span class="btn small gray"><button type="button"  {? isplusfreenot }  class="listJoinBtn" id="listJoinBtn"  {/} value="{.bulkorderform_seq}"  >수정</button></span></td>
+							<td class="its-td"><input type="checkbox" name="labelItem[user][{.bulkorderform_seq}][use]" class="bulkorder_chUse" bulkorder_ch="{.bulkorderform_seq}" value="Y" {?.used == 'Y'} checked {/}/> 사용</td>
+							<td class="its-td"><input type="checkbox" name="labelItem[user][{.bulkorderform_seq}][required]" class="bulkorder_chRequired" value="Y" {? .required == 'Y'} checked {/} /> 필수</td>
+							<td class="its-td">
+								<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][bulkorderform_seq]" value="{.bulkorderform_seq}">
+								<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][id]" value="{.label_id}">
+								<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][name]" value="{.label_title}">
+								<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][type]" value="{.label_type}">
+								<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][exp]" value="{.label_desc}">
+								<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][value]" value="{.label_value}">
+								<input type="hidden" name="labelItem[user][{.bulkorderform_seq}][icon]" value="{.label_icon}">
+								<span class="btn-minus" onclick="deleteRow(this)"><button type="button"></button></span>
+							</td>
+						</tr>
+						<!--{/}-->
+					<!--{/}-->
+					</tbody>
+					</table>
+				</td>
+			</tr>
+			</tbody>
+		</table>
+	<!--{: type == 'A' }-->
+	<div >
+		<div class="item-title">동영상 <span class="desc"  style="font-weight:normal">※ 동영상 기능을 사용하기 위해서는 설정> <a href="../setting/video"><span class="highlight-link hand">동영상</span></a>에서 세팅정보를 설정해 주셔야 합니다!</span>
+		</div>
+		<table class="info-table-style" style="width:100%">
+			<colgroup>
+				<col width="20%" />
+				<col/>
+			</colgroup>
+			<thead   class="hide">
+			<tr>
+				<th class="its-th-align center" >항목</th>
+				<th class="its-th-align center" ></th>
+			</tr>
+			</thead>
+			<tbody>
+
+			<tr>
+				<th class="its-th-align center">사용여부</th>
+				<td class="its-td" class="its-td" colspan="3">
+					<input type="radio" name="video_use" id="addvideo_usey" value="Y"  {? video_use == "Y" } checked="checked" {/} {? !(ucc_domain && ucc_key) } onclick="alert('동영상 세팅정보를 설정해 주세요!');$('#video_usen').attr('checked',true);return false;" {/} /><label for="addvideo_usey">사용함</label>
+					&nbsp;&nbsp;<input type="radio" name="video_use" id="addvideo_usen" value="N" {? video_use == 'N' || !(video_use) } checked="checked" {/} /><label for="addvideo_usen">미사용</label>
+				</td>
+			</tr>
+
+			<tr>
+				<th class="its-th-align center">동영상 인코딩</th>
+				<td class="its-td" class="its-td" colspan="3">
+					품질:<input type="text" name="video_type"  id="video_type"  size="3" value="{? video_type }{video_type}{:}400{/}" class="line onlynumber "   /> Kbps
+					<span class="desc">예) 200, 400(기본), 600, 800, 1000 </span>,
+					크기: <input type="text" name="video_screen[]"  id="video_screen0"  size="3" value="{? video_screen0}{video_screen0}{:}400{/}" class="line onlynumber "   /> Pixel X <input type="text" name="video_screen[]"  id="video_screen1"  size="3" value="{? video_screen1 }{video_screen1}{:}300{/}" class="line onlynumber "   />  Pixel
+					<span class="desc">예) 320X240, 400X300, 640|480, 720|480 </span>
+				</td>
+			</tr>
+
+			<tr>
+				<th class="its-th-align center">동영상 화면크기</th>
+				<td class="its-td" class="its-td" colspan="3">
+					PC/테블릿용:<input type="text" name="video_size[]"  id="video_size0"  size="3" value="{? video_size0 }{video_size0}{:}400{/}" class="line onlynumber video_size"   />pixel X <input type="text" name="video_size[]"  id="video_size1"  size="3" value="{? video_size1 }{video_size1}{:}300{/}" class="line onlynumber video_size"   />pixel,
+					모바일용:<input type="text" name="video_size_mobile[]"  id="video_size_mobile0"  size="3" value="{? video_size_mobile0 }{video_size_mobile0}{:}200{/}" class="line onlynumber video_size_mobile"   />pixel X <input type="text" name="video_size_mobile[]"  id="video_size1"  size="3" value="{? video_size_mobile1 }{video_size_mobile1}{:}150{/}" class="line onlynumber video_size_mobile"   />pixel
+					 <span class="desc" >(예: 320X240, 400X300(기본), 640X480, 720X480)</span>
+				</td>
+			</tr>
+			</tbody>
+		</table>
+	</div>
+	<!--{/}-->
+
+<div style="margin-top:30px;">
+	<div style="position:absolute;">
+	<span class="boardtap boardlarge" ><button type="button" >보기<img src="../images/common/icon_arw.gif" align="absmiddle" style="margin-left:12px;" /></button></span>
+	</div>
+	<table height="30" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:2px solid #727b99;">
+	<tr><td align="center"></td></tr>
+	</table>
+</div>
+
+	<!--{? id != 'faq' && id != 'store_gallery'}-->
+	<div class="item-title">작성자 </div>
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+			<col />
+		</colgroup>
+		<thead class="hide">
+		<tr>
+			<th class="its-th-align center" >항목</th>
+			<th class="its-th-align center" ></th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">작성자 표시(회원/비회원)
+			</th>
+			<td class="its-td">
+				<!--{? id == 'notice'}-->
+				<input type="hidden" name="write_show" id="write_showname" value="NAME"  /><label for="write_showname">관리자로 표시</label>
+				<!--{:}-->
+					<table border="0" cellpadding="3" cellspacing="5">
+					<colgroup>
+					<col width="20%" />
+					<col width="20%" />
+					<col width="20%" />
+					</colgroup>
+					<tr>
+						<td valign="top">
+							<input type="radio" name="write_show" id="write_showid" value="ID" {? write_show == 'ID' || !write_show} checked="checked" {/} />
+							<label for="write_showid">아이디 4자리 (등급) / 이름 (비회원)</label>
+							<br />
+							<input type="radio" name="write_show" id="write_showidnone" value="ID-NONE" {? write_show == 'ID-NONE'} checked="checked" {/} />
+							<label for="write_showidnone">아이디 4자리 / 이름 </label>
+						</td>
+						<td>
+							<input type="radio" name="write_show" id="write_showname" value="NAME" {? write_show == 'NAME' && write_show} checked="checked" {/} /><label for="write_showname">이름 (등급) / 이름 (비회원)</label>
+							<br />
+							<input type="radio" name="write_show" id="write_shownamenone" value="NAME-NONE" {? write_show == 'NAME-NONE' && write_show} checked="checked" {/} /><label for="write_shownamenone">이름 / 이름</label>
+							<br />
+							<input type="radio" name="write_show" id="write_shownic" value="NIC" {? write_show == 'NIC' && write_show} checked="checked" {/} /><label for="write_shownic">닉네임 (등급) / 이름 (비회원)</label>
+							<br />
+							<input type="radio" name="write_show" id="write_shownicnone" value="NIC-NONE" {? write_show == 'NIC-NONE' && write_show} checked="checked" {/} /><label for="write_shownicnone">닉네임 / 이름</label>
+
+						</td>
+						<td>
+							<input type="radio" name="write_show" id="write_showidname" value="ID-NAME" {? write_show == 'ID-NAME' && write_show} checked="checked" {/} /><label for="write_showidname">이름 (아이디 4자리, 등급) / 이름 (비회원)</label>
+							<br />
+							<input type="radio" name="write_show" id="write_showidnamenone" value="ID-NAME-NONE" {? write_show == 'ID-NAME-NONE' && write_show} checked="checked" {/} /><label for="write_showidnamenone">이름 (아이디 4자리)  / 이름</label>
+							<br />
+							<input type="radio" name="write_show" id="write_showidnic" value="ID-NIC" {? write_show == 'ID-NIC' && write_show} checked="checked" {/} /><label for="write_showidnic">닉네임 (아이디 4자리, 등급) / 이름 (비회원)</label>
+							<br />
+							<input type="radio" name="write_show" id="write_showidnicnone" value="ID-NIC-NONE" {? write_show == 'ID-NIC-NONE' && write_show} checked="checked" {/} /><label for="write_showidnicnone">닉네임 (아이디 4자리) / 이름</label>
+							<br />
+						</td>
+					</tr>
+					</table>
+				<!--{/}-->
+			</td>
+		</tr>
+		<!--{? id != 'notice' }-->
+		<tr>
+			<th class="its-th-align center">작성자 표시中 '이름' </th>
+			<td class="its-td" >
+					<input type="radio" name="show_name_type" id="show_name_hid" value="HID" {? show_name_type == 'HID' || !show_name_type} checked="checked" {/}  /><label for="show_name_hid">홍*동
+					<input type="radio" name="show_name_type" id="show_name_all" value="ALL" {? show_name_type == 'ALL' && show_name_type} checked="checked" {/}  /><label for="show_name_all">홍길동
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">작성자 표시中 '닉네임'</th>
+			<td class="its-td"> 상기 이름 설정과 동일. 회원의 닉네임이 없을 경우 <span class="bold" >이름</span> 노출</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">작성자 표시中 '등급'</th>
+			<td class="its-td">
+					<input type="radio" name="show_grade_type" id="show_grade_txt" value="TXT" {? show_grade_type == 'TXT' && show_grade_type} checked="checked" {/}  /><label for="show_grade_txt">등급명 텍스트
+					<input type="radio" name="show_grade_type" id="show_name_img" value="IMG" {? show_grade_type == 'IMG' || !show_grade_type} checked="checked" {/}  /><label for="show_name_img">등급명 이미지
+			</td>
+		</tr>
+		<!--{/}-->
+		<tr>
+			<th class="its-th-align center">회원 가입일/최종 방문일</th>
+			<td class="its-td">
+			<label><input type="checkbox" name="writer_date_regit" value="regit" {? writer_date == 'all' || writer_date == 'regit' } checked="checked" {/} /> 회원 가입일 노출</label> 
+			<label><input type="checkbox" name="writer_date_login" value="login" {? writer_date == 'all' || writer_date == 'login'  } checked="checked" {/} /> 회원 최종방문일 노출</label> 
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">관리자 표시</th>
+			<td class="its-td">
+				<div >
+					<input type="radio" name="write_admin_type" id="write_admintxt" value="TXT" {? write_admin_type == 'TXT' || !write_admin_type} checked="checked" {/}  /><label for="write_admintxt">텍스트로 표시 <input type="text" name="write_admin" id="write_admin" size="10" value="{write_admin}" title="" />
+					</label>
+				</div>
+				<div>
+					<input type="radio" name="write_admin_type" id="write_adminimg" value="IMG" {? write_admin_type == 'IMG' && write_admin_type} checked="checked" {/} /><label for="write_adminimg">이미지로 표시 </label>
+					<span  id="icon_admin_lay" ><img src="{icon_admin_img}" id="icon_admin_img" /></span> <span class="btn small black"><button type="button" id="iconAdminBtn" >[변경]</button></span> 표시합니다. (gif, jpg,jpeg, png 만 가능)
+				</div>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+	<!--{/}-->
+	
+	<div class="item-title">게시글/댓글 평가 <span class="desc" style="font-weight:normal;">※ gif, jpg,jpeg, png 만 가능 </span>
+	 <span class="helpicon" title=" ‘작성권한-글 평가’, ‘작성권한-댓글 평가’ 가 ‘사용함’ 으로 선택할 때만 설정이 가능"></span>
+	 </div>
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+			<col />
+		</colgroup>
+		<thead class="hide">
+		<tr>
+			<th class="its-th-align center" >항목</th>
+			<th class="its-th-align center" ></th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">게시글 평가</th>
+			<td class="its-td"> 
+					<table border="0" style="width:100%">
+					<colgroup>
+					<col width="20%" />
+					<col />
+					</colgroup>
+					<tr>
+						<th valign="top" class="left" > 
+							<label><input type="radio" name="recommend_type" class="recommend_type" value="2" {? recommend_type == '2'} checked="checked" {/} />추천/비추천 </label>
+							<br />
+							<label><input type="radio" name="recommend_type" class="recommend_type"  value="1" {? recommend_type == '1' } checked="checked" {/} />추천 </label>
+						</th>
+						<td align="left">
+							<table width="100%"  border="0" > 
+								<tbody >
+									<tr >
+									<td class="left desc recommend_type1 recommend_type2"  width="200"> - 추천 아이콘 </td>
+									<td class="center  recommend_type1  recommend_type2"><span id="icon_recommend_lay" ><img src="{icon_recommend_img}" id="icon_recommend_img" /></span></td>
+									<td class="center  recommend_type1  recommend_type2 "  width="150" ><span class="btn small black"><button type="button" class="iconrecommendBtn"  icontype="recommend" >[변경]</button></span></td> 
+									<td class="left desc recommend_type2"  width="200"> - 비추천 아이콘 </td>
+									<td class="center  recommend_type2"><span id="icon_none_rec_lay" ><img src="{icon_none_rec_img}"  id="icon_none_rec_img"  /></span></td>
+									<td class="center  recommend_type2"  width="150" ><span class="btn small black"><button type="button" class="iconrecommendBtn"  icontype="none_rec" >[변경]</button></span>
+									</td>
+								</tr>
+							</tbody>
+							</table> 
+						</td>
+					</tr>
+					<tr>
+						<th valign="top"  class="left" > 
+							<label><input type="radio" name="recommend_type"  class="recommend_type"  value="3" {? recommend_type == '3'} checked="checked" {/} />5단계평가 </label> 
+						</th>
+						<td >
+							<table width="100%" class="recommend_type3"> 
+								<tbody >
+								<tr >
+									<td class="desc" > - 매우 좋음 </td>
+									<td><span id="icon_recommend1_lay" ><img src="{icon_recommend1_img}"  id="icon_recommend1_img"  /></span></td>
+									<td><span class="btn small black"><button type="button" class="iconrecommendBtn" icontype="recommend1" >[변경]</button></span></td> 
+									<td class="desc" > - 좋음 </td>
+									<td><span id="icon_recommend2_lay" ><img src="{icon_recommend2_img}"  id="icon_recommend2_img"  /></span></td>
+									<td><span class="btn small black"><button type="button" class="iconrecommendBtn"  icontype="recommend2" >[변경]</button></span></td> 
+									<td class="desc" > - 보통 </td>
+									<td><span id="icon_recommend3_lay" ><img src="{icon_recommend3_img}"  id="icon_recommend3_img"  /></span></td>
+									<td><span class="btn small black"><button type="button" class="iconrecommendBtn"  icontype="recommend3" >[변경]</button></span></td> 
+									<td class="desc" > - 나쁨 </td>
+									<td><span id="icon_recommend4_lay" ><img src="{icon_recommend4_img}"  id="icon_recommend4_img"  /></span></td>
+									<td><span class="btn small black"><button type="button" class="iconrecommendBtn"  icontype="recommend4" >[변경]</button></span></td> 
+									<td class="desc" > - 매우 나쁨 </td>
+									<td><span id="icon_recommend5_lay" ><img src="{icon_recommend5_img}"  id="icon_recommend5_img"  /></span></td>
+									<td><span class="btn small black"><button type="button" class="iconrecommendBtn"  icontype="recommend5" >[변경]</button></span></td>
+								</tr>
+							</tbody>
+							</table>  
+						</td>
+					</tr>
+					</table> 
+			</td>
+		</tr>  
+		<tr>
+			<th class="its-th-align center">댓글 평가</th>
+			<td class="its-td"> 
+					<table border="0" style="width:100%">
+					<colgroup>
+					<col width="20%" />
+					<col />
+					</colgroup>
+					<tr>
+						<th valign="top" class="left"> 
+							<label><input type="radio" name="cmt_recommend_type"  class="cmt_recommend_type"  value="2" {? cmt_recommend_type == '2'} checked="checked" {/} />추천/비추천 </label>
+							<br />
+							<label><input type="radio" name="cmt_recommend_type"  class="cmt_recommend_type"  value="1" {? cmt_recommend_type == '1' } checked="checked" {/} />추천 </label>
+						</th>
+						<td align="left">
+							<table class="100%" border="0" > 
+								<tbody >
+									<tr  >
+									<td class="left  desc cmt_recommend_type1 cmt_recommend_type2 "  width="200"> - 추천 아이콘 </td>
+									<td class="center cmt_recommend_type1 cmt_recommend_type2 " ><span id="icon_cmt_recommend_lay" ><img src="{icon_cmt_recommend_img}" id="icon_cmt_recommend_img" /></span></td>
+									<td class="center  cmt_recommend_type1 cmt_recommend_type2 "  width="150" ><span class="btn small black"><button type="button" class="iconcmtrecommendBtn"  icontype="cmt_recommend" >[변경]</button></span></td> 
+									<td class="left desc cmt_recommend_type2 "  width="200" > - 비추천 아이콘 </td>
+									<td  class=" center cmt_recommend_type2 " ><span id="icon_cmt_none_rec_lay" ><img src="{icon_cmt_none_rec_img}"  id="icon_cmt_none_rec_img"  /></span></td>
+									<td class="center  cmt_recommend_type2 "  width="150" ><span class="btn small black"><button type="button" class="iconcmtrecommendBtn"  icontype="cmt_none_rec" >[변경]</button></span>
+									</td>
+								</tr>
+							</tbody>
+							</table> 
+						</td>
+					</tr>
+					</table> 
+			</td>
+		</tr>  
+		</tbody>
+	</table>
+
+
+	<div class="item-title">리스트
+	{? skin_type ==  'goods'}
+	 <span class="desc" style="font-weight:normal;">({name} 게시판, 상품상세페이지 內  {name}, MY페이지 內  {name})</span>
+	 {/}
+	 </div>
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+			<col/>
+			<col width="20%" />
+			<col/>
+		</colgroup>
+		<thead   class="hide">
+		<tr>
+			<th class="its-th-align center" >항목</th>
+			<th class="its-th-align center" ></th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">페이지당 노출 수 </th>
+			<td class="its-td" colspan="2" > 
+				<div class="defaultlay  {? !id|| !strstr(skin,'gallery') }show{:} hide {/}"><input type="text" name="pagenum"  id="pagenum"  size="3" value="{pagenum}" class="line onlynumber" /> 개
+					{? skin_type ==  'goods'} (상품후기 게시판) or (상품문의 게시판) {/}</div>
+				<div class="gallerylay {? id && strstr(skin,'gallery') }show{:} hide {/}">
+					<input type="text" name="gallerycell[]"  id="gallerycell0"  size="3" value="{gallerycell0}" class="line onlynumber gallerycell"   /> X <input type="text" name="gallerycell[]"  id="gallerycell1"  size="3" value="{gallerycell1}" class="line onlynumber gallerycell"   /> = <span id="gallerytotalnum">{=number_format(gallerycell0*gallerycell1)}</span> 개
+				</div>
+			</td>
+		</tr>
+		<tr class="">
+			<th class="its-th-align center  ">리스트 이미지 사이즈</th>
+			<td class="its-td" colspan="2" >
+				<div >
+				업로드 된 이미지를
+				가로 <input type="text" name="gallery_list_w"  id="gallery_list_w"  size="3" value="{? gallery_list_w }{gallery_list_w}{:}250{/}" class="line onlynumber gallery_list_w"   /> X
+				세로(가변) <input type="text" name="gallery_list_h"  id="gallery_list_h"  size="3" value="{? gallery_list_h }{gallery_list_h}{:}250{/}" class="line onlynumber gallerycell"   />
+				으로 리사이징합니다.
+				</div>
+			</td>
+		</tr>
+			<!--{? useform.display.list_show }-->
+		<tr>
+			<th class="its-th-align center">표시항목</th>
+			<td class="its-td" >
+				{listshowform}
+			</td>
+		</tr>
+			<!--{/}-->
+		<!--{? useform.display.newhot }-->
+		<tr>
+			<th class="its-th-align center">모바일/테블릿 아이콘</th>
+			<td class="its-td" colspan="3">
+					모바일/테블릿 환경에서 등록된 글에
+					<span id="icon_mobile_lay" ><img src="{icon_mobile_img}" id="icon_mobile_img" /></span>아이콘을 사용합니다.
+			</td>
+		</tr>
+
+		<tr class=" {? id == 'bulkorder'}hide{/}" >
+			<th class="its-th-align center">댓글</th>
+			<td class="its-td"  colspan="3">등록된 글에 댓글이 있을 경우 <span class="darkorange fx11">[댓글 수]</span>를 표시합니다.</td>
+		</tr>
+		<tr  class="defaultlay {? !id|| !strstr(skin,'gallery') }show{:} hide {/}" >
+			<th class="its-th-align center">이미지 아이콘</th>
+			<td class="its-td" colspan="3">
+					등록된 글에 이미지가 있을 경우
+					<span id="icon_image_lay" ><img src="{icon_image_img}" id="icon_image_img" /></span>아이콘을 사용합니다.
+			</td>
+		</tr>
+		<tr class="defaultlay {? !id|| !strstr(skin,'gallery') }show{:} hide {/}" >
+			<th class="its-th-align center">첨부파일 아이콘</th>
+			<td class="its-td"  colspan="3">
+					등록된 글에 첨부파일이 있을 경우
+					<span id="icon_file_lay" ><img src="{icon_file_img}" id="icon_file_img" /></span>아이콘을 사용합니다.
+			</td>
+		</tr>
+
+		<tr class="defaultlay {? _GET.id !=  'goods_review' && type == 'B' } hide {/}" >
+			<th class="its-th-align center">동영상 아이콘</th>
+			<td class="its-td"  colspan="3">
+					등록된 글에 동영상이 있을 경우
+					<span id="icon_video_img" ><img src="{icon_video_img}" id="icon_video_img" /></span>아이콘을 사용합니다.
+			</td>
+		</tr>
+
+		<tr>
+			<th class="its-th-align center">New 아이콘</th>
+			<td class="its-td" colspan="3">
+					등록한지
+					<input type="text" name="icon_new_day" id="icon_new_day" size="3" value="{icon_new_day}" title="" />일 이내의 글에
+					<span id="icon_new_lay" ><img src="{icon_new_img}" id="icon_new_img" /></span>아이콘을 사용합니다.
+					<span class="btn small black"><button type="button" id="iconNewBtn" >[변경]</button></span>
+					(gif, jpg,jpeg, png 만 가능)
+			</td>
+		</tr>
+		<tr  class=" {? id == 'bulkorder'}hide{/}" >
+			<th class="its-th-align center">Hot 아이콘</th>
+			<td class="its-td"  colspan="3">
+					조회수가
+					<input type="text" name="icon_hot_visit" id="icon_hot_visit" size="3" value="{icon_hot_visit}" title="" />회 이상인 글에
+					<span id="icon_hot_lay" ><img src="{icon_hot_img}" id="icon_hot_img" /></span> 아이콘을 사용합니다.
+					 <span class="btn small black"><button type="button" id="iconHotBtn" >[변경]</button></span>
+					(gif, jpg,jpeg, png 만 가능)
+			</td>
+		</tr>
+		<!--{:}-->
+		<input type="hidden" name="icon_hot_visit" id="icon_new_day" size="3" value="0" />
+		<input type="hidden" name="icon_hot_visit" id="icon_hot_visit" size="3" value="0" />
+		<!--{/}-->
+		</tbody>
+	</table>
+
+
+
+	<div class="{? skin_type !=  'goods'}hide{/}">
+		<div class="item-title">리스트 <span class="desc" style="font-weight:normal;">(상품상세페이지 內  {name}, MY페이지 內  {name})</span> <span class="helpicon" title="상품후기 게시판과 상품문의 게시판의 경우에는 상품의 상세 페이지에서도 보여집니다.<br />상품 상세페이지에서의 게시물 노출 수를 설정할 수 있습니다.<br />만약, 상품 상세페이지의 상품후기, 상품문의 게시판의 디자인을 변경하고 싶으시면 <br />EYE-DESIGN을 통하여 손쉽게 바로 변경할 수 있으십니다."></span></div>
+		<table class="info-table-style" style="width:100%">
+			<colgroup>
+				<col width="20%" />
+				<col />
+			</colgroup>
+			<thead   class="hide">
+			<tr>
+				<th class="its-th-align center" >항목</th>
+				<th class="its-th-align center" ></th>
+			</tr>
+			</thead>
+			<tbody>
+			<tr>
+				<th class="its-th-align center">페이지당 노출 수</th>
+				<td class="its-td">
+					<input type="text" name="goods_num"  id="goods_num"  size="3" value="{goods_num}" class="line onlynumber"   />개
+				</td>
+			</tr>
+			<tr>
+			<!--{? id ==  'goods_review' ||  id ==  'goods_qna' }-->
+			<th class="its-th-align center">보기방식</th>
+				<td class="its-td"><label><input type="radio" name="viewtype" value="page" checked="checked">페이지 이동방식<span class="desc" >(제목 클릭 -> 상세내용으로 이동)</span></label>,
+				<label><input type="radio" name="viewtype" value="layer" {? viewtype == 'layer' } checked="checked" {/}>레이어 방식<span class="desc" >(제목 클릭 -> 상세내용이 펼쳐짐)</span></label>
+				</td>
+			</tr>
+			<!--{/}-->
+			</tbody>
+		</table>
+	</div>
+
+<!--{? !(id == 'notice' || id == 'faq' || id == 'store_review' || id == 'store_gallery') || (skin_type ==  'goods' && id ==  'goods_review') }-->
+
+<div style="margin-top:30px;">
+	<div style="position:absolute;">
+	<span class="boardtap boardlarge" ><button type="button" >기타<img src="../images/common/icon_arw.gif" align="absmiddle" style="margin-left:12px;" /></button></span>
+	</div>
+	<table height="30" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:2px solid #727b99;">
+	<tr><td align="center"></td></tr>
+	</table>
+</div>
+
+	<!--{? skin_type ==  'goods' && id ==  'goods_review' }-->
+		<div class="item-title">지급 적립금</div>
+		<table width="100%" class="info-table-style">
+			<col width="14%" /><col width="30%" /><col width="56%" />
+			<tr>
+				<th class="its-th" >
+				회원에게 적립금 자동 지급
+				<!--{?service_code!='P_FREE'}-->
+				<div class="center">
+				<label><input type="checkbox" name="autoemoney" id="autoemoney1" value="1" {? autoemoney == 1}checked{/}/> 사용함</label>
+				</div>
+				<!--{/}-->
+				</th>
+				<td class="its-td autoemoney">
+					<!--{?service_code=='P_FREE'}-->
+					무료몰Plus+에서는 지원하지 않는 기능입니다. <span class="btn large cyanblue"><input type="button" onclick="serviceUpgrade();" value="업그레이드 >"></span>
+					<!--{/}-->
+					<!--{?service_code!='P_FREE'}-->
+					<div style="padding-top:5px;">
+					<label><input type="radio" name="autoemoneytype" id="autoemoneytype1" value="1" {? autoemoney != 1 } disabled="disabled" {/} {? autoemoneytype == 1}checked{/} /> 조건1) 구매자(회원)가 작성한 상품후기</label>
+					<div class="desc">※ 당연히 해당 주문건의 구매상품에 대하여 최초 1회만 지급</div>
+					</div>
+					<div>
+					<label><input type="radio" name="autoemoneytype" id="autoemoneytype2" value="2" {? autoemoney != 1 } disabled="disabled" {/} {? autoemoneytype == 2}checked{/} /> 조건2) 구매자(회원)가 작성한 <input type="text" name="autoemoneystrcut1" id="autoemoneystrcut1" value="{autoemoneystrcut1}"  size="2" class="line onlynumber" {? autoemoney != 1 } disabled="disabled" {/} >자 이상의 상품후기</label>
+					<div class="desc">※ 당연히 해당 주문건의 구매상품에 대하여 최초 1회만 지급</div>
+					</div>
+					<div style="padding-top:5px;">
+					<label><input type="radio" name="autoemoneytype" id="autoemoneytype3" value="3" {? autoemoney != 1 } disabled="disabled" {/} {? autoemoneytype == 3}checked{/} /> 조건3) <input type="text" name="autoemoneystrcut2" id="autoemoneystrcut2" value="{autoemoneystrcut2}"  size="2" class="line onlynumber" {? autoemoney != 1 } disabled="disabled" {/} >자 이상의 상품후기</label>
+					</div>
+					<!--{/}-->
+				</td>
+				<td class="its-td autoemoney">
+					<!--{?service_code!='P_FREE'}-->
+						<div id="autoemoneylay">
+							<table>
+								<col /><col/>
+								<tr>
+									<td>동영상 상품후기는&nbsp;</td>
+									<td>
+										적립금 <input type="text" name="autoemoney_video" id="autoemoney_video" value="{autoemoney_video}" size="5" class="line onlynumber right" {? autoemoney != 1 } disabled="disabled" {/} >원. 지급
+										적립금의 유효기간은
+										<select name="video_reserve_select">
+											<option value="">제한하지 않음</option>
+											<option value="year" {?video_reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+											<option value="direct" {?video_reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+										</select>
+										<span name="video_reserve_y" class="hide">→ 지급연도 + <input type="text" name="video_reserve_year" class="line onlynumber"  min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{video_reserve_year}" />년 12월 31일</span>
+										<span name="video_reserve_d" class="hide">→ <input type="text" name="video_reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{video_reserve_direct}" />개월</span>
+									</td>
+								</tr>
+								<tr>
+									<td></td>
+									<td>
+									<span class="autopoint">
+									포인트 <input type="text" name="autopoint_video" id="autopoint_video" value="{autopoint_video}" size="5" class="line onlynumber right" {? autoemoney != 1 } disabled="disabled" {/} >P.
+									지급 포인트의 유효기간은
+									<select name="video_point_select">
+										<option value="">제한하지 않음</option>
+										<option value="year" {?video_point_select=='year'}selected{/}>제한 - 12월31일</option>
+										<option value="direct" {?video_point_select=='direct'}selected{/}>제한 - 직접입력</option>
+									</select>
+									<span name="video_point_y" class="hide">→ 지급연도 + <input type="text" name="video_point_year" class="line onlynumber"  min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{video_point_year}" />년 12월 31일</span>
+									<span name="video_point_d" class="hide">→ <input type="text" name="video_point_direct" class="line onlynumber" style="text-align:right" size="3" value="{video_point_direct}" />개월</span>
+									</span>
+									</td>
+								</tr>
+								<tr>
+									<td>포토 상품후기는&nbsp;</td>
+									<td>
+									적립금 <input type="text" name="autoemoney_photo" id="autoemoney_photo" value="{autoemoney_photo}" size="5" class="line onlynumber right" {? autoemoney != 1 } disabled="disabled" {/} >원. 지급
+									적립금의 유효기간은
+									<select name="photo_reserve_select">
+										<option value="">제한하지 않음</option>
+										<option value="year" {?photo_reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+										<option value="direct" {?photo_reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+									</select>
+									<span name="photo_reserve_y" class="hide">→ 지급연도 + <input type="text" name="photo_reserve_year" class="line onlynumber"  min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{photo_reserve_year}" />년 12월 31일</span>
+									<span name="photo_reserve_d" class="hide">→ <input type="text" name="photo_reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{photo_reserve_direct}" />개월</span>
+									</td>
+								</tr>
+								<tr>
+									<td></td>
+									<td>
+									<span class="autopoint">
+									포인트 <input type="text" name="autopoint_photo" id="autopoint_photo" value="{autopoint_photo}" size="5" class="line onlynumber right" {? autoemoney != 1 } disabled="disabled" {/} >P. 지급
+									포인트의 유효기간은
+									<select name="photo_point_select">
+										<option value="">제한하지 않음</option>
+										<option value="year" {?photo_point_select=='year'}selected{/}>제한 - 12월31일</option>
+										<option value="direct" {?photo_point_select=='direct'}selected{/}>제한 - 직접입력</option>
+									</select>
+									<span name="photo_point_y" class="hide">→ 지급연도 + <input type="text" name="photo_point_year" class="line onlynumber"  min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{photo_point_year}" />년 12월 31일</span>
+									<span name="photo_point_d" class="hide">→ <input type="text" name="photo_point_direct" class="line onlynumber" style="text-align:right" size="3" value="{photo_point_direct}" />개월</span>
+									</span>
+									</td>
+								</tr>
+								<tr>
+									<td>일반 상품후기는&nbsp;</td>
+									<td>
+										적립금 <input type="text" name="autoemoney_review" id="autoemoney_review" value="{autoemoney_review}" size="5" class="line onlynumber right" {? autoemoney != 1 } disabled="disabled" {/} >원. 지급
+										적립금의 유효기간은
+										<select name="default_reserve_select">
+											<option value="">제한하지 않음</option>
+											<option value="year" {?default_reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+											<option value="direct" {?default_reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+										</select>
+										<span name="default_reserve_y" class="hide">→ 지급연도 + <input type="text" name="default_reserve_year" class="line onlynumber"  min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{default_reserve_year}" />년 12월 31일</span>
+										<span name="default_reserve_d" class="hide">→ <input type="text" name="default_reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{default_reserve_direct}" />개월</span>
+									</td>
+								</tr>
+								<tr>
+									<td></td>
+									<td>
+									<span class="autopoint">
+									포인트
+									<input type="text" name="autopoint_review" id="autopoint_review" value="{autopoint_review}" size="5" class="line onlynumber right" {? autoemoney != 1 } disabled="disabled" {/} >P. 지급
+									포인트의 유효기간은
+									<select name="default_point_select">
+										<option value="">제한하지 않음</option>
+										<option value="year" {?default_point_select=='year'}selected{/}>제한 - 12월31일</option>
+										<option value="direct" {?default_point_select=='direct'}selected{/}>제한 - 직접입력</option>
+									</select>
+									<span name="default_point_y" class="hide">→ 지급연도 + <input type="text" name="default_point_year" class="line onlynumber"  min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{default_point_year}" />년 12월 31일</span>
+									<span name="default_point_d" class="hide">→ <input type="text" name="default_point_direct" class="line onlynumber" style="text-align:right" size="3" value="{default_point_direct}" />개월</span>
+									</span>
+									</td>
+								</tr>
+								<tr>
+									<td colspan="2"><br/>
+									<div>
+									단, 특정기간 <input type="text" name="bbs_start_date" value="{bbs_start_date}" class="datepicker line"  maxlength="10" size="10" /> ~ <input type="text" name="bbs_end_date" value="{bbs_end_date}" class="datepicker line"  maxlength="10" size="10" />
+									<br/>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;적립금 <input type="text" name="emoneyBbs_limit" value="{emoneyBbs_limit}" size="6" class="line onlynumber right" />원. <b>추가지급</b>
+										적립금의 유효기간은
+										<select name="date_reserve_select">
+											<option value="">제한하지 않음</option>
+											<option value="year" {?date_reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+											<option value="direct" {?date_reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+										</select>
+										<span name="date_reserve_y" class="hide">→ 지급연도 + <input type="text" name="date_reserve_year" class="line onlynumber"  min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{date_reserve_year}" />년 12월 31일</span>
+										<span name="date_reserve_d" class="hide">→ <input type="text" name="date_reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{date_reserve_direct}" />개월</span>
+										<span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+											<br/>
+											&nbsp;&nbsp;&nbsp;&nbsp; 포인트 <input type="text" name="pointBbs_limit" value="{pointBbs_limit}" size="6" class="line onlynumber right" />P. &nbsp;<b>추가지급</b>
+											포인트의 유효기간은
+											<select name="date_point_select">
+												<option value="">제한하지 않음</option>
+												<option value="year" {?date_point_select=='year'}selected{/}>제한 - 12월31일</option>
+												<option value="direct" {?date_point_select=='direct'}selected{/}>제한 - 직접입력</option>
+											</select>
+											<span name="date_point_y" class="hide">→ 지급연도 + <input type="text" name="date_point_year" class="line onlynumber"  min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{date_point_year}" />년 12월 31일</span>
+											<span name="date_point_d" class="hide">→ <input type="text" name="date_point_direct" class="line onlynumber" style="text-align:right" size="3" value="{date_point_direct}" />개월</span>
+										</span>
+									</td>
+								</tr>
+
+							</table>
+					</div>
+					<!--{/}-->
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th" >회원에게 적립금 수동 지급</th>
+				<td class="its-td" colspan="2">
+					기본 적립금 <input type="text" name="reserve_goods_review" size="5" class="line onlynumber right" value="{reserve_goods_review}" />원
+					<br /><span class="desc">※ 관리환경 > 게시판 > 게시글리스트 > <a href="../board/board?id=goods_review"><span class="highlight-link hand" id="default_goods_review">상품후기</span></a>에서 작성된 후기에 대하여 수동으로 적립금 지급 가능
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th" >지급 적립금 회수</th>
+				<td class="its-td" colspan="2">
+					상품후기 삭제 시 지급된 적립 금액(적립금, 포인트)를 자동 회수하며, 회수할 적립 금액이 부족할 경우 삭제 할 수 없습니다.(단, 관리자는 가능)
+				</td>
+			</tr>
+		</table>
+	<!--{/}-->
+
+	<!--{? !(id == 'notice' || id == 'faq' || id == 'store_review' || id == 'store_gallery') }-->
+		<div class="item-title">SMS 발송</div>
+		<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+			<col />
+			<col width="20%" />
+			<col />
+		</colgroup>
+		<thead   class="hide">
+		<tr>
+			<th class="its-th-align center" >항목</th>
+			<th class="its-th-align center" ></th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center" >SMS 발송 </th>
+			<td class="its-td" colspan="3">
+				<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr>
+				<!--{@ sms_loop }-->
+					<td width="33%" align="center" valign="top">
+					<!--{? .text }-->
+					<div class="clearbox" style="margin-top:0px">
+						<table class="info-table-style" style="width:99%" border="1">
+						<colgroup>
+							<col width="33%" />
+						</colgroup>
+						<tr>
+							<th class="its-th-align center"><span style="padding-left:30px;">{.text}</span>
+							<span class="btn small cyanblue"><input type="button" value="사용 가능한 치환코드" name="{.text}" title="{.text}" class="info_code"/></span>
+							</th>
+						</tr>
+						<tr>
+							<td class="its-td-align" style="text-align:center;"  valign="top" >
+
+							<table border="0" cellpadding="0" cellspacing="0" style="margin:auto;">
+							<tr>
+								<!--{? .user_disabled!='disabled' }-->
+								<td align="center" valign="top">
+									<!-- ### USER -->
+									<div class="sms-define-form">
+										<div class="sdf-head clearbox">
+											<div class="fl"><img src="../images/common/sms_i_antena.gif"></div>
+											<div class="fr"><img src="../images/common/sms_i_battery.gif"></div>
+										</div>
+										<div class="sdf-body-wrap">
+											<div class="sdf-body">
+												<!--{? .user_disabled=='disabled' }-->
+													<textarea readonly style="background-color:#bbbbbb;color:#fff;text-align:center;">{="\n\n\n"} &nbsp;고객수신이{="\n"}불필요한 메세지입니다.</textarea>
+												<!--{:}-->
+													<textarea name="{.name}_user" class="sms_contents">{.user}</textarea>
+												<!--{/}-->
+												<div class="sdf-body-foot clearbox">
+													<div class="fl"><b class="sms_byte">0</b>byte</div>
+													<div class="fr"><img src="../images/common/sms_btn_send.gif" align="absmiddle" class="del_message" /></div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</td>
+								<td width="10"></td>
+								<!--{/}-->
+								<!--{? .disabled!='disabled' }-->
+								<td  valign="top" >
+									<!-- ### ADMIN -->
+									<div class="sms-define-form">
+										<div class="sdf-head clearbox">
+											<div class="fl"><img src="../images/common/sms_i_antena.gif"></div>
+											<div class="fr"><img src="../images/common/sms_i_battery.gif"></div>
+										</div>
+										<div class="sdf-body-wrap">
+											<div class="sdf-body">
+												<!--{?.disabled=='disabled'}-->
+													<textarea readonly style="background-color:#bbbbbb;color:#fff;text-align:center;">{="\n\n\n"} &nbsp;관리자 수신이{="\n"}불필요한 메세지입니다.</textarea>
+												<!--{:}-->
+													<textarea name="{.name}_admin" class="sms_contents">{.admin}</textarea>
+												<!--{/}-->
+
+												<div class="sdf-body-foot clearbox">
+													<div class="fl"><b class="sms_byte">0</b>byte</div>
+													<div class="fr"><img src="../images/common/sms_btn_send.gif" align="absmiddle" class="del_message" /></div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</td>
+								<!--{/}-->
+							</tr>
+							<tr>
+								<!--{? .user_disabled!='disabled' }-->
+								<td class="left pd10" valign="top">
+									<label><input type="checkbox" name="{.name}_user_yn" value="Y" {?.user_chk=='Y'}checked{/} {.user_disabled} />고객</label><br><br>
+								</td>
+								<td></td>
+								<!--{/}-->
+								<!--{? .disabled!='disabled' }-->
+								<td class="left pd10" valign="top" >
+									<!--{@ .arr }-->
+										<label><input type="checkbox" name="{.name}_admins_yn_{..index_}" value="Y" {?.admins_chk[..index_]=='Y'}checked{/} {.disabled}/> 관리자({..index_+1})</label><br>
+									<!--{ / }-->
+								</td>
+								<!--{/}-->
+							</tr>
+							<tr>
+								<!--{? .user_disabled!='disabled' }-->
+								<td>{.sms_rest_user}</td>
+								<td></td>
+								<!--{/}-->
+								<!--{? .disabled!='disabled' }-->
+								<td>{.sms_rest_admin}</td>
+								<!--{/}-->
+							</tr>
+							</table>
+							</td>
+						</tr>
+						</table>
+					</div>
+					<!--{ / }-->
+					</td>
+				<!--{ / }-->
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</tbody>
+		</table>
+	<!--{/}-->
+
+<!--{/}-->
+
+</div>
+<!-- 서브메뉴 바디 : 끝-->
+
+<!--{? id == 'bulkorder' ||  id == 'goods_review'  }-->
+	<input type="hidden" name="windowLabelComment" value="N">
+	<input type="hidden" name="windowLabelSeq" value="">
+	<input type="hidden" name="windowLabelType" value="">
+	<input type="hidden" name="Label_cnt" value="{sub_cnt.cnt}">
+	<input type="hidden" name="Label_maxid" value="{sub_cnt.maxid}">
+	<input type="hidden" name="windowLabelId" value="">
+	<input type="hidden" name="windowLabelvalue" value="">
+	<input type="hidden" name="windowLabelIcon" value="">
+	<input type="hidden" name="windowLabelUseCheck" value="" size="30" class="null" >
+	<input type="hidden" name="windowLabelRequireCheck" value="" size="30" class="null">
+
+	<div id="joinDiv" class="layer_pop hide ">
+		<!--팝업타이틀 -->
+
+		<!--입력폼 -->
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+		<tr>
+			<td width="50%" valign="top">
+				<table width="100%" border="0" cellspacing="3" cellpadding="0" align="center" id="labelTable">
+				<colgroup>
+				<col width="15%" />
+				<col />
+			</colgroup>
+				<tr>
+					<th align="left">항목명</th>
+					<td><input type="text" name="windowLabelName" value="" size="30" style="height:18px;" class="line"></td>
+				</tr>
+				<tr>
+					<th align="left">항목설명</th>
+					<td><input type="text" name="windowLabelExp" value="" size="30" style="height:18px;" class="line"></td>
+				</tr>
+				<tr id="labelTr">
+					<th id="labelTh" align="left" width="100">항목값</th>
+					<td id="labelTd" ></td>
+				</tr>
+				</table>
+			<!--버튼 -->
+			<div style="width:90%; padding:10px 0 0 130px;"><img src="../images/common/btn_confirm.gif" alt="확인" id="labelWriteBtn" style="border:0;cursor:pointer;"/></div>
+			<!--//버튼 -->
+			</td>
+			<td width="50%" valign="top">
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td colspan="2" height="20"></td>
+				</tr>
+				<tr>
+					<td width="30" align="right" valign="top"><img src="../images/common/campaign_i_arrow.gif" style="margin-top:40px;" /></td>
+					<td align="left">
+						<div style=" width:88%; height:250px; border:3px solid #dddddd; padding:15px;">
+							{#surveyForm}
+						</div>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+		<!--//입력폼 -->
+	</div>
+<!--{/}-->
+</form>
+
+<div id="BoardIconPopup"  class="hide">
+<form name="Iconregist" id="Iconregist" method="post" action="" enctype="multipart/form-data"  target="actionFrame">
+<input type="hidden" name="mode" id="" value="boardmanager_icon" />
+<input type="hidden" name="icontype" id="icontype" value="" />
+<input type="hidden" name="seq" value="{seq}" />
+<input type="hidden" name="boardid" value="{id}" />
+<ul>
+<li style="float:left;width:250px;height:30px;text-align:center"><input type="file" name="board_icon" id="board_icon" onChange="iconFileUpload();" /></li>
+</ul>
+</form>
+</div>
+
+<!--{? id == 'goods_review'  }-->
+<!-- 아이콘 선택 -->
+<div id="goodsReviewIconPopup" class="hide">
+	<form enctype="multipart/form-data" method="post" action="../board_goods_process/icon" target="actionFrame">
+	<input type="hidden" name="iconReviewIndex" value="0" />
+	<ul>
+	<!--{ @ code_load('goodsReviewIcon') }-->
+	<li style="float:left;width:50px;height:30px;text-align:center">
+		<input type="hidden" name="goodsReviewIconCode[]" value="{.codecd}">
+		<img src="{goodsreviewicon}{.codecd}" filename="{.codecd}" border="0" title="{.value}" class="hand hover-select icon">
+	</li>
+	<!--{ / }-->
+	</ul>
+	<div class="clearbox"></div>
+	 <div>
+	<input type="file" name="goodsReviewIconImg" /> <span class="btn small black"><button type="submit">추가</button></span>
+	</div>
+	</form>
+</div>
+<!--{ / }-->
+
+<!--{? service_code=='P_FREE' && id=='bulkorder' }-->
+<div id="BulkorderService" class="hide">
+<div  >
+		<table width="100%">
+		<tr>
+		<td align="left">
+			무료몰Plus+에서는 지원하지 않는 기능입니다. <br />
+			프리미엄몰+ 또는 독립몰+로 업그레이드 하시면 대량구매게시판을 이용 가능합니다.
+		</td>
+		</tr>
+		<tr>
+		<td align="center"><br /><br />
+		<span class="btn large gray"><input type="button" onclick="serviceUpgrade();" value="업그레이드 >"></span>
+		</td>
+		</tr>
+		</table>
+	</div>
+</div>
+<!--{/}-->
+
+<!--{? service_limit && !id }-->
+<div id="BoadService" class="hide">
+<div  >
+		<table width="100%">
+		<tr>
+		<td align="left">
+			무료몰 Plus+ : 기본 5개 (게시판 추가 시 1개당 2,200원, 최초 1회 결제로 기간 관계 없이 계속 이용)<br />
+			프리미엄몰+ 또는 독립몰+로 업그레이드 하시면 게시판을 무제한 이용 가능합니다.
+		</td>
+		</tr>
+		<tr>
+		<td align="center"><br /><br />
+		<span class="btn large gray"><input type="button" onclick="serviceBoardAdd();" value="추가 신청 >"></span>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<span class="btn large gray"><input type="button" onclick="serviceUpgrade();" value="업그레이드 >"></span>
+		</td>
+		</tr>
+		</table>
+	</div>
+	<br style="line-height:20px;" />
+</div>
+<!--{/}-->
+
+<div id="infoPopup" class="hide">
+	<div style=""><span style="font-weight:bold;" id="s_title"></span> 사용 가능한 치환코드입니다.</div>
+	<table class="info-table-style" style="width:100%">
+	<colgroup>
+		<col width="30%" />
+		<col width="70%" />
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="its-th-align center" >치환코드</th>
+		<th class="its-th-align center" >설명</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr class="s_info" >
+		<td class="its-td-align center">&#123;shopName&#125;</td>
+		<td class="its-td">쇼핑몰 이름(설정 > 일반정보)</td>
+	</tr>
+
+	<tr class="s_info" >
+		<td class="its-td-align center">&#123;boardName&#125;</td>
+		<td class="its-td">게시판이름</td>
+	</tr>
+
+	<tr class="s_info" >
+		<td class="its-td-align center">&#123;userid&#125;</td>
+		<td class="its-td">회원아이디</td>
+	</tr>
+
+	<tr class="s_info" >
+		<td class="its-td-align center">&#123;userName&#125;</td>
+		<td class="its-td">작성자명</td>
+	</tr>
+	</tbody>
+	</table>
+	<div style="padding:10px;"></div>
+</div>
+<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {  
+	<!--{? service_limit  && !id }-->
+		openDialog("관리자 계정 이용 안내<span class='desc'></span>", "BoadService", {"width":600,"height":200});
+	<!--{/}-->
+
+	<!--{? !goodsreview_sub}-->
+		$("input[name='list_show[]'][value='[reviewinfo]']").attr("checked",false);
+		$("input[name='list_show[]'][value='[reviewinfo]']").attr("disabled",true);
+	<!--{/}-->
+
+
+	var boardid = $('#board_id');
+	var boardname = $('#board_name');
+	<!--{? seq }-->
+		
+		//댓글 사용여부에 따라 댓글평가 체크
+		
+		auth_cmt_use_ck('{cmt_recommend_type}');
+
+		//글평가 사용여부
+		
+		auth_recommend_use_ck('{recommend_type}');
+
+		//댓글평가 사용여부
+		//auth_cmt_recommend_use_ck();
+
+		$('#form1').validate({
+			onkeyup: false,
+			rules: {
+				board_name: { required:true}
+			},
+			messages: {
+				board_name: { required:'<font color="red">게시판명을 입력해 주세요.</font>'}
+			},
+			errorPlacement: function(error, element) {
+				error.appendTo(element.parent());
+			},
+			submitHandler: function(f) {
+				if(readyEditorForm(f)){
+					if (boardname.val().length < 3) { // 게시판명 검사
+						alert('3자리이상 게시판명을 입력해 주세요.');
+						boardname.focus();
+						return false;
+					}
+
+					if (containsChars(boardname,"\"")) {
+						alert('게시판명에는 쌍따옴표(" ")를 사용할 수 없습니다.\n쌍따옴표(\") 를 제거후 게시판명으로 입력해 주세요.');
+						boardname.focus();
+						return false;
+					}
+
+					<!--{? service_code=='P_FREE' && id=='bulkorder' }-->
+						openDialog("대량구매게시판 이용 안내<span class='desc'></span>", "BulkorderService", {"width":600,"height":200});
+					<!--{:}-->
+						f.submit();
+					<!--{/}-->
+				}
+			}
+		});
+	<!--{:}-->
+		//글평가 사용여부 
+		auth_recommend_use_ck(); 
+
+		//댓글 사용여부에 따라 댓글평가 체크 
+		auth_cmt_use_ck(); 
+
+
+		//댓글평가 사용여부 
+		//auth_cmt_recommend_use_ck(); 
+
+
+		$('#form1').validate({
+			onkeyup: false,
+			rules: {
+				board_id: { required:true , remote:{type:'post',url:'../boardmanager_process?mode=boardmanager_idck'}},
+				board_name: { required:true}
+			},
+			messages: {
+				board_id: { required:'<font color="red">입력해 주세요.</font>', remote: '아이디가 중복되었습니다.'},
+				board_name: { required:'<font color="red">입력해 주세요.</font>'}
+			},
+			errorPlacement: function(error, element) {
+				error.appendTo(element.parent());
+			},
+			submitHandler: function(f) {
+				if(readyEditorForm(f)){
+
+					var board_id_ck = /^[a-zA-Z0-9_-]{3,20}$/; // 아이디 검사식
+					if (board_id_ck.test(boardid.val()) != true) { // 아이디 검사
+						alert('특수문자 사용은 불가합니다.\n아이디는 영문,숫자,언더스코어,하이픈만 사용가능합니다.');
+						boardid.focus();
+						return false;
+					}
+					if (boardname.val().length < 3) { // 게시판명 검사
+						alert('3자리이상 게시판명으로 입력해 주세요.');
+						boardname.focus();
+						return false;
+					}
+
+					if (containsChars(boardname,"\"")) {
+						alert('게시판 명에는 쌍따옴표(" ")를 사용할 수 없습니다.\n쌍따옴표(\") 를 제거후 게시판명으로 입력해 주세요.');
+						boardname.focus();
+						return false;
+					}
+
+					<!--{? service_limit  && !id }-->
+						openDialog("게시판 이용 안내<span class='desc'></span>", "BoadService", {"width":600,"height":200});
+					<!--{:}-->
+						f.submit();
+					<!--{/}-->
+				}
+			}
+		});
+	<!--{/}-->
+
+	$('#board_id').after('<strong></strong>');
+	// #boardid 인풋에서 onkeyup 이벤트가 발생하면
+	boardid.keyup( function() {
+		var s = $(this).next('strong'); // strong 요소를 변수에 할당
+		if (boardid.val().length == 0) { // 입력 값이 없을 때
+			s.text(''); // strong 요소에 포함된 문자 지움
+		} else if (boardid.val().length < 3) { // 입력 값이 3보다 작을 때
+			s.text('너무 짧아요.'); // strong 요소에 문자 출력
+		} else if (boardid.val().length > 20) { // 입력 값이 16보다 클 때
+			s.text('너무 길어요.'); // strong 요소에 문자 출력
+		}else{
+			s.text(''); // strong 요소에 문자 출력
+		}
+	});
+
+	//읽기권한 all
+	$(".auth_read").click(function(){
+		if($(this).val() == 'member' ){
+			$(".auth_read_group").attr("disabled",false);
+			$(".auth_read_group").attr("checked",true);
+		}else{
+			$(".auth_read_group").attr("disabled",true);
+			$(".auth_read_group").removeAttr("checked");
+		}
+	});
+
+	{? type == 'A'//추가게시판인경우 }
+		//쓰기 접근권한 all
+		$(".auth_write").click(function(){
+			if($(this).val() == 'member' ){
+				$(".auth_write_group").attr("disabled",false);
+				$(".auth_write_group").attr("checked",true);
+			}else{
+				$(".auth_write_group").attr("disabled",true);
+				$(".auth_write_group").removeAttr("checked");
+			}
+		});
+
+		//답글 접근권한 all
+		$(".auth_reply").click(function(){
+			if($(this).val() == 'member' ){
+				$(".auth_reply_group").attr("disabled",false);
+				$(".auth_reply_group").attr("checked",true);
+			}else{
+				$(".auth_reply_group").attr("disabled",true);
+				$(".auth_reply_group").removeAttr("checked");
+			}
+		});
+
+		//댓글 접근권한 all
+		$(".auth_cmt").click(function(){
+			if($(this).val() == 'member' ){
+				$(".auth_cmt_group").attr("disabled",false);
+				$(".auth_cmt_group").attr("checked",true);
+			}else{
+				$(".auth_cmt_group").attr("disabled",true);
+				$(".auth_cmt_group").removeAttr("checked");
+			}
+		});
+
+	{:}
+		//쓰기/답글/댓글 접근권한 all
+		$(".auth_write").click(function(){
+			if($(this).val() == 'member' ){
+				$(".auth_write_group").attr("disabled",false);
+				$(".auth_write_group").attr("checked",true);
+			}else{
+				$(".auth_write_group").attr("disabled",true);
+				$(".auth_write_group").removeAttr("checked");
+			}
+		});
+
+		//답글 접근권한 all
+		$(".auth_reply").click(function(){
+			if($(this).val() == 'member' ){
+				$(".auth_reply_group").attr("disabled",false);
+				$(".auth_reply_group").attr("checked",true);
+			}else{
+				$(".auth_reply_group").attr("disabled",true);
+				$(".auth_reply_group").removeAttr("checked");
+			}
+		});
+
+		//공지사항 > 댓글 접근권한 all
+		$(".auth_write_cmt").click(function(){
+			if($(this).val() == 'member' ){
+				$(".auth_write_cmt_group").attr("disabled",false);
+				$(".auth_write_cmt_group").attr("checked",true);
+			}else{
+				$(".auth_write_cmt_group").attr("disabled",true);
+				$(".auth_write_cmt_group").removeAttr("checked");
+			}
+		});
+
+
+	{/}
+
+	/* 분류추가*/
+	$("button#boardcategoryadd").click(function(){
+		var trObj = $("#BoardCategoryTable tbody");
+		var trClone = '<tr><td align="center"  class="hand" title="드레그후 순서변경" >↕</td><td align="center"><input type="text" name="category[]" class="line" value="" /></td><td align="center"><span class="btn-minus"><button type="button" class="etcDel"></button></span></td></tr>';
+		trObj.append(trClone);
+	});
+
+	/* 분류추가정보 삭제 */
+	$("#BoardCategoryTable button.etcDel").live("click",function(){ 
+		if($("#BoardCategoryTable tbody tr").length > 0) $(this).parent().parent().parent().remove();
+	});
+
+		/* 분류순서변경 */
+	$("table.simplelist-table-style tbody").sortable({items:'tr'});
+
+
+	/* 평가점수추가*/
+	$("button#boardreviewcategoryadd").click(function(){
+		{? !isplusfreenot //무료몰경우 }
+			//serviceUpgrade();
+		{:}
+			var trObj = $("#BoardReviewCategoryTable tbody");
+			var trClone = '<tr><td align="center"  class="hand" title="드레그후 순서변경" >↕</td><td align="center"><input type="text" name="reviewcategory[]" class="line" value="" /></td><td align="center"><span class="btn-minus"><button type="button" class="etcDel"></button></span></td></tr>';
+			trObj.append(trClone);
+		{/}
+	});
+
+	/* 평가점수추가정보 삭제 */
+	$("#BoardReviewCategoryTable button.etcDel").live("click",function(){
+		if($("#BoardReviewCategoryTable tbody tr").length > 0) $(this).parent().parent().parent().remove();
+	});
+
+	/* 평가점수순서변경 */
+	$("table.reviewlist-table-style tbody").sortable({items:'tr'});
+	/*  New icon > 선택된 아이콘 출력 */
+	$("button#iconNewBtn").click(function(){
+		$("#icontype").val('new');
+		openDialog("아이콘 선택  <span class='desc'>아이콘으로 사용할 이미지를 등록해 주세요.</span>", "BoardIconPopup", {"width":"380","height":"150","show" : "fade","hide" : "fade"});
+	});
+
+	/* Hot icon >  선택된 아이콘 출력 */
+	$("button#iconHotBtn").click(function(){
+		$("#icontype").val('hot');
+		openDialog("아이콘 선택  <span class='desc'>아이콘으로 사용할 이미지를 등록해 주세요.</span>", "BoardIconPopup", {"width":"380","height":"150","show" : "fade","hide" : "fade"});
+	});
+
+	/* 상품후기 > 선택된 아이콘 출력 */
+	$("button#iconReviewBtn").click(function(){
+		$("#icontype").val('review');
+		openDialog("아이콘 선택  <span class='desc'>아이콘으로 사용할 이미지를 등록해 주세요.</span>", "BoardIconPopup", {"width":"380","height":"150","show" : "fade","hide" : "fade"});
+	});
+
+
+	/* 관리자 표시 > 선택된 아이콘 출력 */
+	$("button#iconAdminBtn").click(function(){
+		$("#icontype").val('admin');
+		openDialog("관리자 아이콘 선택  <span class='desc'>아이콘으로 사용할 이미지를 등록해 주세요.</span>", "BoardIconPopup", {"width":"450","height":"150","show" : "fade","hide" : "fade"});
+	});
+	 
+	
+	/* 게시글평가 > 선택된 아이콘 출력 */
+	$("button.iconrecommendBtn").click(function(){
+		var icontype = $(this).attr("icontype");
+		$("#icontype").val(icontype);
+		openDialog("게시글평가 아이콘 선택  <span class='desc'>아이콘으로 사용할 이미지를 등록해 주세요.</span>", "BoardIconPopup", {"width":"450","height":"130","show" : "fade","hide" : "fade"});
+	}); 
+
+	$("input:[name='recommend_type']").click(function(){  
+		if( $(this).val() == '3' ) {
+			$("span#scoreid").html('5단계평가');
+		}else if( $(this).val() == '2' ) {
+			$("span#scoreid").html('추천/비추천');
+		}else{
+			$("span#scoreid").html('추천');
+		} 
+		auth_recommned_icon_lay();
+	}); 
+
+	$("input:[name='cmt_recommend_type']").click(function(){   
+		auth_cmt_recommned_icon_lay();
+	}); 
+
+
+	/* 댓글평가 > 선택된 아이콘 출력 */
+	$("button.iconcmtrecommendBtn").click(function(){
+		var icontype = $(this).attr("icontype");
+		$("#icontype").val(icontype);
+		openDialog("댓글평가 아이콘 선택  <span class='desc'>아이콘으로 사용할 이미지를 등록해 주세요.</span>", "BoardIconPopup", {"width":"450","height":"130","show" : "fade","hide" : "fade"});
+	});
+
+
+
+	$("input:[name='skin[]']").live('click', function() {
+		var skinname = $(".skinlay:checked").val();
+		if( skinname.substring(0,7) == 'gallery' ) {
+			$(".gallerylay").show();
+			$(".defaultlay").hide();
+		}else{
+			$(".defaultlay").show();
+			$(".gallerylay").hide();
+		}
+	});
+
+	// 수량 직접 수정할 경우
+	$("input.gallerycell").blur(function() {
+		var gallerytotalnum = parseInt($("input#gallerycell0").val())*parseInt($("input#gallerycell1").val());
+		$("#gallerytotalnum").html(setComma(gallerytotalnum));
+	});
+	<!--{? useform.display.skin.use}-->
+		<!--{@ skinlist }-->
+			skintypelay('{.key_}');
+		<!--{/}-->
+	<!--{:}-->
+		skintypelay('{skin}');
+	<!--{/}-->
+
+	$("#autoemoneystrcut1").click(function(){
+		$("#autoemoneytype2").attr('checked',true);
+	});
+
+	$("#autoemoneystrcut2").click(function(){//, #autoemoney_photo, #autoemoney_review
+		$("#autoemoneytype3").attr('checked',true);
+	});
+ 
+
+	$("input[name=autoemoney]").change(function(){
+		if( $(this).attr('checked')){
+			$(".autoemoney").find("input,select").removeAttr('disabled');
+		}else{
+			$(".autoemoney").find("input,select").attr('disabled',true);
+		}
+
+		{? !isplusfreenot || !isplusfreenot.ispoint }
+			$(".autopoint").find("input,select").attr('disabled',true);
+		{ / }
+	}).change();
+
+
+		$(".sms_contents").live("keydown",function(){
+			str = $(this).val();
+			$(this).parent().parent().parent().find(".sms_byte").html(chkByte(str));
+		});
+		$(".sms_contents").live("keyup",function(){
+			str = $(this).val();
+			$(this).parent().parent().parent().find(".sms_byte").html(chkByte(str));
+		}).trigger('keyup');
+		$('.del_message').click(function(){
+			$(this).parent().parent().parent().find('textarea').val('');
+		});
+	<!--{? id == 'bulkorder'}-->
+		$("#bulk_show_goods").click(function(){//bulk_totprice
+			if( $(this).attr("checked") ){
+				$(".bulk_totpricelay").removeClass("gray");
+				$(".bulk_totpricelay").removeAttr("disabled");
+				$("#bulk_totprice").removeAttr("disabled");
+				//$("#bulk_totprice").attr("checked",false);
+			}else{
+				$(".bulk_totpricelay").addClass("gray");
+				$(".bulk_totpricelay").attr("disabled","disabled");
+				$("#bulk_totprice").attr("disabled","disabled");
+				$("#bulk_totprice").attr("checked",false);
+			}
+		});
+
+		$("#bulk_show_payment").click(function(){
+			if( $(this).attr("checked") ){
+				$(".bulk_payment_type_alllay").removeClass("gray");
+				$(".bulk_payment_type_alllay").removeAttr("disabled");
+				$("input:radio[name='bulk_payment_type']").removeAttr("disabled");
+			}else{
+				$(".bulk_payment_type_alllay").addClass("gray");
+				$(".bulk_payment_type_alllay").attr("disabled","disabled");
+				$("input:radio[name='bulk_payment_type']").attr("disabled","disabled");
+			}
+		});
+
+		$(".labelList_bulkorder").sortable();
+		$(".labelList_bulkorder").disableSelection();
+		typeCheck();
+		$(".bulkorder_chUse").live("click",function(){
+			typeCheck();
+		});
+
+	<!--{/}-->
+
+
+		/* ### */
+		$(".info_code").click(function(){
+			$("#s_title").html($(this).attr("title"));
+			openDialog("사용 가능한 치환코드 <span class='desc'></span>", "infoPopup", {"width":"500","height":"300"});
+		});
+
+
+
+	// 무료몰인경우 대량구매게시판불가
+	$("input[name=bulkorder_free_btn]").click(function(){
+		{? service_code=='P_FREE'}
+		openDialog("대량구매게시판 이용 안내<span class='desc'></span>", "BulkorderService", {"width":600,"height":200});
+		{/}
+	});
+
+	$("select[name='video_reserve_select']").change(function(){
+		span_controller('reserve','video');
+	}).change();
+	$("select[name='video_point_select']").change(function(){
+		span_controller('point','video');
+	}).change();
+	$("select[name='photo_reserve_select']").change(function(){
+		span_controller('reserve','photo');
+	}).change();
+	$("select[name='photo_point_select']").change(function(){
+		span_controller('point','photo');
+	}).change();
+	$("select[name='default_reserve_select']").change(function(){
+		span_controller('reserve','default');
+	}).change();
+	$("select[name='default_point_select']").change(function(){
+		span_controller('point','default');
+	}).change();
+
+	$("select[name='date_reserve_select']").change(function(){
+		span_controller('reserve','date');
+	}).change();
+	$("select[name='date_point_select']").change(function(){
+		span_controller('point','date');
+	}).change();
+
+	<!--{? id == 'goods_review'  }-->
+		$(".labelList_goodsreview").sortable();
+		/* 선택된 아이콘 출력 .labelList_goodsreview */
+		$("#labelTable .goodsReviewIcon").live("click",function(){
+			//var trObj = $("#labelTable tbody").find("input[name='labelIcon[]']");
+			var idx = $(this).attr('iconindex');
+			$("input[name='iconReviewIndex']").val(idx);
+			set_goods_icon();
+			closeDialog("goodsReviewIconPopup");
+			openDialog("아이콘 선택  <span class='desc'>아이콘으로 사용할 이미지를 클릭하여 주세요.</span>", "goodsReviewIconPopup", {"width":"550","height":"200","show" : "fade","hide" : "fade"});
+		});
+		changeFileStyle();
+
+		/* 아이콘 선택 */
+		$("#goodsReviewIconPopup img.icon").live("click",function(){
+			var idx = $("input[name='iconReviewIndex']").val();
+			$("#labelTable tbody tr").find("img.goodsReviewIcon").eq(idx).attr("src",$(this).attr("src")+'?time'+{=time()});
+			var filename = $(this).attr("filename");
+			$("input[name='labelIcon[]']").eq(idx).val(filename);
+			closeDialog("goodsReviewIconPopup");
+		});
+		typeCheck();
+
+		$(".bulkorder_chUse").live("click",function(){
+			typeCheck();
+		});
+	{/}
+
+
+	$("#auth_writeonlybuyer").click(function(){
+		Editor.switchEditor($("#content_default").data("initializedId"));
+		var content = Editor.getContent();
+		var cont_default = "";
+		var content_default_mobile = "";
+		if( !content || content == "<p>&nbsp;</p>" || content == "<p><br></p>" || !$("#content_default_mobile").val()) {
+			if( confirm("최초 글 작성시 안내문구를 추가하시겠습니까?") ) {
+				var msghtml = "상품후기는 구매자만 작성이 가능합니다.<br />반드시 주문을 조회한 후 상품후기를 작성해 주세요.";
+				var msgtext = "상품후기는 구매자만 작성이 가능합니다.\r\n반드시 주문을 조회한 후 상품후기를 작성해 주세요.";
+				if(!content || content == "<p>&nbsp;</p>" || content == "<p><br></p>") {
+					Editor.modify({"content" : msghtml});
+				}
+				if(!$("#content_default_mobile").val()) $("#content_default_mobile").val(msgtext);
+			}
+		}
+	});
+	
+	//접근권한추가
+	$(".board_view").click(function() {
+		if($(this).attr("checked")){ 
+			$(this).parent().parent().find(".board_view_pw").attr("checked",true);
+			$(this).parent().parent().find(".board_act").attr("checked",true);
+			$(this).parent().parent().find(".board_view_pw").attr("disabled",false);
+			$(this).parent().parent().find(".board_act").attr("disabled",false);
+		}else{
+			$(this).parent().parent().find(".board_view_pw").attr("checked",false);
+			$(this).parent().parent().find(".board_act").attr("checked",false);
+			$(this).parent().parent().find(".board_view_pw").attr("disabled",true);
+			$(this).parent().parent().find(".board_act").attr("disabled",true);
+		}
+	});
+	
+	//댓글 사용여부에 따라 댓글평가 체크
+	$("input[name='auth_cmt_use']").click(function(){
+		auth_cmt_use_ck();
+	});
+
+	//글평가 사용여부
+	$("input[name='auth_recommend_use']").click(function(){
+		auth_recommend_use_ck();
+	});
+
+	//댓글평가 사용여부
+	$("input[name='auth_cmt_recommend_use']").click(function(){
+		auth_cmt_recommend_use_ck();
+	});
+	
+	//관리자권한 전체체크
+	$("#allClick").click(function(){
+		if($(this).attr("gb")=="none"){
+			$("input.authboard").attr("checked",true);
+			$("#click_text").html("전체해제");
+			$(this).attr("gb","click");
+			$("input.board_view_pw").attr("disabled",false);
+			$("input.board_act").attr("disabled",false);
+		}else{
+			$("input.authboard").attr("checked",false);
+			$("#click_text").html("전체선택");
+			$(this).attr("gb","none");
+			$("input.board_view_pw").attr("disabled",true);
+			$("input.board_act").attr("disabled",true);
+		} 
+	});
+
+
+});
+
+//글평가 사용여부
+function auth_recommend_use_ck(recommend_type){ 
+	var auth_recommend_use = $("input[name='auth_recommend_use']:checked").val();  
+	if( auth_recommend_use == 'Y' ){
+		$(".recommend_type").attr("disabled",false);
+		if(recommend_type){
+			$("input[name='recommend_type'][value='"+recommend_type+"']").attr("checked",true);
+		}else{
+			$("input[name='recommend_type'][value='2']").attr("checked",true);
+		}
+		
+		$("input[name='list_show[]'][value='[score]']").attr("checked",true);
+		$("input[name='list_show[]'][value='[score]']").attr("disabled",false);
+	}else{ 
+		$(".recommend_type").attr("disabled",true);
+		$("input[name='recommend_type']").attr("checked",false);
+		
+		$("input[name='list_show[]'][value='[score]']").attr("checked",false);
+		$("input[name='list_show[]'][value='[score]']").attr("disabled",true);
+	}
+	auth_recommned_icon_lay();
+}
+
+//댓글 사용여부 평가설정
+function auth_cmt_use_ck(cmt_recommend_type){ 
+	var auth_recommend_use = $("input[name='auth_recommend_use']:checked").val();  
+	var auth_cmt_use = $("input[name='auth_cmt_use']:checked").val();   
+	if(  auth_cmt_use == 'Y') {// && auth_recommend_use == 'Y' 
+		$(".auth_cmt_recommend_use").attr("disabled",false);
+		$(".cmt_recommend_type").attr("disabled",false);   
+		if(cmt_recommend_type){
+			$("input[name='cmt_recommend_type'][value='"+cmt_recommend_type+"']").attr("checked",true);
+		}else{ 
+			$("input[name='cmt_recommend_type'][value='2']").attr("checked",true); 
+		}
+	}else{
+		$(".auth_cmt_recommend_use").attr("disabled",true);
+		//$(".cmt_recommend_type").attr("disabled",true);
+		//$("input[name='cmt_recommend_type']").attr("checked",false); 
+		$("#auth_cmt_recommend_usey").attr("checked",false);
+		$("#auth_cmt_recommend_usen").attr("checked",true);
+	}
+	auth_cmt_recommend_use_ck(cmt_recommend_type);
+	auth_cmt_recommned_icon_lay();
+}
+
+
+//댓글평가 사용여부
+function auth_cmt_recommend_use_ck(cmt_recommend_type){ 
+	var auth_cmt_recommend_use = $("input[name='auth_cmt_recommend_use']:checked").val();
+	if( auth_cmt_recommend_use == 'Y' ){
+		$(".cmt_recommend_type").attr("disabled",false);
+		if(cmt_recommend_type){
+			$("input[name='cmt_recommend_type'][value='"+cmt_recommend_type+"']").attr("checked",true);
+		}else{ 
+			$("input[name='cmt_recommend_type'][value='2']").attr("checked",true); 
+		}
+	}else{ 
+		$(".cmt_recommend_type").attr("disabled",true);
+		$("input[name='cmt_recommend_type']").attr("checked",false); 
+	}
+	
+	auth_cmt_recommned_icon_lay();
+}
+
+//게시글 아이콘노출
+function auth_recommned_icon_lay(){ 
+	var auth_recommend_use = $("input[name='auth_recommend_use']:checked").val();  
+	var recommend_type = $("input[name='recommend_type']:checked").val();   
+	if( auth_recommend_use == 'Y' && recommend_type ) {
+		$(".recommend_type3").hide();
+		$(".recommend_type2").hide();
+		$(".recommend_type1").hide(); 
+		$(".recommend_type"+recommend_type).show(); 
+	}else{
+		$(".recommend_type1").show(); 
+		$(".recommend_type2").hide();
+		$(".recommend_type3").hide(); 
+	}
+}
+
+//댓글 아이콘노출
+function auth_cmt_recommned_icon_lay(){
+	var auth_cmt_recommend_use = $("input[name='auth_cmt_recommend_use']:checked").val();
+	var cmt_recommend_type = $("input[name='cmt_recommend_type']:checked").val();  
+	if( cmt_recommend_type  && auth_cmt_recommend_use == 'Y' ) {
+		$(".cmt_recommend_type2").hide();
+		$(".cmt_recommend_type1").hide();
+		$(".cmt_recommend_type"+cmt_recommend_type).show(); 
+	}else{
+		$(".cmt_recommend_type1").hide();
+		$(".cmt_recommend_type2").hide();
+	}
+}
+
+
+function span_controller(nm, type){
+	var name = type ? type+"_"+nm : nm;
+	var reserve_y = $("span[name='"+name+"_y']");
+	var reserve_d = $("span[name='"+name+"_d']");
+	var value = $("select[name='"+name+"_select'] option:selected").val();
+	if(value==""){
+		reserve_y.hide();
+		reserve_d.hide();
+	}else if(value=="year"){
+		reserve_y.show();
+		reserve_d.hide();
+	}else if(value=="direct"){
+		reserve_y.hide();
+		reserve_d.show();
+	}
+
+	reserve_y.addClass("black");
+	reserve_d.addClass("black");
+}
+
+function typeCheck(){
+
+	$(".bulkorder_chUse").each( function(){
+		var bulkorder_ch = $(this).attr("bulkorder_ch");
+		var tmps_nm = "labelItem[user]["+bulkorder_ch+"][use]";
+		var obj = $("input:checkbox[name='"+tmps_nm+"']");
+		var tmps_nm2 = "labelItem[user]["+bulkorder_ch+"][required]";
+		if(!$("input:checkbox[name='"+tmps_nm+"']").attr("checked")){
+			$("input:checkbox[name='"+tmps_nm2+"']").attr("disabled","disabled");
+			obj.parent().parent().css("background-color","#ffffff");
+		}else{
+			$("input:checkbox[name='"+tmps_nm2+"']").attr("disabled",false);
+			obj.parent().parent().css("background-color","#e7f2fc");
+		}
+	});
+
+	if( $(".bulkorder_chUse").size() ) {
+		$("input[name='list_show[]'][value='[reviewinfo]']").attr("disabled",false);
+	}
+
+}
+
+function chkByte(str){
+	var cnt = 0;
+	for(i=0;i<str.length;i++) {
+		cnt += str.charCodeAt(i) > 128 ? 2 : 1;
+		if(str.charCodeAt(i)==10) cnt++;
+	}
+	return cnt;
+}
+
+	function skintypelay(skinname){
+		skinname = (skinname) ? skinname:$(".skinlay:checked").val();
+		$.ajax({
+				'url' : "../boardmanager_process",
+				'data' : {'mode':'boardmanager_skin_help', 'boardid':'{id}', 'skinname':skinname},
+				'type' : 'post',
+				'dataType': 'json',
+				'success': function(data) {
+				$("#skin_type_lay"+skinname).html(data.skin_type_img);
+				$("#skin_help_lay"+skinname).html(data.skin_help);
+				}
+		});
+	}
+
+	// 파일업로드 이벤트
+	function iconFileUpload(str){
+		if(str > 0) {
+			alert('아이콘을 선택해 주세요.');
+			return false;
+		}
+		//파일전송
+		var frm = $('#Iconregist');
+		frm.attr("action","../boardmanager_process");
+		frm.submit();
+	}
+
+	// 파일업로드성공후
+	function iconFileUploadComplete(result, icontype,filename, filedir, file_ext){
+		$("#BoardIconPopup").html('<form name="Iconregist" id="Iconregist" method="post" action="" enctype="multipart/form-data"  target="actionFrame"><input type="hidden" name="mode" id="" value="boardmanager_icon" /><input type="hidden" name="seq" value="{seq}" /><input type="hidden" name="boardid" value="{id}" /><input type="hidden" name="icontype" id="icontype" value="' + icontype + '" /><ul><li style="float:left;width:100px;height:30px;text-align:center" ><input type="file" name="board_icon" id="board_icon" onChange="iconFileUpload();" /></li></ul></form>');
+
+		if(result ==  "true"){//file_ext
+			$("#icon_" + icontype + "_lay").html("<input type='hidden' name='real_icon_name_" + icontype + "' value='" + filename + "' /><input type='hidden' name='real_icon_ext_" + icontype + "' value='" + file_ext + "' /><img src='" + filedir + filename +"?"+$.now()+"' id='icon_" + icontype + "_img' />");
+			closeDialog("BoardIconPopup");
+		}
+	}
+
+	/**
+	 * 입력값에 특정 문자(chars)가 있는지 체크
+	 * 특정 문자를 허용하지 않으려 할 때 사용
+	 * ex) if (containsChars(form.name,"^%$#@~;")) {
+	 *         alert("이름 필드에는 특수 문자를 사용할 수 없습니다.");
+	 *     }
+	 */
+	 function containsChars(input,chars) {
+		 for (var inx = 0; inx < input.val().length; inx++) {
+			if (chars.indexOf(input.val().charAt(inx)) != -1)
+				return true;
+		 }
+		 return false;
+	 }
+
+</script>
+{ #layout_footer }

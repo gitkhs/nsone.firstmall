@@ -1,0 +1,187 @@
+{ #layout_header }
+<script>
+//체크박스 색상
+$("input[type='checkbox'][name='del[]']").live('change',function(){
+	if($(this).is(':checked')){
+		$(this).closest('tr').addClass('checked-tr-background');
+	}else{
+		$(this).closest('tr').removeClass('checked-tr-background');
+	}
+}).change();
+</script>
+
+{ #searchform }
+<!-- 게시글리스트테이블 : 시작 t -->
+<table class="list-table-style" cellspacing="0" >
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+	<col width="20" />
+	<col width="40" />
+	<col width="40" />
+	<col width="150" />
+	{? categorylist}<col width="100" />{/}
+	<col />
+	<col width="110" />
+	<col width="90" />
+	<col width="120" />
+	<col width="50" />
+	<col width="90" />
+	</colgroup>
+	<thead class="lthgoodsrevew" >
+	<tr>
+		<th><input type="checkbox" name="checkboxAll" value="" id="checkboxAll" /></th>
+		<th>베스트</th>
+		<th>번호</th>
+		<th>작성자<br/>IP</th>
+		{? categorylist}<th><select  name="category" id="searchcategory" class="line">
+		<option value="" selected="selected" >- 분류전체 -</option>
+		{@ categorylist}
+			<option value="{.value_}" {? _GET.category == .value_} selected="selected"  {/}>{.value_}</option>
+		{/}
+		</select></th>{/}
+		<th>제목</th>
+		<th>등록일<br/>구매여부<br/>조회수</th>
+		<th>{? isplusfreenot && manager.goods_review_type != 'IMAGE'  }
+			<select name="score" id="searchscore"  class="line">
+			<option value=""  selected="selected" >-평점전체-</option>
+			<option value="1" {? _GET.score == 1} selected="selected"  {/} >0~20</option>
+			<option value="2" {? _GET.score == 2} selected="selected"  {/}>21~40</option>
+			<option value="3" {? _GET.score == 3} selected="selected"  {/}>41~60</option>
+			<option value="4" {? _GET.score == 4} selected="selected"  {/}>61~80</option>
+			<option value="5" {? _GET.score == 5} selected="selected"  {/}>81~100</option>
+			</select>
+			{:}
+			<select name="score" id="searchscore"  class="line">
+			<option value=""  selected="selected" >-평점전체-</option>
+			<option value="1" {? _GET.score == 1} selected="selected"  {/} >★</option>
+			<option value="2" {? _GET.score == 2} selected="selected"  {/}>★★</option>
+			<option value="3" {? _GET.score == 3} selected="selected"  {/}>★★★</option>
+			<option value="4" {? _GET.score == 4} selected="selected"  {/}>★★★★</option>
+			<option value="5" {? _GET.score == 5} selected="selected"  {/}>★★★★★</option>
+			</select>
+			{/}
+		</th>
+		<th>적립금/포인트<br/>자동지급</th>
+		<th>적립금<br/>수동지급</th>
+		<th>관리</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb otb"  id="ajaxTable">
+		<!-- 공지리스트데이터 : 시작 -->
+		{? noticeloop }
+			{@ noticeloop }
+			<tr class="list-row noticetr {.onlynoticeclass}">
+				<td align="center"> </td>
+				<td align="center"> </td>
+				<td align="center" class="number">{.number}</td>
+				<td align="center" class="name" >{.name}<br/>{.ip}</td>
+				{? categorylist}<td align="center" class="category" >{.category}</td>{/}
+				<td align="left">
+					{.goodsview}
+				</td>
+				<td align="center" class="date">{.date}<br/>{.hit}</td>
+				<td align="center">{.scorelay}{? .score_avg_lay }/100{/}</td>
+				<td align="center"> </td>
+				<td align="center"> </td>
+				<td align="center" nowrap>
+					{.modifybtn}
+					{.replaybtn}
+					{.deletebtn}
+				</td>
+			</tr>
+			{/}
+		{/}
+		<!--공지 리스트 : 끝 -->
+
+		<!-- 리스트데이터 : 시작 -->
+		{? loop }
+			{@ loop }
+			<tr class="list-row {? .display == 1}gray{/} {.tdclass}" >
+				<td align="center"><input type="checkbox" name="del[]" value="{.seq}"  class="checkeds"  /></td>
+				<td align="center"><span class="icon-best-gray best_select {.best}  hand" seq="{.seq}"></span></td>
+				<td align="center" class="number">{.number}</td>
+				<td align="center" class="name" >{.name}<br/>{.ip}</td>
+				{? categorylist}<td align="center" class="category" >{.category}</td>{/}
+				<td align="left">
+					{.goodsview}
+				</td>
+				<td align="center" class="date">{.date}<br/>{.buyertitle}<br/>{.hit}<br/></td>
+				<td align="center">{.scorelay}{? .score_avg_lay }/100{/}</td>
+				<td align="center">{.autoemoneylay}</td>
+				<td align="center">{.emoneylay}</td>
+				<td align="center" nowrap>
+					{.modifybtn}
+					{.replaybtn}
+					{.deletebtn}
+				</td>
+			</tr>
+			{/}
+		{:}
+			<tr class="list-row">
+				<td colspan="all" align="center">
+					{ ? search_text }
+						'{search_text}' 검색된 게시글이 없습니다.
+					{:}
+						등록된 게시글이 없습니다.
+					{/}
+				</td>
+			<tr>
+		{/}
+
+	</tbody>
+	<!-- 리스트 : 끝 -->
+</table>
+<!-- 게시글리스트테이블 : 끝 -->
+
+<br style="line-height:10px;" />
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{pagin}</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$(".orderview").click(function(){
+		var order_seq = $(this).attr("order_seq");
+		var href = "/admin/order/view?no="+order_seq;
+		var a = window.open(href, 'orderdetail'+order_seq, '');
+		if ( a ) {
+			a.focus();
+		}
+	});
+
+	$(".best_select").click(function(){
+		var best = "";
+		if($(this).hasClass("checked")){
+			$(this).removeClass("checked");
+			best = "none";
+		}else{
+			$(this).addClass("checked");
+			best = "checked";
+		}
+
+		$.ajax({
+			type: "post",
+			url: "../board_goods_process",
+			data: "mode=goods_review_best&board_id="+board_id+"&best="+best+"&seq="+$(this).attr("seq"),
+			success: function(result){}
+		});
+	});
+
+
+});
+</script>
+
+<!--{ ? !loop }-->
+<script>
+// colspan 계산
+$("td[colspan='all']").each(function(){
+	$(this).attr('colspan',$(this).closest("table").children("thead").first().children("tr").first().children("th").length);
+});
+</script>
+<!--{ / }-->
+
+{ #layout_footer }

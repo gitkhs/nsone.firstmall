@@ -1,0 +1,855 @@
+{ #layout_header }
+
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+
+<script>
+$(function(){
+
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='start_date']").val(getDate(0));
+				$("input[name='end_date']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='start_date']").val(getDate(0));
+				$("input[name='end_date']").val(getDate(-3));
+				break;
+			case '1week' :
+				$("input[name='start_date']").val(getDate(0));
+				$("input[name='end_date']").val(getDate(-7));
+				break;
+			case '1month' :
+				$("input[name='start_date']").val(getDate(0));
+				$("input[name='end_date']").val(getDate(-30));
+				break;
+			case '3month' :
+				$("input[name='start_date']").val(getDate(0));
+				$("input[name='end_date']").val(getDate(-90));
+				break;
+			default :
+				$("input[name='start_date']").val('');
+				$("input[name='end_date']").val('');
+				break;
+		}
+	});
+
+	<!--{ ? event.gift_rule }-->
+	$("input[name='goods_rule'][value='{event.goods_rule}']").attr('checked',true);
+	$("input[name='gift_rule'][value='{event.gift_rule}']").attr('checked',true);
+	goods_rule_type();
+	<!--{ / }-->
+
+	$(".event_view_btn").click(function(){
+		window.open("/page/index?tpl="+encodeURIComponent($(".event_view_btn").attr("tpl_path")));
+	});
+
+	var tagCopyClip = new ZeroClipboard.Client();
+	tagCopyClip.setHandCursor( true );
+	tagCopyClip.setCSSEffects( true );
+	tagCopyClip.setText("/page/index?tpl="+encodeURIComponent($(".event_view_btn").attr("tpl_path")));
+	tagCopyClip.addEventListener( 'complete', function(client, text) {
+		alert("주소가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+	} );
+	tagCopyClip.glue('url_copy','page-buttons-right');
+
+
+
+
+	$("#default_select_gift").bind("click",function(){
+		set_gift_list("defaultGiftSelect","defaultGift");
+	});
+	$("#qty_select_gift").bind("click",function(){
+		set_gift_list("qtyGiftSelect","qtyGift");
+	});
+	$("#lot_select_gift").bind("click",function(){
+		set_gift_list("lotGiftSelect","lotGift");
+	});
+	$(".price_select_gift").live("click",function(){
+		var num = $(this).attr("num");
+		set_gift_list("priceGiftSelect"+num,"priceGift"+num);
+	});
+
+	/*
+	var priceClone = $("#priceTable tbody tr").eq(0).clone();
+	var priceClone2 = $("#priceTable tbody tr").eq(1).clone();
+	$("#priceAdd").click(function(){
+		var newClone = priceClone.clone();
+		var newClone2 = priceClone2.clone();
+
+		newClone.find("#priceAdd").attr("id","").addClass("priceDel");
+		newClone.find("span").removeClass("btn-plus");
+		newClone.find("span").addClass("btn-minus");
+
+		var trObj = $("#priceTable tbody tr");
+		trObj.parent().append(newClone);
+		trObj.parent().append(newClone2);
+		apply_input_style(newClone.find("input[type='text']"));
+	});
+	$(".priceDel").live('click',function(){
+		$(this).parent().parent().parent().remove();
+	});
+	*/
+	$("#priceAdd").click(function(){
+		add_table();
+	});
+	$(".priceDel").live('click',function(){
+		del_table();
+	});
+
+
+	var qtyClone = $("#qtyTable tbody tr").eq(0).clone();
+	$("#qtyAdd").click(function(){
+		var newClone = qtyClone.clone();
+		newClone.find("#qtyAdd").attr("id","").addClass("qtyDel");
+		newClone.find("span").removeClass("btn-plus");
+		newClone.find("span").addClass("btn-minus");
+		var trObj = $("#qtyTable tbody tr");
+		trObj.parent().append(newClone);
+		apply_input_style(newClone.find("input[type='text']"));
+	});
+	$(".qtyDel").live('click',function(){
+		$(this).parent().parent().parent().remove();
+	});
+
+	var lotClone = $("#lotTable tbody tr").eq(0).clone();
+	$("#lotAdd").click(function(){
+		var newClone = lotClone.clone();
+		newClone.find("#lotAdd").attr("id","").addClass("lotDel");
+		newClone.find("span").removeClass("btn-plus");
+		newClone.find("span").addClass("btn-minus");
+		var trObj = $("#lotTable tbody tr");
+		trObj.parent().append(newClone);
+		apply_input_style(newClone.find("input[type='text']"));
+	});
+	$(".lotDel").live('click',function(){
+		$(this).parent().parent().parent().remove();
+	});
+
+
+	$("input[name='goods_rule']").click(function(){
+		goods_rule_type();
+	});
+
+	$("form#eventRegist button#issueGoodsButton").bind("click",function(){
+		//if($("input:radio[name='sale_use']:checked").val()=='N') return;
+		set_goods_list("issueGoodsSelect","issueGoods");
+	});
+	$("#issueGoods").sortable();
+	$("#issueGoods").disableSelection();
+
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','');
+	$("select[name='category1']").bind("change",function(){
+		category_admin_select_load('category1','category2',$(this).val());
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").bind("change",function(){
+		category_admin_select_load('category2','category3',$(this).val());
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category3']").bind("change",function(){
+		category_admin_select_load('category3','category4',$(this).val());
+	});
+
+	$("button#issueCategoryButton").bind("click",function(){
+		//if($("input:radio[name='sale_use']:checked").val()=='N') return;
+		var obj;
+		var category;
+		var categoryCode;
+
+		obj = $("select[name='category1']");
+		if(obj.val()){
+			category = $("select[name='category1'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='category2']");
+		if(obj.val()){
+			category += " > " + $("select[name='category2'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='category3']");
+		if(obj.val()){
+			category += " > " + $("select[name='category3'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		var obj = $("select[name='category4']");
+		if(obj.val()){
+			category += " > " + $("select[name='category4'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+
+		if(category){
+			if($("input[name='issueCategoryCode[]'][value='"+categoryCode+"']").length == 0){
+				var tag = "<div style='padding:5px;'><span style='display:inline-block;width:300px'>"+category+"</span>";
+				tag += "<span class='btn-minus'><button type='button' class='delCategory'></button></span>";
+				tag += "<input type='hidden' name='issueCategoryCode[]' value='"+categoryCode+"' /></div>";
+				$("div#issueCategory").append(tag);
+			}
+		}
+	});
+
+	$("form#eventRegist button.delCategory").live("click",function(){
+		$(this).parent().parent().remove();
+	});
+
+});
+
+function goods_rule_type(){
+	var value = $("input[name='goods_rule']:checked").val();
+	if(value=='all'){
+		$("#select_category").hide();
+		$("#select_goods").hide();
+	}else if(value=='category'){
+		$("#select_category").show();
+		$("#select_goods").hide();
+	}else if(value=='goods'){
+		$("#select_category").hide();
+		$("#select_goods").show();
+	}
+}
+
+function set_goods_list(displayId,inputGoods){
+	$.ajax({
+		type: "get",
+		url: "../goods/select",
+		data: "page=1&inputGoods="+inputGoods+"&displayId="+displayId,
+		success: function(result){
+			$("div#"+displayId).html(result);
+		}
+	});
+	openDialog("상품 검색", displayId, {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+}
+
+function set_gift_list(displayId,inputGoods){
+	$.ajax({
+		type: "get",
+		url: "../goods/gift",
+		data: "page=1&inputGoods="+inputGoods+"&displayId="+displayId,
+		success: function(result){
+			$("div#"+displayId).html(result);
+		}
+	});
+	openDialog("사은품 검색", displayId, {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+}
+
+
+function add_table(){
+	var table = document.getElementById("priceTable");
+	var row = table.insertRow();
+	row.onmouseover=function(){table.clickedRowIndex=this.rowIndex;};
+
+	var cell1 = row.insertCell();
+	var cell2 = row.insertCell();
+	cell1.className = "its-th-align center";
+	cell1.innerHTML = "<span class=\"btn-minus\"><button type=\"button\" class=\"priceDel\"></button></span>";
+	cell2.className = "its-th";
+
+	{? gift_gb=='buy' }
+	cell2.innerHTML = "적립금 <input type=\"text\" name=\"sprice2[]\" size=\"5\"/>이면 ↓아래의 사은품 중 1개 증정";
+	{ : }
+	cell2.innerHTML = "&#123;상품 할인가(판매가) x 수량&#125;+&#123;좌동&#125;+&#123;좌동&#125; 합이... <input type=\"text\" name=\"sprice2[]\" size=\"5\"/>원 ~ <input type=\"text\" name=\"eprice2[]\" size=\"5\"/>원이면 ↓아래의 사은품 중 1개 증정";
+	{ / }
+
+	var obj = document.getElementsByName("sprice2[]");
+	var num = obj.length;
+
+	var row = table.insertRow();
+	var cell1 = row.insertCell();
+	var cell2 = row.insertCell();
+	cell1.className = "its-th-align center";
+	cell1.innerHTML = "<span class=\"btn small gray\"><button type=\"button\" class=\"price_select_gift\" num='"+num+"'>사은품 선택</button></span>";
+	cell2.className = "its-td";
+	cell2.innerHTML = "<div id='priceGift"+num+"'></div><div id='priceGiftSelect"+num+"' class='hide'></div>";
+}
+
+
+function del_table(){
+	var bum_table = document.getElementById("priceTable");
+	var row_length = bum_table.rows.length;
+	var idx = bum_table.clickedRowIndex;
+
+	if(row_length > (idx+2)){
+		alert("하단부터 삭제해 주세요.");
+		return;
+	}
+
+	bum_table.deleteRow(idx);
+	bum_table.deleteRow(idx);
+}
+
+function deleteTr(num){
+	$("#pTr1_"+num).remove();
+	$("#pTr2_"+num).remove();
+}
+
+function order_gift_info(){
+	openDialog("주문 시 사은품", "order_gift_info", {"width":"830","height":"520","show" : "fade","hide" : "fade"});
+}
+
+function gift_summary(){
+	openDialog("이벤트 설명 노출 위치", "gift_summary", {"width":"830","height":"520","show" : "fade","hide" : "fade"});
+}
+</script>
+
+<style>
+.info_item {min-height:30px;line-height:30px;padding:0 3px;border:1px solid #ddd;background-color:#fff;margin:1px;}
+.info_item_holder {min-height:30px;line-height:30px;padding:0 3px;border:1px solid #ddd;background-color:#ffeecc;margin:1px;}
+</style>
+
+<form name="eventRegist" id="eventRegist" method="post" enctype="multipart/form-data" action="../event_process/gift_regist" target="actionFrame">
+<input type="hidden" name="gift_gb" value="{gift_gb}" />
+{?event.gift_seq}<input type="hidden" name="gift_seq" value="{event.gift_seq}" />{/}
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+		<!-- { ? event.event_seq } -->
+			<h2>{=getstrcut(event.title,20)} <span style="color:blue;padding-left:20px;">{event.status} / {=number_format(event.page_view)}</span></h2>
+		<!-- { : } -->
+			<h2>({? gift_gb == "order"}구매조건{:}교환조건{/}) 사은품 이벤트 {? _GET.event_seq }수정{:}만들기{/}</h2>
+		<!-- { / } -->
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large white"><button type="button" onclick="document.location.href='/admin/event/gift_catalog?{query_string}';">사은품 이벤트리스트<span class="arrowright"></span></button></span></li>
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right" id="page-buttons-right">
+			<li><span class="btn large white"><button type="button" id="url_copy">주소복사</button></span></li>
+			<!-- { ? event.gift_seq } -->
+			<li><span class="btn large white"><button type="button" class="event_view_btn" tpl_path="{event.tpl_path}">화면보기<span class="arrowright"></span></button></span></li>
+			<!-- { / } -->
+			<li><span class="btn large black"><button type="submit" onclick="submitEditorForm(document.eventRegist);">저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!--{ ? event.event_seq }-->
+<div style="text-align:center">
+
+</div>
+<!--{/}-->
+
+<div class="item-title">사은품 이벤트 정보</div>
+<table class="info-table-style" style="width:100%">
+<colgroup>
+	<col width="10%" />
+	<col width="90%" />
+</colgroup>
+
+<tbody>
+<tr>
+	<th class="its-th-align center">사은품 이벤트 명</th>
+	<td class="its-td">
+		<input type="text" name="title" class="line" size="50" value="{event.title}" />
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">사은품 이벤트 설명<br><span class="btn small orange"><input type="button" value="안내) 노출 위치" onclick="gift_summary();"></span></th>
+	<td class="its-td">
+	<textarea name="gift_contents" style="width:98%; height:100px;" contentHeight="150px" class="daumeditor">{event.gift_contents}</textarea>
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">사은품 이벤트 기간</th>
+	<td class="its-td">
+		<input type="text" name="start_date"  id="start_date" value="{?event.start_date}{event.start_date}{:}{=date('Y-m-d')}{/}" class="datepicker line"  maxlength="10" size="10" />
+		&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+		<input type="text" name="end_date" id="end_date" value="{?event.end_date}{event.end_date}{:}{=date('Y-m-d',strtotime('1 month'))}{/}" class="datepicker line" maxlength="10" size="10" />
+		&nbsp;&nbsp;
+		<span class="btn small"><input type="button" value="오늘" id="today" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date"/></span>
+
+		<p>
+			이벤트 기간이 종료 후 이벤트 페이지를 접속하였을 때<br />
+			<b>방문자</b> : 이벤트가 종료되었습니다!라고 안내되어집니다.<br />
+			<b>관리자</b> : 계속해서 이벤트의 페이지의 내용을 확인 할 수 있습니다.
+		</p>
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">활성화여부</th>
+	<td class="its-td">
+		<label><input type="radio" name="display" value="y" {?event.display=='y' || !event.display}checked="true"{/} />노출</label>
+		&nbsp;&nbsp;
+		<label><input type="radio" name="display" value="n" {?event.display=='n'}checked="true"{/} />비노출</label>
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">SNS치환코드</th>
+	<td class="its-td">
+		<table width="100%"  class="info-table-style" >
+			<tr>
+				<th  class="its-th-align center">전체</th>
+				<th  class="its-th-align center">페이스북</th>
+				<th  class="its-th-align center">트위터</th>
+				<th  class="its-th-align center">google+</th>
+				<th  class="its-th-align center">싸이월드</th>
+				<th  class="its-th-align center">마이피플</th>
+				<th  class="its-th-align center">카카오톡</th>
+				<th  class="its-th-align center">카카오스토리</th>
+				<th  class="its-th-align center">LINE</th>
+			</tr>
+			<tr>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명')//SNS전체}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명')}"  onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','fa')//페이스북}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','fa')//페이스북}"  onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','tw')//트위터}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','tw')//트위터}"  onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','go')//google+}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','go')//google+}"  onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','cy')//싸이월드}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','cy')//싸이월드}"  onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','my')//마이피플}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','my')//마이피플}"  onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','ka')//카카오톡}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','ka')//카카오톡}"  onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','kakaostory')//카카오스토리}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','kakaostory')//카카오스토리}"  onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+				<td  class="its-td-align center">{=snslinkurl('event', '이벤트명','line')//LINE}
+					<br />
+					<span class="btn small"><button type="button" class="copy_qrcode_btn" code="{=snslinkurl('{snsevent}', '이벤트명','line')//LINE}"  onclick="copyContent($(this).attr('code'))">치환코드복사</button></span></td>
+			</tr>
+		</table>
+	</td>
+</tr>
+
+
+{?event.event_seq}
+<tr>
+	<th class="its-th">QR 코드</th>
+	<td class="its-td">
+		{=qrcode("event",event.event_seq,4)}
+		<a href="javascript:;" class="qrcodeGuideBtn fx11 lsp-1" key="event" value="{event.event_seq}">자세히▶</a>
+	</td>
+</tr>
+{/}
+</tbody>
+</table>
+
+{? gift_gb=='buy' }
+<div class="item-title">증정 상품</div>
+<table class="info-table-style" style="width:100%">
+<colgroup>
+	<col width="150" />
+
+</colgroup>
+
+<tbody>
+<tr>
+	<th class="its-th-align center">교환 조건</th>
+	<td class="its-td" colspan="2">
+		<input type="hidden" name="goods_rule" value="reserve">회원이 보유한 적립금
+		<!--label><input type="radio" name="goods_rule" value="reserve" checked/> 회원이 보유한 적립금</label>
+		<label><input type="radio" name="goods_rule" value="point"/> 회원이 보유한 포인트</label-->
+		<!--label><input type="radio" name="goods_rule" value="all"/> 회원이 보유한 적립금 + 포인트</label-->
+
+	</td>
+</tr>
+<tr class="all category goods_view">
+	<th class="its-th-align center">교환 비율</th>
+	<td class="its-td" colspan="2">
+	<ul>
+
+		<label><input type="radio" name="gift_rule" value="price" checked/>사은품 신청시 설정한 적립금만큼 차감됩니다.</label><br>
+		<table class="info-table-style" style="width:90%" id="priceTable">
+		<colgroup><col width="150" /><col /></colgroup>
+		<tbody>
+		{? priceLoop }
+		{@ priceLoop }
+		<tr id="pTr1_{.num}">
+			<th class="its-th-align center">{?.index_==0}<span class="btn-plus"><button type="button" id="priceAdd"></button></span>{:}<span class="btn-minus"><button type="button" onclick="deleteTr('{.num}');"></button></span>{/}</th>
+			<th class="its-th">적립금 <input type="text" name="sprice2[]" value="{.sprice}" size="5"/>이면 ↓아래의 사은품 중 1개 증정
+			</th>
+		</tr>
+		<tr id="pTr2_{.num}">
+			<th class="its-th-align center"><span class="btn small gray"><button type="button" class="price_select_gift" num="{.num}">사은품 선택</button></span></th>
+			<th class="its-td">
+				<div id="priceGift{.num}">
+				<!--{ @ .gifts }-->
+				<div class='goods' style='float:left;'>
+				<div align='center' class='image'>
+					<img class="goodsThumbView" alt="" src="{=viewImg(..goods_seq,'thumbView')}" width="50" height="50">
+				</div>
+				<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{..goods_name}</div>
+				<input type='hidden' name='priceGift{.num}[]' value='{..goods_seq}' />
+				<input type="hidden" name="priceGiftSeq{.num}[{..goods_seq}]" value="{..issuegoods_seq}" />
+				</div>
+				<!--{ / }-->
+				</div>
+				<div id="priceGiftSelect{.num}" class="hide"></div>
+			</th>
+		</tr>
+		{ / }
+		{ : }
+		<tr>
+			<th class="its-th-align center"><span class="btn-plus"><button type="button" id="priceAdd"></button></span></th>
+			<th class="its-th">적립금 <input type="text" name="sprice2[]" value="" size="5"/>이면 ↓아래의 사은품 중 1개 증정
+			</th>
+		</tr>
+		<tr>
+			<th class="its-th-align center"><span class="btn small gray"><button type="button" class="price_select_gift" num="1">사은품 선택</button></span></th>
+			<th class="its-td">
+				<div id="priceGift1">
+				<!--{ @ defaultGifts1 }-->
+				<div class='goods' style='float:left;'>
+				<div align='center' class='image'>
+					<img class="goodsThumbView" alt="" src="{=viewImg(.goods_seq,'thumbView')}" width="50" height="50">
+				</div>
+				<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+				<div align='center' class='price'>{=number_format(.price)}</div>
+				<input type='hidden' name='priceGift1[]' value='{.goods_seq}' />
+				<input type="hidden" name="priceGiftSeq1[{.goods_seq}]" value="{.issuegoods_seq}" />
+				</div>
+				<!--{ / }-->
+				</div>
+				<div id="priceGiftSelect1" class="hide"></div>
+			</th>
+		</tr>
+		{ / }
+		</tbody>
+		</table>
+		<br>
+
+
+	</ul>
+	</td>
+</tr>
+</tbody>
+</table>
+
+
+
+</table>
+{ : }
+<div class="item-title">증정 상품</div>
+<table class="info-table-style" style="width:100%">
+<colgroup>
+	<col width="150" />
+
+</colgroup>
+
+<tbody>
+<tr>
+	<th class="its-th-align center">구매 대상 상품</th>
+	<td class="its-td" colspan="2">
+		<label><input type="radio" name="goods_rule" value="all" checked/> 전체 상품</label>
+		<label><input type="radio" name="goods_rule" value="category" /> 특정 카테고리</label>
+		<label><input type="radio" name="goods_rule" value="goods" /> 특정 상품</label>
+
+		<div id="select_category" class="hide">
+			<div>
+			<select class="line" name="category1">
+				<option value="">1차 카테고리</option>
+			</select>
+			<select class="line" name="category2">
+				<option value="">2차 카테고리</option>
+			</select>
+			<select class="line" name="category3">
+				<option value="">3차 카테고리</option>
+			</select>
+			<select class="line" name="category4">
+				<option value="">4차 카테고리</option>
+			</select>
+			<span class="btn small gray"><button type="button" id="issueCategoryButton">카테고리 선택</button></span>
+			</div>
+			<div id="issueCategory">
+			<!--{ @ issuecategorys }-->
+			<div style='padding:5px;'>
+			<span style='display:inline-block;width:300px'>{.title}</span>
+			<span class='btn-minus'><button type='button' class='delCategory'></button></span>
+			<input type='hidden' name='issueCategoryCode[]' value='{.category_code}' />
+			<input type="hidden" name="issueCategoryCodeSeq[{.category_code}]" value="{.issuecategory_seq}" />
+			</div>
+			<!--{ / }-->
+			</div>
+		</div>
+
+		<div id="select_goods" class="hide">
+			<div><span class="btn small gray"><button type="button" id="issueGoodsButton">상품 등록</button></span></div>
+			<div class="clearbox" style="height:5px;"></div>
+			<div id="issueGoods">
+			<!--{ @ issuegoods }-->
+			<div class='goods' style='float:left;'>
+			<div align='center' class='image'>
+				<img class="goodsThumbView" alt="" src="{=viewImg(.goods_seq,'thumbView')}" width="50" height="50">
+			</div>
+			<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+			<div align='center' class='price'>{=number_format(.price)}</div>
+			<input type='hidden' name='issueGoods[]' value='{.goods_seq}' />
+			<input type="hidden" name="issueGoodsSeq[{.goods_seq}]" value="{.issuegoods_seq}" />
+			</div>
+			<!--{ / }-->
+			</div>
+			<div id="issueGoodsSelect" class="hide"></div>
+		</div>
+
+	</td>
+</tr>
+
+
+
+<tr class="all category goods_view">
+	<th class="its-th-align center">사은품 증정 방식<br><span class="btn small orange"><input type="button" value="안내) 주문 시 사은품" onclick="order_gift_info();"></span></th>
+	<td class="its-td" colspan="2">
+	<ul>
+		<label><input type="radio" name="gift_rule" value="default" checked/> ↑위 기준의 구매 대상 상품을 얼마 이상 구매하면 → 사은품 선택 가능</label><br>
+		<table class="info-table-style" style="width:90%">
+		<colgroup><col width="150" /><col /></colgroup>
+		<tbody>
+		<tr>
+			<th class="its-th"></th>
+			<th class="its-th">
+			&#123;상품 할인가(판매가) x 수량&#125;+&#123;좌동&#125;+&#123;좌동&#125; 합이... <input type="text" name="sprice1[]" value="{default.sprice}" size="5"/>원 이상이면 ↓아래의 사은품 중 1개 증정
+			</th>
+		</tr>
+		<tr>
+			<th class="its-th-align center"><span class="btn small gray"><button type="button" id="default_select_gift">사은품 선택</button></span></th>
+			<th class="its-td">
+				<div id="defaultGift">
+				<!--{ @ defaultGifts }-->
+				<div class='goods' style='float:left;'>
+				<div align='center' class='image'>
+					<img class="goodsThumbView" alt="" src="{=viewImg(.goods_seq,'thumbView')}" width="50" height="50">
+				</div>
+				<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+				<div align='center' class='price'>{=number_format(.price)}</div>
+				<input type='hidden' name='defaultGift[]' value='{.goods_seq}' />
+				<input type="hidden" name="defaultGiftSeq[{.goods_seq}]" value="{.issuegoods_seq}" />
+				</div>
+				<!--{ / }-->
+				</div>
+				<div id="defaultGiftSelect" class="hide"></div>
+			</th>
+		</tr>
+		</tbody>
+		</table>
+		<br>
+
+		<label><input type="radio" name="gift_rule" value="price" /> ↑위 기준의 구매 대상 상품을 얼마 이상 구매하면 → 더 좋은 사은품 선택 가능</label><br>
+		<table class="info-table-style" style="width:90%" id="priceTable">
+		<colgroup><col width="150" /><col /></colgroup>
+		<tbody>
+		{? priceLoop }
+		{@ priceLoop }
+		<tr id="pTr1_{.num}">
+			<th class="its-th-align center">{?.index_==0}<span class="btn-plus"><button type="button" id="priceAdd"></button></span>{:}<span class="btn-minus"><button type="button" onclick="deleteTr('{.num}');"></button></span>{/}</th>
+			<th class="its-th">&#123;상품 할인가(판매가) x 수량&#125;+&#123;좌동&#125;+&#123;좌동&#125; 합이... <input type="text" name="sprice2[]" value="{.sprice}" size="5"/>원 ~ <input type="text" name="eprice2[]" value="{.eprice}" size="5"/>원이면 ↓아래의 사은품 중 1개 증정
+			</th>
+		</tr>
+		<tr id="pTr2_{.num}">
+			<th class="its-th-align center"><span class="btn small gray"><button type="button" class="price_select_gift" num="{.num}">사은품 선택</button></span></th>
+			<th class="its-td">
+				<div id="priceGift{.num}">
+				<!--{ @ .gifts }-->
+				<div class='goods' style='float:left;'>
+				<div align='center' class='image'>
+					<img class="goodsThumbView" alt="" src="{=viewImg(..goods_seq,'thumbView')}" width="50" height="50">
+				</div>
+				<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{..goods_name}</div>
+				<input type='hidden' name='priceGift{.num}[]' value='{..goods_seq}' />
+				<input type="hidden" name="priceGiftSeq{.num}[{..goods_seq}]" value="{..issuegoods_seq}" />
+				</div>
+				<!--{ / }-->
+				</div>
+				<div id="priceGiftSelect{.num}" class="hide"></div>
+			</th>
+		</tr>
+		{ / }
+		{ : }
+		<tr>
+			<th class="its-th-align center"><span class="btn-plus"><button type="button" id="priceAdd"></button></span></th>
+			<th class="its-th">	&#123;상품 할인가(판매가) x 수량&#125;+&#123;좌동&#125;+&#123;좌동&#125; 합이... <input type="text" name="sprice2[]" value="" size="5"/>원 ~ <input type="text" name="eprice2[]" value="" size="5"/>원이면 ↓아래의 사은품 중 1개 증정
+			</th>
+		</tr>
+		<tr>
+			<th class="its-th-align center"><span class="btn small gray"><button type="button" class="price_select_gift" num="1">사은품 선택</button></span></th>
+			<th class="its-td">
+				<div id="priceGift1">
+				<!--{ @ defaultGifts1 }-->
+				<div class='goods' style='float:left;'>
+				<div align='center' class='image'>
+					<img class="goodsThumbView" alt="" src="{=viewImg(.goods_seq,'thumbView')}" width="50" height="50">
+				</div>
+				<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+				<div align='center' class='price'>{=number_format(.price)}</div>
+				<input type='hidden' name='priceGift1[]' value='{.goods_seq}' />
+				<input type="hidden" name="priceGiftSeq1[{.goods_seq}]" value="{.issuegoods_seq}" />
+				</div>
+				<!--{ / }-->
+				</div>
+				<div id="priceGiftSelect1" class="hide"></div>
+			</th>
+		</tr>
+		{ / }
+		</tbody>
+		</table>
+
+		<br>
+
+		<label><input type="radio" name="gift_rule" value="quantity" /> ↑위 기준의 구매 대상 상품을 얼마 이상 구매하면 → 더 많은 사은품 선택 가능</label>
+		<table class="info-table-style" style="width:90%" id="qtyTable">
+		<colgroup><col width="150" /><col /></colgroup>
+		<tbody>
+
+		{? qtyLoop }
+		{@ qtyLoop }
+		<tr>
+			<th class="its-th-align center">{?.index_==0}<span class="btn-plus"><button type="button" id="qtyAdd"></button></span>{:}<span class="btn-minus"><button type="button" id="qtyAdd" class="qtyDel"></button></span>{/}</th>
+			<th class="its-th">
+			&#123;상품 할인가(판매가) x 수량&#125;+&#123;좌동&#125;+&#123;좌동&#125; 합이... <input type="text" name="sprice3[]" value="{.sprice}" size="5"/>원 ~ <input type="text" name="eprice3[]" value="{.eprice}" size="5"/>원이면 ↓아래의 사은품 중 <input type="text" name="ea3[]" value="{.ea}" size="3"/>개 증정
+			</th>
+		</tr>
+		{ / }
+		{ : }
+		<tr>
+			<th class="its-th-align center"><span class="btn-plus"><button type="button" id="qtyAdd"></button></span></th>
+			<th class="its-th">
+			&#123;상품 할인가(판매가) x 수량&#125;+&#123;좌동&#125;+&#123;좌동&#125; 합이... <input type="text" name="sprice3[]" value="" size="5"/>원 ~ <input type="text" name="eprice3[]" value="" size="5"/>원이면 ↓아래의 사은품 중 <input type="text" name="ea3[]" value="" size="3"/>개 증정
+			</th>
+		</tr>
+		{ / }
+
+
+		</table>
+		<table class="info-table-style" style="width:90%">
+		<colgroup><col width="150" /><col /></colgroup>
+		<tr>
+			<th class="its-th-align center"><span class="btn small gray"><button type="button" id="qty_select_gift">사은품 선택</button></span></th>
+			<th class="its-td">
+				<div id="qtyGift">
+				<!--{ @ qtyGifts }-->
+				<div class='goods' style='float:left;'>
+				<div align='center' class='image'>
+					<img class="goodsThumbView" alt="" src="{=viewImg(.goods_seq,'thumbView')}" width="50" height="50">
+				</div>
+				<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+				<div align='center' class='price'>{=number_format(.price)}</div>
+				<input type='hidden' name='qtyGift[]' value='{.goods_seq}' />
+				<input type="hidden" name="qtyGiftSeq[{.goods_seq}]" value="{.issuegoods_seq}" />
+				</div>
+				<!--{ / }-->
+				</div>
+				<div id="qtyGiftSelect" class="hide"></div>
+			</th>
+		</tr>
+		</tbody>
+		</table>
+
+		<br>
+
+		<label><input type="radio" name="gift_rule" value="lot" /> ↑위 기준의 구매 대상 상품을 얼마 이상 구매하면 → 추첨(또는 선정 기준에 따라)을 통하여 사은품 증정</label>
+		<table class="info-table-style" style="width:90%" id="lotTable">
+		<colgroup><col width="150" /><col /></colgroup>
+		<tbody>
+
+		{? lotLoop }
+		{@ lotLoop }
+		<tr>
+			<th class="its-th-align center"></th>
+			<th class="its-th">
+			&#123;상품 할인가(판매가) x 수량&#125;+&#123;좌동&#125;+&#123;좌동&#125; 합이... <input type="text" name="sprice4[]" value="{.sprice}" size="5"/>원 이상이면 ↓아래의 사은품 중 추첨하여 증정
+			</th>
+		</tr>
+		{ / }
+		{ : }
+		<tr>
+			<th class="its-th-align center"></th>
+			<th class="its-th">
+			&#123;상품 할인가(판매가) x 수량&#125;+&#123;좌동&#125;+&#123;좌동&#125; 합이... <input type="text" name="sprice4[]" value="" size="5"/>원 이상이면 ↓아래의 사은품 중 추첨하여 증정
+			</th>
+		</tr>
+		{ / }
+
+
+		</table>
+		<table class="info-table-style" style="width:90%">
+		<colgroup><col width="150" /><col /></colgroup>
+		<tr>
+			<th class="its-th-align center"><span class="btn small gray"><button type="button" id="lot_select_gift">사은품 선택</button></span></th>
+			<th class="its-td">
+				<div id="lotGift">
+				<!--{ @ lotGifts }-->
+				<div class='goods' style='float:left;'>
+				<div align='center' class='image'>
+					<img class="goodsThumbView" alt="" src="{=viewImg(.goods_seq,'thumbView')}" width="50" height="50">
+				</div>
+				<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+				<div align='center' class='price'>{=number_format(.price)}</div>
+				<input type='hidden' name='lotGift[]' value='{.goods_seq}' />
+				<input type="hidden" name="lotGiftSeq[{.goods_seq}]" value="{.issuegoods_seq}" />
+				</div>
+				<!--{ / }-->
+				</div>
+				<div id="lotGiftSelect" class="hide"></div>
+			</th>
+		</tr>
+		</tbody>
+		</table>
+	</ul>
+	</td>
+</tr>
+</tbody>
+</table>
+{ / }
+
+
+
+
+</form>
+<div id="order_gift_info" style="display:none;">
+	<table>
+		<tr>
+			<td><b>주문페이지 샘플화면) 사은품을 선택하는 이벤트일 경우</b></td>
+			<td width="10"></td>
+			<td><b>주문페이지 샘플화면) 사은품을 증정하는 이벤트일 경우</b></td>
+		</tr>
+		<tr>
+			<td><img src="../images/design/gift_smp1.gif" style="padding-top:10px;"></td>
+			<td width="10"></td>
+			<td><img src="../images/design/gift_smp2.gif" style="padding-top:10px;"></td>
+		</tr>
+
+	</table>
+</div>
+
+<div id="gift_summary" style="display:none;">
+	<table>
+		<tr>
+			<td><b>주문페이지 샘플화면) 사은품을 선택하는 이벤트일 경우</b></td>
+			<td width="10"></td>
+			<td><b>주문페이지 샘플화면) 사은품을 증정하는 이벤트일 경우</b></td>
+		</tr>
+		<tr>
+			<td><img src="../images/design/gift_smp1.gif" style="padding-top:10px;"></td>
+			<td width="10"></td>
+			<td><img src="../images/design/gift_smp2.gif" style="padding-top:10px;"></td>
+		</tr>
+
+	</table>
+</div>
+
+{ #layout_footer }

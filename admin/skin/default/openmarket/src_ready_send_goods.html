@@ -1,0 +1,160 @@
+<style type="text/css">
+.total-goods-count {color:red;font-weight:bold;}
+#paging_lay {width:100%;text-align:center;}
+#paging_lay .current-page {font-weight:bold;color:#205fd2;}
+#goods_search_lay { width:467px;border:2px solid #000;margin:0 auto;text-align:right; }
+#goods_search_lay input {width:400px;height: 22px;padding: 0px;border: 0px;margin: 0px;background-color: #fff;line-height: 22px;text-align: center;}
+#goods_search_lay button {width: 62px;height:26px;border: 0px;background: url('../images/common/btn_search.gif') no-repeat center center;cursor: pointer;}
+#goods_search_lay button span { visibility:hidden; }
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+	onload_get_ready_goods();
+
+	$(".btn-src-keyword").click(function(){
+		get_ready_goods_list(1);
+	});
+});
+
+// 초기 페이지 로드 시 대기 상품 수 추출 후 상품 목록 추출
+function onload_get_ready_goods(){
+	$.ajax({
+		type: "get",
+		url: "../openmarket/get_send_ready",
+		data: "no={shopSno}&useLimit=y&page=1&type=count",
+		success: function(result){
+			if	(result > 0){
+				$(".total-goods-count").text(comma(result));
+				get_ready_goods_list(1);
+			}else{
+				$(".total-goods-count").text('0');
+				$("#ready_goods_list").find('tr').remove();
+			}
+		}
+	});
+}
+
+// 대기 상품 수 추출
+function get_ready_goods_count(){
+	$.ajax({
+		type: "get",
+		url: "../openmarket/get_send_ready",
+		data: "no={shopSno}&useLimit=y&page=1&type=count",
+		success: function(result){
+			if	(result > 0)	$(".total-goods-count").text(comma(result));
+			else				$(".total-goods-count").text('0');
+		}
+	});
+}
+
+// 목록 노출
+function get_ready_goods_list(page){
+
+	var keyword	= $("#goods_search_lay").find("input[name='keyword']").val();
+	if	(keyword == $("#goods_search_lay").find("input[name='keyword']").attr('title'))	keyword	= '';
+
+	$("#ready_goods_list").find('tr').remove();
+	$.getJSON('../openmarket/get_send_ready', {'no':'{shopSno}','useLimit':'y','page':page,'keyword':keyword}, function(result){
+
+		// 목록 출력
+		if	( result.list ){
+			var list		= result.list;
+			var listCnt		= list.length;
+			var listHTML	= '';
+			for	(var i = 0; i < listCnt; i++){
+				listHTML	= '<tr>';
+				if	(list[i]['request_date'])
+					listHTML	+= '<td class="its-td-align center">'+list[i]['request_date']+'</td>';
+				else
+					listHTML	+= '<td class="its-td-align center"></td>';
+				listHTML	+= '<td class="its-td-align center">'+list[i]['goods_seq']+'</td>';
+				listHTML	+= '<td class="its-td">'+list[i]['goods_name']+'</td>';
+				listHTML	+= '</tr>';
+				$("#ready_goods_list").append(listHTML);
+			}
+		}
+
+		crt_pagings(result.page, result.tpage, result.spage, result.epage);
+	});
+}
+
+// 페이지 만들기
+function crt_pagings(page, tpage, spage, epage){
+
+	$("#paging_lay").html('');
+
+	// 페이징 출력
+	if	( tpage > 0 ){
+		var pageHTML	= '';
+
+		// 첫페이지, 이전 블럭 첫 페이지
+		if	(page > 10){
+			pageHTML		+= ' <span class="hand pages" pagenum="1">[◀◀]</span> ';
+			var prePage		= Math.floor( ( page - 1 ) / 10 ) * 10 - 9;
+			pageHTML		+= ' <span class="hand pages" pagenum="'+prePage+'">[◀]</span> ';
+		}
+
+		for	(var p = spage; p <= epage; p++){
+			if	(p == page)
+				pageHTML	+= ' <span class="hand pages current-page" pagenum="'+p+'">['+p+']</span> ';
+			else
+				pageHTML	+= ' <span class="hand pages" pagenum="'+p+'">['+p+']</span> ';
+		}
+
+		// 마지막 페이지, 다음 블럭 마지막 페이지
+		if	(tpage > epage){
+			var nextPage	= ( Math.floor( ( page - 1 ) / 10 ) + 2 ) * 10;
+			if	(nextPage > tpage)	nextPage	= tpage;
+			pageHTML		+= ' <span class="hand pages" pagenum="'+nextPage+'">[▶]</span> ';
+			pageHTML		+= ' <span class="hand pages" pagenum="'+tpage+'">[▶▶]</span> ';
+		}
+		
+		$("#paging_lay").append(pageHTML);
+		$("#paging_lay").find("span.pages").click(function(){
+			if	(!$(this).hasClass('current-page')){
+				get_ready_goods_list($(this).attr('pagenum'));
+			}
+		});
+	}
+}
+</script>
+<div id="top_total_string_lay">
+	<div>총 <span class="total-goods-count">0</span>개의 상품이 전송 대기입니다.
+	전송 대기 상품은 전송 시스템(2회/1시간)에 의해 해당 마켓으로 전송됩니다.</div>
+	<div class="red">단, 전송대기 상품이 많은 경우 순차 전송됩니다.</div>
+</div>
+
+<br style="line-height:10px;" />
+
+<div id="goods_search_lay">
+	<input type="text" name="keyword" value="" title="상품명, 상품고유값, 상품코드" />
+	<button type="button" class="btn-src-keyword"><span>검색</span></button>
+</div>
+
+<br style="line-height:30px;" />
+
+<div id="goods_list_lay">
+
+	<!-- 주문리스트 테이블 : 시작 -->
+	<table class="info-table-style" style="width:100%">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="150" />
+		<col width="100" />
+		<col />
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="its-th-align center">접수 일시</th>
+		<th class="its-th-align center">상품 고유값</th>
+		<th class="its-th-align center">상품명</th>
+	</tr>
+	</thead>
+	<tbody id="ready_goods_list">
+	</tbody>
+	</table>
+</div>
+
+<br style="line-height:10px;" />
+
+<div id="paging_lay"></div>

@@ -1,0 +1,154 @@
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>포인트교환</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.gif" /></a>
+</div>
+<style>
+.promocodeImage {position:relative; width:98px; height:95px; padding-bottom:10px; background:url('../images/common/img_promocode.gif') no-repeat;}
+.promocodeImage span {position:absolute; top:52px; left:0px; width:100%; color:#dc0000; font-size:16px; font-family:tahoma; font-weight:bold;}
+</style>
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$(".req_gift").click(function(){
+		var my_point = $("input[name='point']").val();
+		var my_reserve = "{myemoney}";
+		var seq		= $(this).attr("seq");
+		var point	= $(this).attr("point");
+		var goods_rule	= $(this).attr("goods_rule");
+		var goods_name	= $(this).attr("goods_name");
+		
+		if(goods_rule == "reserve"){
+			//alert(my_point+" : "+$(this).attr("point"));
+			if(parseInt(my_reserve) < parseInt($(this).attr("point"))){
+				alert("해당 사은품은 증정 받기 위한 잔여 적립금이 부족합니다");
+				return;
+			}
+		}else{
+			//alert(my_point+" : "+$(this).attr("point"));
+			if(parseInt(my_point) < parseInt($(this).attr("point"))){
+				alert("해당 사은품은 증정 받기 위한 잔여 포인트가 부족합니다");
+				return;
+			}
+		}
+		//alert($(this).attr("point")+" : "+$(this).attr("seq"));
+
+		$.get('/mypage/buy_gift?seq='+seq+'&point='+point+'&goods_rule='+goods_rule+'&goods_name='+escape(goods_name), function(data) {
+		  	$('#giftPopup').html(data);
+		});
+		openDialog("사은품 신청", "giftPopup", {"width":"1000","height":700});
+	});
+
+
+});
+
+function clipBoard(name, id){
+	var clip = new ZeroClipboard.Client();
+	clip.setHandCursor( true );
+	clip.setCSSEffects( true );
+	clip.setText($("input[name='"+name+"']").val());
+	clip.addEventListener( 'complete', function(client, text) {
+		alert("클립보드에 복사되었습니다.");
+	});
+	clip.glue(id);
+}
+</script>
+<!-- 타이틀 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="10"></td></tr>
+<tr><td><img src="../images/common/tit_chg_po_mny.gif" /></td></tr>
+<tr><td height="8"></td></tr>
+<tr><td height="3" bgcolor="#dddddd"></td></tr>
+<tr>
+	<td height="34">
+
+		{userInfo.user_name}님의 보유 포인트 <span class="bold black">P{=number_format(mypoint)}</span>
+		&nbsp;&nbsp;<span class="gray">|</span>&nbsp;&nbsp;
+		이번달 소멸 예정 포인트 <span class="bold black">P{=number_format(0)}</span>
+	</td>
+</tr>
+<tr><td height="1" bgcolor="#dddddd"></td></tr>
+</table>
+
+<div style="padding-left:5px; padding-top:15px; line-height:30px; color:#a3a3a3;">
+	<font color="#ed2b07" style="font-weight: bold !important;"></font>
+	<font color="#dd2e2e">보유하신 포인트로 상품구매시 사용하실 수 있는 적립금으로 교환하실 수 있습니다.</font>
+</div>
+<div class="pdt30">
+
+<input type="hidden" name="point" value="{=get_member_money('point',userInfo.member_seq)}"/>
+<form name="exchangefrm" method="post" action="../mypage_process/point_exchagne" target="actionFrame">
+<div>포인트 {configReserve.emoney_point_rate}P가 적립금 1원으로 교환됩니다. (최소 교환 포인트 {configReserve.emoney_minum_point}P)</div>
+<div style="height:20px"></div>
+<table width="645" border="0" cellpadding="0" cellspacing="0" align="center">
+<tr>
+	<td height="2" bgcolor="#e6e6e6" colspan="4"></td>
+</tr>
+<tr>
+	<td height="50" colspan="4"></td>
+</tr>
+<tr>
+	<td width="116"></td>
+	<td width="175" align="right"><b>교환할 포인트를 입력해 주세요.<b></td>
+	<td width="20"></td>
+	<td height="34"><input type="text" name="exchange_point" value="" onkeyup="exchange_calculate(this.value);" style="width:178px; height:38px;  border:3px solid #b7b7b7; font-size:18px; font-family:Tahoma; font-weight:bold; color:#000; text-align:center;"><br><b>{configReserve.emoney_point_rate}P 미만은 반환됩니다.</b></td>
+</tr>
+<tr>
+	<td height="35" colspan="4"></td>
+</tr>
+
+<tr>
+	<td width="116"></td>
+	<td></td>
+	<td width="20"></td>
+	<td height="34" style="padding-left:65px;"><img src="../images/common/img_chg_arrow.gif"></td>
+</tr>
+<tr>
+	<td height="30" colspan="4"></td>
+</tr>
+<tr>
+	<td width="116"></td>
+	<td align="right"><b>전환 적립금</b></td>
+	<td width="20"></td>
+	<td height="34"><input type="text" name="exchange_emoney" value="" readonly style="width:178px; height:38px;  border:3px solid #a3b5d7; font-size:18px; font-family:Tahoma; font-weight:bold; color:#000; text-align:center; background:#e0f3fd"></td>
+</tr>
+<tr>
+	<td height="30" colspan="4"></td>
+</tr>
+<tr>
+	<td colspan="4" align="center"><img src="../images/common/btn_s_chg.gif" onclick="point_exchange();" style="cursor:pointer;"></td>
+</tr>
+<tr>
+	<td height="40" colspan="4"></td>
+</tr>
+<tr>
+	<td height="2" bgcolor="#e6e6e6" colspan="4"></td>
+</tr>
+</table>
+</form>
+
+</div>
+
+<div style="height:30px"></div>
+<div id="giftPopup" style="display:none"></div>
+
+<script>
+
+	function point_exchange(){
+		var frm = document.exchangefrm;
+		frm.submit();
+	}
+
+	function exchange_calculate(point){
+		var exchange_rate = "{configReserve.emoney_point_rate}";
+
+		if(point == ""){
+			point = "0";
+		}
+		var exchage_emoney = parseInt(parseInt(point) / parseInt(exchange_rate));
+
+		$("input[name='exchange_emoney']").val(exchage_emoney);
+	}
+
+</script>

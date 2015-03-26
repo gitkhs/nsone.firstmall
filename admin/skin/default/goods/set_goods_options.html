@@ -1,0 +1,107 @@
+<!--{ ? mode != 'view' }-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko">
+<head>
+<title>{config_basic.shopName}{ ? !preg_match('/order_print/',_SERVER.REDIRECT_QUERY_STRING)} 관리자환경 :: 퍼스트몰, 오직 운영자만을 생각한 가장 앞선 쇼핑몰입니다.{ / }</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="../css/common.css" />
+<link rel="stylesheet" type="text/css" href="../css/layout.css" />
+<link rel="stylesheet" type="text/css" href="../css/buttons.css" />
+<link rel="stylesheet" type="text/css" href="../css/boardnew.css" />
+<link rel="stylesheet" type="text/css" href="../css/page.css" />
+<link rel="stylesheet" type="text/css" href="../css/jqueryui/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="../css/jqueryui/black-tie/jquery-ui-1.8.16.custom.css" />
+<link rel="stylesheet" type="text/css" href="../css/poshytip/style.css" />
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/editor/css/editor.css" />
+<!--{ ? config_system.favicon }-->
+<!-- 파비콘 -->
+<link rel="shortcut icon" href="{ config_system.favicon}" />
+<!--{ / }-->
+<!-- 자바스크립트 [순서변경하지마세요] -->
+<!--{? preg_match('/goods\/regist/',_SERVER.REQUEST_URI) || preg_match('/category\/catalog/',_SERVER.REQUEST_URI) }-->
+<script type="text/javascript" src="/app/javascript/jquery/jquery.min.1.6.4.js"></script>
+<!--{ : }-->
+<script type="text/javascript" src="/app/javascript/jquery/jquery.min.js"></script>
+<!--{ / }-->
+<script type="text/javascript" src="/app/javascript/jquery/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery.hotkeys.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery.poshytip.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery.activity-indicator-1.0.0.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery.cookie.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-select-box.js"></script>
+<script type="text/javascript" src="/app/javascript/js/dev-tools.js"></script>
+<script type="text/javascript" src="/app/javascript/js/admin-layout.js?dummy=130813&krdomain=http://{config_system.subDomain}"></script>
+<script type="text/javascript" src="/app/javascript/js/admin-goodsRegist.js?v=20140317"></script>
+<script type="text/javascript" src="/app/javascript/js/admin-goodsaddlayer.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery.colorpicker.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-color-picker.js"></script>
+<script type="text/javascript" src="/app/javascript/js/common-function.js"></script>
+<script  type="text/javascript">
+$(document).ready(function(){
+	{ ? reload == 'y' }
+	location.replace('?tmp_seq={tmp_seq}&tmp_policy={tmp_policy}&socialcp_input_type={_GET.socialcp_input_type}{ ? mode == 'view' }&mode=view&goods_seq={goods_seq}{ / }');
+		{ ? mode == 'view' }socialcpinputtype();{ / }
+	{ : mode == 'view' }
+		{ ? options }
+	$("#optionLayer", parent.document).html($("#optionLayer").html());
+	$("#preview_option_divide", parent.document).html($("#preview_option_divide").html());
+	$("#preview_option_sum", parent.document).html($("#preview_option_sum").html());
+	parent.chgSuboptionReservePolicy('{options[0].tmp_policy}');
+		{ / }
+	{ / }
+
+	help_tooltip();
+	socialcpinputtype();
+});
+
+//
+function socialcpinputtype() {
+	{? _GET.socialcp_input_type }
+	var socialcp_input_type = '{_GET.socialcp_input_type}';
+	{:}
+		var socialcp_input_type = $("input[name='socialcp_input_type']:checked", window.opener.document).val();
+	{/}
+	if(socialcp_input_type) {
+		var couponinputsubtitle = '';
+		$(".couponinputtitle").show();
+		if( socialcp_input_type == 'price' ) {
+			couponinputsubtitle = '금액';
+		}else{
+			couponinputsubtitle = '횟수';
+		}
+		{ ? mode != 'view' }
+		$(".socialcpuseopen").val(socialcp_input_type);
+		{ / }
+		$(".couponinputsubtitle").text(couponinputsubtitle);
+	}
+
+	{ ? mode != 'view' }
+	//과세/부가세 체크
+	{ ? _GET.goodsTax }
+	var goodsTax = '{ _GET.goodsTax }';
+	{ : }
+		var goodsTax = $("input[name='tax']:checked", window.opener.document).val();
+	{ / }
+	$(".goodsTax").val(goodsTax);
+	{ / }
+}
+</script>
+</head>
+<body>
+<div id="wrap">
+<!--{ / }-->
+
+<!--{ ? mode == 'view' }-->
+	{ # ONLY_VIEW }
+<!--{ : }-->
+	{ # EDIT_VIEW }
+<!--{ / }-->
+
+<!--{ ? mode != 'view' }-->
+{ #layout_footer_popup }
+<!--{ / }-->

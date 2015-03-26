@@ -1,0 +1,379 @@
+{ #layout_header }
+
+<script type="text/javascript">
+$(document).ready(function() {
+	// CHECKBOX
+	$("input:[name='member_chk[]']").click(function(){
+		if($.isFunction("chkMemberCount")){
+			chkMemberCount()
+		}
+	});
+
+	// SMS
+	$("#sms_form").click(function(){
+		<!--{? !auth_send }-->
+		alert("권한이 없습니다.");
+		return;
+		<!--{ / }-->
+		$("#container").css("height","0px");
+		$("#container").attr("src","sms_form");
+		$("#container").show();
+
+		$(document).scrollTop($("#container").offset().top);
+	});
+
+	// EMONEY
+	$("#emoney_form").click(function(){
+		<!--{? !auth_promotion }-->
+		alert("권한이 없습니다.");
+		return;
+		<!--{ / }-->
+
+		$("#container").css("height","0px");
+		$("#container").attr("src","emoney_form");
+		$("#container").show();
+	});
+
+	$("#point_form").click(function(){
+		<!--{? !auth_promotion }-->
+		alert("권한이 없습니다.");
+		return;
+		<!--{ / }-->
+
+		$("#container").css("height","0px");
+		$("#container").attr("src","point_form");
+		$("#container").show();
+	});
+
+	// EMAIL
+	$("#email_form").click(function(){
+		<!--{? !auth_send }-->
+		alert("권한이 없습니다.");
+		return;
+		<!--{ / }-->
+		emailFormOpen();
+	});
+
+	$("#orderby_disp").change(function(){
+		var value_arr = $(this).val().split(" ");
+		$("input[name='orderby']").val(value_arr[0]);
+		$("input[name='sort']").val(value_arr[1]);
+		$("#memberForm").submit();
+	});
+	$("#display_quantity").change(function(){
+		$("#memberForm").submit();
+	});
+
+	$("#withdrawal_btn").click(function(){
+		<!--{? !auth_act }-->
+		alert("권한이 없습니다.");
+		return;
+		<!--{ / }-->
+		var cnt = $("input:checkbox[name='member_chk[]']:checked").length;
+		if(cnt<1){
+			alert("탈퇴시킬 회원을 선택해 주세요.");
+			return;
+		}else{
+			if(!confirm("선택한 회원을 탈퇴시키겠습니까? ")) return;
+			$("#memberForm").attr("action","../member_process/withdrawal_set");
+			$("#memberForm").attr("target","actionFrame");
+			$("#memberForm").submit();
+		}
+	});
+
+	$("#joingate").click(function(){
+		window.open('/member/register?join_type=member&adminjoin=1','','');//'/member/agreement'
+	});
+
+	// 체크박스 색상
+	$("input[type='checkbox'][name='member_chk[]']").live('change',function(){
+		if($(this).is(':checked')){
+			$(this).closest('tr').addClass('checked-tr-background');
+		}else{
+			$(this).closest('tr').removeClass('checked-tr-background');
+		}
+	}).change();
+
+	$("button[name='excel_down']").bind('click',function(){
+		<!--{? !auth_member_down }-->
+		alert("다운로드 권한이 없습니다.\n\n설정 > 관리자에서 설정할 수 있습니다.");
+		return;
+		<!--{ / }-->
+
+		if(!$("#excel_type").val()){
+			alert("양식을 선택 해 주세요.");
+			return;
+		}
+
+		openDialog('회원정보 다운로드','admin_member_download', {'width':550,'height':402});
+
+		$("input[name='member_download_passwd']").val("");
+		$("input[name='member_download_passwd']").focus();
+	});
+
+	$("input[name='member_download_passwd']").keydown(function(e){
+		if(e.keyCode == 13) {
+			return false;
+		}
+	});
+
+	$("button[name='excel_down_real']").bind('click',function(){
+		if (!$("input[name='member_download_passwd']").val()) {
+			alert("비밀번호를 입력해 주세요.");
+			$("input[name='member_download_passwd']").focus();
+			return;
+		}
+
+		parent.closeDialog('admin_member_download');
+		var queryString = $("#memberForm").serializeArray();
+		queryString.push({name: 'member_download_passwd', value: $("input[name='member_download_passwd']").val()});
+		ajaxexceldown('/admin/member_process/excel_down', queryString);
+	});
+
+	// 다운로드항목설정
+	$("button[name='download_list']").click(function(){
+		<!--{? !auth_member_down }-->
+		alert("다운로드 권한이 없습니다.\n\n설정 > 관리자에서 설정할 수 있습니다.");
+		return;
+		<!--{ / }-->
+
+		openDialogPopup("항목설정", "download_list_setting", {
+			'url' : 'download_write',
+			'width' : 800,
+			'height' : 460
+		});
+	});
+});
+
+function emailFormOpen(){
+	$("#container").css("height","0px");
+	$("#container").attr("src","email_form");
+	$("#container").show();
+}
+
+function ajaxexceldown(url, queryString){
+	var inputs = "";
+	 jQuery.each(queryString, function(i, field){
+		 inputs +='<input type="hidden" name="'+field.name+'" value="'+ field.value +'" />';
+	 });
+	jQuery('<form action="'+ url +'" method="post" target="actionFrame" >'+inputs+'</form>')
+	.appendTo('body').submit().remove();
+}
+</script>
+
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>회원리스트</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button id="joingate">회원가입<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+
+<form name="memberForm" id="memberForm">
+<input type="hidden" name="member_seq" />
+<input type="hidden" name="orderby" value="{sc.orderby}"/>
+<input type="hidden" name="sort" value="{sc.sort}"/>
+<input type="hidden" name="searchcount" value="{sc.searchcount}"/>
+<input type="hidden" name="type" />
+<input type="hidden" name="perpage"  id="perpage" value="{sc.perpage}" />
+
+<input type="hidden" name="query_string" value="{query_string}"/>
+
+{# member_search }
+
+{# member_list }
+
+<div class="clearbox">
+	<ul class="left-btns">
+		<li>
+			<span class="btn small gray"><button type="button" id="withdrawal_btn">탈퇴</button></span>
+			<span class="btn small gray"><button type="button" id="email_form">이메일</button></span>
+			<span class="btn small gray"><button type="button" id="sms_form">SMS</button></span>
+			<span class="btn small gray"><button type="button" id="emoney_form">적립금</button></span>
+			<span class="btn small gray"><button type="button" id="point_form">포인트</button></span>
+		</li>
+	</ul>
+</div>
+
+<br style="line-height:10px;" />
+
+</form>
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{pagin}</div>
+
+
+<br style="line-height:16px;" />
+
+<div>
+<iframe name="container" id="container" style="display:none;width:100%;" frameborder="0"></iframe>
+</div>
+
+
+<div id="excel_popup" class="hide"></div>
+
+
+
+<div class="hide" id="search_detail_dialog">
+<form name="set_search_detail" method="post" action="set_search_default" target="actionFrame">
+<div id="contents">
+	<table class="search-form-table" id="serch_tab">
+	<tr id="member_search_form" style="display:block;">
+		<td>
+			<table class="sf-option-table">
+			<colgroup>
+				<col width="80" />
+				<col width="170" />
+				<col width="80" />
+				<col width="170" />
+				<col width="80" />
+				<col width="170" />
+			</colgroup>
+			<tr>
+				<th>가입일</th>
+				<!--th>
+					<select name="date_gb" class="search_select_pop">
+						<option value="regist_date">가입일</option>
+						<option value="lastlogin_date">최종로그인</option>
+					</select>
+				</th-->
+				<td colspan="5">
+					<label class="search_label"><input type="radio" name="regist_date" value="today" checked="checked" /> 오늘</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3day" /> 3일간</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="7day" /> 일주일</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="1mon" /> 1개월</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3mon" /> 3개월</label>
+				</td>
+			</tr>
+			<tr>
+				<th>최종 방문일</th>
+				<td colspan="5">
+					<label class="search_label"><input type="radio" name="lastlogin_date" value="today" checked="checked" /> 오늘</label>
+					<label class="search_label"><input type="radio" name="lastlogin_date" value="3day" /> 3일간</label>
+					<label class="search_label"><input type="radio" name="lastlogin_date" value="7day" /> 일주일</label>
+					<label class="search_label"><input type="radio" name="lastlogin_date" value="1mon" /> 1개월</label>
+					<label class="search_label"><input type="radio" name="lastlogin_date" value="3mon" /> 3개월</label>
+				</td>
+			</tr>
+			<tr>
+				<th>생일</th>
+				<td colspan="5">
+					<label class="search_label"><input type="radio" name="birthday_date" value="today" checked="checked" /> 오늘</label>
+					<label class="search_label"><input type="radio" name="birthday_date" value="3day" /> 3일간</label>
+					<label class="search_label"><input type="radio" name="birthday_date" value="7day" /> 일주일</label>
+					<label class="search_label"><input type="radio" name="birthday_date" value="1mon" /> 1개월</label>
+					<label class="search_label"><input type="radio" name="birthday_date" value="3mon" /> 3개월</label>
+				</td>
+			</tr>
+			<tr>
+				<th>기념일</th>
+				<td colspan="5">
+					<label class="search_label"><input type="radio" name="anniversary_date" value="today" checked="checked" /> 오늘</label>
+					<label class="search_label"><input type="radio" name="anniversary_date" value="3day" /> 3일간</label>
+					<label class="search_label"><input type="radio" name="anniversary_date" value="7day" /> 일주일</label>
+					<label class="search_label"><input type="radio" name="anniversary_date" value="1mon" /> 1개월</label>
+					<label class="search_label"><input type="radio" name="anniversary_date" value="3mon" /> 3개월</label>
+				</td>
+			</tr>
+			<tr>
+				<th>SMS 수신</th>
+				<td>
+					<label><input type="radio" name="sms" value="" checked/> 전체</label>
+					<label><input type="radio" name="sms" value="y"/> 동의</label>
+					<label><input type="radio" name="sms" value="n"/> 거부</label>
+				</td>
+				<th>이메일 수신</th>
+				<td>
+					<label><input type="radio" name="mailing" value="" checked/> 전체</label>
+					<label><input type="radio" name="mailing" value="y"/> 동의</label>
+					<label><input type="radio" name="mailing" value="n"/> 거부</label>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<th>가입유형</th>
+				<td>
+					<label><input type="radio" name="business_seq" value="" checked/> 전체</label>
+					<label><input type="radio" name="business_seq" value="n"/> 개인</label>
+					<label><input type="radio" name="business_seq" value="y"/> 기업</label>
+				</td>
+				<th>가입승인</th>
+				<td>
+					<label><input type="radio" name="status" value="" checked/> 전체</label>
+					<label><input type="radio" name="status" value="done"/> 승인</label>
+					<label><input type="radio" name="status" value="hold"/> 미승인</label>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<th>등급</th>
+				<td>
+					<select name="grade" class="search_select_pop" style="width:100px;">
+						<option value="">전체</option>
+						{@ group_arr }
+						<option value="{.group_seq}" {?sc.grade==.group_seq}selected{/}>{.group_name}</option>
+						{ / }
+					</select>
+				</td>
+				<th>주문횟수</th>
+				<td>
+					<input type="text" name="sorder_cnt" value="" class="line" size="5"/> ~ <input type="text" name="eorder_cnt" value="" class="line" size="5"/>
+				</td>
+				<th>주문금액</th>
+				<td>
+					<input type="text" name="sorder_sum" value="" class="line" size="7"/> ~ <input type="text" name="eorder_sum" value="" class="line" size="7"/>
+				</td>
+			</tr>
+			<tr>
+				<th>적립금</th>
+				<td>
+					<input type="text" name="semoney" value="" class="line" size="7"/> ~ <input type="text" name="eemoney" value="" class="line" size="7"/>
+				</td>
+				<th>이머니</th>
+				<td>
+					<input type="text" name="scash" value="" class="line" size="7"/> ~ <input type="text" name="ecash" value="" class="line" size="7"/>
+				</td>
+				<th>포인트</th>
+				<td>
+					<input type="text" name="spoint" value="{sc.spoint}" class="line" size="7"/> ~ <input type="text" name="epoint" value="{sc.epoint}" class="line" size="7"/>
+				</td>
+			</tr>
+			<tr>
+				<th>리뷰횟수</th>
+				<td>
+					<input type="text" name="sreview_cnt" value="" class="line" size="5"/> ~ <input type="text" name="ereview_cnt" value="" class="line" size="5"/>
+				</td>
+				<th>방문횟수</th>
+				<td>
+					<input type="text" name="slogin_cnt" value="" class="line" size="5"/> ~ <input type="text" name="elogin_cnt" value="" class="line" size="5"/>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<div align="center" style="padding-top:10px;">
+	<span class="btn large black">
+		<button type="submit">저장하기<span class="arrowright"></span></button>
+	</span>
+</div>
+</form>
+</div>
+
+{ #layout_footer }

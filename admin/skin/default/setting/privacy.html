@@ -1,0 +1,141 @@
+<!-- 회원설정 : 개인정보취급방침 -->
+<style>
+.h1 {background-color:#f1f1f1;color:#94AE6B;font-size:1.1em;font-weight:bold;text-align:left;}
+.h1 a:link {color:#000000;text-decoration:none;background-color:#f1f1f1;}
+.h1 a:visited {color:#000000;text-decoration:none;background-color:#000000;}
+.h1 a:hover, h2 a:focus{color:red;}
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+	var chk2 = '{p3p_xml}';
+	var chk3 = '{privacy_html}';
+	if(chk3){
+		showTab('tab4');
+	}else if(chk2){
+		showTab('tab3');
+	}
+
+	//clipBoard('member_url','board1');
+	//clipBoard('privacy_url','board2');
+	apply_input_style();
+});
+
+function clipBoard(name, id){
+	var clip = new ZeroClipboard.Client();
+	clip.setHandCursor( true );
+	clip.setCSSEffects( true );
+	clip.setText($("input[name='"+name+"']").val());
+	clip.addEventListener( 'complete', function(client, text) {
+		alert("클립보드에 복사되었습니다.");
+	});
+	clip.glue(id);
+}
+
+function showTab(id){
+	if($("#"+id).css("display")=='none'){
+		$(".cont").hide();
+		$(".arrow").html("▼");
+		$("#"+id).show();
+		$("#"+id+"_arrow").html("▷");
+	}else{
+		$(".cont").hide();
+		$(".arrow").html("▼");
+	}
+}
+</script>
+
+
+<div class="item-title">개인정보취급방침 <span style="float:right;padding-right:10px;"><span class="btn small cyanblue"><button type="button" onclick="window.open('http://www.privacy.go.kr/cmm/fms/FileDown.do?atchFileId=FILE_000000000072233&fileSn=2&nttId=1767','','');">민간용 작성예시</button></span></span> <span style="float:right;padding-right:10px;"><span class="btn small cyanblue"><button type="button" onclick="window.open('http://www.privacy.go.kr/cmm/fms/FileDown.do?atchFileId=FILE_000000000072233&fileSn=3&nttId=1767','','');">소상공인용 작성예시</button></span></span></div>
+
+
+<table width="100%" class="info-table-style"><col width="" />
+<tr>
+	<th class="its-th hand"  onclick="showTab('tab1');">1단계 - 개인정보취급방침 만들기  <span style="float:right;padding-right:10px;" id="tab1_arrow" class="arrow">▷</span></th>
+</tr>
+<tr>
+	<td class="its-td cont center" id="tab1">
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr height="150">
+			<td colspan="2">개인정보보 종합지원 포털 사이트(<a href="http://www.privacy.go.kr/a3sc/per/inf/perInfStep01.do" target="_blank">http://www.privacy.go.kr</a>)의 <B><개인정보처리방침 만들기></b>는
+개인정보보호법 및 시행령,<br>표준 개인정보 보호지침에 근거하여 개인정보처리방침 기본 항목에 대한 예시를 작성할 수 있도록 도와드리는 서비스입니다.<br>
+해당 공공기관 또는 사업자께서는 생성된 개인정보처리방침을 참조하여 사업 목적 및 범위에 맞도록 수정하여 사용하시기 바랍니다.<br><span class="btn small cyanblue"><button type="button" onclick="window.open('http://www.privacy.go.kr/a3sc/per/inf/perInfStep01.do','','');">개인정보처리방침 만들기</button></span></td>
+		</tr>
+
+		<!--
+		<tr><td height="10"></td></tr>
+		<tr>
+			<td colspan="2" align="left">＊ 11단계에서 입력하셔야 할 정보 안내</td>
+		</tr>
+		<tr>
+			<td width="520"><img src="../images/design/privacy_sample.jpg"></td>
+			<td valign="top" align="left">
+				<div style="padding:10px;"><input type="text" name="member_url" value="{member_url}" size="40" class="line"> <span class="btn small"><button type="button" id="board1" class="cBtn" onclick="clipBoard('member_url', 'board1');">복사</button></span></div>
+
+				<div style="padding:10px;"><input type="text" name="privacy_url" value="{privacy_url}" size="40" class="line"> <span class="btn small"><button type="button" id="board2" class="cBtn" onclick="clipBoard('privacy_url', 'board2');">복사</button></span></div>
+			</td>
+		</tr>
+		-->
+		</table>
+	</td>
+</tr>
+<!--
+<tr>
+	<th class="its-th hand"  onclick="showTab('tab2');">2단계 – 개인정보취급방침 전자적 표시 파일 적용 <span class="helpicon" title="PC에 다운로드 받은 w3c.zip 파일은 개인정보 취급방침을 규격화하여 표시한 것으로,<br>한국정보보호진흥원에서 고객님의 쇼핑몰 적용여부에 대한 확인을 위해<br>반드시 업로드 하셔야 합니다."></span>  <span style="float:right;padding-right:10px;" id="tab2_arrow" class="arrow">▼</span></th>
+</tr>
+<tr>
+	<td class="its-td cont center" id="tab2" style="display:none;">
+		<div>w3c.zip파일의 압축을 풀면 P3p.xml 과 p3policy.xml 2개가 생성되는데 각각의 위치에 업로드해 주세요.</div>
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr height="30">
+			<td>1단계에서 다운로드 받은 w3c.zip 압축을 풀어 <span style="color:red;font-weight:bold;">P3p.xml</span>을 업로드 하세요!</td>
+		</tr>
+		<tr height="30">
+			<td align="left" style="padding-left:35%;"><input type="file" name="p3p_xml" class="line" style="width:300px;"> {p3p_xml}</td>
+		</tr>
+		<tr height="30">
+			<td>1단계에서 다운로드 받은 w3c.zip 압축을 풀어 <span style="color:red;font-weight:bold;">P3policy.xml</span>을 업로드 하세요!</td>
+		</tr>
+		<tr height="30">
+			<td align="left" style="padding-left:35%;"><input type="file" name="p3policy_xml" class="line" style="width:300px;"> {p3policy_xml}</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+-->
+<tr>
+	<th class="its-th hand" onclick="showTab('tab3');">2단계 - 개인정보취급방침 파일 업로드  <span style="float:right;padding-right:10px;" id="tab3_arrow" class="arrow">▼</span></th>
+</tr>
+<tr>
+	<td class="its-td cont center" id="tab3" style="display:none;height:150px;">
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr height="30">
+			<td>1단계에서 다운로드 받은 <span style="color:red;font-weight:bold;">xxxxxxx.html</span> 파일을 업로드 하세요!</td>
+		</tr>
+		<tr height="30">
+			<td><input type="file" name="privacy_html" class="line" style="width:300px;"> {privacy_html}</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<th class="its-th hand" onclick="showTab('tab4');">3단계 - 개인정보취급방침 확인 (사업자께서는 생성된 개인정보처리방침을 참조하여 사업 목적 및 범위에 맞도록 수정하여 사용하시기 바랍니다)  <span style="float:right;padding-right:10px;" id="tab4_arrow" class="arrow">▼</span></th>
+</tr>
+<tr>
+	<td class="its-td cont" id="tab4" style="display:none;">
+		<div class="item-title-noimg">● 개인정보 취급방침 <span class="desc">(↓ 아래의 내용은 사이트 하단의 링크되어지는 '개인정보취급방침 화면' 에 보여지게 됩니다.)</span></div>
+
+		<div style="width:100%;text-align:left;padding-left:30px;">
+		<textarea rows="30" name="privacy" style="width:90%;" class="line">{privacy}</textarea>
+		</div>
+
+		<div class="item-title-noimg">● 개인정보 수집 및 이용 <span class="desc">(↓ 아래의 내용은 '회원가입 화면', '비회원 주문 화면', '비회원 게시판 글작성' 에 보여지게 됩니다.)</span></div>
+
+		<div style="width:100%;text-align:left;padding-left:30px;">
+		<div>* 위의 내용중에 [개인정보의 수집 및 이용목적] [개인정보의 보유 및 이용기간] [개인정보의 파기절차 및 방법] 부분을
+		아래에 넣어 주세요.</div>
+		<textarea rows="30" name="policy" style="width:90%;" class="line">{policy}</textarea>
+		</div>
+
+	</td>
+</tr>
+</table>

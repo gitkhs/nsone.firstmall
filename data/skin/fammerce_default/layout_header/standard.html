@@ -1,0 +1,125 @@
+<!-- 상단영역 : 시작 -->
+
+<div id="layout_header">
+	<h1><a href="/main/index"><img src="../images/design/header_logo.gif" title="{config_basic.shopName}" alt="{config_basic.shopName}" /></a></h1>
+
+	<h2 class="hide">상단 메뉴</h2>
+	<ul>
+		<li><a href="../goods/category_list">카테고리</a></li>
+		<!--{? userInfo.member_seq }-->
+		<li>{? userInfo.snsfacebookcon && fbuser  }<a href="javascript:void(0);" onclick="FB.logout(function(response) {logout();});return false; " >로그아웃</a>{:}<a href="../login_process/logout" target= "actionFrame"   >로그아웃</a>{/}</li>
+		<li><a href="../order/cart">장바구니</a></li>
+		<li><a href="../mypage/index">마이페이지</a></li>
+		<!--{ : }-->
+		<li><a href="../member/login">로그인</a></li>
+		<!--{ / }-->
+	</ul>
+
+	<h2 class="hide">상품검색</h2>
+	<form action="../goods/search" class="search_form">
+		<input type="hidden" name="keyword_log_flag" value="Y" />
+		<input type="text" name="search_text" value="" class="search_text" /><img src="../images/design/btn_header_search_cancel.gif" class="search_cancel_btn" onclick="$(this).closest('form')[0].reset();$(this).closest('form').find('.search_text').focus();" /><input type="image" src="../images/design/btn_header_search.gif" value="검색" class="search_btn" />
+	</form>
+
+	<script type="text/javascript">
+	$(function(){
+		/* 검색박스 리사이징 */
+		$(window).bind('resize',function(){
+			$(".search_text").css('width',$("#layout_header").width()-240);
+		}).trigger('resize');
+	});
+	</script>
+</div>
+<!-- 상단영역 : 끝 -->
+
+<!-- 퀵메뉴 영역 : 시작 -->
+<div id="quick_layer">
+	<h2 class="hide">퀵메뉴</h2>
+
+	<div class="quick_layer_btn"><img src="../images/design/btn_quick_open.png" /></div>
+
+	<table>
+	<col width="33%" />
+	<col width="33%" />
+	<col width="33%" />
+	<tr>
+		<!--{? userInfo.member_seq }-->
+		<td><a href="../login_process/logout" target="actionFrame">로그아웃</a></td>
+		<!--{:}-->
+		<td><a href="../member/login">로그인</a></td>
+		<!--{/}-->
+		<td><a href="../order/cart">장바구니</a></td>
+		<td><a href="../mypage/wish">위시리스트</a></td>
+	</tr>
+	<tr>
+		<td><a href="../board/?id=goods_review">상품후기</a></td>
+		<td><a href="../mypage/index">마이페이지</a></td>
+		<td><a href="../service/cs">고객센터</a></td>
+	</tr>
+	</table>
+
+	<script>
+	$("#quick_layer .quick_layer_btn").toggle(function(){
+		$("#quick_layer table").show();
+		$("#quick_layer").animate({
+			'margin-top' : '-' + $("#quick_layer table").height() + 'px'
+		});
+	},function(){
+		$("#quick_layer").animate({
+			'margin-top' : '0px'
+		},function(){
+			$("#quick_layer table").hide();
+		});
+	});
+
+	$(document)
+	.bind('touchmove',function(){
+		//$("#quick_layer").hide();
+	})
+	.bind('touchend',function(){
+		//$("#quick_layer").show();
+	})
+	.bind('scroll',function(){
+		$("#quick_layer").css({
+			//'top' : parseInt($(document).scrollTop()) + parseInt($(window).height())			,
+			'left' : $(document).scrollLeft()
+		});
+	}).trigger('scroll');
+	$(window).resize(function(){$(document).scroll();});
+	</script>
+</div>
+<!-- 퀵메뉴 영역 : 끝 -->
+
+{? showTopPromotion(null,layout_config.width) }
+<table width="{=(layout_config.width-5)}" height="45"  align="{layout_config.align}" cellpadding="0" cellspacing="0" border="0" >
+<tr>
+	<td valign="top">
+		<style>
+		.header_promo {position:relative; height:40px; width:{=(layout_config.width-5)}px; margin:auto; border:1px solid #c6c6c6;}
+		.header_promo .promo_prev {position:absolute; left:10px; top:10px;z-index:100;}
+		.header_promo .promo_next {position:absolute; right:10px; top:10px;z-index:100;}
+		.header_promo .promo_list {width:{=(layout_config.width)}px; white-space:nowrap;list-style:none;}
+		.header_promo .promo_list li {float:left;list-style:none;display:inline-block; width:{=(layout_config.width-5)}px; height:40px; line-height:40px; text-align:center; font-size:16px; font-family:dotum; font-weight:bold; color:#fff; letter-spacing:-1px;}
+		</style>
+		<div class="header_promo relative">
+			<div class="promo_prev prev "><a href="#" class=""><img src="../images/common/promo_arrow_prev.png" /></a></div>
+			<div class="promo_next next "><a href="#" class=""><img src="../images/common/promo_arrow_next.png" /></a></div>
+			<div class="promo_list slides_container ">
+				{=showTopPromotion(null,layout_config.width-5)}
+			</div>
+			<script>
+				$('.header_promo').slides({
+					preload: true,
+					play: 3000,
+					generateNextPrev: false,
+					generatePagination: false
+				});
+			</script>
+		</div>
+</td>
+</tr>
+</table>
+<table width="100%" height="1"   cellpadding="0" cellspacing="0" border="0" >
+<tr><td valign="top"></td></tr>
+</table>
+{/}

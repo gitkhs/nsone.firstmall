@@ -1,0 +1,269 @@
+{#layout_header_popup}
+
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/jquery.uploadify.v2.1.4.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery-ui-timepicker-addon.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery.colorpicker.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-color-picker.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-font-decoration.js"></script>
+
+<script type="text/javascript">
+
+var useWebftpFormItem = true;
+$(function(){	
+	{?template_path && popup_seq}
+	parent.DM_window_title_set("left","<a href=\"javascript:;\" onmouseup=\"DM_window_sourceeditor('{template_path}','\{=showDesignPopup({popup_seq})\}')\">◀ 팝업 영역의 HTML소스보기</a>");
+	{/}
+	parent.DM_window_title_set("center","{layout_config.tpl_desc}({layout_config.tpl_path})에 선택한 ");
+	
+	setUploadifyButton('imageUploadButton',{'scriptData':{'allowKorean':1}});
+	setUploadifyButton('bandBackgroundImageUploadButton',{'scriptData':{'allowKorean':1}});
+	
+	$("input[name='status']").change(function(){
+		if($("input[name='status'][value='period']").is(":checked")){
+			$("#period_span").show();
+		}else{
+			$("#period_span").hide();
+		}
+	}).change();
+	
+	$("input[name='contents_type']").change(function(){
+		if($(this).is(":checked")){
+			$(".contents_type_image").hide();
+			$(".contents_type_text").hide();
+			$(".contents_type_"+$(this).val()).show();
+		}
+	}).change();
+
+	$("input[name='style']").change(function(){
+		if($(this).is(":checked")){
+			var val = $(this).val();
+
+			if(val == 'band' || val == 'mobile_band'){
+				$(".location_division, .title_division").hide();
+				$(".contents_band_division").show();
+				$(".band_location_division").show();
+
+				$(".type_label").html("띠배너");
+			}else{
+				$(".location_division, .title_division").show();
+				$(".contents_band_division").hide();
+				$(".band_location_division").hide();
+
+				$(".type_label").html("팝업");
+			}
+
+			if(val == 'window' || val == 'layer' || val == 'mobile_layer'){
+				$(".bar_division").show();
+			}else{
+				$(".bar_division").hide();
+			}
+
+			if(val == 'mobile_layer' || val == 'mobile_band' || val == 'band'){
+				$(".contents_type_text_division").hide();
+				$("input[name='contents_type'][value='image']").closest('label').hide();
+				if($("input[name='contents_type']:checked").val()=='text'){
+					$("input[name='contents_type'][value='image']").attr('checked',true).change();
+				}
+			}else{
+				$(".contents_type_text_division").show();
+				$("input[name='contents_type'][value='image']").closest('label').show();
+			}
+		}
+		
+
+	}).change();
+	
+	setTimepicker();
+
+	/* 컬러피커 */
+	$(".colorpicker").customColorPicker({'hide':false});
+
+	$(".customFontDecoration").customFontDecoration();
+});
+</script>
+
+<form name="popupManagerForm" action="../design_process/popup_edit" method="post" target="actionFrame">
+<input type="hidden" name="template_path" value="{template_path}" />
+<input type="hidden" name="popup_seq" value="{popup_seq}" />
+<input type="hidden" name="direct" value="{_GET.direct}" />
+
+<div style="padding:10px;">
+	<table class="design-simple-table-style" width="100%">
+	<tr>
+		<th class="dsts-th">스타일</th>
+		<td class="dsts-td left">
+			{@popup_styles}
+			{? ((mobileMode || storemobileMode) && substr(.key_,0,7)=='mobile_')
+				|| ((!mobileMode && !storemobileMode) && substr(.key_,0,7)!='mobile_')
+				|| data.style==.key_
+			}
+			<label style="padding-right:20px;"><input type="radio" name="style" value="{.key_}" /> {.value_}</label>
+			{/}
+			{/}
+			<script>
+			{?data.style}
+				$("input[name='style'][value='{data.style}']").attr('checked',true);
+			{:}
+				$("input[name='style']").eq(0).attr('checked',true);
+			{/}
+
+			</script>
+		</td>
+	</tr>
+	<tr>
+		<th class="dsts-th">상태</th>
+		<td class="dsts-td left">
+			<label><input type="radio" name="status" value="show" {?data.status=='show' || !data.status=='show'}checked{/} /> 진행</label>
+			<label><input type="radio" name="status" value="period" {?data.status=='period'}checked{/} /> 기간</label>
+			<span id="period_span">
+				<input type="text" name="period_s" value="{data.period_s}" class="line datetimepicker" size="20" maxlength="19" />
+				<input type="text" name="period_e" value="{data.period_e}" class="line datetimepicker" size="20" maxlength="19" />
+			</span>
+			<label><input type="radio" name="status" value="stop" {?data.status=='stop'}checked{/} /> 중지</label>
+		</td>
+	</tr>
+	<tr>
+		<th class="dsts-th">관리용 코멘트</th>
+		<td class="dsts-td left">
+			<input type="text" name="admin_comment" value="{data.admin_comment}" class="line" size="100" maxlength="200" />
+		</td>
+	</tr>
+	<tr class="title_division">
+		<th class="dsts-th">타이틀 태그</th>
+		<td class="dsts-td left">
+			<input type="text" name="title" value="{data.title}" class="line" size="100" maxlength="200" />
+		</td>
+	</tr>
+	<tr class="location_division">
+		<th class="dsts-th">팝업 위치</th>
+		<td class="dsts-td left">
+			화면상단으로부터 <input type="text" name="loc_top" value="{?data.loc_top}{data.loc_top}{:}0{/}" class="line" size="4" maxlength="4" />px
+			X 화면왼쪽으로부터 <input type="text" name="loc_left" value="{?data.loc_left}{data.loc_left}{:}0{/}" class="line" size="4" maxlength="4" />px
+		</td>
+	</tr>
+	<tr class="band_location_division">
+		<th class="dsts-th">띠배너 위치</th>
+		<td class="dsts-td left">
+			사이트 최상단에 위치하는 배너
+		</td>
+	</tr>
+	<tr>
+		<th class="dsts-th"><span class="type_label">팝업</span> 내용</th>
+		<td class="dsts-td left">
+			<div class="contents_type_image_division">
+				<label><input type="radio" name="contents_type" value="image" {?data.contents_type=='image' || !data.contents_type}checked{/} /> 이미지</label>
+				
+				<div class="contents_type_image pd10 {?data.contents_type!='image'}hide{/}">
+					<div class="pdb5">
+						<input type="text" name="link" value="{data.link}" class="line" size="70" maxlength="200" title="링크 주소" />
+					</div>
+					<div class="webftpFormItem" >
+						<input type="radio" name="webftpFormItemSelector" class="hide" />
+						<table border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td>
+								<input type="text" name="newImgPath" value="" size="30" class="webftpFormItemInput line" readonly="readonly" />
+								<input type="text" name="originalFileName" class="webftpFormItemInputOriName hide" />
+								<input id="bandBackgroundImageUploadButton" type="file" value="" class="uploadify" />
+							</td>
+						</tr>
+						<tr>
+							<td><img src="/data/popup/{data.image}" class="webftpFormItemPreview {?!data.image}hide{/}" style="max-width:750px" /></td>
+						</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<div class="contents_band_division pd10">
+				배경
+				<div>
+					<label><input type="radio" name="band_background_type" value="color" {?data.band_background_color || !data.band_background_color}checked{/} /> 색상</label><input type="text" name="band_background_color" value="{?data.band_background_color}{data.band_background_color}{:}#ffeef7{/}" size="7" maxlength="20" class="line colorpicker" />
+				</div>
+				<div>
+					<label>
+					<input type="radio" name="band_background_type" value="image" {?data.band_background_image}checked{/} /> 이미지</label>
+					<span class="band_background_imageLabel">
+						<select name="band_background_image_repeat">
+							<option value="repeat" {?data.band_background_image_repeat=='repeat'}selected="selected"{/}>바둑판</option>
+							<option value="repeat-x" {?data.band_background_image_repeat=='repeat-x'}selected="selected"{/}>수평반복</option>
+							<option value="repeat-y" {?data.band_background_image_repeat=='repeat-y'}selected="selected"{/}>수직반복</option>
+							<option value="no-repeat" {?data.band_background_image_repeat=='no-repeat'}selected="selected"{/}>원본 그대로</option>
+						</select>
+						<select name="band_background_image_position">
+							<option value="left top" {?data.band_background_image_position=='left top'}selected="selected"{/}>좌측상단</option>
+							<option value="left center" {?data.band_background_image_position=='left center'}selected="selected"{/}>좌측중단</option>
+							<option value="left bottom" {?data.band_background_image_position=='left bottom'}selected="selected"{/}>좌측하단</option>
+							<option value="center top" {?data.band_background_image_position=='center top'}selected="selected"{/}>중앙상단</option>
+							<option value="center center" {?data.band_background_image_position=='center center'}selected="selected"{/}>중앙중단</option>
+							<option value="center bottom" {?data.band_background_image_position=='center bottom'}selected="selected"{/}>중앙하단</option>
+							<option value="right top" {?data.band_background_image_position=='right top'}selected="selected"{/}>우측상단</option>
+							<option value="right center" {?data.band_background_image_position=='right center'}selected="selected"{/}>우측중단</option>
+							<option value="right bottom" {?data.band_background_image_position=='right bottom'}selected="selected"{/}>우측하단</option>
+						</select>
+
+						<span class="webftpFormItem" >
+							<input type="radio" name="webftpFormItemSelector" class="hide" />
+							<input type="text" name="new_band_background_image" value="" size="30" class="webftpFormItemInput line" readonly="readonly" />
+							<input type="text" name="o_band_background_image" class="webftpFormItemInputOriName hide" />
+							<input id="imageUploadButton" type="file" value="" class="uploadify" />
+							<div><img src="/data/popup/{data.band_background_image}" class="webftpFormItemPreview {?!data.band_background_image}hide{/}" style="max-width:750px" /></div>
+						</span>
+
+					</span>
+				</div>		
+			</div>
+
+			<div class="contents_type_text_division pdt10">
+				<label><input type="radio" name="contents_type" value="text" {?data.contents_type=='text'}checked{/} /> 텍스트</label>
+				
+				<div class="contents_type_text pd10 {?data.contents_type!='text'}hide{/}">
+					<div class="pdb5">
+						가로크기 <input type="text" name="width" value="{?data.width}{data.width}{:}0{/}" class="line" size="4" maxlength="4" />px&nbsp;&nbsp;&nbsp;
+						세로크기 <input type="text" name="height" value="{?data.height}{data.height}{:}0{/}" class="line" size="4" maxlength="4" />px
+					</div>
+					<textarea name="contents" contentHeight="370px" class="daumeditor">{data.contents}</textarea>
+				</div>
+			</div>			
+			
+		</td>
+	</tr>
+	<tr class="bar_division">
+		<th class="dsts-th">팝업 하단</th>
+		<td class="dsts-td left">
+			바탕색 <input type="text" name="bar_background_color" value="{?data.bar_background_color}{data.bar_background_color}{:}#333333{/}" size="7" maxlength="20" class="hide colorpicker" />
+			<div class="pdt5 clearbox">
+				<input type="text" name="bar_msg_today_text" value="{?data.bar_msg_today_text}{data.bar_msg_today_text}{:}오늘 하루 이 창을 열지 않음{/}" size="30" maxlength="30" />
+				<textarea name="bar_msg_today_decoration" class="customFontDecoration">{data.bar_msg_today_decoration}</textarea>
+			</div>
+			<div class="pdt5 clearbox">
+				<input type="text" name="bar_msg_close_text" value="{?data.bar_msg_close_text}{data.bar_msg_close_text}{:}닫기{/}" size="30" maxlength="30" />
+				<textarea name="bar_msg_close_decoration" class="customFontDecoration">{data.bar_msg_close_decoration}</textarea>
+			</div>
+		</td>
+	</tr>
+	</table>
+	
+	{? template_path && popup_seq}
+	<div style="height:15px"></div>
+	
+	<div class="center">
+		<label><input type="checkbox" name="removeDesignPopupArea" value="Y" /> 이 페이지의 팝업 영역을 없앰 (설정 정보는 삭제되지 않음)</label>
+	</div>
+	{/}
+	
+	<div style="height:15px"></div>
+	
+	<div class="center">
+		<span class="btn medium cyanblue"><input type="button" value="적용" onclick="submitEditorForm(document.popupManagerForm)" /></span>
+	</div>
+
+</div>
+
+</form>
+
+{#layout_footer_popup}

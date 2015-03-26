@@ -1,0 +1,121 @@
+{ #layout_header_popup }
+<style >
+table.mqs-menu {border:0px;border-collapse:collapse;}
+table.mqs-menu td {background-color:#fbfbfb; border:1px solid #dfdfe4; border-bottom:1px solid #c5c7ce;}
+table.mqs-menu td.selected {background-color:#fff; border-bottom:0px;}
+table.mqs-menu td a {display:inline-block; padding:4px 0px; width:135px; text-align:center; color:#9194a1}
+table.mqs-menu td.selected a {font-weight:bold; color:#333}
+</style>
+<!-- 타이틀 -->
+<div id="main-qna-summary">
+	<table width="100%" height="30">
+	<tr>
+		<td align="right">
+			<table class="mqs-menu fl">
+			<tr>
+				<td {? _GET.tab == '1' || !_GET.tab}class="selected" {/} ><a href="?tab=1&member_seq={_GET.member_seq}">보유한 프로모션 </a></td>
+				<td {? _GET.tab == '2'}class="selected" {/} ><a href="?tab=2&member_seq={_GET.member_seq}">다운로드 가능프로모션 </a></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<div class="main-summary-contents"></div>
+</div>
+<div style="height:8px;"></div>
+{? _GET.tab == '1'  || !_GET.tab}
+	<table class="info-table-style" style="width:100%">
+	<colgroup>
+			<col width="13%" />
+			<col  />
+			<col width="20%" />
+			<col width="20%" />
+			<col width="10%" />
+			<col width="10%" />
+			<col width="10%" />
+		</colgroup>
+	<thead>
+		<tr>
+			<th class="its-th-align center">발급일자</th>
+			<th class="its-th-align center">프로모션명 / 할인액(율) / 종류</th>
+			<th class="its-th-align center">제한금액</th>
+			<th class="its-th-align center">유효기간</th>
+			<th class="its-th-align center">사용여부</th>
+			<th class="its-th-align center">구매상품</th>
+			<th class="its-th-align center">사용일</th>
+		</tr>
+	<tbody class="ltb">
+	{? loop }
+		{@ loop }
+		<tr>
+			<td class="its-td-align center">{.date}</td>
+			<td class="its-td-align center">
+				<div class="bold">{.promotion_name}</div>
+				<div >{.salepricetitle}</div>
+				<div >{.issuebtn}</div>
+			</td>
+			<td class="its-td-align right">{.limit_goods_price}원 이상 구매 시</td>
+			<td class="its-td-align center">{.downloaddate}</td>
+			<td class="its-td-align center">{.use_status_title}</td>
+			<td class="its-td-align center">{.goodsview}</td>
+			<td class="its-td-align center">{.use_date}</td>
+		</tr>
+		{/}
+	{:}
+		<tr >
+			<td colspan="7" align="center" class="cell">
+				보유한 프로모션이 없습니다.
+			</td>
+		<tr>
+	{/}
+	</tbody>
+	</table>
+{:}
+	<table class="info-table-style" style="width:100%">
+	<colgroup>
+			<col  />
+			<col width="20%" />
+			<col width="20%" />
+			<col width="15%" />
+		</colgroup>
+	<thead>
+		<tr>
+			<th class="its-th-align center">프로모션명 / 할인액(율) / 종류</th>
+			<th class="its-th-align center">제한금액</th>
+			<th class="its-th-align center">유효기간</th>
+			<th class="its-th-align center">&nbsp;</th>
+		</tr>
+	</thead>
+	<tbody>
+	{? loop }
+		{@ loop }
+		<tr>
+			<td class="its-td-align center">
+				<div class="bold">{.promotion_name}</div>
+				<div >{.salepricetitle}</div>
+				<div >{.issuebtn}</div>
+			</td>
+			<td class="its-td-align center">{.limit_goods_price}원 이상 구매 시</td>
+			<td class="its-td-align center">{.downloaddate}</td>
+			<td class="its-td-align center"><a href="#" ><img src="{.downloadbtn}" class="downloadbtn hand" promotion_seq="{.promotion_seq}" promotion_name="{.promotion_name}"  /></a> </td>
+		</tr>
+		{/}
+	{:}
+		<tr >
+			<td colspan="7" align="center" class="cell">
+				다운가능한 프로모션이 없습니다.
+			</td>
+		<tr>
+	{/}
+	</tbody>
+	</table>
+
+{/}
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin}</div>
+	</td>
+</tr>
+</table>

@@ -1,0 +1,42 @@
+<style type="text/css">
+.pop_area { width:97px;height:33px; background-color:#fff; border:1px #636364 solid; }
+.pop_link { line-height:13px; padding-left:5px; font-size:11px; }
+.pop_link span { color:#6E6E6E; }
+.pop_link span:hover { color:#000; }
+</style>
+<table cellpadding="0" cellspacing="0" border="0" align="center" width="95%" class="tb_summary_partition">
+<!--{@ orderSummary }-->
+	<!--{? .key_  == '101' }-->
+<tr><td class="under_line2" colspan="4"></td></tr>
+	<!--{ / }-->
+	<!--{? (.index_ % 2) == 0 }-->
+<tr>
+	<td class="s_tit">
+	<!--{? .link_export }-->
+		<a class="t_bold" style="position:relative; cursor:pointer;" onmouseover='$(".link_div_{.key_}").show();' onmouseout='$(".link_div_{.key_}").hide();'>
+			{.name}
+			<div class="link_div_{.key_}" style="position:absolute; top:-10px; right:-100px; display:none;">
+				<div class="msg_div_{.key_} pop_area" >
+					<table cellspacing="0" cellpadding="0" width="100%" height="27px" border="0" style="padding-top:5px;">
+					<tr><td class="pop_link"><a href="../order/catalog?chk_step[{.key_}]=1"><strong>·</strong><span>주문리스트 가기</span></a></td></tr>
+					<tr><td class="pop_link"><a href="../export/catalog?export_status[{.key_}]=1"><strong>·</strong><span>출고리스트 가기</span></a></td></tr>
+					</table>
+				</div>
+			</div>
+		</a>
+	<!--{ : }-->
+		<a href="{.link}" class="t_bold" >{.name}</a>
+	<!--{ / }-->
+	</td>
+	<td class="rlign" width="57px">
+		<a href="{.link}"><span class="cnt_num">{=number_format(.count)}</span></a> 건
+	</td>
+	<!--{ : }-->
+	<td class="e_tit"><a href="{.link}" class="t_bold">{.name}</a></td>
+	<td class="rlign" width="57px">
+		<a href="{.link}"><span class="cnt_num">{=number_format(.count)}</span></a> 건
+	</td>
+</tr>
+	<!--{ / }-->
+<!--{ / }-->
+</table>

@@ -1,0 +1,122 @@
+{ ? openType == 'popup' || openType == 'frame' }
+{ #common_html_header }
+{ / }
+<style type="text/css">
+.mall-selectbox	{width:80%;height:250px;}
+.arrow-lay	{margin:10px 0;}
+.btn-sub	{width:100%;text-align:center;margin-top:20px;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+	// 전송 마켓 추가
+	$(".set-mall").click(function(){
+		var addOption	= '';
+		$("select[name='org_mall_list']").find("option:selected").each(function(){
+			addOption	= '<option value="'+$(this).val()+'">'+$(this).text()+'</option>';
+			$("select[name='sel_mall_list']").append(addOption);
+			$(this).remove();
+		});
+	});
+	// 전송 마켓 제거
+	$(".del-mall").click(function(){
+		$("select[name='sel_mall_list']").find("option:selected").each(function(){
+			addOption	= '<option value="'+$(this).val()+'">'+$(this).text()+'</option>';
+			$("select[name='org_mall_list']").append(addOption);
+			$(this).remove();
+		});
+	});
+	// 전송 마켓 정보 전달
+	$(".btn-set-mall").click(function(){
+		var resData		= [];
+		$("select[name='sel_mall_list']").find("option").each(function(){
+			resData.push({'mall_code':$(this).val(),'mall_name':$(this).text()});
+		});
+
+		{ ? openType == 'popup' }
+			opener.{resfunc}(resData);
+			self.close();
+		{ : openType == 'frame' }
+			parent.{resfunc}(resData);
+			// close는 결과를 받은 함수에서 처리
+		{ : }
+			{resfunc}(resData);
+			// close는 결과를 받은 함수에서 처리
+		{ / }
+	});
+
+	{ ? orgvalinputname }org_val_set();{ / }
+});
+
+// 기존 선택한 값 선택되어 있게 처리
+function org_val_set(){
+	var orgval	= '';
+	var orgarr	= new Array();
+	var k		= 0;
+	$("input[name='{orgvalinputname}']"{ ? openType == 'popup' }, opener.document{ : openType == 'frame' }, parent.document{ / }).each(function(){
+		orgval		= $(this).val();
+		orgarr[k]	= $(this).val();
+		k++;
+	});
+
+	if	(orgval){
+		var orglen		= orgarr.length;
+		var chkval		= '';
+		var chkname		= '';
+		var addOption	= '';
+		for	(var o = 0; o < orglen; o++){
+			chkval		= $("select[name='org_mall_list']").find("option[value='"+orgarr[o]+"']").val();
+			chkname		= $("select[name='org_mall_list']").find("option[value='"+orgarr[o]+"']").text();
+			addOption	= '<option value="'+chkval+'">'+chkname+'</option>';
+			$("select[name='sel_mall_list']").append(addOption);
+			$("select[name='org_mall_list']").find("option[value='"+orgarr[o]+"']").remove();
+		}
+	}
+}
+</script>
+<div class="mall-select-lay">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<colgroup>
+		<col width="45%" />
+		<col />
+		<col width="45%" />
+	</colgroup>
+	<tbody>
+	<tr align="center">
+		<td valign="bottom">
+			<div style="color:red;">판매 마켓</div>
+			<div>
+				<select name="org_mall_list" class="mall-selectbox" multiple>
+				<!--{ ? mall }-->
+					<!--{ @ mall }-->
+					<option value="{.mall_code}">{.mall_name}</option>
+					<!--{ / }-->
+				<!--{ / }-->
+				</select>
+			</div>
+		</td>
+		<td>
+			<div class="arrow-lay"><img src="../images/design/m_q_arw_r.gif" class="set-mall hand" /></div>
+			<div class="arrow-lay"><img src="../images/design/m_q_arw_l.gif" class="del-mall hand" /></div>
+		</td>
+		<td valign="bottom">
+			<div style="color:red;text-align:left;margin-left:20px;">
+				↓아래의 판매마켓으로 상품정보 전송<br/>
+				단, 연동업체 관리환경에서도 <br/>
+				아래의 판매마켓으로 설정되어 있어야만<br/>
+				실제 판매마켓으로 상품이 전송됨
+			</div>
+			<div>
+				<select name="sel_mall_list" class="mall-selectbox" multiple>
+				</select>
+			</div>
+		</td>
+	</tr>
+	</tbody>
+	</table>
+
+	<div class="btn-sub">
+		<span class="btn large cyanblue"><button type="button" class="btn-set-mall">확인</button></span>
+</div>
+{ ? openType == 'popup' || openType == 'frame' }
+{ #common_html_footer }
+{ / }

@@ -1,0 +1,338 @@
+{ #layout_header_popup }
+<div>
+
+<div style="text-align:center;font-size:20px;letter-spacing:-1px;font-weight:bold;padding-top:20px;">출고내역서</div>
+
+
+
+<table class="search-form-table" width="98%">
+<col /><col width="150" />
+<tr>
+	<td align="right">주문일</td><td>: {order.regist_date}</td>
+</tr>
+<tr>
+	<td align="right">주문번호</td><td>: {order.order_seq}</td>
+</tr>
+<tr>
+	<td align="right">출고일</td><td>: {data_export.export_date}</td>
+</tr>
+<tr>
+	<td align="right">출고번호</td><td>: {data_export.export_code}</td>
+</tr>
+</table>
+
+<table style="width:100%">
+<tr>
+	<td style="padding-left:20px;"><b>{order.order_user_name}</b>님의 출고상품 정보 입니다.</td>
+</tr>
+<tr>
+	<td align="center">
+
+	<table class="order-summary-table" style="width:95%;" border=0 style="background-color:#edf3ff;">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="51%" />
+
+		<col width="7%" />
+		<col width="7%" />
+		<col width="7%" />
+		<col width="7%" />
+		<col width="7%" />
+		<col width="7%" />
+		{?order.member_seq}
+		<col width="7%" />
+		{ / }
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>상품명/상품옵션</th>
+		<th>주문</th>
+		<th>출고</th>
+		<th>정가</th>
+		<th>할인가</th>
+		<th>개별<br/>배송비</th>
+		<th>할인</th>
+		{?order.member_seq}
+		<th>적립금<br/>포인트</th>
+		{ / }
+	</tr>
+	</thead>
+	<tbody class="otb">
+		<!--{ @ data_export_item }-->
+		<tr class="order-item-row">
+			<td class="{ ? .opt_type == 'sub' }suboption{ / }">
+				<table width="100%" border="0">
+				<tr>
+					<td class="left" valign="top" style="border:none;width:35px;"><a href='/goods/view?no={.goods_seq}' target='_blank'><span class="order-item-image"><img class="small_goods_image" src="{.image}" /></span></a></td>
+					<td class="left" style="border:none;">
+							<!--{ ? .opt_type == 'sub' }-->
+								<div>
+								<span class="goods_name2">
+								<!--{? .goods_type == "gift" }-->
+									<img src="/admin/skin/default/images/common/icon_gift.gif" />
+								<!--{/}-->
+								{? .cancel_type == '1' }<span class="order-item-cancel-type " >[청약철회불가]</span>{/}
+								<a href='../goods/regist?no={.goods_seq}'>{.goods_name}</a>
+								</span>
+								</div>
+								<!--{ ? .option1 }-->
+									<div><img src="../images/common/icon_add_arrow.gif" /><img src="../images/common/icon_add.gif" />
+										<span class="desc">{.title1}:{.option1}
+										<!--{ ? .option2 }-->
+										{.title2} : {.option2}
+										<!--{ / }-->
+										</span>
+									</div>
+									{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+								<!--{ : }-->
+									{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+								<!--{ / }-->
+							<!--{ : }-->
+								<div>
+								<span class="goods_name1">
+									<!--{? .goods_type == "gift" }-->
+										<img src="/admin/skin/default/images/common/icon_gift.gif" />
+									<!--{/}-->
+									{? .cancel_type == '1' }<span class="order-item-cancel-type " >[청약철회불가]</span>{/}
+									<a href='../goods/regist?no={.goods_seq}'>{.goods_name}</a>
+								</span>
+								</div>
+								<div>
+								<!--{?.option1}-->
+									<div class="goods_option">
+										<img src="/admin/skin/default/images/common/icon_option.gif" />
+										<!--{?.title1}-->{.title1}:<!--{ / }-->{.option1}-->
+										<!--{?.option2 }{?.title2}-->{.title2}:<!--{ / }-->{.option2}<!--{ / }-->
+										<!--{?.option3 }{?.title3}-->{.title3}:<!--{ / }-->{.option3}<!--{ / }-->
+										<!--{?.option4 }{?.title4}-->{.title4}:<!--{ / }-->{.option4}<!--{ / }-->
+										<!--{?.option5 }{?.title5}-->{.title1}:<!--{ / }-->{.option5}<!--{ / }-->
+									</div>
+									{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+								<!--{ : }-->
+									{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+								<!--{ / }-->
+								<!--{ ? .inputs }-->
+									<!--{ @ .inputs }-->
+										<!--{ ? ..value }-->
+											<div class="goods_input">
+												<img src="/admin/skin/default/images/common/icon_input.gif" />
+												<!--{?..title}-->{..title}:<!--{ / }-->
+												<!--{?..type=='file'}-->
+												<a href="../order_process/filedown?file={..value}" target="actionFrame">{..value}</a>
+												<!--{:}-->{..value}<!--{ / }-->
+											</div>
+										<!--{ / }-->
+									<!--{ / }-->
+								<!--{ / }-->
+								</div>
+							<!--{ / }-->
+						</td>
+					</tr>
+				</table>
+			</td>
+			<td class="price info { ? .opt_type == 'sub' }suboption{ / }">{.opt_ea}</td>
+			<td class="price info { ? .opt_type == 'sub' }suboption{ / }">{.ea}</td>
+			<td class="price info { ? .opt_type == 'sub' }suboption{ / }">{=number_format(.out_consumer_price)}</td>
+			<td class="price info { ? .opt_type == 'sub' }suboption{ / }">{=number_format(.out_price)}</td>
+			<td class="price info { ? .opt_type == 'sub' }suboption{ / }">{=number_format(.goods_shipping_cost)}</td>
+			<td class="price info { ? .opt_type == 'sub' }suboption{ / }">{=number_format(.out_coupon_sale + .out_member_sale + .out_fblike_sale + .out_mobile_sale)}</td>
+			{?order.member_seq}
+			<td class="price info { ? .opt_type == 'sub' }suboption{ / }">{=number_format(.out_reserve)}
+			<br/>P {=number_format(.out_point)}</td>
+			{/}
+		</tr>
+		<!--{ / }-->
+	</tbody>
+	</table>
+
+<table style="width:97%;padding-left:4px;">
+<tr>
+	<td valign="top" width="100%">
+		<div class="item-title" style="text-align:left;">주문내역(전체)</div>
+	</td>
+</tr>
+</table>
+
+<table class="order-price-information-table noborder-table" style="width:97%;" cellpadding="0"  cellspacing="0">
+<tr>
+	<td>
+		<dl>
+			<dt style="color:#ff7537">할인가</dt>
+			<dd style="color:#ff7537"><span class="price-text">{=number_format(tot.price)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-plus-item">
+			<dt style="color:#ff7537">개별배송비</dt>
+			<dd style="color:#ff7537"><span class="price-text">{=number_format(tot.goods_shipping_cost)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-plus-item">
+			<dt>기본배송비</dt>
+			<dd>
+				{?orders.international == 'international'}
+				<span class="price-text">{=number_format(order.international_cost)}</span> 원
+				{:}
+				<span class="price-text">{=number_format(order.shipping_cost)}</span> 원
+				{/}
+			</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt style="color:#04a1a1">상품쿠폰</dt>
+			<dd style="color:#04a1a1"><span class="price-text">{=number_format(tot.coupon_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt style="color:#04a1a1">회원등급</dt>
+			<dd style="color:#04a1a1"><span class="price-text">{=number_format(tot.member_sale)}</span> 원</dd>
+		</dl>
+	</td>
+</tr>
+<tr>
+	<td colspan="5">&nbsp;</td>
+</tr>
+<tr>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt style="color:#04a1a1">상품Like</dt>
+			<dd style="color:#04a1a1"><span class="price-text">{=number_format(tot.fblike_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt style="color:#04a1a1">모바일</dt>
+			<dd style="color:#04a1a1"><span class="price-text">{=number_format(tot.mobile_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt style="color:#04a1a1">코드할인</dt>
+			<dd style="color:#04a1a1"><span class="price-text">{=number_format(tot.promotion_code_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt>배송비쿠폰</dt>
+			<dd><span class="price-text">{=number_format(order.coupon_sale)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt>배송비코드</dt>
+			<dd><span class="price-text">{=number_format(order.shipping_promotion_code_sale)}</span> 원</dd>
+		</dl>
+	</td>
+</tr>
+<tr>
+	<td colspan="5">&nbsp;</td>
+</tr>
+<tr>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt>적립금사용</dt>
+			<dd><span class="price-text">{=number_format(order.emoney)}</span> 원</dd>
+		</dl>
+	</td>
+	<td>
+		<dl class="order-price-minus-item">
+			<dt>이머니사용</dt>
+			<dd><span class="price-text">{=number_format(order.cash)}</span> 원</dd>
+		</dl>
+	</td>
+
+
+	<td>
+		<dl class="order-price-total-item">
+			<dt>최종결제금액</dt>
+			<dd><span class="price-text">{=number_format(order.settleprice)}</span> 원</dd>
+		</dl>
+	</td>
+	<!--{ ? orders.shipping_method=='postpaid' && orders.postpaid }-->
+	<td width="30">&nbsp;</td>
+	<td>
+		<dl>
+			<dt>착불배송비</dt>
+			<dd><span class="price-text">{=number_format(order.postpaid)}</span> 원</dd>
+		</dl>
+	</td>
+	<!--{ / }-->
+</tr>
+</table>
+
+	<div class="item-title left">결제정보</div>
+	<table class="info-table-style" style="width:95%">
+	<colgroup>
+		<col width="25%" />
+		<col width="75%" />
+	</colgroup>
+	<tbody>
+	<tr>
+		<th class="its-th-align center">주문자</th>
+		<td class="its-td left">{order.order_user_name}</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">결제일자</th>
+		<td class="its-td left">{order.deposit_date}</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">결제방법</th>
+		<td class="its-td left">{order.mpayment}</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">결제금액</th>
+		<td class="its-td left">{=number_format(order.settleprice)}</td>
+	</tr>
+	</tbody>
+	</table>
+
+	<div class="item-title left">배송지정보 (출고정보)</div>
+	<table class="info-table-style" style="width:95%">
+	<colgroup>
+		<col width="25%" />
+		<col width="75%" />
+	</colgroup>
+	<tbody>
+	<tr>
+		<th class="its-th-align center">수령인</th>
+		<td class="its-td left">{export_shipping.recipient_user_name}</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">수령지주소</th>
+		<td class="its-td left">
+		(우편번호) {=implode('-',export_shipping.recipient_zipcode)}<br>
+		<span {? export_shipping.recipient_address_type != "street"}style="font-weight:bold;"{/}>(지번)</span> {export_shipping.recipient_address} <br>
+		<span {? export_shipping.recipient_address_type == "street"}style="font-weight:bold;"{/}>(도로명)</span> {export_shipping.recipient_address_street} <br>
+		(공통상세) {export_shipping.recipient_address_detail}
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">연락처</th>
+		<td class="its-td left">핸드폰 : {=implode('-',export_shipping.recipient_cellphone)}&nbsp;&nbsp;&nbsp;&nbsp;
+		일반전화 : {=implode('-',export_shipping.recipient_phone)}</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">메모</th>
+		<td class="its-td left">{export_shipping.memo}</td>
+	</tr>
+	</tbody>
+	</table>
+
+	</td>
+</tr>
+</table>
+
+</div>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	window.print();
+});
+</script>
+
+
+{ #layout_footer_popup }

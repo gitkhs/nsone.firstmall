@@ -1,0 +1,136 @@
+			<input type="hidden" name="total_price_temp" value="{=number_format(total_price)}">
+			<!-- List -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+			<thead>
+				<tr>
+					<th width="20"></th>
+					<th>상품명</th>
+					<th width="70">수량</th>
+					<th width="90">판매가격</th>
+					<th width="90">적립금</th>
+					<th width="120" class="cell_left_line">배송분류/배송비</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!--{ ? list }-->
+				<!--{ @ list }-->
+				{?.index_&&.shipping_provider_division}<tr><td colspan="7" height="2" bgcolor="d0d0d0"></td></tr>{/}
+				<tr>
+					<td align="center"><img src="../images/design/icon_del_detail.gif" style="cursor:pointer;" onclick="{? _GET.cart_table=='person' }person_{ / }cart_delete('{.cart_seq}');"></td>
+					<td class="cell">
+						<table width="100%" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td class="left" width="80" valign="top">
+							<a href="/goods/view?no={.goods_seq}"><img src="{.image}" align="absmiddle" hspace="5" style="border:1px solid #ddd;" onerror="this.src='../images/common/noimage_list.gif'" /></a>
+							</td>
+							<td class="left">
+								<div class="goods_name"><a href="/goods/view?no={.goods_seq}" target="_blank">{.goods_name}</a></div>
+						<!--{ ? .cart_options[0].option1 || isset(.cart_suboptions[0].suboption) }-->
+						<div style="padding-top:10px; padding-left:80px;">
+							<table cellpadding="0" cellspacing="0" border="0" width="98%">
+							<col width="75%" /><col width="10%"><col width="15%" />
+							<!--{ @ .cart_options }-->
+							<tr>
+								<td class="desc">
+									<input type="hidden" name="coupon_download[{.cart_seq}][{..cart_option_seq}]" value="" />
+									<div style="float:left;padding-right:10px">{?..title1}{..title1} : { / }{..option1}</div>
+									<!--{ ? ..option2 }-->
+									<div style="float:left;padding-right:10px">{?..title2}{..title2} : { / }{..option2}</div>
+									<!--{ / }-->
+									<!--{ ? ..option3 }-->
+									<div style="float:left;padding-right:10px">{?..title3}{..title3} : { / }{..option3}</div>
+									<!--{ / }-->
+									<!--{ ? ..option4 }-->
+									<div style="float:left;padding-right:10px">{?..title4}{..title4} : { / }{..option4}</div>
+									<!--{ / }-->
+									<!--{ ? ..option5 }-->
+									<div style="float:left;padding-right:10px">{?..title5}{..title5} : { / }{..option5}</div>
+									<!--{ / }-->
+								</td>
+							</tr>
+							<!--{ / }-->
+							<!--{ @ .cart_suboptions }-->
+							<tr>
+								<td class="desc">
+									<div style="float:left;padding-right:10px">{..suboption_title} : {..suboption}</div>
+								</td>
+							</tr>
+							<!--{ / }-->
+							</table>
+						</div>
+						<!--{ : }-->
+						<input type="hidden" name="coupon_download[{.cart_seq}][{.cart_options[0].cart_option_seq}]" value="" />
+						<!--{ / }-->
+							</td>
+						</tr>
+						</table>
+						<div style="display:none;" class="optional_view"></div>
+					</td>
+					<td class="cell">
+						<table align="center" border="0" cellpadding="1" cellspacing="0">
+						<!--{? .sub_cnt > 0 || .opt_cnt > 0 }-->
+						<tr>
+							<td>{.ea}</td>
+						</tr>
+						<tr>
+							<td><img src="../images/design/btn_change.gif" onclick="option_modify('{.cart_seq}','{_GET.cart_table}');" style="cursor:pointer;" /></td>
+						</tr>
+						<!--{ : }-->
+						<tr>
+							<td>{.ea}<!--input type="text" name="ea[{.cart_seq}]" value="{.ea}" style="width:25px; height:15px;" class="onlynumber" /--></td>
+						</tr>
+						<tr>
+							<td><img src="../images/design/btn_change.gif" onclick="option_modify('{.cart_seq}','{_GET.cart_table}');" style="cursor:pointer;"/></td>
+						</tr>
+						<!--{ / }-->
+						</table>
+					</td>
+					<td class="cell">{=number_format(.tot_price)}원</td>
+					<td class="cell">
+						<table align="center" border="0">
+						<col /><col width="50" />
+						<tr>
+							<td><img src="/admin/skin/default/images/common/icon/icon_ord_emn.gif" title="적립금" /></td>
+							<td class="right"><span id="option_reserve_{.cart_option_seq}">{=number_format(.reserve)}</span>원</td>
+						</tr>
+						<!--{ ? isplusfreenot && isplusfreenot.ispoint }-->
+						<tr>
+							<td><img src="/admin/skin/default/images/common/icon/icon_ord_point.gif" title="포인트" /></td>
+							<td class="right"><span id="option_point_{.cart_option_seq}">{=number_format(.point)}</span>P</td>
+						</tr>
+						<!--{ / }-->
+						</table>
+					</td>
+					<td class="cell cell_left_line">
+						<!--{? .shipping_policy == 'shop'}-->
+						기본배송비
+						<!--{ : }-->
+						{=number_format(.goods_shipping)}원
+						<!--{ / }-->
+					</td>
+				</tr>
+				<!--{ / }-->
+				<!--{ : }-->
+				<tr>
+					<td class="cell" colspan="7"  height="80">장바구니에 담긴 상품이 없습니다.</td>
+				</tr>
+				<!--{ / }-->
+				</tbody>
+			</table>
+
+			<table align="right" border="0" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #cacaca; " designImgSrcOri='' >
+			<tr>
+				<td>
+					<table width="130" border="0" cellpadding="0" cellspacing="0">
+					<tr><td align="center" height="30">기본배송비</td></tr>
+					<tr><td align="center" height="25" class="fx16"><span id="total_shipping_price">{=number_format(array_sum(shipping_price))}</span> <span id="coupon_shipping_price"></span></td></tr>
+					</table>
+				</td>
+				<td>
+					<table width="130" border="0" cellpadding="0" cellspacing="0">
+					<tr><td align="center" height="30">상품가격합계</td></tr>
+					<tr><td align="center" height="25" class="fx16"><span class="settle_price_goods bold">{=number_format(total)}</span></td></tr>
+					</table>
+				</td>
+			</tr>
+			</table>

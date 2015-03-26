@@ -1,0 +1,138 @@
+{ #common_html_header }
+
+<!--[if IE]><script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/excanvas.min.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/jquery.jqplot.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.pieRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.donutRenderer.min.js"></script>   
+<link class="include" rel="stylesheet" type="text/css" href="/app/javascript/plugin/jqplot/jquery.jqplot.min.css" />
+
+<script language="javascript">
+function change_search_priod(priod,keyword){
+	document.location.href='goods_search_view?keyword='+keyword+'&keysort=1&search_priod='+priod+'&keysort={_GET.keysort}';
+}
+</script>
+
+<style type="text/css">
+table.simpledata-table-style thead td.top_title {text-align:center;font-weight:bold;background-color:#eee;}
+table.simpledata-table-style tbody td.ltd {text-align:left;padding-left:5px;}
+table.simpledata-table-style tbody td.rtd {text-align:right;padding-right:5px;}
+table.simpledata-table-style tbody td.nulltd {background-color:#e6e6e6;}
+</style>
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<col width="10%"><col width="90%">
+	<tbody>
+	<tr>
+	<td align="center">
+		최근
+		<select name="search_priod" onchange="change_search_priod(this.value,'{_GET.keyword}');">
+			<option value="15" {?_GET.search_priod=='15'}selected{/}>15</option>일
+			<option value="30" {?_GET.search_priod=='30'||!_GET.search_priod}selected{/}>30</option>일
+			<option value="60" {?_GET.search_priod=='60'}selected{/}>60</option>일
+			<option value="90" {?_GET.search_priod=='90'}selected{/}>90</option>일
+		</select>
+		일
+	</td>
+	<td>
+		
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+			<col width="33%"><col width="33%"><col width="33%">
+			{ ? !dataForChartDate }
+			<tr>
+				<td align="center" colspan="3" height="260">"{_GET.keyword}"로 {_GET.search_priod}일간 검색되지 않았습니다.</td>
+			</tr>
+			{ : }
+			<tr>
+				<td align="center">
+					<div class="bold fx16 center">연령별 건수</div>
+					<div id="chartAge{_GET.keysort}" style="margin:auto; height:250px; width:60%;"></div>	
+				</td>
+				<td align="center">
+					<span class="bold fx16 center">성별별 건수</span>
+					<div id="chartSex{_GET.keysort}" style="margin:auto; height:250px; width:60%;"></div>	
+				</td>
+				<td align="center" valign="top">
+					<span class="bold fx16 center">검색일별 건수</span>
+					<div class="pd10"></div>
+					<table width="90%" class="simpledata-table-style" style="margin:auto;">
+						<tbody>
+							{ @ dataForChartDate }
+							<tr>
+								<td>{.regist_date}</td>
+								<td>{.cnt}</td>
+							</tr>
+							{ / }
+						</tbody>
+					</table>
+				</td>
+			</tr>
+			{ / }
+		</table>
+	</td>
+	</tr>
+	</tbody>
+</table>
+
+<script class="code" type="text/javascript">
+	{ ? count(dataForChartAge) > 0 }
+	$(document).ready(function(){
+		var data = {=preg_replace("/\"([0-9]+)\"/","$1",json_encode(dataForChartAge))};
+		var plotAge{_GET.keysort} = jQuery.jqplot ('chartAge{_GET.keysort}', [data], 
+			{ 
+				seriesDefaults: {
+					// Make this a pie chart.
+					renderer: jQuery.jqplot.PieRenderer, 
+					rendererOptions: {
+						// Put data labels on the pie slices.
+						// By default, labels show the percentage of the slice.
+						showDataLabels: true,
+						dataLabels: 'percent'
+					}
+				}, 
+				seriesColors:{=json_encode(seriesColors)},
+				legend: {      
+					show: true,      
+					location: 'e',      
+					placement: 'outside'    
+				},
+				grid: {
+					background: 'transparent',
+					borderWidth: 0,
+					shadow: false
+				}
+			}
+		);
+	});
+	{ / }
+
+	{ ? count(dataForChartSex) > 0 }
+	$(document).ready(function(){
+		var data = {=preg_replace("/\"([0-9]+)\"/","$1",json_encode(dataForChartSex))};
+		var plotSex{_GET.keysort} = jQuery.jqplot ('chartSex{_GET.keysort}', [data], 
+			{ 
+				seriesDefaults: {
+					// Make this a pie chart.
+					renderer: jQuery.jqplot.PieRenderer, 
+					rendererOptions: {
+						// Put data labels on the pie slices.
+						// By default, labels show the percentage of the slice.
+						showDataLabels: true,
+						dataLabels: 'percent'
+					}
+				}, 
+				seriesColors:{=json_encode(seriesColors)},
+				legend: {      
+					show: true,      
+					location: 'e',      
+					placement: 'outside'    
+				},
+				grid: {
+					background: 'transparent',
+					borderWidth: 0,
+					shadow: false
+				}
+			}
+		);
+	});
+	{ / }
+	</script>

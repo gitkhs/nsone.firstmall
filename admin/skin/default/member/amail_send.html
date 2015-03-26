@@ -1,0 +1,459 @@
+{ #layout_header }
+<script type="text/javascript">
+$(document).ready(function() {
+
+	// CHECKBOX COUNT
+	parent.chkMemberCount();
+
+	// SMS "+" CLICK
+	$("#send_to_add_btn").click(function(){
+		var cellphoneNo = $("input[name='send_to_add']").val();
+		var bool = true;
+		if(cellphoneNo){
+			$("select[name='send_to_list'] option").each(function(e, data) {
+				if(data.value == cellphoneNo) bool = false;
+			});
+
+			if(bool){
+				$("select[name='send_to_list']").append("<option value='"+cellphoneNo+"'>"+cellphoneNo+"</option>");
+				$("input[name='send_to_add']").val('');
+			} else {
+				alert("동일한 번호가 입력되어 있습니다.");
+				return true;
+			}
+		}
+		sendMemberSum();
+	});
+	// SMS "-" CLICK
+	$("#send_to_del_btn").click(function(){
+		$("select[name='send_to_list'] option:selected").remove();
+	});
+
+	// MEMBER COUNT
+	$("input[name='add_num_chk']").click(function(){
+		sendMemberSum();
+	});
+	$("input[name='member']").click(function(){
+		if($(this).val()=='excel'){
+			$.get('../member_process/getExcelPopup', function(data) {
+				$('#excel_popup').html(data);
+				openDialog("EMAIL 엑셀 등록 <span class='desc'>&nbsp;</span>", "excel_popup", {"width":"300","height":"350"});
+			});
+		}
+		sendMemberSum();
+	});
+
+	$("#amail_send_submit").click(function(){
+		addNum_init();
+		sendMemberSum();
+		var no = $("input[name='send_to']").val();
+		var serialize = $('#memberForm').serialize();
+		$.get('../member_process/amail_send_set?no='+no+"&"+serialize, function(response) {
+			var data = eval(response)[0];
+			//debug(response);
+			if(data.result == true) {
+				alert(data.msg);
+				$("#emailForm").show();
+				$("#emailForm").width("100%");
+				$("#emailForm").height("1000px");
+				$("#emailForm").attr("src","http://www.postman.co.kr/partner/login.jsp?user_id={mass.cid}&user_no=*************&user_nm={mass.name}&user_email={mass.email}&user_tel={mass.phone}&user_cell={mass.cellphone}&user_domain={mass.server_name}&cooperation_id=GA&target_cd=G002&target_nm=001");
+			} else {
+				alert(data.msg);
+			}
+		});
+	});
+
+
+	// CHECKBOX
+	$("input:[name='member_chk[]']").click(function(){
+		chkMemberCount();
+	});
+
+	$("#orderby_disp").change(function(){
+		var value_arr = $(this).val().split(" ");
+		$("input[name='orderby']").val(value_arr[0]);
+		$("input[name='sort']").val(value_arr[1]);
+		$("#memberForm").submit();
+	});
+	$("#display_quantity").change(function(){
+		$("#memberForm").submit();
+	});
+
+	sendMemberSum();
+	searchMemberCount();
+});
+
+function addNum_init(){
+	$("input[name='send_num']").val($("#send_member").attr("count"));
+	var cellNoList = "";
+	$("select[name='send_to_list'] option").each(function(e, data) {
+		cellNoList += ","+String(data.value);
+	});
+	$("input[name='send_to']").val(cellNoList);
+}
+
+
+// SEND MEMBER COUNT - IFRAME CONTROLLER
+function sendMemberSum(){
+	var add_cnt = $("select[name='send_to_list'] option").size();
+	var chk = $("input:radio[name='member']:checked").val();
+	var chk_cnt = 0;
+	if(chk=='all'){
+		chk_cnt = $("input:radio[name='member']:checked").attr("count");
+	}else if(chk=='search'){
+		chk_cnt = $("input[name='searchcount']").val();
+	}else if(chk=='select'){
+		chk_cnt = $("input:checkbox[name='member_chk[]']:checked").length;
+	}else if(chk=='excel'){
+		chk_cnt = 0;
+	}
+
+	var add_chk = $("input[name='add_num_chk']").attr('checked');
+	if(add_chk=='checked'){
+		chk_cnt = 0;
+	}
+	var total = parseInt(add_cnt) + parseInt(chk_cnt);
+	$("#send_member").attr("count",total);
+	$("#send_member").html(total);
+}
+</script>
+<style>
+.ctab {border-top:1px solid #d6d6d6;border-right:1px solid #d6d6d6;border-bottom:1px solid #d6d6d6;width:150px;line-height:30px;text-align:center;background-color:#eeeeee;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#757575;}
+.ctab-on {border-top:1px solid #d6d6d6;border-bottom:1px solid #ffffff;border-right:1px solid #d6d6d6;width:150px;line-height:30px;text-align:center;background-color:#ffffff;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;}
+</style>
+
+
+<form name="memberForm" id="memberForm"  action="../member/amail_send">
+<input type="hidden" name="search" id="hidden_search" />
+<input type="hidden" name="send_to"/>
+<input type="hidden" name="send_num"/>
+
+<input type="hidden" name="member_seq" />
+<input type="hidden" name="orderby" value="{sc.orderby}"/>
+<input type="hidden" name="sort" value="{sc.sort}"/>
+<input type="hidden" name="searchcount" value="{sc.searchcount}"/>
+<input type="hidden" name="type" />
+<input type="hidden" name="perpage"  id="perpage" value="{sc.perpage}" />
+
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>이메일 대량 발송</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		<!--
+			<li><span class="btn large icon"><button><span class="arrowleft"></span>이동버튼</button></span></li>
+			<li><span class="btn large icon"><button><span class="arrowleft"></span>이동버튼</button></span></li>
+		-->
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		<!--
+			<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+			<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+		-->
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+
+
+
+<!-- 상단 단계 링크 : 시작 -->
+<div class="left" id="rn_join">
+	<br style="line-height:20px;" />
+
+	<div style="position:absolute;">
+	<table cellpadding="0" cellspacing="0">
+		<td class="ctab t1"><span class="hand" onclick="location.href='amail';">이메일 대량발송 설정</span></td>
+		<td class="ctab-on t2"><span class="hand" onclick="location.href='amail_send';">이메일 대량발송</span></td>
+	</tr>
+	</table>
+	</div>
+	<table height="32" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #d6d6d6;">
+	<tr>
+		<td align="center"></td>
+	</tr>
+	</table>
+	<br style="line-height:20px;" />
+</div>
+<!-- 상단 단계 링크 : 끝 -->
+
+
+
+
+
+<div class="clearbox">
+	{# member_search}
+</div>
+
+<div class="clearbox">
+	{# member_list }
+</div>
+
+
+<!-- 페이징 -->
+<table align="center" border="0" cellpadding="0" cellspacing="0" >
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin} </div>
+	</td>
+</tr>
+</table>
+
+<br style="line-height:16px;" />
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+<!-- 테이블 헤더 : 시작 -->
+<colgroup>
+	<col width="250" />
+	<col width="/" />
+	<col width="250" />
+</colgroup>
+<thead class="lth">
+	<tr>
+		<th colspan="3">이메일 대량 발송</th>
+	</tr>
+	<tr>
+		<th colspan="3">받는 사람 <span id="send_member" count="0">0</span>명</th>
+	</tr>
+</thead>
+<!-- 테이블 헤더 : 끝 -->
+
+<!-- 리스트 : 시작 -->
+<tbody class="ltb otb" >
+	<td style="padding:10px;" valign="top">
+
+	<!-- ### RECEIVE USER FORM -->
+	<table width="100%" cellspacing="0">
+	<tr>
+		<td>
+			<label><input type="radio" name="member" value="all" count="{mInfo.total}"/>전체 회원 ({mInfo.total}명)</label>
+			<label><input type="radio" name="member" value="search"/>검색된 회원 (<span id="search_member">0</span>명)</label>
+			<label><input type="radio" name="member" value="select" checked/>선택된 회원 (<span id="selected_member">0</span>명)</label>
+			<!--
+			<label><input type="radio" name="member" value="excel"/>엑셀파일등록</label>
+			-->
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table width="100%" cellspacing="0">
+			<tr>
+				<td width="120"><input type="text" name="send_to_add" style="width:113px;"></td>
+				<td><span class="btn small gray"><button type="button" id="send_to_add_btn">+</button></span></td>
+			</tr>
+			<tr>
+				<td><select name="send_to_list" size="8" class="scrollbox03" style="width:123px;"></select></td>
+				<td valign="top"><span class="btn small gray"><button type="button" id="send_to_del_btn">-</button></span></td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<label><input type="checkbox" name="add_num_chk" value="Y">추가 이메일만 보냄</label>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+
+	</td>
+</tbody>
+</table>
+
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" >
+<tr>
+	<td align="center">
+		<span class="btn large black"><button type="button" {? isdemo.isdemo } {isdemo.isdemojs1} {:}  id="amail_send_submit"  {/}>전송</button></span>
+	</td>
+</tr>
+</table>
+
+
+
+</form>
+
+
+<iframe id="emailForm" frameborder="0" style="display:none;" ></iframe>
+
+
+
+
+
+
+
+
+
+<div id="excel_popup" class="hide"></div>
+
+<div id="amail_chk" class="hide" style="text-align:center;">
+	<table width="100%" cellspacing="0">
+	<tr><td>
+		이메일 대량발송 설정을 등록해 주세요.
+	</td></tr>
+	</table>
+	<span class="btn small gray center"><button type="button" onclick="location.href='amail';">확인</button></span>
+</div>
+
+<div class="hide" id="search_detail_dialog">
+<form name="set_search_detail" method="post" action="set_search_default" target="actionFrame">
+<div id="contents">
+	<table class="search-form-table" id="serch_tab">
+	<tr id="member_search_form" style="display:block;">
+		<td>
+			<table class="sf-option-table">
+			<colgroup>
+				<col width="80" />
+				<col width="170" />
+				<col width="80" />
+				<col width="170" />
+				<col width="80" />
+				<col width="170" />
+			</colgroup>
+			<tr>
+				<th>가입일</th>
+				<!--th>
+					<select name="date_gb" class="search_select_pop">
+						<option value="regist_date">가입일</option>
+						<option value="lastlogin_date">최종로그인</option>
+					</select>
+				</th-->
+				<td colspan="5">
+					<label class="search_label"><input type="radio" name="regist_date" value="today" checked="checked" /> 오늘</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3day" /> 3일간</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="7day" /> 일주일</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="1mon" /> 1개월</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3mon" /> 3개월</label>
+				</td>
+			</tr>
+			<tr>
+				<th>최종 방문일</th>
+				<td colspan="5">
+					<label class="search_label"><input type="radio" name="lastlogin_date" value="today" checked="checked" /> 오늘</label>
+					<label class="search_label"><input type="radio" name="lastlogin_date" value="3day" /> 3일간</label>
+					<label class="search_label"><input type="radio" name="lastlogin_date" value="7day" /> 일주일</label>
+					<label class="search_label"><input type="radio" name="lastlogin_date" value="1mon" /> 1개월</label>
+					<label class="search_label"><input type="radio" name="lastlogin_date" value="3mon" /> 3개월</label>
+				</td>
+			</tr>
+			<tr>
+				<th>생일</th>
+				<td colspan="5">
+					<label class="search_label"><input type="radio" name="birthday_date" value="today" checked="checked" /> 오늘</label>
+					<label class="search_label"><input type="radio" name="birthday_date" value="3day" /> 3일간</label>
+					<label class="search_label"><input type="radio" name="birthday_date" value="7day" /> 일주일</label>
+					<label class="search_label"><input type="radio" name="birthday_date" value="1mon" /> 1개월</label>
+					<label class="search_label"><input type="radio" name="birthday_date" value="3mon" /> 3개월</label>
+				</td>
+			</tr>
+			<tr>
+				<th>기념일</th>
+				<td colspan="5">
+					<label class="search_label"><input type="radio" name="anniversary_date" value="today" checked="checked" /> 오늘</label>
+					<label class="search_label"><input type="radio" name="anniversary_date" value="3day" /> 3일간</label>
+					<label class="search_label"><input type="radio" name="anniversary_date" value="7day" /> 일주일</label>
+					<label class="search_label"><input type="radio" name="anniversary_date" value="1mon" /> 1개월</label>
+					<label class="search_label"><input type="radio" name="anniversary_date" value="3mon" /> 3개월</label>
+				</td>
+			</tr>
+			<tr>
+				<th>SMS 수신</th>
+				<td>
+					<label><input type="radio" name="sms" value="" checked/> 전체</label>
+					<label><input type="radio" name="sms" value="y"/> 동의</label>
+					<label><input type="radio" name="sms" value="n"/> 거부</label>
+				</td>
+				<th>이메일 수신</th>
+				<td>
+					<label><input type="radio" name="mailing" value="" checked/> 전체</label>
+					<label><input type="radio" name="mailing" value="y"/> 동의</label>
+					<label><input type="radio" name="mailing" value="n"/> 거부</label>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<th>가입유형</th>
+				<td>
+					<label><input type="radio" name="business_seq" value="" checked/> 전체</label>
+					<label><input type="radio" name="business_seq" value="n"/> 개인</label>
+					<label><input type="radio" name="business_seq" value="y"/> 기업</label>
+				</td>
+				<th>가입승인</th>
+				<td>
+					<label><input type="radio" name="status" value="" checked/> 전체</label>
+					<label><input type="radio" name="status" value="done"/> 승인</label>
+					<label><input type="radio" name="status" value="hold"/> 미승인</label>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<th>등급</th>
+				<td>
+					<select name="grade" class="search_select_pop" style="width:100px;">
+						<option value="">전체</option>
+						{@ group_arr }
+						<option value="{.group_seq}" {?sc.grade==.group_seq}selected{/}>{.group_name}</option>
+						{ / }
+					</select>
+				</td>
+				<th>주문횟수</th>
+				<td>
+					<input type="text" name="sorder_cnt" value="" class="line" size="5"/> ~ <input type="text" name="eorder_cnt" value="" class="line" size="5"/>
+				</td>
+				<th>주문금액</th>
+				<td>
+					<input type="text" name="sorder_sum" value="" class="line" size="7"/> ~ <input type="text" name="eorder_sum" value="" class="line" size="7"/>
+				</td>
+			</tr>
+			<tr>
+				<th>적립금</th>
+				<td>
+					<input type="text" name="semoney" value="" class="line" size="7"/> ~ <input type="text" name="eemoney" value="" class="line" size="7"/>
+				</td>
+				<th>이머니</th>
+				<td>
+					<input type="text" name="scash" value="" class="line" size="7"/> ~ <input type="text" name="ecash" value="" class="line" size="7"/>
+				</td>
+				<th>포인트</th>
+				<td>
+					<input type="text" name="spoint" value="{sc.spoint}" class="line" size="7"/> ~ <input type="text" name="epoint" value="{sc.epoint}" class="line" size="7"/>
+				</td>
+			</tr>
+			<tr>
+				<th>리뷰횟수</th>
+				<td>
+					<input type="text" name="sreview_cnt" value="" class="line" size="5"/> ~ <input type="text" name="ereview_cnt" value="" class="line" size="5"/>
+				</td>
+				<th>방문횟수</th>
+				<td>
+					<input type="text" name="slogin_cnt" value="" class="line" size="5"/> ~ <input type="text" name="elogin_cnt" value="" class="line" size="5"/>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<div align="center" style="padding-top:10px;">
+	<span class="btn large black">
+		<button type="submit">저장하기<span class="arrowright"></span></button>
+	</span>
+</div>
+</form>
+</div>
+
+{ #layout_footer }

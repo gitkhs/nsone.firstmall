@@ -1,0 +1,69 @@
+{ #layout_header }
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<form name="settingForm" method="post" action="../setting_process/admin_marketing_conf" target="actionFrame">
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2><span class="darkgray">비공개 →</span> 입점마케팅 저장방식</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<div class="sub-layout-container body-height-resizing">
+	<!-- 서브메뉴 바디 : 시작-->
+	<div class='slc-body-wrap'>
+		<div class="slc-body">
+			<br class="table-gap" />
+			<table  cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td>
+				<div class="item-title">입점마케팅 저장방식
+					<span class="null desc" style="font-weight:normal">
+						입점마케팅의 상품 데이터 저장 방식을 설정합니다. (설정 후 다음날 새벽 2시 이후부터 적용됩니다.)
+					</span>
+				</div>
+				</td>
+			</tr>
+			</table>
+			<table width="30%" class="info-table-style">
+			<tr>
+				<th class="its-th">Daum 저장설정</th>
+				<td class="its-td" align="center">
+					Y <input type="radio" name="marketdaum" value="y" {?marketing.marketdaum=='y'}checked{/}/>&nbsp&nbsp&nbsp&nbsp&nbsp
+					N <input type="radio" name="marketdaum" value="n" {?marketing.marketdaum=='n'}checked{/}/>
+				</td>
+				<td class="its-td" align="center"><a href='/partner/file_write?filemode=daum' onclick="openDialogAlert('파일 생성 중<br/>페이지를 이탈하거나 브라우저를 종료하지 마세요.',400,120,function(){},{'hideButton' : true});" target="actionFrame">Daum파일생성</a></td>
+			</tr>
+			<tr>
+				<th class="its-th">about 저장설정</th>
+				<td class="its-td" align="center">
+					Y <input type="radio" name="marketabout" value="y" {?marketing.marketabout=='y'}checked{/}/>&nbsp&nbsp&nbsp&nbsp&nbsp
+					N <input type="radio" name="marketabout" value="n" {?marketing.marketabout=='n'}checked{/}/>
+				</td>
+				<td class="its-td" align="center"><a href='/partner/file_write?filemode=about' onclick="openDialogAlert('파일 생성 중<br/>페이지를 이탈하거나 브라우저를 종료하지 마세요.',350,210,function(){},{'hideButton' : true});" target="actionFrame">about파일생성</a></td>
+			</tr>
+			<tr>
+				<th class="its-th">Naver 저장설정</th>
+				<td class="its-td" align="center">
+					Y <input type="radio" name="marketnaver" value="y" {?marketing.marketnaver=='y'}checked{/}/>&nbsp&nbsp&nbsp&nbsp&nbsp
+					N <input type="radio" name="marketnaver" value="n" {?marketing.marketnaver=='n'}checked{/}/>
+				</td>
+				<td class="its-td" align="center"><a href='/partner/file_write?filemode=naver' onclick="openDialogAlert('파일 생성 중<br/>페이지를 이탈하거나 브라우저를 종료하지 마세요.',300,210,function(){},{'hideButton' : true});" target="actionFrame">Naver파일생성</a></td>
+			</tr>
+			</table>
+		</div>
+	</div>
+</div>
+</form>
+{ #layout_footer }

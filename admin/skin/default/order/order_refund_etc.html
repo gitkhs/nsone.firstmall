@@ -1,0 +1,78 @@
+<script>
+
+function refundSubmit(){
+
+	/* 올앳 결제취소시 파라미터 암호화 스크립트 처리 */
+	<!--{ ? config_system.pgCompany == 'allat' && data_order.payment == 'card' }-->
+	if(document.refundForm.cancel_type.value=='full'){
+		document.refundForm.action = "/common/allat_enc";
+	}else{
+		document.refundForm.action = "../mypage_process/order_refund_etc";
+	}
+	<!--{ / }-->
+
+	loadingStart();
+
+	return true;
+}
+</script>
+<style>
+body, select, button, table {font-size:11px}
+.goods_name {display:inline-block;white-space:nowrap;overflow:hidden;width:350px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+</style>
+<!--{ ? config_system.pgCompany == 'allat' && data_order.payment == 'card' }-->
+	<script language="JavaScript" charset='utf-8' src='https://tx.allatpay.com/common/AllatPayRE.js'></script>
+<!--{ / }-->
+
+
+<div id="order_refund_container">
+
+	<form name="refundForm" method="post" action="../order_process/order_refund_etc" onsubmit="return refundSubmit()" target="actionFrame">
+	<input type="hidden" name="order_seq" value="{data_order.order_seq}" />
+	<input type="hidden" name="cancel_type" value="" />
+
+	<!--{ ? config_system.pgCompany == 'allat' && data_order.payment == 'card' }-->
+	<input type='hidden' name='actionUrl'		value='../mypage_process/order_refund_etc' />
+	<input type='hidden' name='allat_shop_id'	value='{pg.mallCode}' />
+	<input type='hidden' name='allat_order_no'	value='{data_order.order_seq}' />
+	<input type='hidden' name='allat_amt'		value='{data_order.settleprice}' />
+	<input type='hidden' name='allat_seq_no'	value='{data_order.pg_transaction_number}' />
+
+	<input type='hidden' name='allat_pay_type'	value='CARD' />
+	<input type='hidden' name='allat_enc_data'	value='' />
+	<input type='hidden' name='allat_opt_pin'	value='NOVIEW' />
+	<input type='hidden' name='allat_opt_mod'	value='WEB' />
+	<input type='hidden' name='allat_test_yn'	value='N' />
+	<!--{ / }-->
+
+	주문번호 : {data_order.order_seq}
+
+	<div style="height:15px"></div>		
+
+	<div id="refund_method_layer">
+	<div style="height:15px"></div>
+
+	● 환불 방법
+	<table class="info_table_style" width="100%">
+	<tr>
+		<th class="its_th">은행</th><td class="its_td"><input type="text" name="bank_name" value="" /></td>
+		<th class="its_th">예금주</th><td class="its_td"><input type="text" name="bank_depositor" value="" /></td>
+		<th class="its_th">계좌번호</th><td class="its_td"><input type="text" name="bank_account" value="" /></td>
+	</tr>
+	</table>
+	 - 환불방법은 복합결제(적립금, 쿠폰 사용 등) 및 최초 배송비 계산 등의 이유로 쇼핑몰 관리자와 협의 후 결정됩니다.
+	</div>
+
+	<div style="height:15px"></div>
+
+	● 상세 사유
+	<textarea name="refund_reason" style="width:100%;" rows="2"></textarea>
+
+	<div style="height:15px"></div>
+
+	<div class="center"><span class="btn large black"><input type="submit" value="작성완료" /></span></div>
+
+	<div style="height:15px"></div>
+
+	</form>
+</div>

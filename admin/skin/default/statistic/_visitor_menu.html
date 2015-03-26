@@ -1,0 +1,13 @@
+<div class="slc-head pdt5">
+<ul>
+	<li><span class="mitem"><a href="visitor_hourly">시간대별통계</a></span></li>
+	<li><span class="mitem"><a href="visitor_daily">일별통계</a></span></li>
+	<li><span class="mitem"><a href="visitor_monthly">월별통계</a></span></li>
+</ul>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("div.slc-head a[href='{selected_visitor_menu}']").parent().parent().addClass("selected");
+});
+</script>

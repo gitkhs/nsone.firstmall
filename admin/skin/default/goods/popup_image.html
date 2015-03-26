@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head> 
+<title>{config_basic.shopName} -  <!--{ ? _GET.division == 'all' }-->일괄등록<!--{ : }-->개별등록<!--{ / }--></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/common.css" />
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/layout.css" />
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/buttons.css" />
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/boardnew.css" />
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/page.css" />
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/jqueryui/jquery-ui.css" />
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/jqueryui/black-tie/jquery-ui-1.8.16.custom.css" />
+<link rel="stylesheet" type="text/css" href="/admin/skin/default/css/poshytip/style.css" /> 
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/editor/css/goods_image_popup.css" />
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" /> 
+
+<script type="text/javascript" src="/app/javascript/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/app/javascript/jquery/jquery-ui.min.js"></script> 
+<script type="text/javascript" src="/app/javascript/plugin/jquery.poshytip.min.js"></script> 
+<script type="text/javascript" src="/app/javascript/js/dev-tools.js"></script>
+<script type="text/javascript" src="/app/javascript/js/common.js?dummy={=date('YmdHis')}"></script> 
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/jquery.uploadify.v2.1.4.js"></script> 
+<script type="text/javascript" src="/app/javascript/js/admin-goodsRegist.js?dummy={=date('YmdHis')}"></script>
+<script type="text/javascript">
+//<![CDATA[
+//한글도메인체크@2013-03-12
+var fdomain = document.domain;
+var krdomain = 'http://{config_system.subDomain}';
+var kordomainck = false;
+for(i=0; i<fdomain.length; i++){
+ if (((fdomain.charCodeAt(i) > 0x3130 && fdomain.charCodeAt(i) < 0x318F) || (fdomain.charCodeAt(i) >= 0xAC00 && fdomain.charCodeAt(i) <= 0xD7A3)))
+{
+	kordomainck = true;
+	break;
+}
+}
+if( !kordomainck ){
+krdomain = '';
+}
+//]]>
+</script>
+<script type="text/javascript">
+var arrGoodsImage = new Array();
+<!--{ @goodsImageSize }-->
+arrGoodsImage[{.index_}] = '{.key_}';
+<!--{ / }-->
+
+var _mockdata;
+
+$(function(){
+	var goodsImageTableObj = $('#goodsImageTable',window.opener.document);
+
+	var setting = {
+		'script'			: krdomain+'/admin/goods_process/upload_file',
+	    'uploader'			: '/app/javascript/plugin/jquploadify/uploadify.swf',
+	    'buttonImg'			: '/app/javascript/plugin/jquploadify/uploadify-search.gif',
+	    'cancelImg'			: '/app/javascript/plugin/jquploadify/uploadify-cancel.png',
+	    'fileTypeExts'		: '*.jpg;*.gif;*.png;*.jpeg',
+	    'fileTypeDesc'		: 'Image Files (.JPG, .GIF, .PNG)',
+	    'fileSizeLimit'		: '20MB',
+	    'removeCompleted'	: true,
+		'width'				: 64,
+		'height'			: 20,
+		'folder'			: '/data/tmp',
+	    'auto'				: true,
+	    'multi'				: false,
+	    'scriptData'		: {'division':'{_GET.division}','idx':{_GET.idx}},
+	    'completeMsg'		: '첨부 가능',
+	    'onComplete'		: function (event, ID, fileObj, response, data) {
+			var data = eval(response)[0];
+			data.idx = parseInt(data.idx);
+			if(data.status) {
+				if(data.division == 'all'){
+					for(var i=0;i<arrGoodsImage.length;i++){
+						$('.goods'+arrGoodsImage[i],goodsImageTableObj).eq(data.idx).removeClass("desc").addClass("hand blue");
+						$("input[name='"+arrGoodsImage[i]+"GoodsImage[]']",goodsImageTableObj).eq(data.idx).val( data.newFile+arrGoodsImage[i]+data.ext );
+					}
+					window.opener.default_img();
+				}else{
+					opener.document.getElementsByName( data.division + 'GoodsImage[]')[data.idx].value = data.newFile + data.division + data.ext;
+					window.opener.index_img(data.idx, data.division, ''); 
+				}
+				window.self.close();
+			}else{
+				alert(data.msg);
+			}
+		},
+		'onError'			: function (event,ID,fileObj,errorObj) {
+			alert(errorObj.type + ' Error: ' + errorObj.info);
+		}
+	};
+	$("#uploader").uploadify(setting);
+
+	/* 상품이미지 설정 저장 */ 
+	$("#save_image_config_ck").click(function(){ 
+		if($(this).attr("checked") == "checked" ) {
+			$(".save_image_input").removeAttr("disabled").removeAttr("readonly");
+			$("button.save_image_config").parent().removeClass("gray").addClass("cyanblue");
+		}else{
+			$(".save_image_input").attr("disabled","disabled").attr("readonly","readonly");
+			$("button.save_image_config").parent().addClass("gray").removeClass("cyanblue"); 
+		}
+	});
+	$(".save_image_config").click(function(){
+		if($("#save_image_config_ck").attr("checked") == "checked" ) save_image_config();
+	});
+});
+
+function userKeyPress() {
+	//입력받은 key가 엔터시 (key 값이 13)
+	if ( window.event.keyCode == 13 ) { 
+		//아무런 작동값이 없는 0으로 강제 변환
+		window.event.keyCode = 0;
+	}else{
+		return;
+	}
+} 
+
+</script>
+
+</head>
+<body onkeypress="userKeyPress();" >
+<div class="wrapper">
+	<div class="header">
+		<h1><!--{ ? _GET.division == 'all' }-->일괄등록<!--{ : }-->개별등록<!--{ / }--></h1>
+		<p><a href="javascript:void(0);" onclick="window.self.close();" title="닫기" class="close"> </a></p>
+	</div>
+	<div class="body">
+		<ul class="alert">
+		<!--{ ? _GET.division == 'all' }--><div id="goods_resize_formlay" >{ #goods_resize_form }</div><!--{ / }-->
+			<!--{ ? _GET.division != 'all' }-->
+				<li  style="list-style-type:disc;margin-left:20px;" >개별 등록 시 설정된 사이즈로 자동 리사이징 되지 않습니다.</li>
+				<li  style="list-style-type:disc;margin-left:20px;" >움직이는 GIF’파일은 반드시 개별등록 해야 정상적으로 움직입니다.</li>
+			<!--{ / }-->
+		    <li>
+				<div><input type="file" id="uploader" /></div> 
+			</li>
+		</ul>
+	</div>
+</div>
+<div id="openDialogLayer" class="hide">
+	<div align="center" id="openDialogLayerMsg"></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<style>
+#displayGoodsImagesLayer {cursor:default;}
+#displayGoodsImagesLayer .pagination {position:relative; max-height:260px; text-align:center; overflow:hidden; white-space:nowrap; font-size:0px;}
+#displayGoodsImagesLayer .pagination li {display:block;}
+#displayGoodsImagesLayer .pagination li img {border:1px solid #fff; margin:1px 2px;}
+#displayGoodsImagesLayer .pagination li.current img {border:1px solid #999;}
+</style>
+<script type="text/javascript">
+$(function(){
+
+	var setGoodsThumbsPaginationScroll = function(){
+		var paginationHeight = $("#displayGoodsImagesLayer .pagination").height();
+		var currentHeight = $("#displayGoodsImagesLayer .pagination>li.current").outerHeight();
+		var currentTop = $("#displayGoodsImagesLayer .pagination>li.current").position().top;
+
+		var gap = ($("#displayGoodsImagesLayer .pagination").scrollTop()+currentTop+(currentHeight/2))-(paginationHeight/2);
+
+		$("#displayGoodsImagesLayer .pagination").stop(true,true).animate({'scrollTop':gap});
+	};
+	$("#displayGoodsImagesLayer .displayGoodsImagesSlideConatiner>img:gt(0)").hide();
+	$("#displayGoodsImagesLayer .pagination>li:eq(0)").addClass('current');
+	$("#displayGoodsImagesLayer .displayGoodsImagesSlideConatiner").show();
+	$("#displayGoodsImagesLayer .pagination>li").bind('click',function(){
+		var i = $("#displayGoodsImagesLayer .pagination>li").index(this);
+		$("#displayGoodsImagesLayer .displayGoodsImagesSlideConatiner>img").hide().eq(i).show();
+		$("#displayGoodsImagesLayer .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+	$("#displayGoodsImagesLayer .prev").bind('click',function(){
+		var i = $("#displayGoodsImagesLayer .displayGoodsImagesSlideConatiner>img").index($("#displayGoodsImagesLayer .displayGoodsImagesSlideConatiner>img:visible"));
+		if(i<=0) i = $("#displayGoodsImagesLayer .displayGoodsImagesSlideConatiner>img").length-1;
+		else i--;
+		$("#displayGoodsImagesLayer .displayGoodsImagesSlideConatiner>img").hide().eq(i).show();
+		$("#displayGoodsImagesLayer .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+	$("#displayGoodsImagesLayer .next").bind('click',function(){
+		var i = $("#displayGoodsImagesLayer .displayGoodsImagesSlideConatiner>img").index($("#displayGoodsImagesLayer .displayGoodsImagesSlideConatiner>img:visible"));
+		if(i>=$("#displayGoodsImagesLayer .displayGoodsImagesSlideConatiner>img").length-1) i = 0;
+		else i++;
+		$("#displayGoodsImagesLayer .displayGoodsImagesSlideConatiner>img").hide().eq(i).show();
+		$("#displayGoodsImagesLayer .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+
+});
+</script>
+
+<div style="margin-left:2px; border:2px solid #000; padding:8px; background-color:#fff; width:350px">
+{? images }
+	<table cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td width="300" height="300">
+			<div class="displayGoodsImagesSlideConatiner hide">
+				<!--{ @ images }-->
+				<!--{?.view.image}-->
+				<img src="{.view.image}" width="100%" style="max-height:300px;" onerror="this.src='../images/common/noimage.gif'" title="{images.large.label}"/>
+				<!--{ / }-->
+				<!--{ / }-->
+			</div>
+		</td>
+		<td width="51" align="right">
+			<!-- 상품이미지 썸네일 -->
+			<table style="width:100%" cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td height="15" align="center"><a href="#" class="prev"><img src="../images/common/arw_up.gif" /></a></td>
+			</tr>
+			<tr>
+				<td>
+					<ul class="pagination">
+						<!--{ @ images }-->
+						<!--{?.thumbView.image}-->
+						<li><img src="{.thumbView.image}" width="40" height="40" onerror="this.src='../images/common/noimage_list.gif'"/></li>
+						<!--{ / }-->
+						<!--{ / }-->
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td height="15" align="center"><a href="#" class="next"><img src="../images/common/arw_dn.gif" /></a></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+{ : }
+	<table width="100%" height="100" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td align="center">이미지가 없습니다.</td>
+	</tr>
+	</table>
+{ / }
+</div>
+

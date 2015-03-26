@@ -1,0 +1,398 @@
+<?php
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Snssocial
+{
+	function __construct() {
+		$this->ci =& get_instance();
+
+		$this->fammerceplusUrl			= 'http://fammerce.firstmall.kr';//page연동을위해
+		$this->fammerceplusUrlPath	= '/fammerce-plus-page-connect.php';//page연동을위해
+
+		//publish_stream, -> feed 등록시 필요로 skin 상에서처리
+		$this->userauth = 'email,user_likes,publish_actions,user_birthday, read_friendlists';
+		$this->adminauth = 'email,user_likes,manage_pages, publish_actions, user_birthday, read_friendlists';
+
+		//require_once APPPATH.'/libraries/facebook-php-sdk/facebook.php';
+		require_once APPPATH.'/libraries/social/facebook/facebook.php';
+		$this->arrSns	= config_load('snssocial');
+		$this->__APP_USE__			= 'f';
+		$this->__APP_ID__				= $this->arrSns['key_f'];
+		$this->__APP_SECRET__		= $this->arrSns['secret_f'];
+		$this->__APP_PAGE__			= $this->arrSns['page_id_f'];
+		$this->__APP_NAMES__		= $this->arrSns['name_f'];
+
+		$arrSystem = config_load('system');
+		//정식도메인이 있는경우
+		$this->domainurl	= ($arrSystem['domain']) ? 'http://'.$arrSystem['domain']:'http://'.$arrSystem['subDomain'];
+		$this->firstmallurl	= 'http://'.$arrSystem['subDomain'];
+		$this->likeurl		= $this->firstmallurl.'/goods/view?appid='.$this->__APP_ID__;
+
+
+		if($_GET['facebook']=='Y' || $_GET['signed_request'] || $this->ci->session->userdata('fammercemode')){
+			$this->facebooklogin();
+			if($_GET['signed_request']){
+				$this->ci->session->set_userdata('fammercemode', $_GET['signed_request']);
+			}else{
+				$this->ci->session->set_userdata('fammercemode', $this->ci->session->userdata('fammercemode'));
+			}
+		}else{
+			$this->ci->session->set_userdata('fammercemode','');
+		}
+		if($this->ci->session->userdata('fammercemode')){//main iframe 접근시
+			$this->ci->template->assign('fammercemode', true);
+		}
+
+		// Create our Application instance (replace this with your appId and secret).
+		$this->facebook = new Facebook(array(
+		  'appId'  => $this->__APP_ID__,
+		  'secret' => $this->__APP_SECRET__,
+		  "cookie" => true
+		));
+	}
+
+	function facebooklogin() {
+		$this->fbuser_profile = null;
+
+		// Create our Application instance (replace this with your appId and secret).
+
+		$this->facebook = new Facebook(array(
+		  'appId'  => $this->__APP_ID__,
+		  'secret' => $this->__APP_SECRET__,
+		  "cookie" => true
+		));
+
+		if($this->ci->session->userdata('fbuser') && $this->facebook->getUser() ) {
+			$this->fbuser_profile = $this->facebook->api($this->ci->session->userdata('fbuser')); // 유저 프로필을 가져 옵니다.
+			$this->fbuser				= $this->ci->session->userdata('fbuser');
+			$this->accesstoken		= $this->ci->session->userdata('accesstoken');
+			$this->signedrequest		= $this->ci->session->userdata('signedrequest');
+		}else{
+
+			// Get User ID
+			$this->fbuser = $this->facebook->getUser();
+
+			if ($this->fbuser) {
+				try {
+					$this->fbuser_profile = $this->facebook->api('/me'); // 유저 프로필을 가져 옵니다.
+					$this->signedrequest = $this->facebook->getSignedRequest();
+
+					$fb_accounts = $this->facebook->api('/me/accounts');
+					$this->accesstoken = $fb_accounts['data'][1]['access_token'];
+					$this->ci->session->set_userdata('fbuser', $this->fbuser);
+					$this->ci->session->set_userdata('accesstoken', $this->accesstoken);
+					$this->ci->session->set_userdata('signedrequest', $this->signedrequest);
+				} catch (FacebookApiException $e) {
+					$this->fbuser = null;
+					$this->ci->session->unset_userdata('fbuser');
+					$this->ci->session->unset_userdata('accesstoken');
+					$this->ci->session->unset_userdata('signedrequest');
+				}
+			}else{
+				$this->fbuser = null;
+				$this->ci->session->unset_userdata('fbuser');
+				$this->ci->session->unset_userdata('accesstoken');
+				$this->ci->session->unset_userdata('signedrequest');
+			}
+		}
+		return $this->fbuser_profile;
+	}
+
+
+	/**
+	@ twitter login
+	**/
+	function twitterlogin($mtype, $mform = 'login') {
+		$this->ci->session->unset_userdata('oauth_token');
+		$this->ci->session->unset_userdata('oauth_token_secret');
+
+		if($mform == 'join') {
+			$this->arrSns['callbackurl_t'] = 'http://'.($_SERVER['HTTP_HOST']).'/sns_process/twitterjoin?mtype='.$mtype;
+		}else{
+			$this->arrSns['callbackurl_t'] = 'http://'.($_SERVER['HTTP_HOST']).'/sns_process/twitterlogin?mtype='.$mtype;
+		}
+
+		require_once(APPPATH.'/libraries/social/twitter/twitteroauth/twitteroauth.php');
+		require_once(APPPATH.'/libraries/social/twitter/config.php');
+
+ 		$connection = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET);
+		$request_token = $connection->getRequestToken(OAUTH_CALLBACK);/* Get temporary credentials. */
+
+		switch ($connection->http_code) {
+		  case 200:
+			$url = $connection->getAuthorizeURL($request_token['oauth_token']);
+			$this->ci->session->set_userdata('oauth_token', $request_token['oauth_token']);
+			$this->ci->session->set_userdata('oauth_token_secret', $request_token['oauth_token_secret']);
+			$authloginckurl	= $url;
+			break;
+		  default:
+			$authloginckurl = null;
+		  break;
+		}
+
+		return $authloginckurl;
+	}
+
+
+	function twitteraccount($oauth_verifier, $mtype, $mform = 'login') {
+		$this->twuser_profile = null;
+		$this->ci->session->unset_userdata('twuser');
+		if($mform == 'join') {
+			$this->arrSns['callbackurl_t'] = 'http://'.($_SERVER['HTTP_HOST']).'/sns_process/twitterjoin?mtype='.$mtype;
+		}else{
+			$this->arrSns['callbackurl_t'] = 'http://'.($_SERVER['HTTP_HOST']).'/sns_process/twitterlogin?mtype='.$mtype;
+		}
+
+		require_once(APPPATH.'/libraries/social/twitter/twitteroauth/twitteroauth.php');
+		require_once(APPPATH.'/libraries/social/twitter/config.php');
+
+		$connection = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET, $this->ci->session->userdata('oauth_token'), $this->ci->session->userdata('oauth_token_secret'));
+
+		/* Request access tokens from twitter */
+		$access_token = $connection->getAccessToken($oauth_verifier);
+		if($mform == 'join') {
+			$newconnection = new TwitterOAuth(CONSUMER_KEY, CONSUMER_SECRET, $access_token['oauth_token'], $access_token['oauth_token_secret']);
+			$this->twuser_profile = $newconnection->get('account/verify_credentials');
+		}else{
+			$this->twuser_profile['id'] = $access_token['user_id'];
+			$this->twuser_profile['screen_name'] = $access_token['screen_name'];
+		}
+
+		if($this->twuser_profile){
+			$twitter_data = array(
+				'oauth_token'=> $request_token['oauth_token'],
+				'oauth_token'		=> $request_token['oauth_token'],
+				'twuser_profile'					=> $this->twuser_profile
+			);
+			$this->ci->session->set_userdata(array('twuser'=>$twitter_data));
+		}
+		return $this->twuser_profile;
+	}
+
+	/**
+	@ m2day login
+	**/
+		function me2dayloginurl($mtype, $mform = 'login') {
+			$authloginckurl = null;
+			$this->ci->session->unset_userdata('me2day_oauth_token');
+
+			$this->ci->load->library('SofeeXmlParser');
+			$xmlParser = new SofeeXmlParser();
+
+			$xmlParser->parseFile("http://me2day.net/api/get_auth_url.xml?akey=".$this->arrSns['key_m']);
+			$tree = $xmlParser->getTree();
+			if($tree['auth_token']){
+				$authloginckurl = $tree['auth_token']['url']['value'];
+				$this->ci->session->set_userdata('me2day_oauth_token', $tree['auth_token']['token']['value']);
+			}
+			return $authloginckurl;
+		}
+
+		function me2dayaccount($mtype, $mform = 'login') {
+			$this->m2user_profile = null;
+			$this->ci->session->unset_userdata('m2user');
+
+			$this->ci->load->library('SofeeXmlParser');
+			$xmlParser = new SofeeXmlParser();
+			$xmlParser->parseFile("http://me2day.net/api/get_person/".$_GET['user_id'].".json");//
+			$tree = $xmlParser->getTree();
+			debug_var($tree);
+			debug_var($_GET);exit;
+			if(isset($_GET['token']) && isset($_GET['result']) && $_GET['result'] == true && $tree['person']) {//인증된경우
+				$this->m2user_profile['person']		= $tree['person'];
+				$this->m2user_profile['user_key']	= $_GET['user_key'];
+				$authKey = "20120619" . md5("20120619" . $_GET['user_key']);
+				$me2day_data = array(
+					'me2day_oauth_token'=>  $_GET['token'],
+					'me2day_oauth_result'=> $_GET['result'],
+					'me2day_user_id'		=> $_GET['user_id'],
+					'me2day_user_key'	=> $_GET['user_key']
+				);
+				$this->ci->session->set_userdata(array('m2user'=>$me2day_data));
+				file_get_contents("http://me2day.net/api/noop?uid=".$_GET['user_id']."&ukey=".$authKey."&akey=".$this->arrSns['key_m']);
+				//readurl("http://me2day.net/api/noop?uid=".$_GET['user_id']."&ukey=".$authKey."&akey=".$this->arrSns['key_m']); 			}else{
+				$this->m2user_profile = null;
+			}
+			return $this->m2user_profile;
+		}
+
+
+	//허용권한체크
+	function facebookpermissions($facebook) {
+		// Get User ID
+		if ($this->ci->session->userdata('fbuser')) {
+			$fbpermissions =$facebook->api('/me/permissions');
+		}
+		return $fbpermissions;
+	}
+
+	//app token
+	function get_app_token($appid, $appsecret)
+	{
+		$args = array(
+		'grant_type' => 'client_credentials',
+		'client_id' => $appid,
+		'client_secret' => $appsecret
+		);
+
+		$ch = curl_init();
+		$url = 'https://graph.facebook.com/oauth/access_token';
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_HEADER, false);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $args);
+		$data = curl_exec($ch);
+
+		return json_encode($data);
+	}
+
+
+	/**
+	* @ facebook page tabs read
+	* @ $params app_id
+	**/
+	function facebook_tabs_read($params)
+	{
+		$ret_obj = $this->facebook->api('/'.$params['page_id'].'/tabs');
+		return $ret_obj['data'];
+	}
+
+	/**
+	* @ facebook page tabs page read
+	* @ $params app_id
+	**/
+	function facebook_page_read($params, &$appuseck)
+	{
+		$pageapiobj = $this->facebook->api(array( 'method' => 'fql.query', 'query' =>"SELECT  page_id, page_url, name, pic_square, type, has_added_app FROM page WHERE page_id IN (SELECT page_id FROM page_admin WHERE uid=me()) and name!=''"));
+
+		$appuseck = 'N';
+		foreach($pageapiobj as $pagekey => $pagevalue)
+		{
+			$appidck = $this->facebook->api('/'.$pagevalue['page_id'].'/tabs');//debug_var($appidck);debug_var($pageapiobj);
+			unset($pageidinfo);
+			$i =0;
+			$appuse =  false;
+			unset($pagevalue['page_app_link']);
+			foreach($appidck['data'] as $tabskey => $tabsvalue){
+				if($tabsvalue['application']['id'] && !in_array($tabsvalue['application']['id'],$pageidinfo) )
+				{
+					$pageidinfo[$i]['name']			= $tabsvalue['application']['name'];
+					$pageidinfo[$i]['namespace']	= $tabsvalue['application']['namespace'];
+					$pageidinfo[$i]['id']					= $tabsvalue['application']['id'];
+					$pageidinfo[$i]['link']				= $tabsvalue['link'];
+					if($this->__APP_ID__ == $tabsvalue['application']['id'] ) {//이미등록된 앱페지인경우
+						$appuse = true;
+						$appuseck = 'Y';
+						$pagevalue['page_app_link'] = $tabsvalue['link'];
+					}
+					$i++;
+				}
+			}
+			$pagevalue['appinfo'] = $pageidinfo;
+			if($appuse) {
+				$pagevalue['appuse'] = 'Y';
+			}else{
+				$pagevalue['appuse'] = 'N';
+			}
+			$newpageinfo[] = $pagevalue;
+		}
+		return $newpageinfo;
+
+	}
+
+	/**
+	* @ facebook page tabs add
+	* @ $params page_id
+	* @ $params app_id
+	**/
+	function facebook_tabs_add($params)
+	{
+		$page_accounts = $this->facebook->api('/'.$params['page_id'].'/','GET',array("fields" => "access_token"));
+		$this->page_accesstoken = $page_accounts['access_token'];
+		try{
+			$ret_obj = $this->facebook->api('/'.$params['page_id'].'/tabs', 'POST',  array("app_id" => $params['app_id'], "access_token" => $this->page_accesstoken));
+		}catch (FacebookApiException $o){
+			debug_var($o);
+		}
+		return $ret_obj;
+	}
+
+	/**
+	* @ facebook page tabs del
+	* @ $params page_id
+	* @ $params app_id
+	**/
+	function facebook_tabs_delete($params)
+	{
+		$page_accounts = $this->facebook->api('/'.$params['page_id'].'/','GET',array("fields" => "access_token"));
+		$this->page_accesstoken = $page_accounts['access_token'];
+		try{
+			$ret_obj = $this->facebook->api('/'.$params['page_id'].'/tabs/app_'.$params['app_id'], 'DELETE',  array("access_token" => $this->page_accesstoken));
+		}catch (FacebookApiException $o){
+			debug_var($o);
+		}
+		return $ret_obj;
+	}
+
+	function publishCustomAction($product_url)
+	{
+		$this->facebooklogin();
+		if($this->fbuser){
+			try{
+				$ret_obj = $this->facebook->api('/me/'.$this->__APP_NAMES__.':love', 'POST', array('item' => $product_url));//, 'post', array('shopping' => $product_url)
+			}catch (FacebookApiException $o){
+				debug_var($o);
+			}
+		}
+		return $ret_obj;
+  }
+
+	//facebook like 한 경우 체크하기
+	function facebook_goodsLike($product_url)
+	{
+		$this->facebooklogin();
+		if($this->fbuser){
+			$fql_app_user = "SELECT url FROM url_like WHERE user_id = '". $this->fbuser ."'";
+			$param_app_user = array('method' => 'fql.query', 'query' => $fql_app_user);//, 'callback' => ''
+			$linkInfoArray = $this->facebook->api($param_app_user);
+			if (is_array($linkInfoArray)) {
+				foreach ($linkInfoArray as $key => $val) {
+					$linkInfo[] = $val['url'];
+				}
+			}
+			if (in_array($product_url, $linkInfo)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	* @ facebook friends
+	**/
+	function facebook_searchfriends($usename)
+	{
+		$fbuser_profile = $this->facebooklogin();
+		try{
+				$ret_obj = $this->facebook->api('/me/friends','GET',array("fields" => "id, name, picture","name"=>$usename));//$usename
+			}catch (FacebookApiException $o){
+				debug_var($o);
+			}
+		return $ret_obj;
+	}
+
+	//facebook 초대하기
+	function facebook_friendfeed($data)
+	{
+		$fbuser_profile = $this->facebooklogin();
+		try{
+			$params = array('message'=>$data['message'],'name'=>$data['name'],'link'=> $data['link'],'description'=> $data['description']);
+			$result = $this->facebook->api('/'.$data['friendid'].'/feed/','POST', $params);
+		}catch (FacebookApiException $o){
+			debug_var($o);
+		}
+		return $result;
+	}
+}
+?>

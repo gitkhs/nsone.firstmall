@@ -1,0 +1,58 @@
+<?php /* Template_ 2.2.6 2014/12/11 11:28:09 /www/nsone_firstmall_kr/data/skin/default/_modules/common/html_footer.html 000002071 */ ?>
+<div id='popupChangePassword' class='hide'>
+	<form id='passUpdateForm' method='post' action='/login_process/popup_change_pass' target='actionFrame'>
+	<input type='hidden' name='password_mode' value='update'>
+	<table width='100%' cellpadding='0' cellspacing='0' border=0>
+		<tr>
+			<td colspan='2'>
+				회원님의 소중한 개인정보 보호를 위해 비밀번호를 주기적으로 변경하시는 것이 좋습니다.
+			</td>
+		</tr>
+		<tr><td colspan='2' height='10'></td></tr>
+		<tr>
+			<td width='110'>
+			현재 비밀번호
+			</td>
+			<td>
+				<input type='password' name='old_password' value='' size='30' class='passwordField'>
+			</td>
+		</tr>
+		<tr><td colspan='2' height='5'></td></tr>
+		<tr>
+			<td>
+				신규 비밀번호
+			</td>
+			<td>
+				<input type='password' name='new_password' value='' size='30' class='passwordField'>
+			</td>
+		</tr>
+		<tr><td colspan='2' height='5'></td></tr>
+		<tr>
+			<td>
+				신규 비밀번호 확인
+			</td>
+			<td>
+				<input type='password' name='re_new_password' value='' size='30' class='passwordField'>
+			</td>
+		</tr>
+		<tr><td colspan='2' height='5'></td></tr>
+		<tr>
+			<td colspan='2'>
+				<span class='desc'>6~20자, 영문 대소문자 또는 숫자 특수문자 중 2가지 이상 조합</span>
+			</td>
+		</tr>
+		<tr><td colspan='2' height='10'></td></tr>
+		<tr>
+			<td colspan='2'>
+			<label><input type='checkbox' name='update_rate' value='Y' onclick='update_rate_checked();'> <?php echo $TPL_VAR["passwordRate"]?>개월 이후에 비밀번호를 변경하겠습니다.</label>
+			</td>
+		</tr>
+	</table>
+	<div style="padding-top:10px;" class="center">
+		<span class="btn large black"><button type="submit" class="setBtn">확인</button></span>
+		<span class="btn large black">&nbsp;&nbsp;<button type='button' onclick='passwordAfterUpdate();'>취소</button></span>
+	</div>
+	</form>
+</div>
+</body>
+</html>

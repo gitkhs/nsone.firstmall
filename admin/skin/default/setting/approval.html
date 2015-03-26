@@ -1,0 +1,365 @@
+<!-- 회원설정 : 승인/혜택 -->
+<script type="text/javascript">
+$(document).ready(function() {
+	$("input[name='autoApproval'][value='{autoApproval}']").attr('checked','checked');
+	$("select[name='emoneyTerm']").val('{emoneyTerm}');
+
+	if(!$("input[name='autoApproval']:checked").val()) $("input[name='autoApproval'][value='Y']").attr('checked','checked');
+	if(!$("input[name='emoneyJoin']").val()) $("input[name='emoneyJoin']").val(0);
+
+	if(!$("input[name='emoneyRecommend']").val()) $("input[name='emoneyRecommend']").val(0);
+	if(!$("input[name='emoneyLimit']").val()) $("input[name='emoneyLimit']").val(0);
+	if(!$("input[name='emoneyJoiner']").val()) $("input[name='emoneyJoiner']").val(0);
+
+	$("input[name='emoneyRecommend']").live("keyup",function(){
+		var price = parseInt($("input[name='emoneyRecommend']").val()) * parseInt($("input[name='emoneyLimit']").val());
+		$("#sprice").html(setComma(price));
+	});
+
+	$("input[name='emoneyLimit']").live("keyup",function(){
+		var price = parseInt($("input[name='emoneyRecommend']").val()) * parseInt($("input[name='emoneyLimit']").val());
+		price = (price>0)?price:0;
+		$("#sprice").html(setComma(price));
+	});
+	$("input[name='pointRecommend']").live("keyup",function(){
+		var price = parseInt($("input[name='pointRecommend']").val()) * parseInt($("input[name='pointLimit']").val());
+		$("#sprice2").html(setComma(price));
+	});
+	$("input[name='pointLimit']").live("keyup",function(){
+		var price = parseInt($("input[name='pointRecommend']").val()) * parseInt($("input[name='pointLimit']").val());
+		price = (price>0)?price:0;
+		$("#sprice2").html(setComma(price));
+	});
+
+
+	$("select[name='emoneyTerm_invited']").val('{emoneyTerm_invited}');
+
+	if(!$("input[name='emoneyInvited']").val()) {
+		$("input[name='emoneyInvited']").val(0);
+	}
+
+	if( !$("input[name='emoneyLimit_invited']").val() ) {
+		$("input[name='emoneyLimit_invited']").val(0);
+	}
+
+	$("input[name='emoneyLimit_invited']").live("keyup",function(){
+		var price_invited = parseInt($("input[name='emoneyInvited']").val()) * parseInt($("input[name='emoneyLimit_invited']").val());
+		price_invited = (price_invited>0)?price_invited:0;
+		$("#sprice_invited").html(setComma(price_invited));
+	});
+
+	$("input[name='pointLimit_invited']").live("keyup",function(){
+		var price_invited = parseInt($("input[name='pointInvited']").val()) * parseInt($("input[name='pointLimit_invited']").val());
+		price_invited = (price_invited>0)?price_invited:0;
+		$("#sprice_invited2").html(setComma(price_invited));
+	});
+
+	apply_input_style();
+
+
+	$("select[name='reserve_select']").live("change",function(){
+		span_controller('reserve','');
+	});
+	$("select[name='point_select']").live("change",function(){
+		span_controller('point','');
+	});
+
+	$("select[name='joiner_reserve_select']").live("change",function(){
+		span_controller('reserve','joiner');
+	});
+	$("select[name='joiner_point_select']").live("change",function(){
+		span_controller('point','joiner');
+	});
+
+	$("select[name='recomm_reserve_select']").live("change",function(){
+		span_controller('reserve','recomm');
+	});
+	$("select[name='recomm_point_select']").live("change",function(){
+		span_controller('point','recomm');
+	});
+
+	span_controller('reserve','');
+	span_controller('point','');
+	span_controller('reserve','recomm');
+	span_controller('point','recomm');
+	span_controller('reserve','joiner');
+	span_controller('point','joiner');
+
+	$("select[name='invit_reserve_select']").live("change",function(){
+		span_controller('reserve','invit');
+	});
+	$("select[name='invit_point_select']").live("change",function(){
+		span_controller('point','invit');
+	});
+	$("select[name='invited_reserve_select']").live("change",function(){
+		span_controller('reserve','invited');
+	});
+	$("select[name='invited_point_select']").live("change",function(){
+		span_controller('point','invited');
+	});
+	$("select[name='cnt_reserve_select']").live("change",function(){
+		span_controller('reserve','cnt');
+	});
+	$("select[name='cnt_point_select']").live("change",function(){
+		span_controller('point','cnt');
+	});
+	span_controller('reserve','invit');
+	span_controller('point','invit');
+	span_controller('reserve','invited');
+	span_controller('point','invited');
+	span_controller('reserve','cnt');
+	span_controller('point','cnt');
+
+	// 상단 매뉴얼 링크 변경 leewh 2014-10-01
+	$(".page-manual-btn a").attr('href','http://manual.firstmall.kr/html/manual.php?category=010013');
+});
+
+function span_controller(nm, type){
+	var name = type ? type+"_"+nm : nm;
+	var reserve_y = $("span[name='"+name+"_y']");
+	var reserve_d = $("span[name='"+name+"_d']");
+	var value = $("select[name='"+name+"_select'] option:selected").val();
+	if(value==""){
+		reserve_y.hide();
+		reserve_d.hide();
+	}else if(value=="year"){
+		reserve_y.show();
+		reserve_d.hide();
+	}else if(value=="direct"){
+		reserve_y.hide();
+		reserve_d.show();
+	}
+}
+</script>
+
+<div class="item-title">회원 가입 승인 및 혜택 <span class="helpicon" title="회원가입 시 승인방법 및 혜택을 설정할 수 있습니다."></span></div>
+
+<table width="100%" class="info-table-style">
+<col width="80" /><col width="150" /><col width="300" /><col width="" />
+<tr>
+	<th class="its-th  center" colspan="3">회원 승인 방법</th>
+	<td class="its-td">
+		<div class="left">
+		<input type="radio" name="autoApproval" id="apA1" value="Y" /><label for="apA1">자동승인</label>:
+		자동승인 : ID 또는 SNS계정
+		</div>
+		<div class="left">
+		<input type="radio" name="autoApproval" id="apA2" value="N" /><label for="apA2">수동승인 (회원 > <a href="/admin/member"><span class="highlight-link hand">회원리스트</span></a>)</label>
+		</div>
+	</td>
+</tr>
+<tr>
+	<th class="its-th" rowspan="11">회원<br>가입<br>혜택</th>
+	<th class="its-th" colspan="2">회원 가입(승인) 시 적립금</th>
+	<td class="its-td">
+		적립금 <input type="text" name="emoneyJoin" value="{emoneyJoin}" size="6" class="line onlynumber right" />원. 지급 적립금의 유효기간은 <select name="reserve_select">
+						<option value="">제한하지 않음</option>
+						<option value="year" {?reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+						<option value="direct" {?reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+					</select>
+					<span name="reserve_y" class="hide">→ 지급연도 + <input type="text" name="reserve_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{reserve_year}" />년 12월 31일</span>
+					<span name="reserve_d" class="hide">→ <input type="text" name="reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{reserve_direct}" />개월</span><br>
+		<span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+			포인트 <input type="text" name="pointJoin" value="{pointJoin}" size="6" class="line onlynumber right" />p. 지급 포인트의 유효기간은 <select name="point_select" {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+						<option value="">제한하지 않음</option>
+						<option value="year" {?point_select=='year'}selected{/}>제한 - 12월31일</option>
+						<option value="direct" {?point_select=='direct'}selected{/}>제한 - 직접입력</option>
+					</select>
+					<span name="point_y" class="hide">→ 지급연도 + <input type="text" name="point_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{point_year}" />년 12월 31일</span>
+					<span name="point_d" class="hide">→ <input type="text" name="point_direct" class="line onlynumber" style="text-align:right" size="3" value="{point_direct}" />개월</span><br>
+		</span>
+
+		단, 특정기간 <input type="text" name="start_date" value="{start_date}" class="datepicker line"  maxlength="10" size="10" /> ~ <input type="text" name="end_date" value="{end_date}" class="datepicker line"  maxlength="10" size="10" /> <br>
+		적립금 <input type="text" name="emoneyJoin_limit" value="{emoneyJoin_limit}" size="6" class="line onlynumber right" />원
+		<span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >, 포인트 <input type="text" name="pointJoin_limit" value="{pointJoin_limit}" size="6" class="line onlynumber right" />p.</span>
+	</td>
+</tr>
+<tr>
+	<th class="its-th"  colspan="2">회원 가입(승인) 시 쿠폰</th>
+	<td class="its-td">
+		신규회원에게 쿠폰을 발급할 수 있습니다.   (프로모션/쿠폰 > <a href="/admin/coupon/catalog"><span class="highlight-link hand">쿠폰리스트</span></a>)
+	</td>
+</tr>
+<tr>
+	<th class="its-th" rowspan="3">추천인</th>
+	<th class="its-th">회원 가입 시 추천받은 자 - 기존회원</th>
+	<td class="its-td">
+		적립금 <input type="text" name="emoneyRecommend" value="{emoneyRecommend}" size="6" class="line onlynumber right" />원. 지급 적립금의 유효기간은 <select name="recomm_reserve_select">
+						<option value="">제한하지 않음</option>
+						<option value="year" {?recomm_reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+						<option value="direct" {?recomm_reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+					</select>
+					<span name="recomm_reserve_y" class="hide">→ 지급연도 + <input type="text" name="recomm_reserve_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{recomm_reserve_year}" />년 12월 31일</span>
+					<span name="recomm_reserve_d" class="hide">→ <input type="text" name="recomm_reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{recomm_reserve_direct}" />개월</span>
+		단, 월<input type="hidden" name="emoneyTerm" value="month" >
+		<input type="text" name="emoneyLimit" value="{emoneyLimit}" size="6" class="line onlynumber right" />회(최대 <span id="sprice">{? emoneyLimit > 0 }{=number_format(emoneyLimit*emoneyRecommend)}{:}0{/}</span>원)으로 제한 <br>
+
+		<span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+			포인트 <input type="text" name="pointRecommend" value="{pointRecommend}" size="6" class="line onlynumber right" />p. 지급 포인트의 유효기간은 <select name="recomm_point_select" {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+						<option value="">제한하지 않음</option>
+						<option value="year" {?recomm_point_select=='year'}selected{/}>제한 - 12월31일</option>
+						<option value="direct" {?recomm_point_select=='direct'}selected{/}>제한 - 직접입력</option>
+					</select>
+					<span name="recomm_point_y" class="hide">→ 지급연도 + <input type="text" name="recomm_point_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3"  maxlength="3" value="{recomm_point_year}" />년 12월 31일</span>
+					<span name="recomm_point_d" class="hide">→ <input type="text" name="recomm_point_direct" class="line onlynumber" style="text-align:right" size="3" value="{recomm_point_direct}" />개월</span>
+		단, 월<input type="hidden" name="pointTerm" value="month" >
+		<input type="text" name="pointLimit" value="{pointLimit}" size="6" class="line onlynumber right" />회(최대 <span id="sprice2">{? pointLimit > 0 }{=number_format(pointLimit*pointRecommend)}{:}0{/}</span>원)으로 제한
+		</span>
+	</td>
+</tr>
+<tr>
+	<th class="its-th" >회원 가입 시 추천 한 자(추천인 입력) - 신규회원</th>
+	<td class="its-td">
+		적립금 <input type="text" name="emoneyJoiner" value="{emoneyJoiner}" size="6" class="line onlynumber right" />원. 지급 적립금의 유효기간은 <select name="joiner_reserve_select">
+						<option value="">제한하지 않음</option>
+						<option value="year" {?joiner_reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+						<option value="direct" {?joiner_reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+					</select>
+					<span name="joiner_reserve_y" class="hide">→ 지급연도 + <input type="text" name="joiner_reserve_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3"  maxlength="3" value="{joiner_reserve_year}" />년 12월 31일</span>
+					<span name="joiner_reserve_d" class="hide">→ <input type="text" name="joiner_reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{joiner_reserve_direct}" />개월</span><br>
+		<span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+			포인트 <input type="text" name="pointJoiner" value="{pointJoiner}" size="6" class="line onlynumber right" />p. 지급 포인트의 유효기간은 <select name="joiner_point_select" {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+						<option value="">제한하지 않음</option>
+						<option value="year" {?joiner_point_select=='year'}selected{/}>제한 - 12월31일</option>
+						<option value="direct" {?joiner_point_select=='direct'}selected{/}>제한 - 직접입력</option>
+					</select>
+					<span name="joiner_point_y" class="hide">→ 지급연도 + <input type="text" name="joiner_point_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{joiner_point_year}" />년 12월 31일</span>
+					<span name="joiner_point_d" class="hide">→ <input type="text" name="joiner_point_direct" class="line onlynumber" style="text-align:right" size="3" value="{joiner_point_direct}" />개월</span>
+		</span>
+
+	</td>
+</tr>
+<tr>
+	<td class="its-td" colspan="2" >
+		<table>
+		<tr>
+			<td><img src="../images/design/img_member_myinfo.gif" ></td>
+			<td width="5"></td>
+			<td valign="bottom">
+				<span class="bold pdl5">회원가입페이지에서 추천인</span><br />
+				<span class="desc">←좌측의 화면과 같이 신규회원 가입 시 추천인을 입력할 수 있습니다.</span>
+			</td>
+		</tr>
+		</table>
+
+
+	</div>
+	</td>
+</tr>
+{? APP_VER == "2.0" }
+<tr>
+	<th class="its-th" >초대하기</th>
+	<th class="its-th" colspan="2">
+	<div class="desc" >※ 페이스북 API가 version v2.0으로 업데이트되면서  2014년 4월 30일 이후 출시된 전용앱은 친구 목록 가져오기 기능을 지원하지 않습니다.</div>
+	</th>
+</tr>
+{:}
+	<tr>
+		<th class="its-th" rowspan="6">초대하기</th>
+		
+		<th class="its-th" >타이틀</th>
+		<td class="its-td" >[{config_basic.shopName}] <input type="text" name="snstitle" value="{sns.snstitle}" size="40" class="line" />
+			<br /><span class="desc">예) 슬이나라 :: 슬이나라로 초대합니다~ 50%할인 행사 中</span>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th" >초대 문구</th>
+		<td class="its-td" >
+			<textarea name="snsDescription" style="width:600px; height:30px;overflow:auto;" rows="4" class="line" title="" >{sns.snsDescription}</textarea>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">Facebook에서 초대장을 클릭하여 회원가입 하면 </th>
+		<td class="its-td">
+			적립금 <input type="text" name="emoneyInvitees" value="{emoneyInvitees}" size="6" class="line onlynumber right" />원. 지급 적립금의 유효기간은 <select name="invit_reserve_select">
+							<option value="">제한하지 않음</option>
+							<option value="year" {?invit_reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+							<option value="direct" {?invit_reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+						</select>
+						<span name="invit_reserve_y" class="hide">→ 지급연도 + <input type="text" name="invit_reserve_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{invit_reserve_year}" />년 12월 31일</span>
+						<span name="invit_reserve_d" class="hide">→ <input type="text" name="invit_reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{invit_reserve_direct}" />개월</span><br>
+			<span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+				포인트 <input type="text" name="pointInvitees" value="{pointInvitees}" size="6" class="line onlynumber right" />p. 지급 포인트의 유효기간은 <select name="invit_point_select" {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+							<option value="">제한하지 않음</option>
+							<option value="year" {?invit_point_select=='year'}selected{/}>제한 - 12월31일</option>
+							<option value="direct" {?invit_point_select=='direct'}selected{/}>제한 - 직접입력</option>
+						</select>
+						<span name="invit_point_y" class="hide">→ 지급연도 + <input type="text" name="invit_point_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{invit_point_year}" />년 12월 31일</span>
+						<span name="invit_point_d" class="hide">→ <input type="text" name="invit_point_direct" class="line onlynumber" style="text-align:right" size="3" value="{invit_point_direct}" />개월</span>
+			</span>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">Facebook에서 초대장을 클릭하여 회원가입 하면<br/>
+	초대장을 보낸 회원에게도</th>
+		<td class="its-td">적립금 <input type="text" name="emoneyInvited" value="{emoneyInvited}" size="6" class="line onlynumber right" />원. 지급 적립금의 유효기간은 <select name="invited_reserve_select">
+							<option value="">제한하지 않음</option>
+							<option value="year" {?invited_reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+							<option value="direct" {?invited_reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+						</select>
+						<span name="invited_reserve_y" class="hide">→ 지급연도 + <input type="text" name="invited_reserve_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{invited_reserve_year}" />년 12월 31일</span>
+						<span name="invited_reserve_d" class="hide">→ <input type="text" name="invited_reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{invited_reserve_direct}" />개월</span>
+			단, 월<input type="hidden" name="emoneyTerm_invited" value="month" >
+			<input type="text" name="emoneyLimit_invited" value="{emoneyLimit_invited}" size="6" class="line onlynumber right" />회(최대 <span id="sprice_invited">{? emoneyLimit_invited > 0 }{=number_format(emoneyLimit_invited*emoneyInvited)}{:}0{/}</span>원)으로 제한 <br>
+
+			<span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >포인트 <input type="text" name="pointInvited" value="{pointInvited}" size="6" class="line onlynumber right" />p. 지급 포인트의 유효기간은 <select name="invited_point_select" {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+							<option value="">제한하지 않음</option>
+							<option value="year" {?invited_point_select=='year'}selected{/}>제한 - 12월31일</option>
+							<option value="direct" {?invited_point_select=='direct'}selected{/}>제한 - 직접입력</option>
+						</select>
+						<span name="invited_point_y" class="hide">→ 지급연도 + <input type="text" name="invited_point_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{invited_point_year}" />년 12월 31일</span>
+						<span name="invited_point_d" class="hide">→ <input type="text" name="invited_point_direct" class="line onlynumber" style="text-align:right" size="3" value="{invited_point_direct}" />개월</span>
+			단, 월<input type="hidden" name="pointTerm_invited" value="month" >
+			<input type="text" name="pointLimit_invited" value="{pointLimit_invited}" size="6" class="line onlynumber right" />회(최대 <span id="sprice_invited2">{? pointLimit_invited > 0 }{=number_format(pointLimit_invited*pointInvited)}{:}0{/}</span>p)으로 제한 <br>
+			</span>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th" >친구를 초대한 회원 혜택<br>(동일한 친구를 여러 번 초대시 1명만 인정)</th>
+		<td class="its-td">
+			페이스북 친구 <input type="text" name="invitecount" value="{invitecount}" size="6" class="line onlynumber right" />명 초대할 때마다<br>
+
+			적립금 <input type="text" name="emoneyInvitedCnt" value="{emoneyInvitedCnt}" size="6" class="line onlynumber right" />원. 지급 적립금의 유효기간은 <select name="cnt_reserve_select">
+							<option value="">제한하지 않음</option>
+							<option value="year" {?cnt_reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+							<option value="direct" {?cnt_reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+						</select>
+						<span name="cnt_reserve_y" class="hide">→ 지급연도 + <input type="text" name="cnt_reserve_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{cnt_reserve_year}" />년 12월 31일</span>
+						<span name="cnt_reserve_d" class="hide">→ <input type="text" name="cnt_reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{cnt_reserve_direct}" />개월</span>
+			<br>
+			<span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >포인트 <input type="text" name="pointInvitedCnt" value="{pointInvitedCnt}" size="6" class="line onlynumber right" />p. 지급 포인트의 유효기간은 <select name="cnt_point_select" {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+							<option value="">제한하지 않음</option>
+							<option value="year" {?cnt_point_select=='year'}selected{/}>제한 - 12월31일</option>
+							<option value="direct" {?cnt_point_select=='direct'}selected{/}>제한 - 직접입력</option>
+						</select>
+						<span name="cnt_point_y" class="hide">→ 지급연도 + <input type="text" name="cnt_point_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{cnt_point_year}" />년 12월 31일</span>
+						<span name="cnt_point_d" class="hide">→ <input type="text" name="cnt_point_direct" class="line onlynumber" style="text-align:right" size="3" value="{cnt_point_direct}" />개월</span>
+			</span>
+			<br>
+
+			단, 누적기준으로 페이스북 친구 초대 인원<input type="text" name="invitemaxcount" value="{invitemaxcount}" size="6" class="line onlynumber right" />명까지 적립금 및 포인트 지급
+		</td>
+	</tr>
+	<tr>
+		<td class="its-td-align pd10" colspan="2">
+			<table width="100%" cellpadding="2" >
+			<col width="40%" /><col width="10" /><col />
+			<tr>
+				<td class="left pdl5" ><b>모든 회원은 자신의 마이페이지에서 facebook 친구초대</b> <br> ↓아래 화면과 같이 회원은 마이페이지에서 친구를 초대할 수 있습니다. </td>
+				<td></td>
+				<td class="left pdl5" ><b>초대받은 facebook 친구</b><br> 초대 받은 친구는 facebook에서 초대장을 클릭하면 <br />↓아래 화면과 같이 회원가입창으로 이동하게 됩니다. </td>
+			</tr>
+			<tr>
+				<td>
+				<img src="../images/design/img_setting_invitation01.gif" >
+				</td>
+				<td></td>
+				<td>
+				<img src="../images/design/img_setting_invitation02.gif" >
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+{/}
+</table>

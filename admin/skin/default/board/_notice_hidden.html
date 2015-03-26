@@ -1,0 +1,36 @@
+<tr>
+	<th class="its-th-align center">공지글 여부</th>
+	<td class="its-td" >
+		<input type="checkbox" name="notice" id="boardnotice"  value="1" {noticeckeck} onclick="noticecheck()" /><label for="boardnotice" > 공지글입니다.</label>{? _GET.id == 'goods_review' ||  _GET.id == 'goods_qna' }<span class="desc">(상품상세페이지 : 해당 상품으로 작성된 공지글과 상품 없이 작성된 공지글이 노출됨)</span> {/}
+		<div class="noticelay " style="width:99%;padding:3px 5px;">
+		<label > <input type="radio" name="onlynotice" id="onlynotice0"  value="0" {? notice == '1' && onlynotice != '1' } checked="checked" {/}/> 공지글 영역과 리스트 영역에 해당 글이 보여집니다.</label><br />
+		<label > <input type="radio" name="onlynotice" id="onlynotice1"  value="1" {? notice == '1' && onlynotice == '1' } checked="checked" {/}/> 공지글 영역에서 특정기간동안(설정 시)만 해당 글이 보여집니다.</label>
+		<span>
+		<input type="text" name="onlynotice_sdate"  id="onlynotice_sdate" value="{? substr(onlynotice_sdate,0,10) != '0000-00-00'  }{=substr(onlynotice_sdate,0,10)}{/}" class="line"  maxlength="10" size="10" />~
+		<input type="text" name="onlynotice_edate"  id="onlynotice_edate" value="{? substr(onlynotice_edate,0,10) != '0000-00-00'  }{=substr(onlynotice_edate,0,10)}{/}" class="line"  maxlength="10" size="10" />
+		</span>
+		</div>
+	</td>
+</tr>
+
+{? manager.secret_use == 'Y' || manager.secret_use == 'A' || (seq && hidden == 1 ) //비밀글사용인경우 }
+<tr >
+	<th class="its-th-align center ">비밀글 여부</th>
+	<td class="its-td" >
+		{? seq }
+			<span ><input type="checkbox" name="hidden" id="boardhidden"  value="1" {hiddenckeck} /><label for="boardhidden" > 비밀글입니다.</label></span>
+			{? mseq && mseq < 0 }
+				{? pw }
+					<input type="hidden" name="oldpw" value="{pw}" >
+				{/}
+				<input type="password" name="pw" id="boardpw" value="{pw}"  title="비밀번호를 입력해 주세요."  password="password"  class="  line"  {? !strstr(hiddenckeck,"checked") || !hiddenckeck }disabled="disabled" {/} />
+				<span class="btn small cyanblue"><button type="button" class="hidden_sms_send" board_id="{_GET.id}"  board_seq="{seq}">SMS 보내기</button></span>
+			{/}
+		{:}
+			<span ><input type="checkbox" name="hidden" id="boardhidden"  value="1" {hiddenckeck} /><label for="boardhidden" > 비밀글입니다.</label></span>
+			<input type="password" name="pw" id="boardpw" value=""  title="비밀번호를 입력해 주세요."  password="password"  class="  line" {? !strstr(hiddenckeck,"checked") || !hiddenckeck }disabled="disabled" {/} />
+		{/}
+		<div id="sendPopup" class="hide"></div>
+	</td>
+</tr>
+{/}

@@ -1,0 +1,297 @@
+<script type="text/javascript" src="/app/javascript/plugin/jquery.hotkeys.js"></script>
+
+<style>
+#DMModalBackground {display:none; z-index:999; position:fixed; width:100%; height:100%; left:0px; top:0px; background-color:#999;}
+
+#DMWindow {display:none; z-index:1000; position:fixed; margin:auto; top:50px;}
+#DMWindowTitle a {color:#fff;}
+#DMWindowTitle {position:relative; height:34px; line-height:34px; color:#fff; cursor:move; padding:0 3px;}
+#DMWindowTitle .DMWTTextLeft {position:absolute; width:40%; left:10px; top:0px; height:34px; line-height:34px;}
+#DMWindowTitle .DMWTTextLeft a {color:#00ccff; font-weight:bold;}
+#DMWindowTitle .DMWTTextRight {position:absolute; width:40%; left:60%; margin-left:-10px; top:0px; height:34px; line-height:34px;}
+#DMWindowTitle .DMWTTextCenter {text-align:center; background:url('../images/design/win_top_center.gif') repeat-x;}
+#DMWindowTitle .DMWTTextCenter .title {font-weight:bold;}
+#DMWindowTitle .DMWTTextCenter .prefix {}
+#DMWindowTitle .DMWTBgLeft {position:absolute; left:0px; top:0px; width:100%; height:34px; background:url('../images/design/win_top_left.gif') no-repeat left top;}
+#DMWindowTitle .DMWTBgRight {position:absolute; left:0px; top:0px; width:100%; height:34px; background:url('../images/design/win_top_right.gif') no-repeat right top;}
+#DMWindowTitle .DMWTClose {position:absolute; left:100%; top:5px; margin-left:-31px; cursor:pointer; line-height:0px;}
+
+#DMWindowBody {background-color:#fff; border-left:1px solid #333; border-right:1px solid #333; border-bottom:1px solid #333; padding:0px;}
+#DMWindowBody iframe {width:100%; height:100%; border:0px; background-color:#fff;}
+
+#DMPanelTop {display:none; position:fixed; margin-top:-38px; z-index:1100; left:0px; top:0px; min-width:800px; width:100%; height:42px; background:url('../images/design/top_bar_bg.png') repeat-x}
+#DMPanelTop .DMPTLeft {float:left; height:38px; line-height:38px; padding-left:5px; color:#fff; font-size:11px; letter-spacing:-1px;}
+#DMPanelTop .DMPTRight {float:right; height:38px; line-height:38px; padding-right:6px;}
+#DMPanelTop .DMPTRight .DMPTRSetMode {position:relative; display:inline-block; margin:0 10px 0 7px;}
+#DMPanelTop .DMPTRight .DMPTRSetMode-title {display:inline-block; font-size:11px; font-family:dotum; color:#e0e1e1; background:url('../images/design/icon_arrow_go.gif') no-repeat left center;  padding-left:10px;}
+#DMPanelTop .DMPTRight .DMPTRSetMode-subnb {display:none; position:absolute; left:0px; top:100%; border-left:1px solid #000; border-right:1px solid #000; border-bottom:1px solid #000; background-color:#222;}
+#DMPanelTop .DMPTRight .DMPTRSetMode-subnb li.DMPTRSetMode-subnb-item a {display:block; color:#c2c2c2; width:80px; height:20px; line-height:20px; padding:0 5px 0 5px; font-size:11px; letter-spacing:-1px;}
+#DMPanelTop .DMPTRight .DMPTRSetMode-subnb li.DMPTRSetMode-subnb-item a span {letter-spacing:0px;}
+#DMPanelTop .DMPTRight .DMPTRSetMode-subnb li.DMPTRSetMode-subnb-item:hover a {color:#fff; display:block; background-color:#666;}
+
+#DMPanelTop .DMPTRight a.DMPTRGoadmin {display:inline-block; font-size:11px; font-family:dotum; color:#e0e1e1; background:url('../images/design/icon_arrow_go.gif') no-repeat left center; margin:0 10px 0 7px; padding-left:10px;}
+#DMPanelTop .DMPTCenter {position:absolute; left:50%; margin-left:-280px; width:500px; text-align:center; line-height:38px; height:38px; color:#fff; font-family:"dotum"; font-size:14px; font-weight:bold; }
+#DMPanelTop .DMPTCenter .skinName {display:inline-block; width:210px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right;}
+#DMPanelNavigatorBtn {position:fixed; z-index:100; left:100%; top:50%; margin-top:-25px; margin-left:-50px; width:50px; height:50px; cursor:pointer}
+#DMPanelNavigatorBtn .onImg {display:none;}
+#DMPanelNavigatorBtn .offImg {display:block;}
+#DMPanelNavigatorBtn.designEditMode .onImg {display:block;}
+#DMPanelNavigatorBtn.designEditMode .offImg {display:none;}
+
+#DMPanelNavigator {display:none; position:fixed; z-index:1000; left:100%; top:50px; width:160px; height:430px;}
+#DMPanelNavigator .DMPNHeader {width:160px; height:31px; overflow:hidden; white-space:nowrap;}
+#DMPanelNavigator .DMPNHeader .DMPNHSwitch {background:url('../images/design/remote_top_left_off.png') no-repeat -1px; width:37px; height:31px; display:inline-block; cursor:pointer}
+#DMPanelNavigator .DMPNHeader .DMPNHTitle {background:url('../images/design/remote_top_tit.png') no-repeat; width:90px; height:31px; display:inline-block;}
+#DMPanelNavigator .DMPNHeader .DMPNHStatus {background:url('../images/design/remote_top_right_off.png') no-repeat; width:33px; height:31px; display:inline-block;}
+#DMPanelNavigator .DMPNHeader.designEditMode .DMPNHSwitch {background:url('../images/design/remote_top_left_on.png') no-repeat -1px; width:37px; height:31px; display:inline-block;}
+#DMPanelNavigator .DMPNHeader.designEditMode .DMPNHStatus {background:url('../images/design/remote_top_right_on.png') no-repeat; width:33px; height:31px; display:inline-block;}
+#DMPanelNavigator .DMPNFooter {background:url('../images/design/remote_close.png') no-repeat; width:160px; height:21px; cursor:pointer}
+#DMPanelNavigator .DMPNBody {padding:3px 0; background:url('../images/design/remote_bg.gif')}
+#DMPanelNavigator .DMPNBody .DMPNBTop {color:#fff; *zoom:1; padding:2px 0;}
+#DMPanelNavigator .DMPNBody .DMPNBTop:after {display:block; content:""; clear:both;}
+#DMPanelNavigator .DMPNBody .DMPNBTop .skinName {float:left; line-height:17px; padding-left:6px; white-space:nowrap; overflow:hidden; width:95px; letter-spacing:-1px;}
+#DMPanelNavigator .DMPNBody .DMPNListResizeBar {height:4px; cursor:s-resize;}
+#DMPanelNavigator .DMPNBody .DMPNList {position:relative; width:150px; margin:0px auto; border:2px solid #303030; overflow:auto;}
+//#DMPanelNavigator .DMPNBody .DMPNList:hover {overflow:auto;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1 {margin:0px;padding:0px;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item {position:relative;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1ItemTitle {position:relative; display:block; height:26px; line-height:26px; font-size:12px; text-indent:3px; cursor:pointer}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item img.dn_icon {position:absolute; display:none; left:100%; top:11px; margin-left:-18px;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item .off_icon {display:inline-block;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item .on_icon {display:none;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item:hover .DMPNListDepth1ItemTitle,
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item.opened .DMPNListDepth1ItemTitle {font-weight:bold; color:#fff; background-color:#556070}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item:hover .dn_icon,
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item.opened .dn_icon {display:inline-block;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item:hover .off_icon ,
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item.opened .off_icon {display:none}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item:hover .on_icon,
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item.opened .on_icon {display:inline-block;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1Item.opened .DMPNListDepth2 {display:block;margin:0px;padding:0px;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1ItemBg1 {background-color:#ffffff;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth1ItemBg2 {background-color:#f5f5f5;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth2 {display:none;overflow:hidden;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth2Item {}
+#DMPanelNavigator .DMPNBody .DMPNListDepth2Item a {display:block; position:relative; text-indent:17px; width:133px; height:26px; line-height:26px; color:#fff; font-size:11px; letter-spacing:-1px; white-space:nowrap; text-overflow:ellipsis; -o-text-overflow:ellipsis;-ms-text-overflow:ellipsis; overflow:hidden;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth2Item a span.dn_icon {position:absolute; left:100%; top:-2px; margin-left:-21px; margin-top:10px; width:11px; height:10px; background:url('../images/design/icon_mouse_right.gif') no-repeat;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth2Item:hover a,
+#DMPanelNavigator .DMPNBody .DMPNListDepth2Item.opened {background-color:#778090}
+#DMPanelNavigator .DMPNBody .DMPNListDepth2Item.opened a {background:url('../images/design/icon_arrow_select.gif') no-repeat 5px center; color:#0cf}
+/*#DMPanelNavigator .DMPNBody .DMPNListDepth2Item.controlMenuOpened a span.dn_icon {background:url('../images/design/icon_mouse_right_close.gif') no-repeat;}*/
+#DMPanelNavigator .DMPNBody .DMPNListDepth2ItemBg1 {background-color:#ababab;}
+#DMPanelNavigator .DMPNBody .DMPNListDepth2ItemBg2 {background-color:#b2b2b2;}
+
+#DMPanelNavigatorControlMenu {position:absolute; left:10px; width:121px; display:none; border:1px solid #000;}
+#DMPanelNavigatorControlMenu .DMPNCMTitle {height:26px; font-style:italic; line-height:26px; background-color:#141414; color:#00cef3; text-align:center;}
+#DMPanelNavigatorControlMenu .DMPNCMItem {height:25px; line-height:25px; border-top:1px solid #000; text-indent:4px; cursor:pointer; background-color:#2b2b2b; color:#fff; letter-spacing:-1px;}
+#DMPanelNavigatorControlMenu .DMPNCMItem:hover {background-color:#202020;}
+#DMPanelNavigatorControlMenu .DMPNCMItem span {display:block; height:25px; width:100%; background:url('../images/design/icon_arrow_next.gif') no-repeat 95% center;}
+#DMPanelNavigatorControlMenu .DMPNCMHighlight {color:#ffba00;}
+
+.designPopupIcon {position:absolute; display:block;}
+
+.designElement {}
+.designElementEditBtn {position:absolute; z-index:10; left :0px; top:0px; width:100%; height:100%; cursor:pointer; background-color:white;}
+.designElementHover[designElement] {cursor:pointer;}
+.designElementHover[designElement='image'] {border:3px dashed #494949 !important;}
+.designElementHover[designElement='video'] {border:3px dashed #000 !important;}
+.designElementHover[designElement='popup'] {border:3px dashed red blue green !important;}
+.designElementHover[designElement='flash'] {border:3px dashed blue !important;}
+.designElementHover[designElement='banner'] {border:3px dashed #996600 !important; margin:-3px;}
+.designElementHover[designElement='searchGoodsDisplay'],
+.designElementHover[designElement='goodsRecommDisplay'],
+.designElementHover[designElement='display'] {border:3px dashed green !important;}
+.designElementHover[designElement='categoryNavigation'] {border:3px dashed orange !important;}
+.designElementHover[designElement='brandNavigation'] {border:3px dashed purple !important;}
+.designElementHover[designElement='locationNavigation'] {border:3px dashed brown !important;}
+.designElementHover[designElement='categoryRecommendDisplay'] .designElementEditBtn {background-color:red;}
+.designElementHover[designElement='categoryGoodsDisplay'] .designElementEditBtn {background-color:red;}
+.designElementHover[designElement='brandRecommendDisplay'] .designElementEditBtn {background-color:red;}
+.designElementHover[designElement='brandGoodsDisplay'] .designElementEditBtn {background-color:red;}
+.designElementHover[designElement='locationRecommendDisplay'] .designElementEditBtn {background-color:red;}
+.designElementHover[designElement='locationGoodsDisplay'] .designElementEditBtn {background-color:red;}
+.designElementHover[designElement='goodsRelationDisplay'] .designElementEditBtn {background-color:yellow;}
+.designElementHover[designElement='goodsBigdataDisplay'] .designElementEditBtn {background-color:purple;}
+.designElementHover[designElement='topBar'] {border:3px dashed brown !important;}
+.designElementHover[designElement='mainTopBar'] {border:3px dashed brown !important;}
+
+
+.designDisplay {min-height:20px;}
+
+#DMWindow *,
+#DMPanelTop *,
+#DMPanelNavigator * {font-family:dotum !important;}
+</style>
+
+<div id='DMModalBackground'></div>
+
+<div id='DMWindow'>
+	<div id='DMWindowTitle' class='clearbox'>
+		<div class='DMWTBgLeft'></div>
+		<div class='DMWTBgRight'></div>
+		<div class='DMWTTextCenter'><span class="prefix"></span><span class="title"></span></div>
+		<div class='DMWTTextLeft'></div>
+		<div class='DMWTTextRight'></div>
+		<div class='DMWTClose'><img src="../images/design/win_btn_close.gif" onmousedown="DM_window_close()" /></div>
+	</div>
+	<div id='DMWindowBody'><iframe id='DMWindowBodyIframe'></iframe></div>
+</div>
+
+<div id="DMPanelTop">
+	<div class="DMPTLeft">
+		<span class="hand" onclick="popup('/admin/design/gabia_webftp',980, 690)">· WEB FTP</span>&nbsp;&nbsp;&nbsp;
+		<span class="hand" id="css_editor_btn" onclick="DM_window_sourceeditor('{css_path}');">· 스타일시트(CSS)</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<span class="hand" onclick="DM_window_eyeeditor('data/skin/{designWorkingSkin}/{template_path}');">· HTML 디자인</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		<a href="http://manual.firstmall.kr/html/manual.php?category=011002" target="_blank"><img src="../images/design/design_menual.gif" /></a>
+	</div>
+
+	<div class="DMPTRight">
+		<span class="DMPTRSetMode">
+			<span class="DMPTRSetMode-title">디자인환경 변경</span>
+			<ul class="DMPTRSetMode-subnb">
+				{?service_code!='P_STOR'}
+					{?service_code!='P_FAMM'}
+						<li class="DMPTRSetMode-subnb-item"><a href="http://{pcDomain}/?setMode=pc" >PC</a></li>
+						<li class="DMPTRSetMode-subnb-item"><a href="http://{mobileDomain}/?setMode=mobile">Mobile/Tablet</a></li>
+					{/}
+					{?service_code=='P_FREE'}
+						<li class="DMPTRSetMode-subnb-item  hand"><span  id="freefacebookconfignone" ><a >Facebook PC</a></span></li>
+					{:}
+						<li class="DMPTRSetMode-subnb-item"><a href="http://{pcDomain}/?setMode=fammerce">Facebook PC</a></li>
+					{/}
+				{/}
+				{?service_code=='P_STOR'}
+				<li class="DMPTRSetMode-subnb-item"><a href="http://{pcDomain}/?setMode=store" >PC</a></li>
+				<li class="DMPTRSetMode-subnb-item"><a href="http://{mobileDomain}/?setMode=storemobile">Mobile</a></li>
+				<li class="DMPTRSetMode-subnb-item"><a href="http://{mobileDomain}/?setMode=storefammerce">Facebook PC</a></li>
+				{/}
+			</ul>
+		</span>
+		<a href="/admin" target="_blank" class="DMPTRGoadmin">관리자환경 가기</a>
+	</div>
+
+
+	<script>
+	$(function(){
+		$("#DMPanelTop .DMPTRSetMode").each(function(){
+			$(this)
+			.bind('mouseenter',function(){
+				$(".DMPTRSetMode-subnb",this).stop(true,true).slideDown('fast');
+			})
+			.bind('mouseleave',function(){
+				$(".DMPTRSetMode-subnb",this).stop(true,true).slideUp('fast');
+			});
+		});
+	});
+	</script>
+
+	<div class="DMPTCenter">
+		<span class="skinName" title="{designWorkingSkin}">{designWorkingSkin}</span>
+		<span style="display:inline-block; width:250px; overflow:hidden;">스킨
+			<img src="../images/design/btn_all.gif" onclick="DM_window_allpages('{template_path}')" class="hand" hspace="2" /><img src="../images/design/btn_layout.gif" onclick="DM_window_layout('basic')" class="hand" hspace="2" /><img src="../images/design/btn_eye_editor.gif" onclick="DM_window_eyeeditor('data/skin/{designWorkingSkin}/{template_path}');" class="hand" hspace="2" />
+		</span>
+	</div>
+
+</div>
+
+<div id="DMPanelNavigatorBtn"><img src="../images/design/btn_small_remote_on.gif" class="onImg" usemap="#btn_small_remote" /><img src="../images/design/btn_small_remote.gif" class="offImg" usemap="#btn_small_remote" /></div>
+<map name="btn_small_remote">
+	<area shape="rect" coords="0,0,50,18" href="/admin" target="_blank" title="관리자환경 가기" />
+	<area shape="rect" coords="0,18,50,68" onclick="DMPanelOpen(true);" title="아이디자인 패널 Open/Close" />
+	<area shape="rect" coords="0,68,50,86" onclick="$('#DMPanelNavigator .DMPNHSwitch').click();" title="아이디자인 On/Off" />
+</map>
+
+<div id="DMPanelNavigator">
+	<div class="DMPNHeader">
+		<span class="DMPNHSwitch"></span><span class="DMPNHTitle"></span><span class="DMPNHStatus"></span>
+	</div>
+
+	<div class="DMPNBody">
+		<div class="DMPNBTop">
+			<div class="skinName">스킨 : <strong>{designWorkingSkin}</strong></div>
+			<div class="fright"><img src="../images/design/btn_all.gif" onclick="DM_window_allpages('{template_path}')" class="hand" hspace="4" /></div>
+		</div>
+
+		<div class="DMPNList" style="max-height:280px; {?_COOKIE.DPNListHeight}height:{_COOKIE.DPNListHeight}px{/};">
+			<ul class="DMPNListDepth1">
+				{ @ folders }
+					<li class="DMPNListDepth1Item">
+						<span class="DMPNListDepth1ItemTitle {?.index_%2==0}DMPNListDepth1ItemBg1{:}DMPNListDepth1ItemBg2{/}"><img src="../images/design/icon_{.childs[0]}.gif" class="off_icon" onerror="this.src='../images/design/icon_etc.gif'" /><img src="../images/design/icon_{.childs[0]}_on.gif" class="on_icon"  onerror="this.src='../images/design/icon_etc_on.gif'" /> {.name} <img src="../images/design/icon_arrow_dn.gif" class="dn_icon" /></span>
+						{ ? .files }
+						<ul class="DMPNListDepth2">
+						{ @ .files }
+							<li class="DMPNListDepth2Item {?..index_%2==0}DMPNListDepth2ItemBg1{:}DMPNListDepth2ItemBg2{/}" path="{..path}" file_type="{..file_type}"><a href="{..url}" {?in_array(..file_type,array('layout','goods_view','view','noview','settle'))}onclick="openDialogAlert('{..file_type_msg}',800,170); return false;"{/} >{..desc} <span class="dn_icon"></span></a></li>
+						{ / }
+						</ul>
+						{ / }
+					</li>
+				{ / }
+			</ul>
+		</div>
+
+		<div class="DMPNListResizeBar"></div>
+
+		<div class="DMPNList" style="max-height:150px;">
+			<ul class="DMPNListDepth1">
+				{ @ boards }
+					<li class="DMPNListDepth1Item">
+						<span class="DMPNListDepth1ItemTitle {?.index_%2==0}DMPNListDepth1ItemBg1{:}DMPNListDepth1ItemBg2{/}"><img src="../images/design/icon_board.gif" class="off_icon" onerror="this.style.display='none'" /><img src="../images/design/icon_board_on.gif" class="on_icon" onerror="this.style.display='none'" /> {=character_limiter(.name,1)} <img src="../images/design/icon_arrow_dn.gif" class="dn_icon" /></span>
+						{ ? .files }
+						<ul class="DMPNListDepth2">
+						{ @ .files }
+							<li class="DMPNListDepth2Item {?..index_%2==0}DMPNListDepth2ItemBg1{:}DMPNListDepth2ItemBg2{/}" path="{..path}" file_type="{..file_type}"><a href="{..url}"  {?in_array(..file_type,array('board_view','layout','goods_view','noview','settle'))}onclick="openDialogAlert('{..file_type_msg}',800,160); return false;"{/}>{..desc} <span class="dn_icon"></span></a></li>
+						{ / }
+						</ul>
+						{ / }
+					</li>
+				{ / }
+			</ul>
+		</div>
+
+		<div id="DMPanelNavigatorControlMenu">
+			<div class="DMPNCMTitle">이 페이지에</div>
+			<ul>
+				<li class="DMPNCMItem" cmd="image_insert"><span>이미지 넣기</span></li>
+				<li class="DMPNCMItem" cmd="flash_insert"><span>플래시 넣기</span></li>
+				<li class="DMPNCMItem" cmd="banner_insert"><span>슬라이드 배너 넣기</span></li>
+				<li class="DMPNCMItem" cmd="video_insert"><span>동영상 넣기</span></li>
+				<li class="DMPNCMItem" cmd="display_insert"><span>상품디스플레이 넣기</span></li>
+				<li class="DMPNCMItem" cmd="popup_insert"><span>띠배너/팝업 띄우기</span></li>
+				<li class="DMPNCMItem" cmd="lastest_insert"><span>게시판 넣기</span></li>
+				<li class="DMPNCMItem DMPNCMHighlight" cmd="source_edit"><span>HTML소스 편집하기</span></li>
+				<li class="DMPNCMItem DMPNCMHighlight" cmd="layout_edit"><span>레이아웃/폰트/배경색</span></li>
+			</ul>
+		</div>
+
+		<div class="center"><input type="image" src="../images/design/btn_newpage.gif" onclick="DM_window_layout_create()" /></div>
+
+		{?mobileMode || storemobileMode}
+		<div class="center" style="padding-top:2px"><input type="image" src="../images/design/btn_pc_quick.gif" onclick="openDialogAlert('Mobile 디자인환경에서는 PC 버튼 설정이 불가능합니다.<br />디자인환경을 변경해주세요.',800,170);" /></div>
+		{:}
+		<div class="center" style="padding-top:2px"><input type="image" src="../images/design/btn_pc_quick.gif" onclick="DM_window_pc_quick_design()" /></div>
+		{/}
+		<div class="center" style="padding-top:2px"><input type="image" src="../images/design/btn_m_quick.gif" onclick="DM_window_mobile_quick_design()" /></div>
+		
+	</div>
+
+	<div class="DMPNFooter" onclick="DMPanelClose();"></div>
+
+</div>
+
+<script type="text/javascript">
+var designWorkingSkin = "{designWorkingSkin}";
+$(function(){
+	// 현재페이지 처리
+	$(".DMPNListDepth2Item[path='{template_path}']").each(function(){
+		// 메뉴 열어놓기
+		$(this).addClass("opened");
+		$(this).closest(".DMPNListDepth1Item").addClass("opened");
+
+	});
+
+	if(!$.cookie('DMPanelClosed')){
+		DMPanelOpen();
+	}
+
+});
+</script>

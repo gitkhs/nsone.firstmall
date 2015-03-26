@@ -1,0 +1,340 @@
+<script type="text/javascript">
+function useTypeCont(id, name){
+	if(!$(id).attr("checked")){
+		$("#"+name).attr('disabled',true);
+	}else{
+		$("#"+name).attr('disabled',false);
+	}
+}
+$(document).ready(function() {
+	// 산정기준
+	$("input:radio[name='use_type']").click(function(){
+		if($(this).val()=='AUTO'){
+			$("input:checkbox[name='order_sum_use[]']").attr('disabled',false);
+			useTypeCont("#osu0","order_sum_price");
+			useTypeCont("#osu1","order_sum_ea");
+			useTypeCont("#osu2","order_sum_cnt");
+		}else{
+			$("input:checkbox[name='order_sum_use[]']").attr('disabled',true);
+			$("input[name='order_sum_price']").attr('disabled',true);
+			$("input[name='order_sum_ea']").attr('disabled',true);
+			$("input[name='order_sum_cnt']").attr('disabled',true);
+		}
+	});
+	// 산정기준:조건
+	$("#osu0").click(function(){
+		useTypeCont("#osu0","order_sum_price");
+	});
+	$("#osu1").click(function(){
+		useTypeCont("#osu1","order_sum_ea");
+	});
+	$("#osu2").click(function(){
+		useTypeCont("#osu2","order_sum_cnt");
+	});
+	
+	$("select[name='sale_target']").live("change",function(){
+		if($(this).val()=='GOODS'){
+			$("#sale_select_goods").show();
+			$("#sale_select_category").hide();
+		}else if($(this).val()=='CATEGORY'){
+			$("#sale_select_goods").hide();
+			$("#sale_select_category").show();
+		}else{
+			$("#sale_select_goods").hide();
+			$("#sale_select_category").hide();
+		}
+	});
+
+	$("form#gradeFrm button#exceptIssueGoodsButton").bind("click",function(){
+		set_goods_list("exceptIssueGoodsSelect","exceptIssueGoods");
+	});
+	$("#exceptIssueGoods").sortable();
+	$("#exceptIssueGoods").disableSelection();
+});
+
+function set_goods_list(displayId,inputGoods){	
+	$.ajax({
+		type: "get",
+		url: "../goods/select",
+		data: "page=1&inputGoods="+inputGoods+"&displayId="+displayId,
+		success: function(result){			
+			$("div#"+displayId).html(result);
+		}
+	});
+	openDialog("상품 검색", displayId, {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+}
+
+
+
+$(function () {	
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','');
+	$("select[name='category1']").bind("change",function(){
+		category_admin_select_load('category1','category2',$(this).val());
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").bind("change",function(){
+		category_admin_select_load('category2','category3',$(this).val());
+		category_admin_select_load('category3','category4',"");
+	});			
+	$("select[name='category3']").bind("change",function(){
+		category_admin_select_load('category3','category4',$(this).val());
+	});		
+
+	$("button#issueCategoryButton").bind("click",function(){
+		var obj;
+		var category;
+		var categoryCode;		
+				
+		obj = $("select[name='category1']");
+		if(obj.val()){
+			category = $("select[name='category1'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val(); 
+		}
+		obj = $("select[name='category2']");
+		if(obj.val()){
+			category += " > " + $("select[name='category2'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='category3']");
+		if(obj.val()){
+			category += " > " + $("select[name='category3'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		var obj = $("select[name='category4']");
+		if(obj.val()){
+			category += " > " + $("select[name='category4'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+				
+		if(category){
+			if($("input[name='issueCategoryCode[]'][value='"+categoryCode+"']").length == 0){	
+				var tag = "<div style='padding:5px;'><span style='display:inline-block;width:300px'>"+category+"</span>";
+				tag += "<span class='btn-minus'><button type='button' class='delCategory'></button></span>";
+				tag += "<input type='hidden' name='issueCategoryCode[]' value='"+categoryCode+"' /></div>";				
+				$("div#issueCategory").append(tag);
+			}
+		}
+	});
+
+	category_admin_select_load('','exceptCategory1','');
+	$("select[name='exceptCategory1']").bind("change",function(){
+		category_admin_select_load('exceptCategory1','exceptCategory2',$(this).val());
+		category_admin_select_load('exceptCategory2','exceptCategory3',"");
+		category_admin_select_load('exceptCategory3','exceptCategory4',"");
+	});
+	$("select[name='exceptCategory2']").bind("change",function(){
+		category_admin_select_load('exceptCategory2','exceptCategory3',$(this).val());
+		category_admin_select_load('exceptCategory3','exceptCategory4',"");
+	});			
+	$("select[name='exceptCategory3']").bind("change",function(){
+		category_admin_select_load('exceptCategory3','exceptCategory4',$(this).val());
+	});		
+
+	$("button#exceptIssueCategoryButton").bind("click",function(){
+		var obj;
+		var category;
+		var categoryCode;		
+				
+		obj = $("select[name='exceptCategory1']");
+		if(obj.val()){
+			category = $("select[name='exceptCategory1'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val(); 
+		}
+		obj = $("select[name='exceptCategory2']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory2'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='exceptCategory3']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory3'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		var obj = $("select[name='exceptCategory4']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory4'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+				
+		if(category){
+			if($("input[name='exceptIssueCategoryCode[]'][value='"+categoryCode+"']").length == 0){	
+				var tag = "<div style='padding:5px;'><span style='display:inline-block;width:300px'>"+category+"</span>";
+				tag += "<span class='btn-minus'><button type='button' class='delCategory'></button></span>";
+				tag += "<input type='hidden' name='exceptIssueCategoryCode[]' value='"+categoryCode+"' /></div>";
+				$("div#exceptIssueCategory").append(tag);
+			}
+		}
+	});
+	
+	$("form#gradeFrm button.delCategory").live("click",function(){
+		$(this).parent().parent().remove();
+	});			
+});
+</script>
+
+
+<form name="gradeFrm" id="gradeFrm" method="post" target="actionFrame" action="../member_process/grade_write">
+
+<div class="item-title" style="width:92%">등급 생성 <span class="helpicon" title="회원 등급을 설정합니다."></span></div>
+
+<table width="100%" class="info-table-style">
+<colgroup>
+	<col width="8%" /><col width="8%" /><col /><col width="15%" /><col />	
+</colgroup>
+<tbody>
+<tr>
+	<th class="its-th-align center" colspan="2">명칭</th>
+	<td class="its-td" colspan="3">
+		<input type="text" name="group_name" class="line" />
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center" colspan="2">아이콘 <span class="helpicon" title="아이콘"></th>
+	<td class="its-td" colspan="3">
+		<input type="text" name="icon" class="line" />
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center" colspan="2">산정기준 <span class="helpicon" title="산정기준"></th></th>
+	<td class="its-td" colspan="3">
+
+		<label><input type="radio" name="use_type" value="AUTO"/> 자동관리 : </label> 
+		<input type="checkbox" name="order_sum_use[]" id="osu0" value="price" disabled/><label for="osu0"> 구매 금액</label> <input type="text" name="order_sum_price" id="order_sum_price" class="line onlynumber" size="6" disabled/>원 이상, 그리고 
+		<input type="checkbox" name="order_sum_use[]" id="osu1" value="ea" disabled/><label for="osu1"> 구매 건수</label> <input type="text" name="order_sum_ea" id="order_sum_ea" class="line onlynumber" size="6" disabled/>건 이상, 그리고
+		<input type="checkbox" name="order_sum_use[]" id="osu2" value="cnt" disabled/><label for="osu2"> 구매 횟수</label> <input type="text" name="order_sum_cnt" id="order_sum_cnt" class="line onlynumber" size="6" disabled/>회 이상	 <br/>
+		
+		<label><input type="radio" name="use_type" value="MANUAL" checked/> 수동관리 : </label> 
+		해당 등급에 속하거나 제외에 대한 결정을 모두 수동으로 함
+
+	</td>
+</tr>
+
+<tr>
+	<th class="its-th-align center" rowspan="4">구매 시 혜택 <span class="helpicon" title="구매 시 혜택"></th></th>
+	<th class="its-th-align center">구매금액 조건</th>
+	<td class="its-td" colspan="3">
+		<input type="checkbox" name="sale_use" value="Y"/> 상품 판매금액의 합이 <input type="text" name="sale_limit_price" class="line onlynumber" size="6"/>원 이상
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">구매 시 추가할인</th>
+	<td class="its-td" colspan="3">
+		상품 판매가격의 <input type="text" name="sale_price" class="line onlynumber" size="6"/>
+		<select name="sale_price_type">
+			<option value="WON">원</option>
+			<option value="PER">%</option>
+		</select> 금액을 자동 할인 : 
+		<select name="sale_target">
+			<option value="ALL">전체상품 적용</option>
+			<option value="GOODS">선택상품 적용</option>
+			<option value="CATEGORY">선택카테고리 적용</option>
+		</select>	
+
+
+		<div id="sale_select_goods" class="hide">
+		<div><span class="btn small gray">
+			<button type="button" id="exceptIssueGoodsButton">쿠폰 적용 상품 등록</button></span>
+			<span class="desc">노출순서변경</span> <span class="helpicon" title="상품을 마우스로 드래그&드랍해서 조정합니다."></span>
+		</div>
+		<div class="clearbox" style="height:5px;"></div>
+		<div id="exceptIssueGoods">
+		<!--{ @ issuegoods }-->
+		<!--{ ? .type == 'except' }-->	
+		<div class='goods' style='float:left;'>
+		<div align='center' class='image'>
+			<img class="goodsThumbView" alt="" src="{.image}" width="50" height="50" onerror="../images/common/noimage_list.gif">
+		</div>
+		<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+		<div align='center' class='price'>{=number_format(.price)}</div>
+		<input type='hidden' name='exceptIssueGoods[]' value='{.goods_seq}' />
+		<input type="hidden" name="exceptIssueGoodsSeq[{.goods_seq}]" value="{.issuegoods_seq}" />	
+		</div>
+		<!--{ / }-->
+		<!--{ / }-->
+		</div>
+		<div id="exceptIssueGoodsSelect" class="hide"></div>	
+		</div>
+		
+		<div id="sale_select_category" class="hide">
+		<div>
+		<select class="line" name="category1">
+			<option value="">1차 카테고리</option>
+		</select>
+		<select class="line" name="category2">
+			<option value="">2차 카테고리</option>
+		</select>
+		<select class="line" name="category3">
+			<option value="">3차 카테고리</option>
+		</select>
+		<select class="line" name="category4">
+			<option value="">4차 카테고리</option>
+		</select>
+		<span class="btn small gray"><button type="button" id="issueCategoryButton">쿠폰 적용 카테고리 등록</button></span>
+		</div>	
+		<div id="issueCategory">
+		<!--{ @ issuecategorys }-->
+		<!--{ ? .type == 'issue' }-->	
+		<div style='padding:5px;'>
+		<span style='display:inline-block;width:300px'>{.category}</span>
+		<span class='btn-minus'><button type='button' class='delCategory'></button></span>
+		<input type='hidden' name='issueCategoryCode[]' value='{.category_code}' />
+		<input type="hidden" name="issueCategoryCodeSeq[{.category_code}]" value="{.issuecategory_seq}" />
+		</div>
+		<!--{ / }-->
+		<!--{ / }-->
+		</div>
+		</div>
+
+	</td>
+</tr>
+
+
+<tr>
+	<th class="its-th-align center">구매금액 조건</th>
+	<td class="its-td" colspan="3">
+		<input type="checkbox" name="point_use" value="Y"/> 상품 판매금액의 합이 <input type="text" name="point_limit_price" class="line onlynumber" size="6"/>원 이상
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">구매 시 추가적립금</th>
+	<td class="its-td" colspan="3">
+		상품 판매가격의 <input type="text" name="point_price" class="line onlynumber" size="6"/>
+		<select name="point_price_type">
+			<option value="WON">원</option>
+			<option value="PER">%</option>
+		</select> 금액을 배송완료 처리 시 추가 적립 : 
+		<select name="point_target">
+			<option value="ALL">전체상품 적용</option>
+			<option value="GOODS">선택상품 적용</option>
+			<option value="CATEGORY">선택카테고리 적용</option>
+		</select>	
+
+
+		
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center" rowspan="2">추가혜택</th>
+	<th class="its-th-align center">적립금</th>
+	<td class="its-td" colspan="3">
+		등급 유지기간동안에 1회에 한하여 <input type="text" name="add_point" class="line onlynumber" size="6"/>원 적립 
+		(단, 회원->마이페이지에서 적립버튼으로 적립)
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">배송비</th>
+	<td class="its-td" colspan="3">
+		배송비의 <input type="text" name="add_delivery" class="line onlynumber" size="6"/>% 금액을 자동 할인 (100%이면 무료 배송)
+	</td>
+</tr>
+</tbody>
+</table>
+
+
+<div style="padding-top:10px;" class="center">
+<span class="btn large black"><button type="submit" class="addDeliveryCost">저장하기</button></span>
+</div>
+
+</form>

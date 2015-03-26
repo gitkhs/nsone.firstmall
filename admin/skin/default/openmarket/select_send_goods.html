@@ -1,0 +1,262 @@
+<style type="text/css">
+.send-btn-lay {width:100%;text-align:center;}
+.selectedGoods{ background-color:#e7f2fc; }
+.targetGoods {padding:4px; overflow:hidden; cursor:pointer}
+.targetGoods .image { padding-right:4px;}
+.targetGoods .name	{ display:block; width:300px; overflow:hidden; white-space:nowrap;}
+.btn-gray-search	{ width:100px; line-height:25px; text-align:center;
+					color:#fff; font-weight:bold; border:1px solid #5a5a5a; 
+					background-color:#737373; cursor:pointer;
+					background: -ms-linear-gradient(bottom, #7e7e7e 5%, #696969 100%);
+					background: linear-gradient(to bottom, #7e7e7e 5%, #696969 100%);}
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+	/* 셀렉트박스 스타일 */
+	$(".custom-select-box").customSelectBox();
+	$(".custom-select-box-multi").customSelectBox({'multi':true});
+
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','');
+	$("div#{_GET.displayId} select[name='category1']").bind("change",function(){
+		category_admin_select_load('category1','category2',$(this).val());
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("div#{_GET.displayId} select[name='category2']").bind("change",function(){
+		category_admin_select_load('category2','category3',$(this).val());
+		category_admin_select_load('category3','category4',"");
+	});
+	$("div#{_GET.displayId} select[name='category3']").bind("change",function(){
+		category_admin_select_load('category3','category4',$(this).val());
+	});
+
+	/* 브랜드 불러오기 */
+	brand_admin_select_load('','brands1','');
+	$("div#{_GET.displayId} select[name='brands1']").bind("change",function(){
+		brand_admin_select_load('brands1','brands2',$(this).val());
+		brand_admin_select_load('brands2','brands3',"");
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("div#{_GET.displayId} select[name='brands2']").bind("change",function(){
+		brand_admin_select_load('brands2','brands3',$(this).val());
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("div#{_GET.displayId} select[name='brands3']").bind("change",function(){
+		brand_admin_select_load('brands3','brands4',$(this).val());
+	});
+
+	/* 이벤트 선택 */
+	$("div#{_GET.displayId} select[name='selectEvent']").bind("change",function(){
+		event_admin_select_load('selectEvent','selectEventBenefits',$(this).val());
+	}).change();
+
+	/* 지역 불러오기 */
+	location_admin_select_load('','location1','');
+	$("div#{_GET.displayId} select[name='location1']").bind("change",function(){
+		location_admin_select_load('location1','location2',$(this).val());
+		location_admin_select_load('location2','location3',"");
+		location_admin_select_load('location3','location4',"");
+	});
+	$("div#{_GET.displayId} select[name='location2']").bind("change",function(){
+		location_admin_select_load('location2','location3',$(this).val());
+		location_admin_select_load('location3','location4',"");
+	});
+	$("div#{_GET.displayId} select[name='location3']").bind("change",function(){
+		location_admin_select_load('location3','location4',$(this).val());
+	});
+
+	/* 이벤트 검색폼 활성화 */
+	var regExp = /^(.*)\/event[0-9]{7}\.html$/;
+	if(regExp.test($("input[name='template_path']").val())){
+		$(".searchFormItemEvent").show();
+		$(".searchFormItemGift").hide();
+		$(".searchFormItemNormal").hide();
+	}
+
+	/* GIFT 이벤트 검색폼 활성화 */
+	var regExp = /^(.*)\/gift[0-9]{7}\.html$/;
+	if(regExp.test($("input[name='template_path']").val())){
+		$(".searchFormItemGift").show();
+		$(".searchFormItemEvent").hide();
+		$(".searchFormItemNormal").hide();
+	}
+
+	$("div#{_GET.displayId} div.targetGoods").live('dblclick',function(event){
+		$(this).remove();
+		select_{_GET.displayId}.apply_layer();
+	});
+
+	$("div.btn-gray-search").click(function(){
+		searchGoodsListSubmit();
+	});
+
+	$("button.send-btn").click(function(){
+		$("form[name='goodsForm']", goodsListFrame.document).submit();
+	});
+
+	apply_input_style();
+});
+
+// 검색 폼 submit
+function searchGoodsListSubmit(){
+	if	(!$("input[name='sprice']").val() && !$("input[name='eprice']").val()){
+		$("input[name='sprice']").val('');
+		$("input[name='eprice']").val('');
+	}
+	$("#searchsForm").submit();
+}
+
+// 엔터 submit
+function enterSubmit(evt){
+	var e	= evt || window.enent;
+	if	(e.keyCode == 13){
+		searchGoodsListSubmit();
+	}
+}
+
+function searchformchange(){
+	$("input[name='keyword']").focus();
+	$("#searchsForm").submit();
+}
+</script>
+<form name="searchsForm" id="searchsForm" action="goods_list" method="get" target="goodsListFrame">
+<div id="goodsSelectorSearch">
+	<table class="info-table-style" width="100%" border="0" cellpadding="0" cellspacing="0">
+	<col width="120" /><col width="430" /><col width="120" /><col />
+	<tr>
+		<th class="its-th-align">검색어</th>
+		<td class="its-td" colspan="2">
+			<input type="text" name="keyword" value="" title="상품명(매입상품명), 상품코드" style="width:80%;"  />
+		</td>
+		<td class="its-td center">
+			<div class="btn-gray-search">검색</div>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align">상태</th>
+		<td class="its-td">
+			<label><input type="checkbox" name="goodsStatus[]" value="normal" /> 정상</label>
+			<label><input type="checkbox" name="goodsStatus[]" value="runout" /> 품절</label>
+			<label><input type="checkbox" name="goodsStatus[]" value="purchasing" /> 재고확보중</label>
+			<label><input type="checkbox" name="goodsStatus[]" value="unsold" /> 판매중지</label>
+		</td>
+		<th class="its-th-align">노출 여부</th>
+		<td class="its-td">
+			<label><input type="checkbox" name="goodsView[]" value="look" checked="checked" /> 노출</label>
+			<label><input type="checkbox" name="goodsView[]" value="notLook" /> 미노출</label>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align">카테고리</th>
+		<td class="its-td">
+			<select name="category1" style="width:100px">
+			<option value="">1차 카테고리</option>
+			</select>
+			<select name="category2" style="width:100px">
+			<option value="">2차 카테고리</option>
+			</select>
+			<select name="category3" style="width:100px">
+			<option value="">3차 카테고리</option>
+			</select>
+			<select name="category4" style="width:100px">
+			<option value="">4차 카테고리</option>
+			</select>
+		</td>
+		<th class="its-th-align">이미지영역 동영상</th>
+		<td class="its-td">
+			<label><input type="checkbox" name="file_key_w" value="1" {?_GET.file_key_w}checked="checked"{/} /> 있음</label>
+			<select name="video_use" class="video_use">
+				<option value="" selected >전체</option>
+				<option value="Y">노출</option>
+				<option value="N">미노출</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align">브랜드</th>
+		<td class="its-td">
+			<select name="brands1" style="width:100px">
+			<option value="">1차 브랜드</option>
+			</select>
+			<select name="brands2" style="width:100px">
+			<option value="">2차 브랜드</option>
+			</select>
+			<select name="brands3" style="width:100px">
+			<option value="">3차 브랜드</option>
+			</select>
+			<select name="brands4" style="width:100px">
+			<option value="">4차 브랜드</option>
+			</select>
+		</td>
+		<th class="its-th-align">설명영역 동영상</th>
+		<td class="its-td">
+			<label><input type="checkbox" name="videototal" value="1" /> 있음</label>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align">지역</th>
+		<td class="its-td">
+			<select name="location1" style="width:100px">
+			<option value="">1차 지역</option>
+			</select>
+			<select name="location2" style="width:100px">
+			<option value="">2차 지역</option>
+			</select>
+			<select name="location3" style="width:100px">
+			<option value="">3차 지역</option>
+			</select>
+			<select name="location4" style="width:100px">
+			<option value="">4차 지역</option>
+			</select>
+		</td>
+		<th class="its-th-align">
+			<select name="price_gb" class="search_select">
+				<option value="consumer_price" selected>정상가</option>
+				<option value="price" >할인가</option>
+			</select>
+		</th>
+		<td class="its-td">
+			<input type="text" name="sprice" size="6" value="" />원부터 ~
+			<input type="text" name="eprice" size="6" value="" />원까지
+		</td>
+	</tr>
+	</table>
+</div>
+
+<div class="clearbox">
+	<ul class="right-btns clearbox">
+		<li><select name="orderby" onchange="searchformchange();">
+			<option value="asc_goods_name" {?orderby=='asc_goods_name'}selected{/}>상품명순↑</option>
+			<option value="desc_goods_name" {?orderby=='desc_goods_name'}selected{/}>상품명순↓</option>
+			<option value="asc_consumer_price" {?orderby=='asc_consumer_price'}selected{/}>정가↑</option>
+			<option value="desc_consumer_price" {?orderby=='desc_consumer_price'}selected{/}>정가↓</option>
+			<option value="asc_price" {?orderby=='asc_price'}selected{/}>할인가↑</option>
+			<option value="desc_price" {?orderby=='desc_price'}selected{/}>할인가↓</option>
+			<option value="asc_tot_stock"  {?orderby=='asc_tot_stock'}selected{/}>재고↑</option>
+			<option value="desc_tot_stock" {?orderby=='desc_tot_stock'}selected{/}>재고↓</option>
+			<option value="asc_page_view" {?orderby=='asc_page_view'}selected{/}>페이지뷰순↑</option>
+			<option value="desc_page_view" {?orderby=='desc_page_view'}selected{/}>페이지뷰순↓</option>
+			<option value="asc_goods_seq" {?orderby=='asc_goods_seq'}selected{/}>등록일순↑</option>
+			<option value="desc_goods_seq" {?orderby=='desc_goods_seq'}selected{/}>등록일순↓</option>
+			<option value="asc_update_date" {?orderby=='asc_update_date'}selected{/}>수정일순↑</option>
+			<option value="desc_update_date" {?orderby=='desc_update_date'}selected{/}>수정일순↓</option>
+		</select></li>
+		<li><select name="perpage" onchange="searchformchange();">
+			<option id="dp_qty10" value="10" {? perpage == 10 } selected{/} >10개씩</option>
+			<option id="dp_qty50" value="50" {? perpage == 50 } selected{/} >50개씩</option>
+			<option id="dp_qty100" value="100" {? perpage == 100 } selected{/} >100개씩</option>
+			<option id="dp_qty200" value="200" {? perpage == 200 } selected{/} >200개씩</option>
+		</select></li>
+	</ul>
+</div>
+</form>
+
+<iframe name="goodsListFrame" width="100%" height="{containerHeight}" frameborder="0" src="goods_list?inputGoods={_GET.inputGoods}&displayId={_GET.displayId}&onlyType={_GET.onlyType}&adminshipping={_GET.adminshipping}&adminOrder={_GET.adminOrder}&init=Y&type={_GET.type}&select_one_goods_callback={_GET.select_one_goods_callback}" name="select_{_GET.displayId}"></iframe>
+
+<br style="line-height:20px;" />
+
+<div class="send-btn-lay">
+	<b style="line-height:30px;color:red;">선택된 상품을 판매마켓 연동 업체로 일괄 전송합니다.</b>
+	<div><span class="btn large cyanblue"><button type="submit" class="send-btn">전송하기</button></span></div>
+</div>

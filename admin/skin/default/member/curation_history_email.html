@@ -1,0 +1,226 @@
+{ #layout_header }
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".email_select").live("click",function(){
+		$.get('../member_process/getlogcuration?seq='+$(this).attr('seq'), function(response) {
+		  	//$('#contPop').html(data);
+
+			var data = eval(response)[0];
+			$("#contents").show();
+			$('#c_title').html(data.subject);
+			$('#c_to_email').html(data.to_email);
+			$('#c_regist_date').html(data.regist_date);
+			$('#c_contents').html(data.contents);
+			//openDialog("이메일 내용 <span class='desc'>&nbsp;</span>", "contPop", {"width":"600","height":"600"});
+		});
+	});
+
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='start_date']").val(getDate(0));
+				$("input[name='end_date']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='start_date']").val(getDate(3));
+				$("input[name='end_date']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='start_date']").val(getDate(7));
+				$("input[name='end_date']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='start_date']").val(getDate(30));
+				$("input[name='end_date']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='start_date']").val(getDate(90));
+				$("input[name='end_date']").val(getDate(0));
+				break;
+			default :
+				$("input[name='start_date']").val('');
+				$("input[name='end_date']").val('');
+				break;
+		}
+	});
+
+	$("#btn_submit").click(function(){
+		$("#gabiaFrm").submit();
+	});
+});
+</script>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		<!-- 타이틀 -->
+		<div class="page-title"><h2>고객 리마인드 SMS/Email</h2></div>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<style>
+.ctab {border-top:1px solid #d6d6d6;border-right:1px solid #d6d6d6;border-bottom:1px solid #d6d6d6;width:150px;line-height:30px;text-align:center;background-color:#eeeeee;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#757575;}
+.ctab-on {border-top:1px solid #d6d6d6;border-bottom:1px solid #ffffff;border-right:1px solid #d6d6d6;width:150px;line-height:30px;text-align:center;background-color:#ffffff;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;}
+</style>
+
+
+<!-- 상단 단계 링크 : 시작 -->
+{#top_menu}
+<!-- 상단 단계 링크 : 끝 -->
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<form name="gabiaFrm" id="gabiaFrm">
+<input type="hidden" name="sc_gb" value="{sc_gb}">
+<div class="item-title" style="float:left;width:92%">리마인드 Email 발송내역</div>
+<div class="clearbox">
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="15%" />
+			<col />
+		</colgroup>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">발송구분</th>
+			<td class="its-td-align left" style="padding-left:10px;">
+				<select name="sc_kind">
+				<option value="">전체</option>
+				<!--{@ curationmn}-->
+				<option value="{.name}" {? .name == sc.sc_kind} selected{/}>{.title}</option>
+				<!--{ / }-->
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">발송일</th>
+			<td class="its-td-align left" style="padding-left:10px;">
+				<input type="text" name="start_date" value="{sc.start_date}" class="datepicker line"  maxlength="10" size="10" />
+				&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+				<input type="text" name="end_date" value="{sc.end_date}" class="datepicker line" maxlength="10" size="10" />
+				&nbsp;&nbsp;
+				<span class="btn small"><input type="button" value="오늘" id="today" name="select_date"/></span>
+				<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date"/></span>
+				<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date"/></span>
+				<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date"/></span>
+				<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date"/></span>
+				<span class="btn small"><input type="button" value="전체" id="all" name="select_date"/></span>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">이메일 제목</th>
+			<td class="its-td-align left" style="padding-left:10px;">
+				<input type="text" name="sc_subject" size="30" value="{sc.sc_subject}" />
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+<div style="width:100%;text-align:center;padding-top:10px;">
+<span class="btn large gray"><button type="button" id="btn_submit">검색</button></span>
+</div>
+</form>
+
+<br style="line-height:16px;" />
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+<!-- 테이블 헤더 : 시작 -->
+<colgroup>
+	<col width="5%" />
+	<col width="20%" />
+	<col />
+	<col width="20%" />
+</colgroup>
+<thead class="lth">
+<tr>
+	<th>번호</th>
+	<th>발송구분</th>
+	<th>이메일 제목</th>
+	<th>발송일시</th>
+</tr>
+</thead>
+<!-- 테이블 헤더 : 끝 -->
+	<tbody class="ltb otb" >
+{? loop }
+	{@ loop }
+		<!-- 리스트타이틀(주문상태 및 버튼) : 시작 -->
+		<tr class="list-row email_select" seq="{.seq}" style="cursor:pointer;">
+			<td align="center">{.number}</td>
+			<td align="center">{.kind_name}</td>
+			<td align="left"><span style="padding-left:10px;">{.subject}</span></td>
+			<td align="center">{.regist_date}</td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+	{ / }
+{ : }
+		<!-- 리스트타이틀(주문상태 및 버튼) : 시작 -->
+		<tr class="list-row">
+			<td align="center" colspan="4">
+				{ ? search_text }
+					'{search_text}' 검색된 데이터가 없습니다.
+				{:}
+					데이터가 없습니다.
+				{/}
+			</td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+{ / }
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+</table>
+<!-- 주문리스트 테이블 : 끝 -->
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin} </div>
+	</td>
+</tr>
+</table>
+
+
+<div id="contPop" class="hide"></div>
+
+
+
+
+<div id="contents" class="hide">
+<br style="line-height:16px;" />
+<!-- 주문리스트 테이블 : 시작 -->
+<div class="item-title" style="float:left;width:92%">리마인드 Email 발송 상세</div>
+<table class="list-table-style" cellspacing="0">
+<!-- 테이블 헤더 : 시작 -->
+<colgroup>
+	<col />
+	<col width="20%" />
+	<col width="20%" />
+</colgroup>
+<thead class="lth">
+<tr>
+	<th>이메일 제목</th>
+	<th>수신 대상자</th>
+	<th>발송일시</th>
+</tr>
+</thead>
+<!-- 테이블 헤더 : 끝 -->
+<tbody class="ltb otb" >
+<tr class="list-row">
+	<td align="center"><span id="c_title"></span></td>
+	<td align="center"><span id="c_to_email"></span></td>
+	<td align="center"><span id="c_regist_date"></span></td>
+</tr>
+<tr class="list-row">
+	<td align="center" colspan="3" style="padding:10px;"><span id="c_contents" style="width:80%;"></span></td>
+</tr>
+</tbody>
+</tr>
+</table>
+
+
+</div>
+
+
+{ #layout_footer }

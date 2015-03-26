@@ -1,0 +1,386 @@
+{ #layout_header }
+<style>
+.goods_name {display:inline-block;white-space:nowrap;overflow:hidden;width:290px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+.search_label 	{display:inline-block;width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+span.step_title { font-weight:normal;padding-right:5px }
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".all-check").toggle(function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',true);
+	},function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',false);
+	});
+
+
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+	$("#search_set").click(function(){
+		openDialog("기본검색 설정", "search_detail_dialog", {"width":"800","height":"300"});
+	});
+
+	$("#get_default_button").click(function(){
+		$.getJSON('get_search_default', function(result) {
+			for(var i=0;i<result.length;i++){
+				if(result[i][0]=='goodsStatus[0]' || result[i][0]=='goodsView[0]'){
+					//alert(result[i][0]+" : "+result[i][1]);
+					if(result[i][1]=='normal') $("input[name='goodsStatus[]']").eq(0).attr("checked",true);
+					else if(result[i][1]=='runout') $("input[name='goodsStatus[]']").eq(1).attr("checked",true);
+					else if(result[i][1]=='unsold') $("input[name='goodsStatus[]']").eq(2).attr("checked",true);
+					else if(result[i][1]=='look') $("input[name='goodsView[]']").eq(0).attr("checked",true);
+					else if(result[i][1]=='notLook') $("input[name='goodsView[]']").eq(1).attr("checked",true);
+				}else if(result[i][0]=='regist_date'){
+					if(result[i][1] == 'today'){
+						set_date('{=date('Y-m-d')}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3day'){
+						set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '7day'){
+						set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '1mon'){
+						set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3mon'){
+						set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}');
+					}
+				}
+				$("*[name='"+result[i][0]+"']",document.memberForm).val(result[i][1]);
+			}
+		});
+	});
+
+
+	$("#order_star").click(function(){
+		var status = "";
+		if($(this).hasClass("checked")){
+			$(this).removeClass("checked");
+			status = "asc";
+		}else{
+			$(this).addClass("checked");
+			status = "desc";
+		}
+		location.href = "../goods/catalog?orderby=favorite_chk&sort="+status;
+	});
+
+	$(".event_view_btn").click(function(){
+		window.open("/page/index?setDesignMode=on&tpl="+encodeURIComponent($(this).attr("tpl_path")));
+	});
+
+	$(".event_modify_btn").click(function(){
+		if	($(this).attr('event_type') == 'solo')
+			document.location.href="soloregist?event_seq="+$(this).attr("event_seq");
+		else
+		document.location.href="regist?event_seq="+$(this).attr("event_seq");
+	});
+
+	$(".event_copy_btn").click(function(){
+
+		if(!confirm("이벤트와 상품정보만 복사되니 복사 후 정보를 수정해 주세요!\n정말로 이 이벤트를 복사하시겠습니까?")) return;
+
+		actionFrame.document.location.href	= '../event_process/event_copy?event_seq='+$(this).attr("event_seq");
+	});
+
+	$(".event_delete_btn").click(function(){
+
+		if(!confirm("이 이벤트를 삭제하시겠습니까?")) return;
+
+		actionFrame.document.location.href	= '../event_process/event_delete?event_seq='+$(this).attr("event_seq");
+	});
+
+	$("input[name='sc_event_type']").click(function(){
+		if	($(this).attr('checked')){
+			$(".search_solo").removeClass('desc');
+			$(".search_solo").find('select').attr('disabled', false);
+			$(".search_solo").find('input').attr('disabled', false);
+		}else{
+			$(".search_solo").addClass('desc');
+			$(".search_solo").find('select').attr('disabled', true);
+			$(".search_solo").find('input').attr('disabled', true);
+		}
+	});
+});
+
+function set_date(start,end){
+	$("input[name='sdate']").val(start);
+	$("input[name='edate']").val(end);
+}
+</script>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>이벤트 리스트</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="helpicon" title="<b>[일반] 이벤트 등록</b><br/>특정 기간 동안 상품을 할인하는 이벤트를 만듭니다.<br/><br/><b>[단독] 이벤트 등록</b><br/>특정 기간 동안 상품을 할인하는 이벤트를 만듭니다.<br/>단, 1개 상품에 대한 이벤트로 해당 상품에 대한 이벤트 차(횟)수 관리가 가능합니다."></span></li>
+			<li><span class="btn large black"><button onclick="location.href='regist';">[일반] 이벤트 등록<span class="arrowright"></span></button></span></li>
+			<li>
+				{? service_code=='P_FREE' }
+				<span class="btn large gray">
+					<button onclick="openDialog('쇼핑몰 업그레이드 안내<span class=\'desc\'></span>', 'nofreeService', {'width':600,'height':200});" title="무료몰 Plus+ 에서는 해당기능이 지원되지 않습니다.">[단독] 이벤트 등록<span class="arrowright"></span></button>
+				</span>
+				{:}
+				<span class="btn large black">
+					<button onclick="location.href='soloregist';">[단독] 이벤트 등록<span class="arrowright"></span></button>
+				</span>
+				{ / }
+			</li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<form name="orderForm" id="orderForm">
+
+<!-- 이벤트리스트 검색폼 : 시작 -->
+<div class="search-form-container">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table>
+			<tr>
+				<td width="500">
+					<table class="sf-keyword-table">
+					<tr>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{=htmlspecialchars(sc.keyword)}" title="이벤트명" /></td>
+						<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+
+	<table class="search-form-table" id="serch_tab">
+	<tr id="goods_search_form" style="display:block;">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<colgroup>
+				<col width="80" />
+				<col width="" />
+			</colgroup>
+			<tr>
+				<th>
+					<select name="date">
+						<option value="start_date" {?_GET.date=='start_date'}selected{/}>이벤트시작일</option>
+						<option value="end_date" {?_GET.date=='end_date'}selected{/}>이벤트종료일</option>
+						<option value="regist_date" {?_GET.date=='regist_date'}selected{/}>등록일</option>
+
+					</select>
+				</th>
+				<td>
+					<input type="text" name="sdate" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button" value="오늘" id="today" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date"/></span>
+					<span class="btn small"><input type="button" value="전체" id="all" name="select_date"/></span>
+				</td>
+			</tr>
+			<tr>
+				<th>상태</th>
+				<td>
+					<label class="search_label"><input type="checkbox" name="event_status[]" value="before" {?_GET.event_status && in_array('before',_GET.event_status)}checked{/}/>시작 전</label>
+					<label class="search_label"><input type="checkbox" name="event_status[]" value="ing" {?_GET.event_status && in_array('ing',_GET.event_status)}checked{/}/>진행 중</label>
+					<label class="search_label"><input type="checkbox" name="event_status[]" value="end" {?_GET.event_status && in_array('end',_GET.event_status)}checked{/}/>종료</label>
+
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			<tr>
+				<th><label>단독상품 <input type="checkbox" name="sc_event_type" value="solo" {?_GET.sc_event_type == 'solo'}checked{/} /></label></th>
+				<td class="search_solo  {?_GET.sc_event_type != 'solo'}desc{/}">
+					<select name="sc_goods_type"  class="line" {?_GET.sc_event_type != 'solo'}disabled{/}>
+						<option value="" {?!_GET.sc_goods_type}selected{/}>실물+쿠폰</option>
+						<option value="goods" {?_GET.sc_event_type == 'goods'}selected{/}>실물</option>
+						<option value="coupon" {?_GET.sc_event_type == 'coupon'}selected{/}>쿠폰</option>
+					</select>
+					<input type="text" name="sc_start_st" size="3" class="line onlynumber" value="{_GET.sc_start_st}" {?_GET.sc_event_type != 'solo'}disabled{/} />차
+					~
+					<input type="text" name="sc_end_st" size="3" class="line onlynumber" value="{_GET.sc_end_st}" {?_GET.sc_event_type != 'solo'}disabled{/} />차
+					<input type="text" name="sc_goods_name" class="line" value="{_GET.sc_goods_name}" title="상품명" {?_GET.sc_event_type != 'solo'}disabled{/} />
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<!-- 이벤트리스트 검색폼 : 끝 -->
+
+<ul class="left-btns clearbox">
+<!--
+	<li><select class="custom-select-box-multi" id="multichkec" >
+		<option value="true">전체선택</option>
+		<option value="false">전체해제</option>
+		</select>
+	</li>
+	<li><select class="custom-select-box-multi" id="multicmode" >
+		<option value="boardmanager_multi_delete">선택삭제</option>
+		</select>
+	</li>
+-->
+	<li><div style="margin-top:rpx;">총 <b>{=number_format(count.total)}</b>개 이벤트 중 <b>{=number_format(page.totalcount)}</b>개 검색 (진행 중 <b>{=number_format(count.ing)}</b>, 종료 <b>{=number_format(count.end)}</b>)</div></li>
+</ul>
+<ul class="right-btns clearbox">
+<li><select class="custom-select-box-multi" name="sort" onchange="$(this.form).submit();">
+	<option value="evt.regist_date desc" {?sc.sort=='evt.regist_date desc'}selected{/}>최근등록순↓</option>
+	<option value="evt.title desc" {?sc.sort=='evt.title desc'}selected{/}>이벤트명순↓</option>
+	<option value="evt.pageview asc" {?sc.sort=='evt.pageview asc'}selected{/}>페이지뷰↑</option>
+	<option value="evt.pageview desc" desc" {?sc.sort=='evt.pageview desc'}selected{/}>페이지뷰↓</option>
+</select></li>
+<li><select  class="custom-select-box-multi" name="perpage" onchange="$(this.form).submit();">
+	<option id="dp_qty10" value="3" {? sc.perpage == 3 } selected{/} >3개씩</option>
+	<option id="dp_qty10" value="10" {? sc.perpage == 10 } selected{/} >10개씩</option>
+	<option id="dp_qty50" value="50" {? sc.perpage == 50 } selected{/} >50개씩</option>
+	<option id="dp_qty100" value="100" {? sc.perpage == 100 } selected{/} >100개씩</option>
+	<option id="dp_qty200" value="200" {? sc.perpage == 200 } selected{/} >200개씩</option>
+</select></li>
+</ul>
+
+<!-- 이벤트리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="40" />
+		<col />
+		<col width="70" />
+		<col />
+		<col width="140" />
+		<col width="140" />
+		<col width="70" />
+		<col width="70" />
+		<col width="100" />
+		<col width="150" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>번호</th>
+		<th>이벤트 구분</th>
+		<th>할인</th>
+		<th>이벤트명</th>
+		<th>기간</th>
+		<th>등록/수정일</th>
+		<th>상태</th>
+		<th>사용자<br/>접속</th>
+		<th>달성성과<br/>( 갯수/주문 )</th>
+		<th>관리</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb otb" >
+{? list }
+	{@ list }
+		<!-- 리스트타이틀(이벤트상태 및 버튼) : 시작 -->
+		<tr class="list-row">
+			<td align="center">{._rno}</td>
+			<td align="left" class="pdl5">
+			{ ? .event_type == 'solo' }
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<td style="width:60px;border:none;"><a href="/goods/view?no={.goods_seq}" target="_blank"><img class="small_goods_image" src="{=viewImg(.goods_seq,'thumbView')}" width="50"></a></td>
+					<td style="border:none;text-align:left;">
+						<div class="red">[{.st_num}차]</div>
+						<div ><a href="../goods/{? .goods_kind == 'coupon' }social_{/}regist?no={.goods_seq}" target="_blank">{=getstrcut(.goods_name,80)}</a> </div>
+					</td>
+				</tr>
+				</table>
+			{ : }
+			여러 개 상품
+			{ / }
+			</td>
+			<td align="center">{ ? .target_sale == 1 }최종{ : }추가{ / } {.event_sale}%</td>
+			<td align="left" class="pdl5">{.title}</td>
+			<td align="center">
+			{? .start_date == '0000-00-00 00:00:00' && .end_date == '0000-00-00 00:00:00'}
+				0000-00-00 00<br/>
+				0000-00-00 00
+			{ : }
+				{=date('Y-m-d H', strtotime(.start_date))}<br/>
+				{=date('Y-m-d H', strtotime(.end_date))}
+			{ / }
+			</td>
+			<td align="center">{.regist_date}<br/>{.update_date}</td>
+			<td align="center">{.status}</td>
+			<td align="center">{?.display=='y'}Y{:}N{/}</td>
+			<td align="right" class="pdr5">{? .event_type == 'solo'}
+			{=number_format(.order_price)}원<br/>({=number_format(.order_ea)}/{=number_format(.order_cnt)})
+			{/}</td>
+			<td align="center">
+				<div style="text-align:left;margin:0 17px;padding:1px 0;">
+				<p style="padding-bottom:3px;"><span class="btn small red"><input type="button" value="화면에서꾸미기" class="event_view_btn" tpl_path="{.tpl_path}" /></span></p>
+				<span class="btn small"><input type="button" value="수정" class="event_modify_btn" event_seq="{.event_seq}" event_type="{.event_type}" /></span>
+				<span class="btn small"><input type="button" value="복사" class="event_copy_btn" event_seq="{.event_seq}" event_type="{.event_type}" /></span>
+				<span class="btn small"><input type="button" value="삭제" class="event_delete_btn"  event_seq="{.event_seq}" /></span>
+				</div>
+			</td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+	{ / }
+{ : }
+		<!-- 리스트타이틀(이벤트상태 및 버튼) : 시작 -->
+		<tr class="list-row">
+			<td align="center" colspan="10">
+				{ ? keyword }
+					'{keyword}' 검색된 이벤트가 없습니다.
+				{:}
+					등록된 이벤트가 없습니다.
+				{/}
+			</td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+{ / }
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+</table>
+<!-- 이벤트리스트 테이블 : 끝 -->
+
+</form>
+
+<br style="line-height:10px;" />
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{page.html}</div>
+
+{ #layout_footer }

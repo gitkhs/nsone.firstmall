@@ -1,0 +1,112 @@
+<form>
+	<div align="center">
+	<table class="sf-option-table">
+		<colgroup>
+			<col width="" />
+			<col width="{? selected_sales_menu == 'sales_monthly' }180{:}250{/}" />
+		</colgroup>
+	<tr>
+		<td>
+			<div align="center">
+				<div class="ui-widget">
+					<select name="provider_seq_select" class="provider_seq_select" style="vertical-align:middle;">
+					<option value="" selected="selected" ></option>
+					<option value="1" >본사</option>
+					{@provider}
+					<option value="{.provider_seq}">{.provider_name}({.provider_id})</option>
+					{/}
+					</select>
+
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+					<input type="hidden" class="provider_seq" name="provider_seq" value="{_GET.provider_seq}" />
+					<input type="text" name="provider_name" value="{_GET.provider_name}" readonly />
+				</div>
+				<span class="ptc-charges hide"></span>
+
+				<style>
+				.ui-combobox {
+					position: relative;
+					display: inline-block;
+				}
+				.ui-combobox-toggle {
+					position: absolute;
+					top: 0;
+					bottom: 0;
+					margin-left: -1px;
+					padding: 0;
+					/* adjust styles for IE 6/7 */
+					*height: 1.7em;
+					*top: 0.1em;
+				}
+				.ui-combobox-input {
+					margin: 0;
+					padding: 0.3em;
+				}
+				.ui-autocomplete {
+					max-height: 200px;
+					overflow-y: auto;
+					/* prevent horizontal scrollbar */
+					overflow-x: hidden;
+				}
+
+				</style>
+
+				<script>
+				$( ".provider_seq_select" )
+				.combobox()
+				.change(function(){
+					$("input[name='provider_base']").removeAttr('checked').change();
+					$("input[name='provider_seq']").val($(this).val());
+					$("input[name='provider_name']").val($("option:selected",this).text());
+				});
+				</script>
+			</div>
+		</td>
+
+		<td>
+			{? selected_sales_menu == 'sales_monthly' }
+				<select name="year">
+				<option value="">= 연도 선택 =</option>
+				{@range(date('Y'),2010)}
+					<option value="{.value_}" {?_GET.year==.value_}selected{/}>{.value_} 년</option>
+				{/}
+				</select>
+
+				<span class="btn small"><input type="submit" value="검색" /></span>
+				<span class="helpicon" title="배송완료일 기준입니다"></span>
+			{:}
+				<select name="year">
+				<option value="">= 연도 선택 =</option>
+				{@range(date('Y'),2010)}
+					<option value="{.value_}" {?_GET.year==.value_}selected{/}>{.value_} 년</option>
+				{/}
+				</select>
+
+				<select name="month">
+				<option value="">= 월 선택 =</option>
+				{@range(12,1)}
+					<option value="{.value_}" {?_GET.month==.value_}selected{/}>{.value_} 월</option>
+				{/}
+				</select>
+
+				<span class="btn small"><input type="submit" value="검색" /></span>
+				<span class="helpicon" title="배송완료일 기준입니다"></span>
+			{/}
+		</td>
+	</tr>
+	</table>
+	</div>
+
+	<div class="center pdt10">
+		판매환경 :
+		<!--{ @ sitetypeloop }-->
+			<!--{ ? in_array(.key_,sitetype) }-->
+			<label class="search_label pdr5"><input type="checkbox" name="sitetype[]" value="{.key_}" checked="checked" /> {.name}</label>
+			<!--{ : }-->
+			<label class="search_label pdr5"><input type="checkbox" name="sitetype[]" value="{.key_}" /> {.name}</label>
+			<!--{ / }-->
+		<!--{ / }-->
+		<span class="icon-check hand all-check"><b class="">전체</b></span>
+	</div>
+</form>

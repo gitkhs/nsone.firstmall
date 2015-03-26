@@ -1,0 +1,34 @@
+<div style="width:100%;margin-top:10px;">
+	<table width="100%" class="simpledata-table-style">
+	<thead>
+	<tr>
+		<th>발송 일시</th>
+		<th>쿠폰번호</th>
+		<!-- { ? !export.send_type || export.send_type == 'mail' } -->
+		<th>이메일</th>
+		<th>발신상태</th>
+		<!-- { / } -->
+		<!-- { ? !export.send_type || export.send_type == 'sms' } -->
+		<th>SMS</th>
+		<th>발신상태</th>
+		<!-- { / } -->
+	</tr>
+	</thead>
+	<tbody>
+<!-- { @ export.history } -->
+	<tr>
+		<td class="center">{.regist_date}</td>
+		<td class="center">{.export['coupon_serial']}</td>
+		<!-- { ? !export.send_type || export.send_type == 'mail' } -->
+		<td class="left pdl5">{.email}</td>
+		<td class="center">{ ? .email_status == 'y' }성공{ : }실패{ / }</td>
+		<!-- { / } -->
+		<!-- { ? !export.send_type || export.send_type == 'sms' } -->
+		<td class="left pdl5">{.sms}</td>
+		<td class="center">{ ? .sms_status == 'y' }성공{ : }실패{ / }</td>
+		<!-- { / } -->
+	</tr>
+<!-- { / } -->
+	</tbody>
+	</table>
+</div>

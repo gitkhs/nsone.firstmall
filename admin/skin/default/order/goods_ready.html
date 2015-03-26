@@ -1,0 +1,137 @@
+<script type="text/javascript">
+$(document).ready(function(){
+
+	// 전체 체크
+	$("input[name='allReadyCheck']").click(function(){
+		var chk	= false;
+		if	($(this).attr('checked'))	chk		= true;
+
+		$("input[name='optionSeq[]']").each(function(){  
+			if ( $(this).attr("disabled") != "disabled" ) {
+				$(this).attr('checked', chk);
+			}
+		});
+		$("input[name='suboptionSeq[]']").each(function(){ 
+			if ( $(this).attr("disabled") != "disabled"  ) {
+				$(this).attr('checked', chk);
+			}
+		});
+	});
+
+	// 상품준비 처리 submit
+	$("button.set-goods-ready").click(function(){
+		chk		= false;
+		$("input[name='optionSeq[]']").each(function(){
+			if	($(this).attr('checked')){
+				chk		= true;
+				return;
+			}
+		});
+
+		if	(!chk){
+			$("input[name='suboptionSeq[]']").each(function(){
+				if	($(this).attr('checked')){
+					chk		= true;
+					return;
+				}
+			});
+		}
+
+		if	(!chk){
+			openDialogAlert("상품이 선택되지 않았습니다.", 400,150);
+			return;
+		}
+
+		$("form#goods_ready_frm").submit();
+	});
+});
+</script>
+<form name="goods_ready_frm" id="goods_ready_frm" method="post" action="../order_process/goods_ready" target="actionFrame" onsubmit="loadingStart();">
+<input name="order_seq" type="hidden" value="{orders.order_seq}" / >
+
+	<div style="margin:0 0 10px 0;">주문번호 : {orders.order_seq}</div>
+	<div style="margin:0 0 20px 0; border:2px solid #000; padding:15px;">
+		<table class="simplelist-table-style" width="100%" border="0">
+		<colgroup>
+			<col width="5%" />
+			<col />
+			<col width="10%" />
+			<col width="10%" />
+			<col width="10%" />
+			<col width="10%" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th><input type="checkbox" name="allReadyCheck" value="y" /></th>
+			<th>주문상품</th>
+			<th>주문수량</th>
+			<th>취소수량</th>
+			<th>출고된 수량</th>
+			<th>상태</th>
+		</tr>
+		</thead>
+		<tbody>
+		<!--{ @ loop }-->
+			<!--{ @ .options }-->
+		<tr>
+			<td class="info center"><input type="checkbox" name="optionSeq[]" value="{..item_option_seq}" {?..step!=25}disabled{/} /></td>
+			<td class="info left" >
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="inner-table">
+				<tr>
+					<td class="left" width="35" valign="top"><span class="order-item-image"><img src="{.image}" align="absmiddle" hspace="5" style="border:1px solid #ddd;" class="small_goods_image" /></span></td>
+					<td class="left" valign="top">
+						<div class="goods_name">{.goods_name}</div>
+						<div class="goods_option">
+							<img src="/admin/skin/default/images/common/icon_option.gif" />
+							<!--{ ? ..option1 }-->
+								<!--{ ? ..option1 }--><span>{..title1}:{..option1}</span><!--{ / }-->
+								<!--{ ? ..option2 }--><span style="padding-left:5px;">{..title2}:{..option2}</span><!--{ / }-->
+								<!--{ ? ..option3 }--><span style="padding-left:5px;">{..title3}:{..option3}</span><!--{ / }-->
+								<!--{ ? ..option4 }--><span style="padding-left:5px;">{..title4}:{..option4}</span><!--{ / }-->
+								<!--{ ? ..option5 }--><span style="padding-left:5px;">{..title5}:{..option5}</span><!--{ / }-->
+								{? .goods_code }<div><b>{.goods_code}</b></div>{/}
+							<!--{ / }-->
+						</div>
+					</td>
+				</tr>
+				</table>
+			</td>
+			<td class="info" align="center"><span class="ea">{..ea}</span></td>
+			<td class="info" align="center">{..step85}</td>
+			<td class="info" align="center">{..step_complete}</td>
+			<td class="info" align="center">{..mstep}</td>
+		</tr>
+				<!--{ @ ..suboptions }-->
+		<tr>
+			<td class="info center"><input type="checkbox" name="suboptionSeq[]" value="{...item_suboption_seq}" {?...step!=25}disabled{/} /></td>
+			<td class="info left">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" class="inner-table">
+				<tr>
+					<td class="right" style="width:43px;">
+						<div style="padding-right:5px;"><img src="/admin/skin/default/images/common/icon_add_arrow.gif" /></div>
+					</td>
+					<td class="left"  valign="top">
+						<img src="/admin/skin/default/images/common/icon_add.gif" />
+						<!--{ ? ...suboption }-->
+							{ ? ...title }{...title}:{ / }{...suboption}
+						<!--{ / }-->
+					</td>
+				</tr>
+				</table>
+			</td>
+			<td class="info" align="center"><span class="ea">{...ea}</span></td>
+			<td class="info" align="center">{...step85}</td>
+			<td class="info" align="center">{...step_complete}</td>
+			<td class="info" align="center">{...mstep}</td>
+		</tr>
+				<!--{ / }-->
+			<!--{ / }-->
+		<!--{ / }-->
+		</tbody>
+		</table>
+	</div>
+
+	<div style="margin-bottom:30px;text-align:center;">
+		<span class="btn large black"><button type="button" class="set-goods-ready">상품준비 처리</button></span>
+	</div>
+</form>

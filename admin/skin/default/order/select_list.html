@@ -1,0 +1,105 @@
+{ # layout_header_popup }
+<script type="text/javascript">
+function apply_layer(){
+	if(!parent)return;
+	var iObj = $("div#{_GET.inputGoods}",parent.document);
+	var tag = "";
+	$("div#{_GET.displayId} div.targetGoods",parent.document).each(function(){
+		var goodsSeq = $(this).attr('id');
+		var img = $(this).find("div.image").html();
+		var goodsName = $(this).find("div.name").text();
+		var goodsPrice = $(this).find("div.price").html();
+		tag += "<div class='goods fl move'>";
+		tag += "<div align='center' class='image'>"+img+"</div>";
+		tag += "<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>"+htmlspecialchars(goodsName)+"</div>";
+		tag += "<div align='center' class='price'>"+goodsPrice+"</div>";
+		tag += "<input type='hidden' name='{_GET.inputGoods}[]' value='"+goodsSeq+"' />";
+		tag += "</div>";
+		this.onclick=function(){parent.targetGoods_click($(this));};				
+	});	
+	iObj.html( tag ); 	
+}
+$(function() {
+	$("div#sourceList div.sourceGoods").live("click",function(){
+		<!--{ ? adminOrder == 'Y' }-->
+			
+		<!--{ : }-->
+		var cObj = $(this).clone();
+		var tObj = $("div#{_GET.displayId} div#targetList",parent.document);			
+		cObj.removeClass("sourceGoods").addClass("targetGoods");
+		if( ! tObj.find("div#"+cObj.attr('id')).length ) tObj.append(cObj);
+
+		apply_layer();	
+		
+		<!-- { / } -->
+	});	
+	// 등록된 상품 선택된 상태로		
+	if(!parent) return;
+
+	if($("div#{_GET.displayId} div#targetList div.targetGoods",parent.document).length==0){
+		$("div#{_GET.inputGoods} div.goods",parent.document).each(function(){	
+
+			var init = '{_GET.init}';
+			if(init=='Y'){
+				var clone = $("div#sourceList div.sourceGoods").eq(0).clone();
+				var img = $(this).find("div.image").html();		
+				var name = $(this).find("div.name").html();
+				var price = $(this).find("div.price").html();
+				var seq = $(this).find("input[name='{_GET.inputGoods}[]']").val();
+				var tObj = $("div#{_GET.displayId} div#targetList",parent.document);
+				clone.attr('id',seq); 
+				clone.find("div.image").html(img);
+				clone.find("div.name").html(name);		
+				clone.find("div.price").html(price);	
+				clone.removeClass("sourceGoods").addClass("targetGoods");
+				clone[0].onclick=function(){parent.targetGoods_click(clone);};						
+				tObj.append(clone);
+			}
+		
+		});	
+	}
+});
+</script>
+
+<style>
+.sourceGoods {padding:4px; overflow:hidden; cursor:pointer}
+.sourceGoods .image {padding-right:4px;} 
+.sourceGoods .name {display:block; width:300px; overflow:hidden; white-space:nowrap;}
+</style>
+
+<div id="sourceList">
+<!-- { @ record } -->
+<div class="clearbox sourceGoods" id="{.goods_seq}" style="border-right:1px solid #aaa;border-left:1px solid #aaa;border-bottom:1px solid #aaa;">				
+	<div style="float:left;" class="image">
+		<img src="{=viewImg(.goods_seq,'thumbView')}" class="goodsThumbView" width="50" height="50" />
+	</div>
+	<div style="float:left;">
+	<div class="name">{=htmlspecialchars(.goods_name)}</div>
+	<div class="price">{=number_format(.price)}</div>
+	</div>				
+</div>
+<!-- { / } -->
+</div>
+<div style="height:5px"></div>
+<div align="center">
+<!--{ ? page.first }-->
+<a href="select_list?page={page.first}&amp;{page.querystring}">처음</a>
+<!--{ / }-->
+<!--{ ? page.prev }-->
+<a href="select_list?page={page.prev}&amp;{page.querystring}">이전</a>
+<!--{ / }-->
+<!--{ @ page.page }-->
+<!--{ ? page.nowpage ==  .value_ }-->
+<strong>{.value_ }</strong>
+<!--{ : }-->
+<a href="select_list?page={.value_}&amp;{page.querystring}">{.value_ }</a>
+<!--{ / }-->	
+<!--{ / }-->
+<!--{ ? page.next }-->
+<a href="select_list?page={page.next}&amp;{page.querystring}">다음</a>
+<!--{ / }-->
+<!--{ ? page.last }-->
+<a href="select_list?page={page.last}&amp;{page.querystring}">마지막</a>
+<!--{ / }-->
+</div>
+{ # layout_footer_popup }

@@ -1,0 +1,207 @@
+{#layout_header_popup}
+
+<script type="text/javascript">
+$(function(){	
+	{?template_path && flash_seq}
+	parent.DM_window_title_set("left","<a href=\"javascript:;\" onmouseup=\"DM_window_sourceeditor('{template_path}','\{=showDesignFlash({flash_seq})\}')\">◀ 플래시 영역의 HTML소스보기</a>");
+	{/}
+	parent.DM_window_title_set("center","{layout_config.tpl_desc}({layout_config.tpl_path})에 선택한 ");
+	
+});
+</script>
+
+<!-- 쇼핑몰 정보 폼 -->
+<form name="flashManagerForm" method="post" action="/admin/design_process/flash_edit" enctype="multipart/form-data" target="actionFrame" onsubmit="loadingStart()">
+<input type="hidden" name="template_path" value="{template_path}" />
+<input type="hidden" name="flash_seq" value="{flash_seq}" />
+<input type="hidden" name="direct" value="{_GET.direct}" />
+
+<div style="padding:10px;">
+	<table class="design-simple-table-style" width="100%">
+		<colgroup>
+			<col width="150px" />
+			<col width="" />
+		</colgroup>
+		<tbody>
+		<tr>
+			<th class="dsts-th">플래시 이름</th>
+			<td class="dsts-td left"><input type="text"  id="name" name="name" value="{data.name}" /></td>
+		</tr>
+		<tr>
+			<th class="dsts-th">플래시 넓이</th>
+			<td class="dsts-td left"><input type="text"  id="width" name="flashW" value="{options.flashW.value}" />px</td>
+		</tr>
+		<tr>
+			<th class="dsts-th">플래시 높이</th>
+			<td class="dsts-td left"><input type="text"  id="width" name="flashH" value="{options.flashH.value}" />px</td>
+		</tr>
+		{?options.prevBtn.value}
+		<tr>
+			<th class="dsts-th">죄측메뉴</th>
+			<td class="dsts-td left"><input type="file" name="prevBtn" class="line" /> {?options.prevBtn.value}<img src='{options.prevBtn.value}' width='20' height='20' align="absmiddle" />{/}</td>
+			<td><input type="hidden" name="oprevBtn" value="{options.prevBtn.value}" /></td>
+		</tr>
+		{/}
+		{?options.nextBtn.value}
+		<tr>
+			<th class="dsts-th">우측메뉴</th>
+			<td class="dsts-td left"><input type="file" name="nextBtn" class="line" /> {?options.nextBtn.value}<img src='{options.nextBtn.value}' width='20' height='20' align="absmiddle" />{/}</td>
+			<td><input type="hidden" name="onextBtn" value="{options.nextBtn.value}" /></td>
+		</tr>
+		{/}
+		{?options.title.value}
+		<tr>
+			<th class="dsts-th">타이틀</th>
+			<td class="dsts-td left"><input type="file" name="title" /> <img src="{options.title.value}"></td>
+		</tr>
+		{/}
+		<tr>
+			<th class="dsts-th">비주얼이미지
+				{?!productExpendViewer}<br /><span class="btn medium"><button id="image_add" type="button">추가하기</button></span>{/}
+			</th>
+			<td class="dsts-td left" id="flash_image">
+			{@items}
+			<div class="flashmagictr" style="margin-bottom:5px; padding:10px 10px 10px 10px; border: 1px solid #e3e3e3">	
+				<input type="hidden" name="items[]" value="{.key}" />
+				<table width="100%">
+				<tr>
+					<td>
+						<table width="100%">
+						<colgroup>
+						<col align="center" width="80" /><col width="300" /><col align="left" />
+						</colgroup>
+						{?.value_.thumb.value}
+						<tr>
+							<td>비주얼 :</td>
+							<td><input type="file" name="thumb[]" class="line" /> {?.value_.thumb.value}<img src='{.value_.thumb.value}' width='20' height='20' align="absmiddle" />{/}</td>
+							<td><input type="hidden" name="othumb[]" value="{.value_.thumb.value}" /></td>
+						</tr>
+						{/}
+
+						{?.value_.detail.value}
+						<tr>
+							<td>비주얼大 :</td>
+							<td><input type="file" name="detail[]" class="line" /> {?.value_.detail.value}<img src='{.value_.detail.value}' width='20' height='20' align="absmiddle" />{/}</td>
+							<td><input type="hidden" name="odetail[]" value="{.value_.detail.value}" /></td>
+						</tr>
+						{/}
+
+			
+						{?.value_.visual}
+						<tr>
+							<td>플래시 :</td>
+							<td><input type="file" name="visual[]" class="line" /> {?.value_.visual.value}<img src='{.value_.visual.value}' width='20' height='20' align="absmiddle" />{/}</td>
+							<td><input type="hidden" name="ovisual[]" value="{.value_.visual.value}" /></td>
+						</tr>
+						{/}
+						{?first_item.menuOff.value}
+						<tr>
+							<td>버튼 :</td>
+							<td><input type="file" name="menuOff[]" class="line" /> {?.value_.menuOff.value}<img src='{.value_.menuOff.value}' width='20' height='20' align="absmiddle" />{/}</td>
+							<td><input type="hidden" name="omenuOff[]" value="{.value_.menuOff.value}" /></td>
+						</tr>
+						{/}
+						{?first_item.menuOn.value}
+						<tr>
+							<td>롤오버 :</td>
+							<td><input type="file" name="menuOn[]" class="line" /> {?.value_.menuOn.value}<img src='{.value_.menuOn.value}' width='20' height='20' align="absmiddle" />{/}</td>
+							<td><input type="hidden" name="omenuOn[]" value="{.value_.menuOn.value}" /></td>
+						</tr>
+						{/}
+
+						{?.value_.target && .value_.url}
+						<tr>
+							<td>링크 :</td>
+							<td>
+							<select name="target[]">
+								<option value="_parent" {?.value_.target.value == '_self'}selected{/}>현재창</option>
+								<option value="_blank" {?.value_.target.value == '_blank'}selected{/}>새창</option>
+							</select>
+							<input type="text" name="url[]" size="33" value="{.value_.url.value}" title="링크주소를 입력해주세요" />
+							</td>
+							<td></td>
+						</tr>
+						{/}
+					</table>
+					</td>
+					<td><span class="btn small"><button type="button" id="image_del">삭제하기</button></span></td>
+				</tr>
+				</table>
+			</div>
+			{/}
+			<div id="image_add_tag">
+			</div>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+	
+	{? template_path && flash_seq}
+	<div style="height:15px"></div>
+	
+	<div class="center">
+		<label><input type="checkbox" name="removeDesignFlashArea" value="Y" /> 이 페이지의 플래시 영역을 없앰 (설정 정보는 삭제되지 않음)</label>
+	</div>
+	{/}
+	
+	<div style="height:15px"></div>
+	
+	<div class="center">
+		<span class="btn medium cyanblue"><input type="submit" value="적용" /></span>
+	</div>
+</div>
+
+</form>
+
+<script type="text/javascript">
+var tags = $("#image_add_tag").html();
+$("#image_add_tag").html("");
+$(function()
+{
+	$("#image_add").live("click",function()
+	{
+		var use_thumb = use_detail = use_visual = use_menuOff = use_menuOn = use_link = 'N';
+		if	(document.flashManagerForm['thumb[]'])		use_thumb	= 'Y';
+		if	(document.flashManagerForm['detail[]'])		use_detail	= 'Y';
+		if	(document.flashManagerForm['visual[]'])		use_visual	= 'Y';
+		if	(document.flashManagerForm['menuOff[]'])	use_menuOff	= 'Y';
+		if	(document.flashManagerForm['menuOn[]'])		use_menuOn	= 'Y';
+		if	(document.flashManagerForm['url[]'])		use_link	= 'Y';
+		var num = parseInt($(".flashmagictr").length)+1;
+		$.post('/admin/design_process/flash_add', {
+			
+			/*
+			'num': num,
+			'flashmagicxmldir': '<?php echo $flashmagicxmldir?>',
+			'flashimgdirvisual': '<?php echo $flashimgdirvisual?>',
+			'flashimgdirmenuoff': '<?php echo $flashimgdirmenuOff?>',
+			'flashimgdirmenuon': '<?php echo $flashimgdirmenuOn?>',
+			'flashW': '{options.flashW.value}',
+			*/
+			'use_thumb': use_thumb, 
+			'use_detail': use_detail, 
+			'use_visual': use_visual, 
+			'use_menuOff': use_menuOff, 
+			'use_menuOn': use_menuOn, 
+			'use_link': use_link, 
+			'menuOff': '{first_item.menuOff.value}',
+			'menuOn': '{first_item.menuOn.value}',
+			'nextKey':$("input[name='items[]']").length,
+			'url': ''
+			}, function(response) {
+				$("#image_add_tag").append(response);
+				apply_input_style();
+		}, 'html');
+	});
+
+	$("#image_del").live("click",function()
+	{
+		if($(".flashmagictr").length>1) $(this).closest(".flashmagictr").remove();
+	});
+
+
+});
+
+</script>
+
+{#layout_footer_popup}

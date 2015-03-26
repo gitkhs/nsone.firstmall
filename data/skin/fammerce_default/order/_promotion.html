@@ -1,0 +1,46 @@
+<script>
+function getPromotionck(){
+	var cartpromotioncode = $("#cartpromotioncode").val();
+	if(!cartpromotioncode){
+		alert('프로모션코드를 정확히 입력해 주세요.');
+		return false;
+	}
+
+	$.ajax({
+		'url' : '../promotion/getPromotionJson',
+		'data' : {'cartpromotioncode':cartpromotioncode},
+		'type' : 'post',
+		'dataType': 'json',
+		'success': function(data) {
+			if(data.result){
+				//if(data.msg)alert(data.msg);
+				$("#PromotionLayer").dialog('close');
+				mybag_contents_load();
+			}else{
+				alert(data.msg);
+			}
+		}
+	});
+}
+
+/* 프로모션코드 초기화하기 */
+function getPromotionCartDel(){
+	$.ajax({
+		'url' : '/promotion/getPromotionCartDel',
+		'success' : function(){mybag_contents_load();}
+	});
+}
+
+</script>
+<div class="PromotionLayerContainerd"  >
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #cacaca; background-color:#ebebeb;">
+<tr>
+	<td class="pdr5" height="25" align="left">
+		<font color=red>프로모션코드</font> <img src="../images/design/btn_help.gif" align="absmiddle" class="helpicon" title="프로모션코드에 코드를 공백 없이 입력하고 [입력] 단추를 클릭하십시오." /> <input type="text"  name="cartpromotioncode" id="cartpromotioncode" value="{cart_promotioncode}" title="프로모션코드에 코드를 공백 없이 입력하고 [입력] 단추를 클릭하십시오."/> <a href="#" onclick="getPromotionck();return false;"><img id="cartpromotioncodebtn" src="../images/design/btn_s_input.gif" /></a>
+		{? cart_promotioncode }
+		<a href="#" onclick="getPromotionCartDel();return false;"><img src="../images/design/btn_s_input_cartdel.gif" title="[프로모션코드 초기화]" /></a>
+		{/}
+	</td>
+</tr>
+</table>
+</div>

@@ -1,0 +1,102 @@
+{#layout_header}
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2><span class="darkgray">디자인 →</span> 치환코드</h2>
+		</div>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<form name="codeForm" "method="get">
+
+<div class="pdt30">
+	<table align="center" cellspacing="5">
+	<tr>
+		<td>
+			<select name="code_page">
+			<option value="">전체</option>
+			{@arr_code_page}
+			<option value="{.code_page}" {?.code_page==_GET.code_page}selected{/}>{.code_page}</option>
+			{/}
+			</select>
+		</td>
+		<td><input type="text" name="keyword" value="{_GET.keyword}" class="input-box-default-text" title="치환코드, 설명" /></td>
+		<td><span class="btn medium cyanblue"><input type="submit" value="검색" /></span></td>
+	</tr>
+	</table>
+</div>
+
+<div class="clearbox">
+	<ul class="left-btns clearbox">
+		<li><div style="margin-top:rpx;">
+		<!--{ ? search_yn == 'y' }-->
+		검색 <b>{=number_format(page.totalcount)}</b> 개
+		<!--{ : }-->
+		총 <b>{=number_format(page.totalcount)}</b> 개</div>
+		<!--{ / }-->
+		</li>
+	</ul>
+	<ul class="right-btns clearbox">
+		<li><select  class="custom-select-box-multi" name="perpage" onchange="document.codeForm.submit();">
+			<option id="dp_qty10" value="15" {? _GET.perpage == 15 } selected{/} >15개씩</option>
+			<option id="dp_qty50" value="50" {? _GET.perpage == 50 } selected{/} >50개씩</option>
+			<option id="dp_qty100" value="100" {? _GET.perpage == 100 } selected{/} >100개씩</option>
+			<option id="dp_qty200" value="200" {? _GET.perpage == 200 } selected{/} >200개씩</option>
+		</select></li>
+	</ul>
+</div>
+</form>
+
+<!-- 치환코드리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="150" />
+		<col />
+		<col />
+		<col />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>적용페이지</th>
+		<th>치환코드</th>
+		<th>설명</th>
+		<th>예제</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+		<!--{ ? !record }-->
+		<tr class="list-row">
+			<td colspan="4" align="center">검색어가 없거나 검색 결과가 없습니다.</td>
+		</tr>
+		<!--{ : }-->
+		<!--{ @ record }-->
+		<tr class="list-row">
+			<td align="center">{.code_page}</td>
+			<td align="center">{.code}</td>
+			<td align="center">{.description}</td>
+			<td align="center">
+				<div style="padding:5px 0 10px 0; line-height:5px; font-family:tahoma; font-size:11px;">
+				{=nl2br(.example)}
+				</div>
+			</td>
+		</tr>
+		<!--{ / }-->
+		<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+</table>
+<!-- 치환코드리스트 테이블 : 끝 -->
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:10px auto;">{page.html}</div>
+
+{#layout_footer}

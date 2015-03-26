@@ -1,0 +1,28 @@
+{ #layout_header }
+
+<form name="daumshoppingForm" method="post" enctype="multipart/form-data" action="../marketing_process/marketplace_daumshopping_process" target="actionFrame">
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>입점 마케팅 신청/관리</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large cyanblue"><button type="submit">입점신청<span class="arrowright"></span></button></span></li>
+			<li><span class="btn large gray"><input type="button" value="취소" onclick="history.go(-1)" /></span></li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<div style="padding:0 20px">
+	{formHtml}
+</div>
+</form>
+
+{ #layout_footer }

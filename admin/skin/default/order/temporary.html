@@ -1,0 +1,830 @@
+{ #layout_header }
+<style>
+.goods_name {display:inline-block;white-space:nowrap;overflow:hidden;width:100%;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+.search_label 	{display:inline-block;width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+span.step_title { font-weight:normal;padding:0 5px 0 5px; }
+span.export-list { display:inline-block;background-url("../images/common/btn_list_release.gif");width:60px;height:15px; }
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".all-check").toggle(function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',true);
+	},function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',false);
+	});
+
+	// 기본검색 조건 불러오기
+	$("button#get_default_button").bind("click",function(){
+		$.getJSON('get_search_default', function(result) {
+			var patt;
+			$(".mod_chkbox").removeAttr("checked");
+
+			if (result) {
+				$("form[name='set_search_detail'] input[name^='chk_step']").prop("checked",false);
+				$("form[name='set_search_detail'] input[name^='payment']").prop("checked",false);
+			}
+
+			for(var i=0;i<result.length;i++){
+				patt=/_date/g;
+				if( patt.test(result[i][0]) ){
+					if(result[i][1] == 'today'){
+						set_date('{=date('Y-m-d')}','{=date('Y-m-d')}','today');
+					}else if(result[i][1] == '3day'){
+						set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}','3day');
+					}else if(result[i][1] == '7day'){
+						set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}','7day');
+					}else if(result[i][1] == '1mon'){
+						set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}','1mon');
+					}else if(result[i][1] == '3mon'){
+						set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}','3mon');
+					}
+					$("form[name='set_search_detail'] input[name='regist_date']:input[value='"+result[i][1]+"']").attr("checked",true);
+				}
+
+				if(result[i][0] && result[i][0] != "regist_date"){
+					$("form[name='search-form'] input[name='"+result[i][0]+"']").attr("checked",true);
+					$("form[name='set_search_detail'] input[name='"+result[i][0]+"']").attr("checked",true);
+				}
+			}
+		});
+	});
+	// 기본검색 조건 저장하기
+	$("span#set_default_button").bind("click",function(){
+		var title = '기본검색 설정<span style="font-size:11px; margin-left:26px;"> - 아래서 원하는 검색조건을 설정하여 편하게 쇼핑몰을 운영하세요</span>';
+		openDialog(title, "search_detail_dialog", {"width":"85%","height":"240"});
+	});
+
+	$("span.list-important").bind("click",function(){
+		var param = "?no="+$(this).attr('id');
+		if( $(this).hasClass('checked') ){
+			$(this).removeClass('checked');
+			param += "&val=0";
+			$.get('important'+param,function(data) {});
+
+		}else{
+			$(this).addClass('checked');
+			param += "&val=1";
+			$.get('important'+param,function(data) {});
+		}
+	});
+
+	$("select.list-select").bind("change",function(){
+		var nm = $(this).attr("name");
+		var value_str = $(this).val();
+		var that = this;
+
+		$("select[name='"+nm+"']").not(this).each(function(idx){
+			$(this).find("option[value='"+value_str+"']").attr("selected",true);
+			this.selectedIndex = that.selectedIndex;
+			$(this).customSelectBox("selectIndex",that.selectedIndex);
+		});
+
+		var step = nm.replace('select_', "");
+		var obj = $(".important-"+step);
+		obj.each(function(){
+			if( value_str ){
+				$(this).parent().parent().find("td").eq(0).find("input").attr("checked",false);
+				if(  value_str == 'important' && $(this).hasClass('checked') ){
+					$(this).parent().parent().find("td").eq(0).find("input").attr("checked",true);
+				}else if( value_str == 'not-important' && !$(this).hasClass('checked') ){
+					$(this).parent().parent().find("td").eq(0).find("input").attr("checked",true);
+				}else if(  value_str == 'select' ){
+					$(this).parent().parent().find("td").eq(0).find("input").attr("checked",true);
+				}
+			}
+		});
+	});
+
+	// 결제확인 시
+	$("button[name='order_deposit']").bind("click",function(){
+		var step = $(this).attr('id');
+		var order_seq = new Array();
+		$("tr.step"+step).find("input[type='checkbox'][name='order_seq[]']:checked").each(function(idx){
+			order_seq[idx] = 'seq[]='+$(this).val();
+		});
+		if(order_seq.length > 0){
+			openDialogConfirm('선택된 주문을 결제확인 하시겠습니까?',400,140,function(){
+				var str = order_seq.join('&');
+				$.ajax({
+					type: "POST",
+					url: "../order_process/batch_deposit",
+					data: str,
+					success: function(result){
+						location.reload();
+					}
+				});
+			},function(){
+			});
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+
+	// 삭제처리
+	$("button[name='goods_temps']").bind("click",function(){
+		var step = $(this).attr('id');
+		var order_seq = new Array();
+		$("tr.step"+step).find("input[type='checkbox'][name='order_seq[]']:checked").each(function(idx){
+			order_seq[idx] = 'seq[]='+$(this).val();
+		});
+		if(order_seq.length > 0){
+			openDialogConfirm('선택된 주문을 완전삭제처리 하시겠습니까?',400,140,function(){
+				var str = order_seq.join('&');
+				$.ajax({
+					type: "POST",
+					url: "../order_process/batch_temps_orders",
+					data: str,
+					success: function(result){
+						location.reload();
+					}
+				});
+			},function(){
+			});
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+
+	// 주문무효 시
+	$("button[name='cancel_order']").bind("click",function(){
+		var step = $(this).attr('id');
+		var order_seq = new Array();
+		$("tr.step"+step).find("input[type='checkbox'][name='order_seq[]']:checked").each(function(idx){
+			order_seq[idx] = 'seq[]='+$(this).val();
+		});
+		if(order_seq.length > 0){
+			openDialogConfirm('선택된 주문을 주문무효처리 하시겠습니까?',400,140,function(){
+				var str = order_seq.join('&');
+				$.ajax({
+					type: "POST",
+					url: "../order_process/batch_cancel_order",
+					data: str,
+					success: function(result){
+						location.reload();
+					}
+				});
+			},function(){
+			});
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+
+	// 일괄출고처리
+	$("button[name='goods_export']").bind("click",function(){
+		var step = $(this).attr('id');
+		var order_seq = new Array();
+		$("tr.step"+step).find("input[type='checkbox'][name='order_seq[]']:checked").each(function(idx){
+			order_seq[idx] = 'seq[]='+$(this).val();
+		});
+
+		if(order_seq.length > 0){
+			var str = order_seq.join('&');
+			$.ajax({
+				type: "POST",
+				url: "../order/batch_export",
+				data: str,
+				success: function(result){
+					$("#goods_export_dialog").html(result);
+				}
+			});
+			openDialog("일괄 출고 처리<span class='desc'> - "+order_seq.length+"건</span>", "goods_export_dialog", {"width":"95%","height":"700"});
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+	// 바로열기
+	$(".btn-direct-open").toggle(function(){
+		var nextTr = $(this).parent().parent().next();
+		var order_seq = $(this).parent().parent().find("input[type='checkbox']").val();
+		$.get('view?no='+order_seq+'&mode=order_list', function(data) {
+			nextTr.find('div.order_info').html(data);
+		});
+		nextTr.removeClass('hide');
+		$(this).addClass("opened");
+
+	},function(){
+		var nextTr = $(this).parent().parent().next();
+		nextTr.find('div.order_info').html('');
+		nextTr.addClass('hide');
+		$(this).removeClass("opened");
+	});
+
+	// 개별 출고처리
+	$("button.goods_export").live("click",function(){
+		var order_seq = $(this).attr('id').replace("goods_export_","");
+		var url = "goods_export?seq="+order_seq;
+		$.get(url, function(data) {
+			$('#goods_export_dialog').html(data);
+		});
+		openDialog("출고처리<span class='desc'> - "+order_seq+"</span>", "goods_export_dialog", {"width":"95%","height":500});
+	});
+
+	// 개별 결제확인
+	$("button.order_deposit").live("click",function(){
+		var order_seq = $(this).attr('id').replace("order_deposit_","");
+		actionFrame.location.href = '../order_process/deposit?seq='+order_seq;
+	});
+
+	// 체크박스 색상
+	$("input[type='checkbox'][name='order_seq[]']").live('change',function(){
+		if($(this).is(':checked')){
+			$(this).closest('tr').addClass('checked-tr-background');
+		}else{
+			$(this).closest('tr').removeClass('checked-tr-background');
+		}
+	}).change();
+
+
+
+	//
+	$("button[name='goods_print']").bind("click",function(){
+		var step = $(this).attr('id');
+		var order_seq = new Array();
+		var text = "";
+		$("tr.step"+step).find("input[type='checkbox'][name='order_seq[]']:checked").each(function(idx){
+			//order_seq[idx] = 'seq[]='+$(this).val();
+			text += $(this).val()+"|";
+		});
+		if(text){
+			window.open('/admin/order/order_prints?ordarr='+text, '', 'width=1100px,height=800px,toolbar=no,location=no,resizable=yes, scrollbars=yes');
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+
+
+	$("button[name='download_list']").click(function(){
+		//window.open("/admin/order/download_list","","");
+		location.href = "/admin/order/download_list";
+	});
+
+	/*
+	$("button[name='excel_down']").click(function(){
+		var step = $(this).attr("step");
+		if(!$("#select_down_"+step).val()){
+			alert("양식을 선택해 주세요.");
+			return;
+		}
+		actionFrame.location.href="/admin/order_process/excel_down?step="+step+"&seq="+$("#select_down_"+step).val();
+	});
+	*/
+	$("button[name='excel_down']").click(function(){
+		var step = $(this).attr("step");
+		var order_seq = "";
+		$("tr.step"+step).find("input[type='checkbox'][name='order_seq[]']:checked").each(function(idx){
+			order_seq += $(this).val() + "|";
+		});
+		if(!order_seq){
+			alert("선택값이 없습니다.");
+			return;
+		}
+
+		if(!$("#select_down_"+step).val()){
+			alert("양식을 선택해 주세요.");
+			return;
+		}
+		//actionFrame.location.href="/admin/order_process/excel_down?order_seq="+order_seq+"&seq="+$("#select_down_"+step).val();
+		ajaxexceldown('/admin/order_process/excel_down', order_seq, $("#select_down_"+step).val(), step);
+	});
+
+
+	// export_upload
+	$("button[name='excel_upload']").live("click",function(){
+		openDialog("송장번호 일괄 업로드 <span class='desc'></span>", "export_upload", {"width":"600","height":"550","show" : "fade","hide" : "fade"});
+	});
+
+});
+
+function ajaxexceldown(url, order_seq, seq, step){
+        var inputs ='<input type="hidden" name="order_seq" value="'+ order_seq +'" />';
+		inputs +='<input type="hidden" name="seq" value="'+ seq +'" />';
+		inputs +='<input type="hidden" name="step" value="'+ step +'" />';
+        jQuery('<form action="'+ url +'" method="post" target="actionFrame" >'+inputs+'</form>')
+        .appendTo('body').submit().remove();
+}
+
+
+function set_date(start,end,day){
+	$("input[name='regist_date[]']").eq(0).val(start);
+	$("input[name='regist_date[]']").eq(1).val(end);
+	$("input[name='regist_date_type']").val(day);
+}
+
+// sns 계정 정보 확인
+function snsdetailview(m,snscd,mem_seq,no){
+
+	var disp = $("div#snsdetailPopup"+no).css("display");
+	$(".snsdetailPopup").hide();
+
+	var obj	= $("div#snsdetailPopup"+no);
+	if(obj.html() == ''){
+		$.get('../member/sns_detail?snscd='+snscd+'&member_seq='+mem_seq+'&no='+no, function(data) {
+			obj.html(data);
+		});
+	}
+
+	if(disp == "none"){ obj.show(); }
+}
+</script>
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>삭제리스트</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 주문리스트 검색폼 : 시작 -->
+<div class="search-form-container">
+	<form name="search-form" method="get">
+	<input type="hidden" name="regist_date_type" value="{? _GET.regist_date_type}{_GET.regist_date_type}{/}" />
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table>
+			<tr>
+				<td width="500">
+					<table class="sf-keyword-table">
+					<tr>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{_GET.keyword}" title="주문자, 받는자, 입금자, 아이디, 이메일, 휴대폰, 주문번호, 상품명" /></td>
+						<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td>
+				<span class="btn small gray"><button type="button" id="get_default_button">기본검색적용</button></span>
+				<span id="set_default_button" class="icon-arrow-down" style="cursor:pointer;">기본검색설정</span>
+				</td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<table class="search-form-table" id="search_detail_table">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th><span class="icon-arrow-down">주문일</span></th>
+				<td>
+					<input type="text" name="regist_date[]" value="{_GET.regist_date[0]}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="regist_date[]" value="{_GET.regist_date[1]}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button" value="오늘" onclick="set_date('{=date('Y-m-d')}','{=date('Y-m-d')}','today')" /></span>
+					<span class="btn small"><input type="button" value="3일간" onclick="set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}','3day')" /></span>
+					<span class="btn small"><input type="button" value="일주일" onclick="set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}','7day')"/></span>
+					<span class="btn small"><input type="button" value="1개월" onclick="set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}','1mon')"/></span>
+					<span class="btn small"><input type="button" value="3개월" onclick="set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}','3mon')" /></span>
+					<span class="btn small"><input type="button" value="전체" onclick="set_date('','','all')" /></span>
+				</td>
+			</tr>
+
+			<tr>
+				<th>출고 전</th>
+				<td>
+					<!--{ @config_load('step') }-->
+					<!--{ ? .key_=='95' || .key_=='99' }-->
+					<!--{ ? _GET.chk_step[.key_] }-->
+					<label class="search_label"><input type="checkbox" class="mod_chkbox" name="chk_step[{.key_}]" value="1" checked="checked" /> {.value_}</label>
+					<!--{ : }-->
+					<label class="search_label"><input type="checkbox" class="mod_chkbox" name="chk_step[{.key_}]" value="1" /> {.value_}</label>
+					<!--{ / }-->
+					<!--{ / }-->
+					<!--{ / }-->
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+
+			<tr>
+				<th>결제수단</th>
+				<td>
+					<!--{ @ config_load('payment') }-->
+					<!--{ ? !preg_match('/escrow/',.key_) }-->
+					<!--{ ? _GET.payment[.key_] }-->
+					<label class="search_label"><input type="checkbox" class="mod_chkbox" name="payment[{.key_}]" value="1" checked="checked" /> {.value_}</label>
+					<!--{ : }-->
+					<label class="search_label"><input type="checkbox" class="mod_chkbox" name="payment[{.key_}]" value="1" /> {.value_}</label>
+					<!--{ / }-->
+					<!--{ / }-->
+					<!--{ / }-->
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	</form>
+</div>
+<!-- 주문리스트 검색폼 : 끝 -->
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="40" />
+		<col width="40" />
+		<col width="60" />
+		<col width="95" />
+		<col width="275" />
+		<col />
+		<col width="150" />
+		<col width="50" />
+		<col width="70" />
+		<col width="88" />
+		<col width="80" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>선택</th>
+		<th>중요</th>
+		<th>번호</th>
+		<th>주문일시</th>
+		<th>주문번호</th>
+		<th>주문상품</th>
+		<th>주문자</th>
+		<th>결제수단</th>
+		<th>결제금액</th>
+		<th>결제일시</th>
+		<th>처리상태</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+		<!--{ ? !record }-->
+		<tr class="list-row">
+			<td colspan="11" align="center">검색어가 없거나 검색 결과가 없습니다.</td>
+		</tr>
+		<!--{ : }-->
+		<!--{ @ record }-->
+		<!--{ ? .start }-->
+		<!-- 리스트타이틀(주문상태 및 버튼) : 시작 -->
+		<tr class="list-title-row">
+			<td colspan="11" class="list-title-row-td">
+				<div class="relative">
+					<!--{ ? .step == 15 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 전)</span>주문접수
+					<span class="helpicon" title="접수된 주문의 입금을 확인하세요"></span>
+					</div>
+					<!--{ : .step == 25 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 전)</span>결제확인
+					<span class="helpicon" title="결제가 확인된 주문의 상품을 출고하세요"></span>
+					</div>
+					<!--{ : .step == 35 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 전)</span>상품준비
+					<span class="helpicon" title="보내지 못했던 상품의 재고가 확보되셨다면 상품을 출고하세요"></span>
+					</div>
+					<!--{ : .step == 40 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 전)</span>부분 출고준비
+					<span class="helpicon" title="보내지 못했던 상품의 재고가 확보되셨다면 상품을 출고하세요"></span>
+					<a href='../export/catalog?export_status[45]=1'><img src="btn_list_release.gif" border="0"></a>
+					</div>
+					<!--{ : .step == 45 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 전)</span> 출고준비
+					<span class="helpicon" title="출고리스트에서 출고완료를 처리하세요. 출고수량만큼 재고가 자동 차감됩니다"></span>
+					<a href='../export/catalog?export_status[45]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>
+					</div>
+					<!--{ : .step == 50 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 후)</span>
+					부분 출고완료 <span class="helpicon" title="보내지 못했던 상품의 재고가 확보되셨다면 상품을 출고하세요"></span>
+					<a href='../export/catalog?export_status[55]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>
+					</div>
+					<!--{ : .step == 55 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 후)</span>출고완료
+					<span class="helpicon" title="출고리스트에서 배송완료를 처리하세요. 배송완료 시 회원에게 적립금이 지급됩니다"></span>
+					<a href='../export/catalog?export_status[55]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>
+					</div>
+					<!--{ : .step == 60 }-->
+					<div class="ltr-title ">
+					<span class="step_title">(출고 후)</span>부분 배송 중
+					<span class="helpicon" title="보내지 못했던 상품의 재고가 확보되셨다면 상품을 출고하세요"></span>
+					<a href='../export/catalog?export_status[65]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>
+					</div>
+					<!--{ : .step == 65 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 후)</span>배송 중
+					<span class="helpicon" title="출고리스트에서 배송완료를 처리하세요. 배송완료 시 회원에게 적립금이 지급됩니다"></span>
+					<a href='../export/catalog?export_status[65]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>
+					</div>
+					<!--{ : .step == 70 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 후)</span>부분 배송완료
+					<span class="helpicon" title="보내지 못했던 상품의 재고가 확보되셨다면 상품을 출고하세요"></span>
+					<a href='../export/catalog?export_status[75]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>
+					</div>
+					<!--{ : .step == 75 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 후)</span>배송완료
+					<span class="helpicon" title="배송완료가 처리되어 회원에게 적립금이 지급되었습니다"></span>
+					<a href='../export/catalog?export_status[75]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>
+					</div>
+					<!--{ : .step == 85 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 전)</span>결제취소(전체)
+					<span class="helpicon" title="결제를 취소한 주문입니다. 환불리스트에서 환불을 처리하세요."></span>
+					</div>
+					<!--{ : .step == 95 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 전)</span>주문무효
+					<span class="helpicon" title="입금이 안되어 무효 처리된 주문입니다"></span>
+					</div>
+					<!--{ : .step == 99 }-->
+					<div class="ltr-title">
+					<span class="step_title">(출고 전)</span>결제실패
+					<span class="helpicon" title="주문할 때 오류가 발생한 주문입니다"></span>
+					</div>
+					<!--{ / }-->
+					<ul class="left-btns clearbox">
+						<li>
+							<select class="list-select custom-select-box-multi" name="select_{.step}"  rows="4">
+							<option value="select">전체선택</option>
+							<option value="not-select">선택안함</option>
+							<option value="important">별표선택</option>
+							<option value="not-important">별표없음</option>
+							</select>
+						</li>
+						<li>
+							<span class="btn small"><button name="goods_temps"  id="{.step}">완전삭제</button></span>
+						</li>
+					</ul>
+
+					<!-- EXCEL -->
+					<ul class="right-btns clearbox">
+
+					</ul>
+				</div>
+			</td>
+		</tr>
+		<!-- 리스트타이틀(주문상태 및 버튼) : 끝 -->
+		<!--{ / }-->
+		<tr class="list-row step{.step}">
+			<td align="center"><input type="checkbox" name="order_seq[]" value="{.order_seq}" /></td>
+			<td align="center">
+			<!--{ ? .important }-->
+			<span class="icon-star-gray hand checked list-important important-{.step}" id="important_{.order_seq}"></span>
+			<!--{ : }-->
+			<span class="icon-star-gray hand list-important important-{.step}" id="important_{.order_seq}"></span>
+			<!--{ / }-->
+			</td>
+			<td align="center">{.no}</td>
+			<td align="center">{=substr(.regist_date,2,-3)}</td>
+			<td align="center">
+			<span class="blue bold">{.order_seq}</span>
+
+			<a href="javascript:printOrderView('{.order_seq}')"><span class="icon-print-order"></a>
+
+			<!--
+			<a href="view?no={.order_seq}" target="_blank"><span class="btn-administration"><span class="hide">새창</span></span></a>
+			-->
+			<span class="btn-direct-open"><span class="hide">바로열기</span></span>
+			</td>
+			<td align="left">
+			<!--{ ? .item_cnt < 2 }-->
+			<div class="goods_name">{.goods_name}</div>
+			<!--{ : }-->
+			<div class="goods_name">{.goods_name}</div>
+			<div>외 {.item_cnt-1}건</div>
+			<!--{ / }-->
+			</td>
+			<td>
+				<!--{ ? .member_seq }-->
+				<div>
+					{?.member_type=='개인'}<img src="../images/common/icon/icon_personal.gif" />
+					{:.member_type=='기업'}<img src="../images/common/icon/icon_besiness.gif" />{/}
+					{.order_user_name}
+					{? .sns_rute }
+						<span>(<img src="../images/sns/sns_{=substr(.sns_rute,0,1)}0.gif" align="absmiddle" snscd="{.sns_rute}" mem_seq="{.member_seq}" no="{=.step}{=.key_}" onclick="snsdetailview('open','{.sns_rute}','{.member_seq}','{=.step}{=.key_}')" class="btnsnsdetail hand">/<span class="blue">{.group_name}</span>)
+						<div id="snsdetailPopup{=.step}{.key_}" class="snsdetailPopup absolute hide" style="margin-left:73px;margin-top:-16px;"></div>
+						</span>
+					{ : }
+					<!--{ ? .mbinfo_rute == 'facebook' //facebook 회원인경우 }-->
+						(<a href="/admin/member/detail?member_seq={.member_seq}" target="_blank"><span style="color:#d13b00;"><img src="../images/board/icon/sns_f0.gif" align="absmiddle">{.mbinfo_email}</span>/<span class="blue">{.group_name}</span></a>)
+					<!--{ : }-->
+						(<a href="/admin/member/detail?member_seq={.member_seq}" target="_blank"><span style="color:#d13b00;">{.userid}</span>/<span class="blue">{.group_name}</span></a>)
+					<!--{ / }-->
+					{ / }
+				</div>
+				<!--{ : }-->
+				<img src="../images/common/icon/icon_personal.gif" /> {.order_user_name} (<span class="desc">비회원</span>)
+				<!--{ / }-->
+			</td>
+			<td align="center">
+			<!--{ ? .payment == 'escrow_account' }-->
+			<span class="icon-pay-escrow"><span>에스크로</span></span>
+			<span class="icon-pay-account"><span>{.mpayment}</span></span>
+			<!--{ : .payment == 'escrow_virtual' }-->
+			<span class="icon-pay-escrow"><span>에스크로</span></span>
+			<span class="icon-pay-virtual"><span>{.mpayment}</span></span>
+			<!--{ : }-->
+			<span class="icon-pay-{.payment}"><span>{.mpayment}</span></span>
+			<!--{ / }-->
+			</td>
+			<td align="right"><b>{=number_format(.settleprice)}</b></td>
+			<td align="center">{=substr(.deposit_date,2,-3)}</td>
+			<td align="center">{.mstep}</td>
+		</tr>
+		<!--<tr><td colspan="11" style="padding-top:3px;"></td></tr>-->
+		<tr class="order-list-summary-row hide">
+			<td colspan="11" class="order-list-summary-row-td"><div class="order_info" style="padding-top:2px;"></div></td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+		<!--{ ? .end }-->
+		<!-- 합계 : 시작 -->
+		<tr class="list-end-row">
+			<td colspan="11" class="list-end-row-td">
+				<ul class="left-btns clearbox">
+					<li>
+						<select class="list-select custom-select-box-multi" name="select_{.step}"  rows="4">
+						<option value="select">전체선택</option>
+						<option value="not-select">선택안함</option>
+						<option value="important">별표선택</option>
+						<option value="not-important">별표없음</option>
+						</select>
+					</li>
+					<li>
+						<span class="btn small"><button name="goods_temps"  id="{.step}">완전삭제</button></span>
+					</li>
+				</ul>
+				<div class="list-end-total-amount">
+					{.mstep} <span class="darkgray">합계</span> &nbsp; {=number_format(.step_cnt[.step])}건
+					&nbsp;&nbsp;&nbsp;
+					￦ <span class="fx14">{=number_format(.tot_settleprice[.step])}</span>
+				</div>
+			</td>
+		</tr>
+		<!-- 합계 : 끝 -->
+		<!--{ / }-->
+		<!--{ / }-->
+		<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+</table>
+<!-- 주문리스트 테이블 : 끝 -->
+<div class="hide" id="search_detail_dialog">
+<form name="set_search_detail" method="post" action="set_search_default" target="actionFrame">
+<div id="contents">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th width="100">주문일</th>
+				<td class="date" height="30">
+					<label class="search_label"><input type="radio" name="regist_date" value="today" {? !_GET.regist_date_type || _GET.regist_date_type=='today' } checked="checked" {/}/> 오늘</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3day" {? _GET.regist_date_type=='3day' } checked="checked" {/}/> 3일간</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="7day" {? _GET.regist_date_type=='7day' } checked="checked" {/}/> 일주일</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="1mon" {? _GET.regist_date_type=='1mon' } checked="checked" {/}/> 1개월</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3mon" {? _GET.regist_date_type=='3mon' } checked="checked" {/}/> 3개월</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="all" {? _GET.regist_date_type=='all' } checked="checked" {/}/> 전체</label>
+				</td>
+			</tr>
+
+			<tr>
+				<th>출고 전</th>
+				<td>
+					<!--{ @config_load('step') }-->
+					<!--{ ? .key_=='15' || .key_=='95' || .key_=='99' }-->
+					<!--{ ? _GET.chk_step[.key_] }-->
+					<label class="search_label"><input type="checkbox" name="chk_step[{.key_}]" value="1" checked="checked" /> {.value_}</label>
+					<!--{ : }-->
+					<label class="search_label"><input type="checkbox" name="chk_step[{.key_}]" value="1" /> {.value_}</label>
+					<!--{ / }-->
+					<!--{ / }-->
+					<!--{ / }-->
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			<tr>
+				<th>결제수단</th>
+				<td>
+					<!--{ @ config_load('payment') }-->
+					<!--{ ? !preg_match('/escrow/',.key_) }-->
+					<!--{ ? _GET.payment[.key_] }-->
+					<label class="search_label"><input type="checkbox" name="payment[{.key_}]" value="1" checked="checked" /> {.value_}</label>
+					<!--{ : }-->
+					<label class="search_label"><input type="checkbox" name="payment[{.key_}]" value="1" /> {.value_}</label>
+					<!--{ / }-->
+					<!--{ / }-->
+					<!--{ / }-->
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<div align="center" style="padding-top:10px;">
+	<span class="btn large black">
+		<button type="submit">저장하기<span class="arrowright"></span></button>
+	</span>
+</div>
+</form>
+</div>
+<div id="goods_export_dialog"></div>
+
+
+
+<div id="export_upload" class="hide">
+<form name="excelRegist" id="excelRegist" method="post" action="../order_process/excel_upload" enctype="multipart/form-data"  target="actionFrame">
+<table class="search-form-table" style="width:100%;">
+<tr>
+	<td>주문내역을 다운로드 받으신 후 등록해 주시길 바랍니다.</td>
+</tr>
+<tr>
+	<td style="height:30px;text-align:center;"><input type="file" name="excel_file" id="excel_file"/></td>
+</tr>
+<tr><td height="15"></td></tr>
+<tr>
+	<td>일괄 업로드 후 주문상태를
+		<select name="step">
+			<option value="55">출고완료</option>
+			<option value="45">출고준비</option>
+		</select>
+		로 변경합니다.
+	</td>
+</tr>
+</table>
+
+<div style="width:100%;text-align:center;padding-top:10px;">
+<span class="btn large cyanblue"><button id="upload_submit">확인</button></span>
+</div>
+
+
+<div style="padding:15px;"></div>
+<table class="info-table-style" style="width:100%">
+<tr>
+	<th class="its-th-align left" style="padding-left:20px;vertical-align:center;">
+	<div style="height:25px;">* 출고수량, 택배사코드, 송장번호 내용만 적용됩니다.</div>
+	<div style="height:25px;">* 다운로드 받으신 xls파일을 수정하여 업로드 해주세요.</div>
+	<div style="height:25px;">( <span style="color:red;">필독! 엑셀파일 저장시 확장자가 XLS 인 엑셀 97~2003 양식으로 다시저장해 주세요</span> )</div>
+	</th>
+</tr>
+</table>
+
+
+<div class="item-title">택배사 코드 안내</div>
+<table class="info-table-style" style="width:100%">
+<colgroup>
+	<col width="17%" />
+	<col width="16%" />
+	<col width="17%" />
+	<col width="16%" />
+	<col width="17%" />
+	<col width="16%" />
+</colgroup>
+<thead>
+<tr>
+	<th class="its-th-align center">택배사</th>
+	<th class="its-th-align center">코드</th>
+	<th class="its-th-align center">택배사</th>
+	<th class="its-th-align center">코드</th>
+	<th class="its-th-align center">택배사</th>
+	<th class="its-th-align center">코드</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<!-- { @ config_load('delivery_url') } -->
+{? .index_%3==0 && .index_!=0 }</tr><tr>{ / }
+<td class="its-td-align center">{.company}</td>
+<td class="its-td-align center">{.key_}</td>
+<!-- { / } -->
+</tr>
+</tbody>
+</table>
+
+</form>
+</div>
+{ #layout_footer }

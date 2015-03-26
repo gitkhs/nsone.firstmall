@@ -1,0 +1,48 @@
+{ @ flash_list }
+	<tr>
+		<td class="dlts-td center">{?designWorkingSkin==.skin}<input type="checkbox" name="delete_flash_seq[]" value="{.flash_seq}" />{/} {.flash_seq}</td>
+		<td class="dlts-td center">{.skin} 스킨</td>
+		<td class="dlts-td left">{.regdate}</td>
+		<td class="dlts-td center">
+			<div class="admin_comment" flash_seq="{.flash_seq}">{=htmlspecialchars(.name)}</div>
+			{.width} x {.height}
+		</td>
+		<td class="dlts-td center">
+			<div class="relative">
+			{?designWorkingSkin==.skin}
+			<span id="tag_flash_{.flash_seq}"></span> <span class="btn small"><input type="button" value="태그복사" id="copy_flash_{.flash_seq}" /></span>
+			{/}
+			</div>
+		</td>
+		<td class="dlts-td center">
+			{?designWorkingSkin==.skin}
+			<span class="btn small red"><input type="button" value="선택" onclick="select_flash('{.flash_seq}','{.url}')" /></span>
+			<span class="btn small"><input type="button" value="수정" onclick="edit_flash('{.flash_seq}')" /></span>
+			{/}
+		</td>
+	</tr>
+	{?designWorkingSkin==.skin}
+	<script type="text/javascript">
+	
+		var tag_flash = "{" + "=showDesignFlash({.flash_seq})" + "}";
+		$("#tag_flash_{.flash_seq}").text(tag_flash);
+		
+		var tagCopyClipIdx = tagCopyClips.length;
+		tagCopyClips[tagCopyClipIdx] = new ZeroClipboard.Client();
+		tagCopyClips[tagCopyClipIdx].setHandCursor( true );
+		tagCopyClips[tagCopyClipIdx].setCSSEffects( true );
+		tagCopyClips[tagCopyClipIdx].setText(tag_flash);	
+		tagCopyClips[tagCopyClipIdx].addEventListener( 'complete', function(client, text) {
+			alert("플래시 태그가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+		} );
+		tagCopyClips[tagCopyClipIdx].glue('copy_flash_{.flash_seq}');
+		
+		$("#ZeroClipboardMovie_"+(tagCopyClipIdx+1)).parent().css({
+				'left' : $("#copy_flash_{.flash_seq}").position().left,
+				'top' : $("#copy_flash_{.flash_seq}").position().top
+		});
+		
+		$("#copy_flash_{.flash_seq}").after($("#ZeroClipboardMovie_"+(tagCopyClipIdx+1)).parent());
+	</script>
+	{/}
+{ / }

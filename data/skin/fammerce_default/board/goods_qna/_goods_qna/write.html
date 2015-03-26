@@ -1,0 +1,333 @@
+<!-- {? !_GET.iframe } --><div><img src="../../../images/design/mypage_tit_inquiry.gif" /></div><!-- {/} -->
+<form name="writeform" id="writeform" method="post" action="{=sslAction('../board_process')}"  {? ismobile && (manager.file_use == 'Y' || filelist)} enctype="multipart/form-data" {/} target="actionFrame">
+<input type="hidden" name="mode" id="mode" value="{mode}" />
+<input type="hidden" name="board_id" id="board_id" value="{_GET.id}" />
+<input type="hidden" name="reply" id="reply" value="{_GET.reply}" />
+{? seq }
+	<input type="hidden" name="seq" id="seq" value="{seq}" />
+{/}
+<input type="hidden" name="returnurl" id="returnurl" value="{? backtype=='view' }{boardurl->view}{:}{boardurl->lists}{/}" />
+<input type="hidden" name="popup" value="{_GET.popup}" >
+<input type="hidden" name="iframe" value="{_GET.iframe}" >
+<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+
+<!-- 타이틀 -->
+<!-- <div class="page-title center">
+	<h1>[{manager.name}] 게시글 {? seq && _GET.reply != 'y' }수정{: seq && _GET.reply == 'y' }답변{:}등록{/}</h1>
+</div>
+ -->
+<!-- 서브메뉴 바디 : 시작 t-->
+<div >
+	<table class="bbswrite_table_style"  width="100%" cellpadding="0" cellspacing="0" border="0" >
+	<colgroup>
+		<col width="15%" />
+		<col />
+	</colgroup>
+	<tbody>
+	<tr>
+		<th class="cell">작성자</th>
+		<td class="cell td2" >
+			{? defined('__ISUSER__') && name //회원}
+				<input type="hidden" name="name" id="name" value="{name}" >
+				<input type="text" value="{name}"  readonly="readonly" disabled="disabled" class="required line" />
+			{:}
+				<input type="text" name="name" id="name" value="{name}"  title="작성자를 입력해 주세요" class="required line" />
+			{/}
+		</td>
+	</tr>
+
+	{? pw }
+	<input type="hidden" name="oldpw" value="{pw}" >
+	{:}
+	<tr>
+		<th class="cell">비밀번호</th>
+		<td class="cell">
+			<input type="password" name="pw" id="pw" value=""  title="비밀번호를 입력해 주세요"  password="password"  class="required line" />
+		</td>
+	</tr>
+	{/}
+
+	{? categorylist}
+	<tr>
+		<th class="cell">분류</th>
+		<td class="cell" >
+			<select  name="category" id="addcategory" class="required line"  >
+			<option value="" selected="selected" >- 분류선택 -</option>
+			{@ categorylist}
+				<option value="{.value_}" {? datacategory == .value_} selected="selected"  {/}>{.value_}</option>
+			{/}
+			</select>
+		</td>
+	</tr>
+	{/}
+
+	<tr>
+		<th class="cell">문의상품</th>
+		<td class="cell" >
+			{? !_GET.goods_seq } <button type="button" id="issueGoodsButton" class="bbs_btn">상품 선택</button>{/}
+			<div class="clearbox" style="height:5px;"></div>
+			<div id="displayGoods">
+			<!--{ @ displayGoods }-->
+			<div class='goods' style='float:left;'>
+			<div align='center' class='image'>
+				<img class="goodsThumbView small_goods_image" alt="" src="{.image}" width="50" height="50">
+			</div>
+			<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+			<div align='center' class='price'>{=number_format(.price)}</div>
+			<input type='hidden' name='displayGoods[]' value='{.goods_seq}' />
+			</div>
+			<!--{ / }-->
+			</div>
+			<div id="displayGoodsSelect" class="hide"></div>
+		</td>
+	</tr>
+
+	<tr>
+		<th class="cell">답변받기 </th>
+		<td class="cell" >
+			<table  width="90%" cellpadding="0" cellspacing="0" border="0"  >
+			<tr>
+				{? manager.sms_reply_user_yn == 'Y' }
+				<th  >SMS </th>
+				<td  >
+					<input type="text" name="tel1" id="tel1" value="{? tel2 }{tel2}{: tel1}{tel1}{/}"  /> '-' 포함
+					<label for="board_sms"><input type="checkbox" name="board_sms" id="board_sms" value="1" {? (seq && rsms=='Y') || (!seq && (tel1 || tel2)) } checked="checked" {/} /> SMS로 답변받기</label>
+				</td>
+				{/}
+			</tr>
+			<tr>
+				<th  >이메일</th>
+				<td  >
+					<input type="text" name="email" id="email" value="{email}" />
+					<label for="board_email"><input type="checkbox" name="board_email" id="board_email" value="1"  {?(seq && remail=='Y') || (!seq && email)   } checked="checked" {/}/> 이메일로 답변받기</label>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+
+	<tr>
+		<th class="cell">제목</th>
+		<td class="cell" >
+			<input type="text" name="subject" id="subject" value="{subject}" class="required line"  title="제목을 입력해 주세요"  size="70" />
+			<span class="{hiddenlay}" ><input type="checkbox" name="hidden" id="hidden"  value="1" {hiddenckeck} /><label for="hidden" > 비밀글</label></span>
+			{displayckeck}
+		</td>
+	</tr>
+	</tbody>
+	</table>
+
+	<div class="pdt10">
+		<textarea name="contents" id="contents" class="daumeditor required"  style='width:95%; height:300px;'  >{contents}</textarea>
+	</div>
+
+	<table class="bbswrite_table_style"  width="100%" cellpadding="0" cellspacing="0" border="0" >
+	{? (manager.file_use == 'Y' || filelist) //첨부파일 사용중이거나 첨부파일이 있는 경우 }
+		{#mobile_file}
+	{/}
+	{? manager.autowrite_use == 'Y' && !defined('__ISUSER__')}
+	<tr>
+		<th class="cell">스팸방지</th>
+		<td class="cell" >{#securimage}</td>
+	</tr>
+	{/}
+
+	{? !defined('__ISUSER__') //비회원 개인정보 동의}
+	<tr>
+		<th class="cell" colspan="2" >
+			 <div style="margin-left:10px;">
+				 <label><input type="radio" name="agree" value="Y" /> 개인정보 수집ㆍ이용에 동의합니다.</label>&nbsp;&nbsp;&nbsp;
+				<label><input type="radio" name="agree" value="N" checked /> 개인정보 수집ㆍ이용에 동의하지 않습니다.</label>
+			</div>
+		</th>
+	</tr>
+	<tr>
+		<th class="cell" colspan="2" >
+			 <div>
+				 <textarea style="padding:0px; width:98%; height:100px; border:0px;overflow:auto;" class="small" readonly>{policy}</textarea>
+			 </div>
+		</th>
+	</tr>
+
+	{/}
+
+	<tr>
+		<th class="cell center" colspan="2" >
+			<div class="after"> 저장후
+			<input type="radio" name="backtype" id="backtype1" value="list" {? (!backtype || backtype=='list') } checked="checked" {/} /><label for="backtype1">목록으로 이동</label>
+			<input type="radio" name="backtype" id="backtype2" value="view" {? backtype=='view' } checked="checked" {/} /><label for="backtype2">본문으로 이동</label>
+
+			</div>
+		</th>
+	</tr>
+	</tbody>
+	</table>
+
+	<div class="center" style="padding-top:10px;">
+		<button type="button" class="bbs_btn" name="data_save_btn" id="data_save_btn"  >확인</button>
+		<button type="button" class="bbs_btn_gray" onclick="{? _GET.popup }self.close();{:}document.location.href='{boardurl->lists}';{/}">취소</button>
+	</div>
+</div>
+
+</form>
+
+<script type="text/javascript">
+//<![CDATA[
+
+function set_goods_list(displayId,inputGoods) {
+	$.ajax({
+		type: "get",
+		url: "/goods/user_select",
+		data: "page=1&goods_review=1&inputGoods="+inputGoods+"&displayId="+displayId,
+		success: function(result){
+			$("div#"+displayId).html(result);
+		}
+	});
+	{? _GET.popup }
+	openDialog("상품 검색", displayId, {"width":"700","height":"700","show" : "fade","hide" : "fade"});
+	{:}
+	openDialog("상품 검색", displayId, {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+	{/}
+}
+
+//
+function goodslistclose(displayId, goods_seq) {
+	$("div#"+displayId).dialog('close');
+}
+
+$(document).ready(function() {
+
+	$("button#issueGoodsButton").live("click",function(){
+		set_goods_list("displayGoodsSelect","displayGoods");
+	});
+
+
+	EditorJSLoader.ready(function(Editor) {
+		DaumEditorLoader.init(".daumeditor");
+	});
+
+	$("#backtype2").click(function() {
+		$("#returnurl").val('{boardurl->view}');
+	});
+
+	$("#backtype1").click(function() {
+		$("#returnurl").val('{boardurl->lists}');
+	});
+
+	// 게시글저장
+	$('#data_save_btn').click(function() {
+		$("#writeform").submit();
+	});
+	$('#writeform').validate({
+		onkeyup: false,
+		rules: {
+			subject: {required:true},
+			{? manager.autowrite_use == 'Y' && !defined('__ISUSER__') //비회원 }
+			captcha_code:{required:true},
+			{/}
+			{? !defined('__ISUSER__') //비회원 개인정보 동의}
+			pw:{required:true},
+			{/}
+			contents: { required:true}
+		},
+		messages: {
+			name: { required:'<font color="red">작성자를 입력해 주세요.</font>'},
+			category: { required:'<font color="red">분류를 선택해 주세요.</font>'},
+			{? manager.autowrite_use == 'Y' &&  !defined('__ISUSER__') //비회원 }
+			captcha_code: { required:'<font color="red">스팸방지 코드를 입력해 주세요.</font>'},
+			{/}
+			{?  !defined('__ISUSER__') //비회원 }
+			pw: { required:'<font color="red">비밀번호를 입력해 주세요.</font>'},
+			{/}
+			subject: { required:'<font color="red">제목을 입력해 주세요.</font>'}
+		},
+		errorPlacement: function(error, element) {
+			setDefaultText();
+			error.appendTo(element.parent());
+		},
+		submitHandler: function(f) {
+			if(readyEditorForm(f)){
+
+			{? !defined('__ISUSER__') //비회원 개인정보 동의}
+				if($("input[name='agree']:checked").val()!='Y'){
+					alert('개인정보 수집ㆍ이용에 동의하셔야 합니다.');
+					$("input[name='agree']").focus();
+					return false;
+				}
+			{/}
+
+				if($("#addcategory").val() == "newadd"){//신규분류
+					if(!$("#newcategory").val() ) {
+						setDefaultText();
+						alert('신규분류를 입력해 주세요.');
+						$("#newcategory").focus();
+						return false;
+					}
+				}
+
+				var bcontents = $("#writeform").find("#contents").val();
+				if(!bcontents || bcontents.toLowerCase() == "<p>&nbsp;</p>"  || bcontents.toLowerCase() == "<p><br></p>" ){
+					setDefaultText();
+					alert('내용을 입력해 주세요.');
+					$("#contents").focus();
+					return false;
+				}
+
+				if (submitFlag == true)
+				{
+				 alert('게시물을 등록하고 있습니다. 잠시만 기다려 주세요.');
+				 return false;
+				}   
+				submitFlag = true;
+				f.submit();
+			}
+		}
+	});
+
+});
+
+{? (manager.file_use == 'Y' || filelist) && !ismobile //첨부파일 사용중이거나 첨부파일이 있는 경우  }
+function readfilelist(Editor){
+		{? filelist}
+			{@ filelist}
+			var  filePath = '{.realfiledir}';//
+			var  filePathurl = 'http://{_SERVER.HTTP_HOST}{.realfileurl}';//
+			{? realthumbfile }
+				var  realthumbfile = '{.realthumbfiledir}';//
+				var  thumbfilePathurl = 'http://{_SERVER.HTTP_HOST}{.realthumbfileurl}';//
+			{/}
+			var  orig_name = '{.orignfile}';
+			var  file_size = '{.sizefile}';
+			var  typefile = '{.typefile}';
+
+			{? .is_image || strstr(.typefile,'image') || in_array(.typefile, array('jpg','jpeg','png','gif','bmp','tif','pic')) }
+				_mockdata = {
+					'imageurl': filePathurl,
+					'filename': orig_name,
+					'filesize': file_size,
+					'imagealign': 'C',
+					'originalurl': filePath,
+					'thumburl': {? realthumbfile } thumbfilePathurl {:}filePathurl{/}
+				};
+			Editor.getSidebar().getAttacher("image").boxonly = true;
+Editor.getSidebar().getAttacher("image").attachHandler(_mockdata);
+			{:}
+				_mockdata = {
+				'filename': orig_name,
+				'filesize': file_size,
+				'filemime':typefile,
+				'originalurl': filePath,
+				'attachurl': filePath
+				};
+			Editor.getSidebar().getAttacher("file").boxonly = true;
+Editor.getSidebar().getAttacher("file").execAttach(_mockdata);
+			{/}
+			{/}
+
+		{/}
+}
+{/}
+
+
+//]]>
+</script>

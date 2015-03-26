@@ -1,0 +1,36 @@
+<!-- 하단영역 : 시작 -->
+
+<div id="layout_footer">
+	<h2 class="hide">하단 간략 메뉴</h2>
+	<ul class="fnb">
+		<!--{? userInfo.member_seq }-->
+		<li>{? userInfo.snsfacebookcon && fbuser  }<a href="javascript:void(0);" onclick="FB.logout(function(response) {logout();});return false; " >로그아웃</a>{:}<a href="../login_process/logout" target= "actionFrame"   >로그아웃</a>{/}</li>
+		<!--{:}-->
+		<li><a href="../member/login" >로그인</a></li>
+		<!--{/}-->
+		<li><a href="../service/cs">고객센터</a></li>
+	</ul>
+	<h2 class="hide">쇼핑몰 정보</h2>
+	<ul class="fcp">
+		<li><!--구매안전표기 -->
+		<div >{=escrow_mark()}</div><br />
+		</li>
+		<li>
+		<!-- 이미지로 카피라이트를 이용하실 분들은 주석을 해제하여 사용하여 주십시요  -->
+		<!-- <img src="../images/design/footer_txt.gif" /><br />-->
+		회사명 : {config_basic.companyName}
+		<font color="cccccc"><b> | </b></font>사업자등록번호 : {config_basic.businessLicense} {=confirmLicenseLink("[사업자정보확인]")}
+		<font color="cccccc"><b> | </b></font>주소 : {config_basic.companyAddress} {config_basic.companyAddressDetail}<br />
+		통신판매업 신고 : {config_basic.mailsellingLicense}
+		<font color="cccccc"><b> | </b></font>연락처 : {config_basic.companyPhone}
+		<!--{ ? config_basic.companyFax }-->
+		<font color="cccccc"><b> | </b></font>FAX : {config_basic.companyFax}
+		<!--{ / }-->
+		<font color="cccccc"><b> | </b></font>개인정보관리 책임자 : {config_basic.member_info_manager}
+		<font color="cccccc"><b> | </b></font>대표자 : {config_basic.ceo}<br />
+		contact : <font color="990000"><b>{config_basic.companyEmail}</b></font> for more information
+		</li>
+	</ul>
+</div>
+
+<!-- 하단영역 : 끝 -->

@@ -1,0 +1,16 @@
+{ @ flash_list }
+	<tr>
+		<td class="dlts-td center">{.flash_seq}</td>
+		<td class="dlts-td left">{.regdate}</td>
+		<td class="dlts-td center">
+			<div class="admin_comment" flash_seq="{.flash_seq}">{=htmlspecialchars(.name)}</div>
+			{.width} x {.height}
+		</td>
+		<td class="dlts-td center">
+			<span class="btn small red"><input type="button" value="삽입하기" onclick="editor_insert_flash('{.flash_seq}')" /></span>
+		</td>
+	</tr>
+{ / }
+<script type="text/javascript">
+$("#flashpagin").html("{page.html}");
+</script>

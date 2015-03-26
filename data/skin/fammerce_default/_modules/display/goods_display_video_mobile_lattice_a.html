@@ -1,0 +1,163 @@
+<style>
+.thumbnailvideo {position:absolute;z-index:5;background-position:center;background:url('../../images/common/thumb_play.png') no-repeat center center;vertical-align:middle;}
+</style>
+
+<!--{ ? perpage }-->
+<div class="goods_list_top pdt10">
+	<table width="100%" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td align="left">
+			<span class="list_summary">TOTAL <b>{=number_format(page.totalcount)}</b> ITEMS</span>
+		</td>
+		<td align="right">
+			<span class="sort_item">
+				<!--{ @ orders }-->
+					<!--{ ? in_array(.key_,array('popular','low_price','newly')) }-->
+						<!--{ ? .index_ }-->
+						&nbsp;|&nbsp;
+						<!--{ / }-->
+						<!--{ ? .key_ == sort }-->
+							<a href="?sort={.key_}{sortUrlQuerystring}"><b>{.value_}</b></a>
+						<!--{ : }-->
+							<a href="?sort={.key_}{sortUrlQuerystring}">{.value_}</a>
+						<!--{ / }-->
+					<!--{ / }-->
+				<!--{ / }-->
+			</span>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<br style="line-height:10px;" />
+<!--{ : title }-->
+<div class="pd10"><font face="arial black, 돋움" size="2"><b>{title}</b></font></div>
+<!--{ / }-->
+
+<table width="100%" cellpadding="0" cellspacing="5" border="0">
+	<!--{@grid}-->
+	<tr>
+		<!--{@.value_}-->
+			<!--{?..index_}--><td></td>{/}
+			<td width="{goodsImageSize.width}" valign="top">
+				<!--{?..value_}-->
+				<?php
+					{idx} = {.index_}*{count_w}+{..index_};
+					{moduledisplayGoods} = {displayGoodsList[idx]};
+				?>
+				<table width="100%" align="{text_align}" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<!--{? kind == 'designvideo' //동영상인경우 }-->
+						<td align="{text_align}" width="{? videosize_w }{videosize_w}{:}400{/}">
+							<span class="goodsDisplayImageWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(goods))}">
+								<!--{? moduledisplayGoods.file_key_i && moduledisplayGoods.uccdomain_fileurl}-->
+								<iframe   width="{? videosize_w }{videosize_w}{:}400{/}" height="{? videosize_h }{videosize_h}{:}200{/}" src="{moduledisplayGoods.uccdomain_fileurl}&g=tag&width={videosize_w}&height={videosize_h}" frameborder="0" allowfullscreen></iframe>
+								<!--{: moduledisplayGoods.file_key_w && moduledisplayGoods.uccdomain_fileurl}-->
+								<iframe   width="{? videosize_w }{videosize_w}{:}400{/}" height="{? videosize_h }{videosize_h}{:}200{/}" src="{moduledisplayGoods.uccdomain_fileurl}&g=tag&width={videosize_w}&height={videosize_h}" frameborder="0" allowfullscreen></iframe>
+								<!--{:}-->
+								<span class="goodsDisplayImageWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(goods))}"><a href="/goods/view?no={moduledisplayGoods.goods_seq}"><img src="{moduledisplayGoods.image}" width="{(goodsImageSize.width)}" onerror="this.src='../../images/common/noimage.gif'" /></a></span>
+								<!--{/}-->
+							</span>
+						</td>
+					<!--{:}-->
+						<td align="{text_align}" width="{goodsImageSize.width}">
+							<span class="goodsDisplayImageWrap" decoration="{image_decorations}" goodsInfo="{=base64_encode(json_encode(goods))}"><a href="/goods/view?no={moduledisplayGoods.goods_seq}"><img src="{moduledisplayGoods.image}" width="{(goodsImageSize.width)}" onerror="this.src='../../images/common/noimage.gif'" /></a></span>
+						</td>
+					<!--{/}-->
+				</tr>
+
+				<!--{ @ info_settings.list }-->
+					<!--{? ...value_->kind == 'goods_name' }-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}"><span {...value_->name_css}>{moduledisplayGoods.goods_name}</span></td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'summary' && moduledisplayGoods.summary}-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}"><span {...value_->name_css}>{moduledisplayGoods.summary}</span></td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'icon' && moduledisplayGoods.icons}-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td height="18" align="{text_align}">
+							<!--{ @ moduledisplayGoods.icons }-->
+							<img src="/data/icon/goods/{....value_}.gif" border="0">
+							<!--{ / }-->
+						</td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'consumer_price' }-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}">
+							<span {...value_->name_css}>
+								{=number_format(moduledisplayGoods.consumer_price)}
+								{?...value_->postfix}{...value_->postfix}{/}
+							</span>
+						</td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'price' }-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}">
+							<span {...value_->name_css}>
+								{?moduledisplayGoods.string_price}
+									{moduledisplayGoods.string_price}
+								{:}
+									{=number_format(moduledisplayGoods.price)}
+									{?...value_->postfix}{...value_->postfix}{/}
+								{/}
+							</span>
+						</td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'fblike' && APP_USE == 'f' }-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}">{=snsLikeButton(moduledisplayGoods.goods_seq,...value_->fblike)}</td>
+					</tr>
+					<!--{/}-->
+
+					<!--{? ...value_->kind == 'status_icon' }-->
+					<tr><td height="6"></td></tr>
+					<tr>
+						<td align="{text_align}">
+							<!--{ ? ...value_->status_icon_runout && moduledisplayGoods.goods_status == 'runout' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_runout}" />
+							<!--{ / }-->
+							<!--{ ? ...value_->status_icon_purchasing && moduledisplayGoods.goods_status == 'purchasing' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_purchasing}" />
+							<!--{ / }-->
+							<!--{ ? ...value_->status_icon_unsold && moduledisplayGoods.goods_status == 'unsold' }-->
+							<img src="/data/icon/goods_status/{goodsStatusImage.icon_unsold}" />
+							<!--{ / }-->
+						</td>
+					</tr>
+					<!--{/}-->
+
+				<!--{ / }-->
+
+				</table>
+				<!--{/}-->
+			</td>
+		<!--{/}-->
+	</tr>
+	<tr>
+		<td height="20"></td>
+	</tr>
+	<!--{/}-->
+</table>
+
+<!--{ ? perpage }-->
+{#paging}
+<!--{ / }-->
+

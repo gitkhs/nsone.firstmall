@@ -1,0 +1,232 @@
+{ #layout_header }
+  
+<!--[if IE]><script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/excanvas.min.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/jquery.jqplot.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.barRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.pointLabels.min.js"></script>
+<link class="include" rel="stylesheet" type="text/css" href="/app/javascript/plugin/jqplot/jquery.jqplot.min.css" />
+<style type="text/css">
+table.simpledata-table-style td.ctd { text-align:center; }
+table.simpledata-table-style td.ltd { text-align:left; padding-left:5px; }
+table.simpledata-table-style td.rtd { text-align:right; padding-right:5px; }
+.chartBlock	{width:1000px; margin:auto;}
+.tableBlock	{width:1200px; margin:auto;}
+.sub_title	{width:100%;text-align:center;color:#000;margin:15px 0;font-size:15px;font-weight:bold;}
+span.add_info {font-size:11px;color:#838383;font-weight:normal;}
+</style>
+
+<div id="statsSettingLayer"></div>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+	
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+		
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>가입 통계</h2>
+		</div>
+		
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<div class="sub-layout-container body-height-resizing">
+	
+	{#member_menu}
+	
+	<!-- 서브메뉴 바디 : 시작-->
+	<div class='slc-body-wrap'>
+		<div class="slc-body">
+					
+			<div style="width:1200px; margin:auto;">
+				
+				<div class="item-title">가입 통계 - 유입경로</div>
+				
+				<br style="line-height:10px" />
+				
+				<form>
+					<div align="center">
+						<label><input type="radio" name="date_type" value="month" {?sc.date_type=='month'}checked{/}/> 월별</label>
+						<label><input type="radio" name="date_type" value="daily" {?sc.date_type=='daily'}checked{/}/> 일별</label>
+
+						<select name="year">
+						<option value="">= 연도 선택 =</option>
+						{@range(date('Y'),2010)}
+							<option value="{.value_}" {?_GET.year==.value_}selected{/}>{.value_} 년</option>
+						{/}
+						</select>
+						
+						<span class="scMonth {?sc.date_type=='month'}hide{/}">
+						<select name="month">
+						<option value="">= 월 선택 =</option>
+						{@range(1,12)}
+							<option value="{.value_}" {?_GET.month==.value_}selected{/}>{.value_} 월</option>
+						{/}
+						</select>
+						</span>
+				
+						<span class="btn small"><input type="submit" value="검색" /></span>
+						<span class="btn_scMonth {?sc.date_type=='month'}hide{/}">
+						<span class="btn small"><input type="button" value="이번달" onclick="this.form.year.value='';this.form.month.value='';this.form.submit()" /></span>
+						</span>
+					</div>
+				</form>
+				
+				<br style="line-height:10px" />
+				
+				<div id="chart1" style="margin:auto; height:250px; width:800px;"></div>
+				
+				<br style="line-height:20px" />
+					
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="right" valign="bottom"><span class="btn small"><input type="button" value="엑셀출력" onclick="divExcelDownload('유입경로_가입통계','#member_referer')" /></span></td>
+				</tr>
+				</table>
+				
+				<br style="line-height:10px" />
+				
+				<div id="member_referer">
+					<table width="100%" class="simpledata-table-style" style="margin:auto;">
+					<thead>
+					<tr>
+						<th></th>
+						<th width="100"></th>
+					{ @ table_title }
+						<th>{.value_}</th>
+					{ / }
+						<th>합계</th>
+					</tr>
+					</thead>
+					<tbody>
+					{ @ total_referer }
+					<tr>
+						<td class="ctd"><input type="checkbox" name="cntCode[]" value="{.key_}" titleName="{.key_}" {?.index_==0}checked{/} /></td>
+						<td class="ctd">{.key_}</td>
+						{ @ statlist[.key_].list }
+						<td class="rtd">{=number_format(..cnt)}</td>
+						{ / }
+						<td class="rtd">{=number_format(statlist[.key_].total_cnt)}</td>
+					</tr>
+					{ / }
+					</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script class="code" type="text/javascript">
+$(document).ready(function(){
+
+	$("input[name='date_type']").each(function(){
+		$(this).live('click', function(){
+			if	($(this).val() == 'daily'){
+				$(".scMonth").removeClass('hide');
+				$(".btn_scMonth").removeClass('hide');
+			}else{
+				$(".scMonth").addClass('hide');
+				$(".btn_scMonth").addClass('hide');
+			}
+		});
+	});
+
+	$("input[name='cntCode[]']").each(function(){
+		$(this).live('click', function(){
+			if	(!(chkCheckCode('cnt') > 0)) {
+				alert('1개 이상 체크되어야 합니다.');
+				$(this).attr('checked', true);
+			}
+			makePlotCnt();
+		});
+	});
+
+	makePlotCnt();
+});
+
+function chkCheckCode(type){
+	var retVal	= 0;
+	if	(type == 'cnt'){
+		$("input[name='cntCode[]']").each(function(){
+			if	($(this).attr('checked'))	retVal++;
+		});
+	}else{
+		$("input[name='priceCode[]']").each(function(){
+			if	($(this).attr('checked'))	retVal++;
+		});
+	}
+
+	return retVal;
+}
+
+function makePlotCnt(){
+
+	var listData	= new Object();
+	{ @ dataForChart }
+	listData['{.key_}']	= {=json_encode(.value_)};
+	{ / }
+
+	var dataList	= [];
+	var titles		= [];
+	var cnt			= 0;
+	$("input[name='cntCode[]']").each(function(){
+		if	($(this).attr('checked')){
+			cnt++;
+			dataList.push(listData[$(this).val()]);
+			titles.push({'label':$(this).attr('titleName')});
+		}
+	});
+
+	$("#chart1").html('');
+	if	(cnt > 0){
+		var maxCnt		= '{maxCnt}';
+		var gapCnt		= parseInt(maxCnt.toString().substring(0,1)) < 2 ? Math.pow(10,maxCnt.toString().length-2) : Math.pow(10,maxCnt.toString().length-1);
+		var yaxisMaxCnt	= parseInt(maxCnt.toString().substring(0,1)) < 2 ? gapCnt * (parseInt(maxCnt.toString().substring(0,2))+2) : gapCnt * (parseInt(maxCnt.toString().substring(0,1))+2);
+		yaxisMaxCnt = yaxisMaxCnt > 100 ? yaxisMaxCnt : 100;
+		var cntPlot		= $.jqplot('chart1', dataList, {
+			seriesDefaults: { 
+				showMarker:true,
+				pointLabels: { show:true }
+			},
+			seriesColors:{=json_encode(seriesColors)},
+			series: titles,
+			axes: {
+				xaxis: {
+					renderer: $.jqplot.CategoryAxisRenderer,
+				},
+				yaxis: {
+					min: 0,
+					max: yaxisMaxCnt,
+					numberTicks: 11
+				}
+			},
+			legend: { 
+				show:true, 
+				location: 'e',
+				xoffset: 15,
+				yoffset: 15,
+				placement: 'outside'
+			},
+			grid: {
+				drawGridLines: true,
+				gridLineColor: '#dddddd',
+				background: '#fffdf6',
+				borderWidth: 0,
+				shadow: false
+			}
+		});
+	}
+}
+</script>
+
+{ #layout_footer }

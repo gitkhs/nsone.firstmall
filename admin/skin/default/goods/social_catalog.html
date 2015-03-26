@@ -1,0 +1,729 @@
+{ #layout_header }
+
+<script type="text/javascript">
+// SEARCH FOLDER
+function showSearch(){
+	if($("#goods_search_form").css('display')=='none'){
+		$("#goods_search_form").show();
+		$.cookie("goods_list_folder", "folded");
+	}else{
+		$("#goods_search_form").hide();
+		$.cookie("goods_list_folder", "unfolded");
+	}
+}
+
+$(document).ready(function() {
+
+
+	$("#delete_btn").click(function(){
+		<!--{? !auth }-->
+		alert("권한이 없습니다.");
+		return;
+		<!--{ / }-->
+
+		var cnt = $("input:checkbox[name='goods_seq[]']:checked").length;
+		if(cnt<1){
+			alert("삭제할 쿠폰상품을 선택해 주세요.");
+			return;
+		}else{
+			var queryString = $("#goodsForm").serialize();
+			if(!confirm("선택한 쿠폰상품을 삭제 시키겠습니까? ")) return;
+			$.ajax({
+				type: "get",
+				url: "../goods_process/goods_delete",
+				data: queryString,
+				success: function(result){
+					//alert(result);
+					location.reload();
+				}
+			});
+		}
+	});
+
+	$("#chkAll").click(function(){
+		if($(this).attr("checked")){
+			$(".chk").attr("checked",true).change();
+		}else{
+			$(".chk").attr("checked",false).change();
+		}
+	});
+
+	$(".manager_copy_btn").click(function(){
+
+		<!--{? !auth }-->
+		alert("권한이 없습니다.");
+		return;
+		<!--{ / }-->
+
+		{ ? page.totalcount < 3 || config_system.service.max_coupon_use == 1}
+			if(!confirm("이 쿠폰상품을 복사해서 쿠폰상품을 등록하시겠습니까?")) return;
+
+			$.ajax({
+				type: "get",
+				url: "../goods_process/goods_copy",
+				data: "goods_seq="+$(this).attr("goods_seq"),
+				success: function(result){
+					//alert(result);
+					location.reload();
+				}
+			});
+		{ : }
+			$.get('social_payment?type=full&totalCnt={page.totalcount}', function(data) {
+				$('#PaymentPopup').html(data);
+				openDialog("쿠폰상품 무제한 등록 신청", "PaymentPopup", {"width":"800","height":"650"});
+			});
+		{ / }
+	});
+
+	// 체크박스 색상
+	$("input[type='checkbox'][name='goods_seq[]']").live('change',function(){
+		if($(this).is(':checked')){
+			$(this).closest('tr').addClass('checked-tr-background');
+		}else{
+			$(this).closest('tr').removeClass('checked-tr-background');
+		}
+	}).change();
+
+
+	$("button[name='down_list']").click(function(){
+		//window.open("/admin/order/download_list","","");
+		location.href = "/admin/goods/download_write";
+	});
+
+
+	$("button[name='excel_down']").click(function(){
+		if(!$("#excel_type").val()){
+			alert("양식을 선택 해 주세요.");
+			return;
+		}
+		if($("#excel_type").val()=='select'){
+			var cnt = $("input:checkbox[name='goods_seq[]']:checked").length;
+			if(cnt<1){
+				alert("다운로드 할 쿠폰상품을 선택해 주세요.");
+				return;
+			}
+		}
+
+		var queryString = $("#goodsForm").serializeArray();
+		ajaxexceldown('/admin/goods_process/excel_down', queryString);
+
+		/** excel 양식으로 다운시이용
+		var queryString = $("#goodsForm").serialize();
+		$.ajax({
+			type: "get",
+			url: "/admin/goods_process/excel_down",
+			data: queryString,
+			dataType : 'json',
+			success: function(result){
+				if(result){
+					actionFrame.location.href="/admin/goods_process/file_down?realfiledir="+result.realfiledir+"&filenames="+result.filenames;
+				}
+			}
+		});
+		**/
+
+	});
+
+
+	// export_upload
+	$("button[name='upload_excel']").live("click",function(){
+		openDialog("쿠폰상품일괄등록/수정 <span class='desc'></span>", "export_upload", {"width":"800","height":"500","show" : "fade","hide" : "fade"});
+	});
+
+	{ ? service_code == 'P_FREE' }
+	$(".waterMarkImageSetting").bind("click",function(){
+		openDialog('쇼핑몰 업그레이드 안내<span class=\'desc\'></span>', 'nofreeService', {'width':600,'height':200});
+	});
+	{ : }
+	$(".waterMarkImageSetting").bind("click",function(){
+		$.ajax({
+			type: "get",
+			url: "../setting/watermark_setting?layerid=watermark_setting_popup",
+			success: function(result){
+				$("div#watermark_setting_popup").html(result);
+			}
+		});
+		openDialog("워터마크 설정", "watermark_setting_popup", {"width":"700","height":"510","show" : "fade","hide" : "fade"});
+	});
+	{ / }
+
+	/*
+	$(".goodsOptionBtn").bind("click",function(){
+		$(this).closest("td").find(".goodsOptionTable").toggle();
+		if($(this).html() == '닫기'){
+			$(this).html('옵션');
+		}else{
+			$(this).html('닫기');
+		}
+		return false;
+	});
+	*/
+
+	$(".goodsOptionBtn").bind("click",function(){
+		var btnObj = $(this);
+		var goodsOptionTableObj = $(this).closest("td").find(".goodsOptionTable");
+
+		if(goodsOptionTableObj.html()==''){
+			goodsOptionTableObj.load('get_goods_option',{'goods_seq':$(this).attr('goods_seq')});
+		}
+
+		$(".goodsOptionTable:visible").not($(this).closest("td").find(".goodsOptionTable")).closest("td").find(".goodsOptionBtn").click();
+		$(this).closest("td").find(".goodsOptionTable").toggle();
+		if($(this).html() == '닫기'){
+			$(this).html('옵션');
+		}else{
+			$(this).html('닫기');
+		}
+		return false;
+	});
+
+
+	$('#order_star').toggle(function() {
+	  $(this).addClass("checked");
+	  $("span.icon-star-gray.checked").each(function(i){
+		if(i>0){
+			$(this).closest('tr').find("input[type='checkbox']").attr('checked',true);
+		}
+	  });
+
+	}, function() {
+	   $("span.icon-star-gray.checked").each(function(i){
+		   if(i>0){
+			$(this).closest('tr').find("input[type='checkbox']").attr('checked',false);
+		   }
+	   });
+	   $(this).removeClass("checked");
+	});
+	
+	$(".btnSort").bind("click", function(){
+		var sort = $("input[name='sort']").val();
+		if($(this).attr("orderby") != "{=sorderby}") sort = "";
+
+		if(sort == "asc"){
+			sort = "desc";
+		}else if(sort == "desc" || sort == ""){
+			sort = "asc";
+		}
+		var orderby = sort+"_"+$(this).attr("orderby");
+
+		$(this).attr("sort",sort);
+		$("select[name='orderby'] option[value='"+orderby+"']").attr("selected",true);
+		$("input[name='keyword']").focus();
+		$("form[name='goodsForm']").submit();
+	});
+
+});
+
+//
+function ajaxexceldown(url, queryString){
+	var inputs = "";
+	 jQuery.each(queryString, function(i, field){
+		 inputs +='<input type="hidden" name="'+field.name+'" value="'+ field.value +'" />';
+	 });
+	jQuery('<form action="'+ url +'" method="post" target="actionFrame" >'+inputs+'</form>')
+	.appendTo('body').submit().remove();
+}
+
+function goodsView(seq){
+	$("input[name='keyword']").focus();
+	$("input[name='no']").val(seq);
+	var search = location.search;
+	search = search.substring(1,search.length);
+	$("input[name='query_string']").val(search);
+	$("form[name='goodsForm']").attr('action','social_regist');
+	$("form[name='goodsForm']").submit();
+}
+
+function openAdvancedStatistic(goods_seq){
+	$.ajax({
+		type: "get",
+		url: "../statistic/advanced_statistics",
+		data: "ispop=pop&goods_seq="+goods_seq,
+		success: function(result){
+			$(document).find('body').append('<div id="Advanced_Statistics"></div>');
+			$("#Advanced_Statistics").html(result);
+			openDialog("<span style='margin-left:450px;'>이 쿠폰상품의</span>", "Advanced_Statistics", {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+		}
+	});
+}
+
+function social_regist_chk(){
+	{ ? page.totalcount < 3 || config_system.service.max_coupon_use == 1}
+		location.href='social_regist';
+	{ : }
+		$.get('social_payment?type=full&totalCnt={page.totalcount}', function(data) {
+			$('#PaymentPopup').html(data);
+			openDialog("쿠폰상품 무제한 등록 신청", "PaymentPopup", {"width":"800","height":"650"});
+		});
+	{ / }
+}
+
+function searchformchange(){
+	$("input[name='keyword']").focus();
+	$("form[name='goodsForm']").submit();
+}
+</script>
+<style>
+.goodsOptionTable {display:none; position:absolute; border-collapse:collapse; top:-10px; left:60px; border:1px solid #f5f5f5;}
+.goodsOptionTable table {width:220px;}
+.goodsOptionTable th {padding:5px; border:1px solid #ddd; background-color:#f5f5f5}
+.goodsOptionTable td {height:25px !important; border:1px solid #ddd; background-color:#ffffff; text-align:center;}
+</style>
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2><span class="icon-goods-kind-coupon"></span>쿠폰상품 리스트</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		<!--
+			<li><span class="btn large icon"><button><span class="arrowleft"></span>쿠폰상품리스트</button></span></li>
+			-->
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<!--<li><span class="btn large"><button name="upload_excel"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 쿠폰상품일괄등록/수정</button></span></li>-->
+			<li>
+				<span class="btn large black">
+					<button onclick="social_regist_chk();">쿠폰상품 등록하기<span class="arrowright"></span></button>
+				</span>
+			</li>
+
+			<!--<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+			-->
+		</ul>
+		{? service_code!='P_FREE' }
+		<ul class="page-buttons-right">
+			<li>
+				<span class="btn large orange"><button type="button" class="waterMarkImageSetting">워터마크 설정</button></span>
+			</li>
+		</ul>
+		{ / }
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<form name="goodsForm" id="goodsForm">
+<input type="hidden" name="query_string"/>
+<input type="hidden" name="no" />
+<input type="hidden" name="sort" value="{=sort}"/>
+
+<!-- 쿠폰상품 검색폼 : 시작 -->
+{ #goods_search_form }
+<!-- 쿠폰상품 검색폼 : 끝 -->
+<div class="clearbox">
+	<ul class="right-btns clearbox">
+		<li><select class="custom-select-box-multi" name="orderby" onchange="searchformchange();">
+			<option value="asc_goods_name" {?orderby=='asc_goods_name'}selected{/}>쿠폰상품명순↑</option>
+			<option value="desc_goods_name" {?orderby=='desc_goods_name'}selected{/}>쿠폰상품명순↓</option>
+			<option value="asc_consumer_price" {?orderby=='asc_consumer_price'}selected{/}>정가↑</option>
+			<option value="desc_consumer_price" {?orderby=='desc_consumer_price'}selected{/}>정가↓</option>
+			<option value="asc_price" {?orderby=='asc_price'}selected{/}>할인가↑</option>
+			<option value="desc_price" {?orderby=='desc_price'}selected{/}>할인가↓</option>
+			<option value="asc_tot_stock"  {?orderby=='asc_tot_stock'}selected{/}>재고↑</option>
+			<option value="desc_tot_stock" {?orderby=='desc_tot_stock'}selected{/}>재고↓</option>
+			<option value="asc_page_view" {?orderby=='asc_page_view'}selected{/}>페이지뷰순↑</option>
+			<option value="desc_page_view" {?orderby=='desc_page_view'}selected{/}>페이지뷰순↓</option>
+			<option value="asc_goods_seq" {?orderby=='asc_goods_seq'}selected{/}>등록일순↑</option>
+			<option value="desc_goods_seq" {?orderby=='desc_goods_seq'}selected{/}>등록일순↓</option>
+			<option value="asc_update_date" {?orderby=='asc_update_date'}selected{/}>수정일순↑</option>
+			<option value="desc_update_date" {?orderby=='desc_update_date'}selected{/}>수정일순↓</option>
+		</select></li>
+		<li><select  class="custom-select-box-multi" name="perpage" onchange="searchformchange();">
+			<option id="dp_qty10" value="10" {? perpage == 10 } selected{/} >10개씩</option>
+			<option id="dp_qty50" value="50" {? perpage == 50 } selected{/} >50개씩</option>
+			<option id="dp_qty100" value="100" {? perpage == 100 } selected{/} >100개씩</option>
+			<option id="dp_qty200" value="200" {? perpage == 200 } selected{/} >200개씩</option>
+		</select></li>
+	</ul>
+</div>
+<ul class="left-btns clearbox">
+	<li><div style="margin-top:rpx;">
+	<!--{ ? search_yn == 'y' }-->
+	검색 <b>{=number_format(page.totalcount)}</b> 개
+	<!--{ : }-->
+	총 <b>{=number_format(page.totalcount)}</b> 개</div>
+	<!--{ / }-->
+	</li>
+</ul>
+
+<div class="fr">
+	<div class="clearbox">
+		<ul class="right-btns clearbox">
+			<li>
+				<select class="custom-select-box-multi" name="excel_type" id="excel_type">
+					<option value="">양식선택</option>
+					<option value="select">선택 다운로드</option>
+					<option value="search">검색 다운로드</option>
+				</select>
+				<span class="btn small"><button type="button" name="excel_down"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 다운로드</button></span>
+				<span class="btn small"><button type="button" name="down_list"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 다운로드 양식</button></span>
+			</li>
+
+		</ul>
+	</div>
+</div>
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="30" />
+		<col width="30" />
+		<col width="40" />
+		<col width="40"/>
+		<col />
+
+		<col width="90" />
+		<col width="90" />
+		<col width="70" />
+		<col width="70" />
+		<col width="40" />
+
+		<col width="60" />
+		<col width="150" />
+		<col width="60" />
+		<col width="40" />
+
+		<col width="50" />
+		<col width="100" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th><input type="checkbox" id="chkAll" /></th>
+		<th><span class="icon-star-gray hand {?sc.orderby=='favorite_chk' && sc.sort=='desc'}checked{/}" id="order_star"></span></th>
+		<th>번호</th>
+	
+		<th colspan="2">
+			<span class="btnSort hand" orderby="goods_name" title="[쿠폰상품명]으로 정렬">쿠폰상품명{? orderby=='asc_goods_name'}▲{: orderby=='desc_goods_name'}▼{/}</span>
+		</th>
+		<th>
+			<span class="btnSort hand" orderby="consumer_price" title="[정가]로 정렬">정가{? orderby=='asc_consumer_price'}▲{: orderby=='desc_consumer_price'}▼{/}</span>
+		</th>
+		<th>
+			<span class="btnSort hand" orderby="price" title="[할인가]로 정렬">할인가{? orderby=='asc_price'}▲{: orderby=='desc_price'}▼{/}</span>
+		</th>
+		<th>
+			<span class="btnSort hand" orderby="tot_stock" title="[재고] 정렬">재고{? orderby=='asc_tot_stock'}▲{: orderby=='desc_tot_stock'}▼{/}</span>/가용
+		</th>
+		<th>개별 배송비</th>
+		<th>구매</th>
+
+		<th>
+			<span class="btnSort hand" orderby="page_view" title="[페이지뷰]로 정렬">페이지뷰{? orderby=='asc_page_view'}▲{: orderby=='desc_page_view'}▼{/}</span>
+		</th>
+		<th><span class="btnSort hand" orderby="goods_seq" title="[등록일순] 정렬">등록일{? orderby=='asc_goods_seq'}▲{: orderby=='desc_goods_seq'}▼{/}</span>
+		/<span class="btnSort hand" orderby="update_date" title="[수정일순] 정렬">수정일{? orderby=='asc_update_date'}▲{: orderby=='desc_update_date'}▼{/}</span></th>
+
+		<th>상태</th>
+		<th>노출</th>
+
+		<th>통계</th>
+		<th>관리</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+<!--{? loop }-->
+	<!--{@ loop }-->
+		<tr class="list-row" style="height:70px;">
+			<td align="center"><input type="checkbox" class="chk" name="goods_seq[]" value="{.goods_seq}" /></td>
+			<td align="center"><span class="icon-star-gray star_select {.favorite_chk}" goods_seq="{.goods_seq}"></span></td>
+			<td align="center">{page.totalcount - ._no + 1}</td>
+			<td align="center"><a href="/goods/view?no={.goods_seq}" target="_blank"><img class="small_goods_image" src="{=viewImg(.goods_seq,'thumbView')}" width="50"></a></td>
+			<td align="left" style="padding-left:10px;">
+
+				{? .tax=='exempt' && .cancel_type == '1'}
+					<div>
+					<span style="color:red;" class="left" >[비과세]</span>
+					<span class="order-item-cancel-type left" >[청약철회불가]</span>
+					</div>
+				{: .tax=='exempt' }
+					<div>
+					<span style="color:red;" class="left" >[비과세]</span>
+					</div>
+				{: .cancel_type == '1'}
+					<div>
+					<span class="order-item-cancel-type left" >[청약철회불가]</span>
+					</div>
+				{/}
+
+			{? .goods_code }<div ><a href="../goods/social_regist?no={.goods_seq}" target="_blank" class="fx11">[쿠폰상품코드: {.goods_code}]</a></div>{/}
+			<a href="../goods/social_regist?no={.goods_seq}" target="_blank">{=getstrcut(.goods_name,80)}</a> <div style="padding-top:5px;">{.catename}</div>
+			</td>
+			<td align="right">{=number_format(.consumer_price)}&nbsp;</td>
+			<td align="right">{=number_format(.price)}&nbsp;</td>
+			<td align="right">
+				<!--{?.stock<0}-->
+				<span style='color:red'>{=number_format(.stock)}</span>
+				<!--{:}-->
+				{=number_format(.stock)}
+				<!--{/}-->
+				<!--{?.rstock<0}-->
+				<br/> <span style='color:red'>{=number_format(.rstock)}</span>
+				<!--{:}-->
+				<br/> {=number_format(.rstock)}
+				<!--{/}-->
+
+				<!--{?.options[0].option_title}-->
+				<br/>
+				<span class="btn small {?.stocknothing>0 || .rstocknothing >0}red{:}blue{/}"><button class="goodsOptionBtn" type="button" goods_seq="{.goods_seq}">옵션</button></span>
+				<div class="relative" style="z-index:100;">
+					<div class="goodsOptionTable hide" style="max-height:300px;overflow:auto;"></div>
+				</div>
+				<!--{ / }-->
+			</td>
+			<td align="{?.unlimit_shipping_price}right{:}center{/}">{?.unlimit_shipping_price}{=number_format(.unlimit_shipping_price)}{:}-{/}&nbsp;</td>
+			<td align="center"><a href="/admin/order/catalog?goods_seq={.goods_seq}">조회</a></td>
+			<td align="center">{=number_format(.page_view)}</td>
+			<td align="center">{.regist_date}<br/>{.update_date}</td>
+			<td align="center">{.goods_status_text}</td>
+			<td align="center">{.goods_view_text}</td>
+			<td align="center">
+				<img src="../images/design/btn_stats.gif" style="cursor:pointer;" onclick="openAdvancedStatistic('{.goods_seq}');"  />
+			</td>
+			<td align="center">
+				<span class="btn small valign-middle"><input type="button" name="manager_modify_btn" value="수정" goods_seq="{.goods_seq}" onclick="goodsView('{.goods_seq}');"/></span>
+				<span class="btn small valign-middle"><input type="button" class="manager_copy_btn" value="복사" goods_seq="{.goods_seq}"/></span>
+			</td>
+		</tr>
+	<!--{ / }-->
+<!--{ : }-->
+	<tr class="list-row">
+		<td align="center" colspan="17">
+			<!--{ ? search_text }-->
+				'{search_text}' 검색된 쿠폰상품이 없습니다.
+			<!--{:}-->
+				등록된 쿠폰상품이 없습니다.
+			<!--{/}-->
+		</td>
+	</tr>
+<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+</table>
+<!-- 주문리스트 테이블 : 끝 -->
+<div class="clearbox">
+	<ul class="left-btns">
+		<li>
+			<span class="btn small gray"><button type="button" id="delete_btn">삭제</button></span>
+		</li>
+	</ul>
+</div>
+
+
+<br style="line-height:10px;" />
+
+</form>
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{page.html}</div>
+
+<div class="hide" id="search_detail_dialog">
+<form name="set_search_detail" method="post" action="set_search_default" target="actionFrame">
+<div id="contents">
+	<table class="search-form-table" id="serch_tab">
+	<tr id="goods_search_form" style="display:block;">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th>카테고리</th>
+				<td colspan="7">
+					<select class="line" name="s_category1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="s_category2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="s_category3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="s_category4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+			</tr>
+			<tr>
+				<th>브랜드</th>
+				<td colspan="7">
+					<select class="line" name="s_brands1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="s_brands2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="s_brands3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="s_brands4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+			</tr>
+			<tr>
+				<th>지역</th>
+				<td colspan="7">
+					<select class="line" name="s_locations1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="s_locations2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="s_locations3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="s_locations4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+			</tr>
+			<tr>
+				<th><select name="date_gb" class="search_select_pop">
+						<option value="regist_date" {?sc.date_gb=='regist_date'}selected{/}>등록일</option>
+						<option value="update_date" {?sc.date_gb=='update_date'}selected{/}>수정일</option>
+					</select></th>
+				<td colspan="7">
+					<label class="search_label"><input type="radio" name="regist_date" value="today" {? !_GET.regist_date_type || _GET.regist_date_type=='today' } checked="checked" {/}/> 오늘</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3day" {? _GET.regist_date_type=='3day' } checked="checked" {/}/> 3일간</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="7day" {? _GET.regist_date_type=='7day' } checked="checked" {/}/> 일주일</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="1mon" {? _GET.regist_date_type=='1mon' } checked="checked" {/}/> 1개월</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3mon" {? _GET.regist_date_type=='3mon' } checked="checked" {/}/> 3개월</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="all" {? _GET.regist_date_type=='all' } checked="checked" {/}/> 전체</label>
+				</td>
+			</tr>
+			<tr>
+				<th><select name="price_gb" class="search_select_pop">
+						<option value="consumer_price" {?sc.price_gb=='consumer_price'}selected{/}>정상가</option>
+						<option value="price" {?sc.price_gb=='price'}selected{/}>할인가</option>
+					</select></th>
+				<td>
+					<input type="text" name="sprice" value="{_GET.sprice}" size="5" class="line onlynumber" /> - <input type="text" name="eprice" value="{_GET.eprice}" size="5" class="line onlynumber"/>
+				</td>
+				<th>재고수량</th>
+				<td>
+					<input type="text" name="sstock" value="{_GET.sstock}" size="5" class="line onlynumber"/> - <input type="text" name="estock" value="{_GET.estock}" size="5" class="line onlynumber"/>
+				</td>
+				<th>페이지뷰</th>
+				<td>
+					<input type="text" name="spage_view" value="{_GET.spage_view}" class="line onlynumber" size="5"/> - <input type="text" name="epage_view" value="{_GET.epage_view}" class="line onlynumber" size="5"/>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<!--
+				<th>매입처</th>
+				<td>
+					<select name=""></select>
+				</td>
+				<th>판매처</th>
+				<td>
+					<select name=""></select>
+				</td>
+				-->
+				<th>모델명</th>
+				<td>
+					<select name="model" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ model }
+						<option value="{.contents}" {?sc.model==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>브랜드</th>
+				<td>
+					<select name="brand" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ brand }
+						<option value="{.contents}" {?sc.brand==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>상태</th>
+				<td colspan="3">
+					<label><input type="checkbox" name="goodsStatus[]" value="normal" {?sc.goodsStatus && in_array('normal',sc.goodsStatus)}checked{/}/>정상<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="runout" {?sc.goodsStatus && in_array('runout',sc.goodsStatus)}checked{/}/>품절<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="purchasing" {?sc.goodsStatus && in_array('purchasing',sc.goodsStatus)}checked{/}/>재고확보중<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="unsold" {?sc.goodsStatus && in_array('unsold',sc.goodsStatus)}checked{/}/>판매중지<label>
+				</td>
+			</tr>
+			<tr>
+				<th>제조사</th>
+				<td>
+					<select name="manufacture" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ manufacture }
+						<option value="{.contents}" {?sc.manufacture==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>원산지</th>
+				<td>
+					<select name="orign" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ orign }
+						<option value="{.contents}" {?sc.orign==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>노출</th>
+				<td>
+					<label><input type="checkbox" name="goodsView[]" value="look" {?sc.goodsView && in_array('look',sc.goodsView)}checked{/}/>보임<label>
+					<label><input type="checkbox" name="goodsView[]" value="notLook" {?sc.goodsView && in_array('notLook',sc.goodsView)}checked{/}/>안보임<label>
+				</td>
+				<th>과세/비과세</th>
+				<td>
+					<label><input type="checkbox" name="taxView[]" value="tax" {?sc.taxView && in_array('tax',sc.taxView)}checked{/}/>과세<label>
+					<label><input type="checkbox" name="taxView[]" value="exempt" {?sc.taxView && in_array('exempt',sc.taxView)}checked{/}/>비과세<label>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<div align="center" style="padding-top:10px;">
+	<span class="btn large black">
+		<button type="submit">저장하기<span class="arrowright"></span></button>
+	</span>
+</div>
+</form>
+</div>
+
+
+
+<div id="export_upload" class="hide">
+<form name="excelRegist" id="excelRegist" method="post" action="../goods_process/excel_upload" enctype="multipart/form-data"  target="actionFrame">
+
+	<div class="clearbox"></div>
+	<div class="item-title">쿠폰상품 일괄 등록 및 수정</div>
+	<table class="info-table-style" style="width:100%">
+	<colgroup>
+		<col width="20%" />
+		<col width="80%" />
+	</colgroup>
+	<tr>
+		<th class="its-th-align center">일괄수정</th>
+		<td class="its-td">
+			<input type="file" name="excel_file" id="excel_file" style="height:20px;"/>
+		</td>
+	</tr>
+	</table>
+
+	<div style="width:100%;text-align:center;padding-top:10px;">
+	<span class="btn large cyanblue"><button id="upload_submit">확인</button></span>
+	</div>
+
+	<div style="padding:15px;"></div>
+
+	<div style="padding-left:10px;font-size:12px;">
+		* 쿠폰상품을 일괄 등록하거나 수정할 때 엑셀 양식을  먼저 다운로드 받은 후에 이용하면 됩니다.<br/>
+		&nbsp;&nbsp; ( <span style="color:red;">필독! 엑셀파일 저장시 확장자가 XLS 인 엑셀 97~2003 양식으로 저장해 주세요</span> ) <br/>
+		<div style="padding:3px;"></div>
+		* 일괄 등록과 수정의 구분은 고유값 필드에 있는 값의 유무로 판단합니다.(고유값 필드에 값이 있으면 수정, 없으면 등록입니다.)<br/>
+		<div style="padding:3px;"></div>
+		* 쿠폰상품 옵션은 옵션마다 1개의 행을 차지합니다.(옵션을 등록한 이후에 엑셀을 다운로드 받아서 보면 이해하기 편합니다.)<br/>
+		<div style="padding:3px;"></div>
+		* 옵션 항목에는 옵션값만 입력해야 하며 쿠폰상품 공통 정보를 입력하면 안됩니다. 쿠폰상품 공통 정보 항목도 옵션값을 입력하면 안됩니다. <br/>
+		<div style="padding:3px;"></div>
+		* 대표카테고리와 추가카테고리가 병합되었습니다. 맨마지막 카테고리번호가 대표카테고리로 등록됩니다.<br/>
+		<div style="padding:3px;"></div>
+		* 대표브랜드와 추가브랜드가 병합되었습니다. 맨마지막 브랜드번호가 대표브랜드로 등록됩니다.<br/>
+	</div>
+
+	<div style="padding:15px;"></div>
+
+
+</form>
+</div>
+
+<!--### 워터마크세팅 -->
+<div id="watermark_setting_popup"></div>
+<!--### 결제 창 -->
+<div id="PaymentPopup" class="hide"></div>
+{ #layout_footer }

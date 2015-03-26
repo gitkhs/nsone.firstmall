@@ -1,0 +1,107 @@
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="40" />
+		<col width="30" />
+		<col /><!--옵션-->
+		<col width="115" /><!--현재매입가-->
+		<col width="115" /><!--정가-->
+		<col width="160" /><!--마진-->
+		<col width="50" /><!--부가세-->
+		<!--col width="90" /--><!--재고-->
+		<col width="200" /><!--지급적립금-->
+		<col width="180" /><!--배송비-->
+		<!--col width="80" /--><!--노출-->
+	<!--{ @ loop }-->
+	<tr style="height:30px;">
+		<td></td>
+		<td>
+		<input type="radio" name="detail_default_option[{.goods_seq}]" value="{.option_seq}" {?.default_option=='y'}checked{ / } />
+		</td>
+		<td>
+		<span class="detail_default_option_select hand">
+		<!--{ ? .option_divide_title[0] }-->
+		{.option_divide_title[0]} :
+		<!--{ / }-->
+		{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+		{.option1}
+		<!--{ ? .option2 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[1] }-->
+		{.option_divide_title[1]} :
+		<!--{ / }-->
+		{.option2}
+		<!--{ / }-->
+		<!--{ ? .option3 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[2] }-->
+		{.option_divide_title[2]} :
+		<!--{ / }-->
+		{.option3}
+		<!--{ / }-->
+		<!--{ ? .option4 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[3] }-->
+		{.option_divide_title[3]} :
+		<!--{ / }-->
+		{.option4}
+		<!--{ / }-->
+		<!--{ ? .option5 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[4] }-->
+		{.option_divide_title[4]} :
+		<!--{ / }-->
+		{.option5}
+		<!--{ / }-->
+		</span>
+		</td>
+		<td align="left" class="pdl5"><input type="text" name="detail_supply_price[{.option_seq}]" size="10" value="{.supply_price}" class="input_supply_price" style="text-align:right" /></td>
+		<td align="left" class="pdl5"><input type="text" name="detail_consumer_price[{.option_seq}]" size="10" value="{.consumer_price}" style="text-align:right" class="input_consumer_price" /></td>
+		<td align="right" class="pdr28">{=number_format(.price-.supply_price)} / <input type="text" name="detail_price[{.option_seq}]" size="10" value="{.price}" style="text-align:right" class="input_price" /></td>
+		<td align="right" style="padding-right:5px">{=number_format(.price*0.1)}</td>
+		<!--td align="center"><input type="text" name="detail_stock[{.option_seq}]" size="5" value="{.stock}" style="text-align:right" class="input_stock" />({.able_stock})</td-->
+		<td align="center">
+		<!--{ ? .key_ == 0 }-->
+		<select name="detail_reserve_policy[{.goods_seq}]" class="detail_reserve_policy input_reserve_policy">
+			<option value='shop' { ? .reserve_policy == 'shop' } selected{ / } >기본</option>
+			<option value='goods' { ? .reserve_policy == 'goods' } selected{ / } >개별</option>
+		</select>
+		<!--{ / }-->
+		<span class="reserve_span">
+		<input type="text" size="5" name="detail_reserve_rate[{.option_seq}]"  style="text-align:right" value="{.reserve_rate}" class="input_reserve_rate" />
+		<input type="text" size="5" name="detail_reserve[{.option_seq}]"  style="text-align:right" value="{.reserve}" class="input_reserve" />
+		<select name="detail_reserve_unit[{.option_seq}]" class="reserve_unit input_reserve_unit">
+			<option value='percent' { ? .reserve_unit=='percent'} selected{ / } >%</option>
+			<option value='won' { ? .reserve_unit=='won'} selected{ / } >￦</option>
+		</select>
+		</span>
+		<!--{ ? .key_ != 0 }-->
+		<span class="reserve_span_basic">
+		-
+		</span>
+		<!--{ / }-->
+		</td>
+		<td align="center">
+		<!--{ ? .key_ == 0 }-->
+		<select name="detail_shipping_policy[{.goods_seq}]" class="shipping_policy input_shipping_policy">
+			<option value="shop" { ? .shipping_policy == 'shop' } selected{ / }>국내기본</option>
+			<option value="goods" { ? .shipping_policy == 'goods' } selected{ / }>국내개별</option>
+		</select>
+		<input type="text" size="5" name="detail_unlimit_shipping_price[{.goods_seq}]" value="{.unlimit_shipping_price}" style="text-align:right" class="input_unlimit_shipping_price" />
+		<!--{ : }-->
+		-
+		<!--{ / }-->
+		<input type="hidden" name="option_seq[{.option_seq}]" value="{.goods_seq}" />
+		</td>
+		<!--td align="center">
+		-
+		<input type="hidden" name="option_seq[{.option_seq}]" value="{.goods_seq}" />
+		</td-->
+	</tr>
+	<!--{ / }-->
+</table>
+<script type="text/javascript">
+chk_detail_reserve_policy();
+chk_reserve_unit();
+chk_shipping_policy();
+</script>

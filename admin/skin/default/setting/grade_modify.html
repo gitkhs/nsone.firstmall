@@ -1,0 +1,328 @@
+<script type="text/javascript">
+function useTypeCont(id, name){
+	if(!$(id).attr("checked")){
+		$("#"+name).attr('disabled',true);
+	}else{
+		$("#"+name).attr('disabled',false);
+	}
+}
+
+function chkUseType(value){
+	if(value=='AUTO'){
+		$("input:checkbox[name='order_sum_use[]']").attr('disabled',false);
+		$("input:[name='add_point']").attr("disabled",false);
+		//useTypeCont("#osu0","order_sum_price");
+		$("input[name='order_sum_price']").attr('disabled',false);
+		//AUTOPART
+		reset_input_box('autopart');
+		$("input:checkbox[name='order_sum_use2[]']").attr('disabled',true);
+		$("input[name='order_sum_price2']").attr('disabled',true);
+		$("input[name='order_sum_ea2']").attr('disabled',true);
+		$("input[name='order_sum_cnt2']").attr('disabled',true);
+		useTypeCont("#osu1","order_sum_ea");
+		useTypeCont("#osu2","order_sum_cnt");
+	}else if(value=='AUTOPART'){
+		$("input:checkbox[name='order_sum_use2[]']").attr('disabled',false);
+		$("input:[name='add_point']").attr("disabled",false);
+		$("input[name='order_sum_price2']").attr('disabled',false);
+		//AUTO
+		reset_input_box('auto');
+		$("input:checkbox[name='order_sum_use[]']").attr('disabled',true);
+		$("input[name='order_sum_price']").attr('disabled',true);
+		$("input[name='order_sum_ea']").attr('disabled',true);
+		$("input[name='order_sum_cnt']").attr('disabled',true);
+		useTypeCont("#osup1","order_sum_ea2");
+		useTypeCont("#osup2","order_sum_cnt2");
+	}else{
+		$("input:[name='add_point']").attr("disabled",true);
+		//AUTO
+		reset_input_box('auto');
+		$("input:checkbox[name='order_sum_use[]']").attr('disabled',true);
+		$("input[name='order_sum_price']").attr('disabled',true);
+		$("input[name='order_sum_ea']").attr('disabled',true);
+		$("input[name='order_sum_cnt']").attr('disabled',true);
+		//AUTOPART
+		reset_input_box('autopart');
+		$("input:checkbox[name='order_sum_use2[]']").attr('disabled',true);
+		$("input[name='order_sum_price2']").attr('disabled',true);
+		$("input[name='order_sum_ea2']").attr('disabled',true);
+		$("input[name='order_sum_cnt2']").attr('disabled',true);
+	}
+}
+
+function reset_input_box(type) {
+	if (type == 'autopart') {
+		$("input:checkbox[name='order_sum_use2[]']").attr('checked',false);
+		$("input[name='order_sum_price2']").val('');
+		$("input[name='order_sum_ea2']").val('');
+		$("input[name='order_sum_cnt2']").val('');
+	} else if (type == 'auto') {
+		$("input:checkbox[name='order_sum_use[]']").attr('checked',false);
+		$("input[name='order_sum_price']").val('');
+		$("input[name='order_sum_ea']").val('');
+		$("input[name='order_sum_cnt']").val('');
+	}
+}
+
+$(document).ready(function() {
+	// 산정기준
+	$("input:radio[name='use_type']").click(function(){
+		chkUseType($(this).val());
+	});
+	// 산정기준:조건
+	$("#osu0").click(function(){
+		//useTypeCont("#osu0","order_sum_price");
+	});
+	$("#osu1").click(function(){
+		useTypeCont("#osu1","order_sum_ea");
+	});
+	$("#osu2").click(function(){
+		useTypeCont("#osu2","order_sum_cnt");
+	});
+
+	$("#osup0").click(function(){
+		//useTypeCont("#osu0","order_sum_price");
+	});
+	$("#osup1").click(function(){
+		useTypeCont("#osup1","order_sum_ea2");
+	});
+	$("#osup2").click(function(){
+		useTypeCont("#osup2","order_sum_cnt2");
+	});
+
+	//
+	{? data.use_type }
+		$("input:radio[name='use_type']").val(['{data.use_type}']);
+		$("input:radio[name='sale_use']").val(['{data.sale_use}']);
+		$("select[name='sale_price_type']").val(['{data.sale_price_type}']);
+		$("select[name='sale_target']").val(['{data.sale_target}']);
+		$("input:radio[name='point_use']").val(['{data.point_use}']);
+		$("select[name='point_price_type']").val(['{data.point_price_type}']);
+		$("select[name='point_target']").val(['{data.point_target}']);
+		<!--{ @ data.order_sum_arr }-->
+		$("input[name='order_sum_use[]'][value='{.value_}']").attr('checked',true);
+		$("input[name='order_sum_use2[]'][value='{.value_}']").attr('checked',true);
+		<!--{ / }-->
+	{ : }
+		$("input:radio[name='use_type']").val(['MANUAL']);
+		$("input:radio[name='sale_use']").val(['N']);
+		$("input:radio[name='point_use']").val(['N']);
+	{ / }
+	useTypeCont("#osu0","order_sum_price");
+	useTypeCont("#osu1","order_sum_ea");
+	useTypeCont("#osu2","order_sum_cnt");
+	useTypeCont("#osup0","order_sum_price2");
+	useTypeCont("#osup1","order_sum_ea2");
+	useTypeCont("#osup2","order_sum_cnt2");
+	chkUseType('{data.use_type}');
+
+
+
+	apply_input_style();
+});
+
+
+function icon_click(img)
+{
+	var imgname = $(img).attr("filenm");
+	var html = "<img src=\""+$(img).attr('src')+"\" align='absmiddle'>";
+	$("#imgHtml").html(html);
+	$("input[name='icon']").val(imgname);
+	closeDialog("iconPopup");
+}
+
+function myicon_click(img)
+{
+	var imgname = $(img).attr("filenm");
+	var html = "<img src=\""+$(img).attr('src')+"\" align='absmiddle'>";
+	$("#myimgHtml").html(html);
+	$("input[name='myicon']").val(imgname);
+	closeDialog("myiconPopup");
+}
+
+
+function iconFileUpload(str){
+	if(str > 0) {
+		alert('아이콘을 선택해 주세요.');
+		return false;
+	}
+	//파일전송
+	var frm = $('#iconRegist');
+	frm.attr("action","../member_process/iconUpload");
+	frm.submit();
+}
+
+
+function myiconFileUpload(str){
+	if(str > 0) {
+		alert('아이콘을 선택해 주세요.');
+		return false;
+	}
+	//파일전송
+	var frm = $('#myiconRegist');
+	frm.attr("action","../member_process/myiconUpload");
+	frm.submit();
+}
+
+
+
+function iconDisplay(filenm){
+	//alert(filenm);
+	var html = "<img src=\"../../data/icon/common/"+filenm+"\" class=\"hand icons\" filenm=\""+filenm+"\" onclick='icon_click(this);'>&nbsp;";
+	$("#iconDisplay").append(html);
+}
+
+
+function myiconDisplay(filenm){
+	// alert(filenm);
+	var html = "<img src=\"../../data/icon/mypage/"+filenm+"\" class=\"hand hide myicons\" filenm=\""+filenm+"\" onload='myicon_click(this);'>";
+	$("#myiconDisplay").html(html);
+}
+
+function iconBtn_click()
+{
+	openDialog("아이콘 선택  <span class='desc'>아이콘으로 사용할 이미지를 등록해 주세요.</span>", "iconPopup", {"width":"350","height":"250","show" : "fade","hide" : "fade"});
+}
+
+function myiconBtn_click()
+{
+	openDialog("아이콘 선택  <span class='desc'>아이콘으로 사용할 이미지를 등록해 주세요.</span>", "myiconPopup", {"width":"350","height":"250","show" : "fade","hide" : "fade"});
+}
+</script>
+
+{? data.group_seq }
+<form name="gradeFrm" id="gradeFrm" method="post" target="actionFrame" action="../member_process/grade_modify">
+<input type="hidden" name="seq" value="{data.group_seq}">
+{ : }
+<form name="gradeFrm" id="gradeFrm" method="post" target="actionFrame" action="../member_process/grade_write">
+{ / }
+
+<div class="item-title" style="width:92%">등급 {? data.group_seq }수정{ : }생성{ / } <span class="helpicon" title="회원 등급을 생성/설정합니다."></span></div>
+<table width="100%" class="info-table-style">
+<colgroup>
+	<col width="8%" /><col width="8%" /><col /><col width="15%" /><col />
+</colgroup>
+<tbody>
+{? data.group_seq }
+<tr>
+	<th class="its-th-align center" colspan="2">등록일</th>
+	<td class="its-td">
+		{data.regist_date}
+	</td>
+	{? data.update_date != '0000-00-00 00:00:00' }
+	<th class="its-th-align center">수정일</th>
+	<td class="its-td">
+		{data.update_date}
+	</td>
+	{ / }
+</tr>
+{ / }
+<tr>
+	<th class="its-th-align center" colspan="2">명칭</th>
+	<td class="its-td" colspan="3">
+		<input type="text" name="group_name" class="line" value="{data.group_name}"/>
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center" colspan="2">아이콘 <span class="helpicon" title="도움말 준비중입니다."></th>
+	<td class="its-td" colspan="3">
+		기본아이콘(권장 15 X 16) <span id="imgHtml">{?data.icon}<img src="../../data/icon/common/{data.icon}" align="absmiddle">{/}</span> <span class="btn small black"><button type="button" id="iconBtn" onclick="iconBtn_click();">등록하기</button></span>
+		<input type="hidden" name="icon" class="line" value="{data.icon}"/><br>
+		MY페이지용 아이콘(권장 60 X 60) <span id="myimgHtml">{?data.myicon}<img src="../../data/icon/mypage/{data.myicon}" align="absmiddle">{/}</span><span class="btn small black"><button type="button" id="myiconBtn"  onclick="myiconBtn_click();">등록하기</button></span>
+		<input type="hidden" name="myicon" class="line" value="{data.myicon}"/>
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center" colspan="2">산정기준 <span class="helpicon" title="도움말 준비중입니다."></th></th>
+	<td class="its-td" colspan="3">
+		<!-- 자동관리 조건만족 -->
+		<label><input type="radio" name="use_type" value="AUTO"/> 자동관리 : </label>(조건을 모두 만족할 때 등급 변경)
+		<input type="hidden" name="order_sum_use[]" id="osu0" value="price" /> 총 구매 금액 <input type="text" name="order_sum_price" id="order_sum_price" class="line onlynumber right" size="6" value="{data.order_sum_price}"/>원 이상 | 
+		<input type="checkbox" name="order_sum_use[]" id="osu1" value="ea" /><label for="osu1"> 총 상품 구매 개수</label> <input type="text" name="order_sum_ea" id="order_sum_ea" class="line onlynumber right" size="6" value="{data.order_sum_ea}" disabled/>개 이상 | 
+		<input type="checkbox" name="order_sum_use[]" id="osu2" value="cnt" /><label for="osu2"> 총 주문 횟수</label> <input type="text" name="order_sum_cnt" id="order_sum_cnt" class="line onlynumber right" size="6" value="{data.order_sum_cnt}" disabled/>회 이상	 <br/>
+		<!-- 자동관리 일부조건만족 -->
+		<label><input type="radio" name="use_type" value="AUTOPART"/> 자동관리 : </label>(조건을 1가지라도 만족하면 등급 변경)
+		<input type="hidden" name="order_sum_use2[]" id="osup0" value="price" /> 총 구매 금액 <input type="text" name="order_sum_price2" id="order_sum_price2" class="line onlynumber right" size="6" value="{data.order_sum_price}"/>원 이상 | 
+		<input type="checkbox" name="order_sum_use2[]" id="osup1" value="ea" /><label for="osup1"> 총 상품 구매 개수</label> <input type="text" name="order_sum_ea2" id="order_sum_ea2" class="line onlynumber right" size="6" value="{data.order_sum_ea}" disabled/>개 이상 | 
+		<input type="checkbox" name="order_sum_use2[]" id="osup2" value="cnt" /><label for="osup2"> 총 주문 횟수</label> <input type="text" name="order_sum_cnt2" id="order_sum_cnt2" class="line onlynumber right" size="6" value="{data.order_sum_cnt}" disabled/>회 이상	 <br/>
+		<label><input type="radio" name="use_type" value="MANUAL" checked/> 수동관리 : </label> 해당 등급에 속하거나 제외에 대한 결정을 모두 수동으로 함
+		
+		<div class="pdt5 red">※ 총 상품 구매 개수에서 상품 구매와 무관한 사은품은 제외됩니다.</div>
+	</td>
+</tr>
+
+<tr>
+	<th class="its-th-align center" rowspan="2">구매 시</th></th>
+	<th class="its-th-align center">구매금액 조건</th>
+	<td class="its-td " colspan="3" rowspan="4"> <a href="/admin/setting/member?gb=member_sale">설정 > 회원 > 등급별 구매혜택</a>에서 설정하실 수 있습니다.</td>
+</tr>
+<tr>
+	<th class="its-th-align center">추가할인</th>
+	
+</tr>
+<tr>
+	<th class="its-th-align center" rowspan="2">구매 시</th></th>
+	<th class="its-th-align center">구매금액 조건</th>
+	
+</tr>
+<tr>
+	<th class="its-th-align center">추가적립금<br><span {? !isplusfreenot || !isplusfreenot.ispoint } readonly='readonly'  class='gray readonly'  {/}  >추가포인트</span></th>
+	
+</tr>
+<tr>
+	<th class="its-th-align center">그 외<br>추가혜택</th>
+	<th class="its-th-align center">배송비</th>
+	<td class="its-td" colspan="3"> <a href="/admin/coupon/catalog">프로모션/쿠폰 > 쿠폰관리</a>에서 등급별로 배송비 할인쿠폰을 발행할 수 있습니다.</td>
+</tr>
+<!--
+<tr>
+	<th class="its-th-align center" rowspan="2">그 외<br>추가혜택</th>
+	<th class="its-th-align center">적립금</th>
+	<td class="its-td" colspan="3">
+		등급 유지기간동안에 1회에 한하여 <input type="text" name="add_point" class="line onlynumber right" size="6" value="{data.add_point}"/>원 적립
+		(단, 회원->마이페이지에서 적립버튼으로 적립)
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">배송비</th>
+	<td class="its-td" colspan="3"> <a href="/admin/coupon/catalog">프로모션/쿠폰 > 쿠폰관리</a>에서 등급별로 배송비 할인쿠폰을 발행할 수 있습니다.</td>
+</tr>
+-->
+</tbody>
+</table>
+
+<!--
+<div style="padding:10px;" class="center">
+<span class="btn large black"><button type="submit" class="addDeliveryCost">저장하기</button></span>
+</div>
+-->
+
+</form>
+
+
+
+<!-- 아이콘 선택 -->
+<div id="iconPopup" style="display:none;">
+	<form name="iconRegist" id="iconRegist" method="post" action="" enctype="multipart/form-data"  target="actionFrame">
+	<ul>
+		<li>
+		{@ icons}
+		<img src="../../data/icon/common/{.value_}" class="hand icons" filenm="{.value_}" onclick="icon_click(this);">
+		{ / }
+		<span id="iconDisplay"></span>
+		</li>
+		<li style="float:left;width:100px;height:30px;text-align:center" ><input type="file" name="grade_icon" id="grade_icon" onChange="iconFileUpload();" /></li>
+	</ul>
+	</form>
+</div>
+
+<!-- 아이콘 선택 -->
+<div id="myiconPopup" style="display:none;">
+	<form name="myiconRegist" id="myiconRegist" method="post" action="" enctype="multipart/form-data"  target="actionFrame">
+	<ul>
+		<span id="myiconDisplay"></span>
+		</li>
+		<li style="float:left;width:100px;height:30px;text-align:center" ><input type="file" name="my_grade_icon" id="my_grade_icon" onChange="myiconFileUpload();" /></li>
+	</ul>
+	</form>
+</div>

@@ -1,0 +1,21 @@
+
+<div class="slc-head pdt5">
+<ul>
+	<li><span class="mitem"><a href="shop_member">회원가입현황</a></span></li>
+	<li><span class="mitem"><a href="shop_sales_cnt">구매횟수현황</a></span></li>
+	<li><span class="mitem"><a href="shop_sales_price">구매금액현황</a></span></li>
+	<!--
+	<li><span class="mitem"><a href="shop_emoney">적립금현황</a></span></li>
+	<li><span class="mitem"><a href="shop_goods">상품현황</a></span></li>
+	<li><span class="mitem"><a href="shop_supply">공급처(사입처)현황</a></span></li>
+	-->
+
+</ul>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("div.slc-head a[href='{selected_shop_menu}']").parent().parent().addClass("selected");
+});
+
+</script>

@@ -1,0 +1,1417 @@
+{is_file_facebook_tag}
+<style>
+#goods_view	{}
+
+#goods_thumbs .pagination {position:relative; width:90%; margin:auto; text-align:center; overflow:hidden; white-space:nowrap;}
+#goods_thumbs .pagination li {display:inline;}
+#goods_thumbs .pagination li img,#goods_thumbs .pagination li embed {border:1px solid #fff; margin:5px 2px;}
+#goods_thumbs .pagination li.current img {border:1px solid #333;}
+
+.total_goods_price {font-size:18px; font-family:"tahoma","dotum"; font-weight:Bold; color:#ed2b07;}
+.goods_name			{color:#000000; font-size:16px; letter-spacing:-1px; font-weight:bold; }
+.short_desc			{color:#858585; font-size:11px; letter-spacing:-1px; ;}
+.goods_description	{padding:10px 0 20px 0;}
+.exchange_guide		{padding:10px 0 20px 0; overflow:hidden;}
+.sale_price			{color:#ff5500;}
+
+.goods_spec_table th {text-align:left; color:#000000; font-weight:normal;letter-spacing:-1px;}
+.goods_spec_table td {text-align:left; color:#858585; font-size:11px;letter-spacing:-1px; }
+.goods_spec_table td strong {text-align:left; color:#858585; font-size:11px;letter-spacing:0px; }
+.goods_spec_table .price {font-size:24px; font-family:"tahoma"; color:#ff3528; font-weight:bold}
+.goods_spec_table .consumer {font-size:11px; ; color:#858585; letter-spacing:0px;}
+
+.goods_spec_table select {min-width:120px;}
+.goods_spec_table .coupon_btn {position:relative; display:inline-block; width:71px; height:34px; background:url("../images/design/coupon_bg.gif"); vertical-align:middle;}
+.goods_spec_table .coupon_btn span.cb_percent {position:absolute; left:4px; top:14px; font-size:14px; font-family:tahoma; color:#c00c0b; font-weight:bold;}
+.goods_spec_table .coupon_btn span.cb_text {position:absolute; left:100%; top:20px; margin-left:3px; width:65px; color:#c00c0b; font-size:11px; font-weight:bold; text-decoration:underline;}
+
+.goods_option_table {margin:5px 0 10px 0; border:1px solid #d0d0d0; background-color:#ececec}
+.goods_option_table th {text-align:left; color:#616161; font-weight:bold; padding-left:4px;}
+.goods_option_table td {text-align:left; color:#616161; padding-left:4px;}
+.goods_option_table .desc {font-size:11px; color:#9a9a9a;}
+
+.goods_option_table select {width:98%;}
+
+.goods_quantity_table_container {margin:5px 0 10px 0; border:1px solid #d0d0d0;}
+.goods_quantity_table .quantity_cell {padding:3px 0; border-top:1px solid #d0d0d0; padding:5px 10px; font-size:12px; ; color:#676767; }
+.goods_quantity_table .quantity_cell_sub {padding:3px 0; padding:5px 10px; font-size:12px; ; color:#676767; }
+.goods_quantity_table .quantity_cell_sub_price {padding:5px 10px; font-size:12px; ; color:#676767; }
+.goods_quantity_table .quanity_row:first-child .quantity_cell {border-top:0px}
+.goods_quantity_table .option_text {letter-spacing:-1px; font-size:11px; ; color:#000000; }
+.total_price {color:#cc0000;}
+
+.list_table_style {}
+.list_table_style th {height:32px; font-size:11px; font-weight:normal; border-top:2px solid #e7e7e7; border-bottom:2px solid #e7e7e7;}
+.list_table_style td {height:18px; padding:3px 0; font-size:11px; border-bottom:1px solid #e9e9e9;}
+
+div.review_benifit {padding:3px 3px 3px 0px;}
+table.gift_benifit_list span.gift_goods {text-decoration:underline;}
+
+.detailDescriptionLayer .absolute {z-index:100; border:2px solid #000;background-color:#fff;}
+.detailDescriptionLayer .ddlTable {}
+.detailDescriptionLayer .ddlTable tr th {padding:5px 10px 5px 0px; border-top:1px solid #ddd;}
+.detailDescriptionLayer .ddlTable tr td {padding:5px 0; border-top:1px solid #ddd;}
+.detailDescriptionLayer .ddlTable tr:first-child th,
+.detailDescriptionLayer .ddlTable tr:first-child td {border-top:none;}
+.detailDescriptionLayer .gilTable {border:collapse;}
+.detailDescriptionLayer .gilTable td { padding-left:5px; font-size:11px; color:#616161; letter-spacing:-1px; border-bottom:1px solid #ddd;}
+
+.gift_goods_layer {z-index:100; width:250px; border:2px solid #000;background-color:#fff;}
+.gift_goods_layer .gilTable {border:collapse;}
+.gift_goods_layer .gilTable td { font-size:11px; color:#616161; letter-spacing:-1px; border-bottom:1px solid #ddd; font-size:11px;padding:5px 5px 5px 5px; color:#616161;}
+</style>
+<script type="text/javascript">
+var gl_goods_price = 0;
+var gl_event_sale_unit = 0;
+var gl_cutting_sale_price = 0;
+var gl_cutting_sale_action = "{config_system.cutting_sale_action}";
+var gl_multi_discount_use 	= "{goods.multi_discount_use}";
+var gl_multi_discount_unit = "{goods.multi_discount_unit}";
+var gl_multi_discount 		= 0;
+var gl_multi_discount_ea 	= 0;
+var gl_option_view_type = "{goods.option_view_type}";
+var gl_options_count = {=count(options)};
+var gl_opttag = '<tr class="quanity_row">';
+var gl_min_purchase_limit = '{goods.min_purchase_limit}';
+var gl_min_purchase_ea = 0;
+var gl_max_purchase_limit = '{goods.max_purchase_limit}';
+var gl_max_purchase_ea = 0;
+var gl_member_seq = "{sessionMember.member_seq}";
+var gl_request_uri = "{=urlencode(_SERVER.REQUEST_URI)}";
+var gl_goods_seq = 0;
+var gl_option_divide_title_count = {=count(goods.option_divide_title)};
+var gl_skin = "{config_system.skin}";
+var gl_string_price_use = "";
+
+{ ? is_array(options_n0) }
+var gl_option_n0 = {=json_encode(options_n0)};
+{ / }
+
+{ ? is_array(gl_options_join) }
+var gl_options_join = {=json_encode(options_join)};
+{ / }
+
+{ ? goods.price }
+gl_goods_price = {goods.price};
+{ / }
+{ ? goods.price > goods.sale_price }
+gl_goods_price = {goods.sale_price};
+{ / }
+{ ? goods.event.event_sale_unit }
+gl_event_sale_unit = {goods.event.event_sale_unit};
+{ / }
+{? is_numeric(config_system.cutting_sale_price) && config_system.cutting_sale_use !='none'}
+gl_cutting_sale_price = {config_system.cutting_sale_price};
+{ / }
+{ ? goods.multi_discount }
+gl_multi_discount 		= {goods.multi_discount};
+{ / }
+{ ? goods.multi_discount_ea }
+gl_multi_discount_ea 	= {goods.multi_discount_ea};
+{ / }
+{ ? goods.min_purchase_ea }
+gl_min_purchase_ea = {goods.min_purchase_ea};
+{ / }
+{ ? goods.max_purchase_ea }
+gl_max_purchase_ea = {goods.max_purchase_ea};
+{ / }
+{ ? goods.goods_seq }
+gl_goods_seq = {goods.goods_seq};
+{ / }
+{ ? goods.string_price_use }
+gl_string_price_use = {goods.string_price_use};
+{/}
+
+function goods_thumbs_scroll(){
+	$("#goods_thumbs .pagination").hide().width('{=goodsImageSize.view.width-60}').show();
+	var setGoodsThumbsPaginationScroll = function(){
+		var paginationWidth = $("#goods_thumbs .pagination").width();
+		var currentWidth = $("#goods_thumbs .pagination>li.current").outerWidth();
+		var currentLeft = $("#goods_thumbs .pagination>li.current").position().left;
+
+		var gap = ($("#goods_thumbs .pagination").scrollLeft()+currentLeft+(currentWidth/2))-(paginationWidth/2);
+
+		$("#goods_thumbs .pagination").stop(true,true).animate({'scrollLeft':gap});
+	};
+	$("#goods_thumbs .slides_container>a:gt(0)").hide();
+	$("#goods_thumbs .pagination>li:eq(0)").addClass('current');
+	$("#goods_thumbs .slides_container").show();
+	$("#goods_thumbs .pagination>li").bind('click',function(){
+		var i = $("#goods_thumbs .pagination>li").index(this);
+		$("#goods_thumbs .slides_container>a").hide().eq(i).show();
+		$("#goods_thumbs .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+	$("#goods_thumbs .prev").bind('click',function(){
+		var i = $("#goods_thumbs .slides_container>a").index($("#goods_thumbs .slides_container>a:visible"));
+		if(i<=0) i = $("#goods_thumbs .slides_container>a").length-1;
+		else i--;
+		$("#goods_thumbs .slides_container>a").hide().eq(i).show();
+		$("#goods_thumbs .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+	$("#goods_thumbs .next").bind('click',function(){
+		var i = $("#goods_thumbs .slides_container>a").index($("#goods_thumbs .slides_container>a:visible"));
+		if(i>=$("#goods_thumbs .slides_container>a").length-1) i = 0;
+		else i++;
+		$("#goods_thumbs .slides_container>a").hide().eq(i).show();
+		$("#goods_thumbs .pagination>li").removeClass('current').eq(i).addClass('current');
+		setGoodsThumbsPaginationScroll();
+		return false;
+	});
+}
+
+// 쿠폰상품 지도변경 버튼 :: 2014-04-02 lwh
+function setMapajax(){
+	var option_seq	= $("#option_location option:selected").val();
+	var goods_seq	= $("#option_location option:selected").attr('goods_seq');
+
+	$.ajax({
+			type: "post",
+			url: "../goods/coupon_location_ajax",
+			data: {'option_seq':option_seq, 'goods_seq':goods_seq, 'width':'{layout_config.body_width}'},
+			success: function(result){
+				$("#NaverMap").html('');
+				$("#map_area").html(result);
+			}
+		});
+}
+
+// 컬러 옵션 클릭시 상품상세컷 연결 2014-05-14 leewh
+function clickSelectColor(color) {
+	$("#goods_thumbs .pagination>li img").each(function(){
+		if ($(this).attr('color')==color) {
+			$(this).trigger("click");
+			return false;
+		}
+	});
+}
+
+$(document).ready(function(){ 
+
+	{? eventEnd}
+	timeInterval{goods.goods_seq} = setInterval(function(){
+		var time{goods.goods_seq} = showClockTime('img', '{eventEnd.year}', '{eventEnd.month}', '{eventEnd.day}', '{eventEnd.hour}', '{eventEnd.min}', '{eventEnd.second}', 'soloday', 'solohour', 'solomin', 'solosecond', '{goods.goods_seq}');
+		var time_tmp = showClockTime('text', '{eventEnd.year}', '{eventEnd.month}', '{eventEnd.day}', '{eventEnd.hour}', '{eventEnd.min}', '{eventEnd.second}', 'soloday{goods.goods_seq}', 'solohour{goods.goods_seq}', 'solomin{goods.goods_seq}', 'solosecond{goods.goods_seq}', '{goods.goods_seq}');
+		if(time{goods.goods_seq} == 0){
+			clearInterval(timeInterval{goods.goods_seq});
+			alert("단독이벤트가 종료되었습니다.");
+			document.location.reload();
+		}
+	},1000);
+	{/}
+
+	$("select[name='viewOptions[]']").last().bind("change",function(){
+		if(gl_string_price_use){
+			$(this).find("option").eq(0).attr('selected',true);
+			return ;
+		}
+
+		gl_opttag = '<tr class="quanity_row">';
+		gl_opttag += '<td class="quantity_cell option_text">';
+		<!--{ @options[0].option_divide_title }-->
+		var opt = $(this).find('option:selected').attr('opt{.key_+1}');
+		if(!opt) return false;
+		gl_opttag += '	{.value_} : '+opt+'<input type="hidden" name="option[{.key_}][]" value="'+opt+'" />';
+		gl_opttag += '<input type="hidden" name="optionTitle[{.key_}][]" value="{.value_}" />';
+		<!--{ ? .size_ != .key_+1 }-->
+		gl_opttag += '<br/>';
+		<!--{ / }-->
+		<!--{ / }-->
+	});
+
+	// 컬러 옵션 클릭시 상품상세컷 연결 2014-05-13 leewh
+	<!--{ ? goods.option_view_type == 'divide' && options }-->
+	var cntImg = $("#goods_thumbs .pagination>li img").length;
+	$("select[name='viewOptions[]']").bind("change",function(){
+		var selectColor = $("option:selected", this).attr('color');
+		if (selectColor && cntImg) {
+			clickSelectColor(selectColor);
+		}
+	});
+
+	$(".viewOptionsspecialbtn").live('mouseover',function(){
+		var spanColor = $(this).parent().attr('class');
+		if (spanColor && cntImg) {
+			clickSelectColor(spanColor);
+		}
+	});
+	<!--{/}-->
+	// 컬러 옵션 end
+
+	$(".detailDescriptionLayerBtn").click(function(){
+		$('div.detailDescriptionLayer').not($(this).next('div.detailDescriptionLayer')).hide();$(this).next('div.detailDescriptionLayer').toggle()
+	});
+	$(".detailDescriptionLayerCloseBtn").click(function(){
+		$(this).closest('div.detailDescriptionLayer').toggle()
+	});
+
+});
+</script>
+<script type="text/javascript" src="/app/javascript/js/goods-view.js?dummy={=date('YmdHis')}"></script>
+<!--{? eventEnd}-->
+<div class="event_datetime">
+<table width="100%" height="180">
+	<tr>
+		<td height="180" bgcolor="{goods.event.bgcolor}" valign="top">
+			<div style="height:20px;"></div>
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td align="center">{goods.event.title_contents}</td>
+				</tr>
+				<tr><td height="20"></td></tr>
+				<tr>
+					<td>
+						<table border="0" cellspacing="0" cellpadding="0" align="center">
+							<td><img src="../images/common/social_i_remain.png"></td>
+							<td width="10"></td>
+							<td>
+								<table border="0" cellspacing="0" cellpadding="0">
+									<tr>
+										<td><img src="../images/common/social_bg_dayl.png"></td>
+										<td align="" background="../images/common/social_bg_daym.png" align="center" class="soloday"><img src="../images/common/social_no0.png"></td>
+										<td><img src="../images/common/social_bg_dayr.png"></td>
+									</tr>
+								</table>
+							</td>
+							<td width="5"></td>
+							<td><img src="../images/common/social_i_day.png"></td>
+							<td width="20"></td>
+							<td>
+								<table border="0" cellspacing="0" cellpadding="0">
+									<tr>
+										<td><img src="../images/common/social_bg_timel.png"></td>
+										<td width="92" align="center" background="../images/common/social_bg_timem.png" align="center" class="solohour"><img src="../images/common/social_no0.png"><img src="../images/common/social_no0.png"></td>
+										<td><img src="../images/common/social_bg_timer.png"></td>
+									</tr>
+								</table>
+							</td>
+							<td width="26" align="center"><img src="../images/common/social_i_colon.png"></td>
+							<td>
+								<table border="0" cellspacing="0" cellpadding="0">
+									<tr>
+										<td><img src="../images/common/social_bg_timel.png"></td>
+										<td width="92" align="center" background="../images/common/social_bg_timem.png" align="center" class="solomin"><img src="../images/common/social_no0.png"><img src="../images/common/social_no0.png"></td>
+										<td><img src="../images/common/social_bg_timer.png"></td>
+									</tr>
+								</table>
+							</td>
+							<td width="26" align="center"><img src="../images/common/social_i_colon.png"></td>
+							<td>
+								<table border="0" cellspacing="0" cellpadding="0">
+									<tr>
+										<td><img src="../images/common/social_bg_timel.png"></td>
+										<td width="92" align="center" background="../images/common/social_bg_timem.png" align="center" class="solosecond"><img src="../images/common/social_no0.png"><img src="../images/common/social_no0.png"></td>
+										<td><img src="../images/common/social_bg_timer.png"></td>
+									</tr>
+								</table>
+							</td>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+</div>
+<!--{ / }-->
+<!-- 카테고리 뎁스 네비 -->
+<!--{ ? !_GET.quickview }-->
+<!--{=showCategoryDepth(goods.category_code[count(goods.category_code)-1])}-->
+<!--{ / }-->
+
+<div id="goods_view">
+
+	<table width="95%" cellpadding="0" cellspacing="0" border="0" style="margin:auto;">
+	<tr>
+		<td height="20"></td>
+	</tr>
+	<tr>
+		<td width="{goodsImageSize.view.width+50}" valign="top">
+			<!-- 상품 이미지 -->
+			<div id="goods_thumbs">
+				<table cellpadding="0" cellspacing="0" style="width:{goodsImageSize.view.width}px;">
+				<tr>
+					<td>
+						<div class="slides_container hide" style="margin:auto; width:{goodsImageSize.view.width}px;">
+							<!--{ @ images }-->
+							<!--{?.view.image}-->
+							<a href="#" style="width:100%;display:inline-block;">
+							{? .view.image_type == 'video'}
+								<div style="margin:auto;text-align:Center;"><embed src="{.view.image}" width="{? goods.video_size0 }{goods.video_size0}{:}100%{/}" height="{? goods.video_size1 }{goods.video_size1}{:}300{/}" allowfullscreen="true" wmode="transparent"></embed></div>
+							{:}
+								<img src="{.view.image}" width="{goodsImageSize.view.width}" onerror="this.src='../images/common/noimage.gif'" title="{images.large.label}"/>
+							{/}
+							</a>
+							<!--{ / }-->
+							<!--{ / }-->
+						</div>
+						<div class="clearbox" style="margin:5px auto 0 auto; width:{goodsImageSize.view.width}px;">
+							<div class="fleft"><a href="javascript:popup('zoom?no={goods.goods_seq}&popup=1',{=(goodsImageSize.view.width+400)},{=(goodsImageSize.large.height+ goodsImageSize.thumbCart.height + 100)},'no')"><img src="../images/icon/icon_zoom.gif" hspace="1" /></a></div>
+							<div class="fright">{=snslinkurl('goods', goods.goods_name)//SNS전체}</div>
+						</div>
+					</td>
+				</tr>
+				<!--{ ? count(images)>1 }-->
+				<tr>
+					<td height="15"></td>
+				</tr>
+				<tr>
+					<td align="center">
+
+						<!-- 상품이미지 썸네일 -->
+						<table style="width:100%" cellpadding="0" cellspacing="0" border="0">
+						<tr>
+							<td width="15" align="left"><a href="#" class="prev"><img src="../images/design/btn_detail_prev.gif" /></a></td>
+							<td>
+								<ul class="pagination">
+									<!--{ @ images }-->
+									<!--{?.thumbView.image}-->
+									<li><a href="#"><img src="{.thumbView.image}" width="{goodsImageSize.thumbView.width}" onerror="this.src='../images/common/noimage_list.gif'" {? .thumbView.match_color } color="{.thumbView.match_color}" {/}/></a></li>
+									<!--{ / }-->
+									<!--{ / }-->
+								</ul>
+							</td>
+							<td width="15" align="right"><a href="#" class="next"><img src="../images/design/btn_detail_next.gif" /></a></td>
+						</tr>
+						</table>
+
+					</td>
+				</tr>
+				<!--{ / }-->
+				</table>
+			</div>
+			<!-- 상품 썸네일 이미지 스크롤 -->
+			<script type="text/javascript">goods_thumbs_scroll();</script>
+			<!-- 상품 썸네일 이미지 스크롤 -->
+		</td>
+		<td valign="top">
+			<form name="goodsForm" method="post" action="../order/add" enctype="multipart/form-data" target="actionFrame">
+			<input type="hidden" name="goodsSeq" value="{goods.goods_seq}" />
+			<!-- 상품 스펙 -->
+			<table width="100%" cellpadding="0" cellspacing="0" border="0">
+			<tr><td height="1" bgcolor="cccccc"></td></tr>
+			
+			<tr>
+				<td height="0">
+				<!--할인율 표기 시작-->
+				{ ? goods.sale_rate }
+				<div style="float:right;" class="relative">
+					<div style="position:absolute;left:-70px;text-align:center;height:41px;width:73px;"><img src='../images/common/bg_spec_dc.png' /></div>
+					<div style="position:absolute;left:-70px;text-align:center;height:41px;width:73px;float:right;font-size:20px;font-family:tahoma;font-weight:bold;color:#ffffff">
+					{goods.sale_rate}%
+					</div>
+				</div>
+				{ / }
+				<!--할인율 표기 끝-->
+				</td>
+			</tr>
+
+			<tr><td height="10"></td></tr>
+
+			<!-- 상품 짧은 설명 시작 -->
+			<tr>
+				<td>
+					<span class="short_desc">{goods.summary}</span>
+				</td>
+			</tr>
+			<!-- 상품 짧은 설명 끝 -->
+			<tr><td height="5"></td></tr>
+			<!-- 상품명 시작 -->
+			<tr>
+				<td>
+					<span class="goods_name">{goods.goods_name}</span>
+				</td>
+			</tr>
+			<!-- 상품명 끝 -->
+			<!--{? eventEnd}-->
+			<tr>
+				<td height="10"></td>
+			</tr>
+			<tr>
+				<td height="44" style="border-top:1px solid #eaeaea;  border-bottom:1px solid #eaeaea; background:#fafafa">
+					<table width="97%" cellspacing="0" cellpadding="0" border="0" width="100%" align="center">
+						<tr>
+							<td width="30%" align="left" style="font-size:12px; color:#666666;">현재 <span style="font-size:18px; font-family:Verdana; color:#000000; font-weight:bold; letter-spacing:-1px">{=number_format(goods.event.event_order_ea)}</span>개 구매</td>
+							<td width="70%" align="right" >
+								<table cellspacing="0" cellpadding="0" border="0">
+									<td style="font-size:11px; color:#666666; padding-right:4px; letter-spacing:-1px; line-height:0.8">남은시간</td>
+									<td>
+										<table cellspacing="0" cellpadding="0" border="0" style="border:1px solid #858585;" bgcolor="#7b7b7b">
+											<td height="25" style="padding:0px 10px 0px 10px; font-size:16px; font-family:Tahoma; font-weight:bold; color:#ffffff;"><span id="soloday{goods.goods_seq}">0</span><span style="font-size:12px">일</span></td>
+											<td height="25" style="padding:0px 10px 0px 0px; font-size:16px; font-family:Tahoma; font-weight:bold; color:#ffffff;"><span id="solohour{goods.goods_seq}">00</span> : <span id="solomin{goods.goods_seq}">00</span> : <span id="solosecond{goods.goods_seq}">00</span></td>
+										</table>
+									</td>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td height="10"></td>
+			</tr>
+			<!--{ / }-->
+			<!-- 아이콘 시작 -->
+			<!--{ ? icons }-->
+			<tr>
+				<td>
+				<!--{ @ icons }-->
+					<img src="/data/icon/goods/{.codecd}.gif" border="0">
+				<!--{ / }-->
+				</td>
+			</tr>
+			<!--{ / }-->
+			<!-- 아이콘 끝 -->
+			<!--{ ? !eventEnd || icons }-->
+			<tr><td height="10"></td></tr>
+			<tr><td height="1" bgcolor="cccccc"></td></tr>
+			<tr><td height="10"></td></tr>
+			<!--{ / }-->
+			<tr>
+				<td>
+					<table class="goods_spec_table" width="100%" cellpadding="0" cellspacing="3" border="0">
+					<col width="100" />
+					<!-- 판매가격 시작-->
+					<tr>
+						<th>판매가</th>
+						<td>
+						<!--{? goods.string_price_use }-->
+							<b>{goods.string_price}</b>
+						<!--{ : }-->
+							<!--{ ? goods.org_price > goods.sale_price }-->
+							<span class="consumer">{=number_format(goods.org_price)}원</span>
+							&nbsp;<img src="../images/common/icon_dc_list.gif" alt="할인내역" id="price_area" {?goods.sum_sale_price}class="hand"{/} /><br/>
+							<!--{ / }-->
+
+							<!-- 할인내역 시작 -->
+							<!--{ ? goods.sum_sale_price }-->
+							<div class="absolute hide">
+								<div class="sale_price_layer" style="width:200px;">
+									<div class="title_line">할인내역</div>
+									<br style="line-height:10px;" />
+									<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+									<col width="78" />
+									<tr>
+										<th>구분</th>
+										<th class="bolds ends">할인</th>
+									</tr>
+									<!--{ @ sales.sale_list }-->
+										<!--{ ? .value_ > 0 }-->
+									<tr>
+										<td class="gr">
+											{sales.title_list[.key_]}
+										</td>
+										<td class="bolds ends prices">
+											{=number_format(.value_)}원
+										</td>
+									</tr>
+										<!--{ / }-->
+									<!--{ / }-->
+									</table>
+								</div>
+							</div>
+							<!--{ / }-->
+							<!-- 할인내역 끝 -->
+
+							<b class="price">{? goods.sale_price > 0 }{=number_format(goods.sale_price)}{:}0{/}</b><b style="font-size:12px;  color:#ff3528">원</b>
+						<!--{ / }-->
+						</td>
+					</tr>
+					<!-- 판매가격 끝 -->
+					<tr>
+						<td colspan="2" height="5"></td>
+					</tr>
+					<tr><td colspan="2" height="1" bgcolor="#eaeaea"></td></tr>
+					<tr><td colspan="2" height="2"></td></tr>
+
+					<!-- 이벤트 시작 -->
+					<!--{ ? sales.text_list['event'] }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>이벤트</th>
+						<td>{sales.text_list['event']}
+						<img src="../images/common/btn_detail.gif" class="detailDescriptionLayerBtn hand" />
+						<div class="detailDescriptionLayer hide">
+							<div class="absolute">
+								<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="000000" >
+								<tr>
+									<td class="left pdl5" style="font-weight:bold; color:#fff; font-size:12px;" height="25">이벤트 혜택</td>
+									<td class="right pdr5 fx15"><span class='hand detailDescriptionLayerCloseBtn'>X</span></td>
+								</tr>
+								</table>
+								<div style="padding:10px;line-height:18px;">
+									<div>{ sales.subject_list['event'] }</div>
+									<div>{ sales.text_list['event'] }</div>
+								</div>
+							</div>
+						</div>
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 이벤트 끝 -->
+
+					<!-- 복수구매 할인 시작 -->
+					<!--{ ? sales.text_list['multi'] }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>복수구매</th>
+						<td>{sales.text_list['multi']}</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 복수구매 할인 끝 -->
+
+					<!-- 회원등급 시작 -->
+					<!--{ ? sales.text_list['member'] }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>회원등급</th>
+						<td>{sales.text_list['member']}
+						<img src="../images/common/btn_detail.gif" class="detailDescriptionLayerBtn hand" />
+						<div class="detailDescriptionLayer relative hide">
+							<div class="absolute">
+								<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="000000" >
+								<tr>
+									<td class="left pdl5" style="font-weight:bold; color:#fff; font-size:12px;" height="25">회원등급별 혜택</td>
+									<td class="right pdr5 fx15"><span class='hand detailDescriptionLayerCloseBtn'>X</span></td>
+								</tr>
+								</table>
+								<div style="padding:10px">
+									<table class="ddlTable">
+									<!--{@goods.group_benifits}-->
+										<!--{?.group_seq}-->
+									<tr>
+										<th>{.group_name}</th>
+										<td>
+											<!--{ ? .sale_price > 0 }-->
+												<!--{ ? .sale_price_type == 'PER' }-->
+											{.sale_price}% 추가할인
+												<!--{ : }-->
+											{.sale_price}원 추가할인
+												<!--{ / }-->
+												<!--{ ? .sale_use == 'Y' && .sale_limit_price > 0 }-->
+											({=number_format(.sale_limit_price)} 이상 구매 시)
+												<!--{ / }-->
+											<!--{ / }-->
+											<br />
+											<!--{ ? .reserve_price > 0 }-->
+												<!--{ ? .reserve_price_type == 'PER' }-->
+											{.reserve_price}%추가적립
+												<!--{ : }-->
+											{.reserve_price}원추가적립
+												<!--{ / }-->
+											<!--{ / }-->
+
+											<!--{ ? .point_price > 0 }-->
+												<!--{ ? .point_price_type == 'PER' }-->
+											{.point_price}%추가포인트
+												<!--{ : }-->
+											{.point_price}P추가포인트
+												<!--{ / }-->
+											<!--{ / }-->
+
+											<!--{ ? .reserve_price > 0 || .point_price > 0 }-->
+												<!--{ ? .point_use == 'Y' && .point_limit_price > 0 }-->
+											({=number_format(.point_limit_price)} 이상 구매 시)
+												<!--{ / }-->
+											<!--{ / }-->
+										</td>
+									</tr>
+										<!--{ / }-->
+									<!--{ / }-->
+									</table>
+								</div>
+							</div>
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 회원등급 끝 -->
+
+					<!-- 모바일 시작 -->
+					<!--{ ? sales.text_list['mobile'] }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr >
+						<th>모바일</th>
+						<td>{sales.text_list['mobile']}
+						<img src="../images/common/btn_detail.gif" class="detailDescriptionLayerBtn hand" />
+						<div class="detailDescriptionLayer relative hide">
+							<div class="absolute">
+								<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="000000" >
+								<tr>
+									<td class="left pdl5" style="font-weight:bold; color:#fff; font-size:12px;" height="25">모바일 혜택</td>
+									<td class="right pdr5 fx15"><span class='hand detailDescriptionLayerCloseBtn'>X</span></td>
+								</tr>
+								</table>
+								<div style="padding:10px">
+									<table class="ddlTable">
+									<!--{@mobilesale.result}-->
+									<tr>
+										<td>
+											모바일에서 {=number_format(.price1)}원 이상 구매시<br />
+											{?count(.result)>1}
+												최대
+												{=number_format(.sale_price_max)}%추가할인
+												{?.sale_emoney_max}, {=number_format(.sale_emoney_max)}%추가적립{/}
+												{?.sale_point_max}, {=number_format(.sale_point_max)}%추가포인트{/}
+											{:}
+												{=number_format(.sale_price)}%추가할인
+												{?.sale_emoney}, {=number_format(.sale_emoney)}%추가적립{/}
+												{?.sale_point}, {=number_format(.sale_point)}%추가포인트{/}
+											{/}
+										</td>
+									</tr>
+									<!--{/}-->
+									</table>
+								</div>
+							</div>
+						</div>
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 모바일 끝 -->
+
+					<!-- 좋아요 시작 -->
+					<!--{ ? sales.text_list['like'] }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr >
+						<th>좋아요</th>
+						<td>{sales.text_list['like']}
+						<img src="../images/common/btn_detail.gif" class="detailDescriptionLayerBtn hand" />
+						<div class="detailDescriptionLayer relative hide">
+							<div class="absolute">
+								<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="000000" >
+								<tr>
+									<td class="left pdl5" style="font-weight:bold; color:#fff; font-size:12px;" height="25">좋아요 혜택</td>
+									<td class="right pdr5 fx15"><span class='hand detailDescriptionLayerCloseBtn'>X</span></td>
+								</tr>
+								</table>
+								<div style="padding:10px">
+									<table class="ddlTable">
+									<!--{@fblikesale.result}-->
+									<tr>
+										<td>
+											좋아요 한 상품을 {=number_format(.price1)}원 이상 구매시<br />
+											{?count(.result)>1}
+												최대
+												{=number_format(.sale_price_max)}%추가할인
+												{?.sale_emoney_max}, {=number_format(.sale_emoney_max)}%추가적립{/}
+												{?.sale_point_max}, {=number_format(.sale_point_max)}%추가포인트{/}
+											{:}
+												{=number_format(.sale_price)}%추가할인
+												{?.sale_emoney}, {=number_format(.sale_emoney)}%추가적립{/}
+												{?.sale_point}, {=number_format(.sale_point)}%추가포인트{/}
+											{/}
+										</td>
+									</tr>
+									<!--{/}-->
+									</table>
+								</div>
+							</div>
+						</div>
+						<!--{ ? APP_USE == 'f' && APP_LIKE_TYPE != 'NO' }-->
+						<div>{=snsLikeButton(goods.goods_seq,'button_count')}</div>
+						<!--{ / }-->
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 좋아요 끝 --> 
+
+					<!-- 쿠폰 시작 -->
+					<!--{ ? sales.text_list['coupon'] }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>쿠폰</th>
+						<td>{sales.text_list['coupon']}
+						<a href="#" id="couponDownload" class="coupon_btn2"><span  class="cb_text"><img src="../images/common/btn_coupon_dn.gif" /></span></a>
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 쿠폰 끝 -->
+
+					<!-- 프로모션코드 시작 -->
+					<!--{ ? sales.text_list['code'] }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>할인코드</th>
+						<td>{sales.text_list['code']}</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 프로모션코드 끝 -->
+
+					<!-- 유입경로 시작 -->
+					<!--{ ? sales.text_list['referer'] }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>유입경로</th>
+						<td>{sales.text_list['referer']}</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 유입경로 끝 -->
+
+					<!-- 무이자 할부 행사 정보입니다. 수정하여 운영 하세요-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>무이자할부</th>
+						<td>
+
+						<img src="../images/common/btn_detail.gif" class="detailDescriptionLayerBtn hand" />
+						<div class="detailDescriptionLayer relative hide">
+							<div class="absolute">
+								<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="000000" >
+								<tr>
+									<td class="left pdl5" style="font-weight:bold; color:#fff; font-size:12px;" height="25">무이자할부 카드안내</td>
+									<td class="right pdr5 fx15"><span class='hand detailDescriptionLayerCloseBtn'>X</span></td>
+								</tr>
+								</table>
+								<div style="padding:0 10px">
+								<table class="ddlTable" style="width:350px;">
+								<tr>
+									<td width="110" class="left"><img src="../images/common/Interest_img_bc.gif"></td>
+									<td width="126" class="left">3~12개월</td>
+									<td class="right pdr5">5만원이상</td>
+								</tr>
+								<tr>
+									<td width="110" class="left"><img src="../images/common/Interest_img_ct.gif"></td>
+									<td class="left">3~12개월</td>
+									<td class="right pdr5">5만원이상</td>
+								</tr>
+								<tr>
+									<td width="110" class="left"><img src="../images/common/Interest_img_hd.gif"></td>
+									<td class="left">3~12개월</td>
+									<td class="right pdr5">5만원이상</td>
+								</tr>
+								<tr>
+									<td width="110" class="left"><img src="../images/common/Interest_img_hn.gif"></td>
+									<td class="left">3~12개월</td>
+									<td class="right pdr5">5만원이상</td>
+								</tr>
+								<tr>
+									<td width="110" class="left"><img src="../images/common/Interest_img_kb.gif"></td>
+									<td class="left">3~12개월</td>
+									<td class="right pdr5">5만원이상</td>
+								</tr>
+								<tr>
+									<td width="110" class="left"><img src="../images/common/Interest_img_lt.gif"></td>
+									<td class="left">3~12개월</td>
+									<td class="right pdr5">5만원이상</td>
+								</tr>
+								<tr>
+									<td width="110" class="left"><img src="../images/common/Interest_img_sh.gif"></td>
+									<td class="left">3~12개월</td>
+									<td class="right pdr5">5만원이상</td>
+								</tr>
+								<tr>
+									<td width="110" class="left"><img src="../images/common/Interest_img_ss.gif"></td>
+									<td class="left">3~12개월</td>
+									<td class="right pdr5">5만원이상</td>
+								</tr>
+								</table>
+								
+							</div>
+						</div>
+
+						</td>
+					</tr>
+					<!-- 무이자할부 표기 끝 -->
+					<tr><td colspan="2" height="5"></td></tr>
+					<tr><td colspan="2" height="1" bgcolor="eaeaea"></td></tr>
+					<tr><td colspan="2" height="5"></td></tr>
+					<!-- 사은품 표기 시작 -->
+					<!--{ ? goods.gift }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>사은품</th>
+						<td>
+							<table class="gift_benifit_list" cellpadding="0" cellspacing="0" border="0">
+							<!--{ @ goods.gift.benifits }-->
+							<tr>
+								<td class="left">{ ? .sprice }{=number_format(.sprice)}원 이상 {/}구매 시&nbsp;</td>
+								<td>
+									<!--{ ?count(.goods) > 1 }-->
+									<span class="gift_goods hand">사은품</span> 중
+									<div class="relative">
+									<div class="absolute gift_goods_layer hide">
+									<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="000000" >
+									<tr>
+										<td class="left pdl5" style="font-weight:bold; color:#fff; font-size:12px;" height="25">사은품</td>
+									</tr>
+									</table>
+									<div style="max-height:200px;overflow:auto;">
+									<table class="gilTable" width="100%" border="0" cellpadding="0" cellspacing="0" >
+									<!--{ @ .goods }-->
+									<tr>
+										<td class="left pdl5"><img src="/admin/skin/default/images/common/arrow_right.gif" /> {..goods_name}</td>
+									</tr>
+									<!--{ / }-->
+									</table>
+									</div>
+									</div>
+									</div>
+									<!--{:}-->
+									{.goods[0].goods_name}
+									<!--{/}-->
+								</td>
+								<td>{.ea}개 선택</td>
+							</tr>
+							<!--{ / }-->
+							</table>
+
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 사은품 표기 끝 -->
+					<!-- 적립금 시작 -->
+					<!--{ ? goods.reserve > 0 }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>적립금</th>
+						<td>
+							<strong>{=number_format(goods.reserve)}원</strong>
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!--{ ? isplusfreenot && isplusfreenot.ispoint  && goods.point > 0 }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>포인트</th>
+						<td>
+							<strong>{=number_format(goods.point)}P</strong>
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 적립금 끝 -->
+					<!-- 네이버 마일리지 시작 -->
+					<!--{ ? in_array(naver_mileage_yn,array('y','t')) }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>네이버 마일리지</th>
+						<td>{=showNaverMileageButton('view')}</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 네이버 마일리지 끝 -->
+					<!-- 상품후기 시작 -->
+					<!--{ ? (cfg_reserve.autoemoney_video > 0 ||  cfg_reserve.autopoint_video > 0
+					|| cfg_reserve.autoemoney_photo > 0 ||  cfg_reserve.autopoint_photo > 0
+					|| cfg_reserve.autoemoney_review > 0 ||  cfg_reserve.autopoint_review > 0
+					|| cfg_reserve.bbs_start_date  &&  cfg_reserve.bbs_end_date)
+					&& isplusfreenot  // }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr >
+						<th>구매후기</th>
+						<td>
+							{? cfg_reserve.autoemoney_video > 0 ||  cfg_reserve.autopoint_video > 0 }
+								<div class="review_benifit">
+								동영상후기
+								{? cfg_reserve.autoemoney_video > 0 } {=number_format(cfg_reserve.autoemoney_video)}원 추가적립금,{/}
+								{? cfg_reserve.autopoint_video > 0 } {=number_format(cfg_reserve.autopoint_video)}P 추가포인트{/}
+								</div>
+							{/}
+
+							{? cfg_reserve.autoemoney_photo > 0 ||  cfg_reserve.autopoint_photo > 0 }
+								<div class="review_benifit">
+								포토후기
+								{? cfg_reserve.autoemoney_photo > 0 } {=number_format(cfg_reserve.autoemoney_photo)}원 추가적립금,{/}
+								{? cfg_reserve.autopoint_photo > 0 } {=number_format(cfg_reserve.autopoint_photo)}P 추가포인트 {/}
+								</div>
+							{/}
+
+							{? cfg_reserve.autoemoney_review > 0 ||  cfg_reserve.autopoint_review > 0 }
+								<div class="review_benifit">
+								일반후기
+								{? cfg_reserve.autoemoney_review > 0 } {=number_format(cfg_reserve.autoemoney_review)}원 추가적립금,{/}
+								{? cfg_reserve.autopoint_review > 0 } {=number_format(cfg_reserve.autopoint_review)}P 추가포인트{/}
+								</div>
+							{/}
+
+							{? cfg_reserve.bbs_start_date  &&  cfg_reserve.bbs_end_date }
+								<div class="review_benifit">
+								{? cfg_reserve.emoneyBbs_limit > 0 } {=number_format(cfg_reserve.emoneyBbs_limit)}원 추가적립금,{/}
+								{? cfg_reserve.pointBbs_limit > 0 } {=number_format(cfg_reserve.pointBbs_limit)}P 추가포인트{/}
+								</div>
+							{/}
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 상품후기 끝 -->
+					<!-- 배송 시작 -->
+					<!--{?goods.goods_kind!='coupon'}-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>배송</th>
+						<td>
+							<!--{ ? delivery.type == 'delivery' }-->택배<!--{ / }-->
+							<!--{ ? delivery.type == 'quick' }-->퀵서비스<!--{ / }-->
+							<!--{ ? delivery.type == 'direct' }-->직접배송<!--{ / }-->
+							<!--{ ? delivery.type == 'delivery' }-->
+								<!--{ ? delivery.price == 0 }-->
+									무료
+								<!--{: delivery.free > 0 }-->
+									{=number_format(delivery.free)}원 이상 구매 시 무료
+								<!--{: delivery.price > 0 && !delivery.free }-->
+									{=number_format(delivery.price)}원
+								<!--{ / }-->
+							<!--{ : }-->
+							<!--{ ? delivery.summary }-->({delivery.summary})<!--{ / }-->
+							<!--{ / }-->
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 배송 끝 -->
+					<!-- 상품정보고시 시작 -->
+					<!--{ ? goods.sub_info_desc.subInfo }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>상품정보</th>
+						<td>
+							<img src="../images/common/btn_items_info.gif" class="hand" onmouseover="$('.goodsInfoLayer').show();" onmouseout="$('.goodsInfoLayer').hide();" />
+							<div class="relative">
+								<div class="absolute goodsInfoLayer hide">
+									<table width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="000000">
+									<tr>
+										<td class="left pdl5" style="font-weight:bold; color:#fff; font-size:12px;">전자상거래 상품정보 제공 고시</td>
+										<td class="center" width="30"><img src="../images/design/popup_close_s.gif" class="hand hide" onclick="$('.goodsInfoLayer').hide();"/></td>
+									</tr>
+									</table>
+									<table class="gilTable" width="100%" border="0" cellpadding="0" cellspacing="0">
+									<!-- { @ goods.sub_info_desc.subInfo } -->
+									<tr>
+										<th>{.title}</th>
+										<td>{.desc}</td>
+									</tr>
+									<!-- { / } -->
+									</table>
+								</div>
+							</div>
+							<style>
+							.goodsInfoLayer {z-index:100; width:320px; border:2px solid #000;}
+							.goodsInfoLayer .gilTable {border-collapse:collapse;}
+							.goodsInfoLayer .gilTable th {width:70px;background-color:#e8e8e8; text-align:left; padding-left:5px; font-size:11px; font-weight:normal; color:#535353; letter-spacing:-1px;  border-top:1px solid #fefefe; border-bottom:1px solid #Fefefe;}
+							.goodsInfoLayer .gilTable td {background-color:#fff; padding-left:5px; font-size:11px; color:#000; letter-spacing:-1px; border:1px solid #ddd;}
+							</style>
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 상품정보고시 끝 -->
+					<!--{ ? goods.brand || additions  }-->
+					<tr><td colspan="2" height="5"></td></tr>
+					<tr><td colspan="2" height="1" bgcolor="eaeaea"></td></tr>
+					<tr><td colspan="2" height="5"></td></tr>
+					<!--{ / }-->
+					<!-- 브랜드 시작 -->
+					<!--{ ? goods.brand }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>브랜드</th>
+						<td>{=strip_tags(view_brand)}</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 브랜드 끝 -->
+
+					<!-- 고객평가 시작 -->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>고객평가</th>
+						<td>
+							{=number_format(goods.review_count)}건&nbsp;
+							<span class="orange">{=str_repeat('★',round(goods.review_sum/goods.review_count))}</span><span class="gray">{=str_repeat('★',5-round(goods.review_sum/goods.review_count))}</span>
+							<font style="color:#ee6600; font-family:tahoma">{=round(goods.review_sum/goods.review_count,2)}/5</font>
+						</td>
+					</tr>
+					<!-- 고객평가 끝 -->
+
+					<!-- 추가 정보 시작 -->
+					<!--{@ additions }-->
+					<tr><td colspan="2" height="3"></td></tr>
+					<tr>
+						<th>{.name}</th>
+						<td>{.contents}</td>
+					</tr>
+					<!--{ / }-->
+					<!-- 추가 정보 끝 -->
+					</table>
+					<!-- 필수옵션 시작 -->
+					<!--{ ? count(options) > 0 && options[0].option_title }-->
+					<table class="goods_option_table" width="100%" cellpadding="0" cellspacing="5" border="0">
+					<col width="70" />
+					<tr>
+						<th>상품옵션</th>
+						<td class="desc">(다시 선택하면 상품을 추가할 수 있습니다)</td>
+					</tr>
+					<!--{ ? goods.option_view_type == 'join' && options }-->
+					<tr>
+						<th class="optionTitle">{options[0].option_title}</th>
+						<td>
+							<select name="viewOptions[]">
+							<option value="">- {options[0].option_title} 선택 -</option>
+							<!--{ @ options }-->
+							<!--{ ? .chk_stock }-->
+							<option value="{=implode('/',.opts)}" price="{.price}" opt1="{.option1}" opt2="{.option2}" opt3="{.option3}" opt4="{.option4}" opt5="{.option5}" infomation="{.infomation}">{=implode('/',.opts)}</option>
+							<!--{ : }-->
+							<option value="{=implode('/',.opts)}" price="{.price}" opt1="{.option1}" opt2="{.option2}" opt3="{.option3}" opt4="{.option4}" opt5="{.option5}" disabled="disabled">{=implode('/',.opts)} (품절)</option>
+							<!--{ / }-->
+							<!--{ / }-->
+							</select>
+							{? options[0].newtype }
+							<div class="viewOptionsspecialays"></div>
+							{/}
+							<script type="text/javascript">set_option_join();</script>
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!--{ ? goods.option_view_type == 'divide' && options }-->
+					<!--{ @ goods.option_divide_title }-->
+					<tr>
+						<th class="optionTitle">{.value_}</th>
+						<td>
+							<select name="viewOptions[]" id="{.key_}" opttype="{goods.divide_newtype[.index_]}" >
+							<option value="">- {.value_} 선택 -</option>
+							</select>
+							{? goods.divide_newtype[.index_] }
+							<div class="viewOptionsspecialays {goods.divide_newtype[.index_]}" style="padding-bottom:9px;"></div>
+							{/}
+						</td>
+					</tr>
+					<!--{ / }-->
+					<!--{ / }-->
+					<tr id="viewoptionsInfoTr" class="hide">
+						<td></td>
+						<td id="viewOptionsInfo" style="word-break:break-all;"></td>
+					</tr>
+					</table>
+					<!--{ : !goods.string_price_use }-->
+					<table class="goods_spec_table" width="100%" cellpadding="0" cellspacing="3" border="0">
+					<col width="100" />
+					<tr>
+						<th>수량</th>
+						<td>
+						<input type="hidden" name="option[0][]" value="" />
+						<input type="hidden" name="optionTitle[0][]" value="" />
+						<table align="left" border="0" cellpadding="1" cellspacing="0">
+							<tr>
+								<td>
+									<input type="text" name="optionEa[]" value="1" style="width:25px; height:15px;" />
+								</td>
+								<td align="right" style="font-size:0px;">
+									<div><img src="../images/design/btn_num_plus.gif" class="hand eaPlus" /></div>
+									<div><img src="../images/design/btn_num_minus.gif" class="hand eaMinus" /></div>
+									<div style="display:none" class="optionPrice">{goods.sale_price}</div>
+								</td>
+								<td>개</td>
+							</tr>
+						</table>
+						</td>
+					</tr>
+					</table>
+					<!--{ / }-->
+					<!-- 필수옵션 끝 -->
+					<!-- 추가옵션 시작 -->
+					<!--{ ? suboptions }-->
+					<table class="goods_option_table" width="100%" cellpadding="0" cellspacing="5" border="0">
+					<col width="70" />
+					<tr>
+						<th>추가구성</th>
+						<td class="desc">(추가 구매를 원하시면 선택하세요.)</td>
+					</tr>
+
+					<!--{ @ suboptions }-->
+					<tr>
+						<td class="suboptionTitle">{.value_[0].suboption_title}</td>
+						<td>
+							<select name="viewSuboption[]" {?.value_[0].sub_required=='y'}required="y"{/}>
+								<option value="">선택안함</option>
+								<!--{ @ .value_ }-->
+								<!--{ ? ..chk_stock }-->
+									<!--{ ? ..price > 0 }-->
+									<option value="{..suboption}" price="{..price}">{..suboption} (추가 {=number_format(..price)}원)</option>
+									<!--{ : }-->
+									<option value="{..suboption}" price="0">{..suboption}</option>
+									<!--{ / }-->
+								<!--{ : }-->
+									<option value="{..suboption}" price="0" disabled>{..suboption} (품절)</option>
+								<!--{ / }-->
+								<!--{ / }-->
+							</select>
+							<div class="viewSubOptionsspecialays">
+							<!--{ @ .value_ }-->
+								<!--{? ..newtype == 'color' }-->
+									<!--{ ? ..chk_stock }-->
+											<span  class='{..color}'  ><span name='viewSubOptionsspecialbtn' opspecialtype='color' class='viewSubOptionsspecialbtn hand bbs_btn {..color}'  style='width:30px; height:30px; margin-top:2px; margin-left:2px; border:0px solid #e8e8e8; color:{..color};size:25px;'  value=\"{..suboption}\"  suboptvalue="{..suboption}" price='{..price}' eqindex='{=(.index_-1)}' opspecial_location='1' ><font size='5'>■</font></span></span>
+									<!--{ : }-->
+											<span  class='{..color}'  ><span name='' opspecialtype='color' class=' hand bbs_btn {..color}'  style='width:30px; height:30px; margin-top:2px; margin-left:2px; border:0px solid #e8e8e8; color:{..color};size:25px;'  value=\"{..suboption}\"  suboptvalue="{..suboption}" price='{..price}' eqindex='{=(.index_-1)}' opspecial_location='1' ><font size='5'>■</font>(품절)</span></span>
+									<!--{/}-->
+								<!--{/}-->
+							<!--{ / }-->
+							</div>
+						</td>
+					</tr>
+					<!--{?.value_[0].sub_required=='y'}-->
+					<input type="hidden" name="suboption_title_required[]" value="{.value_[0].suboption_title}" />
+					<!--{ / }-->
+					<!--{ / }-->
+					</table>
+					<!--{ / }-->
+					<!-- 추가옵션 끝 -->
+					<!--{ ? !goods.string_price_use }-->
+					<div class="goods_quantity_table_container" style="display:none">
+						<table class="goods_quantity_table" width="100%" cellpadding="0" cellspacing="0" border="0">
+						<col /><col width="70"><col width="90" />
+						</table>
+					</div>
+					<!--{ / }-->
+
+					<!-- 추가입력옵션 시작 -->
+					<!--{? inputs}-->
+					<table class="goods_option_table" width="100%" cellpadding="0" cellspacing="5" border="0">
+					<col width="70" />
+					<!--{ @ inputs }-->
+
+					<tr>
+						<th>{.input_name}</th>
+						<td class="desc">
+						<!--{ ? .input_form == 'edit' }-->
+						<textarea name="inputsValue[]" rows="4" style="width:97%;overflow:auto;" limit="{.input_limit}" onkeyup="input_limits(this,'{.input_limit}')" onkeydown="input_limits(this,'{.input_limit}')"></textarea>
+						<!--{ : .input_form == 'text' }-->
+						<input type="text" name="inputsValue[]" style="width:100%;" limit="{.input_limit}" onkeyup="input_limits(this,'{.input_limit}')" onkeydown="input_limits(this,'{.input_limit}')"/>
+						<!--{ : .input_form == 'file' }-->
+						<input type="file" name="inputsValue[]" style="width:100%;" />
+						<!--{ / }-->
+						</td>
+					</tr>
+					<!--{ / }-->
+					</table>
+					<!--{ / }-->
+					<!-- 추가입력옵션 끝 -->
+				</td>
+			</tr>
+			<!-- 총 상품 금액 표기 시작-->
+			<tr><td height="1" bgcolor="cccccc"></td></tr>
+			<!--{ ? !goods.string_price_use }-->
+			<tr><td height="15"></td></tr>
+			<tr>
+				<td>
+					<table  align="right" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td valign="bottom" class="fx12"><b>총 상품금액</b></td>
+						<td width="25"></td>
+						<td class="total_goods_price">
+							<!--{ ? (goods.price > goods.sale_price) || (goods.consumer_price > goods.sale_price && goods.event.target_sale == 1 ) }-->
+							<span id="total_goods_price" style="font-size:24px;font-family:tahoma;color:#ff3528;font-weight:bold;letter-spacing:-1px;'">{? goods.sale_price > 0 }{=number_format(goods.sale_price)}{:}0{/}</span><font style="font-family:tahoma;color:#ff3528;font-weight:bold;font-size:12px;">원</font>
+							<!--{ : }-->
+							<span id="total_goods_price"  style="font-size:24px;font-family:tahoma;color:#ff3528;font-weight:bold;letter-spacing:-1px;">{=number_format(goods.price)}</span><font style="font-family:tahoma;color:#ff3528;font-weight:bold;font-size:12px;">원</font>
+							<!--{ / }-->
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<!--{ / }-->
+			<!-- 총 상품 금액 표기 끝 -->
+			<tr><td height="50"></td></tr>
+			<!-- 구매하기,장바구니 버튼 시작-->
+			<tr>
+				<td align="right">
+					<!--{ ? goods.goods_status == 'normal' && !goods.string_price_use }-->
+					<img src="../images/buttons/btn_buy.gif"  id="buy" class="hand" />
+					<img name="addCart" src="../images/buttons/btn_cart.gif" id="addCart" class="hand"/>
+					<!--{ / }-->
+					<!--{ ? goods.goods_status != 'unsold'}-->
+					<a href="../mypage/wish_add?seqs[]={goods.goods_seq}" target="actionFrame"><img src="../images/buttons/btn_wish.gif" /></a>
+					<!--{ / }-->
+					<!--{ ? goods.goods_status == 'runout'}-->
+					<img src="../images/buttons/btn_runout.gif" />
+					<!--{ / }-->
+					<!--{ ? goods.goods_status == 'purchasing'}-->
+					<img src="../images/buttons/btn_purchasing.gif" />
+					<!--{ / }-->
+					<!--{ ? goods.goods_status == 'purchasing' || (goods.goods_status == 'runout' && goods.restock_notify_use)}-->
+					<a href="javascript:;" onclick="openDialogPopup('재입고알림 - 휴대폰 알림 신청','restockNotifyApply',{'width':'500','height':'auto','url':'restock_notify_apply?goods_seq={goods.goods_seq}'});"><img src="../images/buttons/btn_restock_notify.gif" /></a>
+					<!--{ / }-->
+					<!--{ ? goods.goods_status == 'unsold'}-->
+					<img src="../images/buttons/btn_unsold.gif" />
+					<!--{ / }-->
+				</td>
+			</tr>
+			<!-- 구매하기,장바구니 버튼 끝 -->
+			</table>
+			<!-- 네이버체크아웃 시작-->
+			<!--{?navercheckout_tpl}-->
+				<div align="right" style="padding:25px 10px 0 0">
+				{navercheckout_tpl}
+				</div>
+			<!--{/}-->
+			<!-- 네이버체크아웃 끝-->
+			</form>
+		</td>
+	</tr>
+	<tr>
+		<td height="60"></td>
+	</tr>
+	</table>
+
+	<!--[ 쿠폰 ]-->
+	{=showCoupons('all','detail','2')}
+
+	<!--{ ? !_GET.quickview }-->
+	
+	<script>
+	$(document).ready(function(){
+		$(".goodsDetailTabItem").click(function(){
+			$(".goodsDetailTabArea").hide();
+			$(".goodsDetailTabItem").css('background-color','#EFEFEF');
+			$("#"+$(this).attr('code')).show(); 
+			$(this).css('background-color','#fff');
+		});
+		$(".goodsDetailTabItem[code='goods_description']").click();
+	});
+	</script>
+	<table width="100%" height="35" cellpadding="0" cellspacing="1" border="0" bgcolor="DFDFDF">
+	<tr>
+		<th bgcolor="#ffffff" width="25%" class="goodsDetailTabItem hand" code="goods_description"><a href="#goods_description1"><img src="../images/design/detail_tab_details_on.gif" alt="상품설명" /></a></th>
+		<th bgcolor="#EFEFEF" width="25%" class="goodsDetailTabItem hand" code="goods_review"><a href="#goods_review1"><img src="../images/design/detail_tab_review.gif" alt="상품후기" /></a></th>
+		<th bgcolor="#EFEFEF" width="25%" class="goodsDetailTabItem hand" code="goods_qna"><a href="#goods_qna1"><img src="../images/design/detail_tab_qna.gif" alt="상품문의" /></a></th>
+		<th bgcolor="#EFEFEF" width="25%" class="goodsDetailTabItem hand" code="common_contents"><a href="#common_contents"><img src="../images/design/detail_tab_return.gif" alt="교환/반품/배송정보" /></a></th>
+	</tr>
+	</table>
+	
+	
+	<div id="goods_description" class="goodsDetailTabArea" > 
+		<!-- 상품설명 -->
+		<a name="goods_description"></a> 
+		<div class="goods_description">
+			<!--{? goodsvideofiles }-->
+			<div align="center" >
+			<!--{@ goodsvideofiles }-->
+			<div ><embed src="{.uccdomain_fileswf}" width="{? .pc_width }{.pc_width}{:}400{/}" height="{? .pc_height }{.pc_height}{:}300{/}" allowfullscreen="true" wmode="transparent"></embed>
+			</div><br/>
+			<!--{/}-->
+			</div>
+			<!--{/}-->
+			{goods.contents}
+		</div>
+
+		<!-- 쿠폰상품 위치 안내 : 시작 -->
+		<!--{? goods.pc_mapview == 'Y'}-->
+		<div class="goods_mapview">
+			<div style="margin:-20px;padding-bottom:10px;">
+				{=showNaverMapApi(layout_config.body_width, '500', mapArr[0]['address'], mapArr[0]['option'])}
+			</div>
+			<div id="map_area"></div>
+			<table cellpadding="0" cellspacing="0" border="0" width="100%" style="line-height:17px;">
+			<tr>
+				<td width="50px">업체명</td><td width="5px"> : </td>
+				<td>
+					<select name="option_location" id="option_location" >
+						<!--{@ mapArr }-->
+						<option value="{.o_seq}" goods_seq="{_GET.no}" >{.option}</option>
+						<!--{ / }-->
+					</select>
+					<span class="btn small cyanblue"><button type="button" onclick="setMapajax();">보기</button></span>
+				</td>
+			</tr>
+			<tr>
+				<td>주소</td><td> : </td>
+				<td id="address">{mapArr[0]['address']}</td>
+			</tr>
+			<tr>
+				<td></td><td></td>
+				<td id="street">{mapArr[0]['address_street']}</td>
+			</tr>
+			<tr>
+				<td>전화번호</td><td> : </td>
+				<td id="biztel">{mapArr[0]['biztel']}</td>
+			</tr>
+			</table>
+		</div>
+		<!--{ / }-->
+		<!-- 쿠폰상품 위치 안내 : 끝 -->
+
+		<!--### BIGDATA -->
+		<!--{ @ bigdata }-->
+		<div class="bigdata-title-bar">
+			<img src="../images/design/ico_bd_{ .key_ }.gif" />
+			{ .textStr }
+		</div>
+		<div class="bigdata-goods-list">
+			{ .display }
+		</div>
+		<!--{ / }-->
+
+		<!--### RELATION -->
+		<!--{ ? goodsRelationDisplayHTML }-->
+			<table width="100%" cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td align="left" valign="bottom"><img src="../images/common/tit_datail_related.gif" /></td>
+				<td align="right" valign="bottom"></td>
+			</tr>
+			<tr>
+				<td height="10"></td>
+			</tr>
+			</table>
+			<div>{goodsRelationDisplayHTML}</div>
+		<!--{ / }-->
+	
+	</div>
+	
+	
+	<div id="goods_review" class="goodsDetailTabArea hide" >
+		<!-- 상품후기 -->
+		<a name="goods_review"></a> 
+
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td height="10"></td>
+		</tr>
+		<tr>
+			<td align="left" valign="bottom"><img src="../images/design/tit_datail_review.gif" /></td>
+			<td align="right" valign="bottom"></td>
+		</tr>
+		<tr>
+			<td height="10"></td>
+		</tr>
+		</table>
+		<div id="goods_review_frame_div"></div>
+		<br /><br /><br />
+	</div> 
+
+	
+	<div id="goods_qna" class="goodsDetailTabArea hide" > 
+		<!-- 상품문의 -->
+		<a name="goods_qna"></a> 
+		<table width="100%" cellpadding="0"  cellspacing="0" border="0">
+		<tr>
+			<td height="10"></td>
+		</tr>
+		<tr>
+			<td align="left" valign="bottom"><img src="../images/design/tit_datail_qna.gif" /></td>
+			<td align="right" valign="bottom"></td>
+		</tr>
+		<tr>
+			<td height="10"></td>
+		</tr>
+		</table>
+		<div id="goods_qna_frame_div">	
+		</div>
+		<br /><br /><br />
+	</div> 
+
+	<div id="common_contents" class="goodsDetailTabArea hide" >
+		{? goods.common_contents }
+			<!-- 교환/반품/배송정보 -->
+			<a name="exchange_guide"></a>
+			<div class="exchange_guide">
+				{goods.common_contents}
+			</div>
+			<br /><br /><br />
+		{ / }
+	</div>
+
+	<!--{ / }-->
+
+</div>
+<div id="couponDownloadDialog" style="display:none"></div>
+<script type="text/javascript">
+$("div#goods_review_frame_div").html('<iframe name="goods_review_frame" id="goods_review_frame" src="./review_catalog?goods_seq={goods.goods_seq}&iframe=1" width="100%" height="500" frameborder="0" scrolling="no" allowTransparency="true"></iframe>');
+$("div#goods_qna_frame_div").html('<iframe name="goods_qna_frame" id="goods_qna_frame" src="./qna_catalog?goods_seq={goods.goods_seq}&iframe=1" width="100%" height="500" frameborder="0" scrolling="no" allowTransparency="true"></iframe>');
+</script>

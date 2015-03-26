@@ -1,0 +1,148 @@
+{ #layout_header }
+
+<script>
+//체크박스 색상
+$("input[type='checkbox'][name='del[]']").live('change',function(){
+	if($(this).is(':checked')){
+		$(this).closest('tr').addClass('checked-tr-background');
+	}else{
+		$(this).closest('tr').removeClass('checked-tr-background');
+	}
+}).change();
+</script>
+{ #searchform }
+<!-- 게시글리스트테이블 : 시작 -->
+<table class="list-table-style " cellspacing="0" border="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+	<col width="20" />
+	{? strstr(manager.list_show,'[num]') }<col width="40" />{/}
+	{? strstr(manager.list_show,'[writer]') }<col width="150" />{/}
+	<col width="100" />
+	{? categorylist}<col width="100" />{/}
+	{? strstr(manager.list_show,'[subject]') }<col />{/}
+	{? strstr(manager.list_show,'[date]') }<col width="110" />{/}
+	{? strstr(manager.list_show,'[hit]') }<col width="90" />{/}
+	{? !(manager.id == 'notice' || manager.id == 'faq' ) }<col width="50" />{/}
+	<col width="150" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th><input type="checkbox" name="checkboxAll" value="" id="checkboxAll" /></th>
+		{? strstr(manager.list_show,'[num]') }<th>번호</th>{/}
+		{? strstr(manager.list_show,'[writer]') }<th>작성자</th>{/}
+		<th>IP</th>
+		{? categorylist}<th><select  name="category" id="searchcategory" class="line">
+		<option value="" selected="selected" >- 전체 -</option>
+		{@ categorylist}
+			<option value="{.value_}" {? _GET.category == .value_} selected="selected"  {/}>{.value_}</option>
+		{/}
+		</select></th>{/}
+		{? strstr(manager.list_show,'[subject]') }<th>제목</th>{/}
+		{? strstr(manager.list_show,'[date]') }<th>등록일</th>{/}
+		{? strstr(manager.list_show,'[hit]') }<th>조회수</th>{/}
+		{? !(manager.id == 'notice' || manager.id == 'faq' ) }<th>적립금</th>{/}
+		<th>관리</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb otb"  id="ajaxTable">
+		<!-- 공지리스트데이터 : 시작 -->
+		{? noticeloop }
+			{@ noticeloop }
+			<tr class="list-row noticetr">
+				<td align="center"> </td>
+				{? strstr(manager.list_show,'[num]') }<td align="center" class="number">{.number}</td>{/}
+				{? strstr(manager.list_show,'[writer]') }<td align="center" class="name" >{.name}</td>{/}
+				<td align="center" class="ip" >{.ip}</td>
+				{? categorylist}<td align="center" class="category" >{.category}</td>{/}
+				{? strstr(manager.list_show,'[subject]') }
+					<td align="left">
+						{.iconmobile}
+						{.subject}
+						{.iconimage}
+						{.iconfile}
+						{.iconvideo}
+						{.iconnew}
+						{.iconhot}
+						{.iconhidden}
+					</td>
+				{/}
+				{? strstr(manager.list_show,'[date]') }<td align="center" class="date">{.date}</td>{/}
+				{? strstr(manager.list_show,'[hit]') }<td align="center" class="hit">{.hit}</td>{/}
+				{? !(manager.id == 'notice' || manager.id == 'faq' ) }<td align="center"> </td>{/}
+				<td align="center" nowrap>
+					{.modifybtn}
+					{.replaybtn}
+					{.deletebtn}
+				</td>
+			</tr>
+			{/}
+		{/}
+		<!--공지 리스트 : 끝 -->
+
+		<!-- 리스트데이터 : 시작 -->
+		{? loop }
+			{@ loop }
+			<tr class="list-row {? .display == 1}gray{/}">
+				<td align="center"><input type="checkbox" name="del[]" value="{.seq}"  class="checkeds"  {? !.deletebtn } disabled="disabled" {/} /></td>
+				{? strstr(manager.list_show,'[num]') }<td align="center" class="number">{.number}</td>{/}
+				{? strstr(manager.list_show,'[writer]') }<td align="center" class="name" >{.name}</td>{/}
+				<td align="center" class="ip" >{.ip}</td>
+				{? categorylist}<td align="center" class="category" >{.category}</td>{/}
+				{? strstr(manager.list_show,'[subject]') }
+					<td align="left">
+						{.iconmobile}
+						{.subject}
+						{.iconimage}
+						{.iconfile}
+						{.iconvideo}
+						{.iconnew}
+						{.iconhot}
+						{.iconhidden}
+					</td>
+				{/}
+				{? strstr(manager.list_show,'[date]') }<td align="center" class="date">{.date}</td>{/}
+				{? strstr(manager.list_show,'[hit]') }<td align="center" class="hit">{.hit}</td>{/}
+				{? !(manager.id == 'notice' || manager.id == 'faq' ) }<td align="center">{.emoneylay}</td>{/}
+				<td align="center" nowrap>
+					{.modifybtn}
+					{.replaybtn}
+					{.deletebtn}
+				</td>
+			</tr>
+			{/}
+		{:}
+			<tr class="list-row">
+				<td colspan="all" align="center">
+					{ ? search_text }
+						'{search_text}' 검색된 게시글이 없습니다.
+					{:}
+						등록된 게시글이 없습니다.
+					{/}
+				</td>
+			<tr>
+		{/}
+
+	</tbody>
+	<!-- 리스트 : 끝 -->
+</table>
+<!-- 게시글리스트테이블 : 끝 -->
+
+<br style="line-height:10px;" />
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{pagin}</div>
+
+<!--{ ? !loop }-->
+<script>
+// colspan 계산
+$("td[colspan='all']").each(function(){
+	$(this).attr('colspan',$(this).closest("table").children("thead").first().children("tr").first().children("th").length);
+});
+</script>
+<!--{ / }-->
+
+{ #layout_footer }

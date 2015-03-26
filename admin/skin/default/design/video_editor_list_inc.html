@@ -1,0 +1,21 @@
+{ @ video_list }
+	<tr>
+		<td class="dlts-td center">{.seq}</td>
+		<td class="dlts-td center">{.upkindtitle}</td>
+		<td class="dlts-td center">
+		{=showDesignVideo(.seq,'150X100')}
+		</td>
+		<td class="dlts-td left">{.r_date}</td>
+		<td class="dlts-td center">{? .memo} {.memo}<br/>{/}
+		{? .playtime} {.playtime}초<br/>{/}
+		{? .encoding_speed}{.encoding_speed}Kbps{/} {? .encoding_screen}, {.encoding_screen}Pixel<br/>{/}
+		</td>
+		<td class="dlts-td center">
+			<span class="btn small red"><input type="button" value="삽입하기" onclick="{? .pc_width }editor_insert_video('{.seq}','{.pc_width}','{.pc_height}'){:}editor_insert_video('{.seq}','',''){/}" /></span>
+		</td>
+	</tr>
+{ / }
+
+<script type="text/javascript">
+$("#videopagin").html('{videopagin}');
+</script>

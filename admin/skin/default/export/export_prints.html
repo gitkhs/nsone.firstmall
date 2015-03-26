@@ -1,0 +1,240 @@
+{ #layout_header_popup }
+
+<style>
+.pbreak {page-break-after: always;}
+#pbreak {page-break-after: always;}
+
+table.order-summary-table tr.order-item-row td table tr {height:50px !important;}
+table.order-summary-table tbody.otb td.price { text-align:right; }
+table.order_price_contents {width:97%;border:2px solid #efefef;background-color:#fff;}
+table.order_price_contents tr td {border-top:1px solid #efefef;border-left:1px solid #efefef;background-color:#fff;padding:3px;}
+table.order_price_contents tr th {border-top:1px solid #efefef;border-left:1px solid #efefef;background-color:#fff;padding:3px;}
+table.order_price_contents tr td:first-child {border-left:0px;}
+table.order_price_contents tr th:first-child {border-left:0px;}
+table.order_price_contents tr:first-child th {border-top:0px;}
+table.info-table-style tr td { padding:5px 5px 5px 5px !important;line-height:100% !important;}
+table.info-table-style tr th { padding:5px 5px 5px 5px !important;line-height:100% !important;}
+table.order-summary-table tr.order-item-row td {padding-bottom:0px !important;background-color:#fff;}
+</style>
+
+
+{@ loop }
+
+<div class="pbreak" id="pbreak">
+
+<div style="text-align:center;font-size:20px;letter-spacing:-1px;font-weight:bold;padding-top:20px;">출고내역서</div>
+
+<table class="search-form-table" width="98%">
+<col /><col width="150" />
+<tr>
+	<td align="right">주문일</td><td>: {.order.regist_date}</td>
+</tr>
+<tr>
+	<td align="right">주문번호</td><td>: {.order.order_seq}</td>
+</tr>
+<tr>
+	<td align="right">출고일</td><td>: {.data_export.export_date}</td>
+</tr>
+<tr>
+	<td align="right">출고번호</td><td>: {.data_export.export_code}</td>
+</tr>
+</table>
+
+<table style="width:100%">
+<tr>
+	<td align="center">
+	
+	<table align="center" style="width:97%">
+	<tr>
+		<td class="left">
+		<b>{.order.order_user_name}</b>님의 출고상품 정보 입니다.
+		</td>
+		{?exportPrintExportcodeBarcode}
+		<td align="right">
+			<img src="export_barcode_image?export_code={.data_export.export_code}" vspace="5" />
+		</td>
+		{/}
+	</tr>
+	</table>
+
+	<table class="order-summary-table" style="width:95%;" border=0>
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col />
+		<col width="50" />
+		<col width="50" />
+		<col width="80" />
+		<col width="80" />
+		<col width="80" />
+		<col width="80" />
+		<col width="80" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>상품명</th>
+		<th>주문수량</th>
+		<th>출고수량</th>
+		<th>단가</th>
+		<th>합계</th>
+		<th>할인</th>
+		<th>적립금<br/>포인트</th>
+	</tr>
+	</thead>
+	<tbody class="otb">
+		<!--{ @ .data_export_item }-->
+		<tr class="order-item-row">
+			<td class="info left">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td class="left" valign="top" style="border:none;width:35px;"><a href='/goods/view?no={..goods_seq}' target='_blank'><span class="order-item-image"><img class="small_goods_image" src="{..image}" /></span></a></td>
+					<td class="left" valign="top" style="border:none;">
+						<div class="goods_name">
+						<!--{ ? ..goods_type == 'gift'}-->
+						<img src="/admin/skin/default/images/common/icon_gift.gif" />
+						<!--{ / }-->
+						<!--{ ? ..cancel_type == '1' }-->
+						<span class="order-item-cancel-type " >[청약철회불가]</span>
+						<!--{ / }-->
+						<a href='/goods/view?no={..goods_seq}' target='_blank'><span class="goods_name1" style="color:#000000;">{..goods_name}</span></a></div>
+						<!--{?..option1}-->
+						<div class="goods_option">
+							<img src="/admin/skin/default/images/common/icon_option.gif" />
+							<!--{?..title1}-->{..title1}:<!--{ / }-->{..option1}-->
+							<!--{?..option2 }{?..title2}-->{..title2}:<!--{ / }-->{..option2}<!--{ / }-->
+							<!--{?..option3 }{?..title3}-->{..title3}:<!--{ / }-->{..option3}<!--{ / }-->
+							<!--{?..option4 }{?..title4}-->{..title4}:<!--{ / }-->{..option4}<!--{ / }-->
+							<!--{?..option5 }{?..title5}-->{..title5}:<!--{ / }-->{..option5}<!--{ / }-->
+						</div>
+						{? ..goods_code }
+							<div class="goods_option fx11 goods_code_icon">
+								{? orderPrintGoodsCode}
+									[상품코드: {..goods_code}]
+								{/}
+								{? orderPrintGoodsBarcode}
+									<img src="order_goods_barcode_image?goods_code={..goods_code}" vspace="5" align="absmiddle" />
+								{/}
+							</div>
+						{/}
+						<!--{ : }-->
+							{? ..goods_code && orderPrintGoodsCode }
+								<div class="goods_option fx11 goods_code_icon">
+									[상품코드: {..goods_code}]
+									{? orderPrintGoodsBarcode}
+										<img src="order_goods_barcode_image?goods_code={..goods_code}" vspace="5" align="absmiddle" />
+									{/}
+								</div>
+							{/}
+						<!--{ / }-->
+						<!--{ ? ..inputs }-->
+							<!--{ @ ..inputs }-->
+								<!--{ ? ...value }-->
+						<div class="goods_input">
+							<img src="/admin/skin/default/images/common/icon_input.gif" />
+							<!--{?...title}-->{...title}:<!--{ / }-->
+							<!--{?...type=='file'}-->
+							<a href="../order_process/filedown?file={...value}" target="actionFrame">{...value}</a>
+							<!--{:}-->{...value}<!--{ / }-->
+						</div>
+								<!--{ / }-->
+							<!--{ / }-->
+						<!--{ / }-->
+					</td>
+				</tr>
+				</table>
+			</td>
+			<td class="price info">{..opt_ea}</td>
+			<td class="price info">{..ea}</td>
+			<td class="price info">{=number_format(..price)}</td>
+			<td class="price info">{=number_format(..out_price)}</td>
+			<td class="price info">{=number_format(..out_coupon_sale + ..out_member_sale + ..out_fblike_sale + ..out_mobile_sale + ..out_referer_sale)}</td>
+			<td class="price info">{=number_format(..out_reserve)}<br/>P{=number_format(..out_point)}</td>
+		</tr>
+		<!--{ / }-->
+		<tr class="order-item-row">
+			<td class="info center">합계</td>
+			<td class="price info">{.export_tot.opt_ea}</td>
+			<td class="price info">{.export_tot.ea}</td>
+			<td class="price info">{=number_format(.export_tot.oprice)}</td>
+			<td class="price info">{=number_format(.export_tot.price)}</td>
+			<td class="price info">{=number_format(.export_tot.coupon_sale + .export_tot.member_sale + .export_tot.fblike_sale + .export_tot.mobile_sale + .export_tot.referer_sale)}</td>
+			<td class="price info">{=number_format(.export_tot.reserve)}<br/>P{=number_format(.export_tot.point)}</td>
+		</tr>
+	</tbody>
+	</table>
+
+
+	<table align="center" style="width:95%">
+	<tr><td><div class="item-title left">배송지정보</div></td></tr>
+	</table>
+	<table align="center" class="info-table-style" style="width:95%">
+	<colgroup>
+		<col width="15%" />
+		<col width="35%" />
+		<col width="15%" />
+		<col width="35%" />
+	</colgroup>
+	<tbody>
+	<tr>
+		<th class="its-th-align center">수령인</th>
+		<td class="its-td left">{.order.recipient_user_name}</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">연락처</th>
+		<td class="its-td left">
+			{.order.recipient_phone} / 
+			{.order.recipient_cellphone} / 
+			{.order.recipient_email}
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">주소</th>
+		<td class="its-td left" colspan="3">
+			{?.order.international == 'international'}
+			<div>
+				{shipping_policy.policy[1][0].region[.region]}
+				{.order.international_address}
+				{.order.international_town_city}
+			</div>
+			<div>
+				{.order.international_county}
+				{.order.international_postcode}
+			</div>
+			<div>{.order.international_country}</div>
+			{:}
+				{?.order.recipient_zipcode}<div style="line-height:18px;">{.order.recipient_zipcode}</div>{/}
+				{?.order.recipient_address}
+				<div style="line-height:22px;">(지번) {.order.recipient_address} {.order.recipient_address_detail}</div>
+				{/}
+				{?.order.recipient_address_street}
+				<div style="line-height:22px;">(도로명) {.order.recipient_address_street} {.order.recipient_address_detail}</div>
+				{/}
+			{/}
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">메모</th>
+		<td class="its-td left" colspan="3">{.order.memo}</td>
+	</tr>
+	</tbody>
+	</table>
+
+	</td>
+</tr>
+</table>
+
+
+
+<div style="padding:20px;"></div>
+</div>
+
+{ / }
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	window.print();
+});
+</script>
+
+
+{ #layout_footer_popup }

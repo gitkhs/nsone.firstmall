@@ -1,0 +1,261 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	// 바로열기
+	$(".btn-direct-open").toggle(function(){
+		var nextTr = $(this).closest('tr').next();
+		var goods_seq = $(this).closest('tr').find("input[name='goods_seq[]']").val();
+		$.get('batch_option_view?mopt=1&no='+goods_seq, function(data) {
+			nextTr.find('div.option_info').html(data);
+		});
+		nextTr.removeClass('hide');
+		$(this).addClass("opened");
+	},function(){
+		var nextTr = $(this).closest('tr').next();
+		nextTr.find('div.order_info').html('');
+		nextTr.addClass('hide');
+		$(this).removeClass("opened");
+	});
+
+	// 적용 마켓 선택
+	$("select[name='top_sel_mall']").change(function(){
+		var target	= $("select[name='top_set_mall']").val();
+		if	(target == 'all'){
+			if	($(this).val() != 'direct')
+				$(this).find("option[value='direct']").attr('selected', true);
+		}else{
+			if	($(this).val() != 'direct' && target != $(this).val())
+				$(this).find("option[value='"+target+"']").attr('selected', true);
+		}
+
+		$(".set-mall-lay").hide();
+		$(".set-mall-"+$(this).val()).show();
+
+		if	($(this).val() == 'direct'){
+			set_revision('direct', '');
+		}else{
+			set_revision('', $(".set-mall-"+$(this).val()).find("select[name='revision_set']"));
+		}
+	});
+
+	// 금액조정 set 선택
+	$("select[name='revision_set']").bind('change', function(){
+		set_revision('', this);
+	});
+
+	{ ? !LINKAGE_SERVICE }
+	$.ajax({
+		type: "get",
+		url: "../openmarket/notice_pop",
+		data: {},
+		success: function(result){
+			$("#openmarket_pop_info").html(result);
+			openDialog("다중 판매마켓  서비스 안내", "openmarket_pop_info", {"width":"500","height":"200","noClose":"true"});
+		}
+	});
+	{ / }
+});
+
+// 금액조정 set 선택
+function set_revision(direct_type, obj){
+	var set_data		= '';
+	if	(direct_type != 'direct'){
+		set_data	= $(obj).find('option:selected').val()
+					+ '|' + $(obj).find('option:selected').attr('revisionUnit')
+					+ '|' + $(obj).find('option:selected').attr('revisionType');
+	}
+	$("input[name='revision_set_data']").val(set_data);
+}
+</script>
+<br class="table-gap" />
+
+<ul class="left-btns clearbox">
+	<li><div style="margin-top:rpx;">
+	<!--{ ? search_yn == 'y' }-->
+	검색 <b>{=number_format(page.totalcount)}</b> 개
+	<!--{ : }-->
+	총 <b>{=number_format(page.totalcount)}</b> 개</div>
+	<!--{ / }-->
+	</li>
+</ul>
+
+<div class="fr">
+	<div class="clearbox">
+		<ul class="right-btns clearbox">
+		<li><select class="custom-select-box-multi" name="orderby">
+			<option value="goods_seq" {?orderby=='goods_seq'}selected{/}>최근등록순</option>
+			<option value="goods_name" {?orderby=='goods_name'}selected{/}>상품명순</option>
+			<option value="page_view" {?orderby=='page_view'}selected{/}>페이지뷰순</option>
+		</select></li>
+		<li><select  class="custom-select-box-multi" name="perpage">
+			<option id="dp_qty10" value="10" {? perpage == 10 } selected{/} >10개씩</option>
+			<option id="dp_qty50" value="50" {? perpage == 50 } selected{/} >50개씩</option>
+			<option id="dp_qty100" value="100" {? perpage == 100 } selected{/} >100개씩</option>
+			<option id="dp_qty200" value="200" {? perpage == 200 } selected{/} >200개씩</option>
+		</select></li>
+	</ul>
+	</div>
+</div>
+
+<!-- 리스트 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+<colgroup>
+	<col width="30" /><!--체크-->
+	<col width="50" /><!--상품이미지-->
+	<col width="200" /><!--상품명-->
+	<col width="40" /><!--옵션-->
+	<col width="90" /><!--정가-->
+	<col width="90" /><!--할인가(판매가)-->
+	<col width="90" /><!--부가세-->
+	<col width="90" /><!--재고-->
+	<!--{ ? mall }-->
+		<!--{ @ mall }-->
+	<col />
+		<!--{ / }-->
+	<!--{ / }-->
+</colgroup>
+<thead class="lth">
+<tr>
+	<th colspan="3">대상 상품</th>
+	<th colspan="{=(mallcnt + 5)}">아래와 같이 업데이트</th>
+</tr>
+<tr style="background-color:#e3e3e3" height="80">
+	<td colspan="3" align="right" style="padding:20px;">
+		검색된 상품에서 →
+		<select name="target_type">
+			<option value="sel">선택</option>
+			<option value="all">전체</option>
+		</select>
+	</td>
+	<td colspan="{=(mallcnt + 5)}" align="left" style="padding:10px 0;">
+		<div >
+			<input type="checkbox" name="openmarket_use_status" value="y" />
+			<select name="set_status_openmarket">
+				<option value="all">모든 판매마켓</option>
+				<!--{ ? mall }-->
+					<!--{ @ mall }-->
+				<option value="{.mall_code}">{.mall_name}</option>
+					<!--{ / }-->
+				<!--{ / }-->
+			</select>
+			에 상품 전송여부를
+			<select name="openmarket_status">
+				<option value="send">전송</option>
+				<option value="stop">중지</option>
+			</select>
+			합니다.
+		</div>
+		<div >
+			<input type="hidden" name="revision_set_data" value="" />
+			<input type="checkbox" name="openmarket_use_price" value="y" />
+			<select name="set_price_openmarket">
+				<option value="all">모든 판매마켓</option>
+				<!--{ ? mall }-->
+					<!--{ @ mall }-->
+				<option value="{.mall_code}">{.mall_name}</option>
+					<!--{ / }-->
+				<!--{ / }-->
+			</select>
+			판매가를 → 
+			<select name="top_sel_mall">
+				<option value="direct">직접입력</option>
+				<!--{ ? mall }-->
+					<!--{ @ mall }-->
+				<option value="{.mall_code}">{.mall_name}</option>
+					<!--{ / }-->
+				<!--{ / }-->
+			</select>
+			<span class="set-mall-lay set-mall-direct">
+				<input type="text" size="3" name="set_revision_val" />
+				<select name="set_revision_unit">
+					<option value="percent">%</option>
+					<option value="won">원</option>
+				</select>
+				<select name="set_revision_type">
+					<option value="P">+조정</option>
+					<option value="M">-조정</option>
+				</select>
+			</span>
+			<!--{ ? mall }-->
+				<!--{ @ mall }-->
+			<span class="set-mall-lay set-mall-{.mall_code} hide">
+				<select name="revision_set">
+					<!--{ @ .revision }-->
+					<option value="{..revision_val}" revisionUnit="{..revision_unit}" revisionType="{..revision_type}" {?..default_yn=='Y'}selected{/}>{..revision_str}</option>
+					<!--{ / }-->
+				</select>
+			</span>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? linkage.cut_price_use == 'y' }-->
+			조정된 가격을 
+			{ ? (linkage.cut_price_unit / 10) == '10' }십원{ : (linkage.cut_price_unit / 10) == '100' }백원{ : (linkage.cut_price_unit / 10) == '1000' }천원{ : (linkage.cut_price_unit / 10) == '10000' }만원{ : }일원{ / }자리에서 
+			{ ? linkage.cut_price_type == 'ceil' }올림{ : linkage.cut_price_type == 'floor' }버림{ : }반올림{ / }하여 절사처리합니다.
+			<!--{ / }-->
+		</div>
+	</td>
+</tr>
+<tr>
+	<th><input type="checkbox" id="chkAll" /></th>
+	<th colspan="2">상품명</th>
+	<th>옵션</th>
+	<th>정가</th>
+	<th>할인가(판매가)</th>
+	<th>부가세</th>
+	<th>재고(가용)</th>
+	<!--{ ? mall }-->
+		<!--{ @ mall }-->
+	<th>{.mall_name}</th>
+		<!--{ / }-->
+	<!--{ / }-->
+</tr>
+</thead>
+<tbody class="ltb">
+<!--{? loop }-->
+	<!--{@ loop }-->
+<tr class="list-row" style="height:70px;">
+	<td align="center"><input type="checkbox" class="chk" name="goods_seq[]" value="{.goods_seq}" /></td>
+	<td align="center"><a href="/goods/view?no={.goods_seq}" target="_blank"><img src="{=viewImg(.goods_seq,'thumbView')}" width="50"></a></td>
+	<td align="left" style="padding-left:10px;">
+		<!--{? .tax=='exempt' && .cancel_type == '1'}-->
+		<div>
+			<span style="color:red;" class="left" >[비과세]</span>
+			<span class="order-item-cancel-type left" >[청약철회불가]</span>
+		</div>
+		<!--{: .tax=='exempt' }-->
+		<div><span style="color:red;" class="left" >[비과세]</span></div>
+		<!--{: .cancel_type == '1'}-->
+		<div><span class="order-item-cancel-type left" >[청약철회불가]</span></div>
+		<!--{ / }-->
+		<!--{? .goods_code }-->
+		<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>
+		<!--{/}-->
+		<a href="../goods/regist?no={.goods_seq}" target="_blank">{=getstrcut(.goods_name,80)}</a>
+		<div style="padding-top:5px;">{.catename}</div>
+	</td>
+	<td align="center"><span class="btn-direct-open"><span class="hide">바로열기</span></span></td>
+	<td align="right" style="padding-right:5px;" class="option_td">{=number_format(.consumer_price)}</td>
+	<td align="right" style="padding-right:5px;" class="option_td">{=number_format(.price)}</td>
+	<td align="right" style="padding-right:5px;" class="option_td">{? .tax=='exempt'}0{:}{=number_format(.price - (.price / 1.1))}{/}</td>
+	<td align="center" class="option_td">{=number_format(.stock)} ({=number_format(.able_stock)})</td>
+	<!--{ ? .mallprice }-->
+		<!--{ @ .mallprice }-->
+	<td align="right" style="padding-right:5px;" class="option_td">
+			<!--{ ? .mallinfo[..key_] == 'y' }-->
+		{=number_format(..value_)}
+			<!--{ : }-->
+		<s style="color:red;">{=number_format(..value_)}</s>
+			<!--{ / }-->
+	</td>
+		<!--{ / }-->
+	<!--{ / }-->
+</tr>
+<tr class="order-list-summary-row hide">
+	<td colspan="{=(.mallcnt+8)}" class="order-list-summary-row-td"><div class="option_info"></div></td>
+</tr>
+	<!--{ / }-->
+<!--{ / }-->
+</tbody>
+</table>
+<!-- 리스트 : 끝 -->
+
+<div id="openmarket_pop_info" class="hide"></div>

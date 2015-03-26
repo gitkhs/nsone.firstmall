@@ -1,0 +1,1587 @@
+{ #layout_header }
+<style>
+div .connectCategory { width:97%; float:left; cursor:hand; }
+</style>
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/jquery.uploadify.v2.1.4.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+<script type="text/javascript" src="/app/javascript/js/admin-goodsRegist.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#coupongoodsreviewbtn").click(function() {
+		{? _GET.no }
+			var coupon_seq = "{_GET.no}";
+			var coupon_name = "{coupons.coupon_name}";  
+			var use_type = "{coupons.use_type}";   
+			var issue_type = "{coupons.issue_type}";
+			var coupongoodsreviewerurl = '../coupon/coupongoodsreviewer?no='+coupon_seq+'&coupon_type=online';
+			if( use_type == 'offline' ) {
+				addFormDialog(coupongoodsreviewerurl, '650', '', '쿠폰 사용 가능한 상품 확인하기','false');
+			}else{
+				addFormDialog(coupongoodsreviewerurl, '450', '', '쿠폰 사용 가능한 상품 확인하기','false');
+			}
+		{:}
+			alert("쿠폰 생성 후 조회가 가능합니다.");
+		{/}
+	});
+
+	//쿠폰상품 조회후 상품검색창
+	$("input:button[name=goodssearchbtn]").live("click",function(){
+		var goods_seq		= $("#coupongoods_goods_seq").val();
+		var coupon_seq	= $(this).attr("coupon_seq");
+
+		if(!goods_seq) {
+				openDialogAlert("상품번호를 정확히 입력해 주세요.",'260','140',function(){$("#coupongoods_goods_seq").focus();return;});
+		}else{ 
+			$.ajax({
+				'url' : '../coupon/coupongoodssearch',
+				'data' : {'coupon':coupon_seq,'goods':goods_seq},
+				'type' : 'post',
+				'dataType': 'json',
+				'success' : function(res){ 
+					$(".coupongoodsreviewerno").hide();//상품사용불가
+					$(".coupongoodsrevieweryes").hide();//쿠폰사용가능
+					if( res.result == 'goodsyes' ) {  
+						var imgsrc = (eval("res.goods.src"))?res.goods.src:"/admin/skin/default/images/common/noimage_list.gif";
+						$(".coupongoodsrevieweryes").show(); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".image").html('<img class="goodsThumbView" alt="" src="'+imgsrc+'" width="50" height="50">'); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".name").html(res.goods.name);
+						$(".coupongoodsrevieweryes .issueGoods").find(".price").html(res.goods.price);
+						$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq",goods_seq); 
+						
+						openDialog('상품번호 찾기',"coupongoodsreviewerpopup",{"width":"480","height":"250"});
+					}else if( res.result == 'goodsno' ) {  						
+						var imgsrc = (eval("res.goods.src"))?res.goods.src:"/admin/skin/default/images/common/noimage_list.gif";
+						$(".coupongoodsreviewerno").show();
+						$(".coupongoodsrevieweryes .issueGoods").find(".image").html('<img class="goodsThumbView" alt="" src="'+imgsrc+'" width="50" height="50">'); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".name").html(res.goods.name);
+						$(".coupongoodsrevieweryes .issueGoods").find(".price").html(res.goods.price);
+						$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq",goods_seq); 
+						
+						openDialog('상품번호 찾기',"coupongoodsreviewerpopup",{"width":"400","height":"250"});
+					}else{
+						openDialogAlert("상품을 찾을 수 없습니다.<br/>확인 후 다시 입력하시기 바랍니다.",'250','160'); 
+					}
+				}
+			});
+		}
+	});
+	
+	//상품상세보기
+	$('.coupongoodsdetail').live("click",function(){ 
+		window.open("/goods/view?no="+$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq"),'','');
+	});
+
+	$("#offlinecoupontypepopupbtn").click(function() {
+			openDialog("쿠폰 종류 선택", "offlinecoupontypePopup", {"width":"930","height":"720"});
+	});
+
+	$("#sale_referer_item_btn").click(function() {
+			openDialog("유입경로 선택", "offlinecouponrefererpopup", {"width":"330","height":"320"});
+	});
+
+	$(".sale_referer").live("click",function(){  
+		var sale_referer = $("form#offlineRegist input[name='sale_referer']:checked").val(); 
+		if( sale_referer == 'y' ) {
+			$(".sale_referer_y_lay").attr("disabled",false);
+		}else{
+			$(".sale_referer_y_lay").attr("disabled",true);
+		}
+	}); 
+	
+	$("input[name='sale_referer_type_tmp']").live("click",function(){  
+		var sale_referer_type_tmp = $("input[name='sale_referer_type_tmp']:checked").val(); 
+		$("input[name='sale_referer_type']").val(sale_referer_type_tmp); 
+		if( sale_referer_type_tmp == 's' ) {
+			$(".sale_referer_type_s").attr("disabled",false);
+		}else{
+			$(".sale_referer_type_s").attr("disabled",true);
+		}
+	});  
+	
+	/* 사용제한 - 유입경로 추가 */
+	$("#sale_referer_add_btn").live("click",function(){ 
+		var referersale_name = $("#sale_referer").find("option:selected").attr("referersale_name");
+		var referersale_seq = $("#sale_referer").find("option:selected").val();
+		if( !referersale_seq ){
+			alert('유입경로를 추가해 주세요.');
+			return false;
+		}
+		var chkitemArr= new Array();
+		var ret = true;
+		$("input:[name='sale_referer_item_tmp[]']").each(function(idx, obj){  
+			if (jQuery.inArray( referersale_seq , chkitemArr ) == -1) {
+				chkitemArr.push($(this).val()); 
+			}
+		});
+		if ( jQuery.inArray( referersale_seq , chkitemArr ) != -1 ) {
+			alert("이미 선택된 유입경로 입니다.");
+			return;
+		}  
+
+		var salserefereritemhtml = '';
+		salserefereritemhtml += '<li  class="pdb3">';
+		salserefereritemhtml += '<span class="left">'+referersale_name+'</span> <span class="right"><input type="hidden" name="sale_referer_item_tmp[]" value="'+referersale_seq+'" referersale_name = "'+referersale_name+'" ><span class="btn small gray"><button type="button" id="sale_referer_del_btn" referersale_seq = "'+referersale_seq+'" >삭제</button></span></span>';		
+		salserefereritemhtml += '</li >'; 
+		$("#salserefereritemlay").append(salserefereritemhtml); 
+	});
+
+	/* 사용제한 - 유입경로 삭제 */
+	$("#salserefereritemlay button#sale_referer_del_btn").live("click",function(){ 
+		$(this).parents("li").remove();
+	});
+	
+	/* 사용제한 - 유입경로 확인 */
+	$("#salserefereritembtn").live("click",function(){ 
+		var sale_referer_type_tmp = $("input[name='sale_referer_type_tmp']:checked").val(); 
+		var chkitemArr= new Array();
+		var ret = true;
+		var itemseqvalue = ""; 
+		if( sale_referer_type_tmp == 's' ) {
+			var itemnamevalue = "";
+			$("input:[name='sale_referer_item_tmp[]']").each(function(idx, obj){ 
+				if (jQuery.inArray( $(obj).val() , chkitemArr ) == -1) {
+					chkitemArr.push($(obj).val());
+					itemseqvalue += $(obj).val()+","; 
+					itemnamevalue += $(obj).attr("referersale_name")+", ";
+				}
+			});
+		}else{
+			var itemnamevalue = "모든 유입경로";
+		}
+		$("#sale_referer_item").val(itemseqvalue);		
+		$("input[name='sale_referer_type']").val(sale_referer_type_tmp); 
+		$(".salserefereritemtmplay").text(itemnamevalue);
+		$("#offlinecouponrefererpopup").dialog('close'); 
+	});
+
+	<!--{ ? coupons.sale_agent }-->
+		$("input[name='sale_agent'][value='{coupons.sale_agent}']").attr('checked',true);
+	<!--{ / }-->
+
+	<!--{ ? coupons.sale_payment }-->
+		$("input[name='sale_payment'][value='{coupons.sale_payment}']").attr('checked',true);
+	<!--{ / }-->
+
+	<!--{ ? coupons.sale_referer }-->
+		$("input[name='sale_referer'][value='{coupons.sale_referer}']").attr('checked',true);
+	<!--{ / }-->
+
+	<!--{ ? coupons.sale_referer_type }-->
+		$("input[name='sale_referer_type_tmp'][value='{coupons.sale_referer_type}']").attr('checked',true);
+	<!--{ / }-->
+
+
+
+	$('body,input,textarea,select').bind('keydown','Ctrl+s',function(event){
+		event.preventDefault();
+		$("#offlineRegist").submit();
+	});
+
+	$(".batchExcelRegist").live("click",function(){
+		$("#ExcelUploadDialog").dialog("open");
+	});
+
+	openDialog("엑셀 업로드 <span class='desc'>인쇄용 쿠폰 인증번호 엑셀 등록</span>", "ExcelUploadDialog", {"width":600,"height":530,"autoOpen":false,"close":function(){
+		$("#ExcelUploadButton").uploadifyCancel();
+		$("#ExcelUploadButtonQueue").empty();
+		$("#ExcelUploadButton").uploadifyClearQueue();
+	}});
+
+
+	/* 파일업로드버튼 Uploadify 적용 */
+	$("#ExcelUploadButton").uploadify({
+		'script'			: krdomain+'/admin/coupon_process/upload_excelfile',
+	    'uploader'			: '/app/javascript/plugin/jquploadify/uploadify.swf',
+	    'buttonImg'			: '../images/common/btn_filesearch.gif',
+	    'cancelImg'			: '/app/javascript/plugin/jquploadify/uploadify-cancel.png',
+	    'fileTypeExts'		: '*.xls',
+	    'fileTypeDesc'		: 'Excel',
+	    'removeCompleted'	: false,
+		'width'				: 63,
+		'height'			: 20,
+	    'folder'			: '/data/tmp',
+	    'auto'				: true,
+	    'multi'				: false,
+	    'onComplete'		: function (event, ID, fileObj, response, data) {
+			var data = eval(response)[0];
+			if(data.status){
+				$("#ExcelUploadButton").uploadifyCancel();
+				$("#ExcelUploadButtonQueue").empty();
+				$("#ExcelUploadButton").uploadifyClearQueue();
+				$("#offline_file").val(data.file_name);
+				closeDialog("ExcelUploadDialog");
+			}else{
+				$("#ExcelUploadButton").uploadifyCancel();
+				$("#ExcelUploadButtonQueue").empty();
+				$("#ExcelUploadButton").uploadifyClearQueue();
+				alert(data.msg);
+			}
+		},
+		'onError'			: function (event,ID,fileObj,errorObj) {
+			alert(errorObj.type + ' Error: ' + errorObj.info);
+		}
+	});
+
+	$(".offline_coupon_form").click(function(){
+		document.location.href = '{offline_coupon_form}';
+	});
+
+	$("form#offlineRegist input[name='couponType']").bind("click",function(){
+		set_coupon_form();
+	});
+
+
+	$("form#offlineRegist input[name='issue_type']").bind("click",function(){
+		if($(this).val() == 'issue') {
+			$('.issuetypelay').show();
+			$('#issuesgoodslay').show();
+			$('#exceptgoodslay').hide();
+			$('#issuescategorylay').show();
+			$('#exceptcategorylay').hide();
+		}else if($(this).val() == 'except'){
+			$('.issuetypelay').show();
+			$('#issuesgoodslay').hide();
+			$('#exceptgoodslay').show();
+
+			$('#issuescategorylay').hide();
+			$('#exceptcategorylay').show();
+		}else{
+			$('.issuetypelay').hide();
+			$('#issuesgoodslay').hide();
+			$('#exceptgoodslay').hide();
+			$('#issuescategorylay').hide();
+			$('#exceptcategorylay').hide();
+		}
+	});
+
+
+	$(".setGroup").live("click",function(){
+		$("input:checkbox[name='memberGroup']").attr("checked",false);
+		openDialog("등급제한 <span class='desc'>카테고리를 접속할 회원그룹을 설정합니다.</span>", "setGroupsPopup", {"width":"500","height":150});
+	});
+
+	$("input[name=memberGroup]").live("click",function(){
+		var type = $("form#offlineRegist input[name='couponType']").val(); 
+		groupsMsg(type);
+	});
+	$("form#offlineRegist button#issueGoodsButton").bind("click",function(){
+		set_goods_list("issueGoodsSelect","issueGoods");
+	});
+	$("#issueGoods").sortable();
+	$("#issueGoods").disableSelection();
+
+	$("form#offlineRegist button#exceptIssueGoodsButton").bind("click",function(){
+		set_goods_list("exceptIssueGoodsSelect","exceptIssueGoods");
+	});
+	$("#exceptIssueGoods").sortable();
+	$("#exceptIssueGoods").disableSelection();
+
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','');
+	$("select[name='category1']").bind("change",function(){
+		category_admin_select_load('category1','category2',$(this).val());
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").bind("change",function(){
+		category_admin_select_load('category2','category3',$(this).val());
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category3']").bind("change",function(){
+		category_admin_select_load('category3','category4',$(this).val());
+	});
+
+	$("button#issueCategoryButton").bind("click",function(){
+		var obj;
+		var category;
+		var categoryCode;
+
+		obj = $("select[name='category1']");
+		if(obj.val()){
+			category = $("select[name='category1'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='category2']");
+		if(obj.val()){
+			category += " > " + $("select[name='category2'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='category3']");
+		if(obj.val()){
+			category += " > " + $("select[name='category3'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='category4']");
+		if(obj.val()){
+			category += " > " + $("select[name='category4'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+
+		if(category){
+			if($("input[name='issueCategoryCode[]'][value='"+categoryCode+"']").length == 0){
+				var tag = "<div style='padding:5px;'><span style='display:inline-block;width:300px'>"+category+"</span>";
+				tag += "<span class='btn-minus'><button type='button' class='delCategory'></button></span>";
+				tag += "<input type='hidden' name='issueCategoryCode[]' value='"+categoryCode+"' /></div>";
+				$("div#issueCategory").append(tag);
+			}
+		}
+	});
+
+	category_admin_select_load('','exceptCategory1','');
+	$("select[name='exceptCategory1']").bind("change",function(){
+		category_admin_select_load('exceptCategory1','exceptCategory2',$(this).val());
+		category_admin_select_load('exceptCategory2','exceptCategory3',"");
+		category_admin_select_load('exceptCategory3','exceptCategory4',"");
+	});
+	$("select[name='exceptCategory2']").bind("change",function(){
+		category_admin_select_load('exceptCategory2','exceptCategory3',$(this).val());
+		category_admin_select_load('exceptCategory3','exceptCategory4',"");
+	});
+	$("select[name='exceptCategory3']").bind("change",function(){
+		category_admin_select_load('exceptCategory3','exceptCategory4',$(this).val());
+	});
+
+	$("button#exceptIssueCategoryButton").bind("click",function(){
+		var obj;
+		var category;
+		var categoryCode;
+
+		obj = $("select[name='exceptCategory1']");
+		if( obj.val()) {
+			category = $("select[name='exceptCategory1'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='exceptCategory2']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory2'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='exceptCategory3']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory3'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+		obj = $("select[name='exceptCategory4']");
+		if(obj.val()){
+			category += " > " + $("select[name='exceptCategory4'] option[value='"+obj.val()+"']").html();
+			categoryCode = obj.val();
+		}
+
+		if(category){
+			if($("input[name='exceptIssueCategoryCode[]'][value='"+categoryCode+"']").length == 0){
+				var tag = "<div style='padding:5px;'><span style='display:inline-block;width:300px'>"+category+"</span>";
+				tag += "<span class='btn-minus'><button type='button' class='delCategory'></button></span>";
+				tag += "<input type='hidden' name='exceptIssueCategoryCode[]' value='"+categoryCode+"' /></div>";
+				$("div#exceptIssueCategory").append(tag);
+			}
+		}
+	});
+
+	$("form#offlineRegist button.delCategory").live("click",function(){
+		$(this).parent().parent().remove();
+	});
+
+	<!--{ ? coupons.coupon_seq }--> 
+		var offlinecptype = "{coupons.type}";  
+		$("#couponType").val(offlinecptype);
+		$('.offlinecptypetr').hide();
+		$('.'+offlinecptype+'tbllay').show();
+		$("input[name='couponType'][value='"+offlinecptype+"']"); 
+		if( offlinecptype == "offline_emoney" ) {
+			$("#offlinetypetitle").text("적립금"); 
+		}else{
+			$("#offlinetypetitle").text("쿠폰"); 
+		}
+		set_coupon_form();
+	<!--{ / }-->
+ 
+	<!--{ ? coupons.download_limit }-->
+	$("form#offlineRegist select[name='downloadLimit_{coupons.type}']").val(['{coupons.download_limit}']);
+	<!--{ / }-->
+
+	<!--{ ? coupons.download_limit_ea }-->
+	$("form#offlineRegist input[name='downloadLimitEa_{coupons.type}']").val('{coupons.download_limit_ea}');
+	<!--{ / }-->
+
+	<!--{ ? coupons.sale_type == 'won'}-->
+			$("input:radio[name='saleType']").eq(1).attr("checked","checked");
+	<!--{ : coupons.sale_type == 'percent'}-->
+			$("input:radio[name='saleType']").eq(0).attr("checked","checked");
+	<!--{ / }-->
+
+
+	<!--{ ? coupons.shipping_type }-->
+		$("input[name='shippingType'][value='{coupons.shipping_type}']").attr('checked',true);
+	<!--{ / }-->
+
+
+	<!--{ ? coupons.coupon_same_time }-->
+		$("input[name='couponsametime'][value='{coupons.coupon_same_time}']").attr('checked',true);
+		<!--{ ? coupons.coupon_same_time == "N" }-->
+			$(".couponsametimen").show();
+			$(".couponsametimey").hide();
+		<!--{ :}-->
+			$(".couponsametimey").show();
+			$(".couponsametimen").hide();
+		<!--{ / }-->
+	<!--{ / }-->
+
+	<!--{ ? coupons.issue_type }-->
+		$("input[name='issue_type'][value='{coupons.issue_type}']").attr('checked',true);
+		<!--{ ? coupons.issue_type == 'issue' }-->
+
+			$('.issuetypelay').show();
+			$('#issuesgoodslay').show();
+			$('#exceptgoodslay').hide();
+			$('#issuescategorylay').show();
+			$('#exceptcategorylay').hide();
+		<!--{: coupons.issue_type == 'except' }-->
+
+			$('.issuetypelay').show();
+			$('#issuesgoodslay').hide();
+			$('#exceptgoodslay').show();
+			$('#issuescategorylay').hide();
+			$('#exceptcategorylay').show();
+		<!--{:}-->
+			$('.issuetypelay').hide();
+			$('#issuesgoodslay').hide();
+			$('#exceptgoodslay').hide();
+			$('#issuescategorylay').hide();
+			$('#exceptcategorylay').hide();
+		<!--{ / }-->
+	<!--{ / }-->
+
+	$("input[name='duplicationUse']").click(function(){
+		if($(this).attr('checked') == 'checked' ) {
+			$("input[name='duplicationUse']").attr('checked',true);
+			$(".duplicationuselay").removeClass('gray');
+		}else{
+			$("input[name='duplicationUse']").attr('checked',false);
+			$(".duplicationuselay").addClass('gray');
+		}
+	});
+
+	<!--{ ? coupons.duplication_use==1 }-->
+	$("input[name='duplicationUse']").attr('checked',true);
+	<!--{ / }-->
+	<!--{ ? coupons.coupon_img }-->
+		$("input[name='couponImg'][value='{coupons.coupon_img}']").attr('checked',true);
+	<!--{ / }-->
+
+	<!--{ ? coupons.issue_priod_type == 'day'}-->
+			$("input:radio[name='issuePriodType']").eq(1).attr("checked","checked");
+	<!--{ : coupons.issue_priod_type == 'date'}-->
+			$("input:radio[name='issuePriodType']").eq(0).attr("checked","checked");
+	<!--{ / }-->
+
+	<!--{ ? coupons.issue_stop }-->
+	$("select[name='{coupons.type}_issue_stop']").val(['{coupons.issue_stop}']);
+	//$("form#offlineRegist input[name='issue_stop']").val('{coupons.issue_stop}');
+	//$("input[name='issue_stop']").attr("checked","checked");
+	<!--{ / }-->
+
+
+	//set_coupon_form();
+
+	<!--{ ? !couponGroups ||  (coupons.type != 'download') }-->
+		groupsMsg('download');
+	<!--{ / }-->
+	<!--{ ? !couponGroups || (coupons.type != 'birthday') }-->
+		groupsMsg('birthday');
+	<!--{ / }-->
+	<!--{ ? !couponGroups ||  (coupons.type != 'shipping') }-->
+		groupsMsg('shipping');
+	<!--{ / }-->
+	<!--{ ? !couponGroups ||  (coupons.type != 'memberGroup') }-->
+		groupsMsg('memberGroup');
+	<!--{ / }-->
+
+
+	// 발급내역
+	$('.downloadlist_btn').live('click', function() {
+		addFormDialog('./download?no={coupons.coupon_seq}', '85%', '650', '[{=addslashes(coupons.coupon_name)}] 발급내역 ','false');
+	});
+
+	// 발급내역
+	$('.downloadlistuse_btn').live('click', function() {
+		addFormDialog('./download?use_status=used&no={coupons.coupon_seq}', '85%', '650', '[{=addslashes(coupons.coupon_name)}] 발급내역 ','false');
+	});
+
+	//수동생성 > 인증번호보기
+	$('#offline_coupon_view').live('click', function() {
+		addFormDialog('./offline_coupon?no={coupons.coupon_seq}', '480', '750', '[{=addslashes(coupons.coupon_name)}] 인증번호 보기 ','false');
+	});
+
+	//수동생성 > 인증번호 엑셀 다운받기
+	$('#offline_coupon_excel_down').live('click', function() {
+		document.location.href='/admin/coupon_process/offline_coupon_exceldown?no={coupons.coupon_seq}';
+	});
+
+
+
+	$("#downloadLimit_download").click(function(){
+		if($(this).val() == 'limit') {
+			$("#downloadLimitEa_download").show();
+		}else{
+			$("#downloadLimitEa_download").hide();
+		}
+	});
+
+	$("#downloadLimit_birthday").click(function(){
+		if($('.birthdaytbllay').attr("disabled") != 'disabled'){
+			if($(this).val() == 'limit') {
+				$("#downloadLimitEa_birthday").show();
+			}else{
+				$("#downloadLimitEa_birthday").hide();
+			}
+		}
+	});
+
+	$("#downloadLimit_shipping").click(function(){
+		if($(this).val() == 'limit') {
+			$("#downloadLimitEa_shipping").show();
+		}else{
+			$("#downloadLimitEa_shipping").hide();
+		}
+	});
+
+	$("#downloadLimit_memberGroup").click(function(){
+		if($(this).val() == 'limit') {
+			$("#downloadLimitEa_memberGroup").show();
+		}else{
+			$("#downloadLimitEa_memberGroup").hide();
+		}
+	});
+
+
+	$("#offlineLimit_one").click(function(){
+		if($(this).val() == 'limit') {
+			$("#offlineLimitEa_one_title").html('번까지 쿠폰 인증 허용');
+			$("#offlineLimitEa_one").show();
+		}else{
+			$("#offlineLimitEa_one_title").html('쿠폰 인증 허용');
+			$("#offlineLimitEa_one").hide();
+		}
+	});
+
+	$("#offlineLimit_input").click(function(){
+		if($(this).val() == 'limit') {
+			$("#offlineLimitEa_input_title").html('번까지 쿠폰 인증 허용');
+			$("#offlineLimitEa_input").show();
+		}else{
+			$("#offlineLimitEa_input_title").html('쿠폰 인증 허용');
+			$("#offlineLimitEa_input").hide();
+		}
+	});
+
+	$(".offline_type1").click(function(){
+		$("#offline_type1").attr('checked',true);
+	});
+
+	$(".offline_type2").click(function(){
+		$("#offline_type2").attr('checked',true);
+	});
+
+	$(".offline_type3").click(function(){
+		$("#offline_type3").attr('checked',true);
+	});
+
+	$(".offline_type4").click(function(){
+		$("#offline_type4").attr('checked',true);
+
+		{? !coupons.coupons_seq }
+			$('#offlineRegist').validate({
+				onkeyup: false,
+				focusInvalid: false,
+				onfocusout: false,
+				rules: {
+					offline_input_num: {
+						required: function () {
+						 if($("#offline_type4").is(':checked')){
+								return true;
+							}else{
+								return false;
+							}
+						},
+						remote:{type:'post',url:'../coupon_process/offlinecoupon_ck'},
+					}
+				},
+				messages: {
+					offline_input_num: { required:'<font color="red">인증번호를 입력해 주세요.</font>', remote: '이미 등록된 인증번호입니다.'},
+				},
+				errorPlacement: function(error, element) {
+					//error.appendTo(element.parent());
+					openDialogAlert(error.text(),'400','140',function(){ $("#offline_input_num").focus();});
+				},
+				submitHandler: function(f) {
+					f.submit();
+				}
+			});
+		{/}
+	});
+
+	$(".saleType0").click(function(){
+		$("#saleType0").attr('checked',true);
+	});
+
+	$(".saleType1").click(function(){
+		$("#saleType1").attr('checked',true);
+	});
+
+	$("input:radio[name='couponsametime']").click(function() {
+		if($(this).val() == 'N' ) {
+			$(".couponsametimen").show();
+			$(".couponsametimey").hide();
+		}else{
+			$(".couponsametimey").show();
+			$(".couponsametimen").hide();
+		}
+	});
+
+
+	$(".issuePriodType0").click(function(){
+		$("#issuePriodType0").attr('checked',true);
+	});
+
+	$(".issuePriodType1").click(function(){
+		$("#issuePriodType1").attr('checked',true);
+	});
+
+	$(".shippingtbllay").click(function(){
+		$("#couponType_shipping").attr('checked',true);
+	});
+
+	$(".birthdaytbllay").click(function(){
+		if($(this).attr("disabled") != 'disabled'){
+			$("#couponType_birthday").attr('checked',true);
+		}
+	});
+
+	$(".downloadtbllay").click(function(){
+		$("#couponType_download").attr('checked',true);
+	});
+
+	$(".admintbllay").click(function(){
+		$("#couponType_admin").attr('checked',true);
+	});
+
+	$(".mbregirtertbllay").click(function(){
+		if($(this).attr("disabled") != 'disabled'){
+			$("#couponType_member").attr('checked',true);
+		}
+	});
+
+	$(".mbgrouptbllay").click(function(){
+		$("#couponType_memberGroup").attr('checked',true);
+	});
+
+	// 인증번호 복사
+	{ ? coupons.coupon_seq }
+		{? coupons.offline_type == 'one' || coupons.offline_type == 'input'}
+			var offline_input_serialnumber =  $("#offline_coupon_copy").attr('offline_input_serialnumber');
+			tagCopyClips = new ZeroClipboard.Client();
+			tagCopyClips.setHandCursor( true );
+			tagCopyClips.setCSSEffects( true );
+			tagCopyClips.setText(offline_input_serialnumber);
+			tagCopyClips.addEventListener( 'complete', function(client, text) {
+				alert("인증번호가 복사되었습니다.\nCtrl+V로 붙여넣기 하세요.");
+			} );
+			tagCopyClips.glue('offline_coupon_copy');
+		{/}
+	{/}
+
+	$("select[name='offline_reserve_select']").live("change",function(){
+		span_controller('offline_reserve');
+	});
+
+	/* 프로그램 단에서 유효성 체크시 같이 실행 되는 오류로 주석 처리함.
+	$("form#offlineRegist").on('submit',function(){		
+		if($("#offlineRegist").valid()) {
+			openDialogAlert('쿠폰 생성 중 입니다.<br/><b><font color=red>창이 닫히지 않도록 주의해 주세요.</font></b>',400,150);
+			loadingStart();
+		}
+	});
+	*/
+});
+
+
+//혜택 > 적립금 유효기간설정
+function span_controller(name){
+	var reserve_y = $("span[name='"+name+"_y']");
+	var reserve_d = $("span[name='"+name+"_d']");
+	var value = $("select[name='"+name+"_select'] option:selected").val();
+	if(value==""){
+		reserve_y.hide();
+		reserve_d.hide();
+	}else if(value=="year"){
+		reserve_y.show();
+		reserve_d.hide();
+	}else if(value=="direct"){
+		reserve_y.hide();
+		reserve_d.show();
+	}
+}
+
+
+//인쇄용 엑셀등록
+function offlineexcelsave(coupon_seq)
+{
+	var coupon_name = $("#coupon_name").val();
+	var filename = $("#offline_file").val();
+	addExcelFormDialog('./offline_excel?filename='+ filename +'&no='+coupon_seq, '45%', '800', '['+coupon_name+'] 인증번호 일괄등록 ','false',coupon_seq);
+}
+
+
+/**
+ * 신규생성 다이얼로그 창을 띄운다.
+ * <pre>
+ * 1. createElementContainer 함수를 이용하여 매번 div 태그를 입력하지 않고 다이얼로그 생성시 자동으로 생성한다.
+ * 2. refreshTable 함수를 이용하여 다이얼로그 내용 부분을 불러온다.
+ * </pre>
+ * @param string url 폼화면 주소
+ * @param int width 가로 사이즈
+ * @param int height 세로 사이즈
+ * @param string title 제목
+ * @param string btn_yn 'false'이면 닫기버튼만 나타낸다.
+ */
+function addExcelFormDialog(url, width, height, title, btn_yn, coupon_seq) {
+	newcreateElementContainer(title);
+	newrefreshTable(url);
+
+	if (btn_yn != 'false') {
+		var buttons = {
+			'닫기': function() {
+				$(this).dialog('close');
+			},
+			'저장하기': function() {
+				$('#form1').submit();
+			}
+		}
+	}
+	else if (btn_yn == 'close') {
+		var buttons =  {
+			'닫기': function() {
+				document.location.href='./offline?no='+coupon_seq;
+			}
+		}
+	}
+
+	$('#dlg').dialog({
+		bgiframe: true,
+		autoOpen: false,
+		width: width,
+		height: height,
+		resizable: false,
+		draggable: false,
+		modal: true,
+		overlay: {
+			backgroundColor: '#000000',
+			opacity: 0.8
+		},
+		buttons: buttons,
+		open: function() {
+				$("#ui-datepicker-div").css("z-index",
+				$(this).parents(".ui-dialog").css("z-index")+1);
+		},
+		close: function() {
+			document.location.href='./offline?no='+coupon_seq;
+		}
+	}).dialog('open');
+	return false;
+}
+
+function groupsMsg(type){
+	var str = "";
+	var tag = "";
+	$("#groupsMsg_"+type).html("이 쿠폰의 다운로드 권한 제한은 없습니다.");
+	$("input[type='checkbox'][name='memberGroup']:checked").each(function(){
+		var clone = $(this).parent().clone();
+		clone.find("input").remove();
+		str += clone.html() + ' , ';
+		tag += "<input type='hidden' name='memberGroups_"+type+"["+$(this).val()+"]' value='"+$(this).val()+"'>";
+	});
+	if(str){
+		var msg = "이 쿠폰의 다운로드 권한은 <strong>" + str.substr(0,str.length-3) + "</strong> 회원에게 있습니다." + tag;
+		$("#groupsMsg_"+type).html(msg);
+	}
+}
+
+function set_coupon_form(){ 
+	$(".offlinebaseinfolay").show();
+	var couponType = $("form#offlineRegist input[name='couponType']").val(); 
+	$(".download, .birthday, .shipping, .memberGroup, .member, .admin, .offline_coupon, .offline_emoney").hide();
+	$("."+couponType).show(); 
+}
+function set_goods_list(displayId,inputGoods){
+	$.ajax({
+		type: "get",
+		url: "../goods/select",
+		data: "page=1&inputGoods="+inputGoods+"&displayId="+displayId,
+		success: function(result){
+			$("div#"+displayId).html(result);
+		}
+	});
+	openDialog("상품 검색", displayId, {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+}
+function regist_category(targetCategory){
+	$("div#categoryDialog input[name='targetCategory']").val(targetCategory);
+	openDialog("카테고리 등록", "categoryDialog", {"width":900,"height":300});
+}
+
+</script>
+
+<!--{ ? coupons.coupon_seq }-->
+<form name="offlineRegist" id="offlineRegist" method="post" enctype="multipart/form-data" action="../coupon_process/offline_modify" target="actionFrame">
+<input type="hidden" name="couponSeq" value="{coupons.coupon_seq}" />
+<!--{ : }-->
+<form name="offlineRegist" id="offlineRegist" method="post" enctype="multipart/form-data" action="../coupon_process/offline" target="actionFrame">
+<!--{ / }-->
+<input type="hidden" name="couponType"  id="couponType" value="{coupons.type}" >
+<input type="hidden" name="sale_referer_item"  id="sale_referer_item" value="{coupons.sale_referer_item}" >
+<input type="hidden" name="sale_referer_type"  id="sale_referer_type" value="{coupons.sale_referer_type}" >
+<input type="hidden" class="line onlynumber" name="downloadLimitEa" value="1" />
+
+<input type="hidden" name="query_string" value="{query_string}"/>
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area"  class="gray-bar">
+	<div id="page-title-bar">
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large white"><button type="button" onclick="document.location.href='../coupon/catalog?{query_string}';">쿠폰리스트<span class="arrowright"></span></button></span></li>
+		</ul>
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>인쇄 배포용 쿠폰 만들기</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		{? coupons.downloadtotal < 1 }
+		<ul class="page-buttons-right">
+			{? _GET.no }
+				{? coupons.type == 'offline_emoney' }
+					<li><span class="btn large black"><input type="button" class="downloadlist_btn" coupon_seq="{coupons.coupon_seq}" coupon_name="{=addslashes(coupons.coupon_name)}" value="인증 [{coupons.downloadtotalbtn}건] / - " /></span> </li>
+				{:}
+					<li><span class="btn large black"><input type="button" class="downloadlist_btn" coupon_seq="{coupons.coupon_seq}" coupon_name="{=addslashes(coupons.coupon_name)}" value="인증 [{coupons.downloadtotalbtn}건] / 사용 [{coupons.usetotalbtn}건]" /></span> </li>
+				{/}
+			{/}
+			<li><span class="btn large black"><button type="submit" id="offlinesave">저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+		{/}
+	</div>
+</div>
+
+<div style="height:20px;"></div>
+<div class="item-title">쿠폰 사용처</div>
+<table class="info-table-style" style="width:100%" >
+<colgroup>
+	<col width="15%"/>
+	<col width="85%"/>
+</colgroup>
+<tbody>
+<tr>
+	<th class="its-th">사용처</th>
+	<td class="its-td">
+		인쇄된 쿠폰번호를 받은 후 온라인에서 쿠폰번호 인증 후 판매되는 상품(실물, 쿠폰)에 사용하여 쿠폰 혜택을 받음
+		<div><img src="../images/common/img_cpn_offline.gif" /></div>
+	</td>
+</tr>
+</tbody>
+</table>
+
+
+<div style="height:20px;"></div>
+<div class="item-title">
+	쿠폰 종류 
+	{ ? !coupons.coupon_seq }
+	<span class="btn small red"><button type="button" id="offlinecoupontypepopupbtn"  coupon_seq="{coupons.coupon_seq}" >선택</button></span>
+	{/} 
+
+</div>
+<table class="info-table-style" style="width:100%">
+<colgroup> 
+	<col width="20%" />
+	<col width="70%" />
+	<col width="10%" />
+</colgroup>
+<thead>
+<tr>
+	<th class="its-th-align center" >종류</th> 
+	<th class="its-th-align center" >발급 방식</th> 
+	<th class="its-th-align center" >인증 여부</th> 
+</tr>
+</thead>
+<tbody> 
+
+<tr class="offlinecptypetr offline_coupontbllay hide" offlinecptype="offline_coupon" >
+	<td class="its-td left">인쇄용 쿠폰</label></td>
+	<td class="its-td left">오프라인으로 배포된 인증번호를 온라인에서 회원이 인증 받으면  → <span class="blue">쿠폰 자동 제공</span></td>
+	<td class="its-td left">
+	<select name="offline_coupon_issue_stop"  >
+	<option value="0" class="cyanblue" > 인증합니다.</option>
+	<option value="1" class="red" > 인증하지 않습니다.</option>
+	</select>
+	</td>
+</tr>
+
+<tr class="offlinecptypetr offline_emoneytbllay hide" offlinecptype="offline_emoney" >
+	<td class="its-td left">인쇄용 쿠폰</label></td>
+	<td class="its-td left">오프라인으로 배포된 인증번호를 온라인에서 회원이 인증 받으면  → <span class="blue">적립금 자동 제공</span></td>
+	<td class="its-td left">
+	<select name="offline_emoney_issue_stop"  >
+	<option value="0" class="cyanblue" > 인증합니다.</option>
+	<option value="1" class="red" > 인증하지 않습니다.</option>
+	</select>
+	</td>
+</tr>
+</tbody>
+</table>
+
+
+<div class="offlinebaseinfolay hide" >
+	<div>
+	<div style="height:20px;"></div>
+	<div class="item-title"><span id="offlinetypetitle">쿠폰</span> 제공 : <span class="blue" >인증->자동</span> 
+	</div>
+	<table class="info-table-style" style="width:100%">
+	<colgroup> 
+		<col width="65%" /> 
+		<col width="25%" />
+	</colgroup>
+	<thead> 
+	<tr>
+		<th class="its-th-align center" >인증 횟수 제한</th>
+		<th class="its-th-align center" >인증 기간 제한</th> 
+	</tr>
+	</thead>
+	<tbody> 
+	<tr class="offlinecptypetr offline_coupontbllay hide"> 
+		<td class="its-td "> 
+		동일 회차의 쿠폰을 여러 장 받았을 경우 
+		<input type="text" class="line onlynumber " name="downloadLimitEa_offline_coupon" id="downloadLimitEa_offline_coupon" value="1" size="5"  />회만 인증 허용
+		</td>
+		<td class="its-td ">  
+			<input type="text" name="downloadDate_offline_coupon[]" value="{coupons.download_startdate}" class="datepicker line"  maxlength="10" size="10" />
+			~
+			<input type="text" name="downloadDate_offline_coupon[]" value="{coupons.download_enddate}" class="datepicker line"  maxlength="10" size="10" />
+		</td>
+	</tr>
+	<tr class="offlinecptypetr offline_emoneytbllay hide"> 
+		<td class="its-td "> 
+		동일 회차의 쿠폰을 여러 장 받았을 경우 
+		<input type="text" class="line onlynumber " name="downloadLimitEa_offline_emoney" id="downloadLimitEa_offline_emoney" value="1" size="5"  />회만 인증 허용
+		</td>
+		<td class="its-td ">
+			<input type="text" name="downloadDate_offline_emoney[]" value="{coupons.download_startdate}" class="datepicker line"  maxlength="10" size="10" />
+			~
+			<input type="text" name="downloadDate_offline_emoney[]" value="{coupons.download_enddate}" class="datepicker line"  maxlength="10" size="10" />
+		</td>
+	</tr>
+	</table>
+ 
+
+<div style="height:20px;"></div>
+<div class="item-title">쿠폰정보</div>
+<table class="info-table-style" style="width:100%">
+<colgroup>
+	<col width="15%"/>
+	<col width="35%"/>
+	<col width="15%"/>
+	<col width="35%"/>
+</colgroup>
+<tbody>
+
+<tr>
+	<th class="its-th">생성일</th>
+	<td class="its-td">
+		{? coupons.regist_date }
+			{coupons.regist_date}
+		{:}
+			{=date("Y-m-d H:i:s")}
+		{/}
+	</td>
+	<th class="its-th">수정일</th>
+	<td class="its-td">
+		{? coupons.update_date > coupons.regist_date }
+			{coupons.update_date}
+		{/}
+	</td>
+</tr>
+
+<tr>
+	<th class="its-th">쿠폰명</th>
+	<td class="its-td">
+	{? coupons.downloadtotal > 0 }
+		{coupons.coupon_name}
+	{:}
+		<input type="text" class="line" name="couponName" id="coupon_name" value="{coupons.coupon_name}" />
+	{/}
+	</td>
+	<th class="its-th">쿠폰설명</th>
+	<td class="its-td">
+	{? coupons.downloadtotal > 0 }
+		{coupons.coupon_desc}
+	{:}
+		<input type="text" class="line" size="50" name="couponDesc" value="{coupons.coupon_desc}" />
+	{/}
+	</td>
+</tr>
+
+<tr>
+	<th class="its-th"  >인증번호 <span class="helpicon" title="인증번호란 오프라인에서 배포되는 쿠폰 인쇄물에 찍히는 번호로,<br />
+인쇄용 쿠폰 수령자는 쇼핑몰의 MY페이지에서 인증번호를 기입하여 쿠폰의 혜택을 받을 수 있습니다."></span>
+	</th>
+	<td class="its-td" colspan="3">
+	{? coupons.coupon_seq  }
+		<table class="info-table-style" style="width:100%">
+		{? coupons.offline_type == 'random' || coupons.offline_type == 'one' }
+		<tr>
+			<th class="its-th">자동 생성</th>
+			<td  class="its-td" >
+				{? coupons.offline_type == 'random' }
+					<input type="hidden" name="offline_type" value="random" >
+					<input type="hidden" name="offline_random_num" value="{coupons.offline_random_num}" >
+					<div class="offline_type1"  style="padding:5px 0 0 0;">
+						서로 다른(랜덤) 인증번호  {=number_format(coupons.offline_random_num)}개 자동 생성
+						<span class="btn small valign-middle cyanblue"><input type="button" id="offline_coupon_view" value="인증번호 보기" /></span>
+						<span class="btn small valign-middle lightblue"><input type="button" id="offline_coupon_excel_down" value="인증번호 엑셀 다운로드" /></span>
+					</div>
+				{: coupons.offline_type == 'one' }
+					<input type="hidden" name="offline_type" value="one" >
+					<input type="hidden" name="offlineLimit_one" value="{coupons.offline_limit}" >
+					<input type="hidden" name="offlineLimitEa_input" value="{coupons.offline_limit_ea}" >
+					<div class="offline_type2"  style="padding:5px 0 0 0;">
+						<label for="offline_type2">동일 인증번호 1개를 자동 생성 [{coupons.offline_input_serialnumber}]하여 (인증기간 동안) </label>
+						{? coupons.offline_limit == 'unlimit'}
+							제한없이 쿠폰인증 허용
+						{:}
+							 {=number_format(coupons.offline_limit_ea)}번까지 쿠폰 인증 허용
+						{/}
+						<span class="btn small valign-middle cyanblue"><input type="button" id="offline_coupon_copy" offline_input_serialnumber="{coupons.offline_input_serialnumber}" value="인증번호 복사" /></span>
+					</div>
+				{/}
+			</td>
+		</tr>
+		{: coupons.offline_type == 'file' || coupons.offline_type == 'input' }
+		<tr>
+			<th class="its-th">수동 생성<br>(권장 안함)</th>
+			<td  class="its-td" >
+			{? coupons.offline_type == 'file'}
+					<input type="hidden" name="offline_type" value="file" >
+				<div class="offline_type3"  style="padding:5px 0 0 0;"> 인증번호 수동등록 [총 {=number_format(coupons.offlinecoupontotal)}건]
+					<span class="btn small valign-middle cyanblue"><input type="button" id="offline_coupon_view" value="인증번호 보기 " /></span>
+					<span class="btn small valign-middle lightblue"><input type="button" id="offline_coupon_excel_down" value="인증번호 엑셀 다운로드" /></span>
+				</div>
+			{: coupons.offline_type == 'input' }
+				<input type="hidden" name="offline_type" value="input" >
+				<input type="hidden" name="offlineLimit_input" value="{coupons.offline_limit}" >
+				<input type="hidden" name="offlineLimitEa_input" value="{coupons.offline_limit_ea}" >
+				<input type="hidden" name="offline_input_num" value="{coupons.offline_input_serialnumber}" >
+				<div class="offline_type4"  style="padding:5px 0 0 0;">
+				동일 인증번호 [{coupons.offline_input_serialnumber}]로 (인증기간 동안) </label>
+				{? coupons.offline_limit == 'unlimit'}
+					제한없이 쿠폰인증 허용
+				{:}
+					 {=number_format(coupons.offline_limit_ea)}번까지 쿠폰 인증 허용
+				{/}
+				<span class="btn small valign-middle cyanblue"><input type="button" id="offline_coupon_copy" offline_input_serialnumber="{coupons.offline_input_serialnumber}" value="인증번호 복사" /></span>
+				</div>
+			{/}
+			</td>
+		</tr>
+		{/}
+		</table>
+	{:}
+		<table class="info-table-style" style="width:100%">
+		<tr>
+			<th class="its-th">자동 생성<br>(권장)</th>
+			<td  class="its-td" >
+				<div class="offline_type1"  style="padding:5px 0 0 0;">
+					<input type="radio" name="offline_type" id="offline_type1" value="random" checked="checked" /> <label for="offline_type1"> 랜덤한 인증번호 <input type="text" name="offline_random_num" value="" size="5" class="line" >개 자동 생성 (최대 1만개까지 가능) </label>
+				</div>
+				<div class="offline_type2"  style="padding:5px 0 0 0;">
+					<input type="radio" name="offline_type" id="offline_type2" value="one" /> <label for="offline_type2">동일 인증번호 1개를 자동 생성하여 (인증기간 동안) </label>
+					<select name="offlineLimit_one" id="offlineLimit_one">
+					<option value="unlimit" selected="selected" >제한 없이</option>
+					<option value="limit">선착순</option>
+					</select>
+					<input type="text" class="line onlynumber  hide" name="offlineLimitEa_one" id="offlineLimitEa_one" value=""  size="11" /><span id="offlineLimitEa_one_title">쿠폰 인증 허용</span>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th">수동 생성
+			<span class="helpicon" title="※ 엑셀양식의 제일 첫째라인은 수정하지 말아주세요.<br />
+			※ 쿠폰번호는 서로 달라야 하며, 절대 중복되지 말아야 합니다. <br />
+			&nbsp;&nbsp;&nbsp; (중복된 쿠폰번호는 등록되지 않습니다)<br />
+			※ 쿠폰번호는 숫자 또는 영문으로 10~35자로 되어 있어야 합니다."></span><br>(권장 안함)</th>
+			<td  class="its-td" >
+			<div class="offline_type3"  style="padding:5px 0 0 0;">
+				<input type="radio" name="offline_type" id="offline_type3" value="file" /> <label for="offline_type3">인증번호 수동 등록
+				<input type="hidden" name="offline_file" id="offline_file" >
+				<label for="offline_type3"><span class="btn small lightblue"><button type="button" class="batchExcelRegist">엑셀등록</button></span></label>
+				 <span class="btn small valign-middle"><input type="button" class="offline_coupon_form" value="양식 다운로드" /></span> </label>
+			</div>
+			<div class="offline_type4"  style="padding:5px 0 0 0;">
+				<input type="radio" name="offline_type" id="offline_type4" value="input" /> <label for="offline_type4">동일 인증번호 <input type="text" name="offline_input_num" id="offline_input_num" value="" size="20" class="line">로 (인증기간 동안) </label>
+				<select name="offlineLimit_input" id="offlineLimit_input">
+				<option value="unlimit" selected="selected" >제한 없이</option>
+				<option value="limit">선착순</option>
+				</select>
+				<input type="text" class="line onlynumber  hide" name="offlineLimitEa_input" id="offlineLimitEa_input" value=""  size="11" /><span id="offlineLimitEa_input_title"> 쿠폰 인증 허용</span>
+			</div>
+			</td>
+		</tr>
+		</table>
+	{/}
+	</td>
+</tr>
+<tr>
+	<th class="its-th" height="55">혜택
+		<div class="offline_coupon"> 
+			<span class="btn small orange addsaleGuideBtn "><button type="button" class="hand" >안내) 추가 혜택 적용 범위</button></span>
+		</div>
+	</th>
+	<td class="its-td" colspan="3">
+	<div class="relative">
+		<div  style="margin-left:5px;">
+			{? coupons.downloadtotal > 0 }
+				<div  class="download birthday memberGroup member admin offline_coupon {? coupons.type =='shipping' }hide{/}" style="padding:5px 0 0 0;">
+					{? coupons.sale_type == 'won' }
+						<label>상품판매가격의 {=number_format(coupons.won_goods_sale)}원 할인</label>
+					{:}
+						<label>상품판매가격의 {coupons.percent_goods_sale}% 할인,</label>
+						<label><span>최대 {=number_format(coupons.max_percent_goods_sale)} 원</span></label>
+					{/}
+				</div>
+			{:}
+				<div class="download birthday memberGroup member admin saleType0 offline_coupon" style="padding:5px 0 0 0;">
+					<label>
+					<input type="radio" name="saleType" id="saleType0" value="percent"  {? !coupons.coupon_seq } checked="checked"{/} >
+					상품판매가격의 </label><input type="text" name="percentGoodsSale" size="3" maxlength="2" class="line onlynumber" value="{coupons.percent_goods_sale}" />% 할인,
+
+					<label>
+					<span>최대 <input type="text" name="maxPercentGoodsSale" size="5" value="{coupons.max_percent_goods_sale}" class="onlynumber"/>원</span>
+					</label>
+				</div>
+				<div class="download birthday memberGroup member admin saleType1 offline_coupon" style="padding:5px 0 0 0;">
+					<label>
+					<input type="radio" name="saleType" id="saleType1" value="won"> 상품판매가격의 </label><input type="text" name="wonGoodsSale" size="6" class="line onlynumber" value="{coupons.won_goods_sale}" />원 할인
+				</div>
+
+				<div class="offline_emoney" style="padding:5px 0 0 0;">
+					<label>
+					쿠폰 인증번호로 인증완료 시 적립금 <input type="text" name="offline_emoney" size="5" class="line onlynumber" value="{coupons.offline_emoney}" />원 지급</label>, 지급 적립금의 유효기간은
+						<select name="offline_reserve_select">
+							<option value="">제한하지 않음</option>
+							<option value="year" {?coupons.offline_reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+							<option value="direct" {?coupons.offline_reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+						</select>
+						<span name="offline_reserve_y" class="hide">→ 지급연도 + <input type="text" name="offline_reserve_year" min="0" max="9" class="line onlynumber" style="text-align:right" size="3" maxlength='3'  value="{coupons.offline_reserve_year}" />년 12월 31일</span>
+						<span name="offline_reserve_d" class="hide">→ <input type="text" name="offline_reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{coupons.offline_reserve_direct}" />개월</span>
+				</div>
+			{/}
+
+			{? coupons.downloadtotal > 0 }
+				<div class="shipping {? coupons.type !='shipping' }hide{/}" style="padding:5px 0 0 0;">
+					{? coupons.shipping_type == 'won' }
+						배송비 {=number_format(coupons.won_shipping_sale)}원 할인
+					{:}
+						<label>
+						기본 배송비 무료,
+						</label>
+						<span>최대 {=number_format(coupons.max_percent_shipping_sale)}원</span> (개별 배송 상품 제외)
+					{/}
+				</div>
+
+				{? coupons.duplication_use == '1' && coupons.type =='download'  }
+					<div style="padding:10px 0 0 0;" class="download"><label>여러 번 사용 가능</label></div>
+				{/}
+			{:}
+				<div class="shipping" style="padding:5px 0 0 0;">
+					<label>
+					<input type="radio" name="shippingType" value="free"  checked="checked" />
+					기본 배송비 무료,</label>
+					<span>최대 <input type="text" name="maxPercentShippingSale" size="5"   value="{coupons.max_percent_shipping_sale}" class="onlynumber right" />원</span>
+					(개별 배송 상품 제외)
+				</div>
+				<div class="shipping" style="padding:5px 0 0 0;">
+					<label> <input type="radio" name="shippingType" value="won">배송비 </label><input type="text" name="wonShippingSale" size="5" class="line onlynumber right" value="{coupons.won_shipping_sale}" />원 할인
+				</div>
+				<div style="padding:10px 0 0 0;" class="download"><label><input type="checkbox" name="duplicationUse" value="1" /> 여러 번 사용 가능</label></div>
+			{/}
+		</div>
+
+		<div style="position:absolute; left:300px; top:0px">
+			{? coupons.downloadtotal > 0 }
+				{? coupons.duplication_use == '1' }
+					<div style="" class="offline_coupon">
+						<label>중복할인</label>
+						<div class="duplicationuselay fx11 lsp-1" >
+							- 상품 수량에 중복할인 : A상품10,000원x10개 - (10%할인쿠폰x10개) = 90,000원<br />
+							- 상품 종류에 중복할인 : A상품10,000원x10개 - (10%할인쿠폰x10개) + B상품10,000원x10개 - (10%할인쿠폰x10개) = 180,000원
+						</div>
+					</div>
+				{/}
+			{:}
+				<div style="" class="offline_coupon">
+					<label><input type="checkbox" name="duplicationUse" value="1" /> 중복할인</label>
+					<div class="duplicationuselay fx11 lsp-1 {? coupons.duplication_use != 1 } gray{/}" >
+						- 상품 수량에 중복할인 : A상품10,000원x10개 - (10%할인쿠폰x10개) = 90,000원<br />
+						- 상품 종류에 중복할인 : A상품10,000원x10개 - (10%할인쿠폰x10개) + B상품10,000원x10개 - (10%할인쿠폰x10개) = 180,000원
+					</div>
+				</div>
+			{/}
+		</div>
+	</div>
+	</td>
+</tr>
+
+
+<tr  class="offline_coupon" >
+	<th class="its-th">유효 기간</th>
+	<td class="its-td" colspan="3">
+	{? coupons.downloadtotal > 0 }
+		<div>
+			{? coupons.issue_priod_type =='day' }
+				<label>발급일로부터 {coupons.after_issue_day}일 동안 사용 가능</label>
+			{:}
+				<label>{coupons.issue_startdate}~{coupons.issue_enddate}</label>
+			{/}
+		</div>
+	{:}
+		<div class="download shipping admin issuePriodType0 offline_coupon">
+			<label><input type="radio" name="issuePriodType" id="issuePriodType0" value="date" {? !coupons.coupon_seq } checked="checked"{/} /></label>
+				<input type="text" name="issueDate[]" value="{coupons.issue_startdate}" class="datepicker line"  maxlength="10" size="10" />~<input type="text" name="issueDate[]" value="{coupons.issue_enddate}" class="datepicker line"  maxlength="10" size="10" />
+		</div>
+		<div class="issuePriodType1 offline_coupon">
+			<label>
+			<input type="radio" name="issuePriodType"  id="issuePriodType1"  value="day" />
+			발급일로부터 </label><input type="text" name="afterIssueDay" size="2" value="{coupons.after_issue_day}" class="onlynumber" >일 동안 사용 가능
+		</div>
+	{/}
+	</td>
+</tr>
+
+<tr class="offline_coupon">
+	<th class="its-th">사용제한-단독</th>
+	<td class="its-td">
+		<label><input type="radio" name="couponsametime" value="Y" {? !coupons.coupon_same_time } checked="checked"{/} > 이 쿠폰은 동일한 주문건에 다른 쿠폰과 동시에 사용할 수 있습니다.</label><br/>
+		<label><input type="radio" name="couponsametime" value="N" > 이 쿠폰은 동일한 주문건에 다른 쿠폰과 동시에 사용할 수 없습니다.</label>
+		<br/>
+		<span class=" desc" style="margin-left:15px;"> 동일 주문에 이 쿠폰을 사용하게 되면 다른 쿠폰은 사용 불가능합니다.</span>
+	</td>
+	<td class="its-td-align"  colspan="2" style="border-left:0px;">
+		<img src="../images/design/coupon_sametimey.gif" class="couponsametimey " >
+		<img src="../images/design/coupon_sametimen.gif" class="couponsametimen {? !coupons.coupon_same_time } hide{/}" >
+	</td>
+</tr>
+
+
+<tr class="offline_coupon" >
+	<th class="its-th">사용제한 - 금액</th>
+	<td class="its-td" colspan="3">
+	{? coupons.downloadtotal > 0 }
+		상품판매금액의 합이 {coupons.limit_goods_price}원 이상<span class="desc">( 예 - 2만원이상 구매시)</span>
+	{:}
+		상품판매금액의 합이 <input type="text" name="limitGoodsPrice" size="6" value="{coupons.limit_goods_price}" class="onlynumber right" />원 이상<span class="desc">( 예 - 2만원이상 구매시)</span>
+	{/}
+	</td>
+</tr>
+
+<tr  class="download member memberGroup admin birthday offline_coupon {? coupons.type=='shipping' }hide{/}">
+	<th class="its-th">사용제한 - 상품</th>
+	<td class="its-td" colspan="3">
+
+	<table class="info-table-style" style="width:100%">
+	<tbody>
+	<tr>
+		{? coupons.downloadtotal > 0 }
+			<th>{? coupons.issue_type =='issue' }특정 상품/카테고리에서만 쿠폰사용 가능
+			{: coupons.issue_type =='except' }특정 상품/카테고리에서는 쿠폰사용 불가
+			{:}전체상품에 쿠폰사용 가능&nbsp;&nbsp;&nbsp;
+			{/}</th>
+		{:}
+			<th class="its-th"><input type="radio" name="issue_type" id="issue_type0" value="all" checked="checked" > <label for="issue_type0">전체상품에 쿠폰사용 가능</label></th>
+			<th class="its-th"><input type="radio" name="issue_type" id="issue_type1" value="issue" > <label for="issue_type1">특정 상품/카테고리에서만 쿠폰사용 가능</label></th>
+			<th class="its-th"><input type="radio" name="issue_type" id="issue_type2" value="except" > <label for="issue_type2">특정 상품/카테고리에서는 쿠폰사용 불가</label></th>
+		{/}
+	</tr>
+	<tr class="issuetypelay"><td colspan="3" class="its-td" >
+			<div id="issuesgoodslay" class="hide " >
+				<div style="margin:10px;" >
+					{? coupons.downloadtotal < 1 }
+						<div>
+							<span class="btn small gray"><button type="button" id="issueGoodsButton">쿠폰 상품 등록</button></span>
+							<span class="desc">노출순서변경</span> <span class="helpicon" title="상품을 마우스로 드래그&드랍해서 조정합니다."></span>
+						</div>
+					{/}
+					<div class="clearbox" style="height:5px;"></div>
+					<div id="issueGoods" >
+					<!--{ @ issuegoods }-->
+					<!--{ ? .type == 'issue' }-->
+					<div class='goods fl move'>
+					<div align='center' class='image'>
+						<img class="goodsThumbView" alt="" src="{.image}" width="50" height="50">
+					</div>
+					<div align='center' class='name' style='width:70px;min-height:70px;word-wrap:break-word;'>{.goods_name}</div>
+					<div align='center' class='price'>{=number_format(.price)}</div>
+					<input type="hidden" name='issueGoods[]' value='{.goods_seq}' />
+					<input type="hidden" name="issueGoodsSeq[{.goods_seq}]" value="{.issuegoods_seq}" />
+					</div>
+					<!--{ / }-->
+					<!--{ / }-->
+					</div>
+					<div id="issueGoodsSelect" class="hide"></div>
+				</div>
+			</div>
+		<div style="clear: both"></div>
+			<div id="issuescategorylay" class="hide  " >
+				<div  style="margin:10px;">
+					{? coupons.downloadtotal < 1 }
+						<div>
+							<select class="line" name="category1">
+								<option value="">1차 카테고리</option>
+							</select>
+							<select class="line" name="category2">
+								<option value="">2차 카테고리</option>
+							</select>
+							<select class="line" name="category3">
+								<option value="">3차 카테고리</option>
+							</select>
+							<select class="line" name="category4">
+								<option value="">4차 카테고리</option>
+							</select>
+							<span class="btn small gray"><button type="button" id="issueCategoryButton">쿠폰 카테고리 등록</button></span>
+						</div>
+					{/}
+					<div id="issueCategory" >
+					<!--{ @ issuecategorys }-->
+					<!--{ ? .type == 'issue' }-->
+					<div style='padding:5px;'>
+					<span style='display:inline-block;width:300px'>{.category}</span>
+					{? coupons.downloadtotal < 1 }<span class='btn-minus'><button type='button' class='delCategory'></button></span>{/}
+					<input type="hidden" name='issueCategoryCode[]' value='{.category_code}' />
+					<input type="hidden" name="issueCategoryCodeSeq[{.category_code}]" value="{.issuecategory_seq}" />
+					</div>
+					<!--{ / }-->
+					<!--{ / }-->
+					</div>
+				</div>
+			</div>
+
+		<div style="clear: both"></div>
+			<div   id="exceptgoodslay" class="hide  ">
+				<div  style="margin:10px;">
+					{? coupons.downloadtotal < 1 }
+						<div>
+							<span class="btn small gray"><button type="button" id="exceptIssueGoodsButton">쿠폰 예외 상품 등록</button></span>
+							<span class="desc">노출순서변경</span> <span class="helpicon" title="상품을 마우스로 드래그&드랍해서 조정합니다."></span>
+						</div>
+					{/}
+					<div class="clearbox" style="height:5px;"></div>
+					<div id="exceptIssueGoods">
+					<!--{ @ issuegoods }-->
+					<!--{ ? .type == 'except' }-->
+					<div class='goods fl move'>
+					<div align='center' class='image'>
+						<img class="goodsThumbView" alt="" src="{.image}" width="50" height="50">
+					</div>
+					<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{.goods_name}</div>
+					<div align='center' class='price'>{=number_format(.price)}</div>
+					<input type="hidden" name='exceptIssueGoods[]' value='{.goods_seq}' />
+					<input type="hidden" name="exceptIssueGoodsSeq[{.goods_seq}]" value="{.issuegoods_seq}" />
+					</div>
+					<!--{ / }-->
+					<!--{ / }-->
+					</div>
+					<div id="exceptIssueGoodsSelect" class="hide"></div>
+				</div>
+			</div>
+
+		<div style="clear: both"></div>
+			<div id="exceptcategorylay" class="hide  " >
+				<div  style="margin:10px;">
+					{? coupons.downloadtotal < 1 }
+						<div>
+						<select class="line" name="exceptCategory1">
+							<option value="">1차 카테고리</option>
+						</select>
+						<select class="line" name="exceptCategory2">
+							<option value="">2차 카테고리</option>
+						</select>
+						<select class="line" name="exceptCategory3">
+							<option value="">3차 카테고리</option>
+						</select>
+						<select class="line" name="exceptCategory4">
+							<option value="">4차 카테고리</option>
+						</select>
+						<span class="btn small gray"><button type="button" id="exceptIssueCategoryButton">쿠폰 예외 카테고리 등록</button></span>
+						</div>
+					{/}
+					<div id="exceptIssueCategory">
+					<!--{ @ issuecategorys }-->
+					<!--{ ? .type == 'except' }-->
+					<div style='padding:5px;'>
+					<span style='display:inline-block;width:300px'>{.category}</span>
+					{? coupons.downloadtotal < 1 }<span class='btn-minus'><button type='button' class='delCategory'></button></span>{/}
+					<input type="hidden" name='exceptIssueCategoryCode[]' value='{.category_code}' />
+					<input type="hidden" name="exceptIssueCategoryCodeSeq[{.category_code}]" value="{.issuecategory_seq}" />
+					</div>
+					<!--{ / }-->
+					<!--{ / }-->
+					</div>
+				</div>
+			</div>
+	</td>
+	</tr>
+	</table>
+	</td>
+</tr>
+
+<tr  class="offline_coupon">
+	<th class="its-th">사용제한 - 사용환경</th>
+	<td class="its-td" colspan="3">
+	<label><input type="radio" name="sale_agent" id="sale_agent_a" value="a" checked="checked" /> 모든 환경에서 쿠폰 사용 가능</label>
+	<label><input type="radio" name="sale_agent" id="sale_agent_m" value="m" /><span class="sale_agent_m_lay"> 
+	{? coupons.use_type && coupons.use_type=='offline' }모바일/태블릿 환경에서만 쿠폰 다운로드 가능 (모바일/태블릿 전용 쿠폰){:}모바일/태블릿 환경에서만 쿠폰 사용 가능 (모바일/태블릿 전용 쿠폰){/}</span></label>
+	</td>
+</tr>
+
+<tr  class="offline_coupon">
+	<th class="its-th">사용제한 - 결제수단</th>
+	<td class="its-td" colspan="3">
+	<label><input type="radio" name="sale_payment" id="sale_payment_a" value="a" checked="checked" /> 가능한 결제수단으로 쿠폰 사용 가능 (권장)</label>
+	<label><input type="radio" name="sale_payment" id="sale_payment_b" value="b" /> 무통장 입금수단으로만 쿠폰 사용 가능</label>
+	</td>
+</tr>
+
+
+<tr  class="offline_coupon">
+	<th class="its-th">사용제한 - 유입경로</th>
+	<td class="its-td" colspan="3">
+	<label><input type="radio" name="sale_referer" class="sale_referer" id="sale_referer_a" value="a" checked="checked" /> 유입경로와 무관하게 쿠폰 사용 가능</label><br/>
+	<label><input type="radio" name="sale_referer" class="sale_referer"  id="sale_referer_n" value="n" /> 유입경로 할인이 없을 때 쿠폰 사용 가능 (바로 접속 시)</label><br/>
+	<label><input type="radio" name="sale_referer" class="sale_referer"  id="sale_referer_y" value="y" /> 유입경로 할인이 있을 때 쿠폰 사용 가능 </label>
+	: <span class="btn small gray sale_referer_y_lay" {? coupons.sale_referer != 'y'}  disabled="disabled" {/} ><button type="button" id="sale_referer_item_btn" class="sale_referer_y_lay"  {? coupons.sale_referer != 'y'} disabled="disabled" {/} >선택</button></span> <span class="salserefereritemtmplay">
+	{? coupons.sale_referer == 'y'} 
+		{? coupons.sale_referer_type == 's'} 
+			{? salserefereritemloop } 
+				{@ salserefereritemloop }
+					<span class="left">{.referersale_name}</span> {? count(salserefereritemloop)-1 > .index_ },{/}
+				{/}
+			{/} 
+		{:}
+		모든 유입경로
+		{/} 
+	{/}
+	</span>
+	</td>
+</tr>
+</tbody>
+</table>
+<div style="height:30px;"></div>
+</form>
+
+<!--{ ? groups }-->
+<div id="setGroupsPopup" class="hide">
+<!--{ @ groups }-->
+<div style="float:left;padding-right:5px;">
+	<label><input type="checkbox" name="memberGroup" value="{.group_seq}" class="line" >{.group_name}</label>
+</div>
+<!--{ / }-->
+</div>
+<!--{ / }-->
+
+
+
+<!-- 첨부파일 업로드 다이얼로그 -->
+<div id="ExcelUploadDialog" class="hide">
+	<table width="100%" class="info-table-style">
+	<col width="160" />
+	<tr>
+		<th class="its-th">엑셀 데이터 등록 안내</th>
+		<td class="its-td">인쇄용 쿠폰 인증번호를 엑셀 데이터로 등록할 수 있습니다.<br>
+		엑셀 양식을 다운로드 받아 형식에 맞게 데이터를 입력해 주세요.
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">엑셀 데이터 입력 방법</th>
+		<td class="its-td">
+			1. 기본적으로 다운로드 받은 엑셀 양식을 유지한 후 데이터만 입력<br />
+			2. 반드시 A열에는 쿠폰 인증번호를 입력<br />
+			3. 엑셀양식의 제일 첫째라인은 수정하지 말아주세요.<br/>
+			4. 쿠폰번호는 랜덤형으로 같은 번호가 없어야 합니다. <br>&nbsp;&nbsp;&nbsp;&nbsp;(중복된 인증번호는 등록하지 않습니다.)<br/>
+			5. 쿠폰번호는 숫자 또는 영문으로 10~35자로 되어 있어야 합니다.<br />
+			<img src="../images/common/offlinecoupon_sample.jpg"><br />
+			6. 입력완료 후 엑셀파일 저장 형식을 *.xls로 저장<br />
+
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">엑셀 파일 업로드</th>
+		<td class="its-td"><span class="btn small valign-middle"><input type="button" class="offline_coupon_form" value="양식 다운로드" /></span></td>
+	</tr>
+	<tr>
+		<td class="its-td" colspan="2" >
+			<div class="pdr10">
+				<input id="ExcelUploadButton" type="file" name="file" value="" class="uploadify" />
+			</div>
+		</td>
+	</tr>
+	</table>
+	<div class="center pdt20 pdb20"><span class="btn medium"><input type="button" value="업로드" onclick="$('#ExcelUploadButton').uploadifyUpload();" /></span></div>
+</div>
+
+<div id="offlinecoupontypePopup" class="hide">{#offlinecoupontypelayer}</div>
+
+<div id="offlinecouponrefererpopup" class="hide"> 
+	<table width="100%" cellspacing="3" border="0">
+	<tr>
+		<td class="its-td"> 
+		<label><input type="radio" name="sale_referer_type_tmp" class="sale_referer_type_tmp" value="a" checked="checked" > 모든 유입경로</label>
+		</td>
+	</tr>
+	<tr>
+		<td class="its-td"> 
+			<div style="height:10px;"></div>
+			<label><input type="radio" name="sale_referer_type_tmp"  class="sale_referer_type_tmp"  value="s" > 선택된 유입경로</label>
+			<div  class="sale_referer_type_s"  >
+				&nbsp;&nbsp;&nbsp;&nbsp;
+				<select name="sale_referer" class="sale_referer_type_s" id="sale_referer" {? coupons.sale_referer_type != 's'} disabled="disabled" {/} >
+					{? referersaleloop } 
+						{@ referersaleloop }
+							<option value="{.referersale_seq}" referersale_name="{.referersale_name}">{.referersale_name}</option>
+						{/}
+					{/}
+				</select>
+				<span class="btn small gray"><button type="button" id="sale_referer_add_btn" class="sale_referer_type_s"    {? coupons.sale_referer_type != 's'} disabled="disabled" {/} >추가</button></span>
+				<div style="height:10px;"></div>
+				<div>
+					<ul id="salserefereritemlay" class="sale_referer_type_s"> 
+						{? salserefereritemloop } 
+							{@ salserefereritemloop }
+								<li class="pdb3">
+								<span class="left">{.referersale_name}</span>
+								<span class="right"><span class="btn small gray"><input type="hidden" name="sale_referer_item_tmp[]" value="{.referersale_seq}" referersale_name = "{.referersale_name}" ><button type="button" id="sale_referer_del_btn" referersale_seq = "{.referersale_seq}" >삭제</button></span></span>
+								</li>
+							{/}
+						{/}
+					</ul>
+				</div> 
+			</div> 
+		</td>
+	</tr>
+	<tr>
+		<td class="its-td center">
+		<div ><span class="btn small black"><button type="button" id="salserefereritembtn" >확인</button></span></div> 
+		</td>
+	</tr>
+	</table> 
+</div>
+
+{ #coupongoodslayer }
+{ #layout_footer }

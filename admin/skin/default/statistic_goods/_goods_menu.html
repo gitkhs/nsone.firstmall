@@ -1,0 +1,31 @@
+
+<div class="slc-head pdt5">
+<ul>
+	{ ? !statistic_goods_detail_limit }
+	<li><span class="mitem"><a href="goods_cart">장바구니</a></span></li>
+	<li><span class="mitem"><a href="goods_wish">위시리스트</a></span></li>
+	<li><span class="mitem"><a href="goods_search">검색어</a></span></li>
+	<li><span class="mitem"><a href="goods_review">상품후기</a></span></li>
+	<li><span class="mitem"><a href="goods_restock">재입고알림</a></span></li>
+	{ : }
+	<li><span class="nofreelinknone mitem"><a href="#">장바구니</a></span></li>
+	<li><span class="nofreelinknone mitem"><a href="#">위시리스트</a></span></li>
+	<li><span class="nofreelinknone mitem"><a href="#">검색어</a></span></li>
+	<li><span class="nofreelinknone mitem"><a href="#">상품후기</a></span></li>
+	<li><span class="nofreelinknone mitem"><a href="#">재입고알림</a></span></li>
+	{ / }
+	<!--
+	<li><span class="mitem"><a href="shop_emoney">적립금현황</a></span></li>
+	<li><span class="mitem"><a href="shop_goods">상품현황</a></span></li>
+	<li><span class="mitem"><a href="shop_supply">공급처(사입처)현황</a></span></li>
+	-->
+
+</ul>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("div.slc-head a[href='{selected_goods_menu}']").parent().parent().addClass("selected");
+});
+
+</script>

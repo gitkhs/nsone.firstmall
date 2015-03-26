@@ -1,0 +1,358 @@
+{ #layout_header }
+<script type="text/javascript">
+var board_id = '{_GET.id}';
+var boardlistsurl = '{boardurl->lists}';
+var boardwriteurl = '{boardurl->write}';
+var boardviewurl = '{boardurl->view}';
+var boardmodifyurl = '{boardurl->modify}';
+var boardreplyurl = '{boardurl->reply}';
+var file_use = '{=manager.file_use}';
+</script>
+<script type="text/javascript" src="/app/javascript/js/admin-board.js?v=20141105"></script>
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" ></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$("#manager_main_btn").click(function() {
+		openDialog("주요 게시판 보기 설정", "boardmanagermainPopup", {"width":"680","height":"400","show" : "fade","hide" : "fade"});
+	});
+
+	// 예약문의 답변하기
+	$('span.store_reservation_boad_view_btn').click(function() {
+		var board_seq = $(this).attr('board_seq');
+		var board_id = $(this).attr('board_id');
+		var boardwriteurl = './'+board_id+'_write?id='+board_id+'&reply=y&seq='+board_seq;
+		boardaddFormDialog(boardwriteurl, '80%', '800', '게시글 보기','false');
+	});
+
+	// 상품문의/상품후기/대량구매/faq/gs_seller 게시글 보기
+	$('span.layer_boad_view_btn').click(function() {
+		var board_seq = $(this).attr('board_seq');
+		var board_id = $(this).attr('board_id');
+		var boardviewurl = './'+board_id+'_view?id='+board_id+'&mainview=1&seq='+board_seq;
+		boardaddFormDialog(boardviewurl, '90%', '800', '게시글 보기','false');
+	});
+
+	//그외 추가 게시글 보기
+	$('span.add_boad_view_btn').click(function() {
+		var board_seq = $(this).attr('board_seq');
+		var board_id = $(this).attr('board_id');
+		var boardviewurl = './view?id='+board_id+'&mainview=1&seq='+board_seq;
+		boardaddFormDialog(boardviewurl, '90%', '800', '게시글 보기','false');
+	});
+
+});
+
+$('img.small_goods_image').load(function() {
+	/* 스타일적용 */
+	apply_input_style();
+});
+</script>
+<script type="text/javascript">
+ // 메뉴 끝으로 이동
+function fnMenuMoveEnd(oMenu) {
+	var cnt = oMenu.length-1;
+	var i=0;
+
+	for (i=oMenu.length-1; i>=0; i--) {
+		if (Menulist_isSelected(oMenu, i)) {
+			if (i==oMenu.length-1) return;
+			var idx = i;
+
+			for (j=idx;j<cnt;j++) {
+				Menulist_downMenu(oMenu, idx);
+				idx = idx + 1;
+			}
+			cnt = cnt - 1;
+		}
+	}
+}
+
+// 메뉴 맨 위로 이동
+function fnMenuMoveStart(oMenu) {
+	var i=0;
+	var len = oMenu.length;
+	var cnt = 0;
+	for (i=0; i<oMenu.length; i++) {
+	if (Menulist_isSelected(oMenu, i)) {
+		if (i==0) return;
+		var idx = i;
+
+		for (j=idx;j>cnt;j--) {
+			Menulist_upMenu(oMenu, idx);
+			idx = idx - 1;
+		}
+		cnt = cnt + 1;
+		}
+	}
+}
+
+// 메뉴 위로 이동
+function fnMenuMoveUp(oMenu) {
+	var i=0;
+	for (i=0; i<oMenu.length; i++) {
+		if (Menulist_isSelected(oMenu, i)) {
+			if (i==0) return;
+			Menulist_upMenu(oMenu, i);
+		}
+	}
+}
+
+// 메뉴 아래로 이동
+function fnMenuMoveDown(oMenu) {
+	var i=0;
+	for (i=oMenu.length-1; i>=0; i--) {
+		if (Menulist_isSelected(oMenu, i)) {
+			if (i==oMenu.length-1) return;
+			Menulist_downMenu(oMenu, i);
+		}
+	}
+}
+
+function Menulist_downMenu(oMenu, index) {
+	if (index < 0) return;
+	if (index == oMenu.length-1) {
+		return; // 더 이상 아래로 이동할 수 없을때
+	}
+	Menulist_moveMenu(oMenu, index, 1);
+}
+
+function Menulist_upMenu(oMenu, index) {
+	if (index < 0) return;
+	if (index == 0) {
+		return; // 더 이상 위로 이동할 수 없을때
+	}
+	Menulist_downMenu(oMenu, index-1);
+}
+
+function Menulist_isSelected(oMenu, idx) {
+	return (oMenu.options[idx].selected==true);
+}
+function Menulist_moveMenu(oMenu, index, distance) {
+	var tmpOption = new Option(oMenu.options[index].text, oMenu.options[index].value, false,
+	oMenu.options[index].selected);
+	for (var i=index; i<index+distance; i++) {
+		oMenu.options[i].text = oMenu.options[i+1].text;
+		oMenu.options[i].value = oMenu.options[i+1].value;
+		oMenu.options[i].selected = oMenu.options[i+1].selected;
+	}
+	oMenu.options[index+distance] = tmpOption;
+}
+
+function write_submit(){
+	var option = document.getElementById("boardmain_item_use");
+	if(option.options.length<1){
+		alert('주요 게시판을 한개이상 선택해 주세요.');
+		return false;
+	}
+	for(var i=0;i<option.options.length;i++){
+		option.options[i].selected = true;
+	}
+	document.BoardManagermain.submit();
+}
+
+$(document).ready(function() {
+		// 항목 추가
+		$('#add_element').click(function() {
+			$("#boardmain_item_nouse option:selected").each(function() {
+				$(this).appendTo("#boardmain_item_use");
+			});
+		});
+		$("#boardmain_item_nouse").dblclick(function(){
+			$("#boardmain_item_nouse option:selected").each(function() {
+				$(this).appendTo("#boardmain_item_use");
+			});
+		});
+
+		// 항목 삭제
+		$('#del_element').click(function() {
+			var cnt = 0;
+			$("#boardmain_item_use option:selected").each(function() {
+				$(this).appendTo("#boardmain_item_nouse");
+			});
+			if(cnt>0) alert("필수 항목은 삭제하실 수 없습니다.");
+		});
+
+		$("#boardmain_item_use").dblclick(function(){
+			var cnt = 0;
+			$("#boardmain_item_use option:selected").each(function() {
+				$(this).appendTo("#boardmain_item_nouse");
+			});
+			if(cnt>0) alert("필수 항목은 삭제하실 수 없습니다.");
+		});
+
+		// 항목 처음으로 이동
+		$('#firstMove').click(function() {
+			fnMenuMoveStart(document.BoardManagermain.boardmain_item_use);
+		});
+
+		// 항목 위로 이동
+		$('#upMove').click(function() {
+			fnMenuMoveUp(document.BoardManagermain.boardmain_item_use);
+		});
+
+		// 항목 아래로 이동
+		$('#downMove').click(function() {
+			fnMenuMoveDown(document.BoardManagermain.boardmain_item_use);
+		});
+
+		// 항목 마지막 이동
+		$('#lastMove').click(function() {
+			fnMenuMoveEnd(document.BoardManagermain.boardmain_item_use);
+		});
+
+});
+</script>
+
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>
+				<h2 >
+				<select class="custom-select-box-multi" id="boardgo" onchange="if(this.value){document.location.href='./board?id='+this.value;}">
+				<option value="" >주요게시판</option>
+				{@ boardmanagerlist }
+					<option value="{.id}" {? _GET.id == .id } selected {/} >{=getstrcut(.name, 20)} ({=number_format(.totalnum)})</option>
+				{/}
+				</select></h2>
+				<h2>[주요게시판] 게시글 리스트</h2>
+				<h2><span class="btn small orange"><button type="button" name="manager_main" id="manager_main_btn"  >설정</button></span></h2>
+			</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><select  class="custom-select-box-multi btn drop_multi_main " id="display_quantity" onchange="if(this.value){document.location.href='./?perpage='+this.value;}">
+				<option id="dp_qty5" value="5" {? _GET.perpage == '5' } selected {/} >5개씩</option>
+				<option id="dp_qty10" value="10" {? _GET.perpage == '10' } selected {/} >10개씩</option>
+				<option id="dp_qty20" value="20" {? _GET.perpage == '20' } selected{/} >20개씩</option>
+				<option id="dp_qty30" value="30" {? _GET.perpage == '30' } selected{/} >30개씩</option>
+				<option id="dp_qty50" value="50" {? _GET.perpage == '50' } selected{/} >50개씩</option>
+				<option id="dp_qty50" value="100" {? _GET.perpage == '100' } selected{/} >100개씩</option>
+				<option id="dp_qty50" value="150" {? _GET.perpage == '150' } selected{/} >150개씩</option>
+				<option id="dp_qty50" value="200" {? _GET.perpage == '200' } selected{/} >200개씩</option>
+			</select></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+{? boardmainlist }
+<div id="boardmain">
+{@ boardmainlist }
+<div id="{? (.index_)%2==0 }boardtopright{:}boardtopleft{/}" style="width:49%;padding: 5px 3px;" class="{? (.index_+1)%2==0 }fr{:}fl{/}">
+<ul class="left-btns clearbox">
+<li ><div class="item-title" >{.boardname} {=number_format(.totalnum)} 건</div></li>
+</ul>
+<ul class="right-btns clearbox">
+<li style="margin-top:10px; padding-left:30px; line-height:30px; font-size:14px; font-weight:bold; vertical-align:middle;"><a href="./board?id={.id}"> + 더보기</a></li>
+</ul>
+<table class="list-table-style" style="table-layout:auto;" cellspacing="0" >
+<colgroup>
+<col width="40" />
+<col width="80" />
+<col />
+{? .id == 'goods_qna' || .id == 'store_reservation' || .id == 'mbqna' }<col width="110" />{/}
+<col width="100" />
+</colgroup>
+<thead class="lth">
+<tr>
+<th>번호</th>
+<th>작성자</th>
+<th>내용</th>
+{? .id == 'goods_qna' || .id == 'store_reservation' || .id == 'mbqna' }<th>상태</th>{/}
+<th>{? .id == 'goods_qna' || .id == 'store_reservation'  || .id == 'mbqna'}문의일{:}등록일{/}</th>
+</tr>
+</thead>
+<!-- 테이블 헤더 : 끝 -->
+
+<!-- 리스트 : 시작 -->
+<tbody class="ltb otb"  id="ajaxTable">
+<!-- 리스트데이터 : 시작 -->
+{? .widgetloop }
+	{@ .widgetloop }
+	<tr class="list-row {? ..display == 1}gray{/} {..tdclass}">
+		<td align="center" class="number">{..number}</td>
+		<td align="center" class="name" >{..name}</td>
+		<td align="left">{..iconmobile}
+			{..subject}
+			{..iconimage}
+			{..iconfile}
+			{..iconnew}
+			{..iconhot}
+			{..iconhidden}
+		</td>
+		{? .id == 'goods_qna' || .id == 'store_reservation'  || .id == 'mbqna'}<td align="center">{..reply_title}</td>{/}
+		<td align="center" class="date">{..date}</td>
+	</tr>
+	{/}
+{:}
+<tr class="list-row"><td colspan="{? .id == 'goods_qna' || .id == 'store_reservation'  || .id == 'mbqna'}5{:}4{/}" align="center"> 등록된 게시글이 없습니다. </td><tr>
+{/}
+</tbody>
+</table>
+</div>
+{? (.index_+1)%2==0 }<div class="cboth"></div>{/}
+{/}
+</div>
+{/}
+
+{#emoneyform}
+
+
+<div id="boardmanagermainPopup" class="hide">
+	<form name="BoardManagermain" id="BoardManagermain" method="post" action="../boardmanager_process/boardmanagermain"  target="actionFrame">
+	<div align="center">
+		<div style="width:100%;text-align:center;">
+		<center>
+			<table cellpadding="0" cellspacing="10" width="550" border="0">
+			<tr>
+				<td align="center" width="210" >
+					<div style="hiehgt:20px;font-weight:bold;">전체 게시판</div>
+					<select multiple="multiple" name="boardmain_item_nouse[]" id="boardmain_item_nouse" style="width: 240px; height: 230px;">
+					{@ boardmainnosel }
+						<option value="{.id}" >{=.boardname} ({=number_format(.totalnum)})</option>
+					{/}
+					</select>
+				</td>
+
+				<td width="60" align="center">
+					<span class="btn small gray"><button type="button" id="add_element">추가→</button></span>
+					<div style="padding-top:6px;"></div>
+					<span class="btn small gray"><button type="button" id="del_element">←제외</button></span>
+				</td>
+				<td align="center"  width="210" >
+					<div style="hiehgt:20px;font-weight:bold;">노출 게시판</div>
+					<select multiple="multiple" name="boardmain_item_use[]" id="boardmain_item_use" style="width: 240px; height: 230px;">
+					{@ boardmainlist }
+						<option value="{.id}" {? _GET.id == .id } selected {/} >{=.boardname} ({=number_format(.totalnum)})</option>
+					{/}
+					</select>
+				</td>
+				<td align="left" style="padding-left:5px;">
+					<span class="btn small gray"><button type="button" id="firstMove" style="width:45px;">처음</button></span>
+						<div style="padding-top:6px;"></div>
+					<span class="btn small gray"><button type="button" id="upMove" style="width:45px;">위로</button></span>
+						<div style="padding-top:6px;"></div>
+					<span class="btn small gray"><button type="button" id="downMove" style="width:45px;">아래로</button></span>
+						<div style="padding-top:6px;"></div>
+					<span class="btn small gray"><button type="button" id="lastMove" style="width:45px;">마지막</button></span>
+				</td>
+			</tr>
+			</table>
+		</center>
+		</div>
+	</div>
+	<div style="padding:10px 0 0 0" align="center"><span class="btn medium  cyanblue"><input type="button" value="저장" id="boardmanagermainsave" name="boardmanagermainsave"  onclick="write_submit();"/></span></div>
+	</form>
+</div>
+
+{ #layout_footer }

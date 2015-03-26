@@ -1,0 +1,52 @@
+<table cellpadding="0" cellspacing="0" border="0" align="center" class="tb_summary_partition">
+<!-- 판매중 -->
+<tr>
+	<td rowspan="2">
+		<img src="../images/main/admin_mtit12.gif" />
+	</td>
+	<td><a href="{goodsSummary.goods.link}">실물</a></td>
+	<td class="rlign">
+		<a href="{goodsSummary.goods.link}"><span class="cnt_num">{=number_format(goodsSummary.goods.count)}</span></a> 개
+	</td>
+</tr>
+<tr>
+	<td><a href="{goodsSummary.social.link}">티켓</a></td>
+	<td class="rlign">
+		<a href="{goodsSummary.social.link}"><span class="cnt_num">{=number_format(goodsSummary.social.count)}</span></a> 개
+	</td>
+</tr>
+<tr><td class="under_line" colspan="3"></td></tr>
+<!-- 종료5일전 -->
+<tr>
+	<td rowspan="2">
+		<img src="../images/main/admin_mtit13.gif" />
+	</td>
+	<td><a href="{goodsSummary.endgoods.link}">실물</a></td>
+	<td class="rlign">
+		<a href="{goodsSummary.endgoods.link}"><span class="cnt_num">{=number_format(goodsSummary.endgoods.count)}</span></a> 개
+	</td>
+</tr>
+<tr>
+	<td><a href="{goodsSummary.endsocial.link}">티켓</a></td>
+	<td class="rlign">
+		<a href="{goodsSummary.endsocial.link}"><span class="cnt_num">{=number_format(goodsSummary.endsocial.count)}</span></a> 개
+	</td>
+</tr>
+<tr><td class="under_line" colspan="3"></td></tr>
+<!-- 재고10개 이하 -->
+<tr>
+	<td rowspan="2">
+		<img src="../images/main/admin_mtit14.gif" />
+	</td>
+	<td><a href="{goodsSummary.stockgoods.link}">실물</a></td>
+	<td class="rlign">
+		<a href="{goodsSummary.stockgoods.link}"><span class="cnt_num">{=number_format(goodsSummary.stockgoods.count)}</span></a> 건
+	</td>
+</tr>
+<tr>
+	<td><a href="{goodsSummary.stocksocial.link}">티켓</a></td>
+	<td class="rlign">
+		<a href="{goodsSummary.stocksocial.link}"><span class="cnt_num">{=number_format(goodsSummary.stocksocial.count)}</span></a> 개
+	</td>
+</tr>
+</table>

@@ -1,0 +1,215 @@
+{? _GET.mainview }
+<script type="text/javascript">
+var boardlistsurl = '{boardurl->lists}';
+var boardwriteurl = '{boardurl->write}';
+var boardviewurl = '{boardurl->view}';
+var boardmodifyurl = '{boardurl->modify}';
+var boardreplyurl = '{boardurl->reply}';
+</script>
+{/}
+<div id="boardview">
+
+<br style="line-height:12px;" />
+<div class="viewbox">
+<form name="form1" id="form1" method="post" action="../board_process"  target="actionFrame">
+<input type="hidden" name="mode" id="mode" value="{mode}" />
+<input type="hidden" name="board_id" id="board_id" value="{_GET.id}" />
+<input type="hidden" name="reply" id="reply" value="{_GET.reply}" />
+<!--{? seq }-->
+	<input type="hidden" name="seq" id="board_seq" value="{seq}" />
+<!--{/}-->
+<input type="hidden" name="popup" value="{_GET.popup}" >
+<input type="hidden" name="iframe" value="{_GET.iframe}" >
+<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" >
+	<!-- 페이지 타이틀 바 : 시작 -->
+	<div id="page-title-bar-area" style="margin-top:-40px;">
+		<div id="page-title-bar">
+			<!-- 타이틀 -->
+			<div class="page-title">
+				<h2 > [{managername}]  게시글 보기 </h2>
+			</div>
+
+			<!-- 좌측 버튼 -->
+			<ul class="page-buttons-left">
+				<li><span class="btn small white"><button type="button" name="boardviewclose" >게시글리스트<span class="arrowright"></span></button></span></li>
+			</ul>
+			<!-- 우측 버튼 -->
+
+			<ul class="page-buttons-right">
+				<li>{emoneylay}</li>
+				{? display == 0 } <li><span class="btn small black"><button type="button"  name="boad_modify_btn" board_seq="{seq}"  board_id="{boardid}" >수정 </button></span></li>{/}
+				{? display == 0 } <li><span class="btn small black"><button type="button"  name="boad_reply_btn" board_seq="{seq}"  board_id="{boardid}" >답변{? re_contents }수정{:}등록{/}</button></span></li>{/}
+				{? display == 0 || (display == 1 && replyor == 0 && comment ==0) } <li><span class="btn small black"><button type="button"  name="boad_delete_btn"  board_seq="{seq}"  board_id="{boardid}" >삭제 </button></span></li>{/}
+			</ul>
+		</div>
+	</div>
+	<!-- 페이지 타이틀 바 : 끝 -->
+
+	<table class="bbsview_table_style" style="width:100%" cellpadding="0" cellspacing="0" border="0">
+	<colgroup>
+		<col /><col width="300px"/>
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="left pdl5  pdt5 pdb5"><!--{? datacategory }-->[{datacategory}]<!--{/}--><b>{iconmobile} {subject} {iconnew} {iconhot} {iconhidden}</b></th>
+		<th class="right">
+		</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td class="cell" colspan="2">
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td width="5"></td>
+				<td>
+					<table align="right" border="0" cellpadding="0" cellspacing="0" width="100%">
+					<tr>
+						<td><span class="han">작성자</span> : {name}</td>
+						<!--{ ? email }--><td class="cell_bar">|</td><td><span class="han">이메일</span> : {email}</td><!--{/}-->
+						<!--{ ? tel1 }--><td class="cell_bar">|</td><td><span class="han">휴대폰</span> : {tel1}</td><!--{/}-->
+						<!--{ ? emoneyviewlay }--><td class="cell_bar">|</td><td><span class="han">적립금</span> : <span class="num">{emoneyviewlay}</span></td><!--{/}-->
+						<td class="cell_bar">|</td><td><span class="han">IP</span> : {ip}</td>
+						<td class="cell_bar">|</td><td><span class="han">조회:</span> <span class="num">{=number_format(hit)}</span></td>
+						<td class="cell_bar">|</td><td><span class="han">날짜:</span> <span class="num">{m_date}</span></td>
+						<!--{ ? order_seq }--><td class="cell_bar">|</td><td><span class="han orderview  " order_seq="{order_seq}" >주문번호</span> : <span class="hand orderview blue bold" order_seq="{order_seq}" >{order_seq}</span></td><!--{/}-->
+					</tr>
+					</table>
+				</td>
+				<td width="5"></td>
+			</tr>
+			</table>
+			<div class="cboth"></div>
+		</td>
+	</tr>
+
+	<!--{? goodsview }-->
+	<tr>
+		<td class="cell"   colspan="2">
+			<div class="content" >
+				{goodsview}
+			</div>
+		</td>
+	</tr>
+	<!--{/}-->
+
+	<!--{? filelist}-->
+	<tr>
+		<td class="cell "  colspan="2">
+			<div class="attach ">
+				<ul>
+						<!--{@ filelist}-->
+						<li class="left pdl5  pdt5"><span class="realfilelist hand " realfiledir="{.realfiledir}" realfilename="{.orignfile}" board_id="{boardid}" filedown="../board_process?mode=board_file_down&board_id={boardid}&realfiledir={.realfiledir}&realfilename={.orignfile}"><span class="highlight-link">{.orignfile}</span> <span class="size">({.realsizefile})</span> <button type="button"  class="bbs_btn" >down</button></span></li>
+						<!--{/}-->
+				</ul>
+			</div>
+		</td>
+	</tr>
+	<!--{/}-->
+	</tbody>
+	</table>
+
+	<div class="content" >
+		{contents}
+		<!--{? re_contents }-->
+			<div class="reply">
+				<div class="sbj">{re_subject}</div>
+				{re_contents}
+			</div>
+		<!--{/}-->
+	</div>
+	</form>
+
+	<!--{? managerview.auth_recommend_use == 'Y' }-->
+	<!-- 게시글평가 -->
+	<div class="scorelay"  style="margin: 15px 0 5px">{#scoreskin}</div>
+	<!-- 게시글평가 -->
+	<!--{/}-->  
+
+	<!--{? commentlay == 'Y' || comment > 0 // 댓글 사용여부, 댓글수 }-->
+		<!-- 코멘트부분 -->
+		<a name="cmtlist"></a>
+		<div class="comment"  id="comment_container" style="margin: 15px 0 5px">{#commentskin}</div>
+		<!-- 코멘트부분 -->
+	<!--{/}-->
+
+	<!-- 이전/다음 -->
+	<div id="prenextlist"  style="margin: 15px 0 5px">{#prenextskin}</div>
+	<!-- 이전/다음 -->
+
+</div>
+
+<!-- 댓글관리 start -->
+<script type="text/javascript">
+//<![CDATA[
+
+
+//체크박스 색상
+$("input[type='checkbox'][name='cmtdel[]']").live('change',function(){
+	var cmtseq = $(this).val();
+	var cmttype = $(this).attr('cmt');
+
+	if($(this).is(':checked')){
+		$(this).closest('tr').addClass('checked-tr-background');
+		if(cmttype == 'reply'){
+			$('.replycmtcontent'+cmtseq).addClass('checked-tr-background');
+		}else{
+			$('.cmtcontent'+cmtseq).addClass('checked-tr-background');
+		}
+	}else{
+		$(this).closest('tr').removeClass('checked-tr-background');
+		if(cmttype == 'reply'){
+			$('.replycmtcontent'+cmtseq).removeClass('checked-tr-background');
+		}else{
+			$('.cmtcontent'+cmtseq).removeClass('checked-tr-background');
+		}
+	}
+}).change();
+
+$(document).ready(function() {
+
+
+	$(".orderview").click(function(){
+		var order_seq = $(this).attr("order_seq");
+		var href = "/admin/order/view?no="+order_seq;
+		var a = window.open(href, 'orderdetail'+order_seq, '');
+		if ( a ) {
+			a.focus();
+		}
+	});
+
+
+
+});
+
+function getboardLogin(){
+	{? defined('__ISUSER__') === true }
+		openDialogAlert('해당 서비스를 이용하시려면 관리자에게 문의하여 주시길 바랍니다.','450','140');
+	{:}
+		openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','140',function(){location.href="/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+	{/}
+}
+
+function getcmtMbLogin(){
+	{? defined('__ISUSER__') === true }
+		openDialogAlert('글작성자만 이용가능합니다.','450','140');
+	{:}
+		openDialogConfirm('이용하시려면 로그인이 필요합니다!<br/>로그인하시겠습니까?','400','140',function(){location.href="/member/login?return_url={=urlencode(_SERVER.REQUEST_URI)}";},function(){});
+	{/}
+}
+
+//]]>
+</script>
+<!-- 댓글관리 end  -->
+
+<script type="text/javascript">
+$(".content img").load(function() {
+	//이미지 가로가 큰경우
+	$(".content img").each(function() {
+		var default_width = '600';
+		if( $(this).width() > default_width || $(this).height() > default_width ) {
+			imageResize(this);
+		}
+	});
+});
+</script>

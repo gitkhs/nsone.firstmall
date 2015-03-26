@@ -1,0 +1,66 @@
+<!-- js/css 현페이지에서는 한번만 호출해 주세요 -->
+<script type="text/javascript" src="/app/javascript/js/promotion.js" ></script>
+<link type="text/css" rel="stylesheet" charset="utf-8" href="../css/coupon.css" />
+<!-- js/css 현페이지에서는 한번만 호출해 주세요 -->
+
+<!--{=getCouponCode('{쿠폰고유번호}')//치환코드필수}-->
+<!--{? getCouponCodedatacnt }-->
+<div class="coupon_{쿠폰고유번호}">
+	<table border="0" cellpadding="0" cellspacing="0" align="center" >
+	<!--{ @ (getCouponCodedata) }-->
+	<tr>
+		<td width="246" align="center">
+			<div class="left">
+				{? .type=='shipping' || strstr(.type,'_shipping') }
+					{? .shipping_type == 'free' } <div class="online_coupon" style="{? .coupon_img == '4'}background:url('/data/coupon/{.coupon_image4}'){:}background:url('/data/coupon/coupon{.sametime_shipping_img}_skin_0{.coupon_img}.gif'){/} no-repeat;" ></div>
+					{: .shipping_type == 'won' }
+						<div class="online_coupon_{.shipping_type}_{.couponsametimeimg}" style="{? .coupon_img == '4'}background:url('/data/coupon/{.coupon_image4}'){:}background:url('/data/coupon/coupon{.sametime_shipping_img}_skin_0{.coupon_img}.gif'){/} no-repeat;">
+							<div class="discount_price">{.view_coupon_html}</div>
+						</div> 
+					{/}
+				{:}
+					<div class="online_coupon_{.sale_type}_{.couponsametimeimg}" style="{? .coupon_img == '4'}background:url('/data/coupon/{.coupon_image4}'){:}background:url('/data/coupon/coupon{.sametime_shipping_img}_skin_0{.coupon_img}.gif'){/} no-repeat;">
+						<div class="discount_price">{.view_coupon_html}</div>
+					</div> 
+				{/}
+			</div>
+			<dt><a href="/coupon?no={.coupon_seq}&return_url={_SERVER.REQUEST_URI}" target="actionFrame"><img src="../images/promotion/btn_cpn_dn{? .coupondownfinish}_finish{: .coupondownno }_no{/}.gif" alt="쿠폰 다운받기" style="margin-top:5px" class="newcoupondownbtn{? .coupondownfinish}_finish{: .coupondownno }_no{/}" /></a></dt>
+		</td>
+		<td width="{? _GET.popup }10{:}20{/}"></td> 
+		<td >
+		<table width="" cellpadding="0" cellspacing="0" border="0">
+		{다운대상기간치환}
+		<tr>
+			<td height="5"></td>
+		</tr>
+		<tr>
+			<td height="30"><img src="../images/promotion/item_period.gif" alt="유효 기간" /></td>
+		</tr>
+		<tr>
+			<td> 
+				{? .issue_priod_type == 'day' }
+					발급일로부터 <b>{=number_format(.after_issue_day)}일</b> 동안 사용 가능
+				{: .issue_priod_type == 'months' }
+					발급 당월 말일까지 (~{.downloaddate_endday})
+				{: .issue_priod_type == 'date' }
+					{.issue_startdate} ~ {.issue_enddate} ({? .issuedaylimituse }{=number_format(.issuedaylimit)}일 남음{:}{=number_format(.issuedaylimit)}일 지남{/})
+				{/}
+			</td>
+		</tr>
+		<tr>
+			<td height="5"></td>
+		</tr>
+		<tr>
+			<td height="30"><img src="../images/promotion/item_price.gif" alt="제한 금액" /></td>
+		</tr>
+		<tr>
+			<td><b>{=(.limit_goods_price)}</b>원 이상 구매 시 사용 가능</td>
+		</tr>
+		</table>
+		</td>
+		<td align="right" valign="bottom"><img src="../images/promotion/btn_more.gif" alt="자세히" class="coupongoodsreviewbtn" coupon_type="{? .type == 'offline_coupon' }offline{:}online{/}" coupon_seq="{.coupon_seq}" download_seq="{.download_seq}"  use_type="{.use_type}"  issue_type="{.issue_type}"   coupon_name="{.coupon_name}" /></td>  
+	</tr> 
+	<!--{/}-->
+	</table>
+</div>
+<!--{/}-->

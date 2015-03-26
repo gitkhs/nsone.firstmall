@@ -1,0 +1,310 @@
+<style type="text/css">
+div.search-layer {background-color:#e5e9ea;padding-bottom:12px;}
+div.search-layer table.search-table {}
+div.search-layer table.search-table td.left-td {width:180px;padding:25px 0 0 30px;border-right:1px solid #bfbfbf;}
+div.search-layer table.search-table td.right-td {padding:20px 0 0 36px;}
+div.search-layer table.search-table td.right-btn {text-align:center;padding-top:15px;}
+
+div.search-layer table.sf-keyword-table {width:100%; border:2px solid #000; border-collapse:collapse; background-color:#fff; table-layout:fixed;}
+div.search-layer table.sf-keyword-table .sfk-td-txt {padding-right:5px;}
+div.search-layer table.sf-keyword-table .sfk-td-txt input {width:100%; height:22px; padding:0px; border:0px; margin:0px; background-color:#fff; line-height:22px; text-align:center;}
+div.search-layer table.sf-keyword-table .sfk-td-btn {width:62px; text-align:center;}
+div.search-layer table.sf-keyword-table .sfk-td-btn button {width:62px; height:26px; border:0px; background:url('../images/common/btn_search.gif') no-repeat center center; cursor:pointer}
+div.search-layer table.sf-keyword-table .sfk-td-btn button span {display:none}
+div.search-btn-lay {width:100%;margin-top:20px;text-align:center;line-height:30px;}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','',function(){
+		<!--{?sc.category1}-->
+		$("select[name='category1']").val('{_GET.category1}').change();
+		<!--{/}-->
+	});
+	$("select[name='category1']").bind("change",function(){
+		category_admin_select_load('category1','category2',$(this).val(),function(){
+			<!--{?sc.category2}-->
+			$("select[name='category2']").val('{_GET.category2}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").bind("change",function(){
+		category_admin_select_load('category2','category3',$(this).val(),function(){
+			<!--{?sc.category3}-->
+			$("select[name='category3']").val('{_GET.category3}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category3']").bind("change",function(){
+		category_admin_select_load('category3','category4',$(this).val(),function(){
+			<!--{?sc.category4}-->
+			$("select[name='category4']").val('{_GET.category4}').change();
+			<!--{/}-->
+		});
+	});
+
+	$("select[name='s_category1']").bind("change",function(){
+		category_admin_select_load('s_category1','s_category2',$(this).val(),function(){
+			<!--{?sc.category2}-->
+			$("select[name='s_category2']").val('{_GET.category2}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='s_category2']").bind("change",function(){
+		category_admin_select_load('s_category2','s_category3',$(this).val(),function(){
+			<!--{?sc.category3}-->
+			$("select[name='s_category3']").val('{_GET.category3}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('s_category3','s_category4',"");
+	});
+	$("select[name='s_category3']").bind("change",function(){
+		category_admin_select_load('s_category3','s_category4',$(this).val(),function(){
+			<!--{?sc.category4}-->
+			$("select[name='s_category4']").val('{_GET.category4}').change();
+			<!--{/}-->
+		});
+	});
+	////////////////////////////
+
+	/* 브랜드 불러오기 */
+	brand_admin_select_load('','brands1','',function(){
+		<!--{?sc.brands1}-->
+		$("select[name='brands1']").val('{_GET.brands1}').change();
+		<!--{/}-->
+	});
+	$("select[name='brands1']").bind("change",function(){
+		brand_admin_select_load('brands1','brands2',$(this).val(),function(){
+			<!--{?sc.brands2}-->
+			$("select[name='brands2']").val('{_GET.brands2}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('brands2','brands3',"");
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("select[name='brands2']").bind("change",function(){
+		brand_admin_select_load('brands2','brands3',$(this).val(),function(){
+			<!--{?sc.brands3}-->
+			$("select[name='brands3']").val('{_GET.brands3}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("select[name='brands3']").bind("change",function(){
+		brand_admin_select_load('brands3','brands4',$(this).val(),function(){
+			<!--{?sc.brands4}-->
+			$("select[name='brands4']").val('{_GET.brands4}').change();
+			<!--{/}-->
+		});
+	});
+	$("select[name='s_brands1']").bind("change",function(){
+		brand_admin_select_load('s_brands1','s_brands2',$(this).val(),function(){
+			<!--{?sc.brands2}-->
+			$("select[name='s_brands2']").val('{_GET.brands2}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('s_brands2','s_brands3',"");
+		brand_admin_select_load('s_brands3','s_brands4',"");
+	});
+	$("select[name='s_brands2']").bind("change",function(){
+		brand_admin_select_load('s_brands2','s_brands3',$(this).val(),function(){
+			<!--{?sc.brands3}-->
+			$("select[name='s_brands3']").val('{_GET.brands3}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('s_brands3','s_brands4',"");
+	});
+	$("select[name='s_brands3']").bind("change",function(){
+		brand_admin_select_load('s_brands3','s_brands4',$(this).val(),function(){
+			<!--{?sc.brands4}-->
+			$("select[name='s_brands4']").val('{_GET.brands4}').change();
+			<!--{/}-->
+		});
+	});
+
+	/* 지역 불러오기 */
+	location_admin_select_load('','location1','',function(){
+		<!--{?sc.location1}-->
+		$("select[name='location1']").val('{_GET.location1}').change();
+		<!--{/}-->
+	});
+	$("select[name='location1']").bind("change",function(){
+		location_admin_select_load('location1','location2',$(this).val(),function(){
+			<!--{?sc.location2}-->
+			$("select[name='location2']").val('{_GET.location2}').change();
+			<!--{/}-->
+		});
+		location_admin_select_load('location2','location3',"");
+		location_admin_select_load('location3','location4',"");
+	});
+	$("select[name='location2']").bind("change",function(){
+		location_admin_select_load('location2','location3',$(this).val(),function(){
+			<!--{?sc.location3}-->
+			$("select[name='location3']").val('{_GET.location3}').change();
+			<!--{/}-->
+		});
+		location_admin_select_load('location3','location4',"");
+	});
+	$("select[name='location3']").bind("change",function(){
+		location_admin_select_load('location3','location4',$(this).val(),function(){
+			<!--{?sc.location4}-->
+			$("select[name='location4']").val('{_GET.location4}').change();
+			<!--{/}-->
+		});
+	});
+	$("select[name='s_location1']").bind("change",function(){
+		location_admin_select_load('s_location1','s_location2',$(this).val(),function(){
+			<!--{?sc.location2}-->
+			$("select[name='s_location2']").val('{_GET.location2}').change();
+			<!--{/}-->
+		});
+		location_admin_select_load('s_location2','s_location3',"");
+		location_admin_select_load('s_location3','s_location4',"");
+	});
+	$("select[name='s_location2']").bind("change",function(){
+		location_admin_select_load('s_location2','s_location3',$(this).val(),function(){
+			<!--{?sc.location3}-->
+			$("select[name='s_location3']").val('{_GET.location3}').change();
+			<!--{/}-->
+		});
+		location_admin_select_load('s_location3','s_location4',"");
+	});
+	$("select[name='s_location3']").bind("change",function(){
+		location_admin_select_load('s_location3','s_location4',$(this).val(),function(){
+			<!--{?sc.location4}-->
+			$("select[name='s_location4']").val('{_GET.location4}').change();
+			<!--{/}-->
+		});
+	});
+
+	$("button.btn-search-submit").click(function(){
+		search_sumit($("form#searchFrm"));	// 호출한 파일에서 정의
+	});
+
+	$("div.search-layer").find("input[name='src_type']").click(function(){
+		$("div.search-layer").find("td.right-td").hide();
+		if	($(this).val() == 'detail')	$("div.search-layer").find("td.right-td").eq(1).show();
+		else							$("div.search-layer").find("td.right-td").eq(0).show();
+	});
+
+	{ ? _GET.no > 0 }
+		search_sumit($("form#searchFrm"));
+	{ / }
+});
+</script>
+
+<!-- 검색 영역 : 시작 -->
+<form name="searchFrm" id="searchFrm" onsubmit="search_sumit(this);return false;">
+<div class="search-layer">
+	<table class="search-table" width="100%" cellpadding="0" cellspacing="0" border="0">
+	<tr>
+		<td class="left-td" rowspan="2" valign="top">
+			<div><b>빅데이터 기준상품</b></div>
+			<br style="line-height:5px;" />
+			<div><label><input type="radio" name="src_type" value="seq" {?_GET.src_type=='seq'}checked{/} /> 상품번호 검색</label></div>
+			<div><label><input type="radio" name="src_type" value="detail" {?_GET.src_type=='detail'}checked{/} /> 조건 검색</label></div>
+		</td>
+		<td class="right-td {?_GET.src_type!='seq'}hide{ / }">
+			<table class="search-form-table" align="left">
+			<tr>
+				<th width="100" class="left pdl5">상품번호</th>
+				<td width="500">
+					<table class="sf-keyword-table">
+					<tr>
+						<td class="sfk-td-txt"><input type="text" name="goods_seq" value="{_GET.goods_seq}" title="상품 고유값" /></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</td>
+		<td class="right-td {?_GET.src_type=='seq'}hide{ / }">
+			<table width="100%" cellpadding="0" cellspacing="0" border="0" align="left">
+			<colgroup>
+				<col width="85" />
+				<col width="430" />
+				<col width="60" />
+				<col width="85" />
+				<col />
+			</colgroup>
+			<tr>
+				<th class="left pdl5">조건</th>
+				<td class="pdl5" colspan="5">
+					<select class="line" name="src_month">
+						<option value="12" {?_GET.src_month==12}selected{/}>최근 12개월 동안</option>
+						<option value="6" {?_GET.src_month==6}selected{/}>최근 6개월 동안</option>
+						<option value="3" {?_GET.src_month==3}selected{/}>최근 3개월 동안</option>
+						<option value="1" {?_GET.src_month==1}selected{/}>최근 1개월 동안</option>
+					</select>
+					<select class="line" name="src_kind">
+						<option value="order" {?_GET.src_kind=='order'}selected{/}>가장 많이 판매(수량)된 상품</option>
+						<option value="review" {?_GET.src_kind=='review'}selected{/}>가장 많이 리뷰가 작성된 상품</option>
+						<option value="cart" {?_GET.src_kind=='cart'}selected{/}>가장 많이 장바구니에 담긴 상품</option>
+						<option value="wish" {?_GET.src_kind=='wish'}selected{/}>가장 많이 위시리스트에 담긴 상품</option>
+						<option value="view" {?_GET.src_kind=='view'}selected{/}>가장 많이 본 상품</option>
+						<option value="like" {?_GET.src_kind=='like'}selected{/}>가장 많이 좋아요한 상품</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<th class="left pdl5">카테고리</th>
+				<td class="pdl5">
+					<select class="line" name="category1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="category2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="category3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="category4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+				<td>&nbsp;</td>
+				<th class="left pdl5">상태</th>
+				<td class="pdl5">
+					<label><input type="checkbox" name="goodsStatus[]" value="normal" {?sc.goodsStatus && in_array('normal',sc.goodsStatus)}checked{/}/>정상</label>
+					<label><input type="checkbox" name="goodsStatus[]" value="runout" {?sc.goodsStatus && in_array('runout',sc.goodsStatus)}checked{/}/>품절</label>
+					<label><input type="checkbox" name="goodsStatus[]" value="purchasing" {?sc.goodsStatus && in_array('purchasing',sc.goodsStatus)}checked{/}/>재고확보중</label>
+					<label><input type="checkbox" name="goodsStatus[]" value="unsold" {?sc.goodsStatus && in_array('unsold',sc.goodsStatus)}checked{/}/>판매중지</label>
+				</td>
+			</tr>
+			<tr>
+				<th class="left pdl5">브랜드</th>
+				<td class="pdl5">
+					<select class="line" name="brands1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="brands2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="brands3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="brands4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+				<td>&nbsp;</td>
+				<th class="left pdl5">노출</th>
+				<td class="pdl5">
+					<label><input type="checkbox" name="goodsView[]" value="look" {?sc.goodsView && in_array('look',sc.goodsView)}checked{/}/>보임<label>
+					<label><input type="checkbox" name="goodsView[]" value="notLook" {?sc.goodsView && in_array('notLook',sc.goodsView)}checked{/}/>안보임<label>
+				</td>
+			</tr>
+			<tr>
+				<th class="left pdl5">지역</th>
+				<td class="pdl5" colspan="5">
+					<select class="line" name="location1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="location2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="location3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="location4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<div class="search-btn-lay">
+<ul>
+	<li>쇼핑몰 매출향상을 위해 관리자의 빅데이터 설정에 따라 소비자에게 빅데이터를 PC/Mobile의 빅데이터전용페이지 및 상품상세페이지에서 모두 제공합니다.</li>
+	<li>↓아래의 빅데이터 검색 결과화면은 관리자를 위한 빅데이터 조회화면으로 'PC용 빅데이터전용페이지'를 기준으로 보여드립니다.</li>
+	<li><span class="btn large black"><button type="button" class="btn-search-submit">빅데이터 검색</button></span></li>
+</ul>
+</div>
+</form>
+<!-- 검색 영역 : 끝 -->

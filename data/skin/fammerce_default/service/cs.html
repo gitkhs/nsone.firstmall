@@ -1,0 +1,35 @@
+<style>
+#layout_body {background-color:#ebebeb}
+table.cs_info {margin:20px 15px; font-weight:bold;}
+table.cs_info th {text-align:left; width:80px; padding-bottom:10px;}
+table.cs_info td {text-align:left; padding-bottom:10px;}
+table.cs_info .gray_box {min-width:190px; padding-left:10px; height:51px; line-height:47px; font-size:18px; font-family:"arial black"; font-weight:bold; background:url('../images/design/gray_box_bg_left.gif') repeat-x}
+table.cs_info .gray_box .gray_box_inner {height:51px; background:url('../images/design/gray_box_bg_right.gif') no-repeat right}
+</style>
+
+<div class="sub_title_bar">
+	<h2>고객센터</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.gif" /></a>
+</div>
+
+<ul class="normal_list">
+	<li><a href="../board/?id=notice"><img src="../images/design/icon_list_doc.gif" hspace="2" /> <b>공지사항</b></a></li>
+	<li><a href="../board/?id=goods_review"><img src="../images/design/icon_list_doc.gif" hspace="2" /> <b>상품후기</b></a></li>
+	<li><a href="../board/?id=goods_qna"><img src="../images/design/icon_list_doc.gif" hspace="2" /> <b>상품문의</b></a></li>
+	<li><a href="../service/guide"><img src="../images/design/icon_list_doc.gif" hspace="2" /> <b>이용안내</b></a></li>
+</ul>
+
+<table class="cs_info">
+<tr>
+	<th valign="top">CONTACT</th>
+	<td valign="top">MON - FRI 10:00 ~ 18:00<br />SAT 10:00 ~ 13:00</td>
+</tr>
+<tr>
+	<th>CALL</th>
+	<td><div class="gray_box"><div class="gray_box_inner"><a href="tel:{config_basic.companyPhone}">{config_basic.companyPhone}</a></div></div></td>
+</tr>
+<tr>
+	<th>E-MAIL</th>
+	<td><div class="gray_box"><div class="gray_box_inner"><a href="mailto:{config_basic.companyEmail}">{config_basic.companyEmail}</a></div></div></td>
+</tr>
+</table>

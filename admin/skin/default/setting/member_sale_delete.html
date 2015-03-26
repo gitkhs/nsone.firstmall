@@ -1,0 +1,48 @@
+<script>
+
+	function member_sale_delete_ok(){
+		if($("#change_seq").val() == ""){
+			openDialogAlert('변경될 혜택 세트를 선택하세요','400','200','');
+			return;
+		}
+		document.actionFrame.location.href = "../setting_process/member_sale_delete?sale_seq={_GET.sale_seq}&change_seq="+$("#change_seq").val();
+		
+	}
+
+</script>
+<div>
+<table width="100%">
+<tr>
+	<td align="center">
+		‘{sale_title}’를 삭제하기 전에<br>
+		‘{sale_title}’ 로 회원등급별 혜택을 주고 있는 상품에 대한 기본값을 결정해 주십시오.
+	</td>
+</tr>
+</table>
+
+</div>
+<div class="slc-body" style="padding:5px 0 0 0">
+	<table width="100%" >
+	<form name="saleDelFrm" id="saleDelFrm" method="post" action="../setting_process/member_sale_delete" target="actionFrame">
+		<input type="hidden" name="sale_seq" value="{_GET.sale_seq}">
+	<tr><td height="15"></td></tr>
+	<tr>
+		<td colspan="2" align="center">‘{sale_title}’ → 
+		<select name="change_seq" id="change_seq">
+			{@ list }
+			<option value="{.sale_seq}">[{.sale_seq}]{.sale_title}</option>
+			{ / }
+		</select>
+		</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<tr>
+		<td align="center">‘{sale_title}’를 정말 삭제하시겠습니까?</td>
+	</tr>
+	<tr><td height="15"></td></tr>
+	<tr>
+		<td align="center"><span class="btn large deepblue"><button id="delete_btn" onclick="member_sale_delete_ok();">확인</button></span></td>
+	</tr>
+	</form>
+	</table>
+</div>

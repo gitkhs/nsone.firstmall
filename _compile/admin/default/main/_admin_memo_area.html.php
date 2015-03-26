@@ -1,0 +1,291 @@
+<?php /* Template_ 2.2.6 2015/03/11 14:46:14 /www/nsone_firstmall_kr/admin/skin/default/main/_admin_memo_area.html 000013977 */ ?>
+<script type="text/javascript" src="/app/javascript/plugin/jquery_pagination/jquery.pager.js" charset="utf8"></script>
+
+<script>
+var memo_page = 1;
+var memo_animation = false;
+var addHeight = 0;
+var memo_opened	= false;
+
+$(function(){
+	var memoWidth;
+	$("#admin-memo-container").height($("#layout-body").outerHeight());
+	$("#admin-memo-openbtn").toggle(function(){
+		memoWidth = 216;
+		//memoWidth = $("#layout-container").width()-$("#main-body").width()-15;
+
+		//if(memoWidth<216) memoWidth = 216;
+
+		$("#admin-memo-container").outerWidth(memoWidth).height($("#layout-body").outerHeight());
+
+		if(memo_animation)	$("#admin-memo").animate({'width':memoWidth,'margin-left':-memoWidth});
+		else				$("#admin-memo").css({'width':memoWidth,'margin-left':-memoWidth});
+		$(".memo-closebtn").show();
+		$(".memo-openbtn").hide();
+	},function(){
+		$("#admin-memo").animate({'width':0,'margin-left':0});
+		$(".memo-openbtn").show();
+		$(".memo-closebtn").hide();
+	});
+
+	$("#admin-memo-openbtn").click();
+	memo_animation = true;
+
+	$(".memo-item-openbtn").live('click',function(){
+		$(".memo-item").not($(this).closest('.memo-item')).removeClass('memo-item-opened');
+		$(this).closest('.memo-item').toggleClass('memo-item-opened');
+		//$(this).closest('.memo-item').find("form")[0].reset();
+		if(memo_opened) {
+			$("#admin-memo-container").height(addHeight);		memo_opened = false;
+		} else			{
+			$("#admin-memo-container").height(addHeight + 300); memo_opened = true;
+		}
+		$("#admin-memo").height("100%");
+	});
+
+	$(".memo-item-contents").live('click',function(){
+		if(!$(this).closest('.memo-item').is(".memo-item-opened")){
+			$(this).closest('.memo-item').find(".memo-item-openbtn").click();
+		}
+	});
+
+	$(window).scroll(function(){
+		if ($(this).scrollTop() <= 50) {
+			if($("#layout-header").hasClass("icon-view")){
+				$("#admin-memo").css('top',98-$(this).scrollTop());
+			}else{
+				$("#admin-memo").css('top',72-$(this).scrollTop());
+			}
+			$('#admin-memo').css('position','fixed');
+		} else {
+			$('#admin-memo').css('position','absolute');
+			if ($(".memo-closebtn").is(":visible")) $('#admin-memo').css('margin-left',$(this).scrollLeft()-216);
+		}
+	}).scroll();
+
+	$(window).resize(function(){
+		if($(".memo-closebtn").is(":visible")){
+			var memoWidth = 216;
+			//var memoWidth = $("#layout-container").width()-$("#main-body").width()-15;
+			//if(memoWidth<216) memoWidth = 216;
+			//$("#admin-memo-container").outerWidth(memoWidth);
+			$("#admin-memo").css({'width':memoWidth,'margin-left':-memoWidth});
+		}
+	});
+
+	$(".memo-item-contents textarea").live('keydown','Ctrl+S',function(event){
+		event.preventDefault();
+		$(this.form).submit();
+		return false;
+	});
+
+	$("#admin-memo-container .memo-input").focus(function(){
+		$(".memo-input-container").addClass('memo-input-container-focused');
+		$(this).css({'height':66,'padding':'3px 0','line-height':'15px'});
+	});
+
+	get_memo_list();
+
+});
+
+function get_memo_list(page,search_keyword){
+	memo_page = page ? page : memo_page;
+
+	if(search_keyword && document.searchMemoForm.search_keyword.value==document.searchMemoForm.search_keyword.title){
+		document.searchMemoForm.search_keyword.value='';
+		search_keyword='';
+	}
+
+	$.ajax({
+		'url' : '../adminmemo_process/get_list',
+		'data' : {'page':page,'search_keyword':search_keyword},
+		'type' : 'post',
+		'dataType' : 'json',
+		'global' : false,
+		'success' : function(result){
+
+			$("#admin-memo-page").show().pager({pagenumber: result.page.nowpage, pagecount: result.page.totalpage, buttonClickCallback:function(clicked_page){
+				get_memo_list(clicked_page,search_keyword);
+			}});
+
+			html = '';
+
+			for(var i=0;i<result.record.length;i++){
+
+				html += '<div class="memo-item '+(result.record[i].check=='1'?'checked':'')+'" memo_seq="'+result.record[i].memo_seq+'">';
+				html += '	<form action="../adminmemo_process/edit" method="post" target="actionFrame">';
+				html += '	<input type="hidden" name="memo_seq" value="'+result.record[i].memo_seq+'" />';
+				html += '	<div class="memo-item-important"><span class="icon-star-gray '+(result.record[i].important=='1'?'checked':'')+'" onclick="important_memo('+result.record[i].memo_seq+')"></span></div>';
+				html += '	<div class="memo-item-writer"><span>'+result.record[i].manager_id+'</span></div>';
+				html += '	<div class="memo-item-contents">';
+				html += '		<div class="memo-item-contents-summary">'+result.record[i].contents_htmlspecialchars+'</div>';
+				html += '		<textarea name="contents">'+result.record[i].contents_htmlspecialchars+'</textarea>';
+				html += '	</div>';
+				html += '	<div class="memo-item-openbtn"></div>';
+				html += '	<div class="memo-item-footer clearbox">';
+				html += '		<div class="fl">';
+				html += '			<span class="memo-item-check" onclick="check_memo('+result.record[i].memo_seq+')"></span>';
+				html += '			<input type="image" src="/admin/skin/default/images/main/btn_memo_edit.gif" onmouseover="this.src=\'/admin/skin/default/images/main/btn_memo_edit_on.gif\'" onmouseout="this.src=\'/admin/skin/default/images/main/btn_memo_edit.gif\'" align="absmiddle" title="저장하기" />';
+				html += '			<img src="/admin/skin/default/images/main/btn_memo_del.gif" onmouseover="this.src=\'/admin/skin/default/images/main/btn_memo_del_on.gif\'" onmouseout="this.src=\'/admin/skin/default/images/main/btn_memo_del.gif\'" align="absmiddle" hspace="5" title="삭제하기" class="hand" onclick="delete_memo('+result.record[i].memo_seq+')" />';
+				html += '		</div>';
+				html += '		<div class="fr fx11 gray">'+result.record[i].date+'</div>';
+				html += '	</div>';
+				html += '	</form>';
+				html += '</div>';
+			}
+
+			if(result.record.length==0){
+				html = '<div class="pd5 desc center">검색된 메모가 없습니다.</div>';
+				$("#admin-memo-page").hide();
+			}
+
+			$("#admin-memo .memo-list").html(html);
+
+			addHeight	= $("#layout-body").outerHeight() + $(".memo-list").outerHeight() - 256;
+			if($("#layout-body").outerHeight() <= addHeight )
+				$("#admin-memo-container").height(addHeight);
+			$("#admin-memo").height("100%");
+		}
+	});
+
+}
+
+function delete_memo(memo_seq){
+
+	openDialogConfirm('메모를 삭제하시겠습니까?',400,140,function(){
+		$.ajax({
+			'url'	: '../adminmemo_process/delete',
+			'type'	: 'post',
+			'data'	: {'memo_seq':memo_seq},
+			'success' : function(){
+				$(".memo-item[memo_seq='"+memo_seq+"']").slideUp();
+				openDialogAlert("메모가 삭제 되었습니다.",400,140,function(){
+					get_memo_list(memo_page);
+				});
+			}
+		});
+	});
+}
+
+function important_memo(memo_seq){
+
+	$.ajax({
+		'url'	: '../adminmemo_process/important',
+		'type'	: 'post',
+		'data'	: {'memo_seq':memo_seq},
+		'global' : false,
+		'success' : function(important){
+			if(important=='1') $(".memo-item[memo_seq='"+memo_seq+"'] .memo-item-important .icon-star-gray").addClass('checked');
+			else $(".memo-item[memo_seq='"+memo_seq+"'] .memo-item-important .icon-star-gray").removeClass('checked');
+		}
+	});
+}
+
+function check_memo(memo_seq){
+
+	$.ajax({
+		'url'	: '../adminmemo_process/check',
+		'type'	: 'post',
+		'data'	: {'memo_seq':memo_seq},
+		'global' : false,
+		'success' : function(check){
+			if(check=='1'){
+				$(".memo-item[memo_seq='"+memo_seq+"']").addClass('checked');
+			}
+			else{
+				$(".memo-item[memo_seq='"+memo_seq+"']").removeClass('checked');
+			}
+
+		}
+	});
+}
+
+</script>
+
+<style>
+#admin-memo {position:fixed; z-index:10; top:72px; left:100%; width:0px; }
+#admin-memo-openbtn {position:absolute; top:3.5px; left:-10px; width:7px; cursor:pointer;}
+#admin-memo-container {overflow:none; margin-top:3.5px; width:216px; padding:4px; border-left:1px solid #c6c6c6; background-color:#d5d5d5;}
+
+#admin-memo-container .memo-input-container {margin:24px 0 4px 0;}
+#admin-memo-container .memo-input-container textarea {width:168px; border:1px solid #cacaca; padding:0px; height:22px; line-height:22px; text-indent:5px; font-size:11px; letter-spacing:-1px; overflow:auto;}
+#admin-memo-container .memo-input-container-focused {}
+#admin-memo-container .memo-input-container-focused textarea {width:100%;}
+#admin-memo-container .memo-input-container-focused input {margin-top:3px; float:right;}
+#admin-memo-container .memo-search {position:relative; height:22px; border:1px solid #999; background-color:#e7e7e7; margin:5px 0 3px 0; white-space:nowrap; overflow:hidden;}
+#admin-memo-container .memo-search .memo-search-input {width:85%; min-width:175px; border:0px; padding:0px; height:22px; line-height:22px; text-indent:5px; background-color:#e7e7e7; color:#b9b9b9; font-size:11px; letter-spacing:-1px;}
+#admin-memo-container .memo-search .memo-search-btn {position:absolute; top:0px; left:100%; margin-left:-26px;}
+
+.memo-item {position:relative; height:30px; overflow:hidden; border:1px solid #c5c5c5; border-bottom:1px solid #a0a0a0; background-color:#fff;}
+.memo-item .memo-item-important {position:absolute; left:8px; top:8px; cursor:pointer}
+.memo-item .memo-item-check {display:inline-block; cursor:pointer; background:url("/admin/skin/default/images/common/btn_memo_check.gif") no-repeat; width:10px; height:10px; margin-right:8px; vertical-align:middle;}
+.memo-item .memo-item-writer {display:none; position:absolute; left:27px; top:0px; line-height:30px; font-weight:bold; color:#666;}
+.memo-item .memo-item-openbtn {position:absolute; left:100%; margin-left:-30px; top:0px; width:30px; height:30px; background:url("/admin/skin/default/images/main/icon_arrow_open.gif") no-repeat center center; cursor:pointer;}
+.memo-item .memo-item-contents {position:absolute; left:25px; top:0px; line-height:32px; height:30px; width:77%; overflow:hidden; cursor:pointer}
+.memo-item .memo-item-contents .memo-item-profileimage {display:none;}
+.memo-item .memo-item-contents .memo-item-contents-summary {display:block; color:#666; font-size:11px; letter-spacing:-1px;}
+.memo-item .memo-item-contents textarea {display:none; border:0px; padding:0px; width:100%; height:100px; overflow:auto; color:#666; font-size:11px; letter-spacing:-1px;}
+.memo-item .memo-item-footer {display:none; padding:0 10px; line-height:25px; height:25px; border-top:1px solid #eaeaea}
+
+.memo-item.checked .memo-item-check {background:url("/admin/skin/default/images/common/btn_memo_check_on.gif") no-repeat;}
+.memo-item.checked .memo-item-contents textarea,
+.memo-item.checked .memo-item-contents .memo-item-contents-summary {text-decoration:line-through;}
+
+.memo-item-opened {height:auto; overflow:visible; /*border:1px solid #333333*/}
+.memo-item-opened .memo-item-openbtn {background:url("/admin/skin/default/images/main/icon_arrow_close.gif") no-repeat center center}
+.memo-item-opened .memo-item-writer {display:block;}
+.memo-item-opened .memo-item-contents {position:relative; margin:30px 10px 10px 10px; width:auto; left:0px; top:0px; line-height:15px; height:auto; cursor:auto;}
+.memo-item-opened .memo-item-contents .memo-item-profileimage {}
+.memo-item-opened .memo-item-contents .memo-item-contents-summary {display:none;}
+.memo-item-opened .memo-item-contents textarea {display:block;}
+.memo-item-opened .memo-item-footer {display:block;}
+
+.pager {margin-top:5px;}
+.pager .pages {text-align:center;}
+.pager .pages span {display:inline-block; padding:3px; font-size:11px; color:#666; cursor:pointer;}
+.pager .pages span.first {width:10px; padding:5px 0 3px 0; background:url("/admin/skin/default/images/main/btn_memo_prev.gif") repeat-x 0px center;}
+.pager .pages span.prev {padding-top:5px; padding-right:12px; background:url("/admin/skin/default/images/main/btn_memo_prev.gif") no-repeat center center;}
+.pager .pages span.next {padding-top:5px; padding-left:12px; background:url("/admin/skin/default/images/main/btn_memo_next.gif") no-repeat center center;}
+.pager .pages span.last {width:10px; padding:5px 0 3px 0; background:url("/admin/skin/default/images/main/btn_memo_next.gif") repeat-x 0px center;}
+.pager .pages span.pgCurrent {font-weight:bold;}
+
+#admin-memo-container .memo-input,
+.memo-item .memo-item-contents textarea {
+	scrollbar-face-color: #ffffff;
+	scrollbar-highlight-color: #ffffff;
+	scrollbar-3dlight-color: #cccccc;
+	scrollbar-shadow-color: #ffffff;
+	scrollbar-darkshadow-color: #cccccc;
+	scrollbar-track-color: #cccccc;
+	scrollbar-arrow-color: #cccccc;
+}
+</style>
+
+<div id="admin-memo">
+	<div id="admin-memo-openbtn"><img src="/admin/skin/default/images/main/memo_mark.gif" style="height:40px;" class="memo-openbtn" /><img src="/admin/skin/default/images/main/memo_mark2.gif" style="height:40px;" class="memo-closebtn hide" /></div>
+	<div id="admin-memo-container">
+
+		<!-- 우측 배너 영역 : 시작 -->
+		<div class="gabia-pannel" code="main_right_banner" style="margin:auto; width:216px; min-height:118px;"></div>
+		<!-- 우측 배너 영역 : 끝 -->
+
+		<div class="memo-input-container clearbox">
+			<form name="newMemoForm" action="../adminmemo_process/save" method="post" target="actionFrame">
+				<textarea class="memo-input" name="contents" title="메모를 남기세요." rows="5"></textarea>
+				<input type="image" src="/admin/skin/default/images/main/btn_save_memo.gif" align="absmiddle" />
+			</form>
+		</div>
+
+		<div class="memo-search">
+			<form name="searchMemoForm" method="post" onsubmit="get_memo_list('',this.search_keyword.value);return false;">
+				<input type="text" class="memo-search-input" name="search_keyword" value="" class="line" title="메모 검색" />
+				<input type="image" class="memo-search-btn" src="/admin/skin/default/images/main/right_search_btn.gif" align="absmiddle"/>
+			</form>
+		</div>
+
+		<div class="memo-list"></div>
+
+		<div id="admin-memo-page" class="pager"></div>
+
+	</div>
+</div>

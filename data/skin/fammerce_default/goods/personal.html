@@ -1,0 +1,62 @@
+<style>
+.catalog_title {font-family:"맑은 고딕","나눔고딕","dotum"; letter-spacing:-1px; font-size:20px; font-weight:bold; padding-right:30px; padding-bottom:4px; border-bottom:3px solid #ddd;}
+.catalog_paging {height:30px; line-height:30px; padding:0 15px; font-size:10px; font-family:verdana; color:#656565; background-color:#f2f2f2;}
+.catalog_paging .on {color:#000; font-weight:bold; text-decoration:underline;}
+</style>
+
+<!--[ 타이틀 ]-->
+<div class="clearbox">
+	<div class="fleft catalog_title"><img src="../images/design/tit_onlyyou.gif"></div>
+	<div class="fright catalog_paging">
+		Showing items
+		<!--{ ? page.totalcount}--> 
+		{page.nowpage}-{=min(array(page.nowpage+sc.perpage-1,page.totalcount))} 
+		<!--{ : }-->
+		0
+		<!--{ / }-->
+		of {=number_format(page.totalcount)}
+		&nbsp;&nbsp;|&nbsp;&nbsp;
+		View
+		<!--{ @ array(20,50,100) }-->
+		<a href="?perpage={.value_}{sortUrlQuerystring}" {?sc.perpage==.value_}class="on"{/}>{.value_}</a>
+		<!--{ / }-->
+		&nbsp;&nbsp;|&nbsp;&nbsp;
+		<!--{ ? page.page }-->
+			<!--{ ? page.prev }--><a href="?page={page.prev}&amp;{page.querystring}" class="prev">Prev</a><!--{ / }-->
+			<!--{ @ page.page }-->
+				<!--{ ? page.nowpage ==  .value_ }-->
+					<a href="?page={.value_}&amp;{page.querystring}" class="on">{.value_ }</a>
+				<!--{ : }-->
+					<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? page.next }--><a href="?page={page.next}&amp;{page.querystring}" class="next">Next</a><!--{ / }-->
+		<!--{ : }-->
+			<span class="on">1</span>
+		<!--{ / }-->
+	</div>
+</div>
+
+<div style="height:24px"></div>
+
+<!--{ ? page.totalcount==0 }-->
+<table align="center" cellpadding="0" cellspacing="0" border="0">
+<tr><td height="50"></td></tr>
+<tr>
+	<td>
+		<span class="small">이 분류에 상품이 없습니다.</span>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+<!--{ : }-->
+{goodsDisplayHTML}
+<!--{ / }-->
+
+<div style="height:30px"></div>
+
+<div class="clearbox">
+	<div class="fright catalog_paging_clone"></div>
+	<script>$(".catalog_paging").clone().appendTo($(".catalog_paging_clone"));</script>
+</div>
+

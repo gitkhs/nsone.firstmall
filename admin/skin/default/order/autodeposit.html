@@ -1,0 +1,452 @@
+{ #layout_header }
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#set_pop").click(function(){
+		openDialog("주문조회 설정확인", "setPopup", {"width":"500","height":"300"});
+	});
+
+	$(".all-check").toggle(function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',true);
+	},function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',false);
+	});
+
+	$("#autorun_once").click(function(){
+		{?sc.auto_status == 'Y'}
+		if(confirm("현재 검색자동실행 중입니다.\n\n종료하시고 입금내역을 확인하시겠습니까?")){
+			clearTimeout(timeout_obj);
+			auto_run_plus('SET');
+		}
+		{:}
+		auto_run_plus('SET');
+		{/}
+	});
+
+	$("#auto_run").click(function(){
+		$.ajax({
+			type: "get",
+			url: "../order_process/auto_deposit_update",
+			data: "",
+			success: function(result){	
+				alert('입금내역이 갱신 되었습니다.');
+				document.location.reload();
+			}
+		});
+	});
+
+	$("#auto_termrun").click(function(){
+		{?sc.auto_status == 'Y'}auto_run_check_stop(0);{:}auto_run_check_start(0);{/}
+	});
+
+	$(".order_search").click(function(){
+		var sprice = $(this).attr("sprice");
+		var eprice = $(this).attr("eprice");
+		//alert(sprice+" "+eprice);
+		window.open("catalog?mode=bank&sprice="+sprice+"&eprice="+eprice);
+	});
+	
+	$("button#get_default_button").bind("click",function(){
+		$.getJSON('get_search_autodeposit', function(result) {
+			var patt;
+			for(var i=0;i<result.length;i++){
+				patt=/date/g;
+				if( patt.test(result[i][0]) ){
+					if(result[i][1] == 'today'){
+						set_date('{=date('Ymd')}','{=date('Ymd')}');
+					}else if(result[i][1] == '3day'){
+						set_date('{=date('Ymd',strtotime("-3 day"))}','{=date('Ymd')}');
+					}else if(result[i][1] == '7day'){
+						set_date('{=date('Ymd',strtotime("-7 day"))}','{=date('Ymd')}');
+					}else if(result[i][1] == '1mon'){
+						set_date('{=date('Ymd',strtotime("-1 month"))}','{=date('Ymd')}');
+					}
+				}
+				patt=/ad_/;
+				if( patt.test(result[i][0]) ){
+					$("form[name='search-form'] input[name='"+result[i][0]+"']").attr("checked",true);
+				}
+			}
+		});
+	});
+	// 기본검색 조건 저장하기
+	$("span#set_default_button").bind("click",function(){
+		var title = '기본검색 설정<span style="font-size:11px; margin-left:26px;"> - 아래서 원하는 검색조건을 설정하여 편하게 쇼핑몰을 운영하세요</span>';
+		openDialog(title, "search_detail_dialog", {"width":"50%","height":"190"});
+	});
+
+
+	$(".info").click(function(){
+		document.location.href = "../setting/bank";		
+	});
+
+
+	if("{bankChk}" == 'N'){
+		openDialog("자동 입금 확인", "pop_info", {"width":"450","height":"180","noClose":"true"});
+	}else if("{bankChk}" == 'END'){
+		openDialog("자동 입금 확인", "pop_info2", {"width":"450","height":"180","noClose":"true"});
+	}
+
+	
+});
+
+
+var timeout_obj	= '';
+function auto_runs(){
+	$.ajax({
+		type: "get",
+		url: "../order_process/auto_deposit_update",
+		data: "",
+		success: function(result){	
+			alert('입금내역이 갱신되었습니다.');
+			auto_run_check_stop();
+//			document.location.reload();
+		}
+	});
+}
+
+function auto_run_plus(setType){
+	$.ajax({
+		type: "get",
+		url: "../order_process/auto_deposit_update_plus",
+		data: "setType="+setType,
+		success: function(result){
+			if	(result > 0){
+				auto_run_plus('');
+			}else{
+				auto_runs();
+			}
+		}
+	});
+}
+
+function auto_run_check()
+{
+	$.ajax({
+		type: "get",
+		url: "../order_process/auto_deposit_update_term",
+		data: "",
+		success: function(result){
+			var url	= addQueryString() + '&auto_status=Y&auto_term='+$("#auto_term").val();
+			document.location.replace(url);
+		}
+	});
+}
+
+function auto_run_check_start(type){
+	$("#auto_termrun").html("검색자동실행 중지");
+	$("#auto_termrun_btn").removeClass("gray");
+	$("#auto_termrun_btn").addClass("red");
+	$("#auto_term").attr('disabled', 'disabled');
+	if	(type){
+		timeout_obj	= setTimeout("auto_run_check()", {sc.auto_term*60000});
+	}else{
+		$("form[name='search-form'] input[name='auto_status']").val('Y');
+		$("form[name='search-form'] input[name='auto_term']").val($("#auto_term").val());
+		auto_run_check();
+	}
+}
+
+function auto_run_check_stop(){
+	var url	= addQueryString() + '&auto_status=N&auto_term='+$("#auto_term").val();
+	document.location.replace(url);
+}
+
+function addQueryString()
+{
+	var replaceURI = '?';
+	{?sc.keyword}	replaceURI = replaceURI + '&keyword={sc.keyword}';{/}
+	{?sc.keyword}	replaceURI = replaceURI + '&keyword={sc.keyword}';{/}
+	{?sc.sdate}		replaceURI = replaceURI + '&sdate={sc.sdate}';{/}
+	{?sc.edate}		replaceURI = replaceURI + '&edate={sc.edate}';{/}
+	{?sc.ad_chk1}	replaceURI = replaceURI + '&ad_chk1={sc.ad_chk1}';{/}
+	{?sc.ad_chk2}	replaceURI = replaceURI + '&ad_chk2={sc.ad_chk2}';{/}
+
+	return replaceURI;
+}
+
+function set_date(start,end){
+	$("input[name='sdate']").eq(0).val(start);
+	$("input[name='edate']").eq(1).val(end);
+}
+
+</script>
+<style type="text/css">
+.autorun_top_manual	{ margin:10px 0;text-align:center;line-height:27px; }
+</style>
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+	
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>자동입금확인</h2>			
+		</div>
+		
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">	
+		</ul>
+		
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 주문리스트 검색폼 : 시작 -->
+<div class="search-form-container">
+	<div class="autorun_top_manual">
+		최근 <strong style="color:red;">{order.cancelDuration}</strong>일간의 무통장 주문건에 대하여 
+		① 매시 20분 마다 자동으로 입금내역을 확인합니다. 또는
+		② 지금 바로 입금내역을 확인하고 싶으면, 
+		<span class="btn small cyanblue"><button type="button" id="autorun_once">입금내역 실시간 확인</button></span><br/>
+		<span style="margin-right:20px;">
+		①또는②를 통해서 입금내역이 확인된 주문을 ↓아래에서 검색하세요
+		</span>
+		<select id="auto_term">
+			<option value="10" {?sc.auto_term==10}selected{/}>10분 마다</option>
+			<option value="15" {?sc.auto_term==15}selected{/}>15분 마다</option>
+			<option value="20" {?sc.auto_term==20}selected{/}>20분 마다</option>
+			<option value="30" {?sc.auto_term==30}selected{/}>30분 마다</option>
+		</select>
+		<span id="auto_termrun_btn" class="btn small gray"><button type="button" id="auto_termrun">검색자동실행 시작</button></span>
+	</div>
+
+	<form name="search-form" method="get">
+	<input type="hidden" name="auto_status" value="{sc.auto_status}" />
+	<input type="hidden" name="auto_term" value="{sc.auto_term}" />
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table>
+			<tr>
+				<td width="500">
+					<table class="sf-keyword-table">
+					<tr>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{sc.keyword}" title="입금자명,입금은행,금액,주문번호" /></td>
+						<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td>
+				<span class="btn small gray"><button type="button" id="get_default_button">기본검색적용</button></span>
+				<span id="set_default_button" class="icon-arrow-down" style="cursor:pointer;">기본검색 설정</span>
+				</td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<table class="search-form-table" id="search_detail_table">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th><span class="icon-arrow-down">입금일</span></th>
+				<td>					
+					<input type="text" name="sdate" value="{sc.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" value="{sc.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;					
+					<span class="btn small"><input type="button" value="오늘" onclick="set_date('{=date('Ymd')}','{=date('Ymd')}')" /></span>
+					<span class="btn small"><input type="button" value="3일간" onclick="set_date('{=date('Ymd',strtotime("-3 day"))}','{=date('Ymd')}')" /></span>
+					<span class="btn small"><input type="button" value="일주일" onclick="set_date('{=date('Ymd',strtotime("-7 day"))}','{=date('Ymd')}')"/></span>
+					<span class="btn small"><input type="button" value="1개월" onclick="set_date('{=date('Ymd',strtotime("-1 month"))}','{=date('Ymd')}')"/></span>	
+				</td>
+				<td width="15"></td>
+				<th>처리상태</th>
+				<td>
+					<label class="search_label"><input type="checkbox" name="ad_chk1" value="1" {? cookie_arr.ad_chk1 }checked{ / }/> 입금확인</label>	
+					&nbsp;&nbsp;
+					<label class="search_label"><input type="checkbox" name="ad_chk2" value="2" {? cookie_arr.ad_chk2 }checked{ / }/> 입금미확인</label>	
+					&nbsp;&nbsp;
+					<span class="icon-check hand all-check"><b>전체</b></span>					
+				</td>
+			</tr>					
+			</table>
+		</td>
+	</tr>
+	</table>
+	</form>
+	<div class="fr clearbox" style="margin-top:-29px;margin-right:20px;">
+		<ul class="right-btns clearbox">
+			<li>
+				<span id="set_pop" class="icon-arrow-right" style="cursor:pointer;">주문조회설정확인</span>
+			</li>
+		</ul>
+	</div>
+</div>
+<!-- 주문리스트 검색폼 : 끝 -->
+
+<div style="margin:15px 0;"></div>
+<!--div class="fr">
+	<div class="clearbox">
+		<ul class="right-btns clearbox">
+			<li>	
+				<span class="btn small"><button type="button" id="set_pop">주문조회설정확인</button></span>
+				<span class="btn small"><button type="button" id="auto_run">입금내역 갱신</button></span>
+			</li>
+		</ul>
+	</div>
+</div-->
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="140" />
+		<col width="200" />
+		<col width="150" />
+		<col width="140" />
+		<col width="140" />
+		<col width="140" />
+		<col width="140" />
+		<col />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>입금일</th>
+		<th>계좌번호</th>
+		<th>입금자</th>
+		<th>은행명</th>
+		<th>입금액</th>
+		<th>처리상태</th>
+		<th>입금확인일</th>
+		<th>주문번호</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+	<!--{ ? !loop }-->
+		<tr class="list-row">
+			<td colspan="8" align="center">검색어가 없거나 검색 결과가 없습니다.</td>
+		</tr>
+	<!--{ : }-->	
+		<!--{ @ loop }-->
+		<tr class="list-row">
+			<td align="center">{.bk_date}</td>
+			<td align="center">{.bkacctno}</td>
+			<td align="center">{.bkjukyo}</td>
+			<td align="center">{.bkname}</td>
+			<td align="center">{=number_format(.bkinput)}원</td>
+			<td align="center">{.status}</td>
+			<td align="center">{.deposit_date}</td>
+			<td align="center">
+				{? .order_seq  }
+					<a href="view?no={.order_seq}">{.order_seq}</a> / {.user_name}({.userid})
+				{ : }
+					<span class="btn small gray"><button type="button" sprice="{.bkinput - banks.sprice}" eprice="{.bkinput + banks.eprice}" class="order_search">주문조회</button></span>
+				{ / }
+			</td>
+		</tr>
+		<!--{ / }-->	
+	<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+</table>
+<!-- 주문리스트 테이블 : 끝 -->
+
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" >
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin}</div>
+	</td>
+</tr>
+</table>
+
+
+
+<div id="setPopup" class="hide">
+	<form name="sForm" id="sForm" method="post" target="actionFrame" action="../order_process/bank_search_set">
+	
+	<table class="info-table-style" style="width:100%">
+	<tbody>
+	<tr>
+		<td class="its-td-align center" colspan="2">
+			입금 미확인시  실패 사유를 가지고 유사한 주문 정보를 검색합니다. <br/>
+			동명이인 : 은행과 입금인과 금액이 일치하는 주문건 모두 검색합니다.<br/>
+			은행 임금인과 금액은 같으나 은행이 다른 주문건을 검색합니다.<br/>
+			주문무효: 이미 주문무효인 주문건을 검색합니다.<br/>
+			금액: - <input type="text" name="sprice" value="{banks.sprice}" class="onlynumber" size="6"/> ~  + <input type="text" name="eprice" value="{banks.eprice}" class="onlynumber" size="6"/> <br/>
+			기타: 입금인이 입금자나 주문자와 같은 경우를 모두 검색합니다.
+		</td>
+	</tr>
+	</table>
+	<div style="width:100%;text-align:center;padding-top:10px;">
+	<span class="btn large cyanblue"><button type="submit" id="send_submit">확인</button></span>
+	</div>
+	</form>
+</div>
+
+
+<div id="pop_info" class="hide">
+	<table style="width:100%">
+	<tbody>
+	<tr><td>무통장 자동입금확인을 이용하기 위해 먼저 서비스를 신청해 주십시오.</td></tr>
+	<tr><td height="30">설정 > 무통장에서 신청을 하실 수 있으며 계좌도 설정할 수 있습니다. </td></tr>
+	</table>
+	<div style="width:100%;text-align:center;padding-top:10px;">
+	<span class="btn large cyanblue"><button class="info">바로가기</button></span>
+	</div>
+</div>
+
+<div id="pop_info2" class="hide">
+	<table style="width:100%">
+	<tbody>
+	<tr><td>서비스 기한이 만료되었습니다. </td></tr>
+	<tr><td height="30">다시 신청해 주시기 바랍니다.</td></tr>
+	</table>
+	<div style="width:100%;text-align:center;padding-top:10px;">
+	<span class="btn large cyanblue"><button class="info">바로가기</button></span>
+	</div>
+</div>
+
+
+<!-- 주문리스트 테이블 : 끝 -->
+<div class="hide" id="search_detail_dialog">
+<form name="set_search_detail" method="post" action="set_search_autodeposit" target="actionFrame">
+<div id="contents">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th width="100">입금일</th>
+				<td class="date" height="30">
+					<label class="search_label"><input type="radio" name="regist_date" value="today" {? cookie_arr.regist_date=='today'}checked="checked"{/} /> 오늘</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3day" {? cookie_arr.regist_date=='3day'}checked="checked"{/} /> 3일간</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="7day" {? cookie_arr.regist_date=='7day'}checked="checked"{/} /> 일주일</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="1mon" {? cookie_arr.regist_date=='1mon'}checked="checked"{/} /> 1개월</label>
+				</td>
+			</tr>
+			<tr>
+				<th>처리상태</th>
+				<td>
+					<label class="search_label"><input type="checkbox" name="ad_chk1" value="1" {? cookie_arr.ad_chk1 }checked{ / }/> 입금확인</label>	
+					&nbsp;&nbsp;
+					<label class="search_label"><input type="checkbox" name="ad_chk2" value="2" {? cookie_arr.ad_chk2 }checked{ / }/> 입금미확인</label>	
+					&nbsp;&nbsp;
+					<span class="icon-check hand all-check"><b>전체</b></span>			
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<div align="center" style="padding-top:10px;">
+	<span class="btn large black">
+		<button type="submit">저장하기<span class="arrowright"></span></button>
+	</span>
+</div>
+</form>
+</div>
+
+{ #layout_footer }

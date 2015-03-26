@@ -1,0 +1,80 @@
+<style>
+table#tb_string_price th { height:40px; }
+table#tb_string_price td { height:50px; }
+#setting_guide_msg {height:34px;}
+</style>
+<table class="info-table-style" id="tb_string_price" style="width:100%">
+	<colgroup>
+		<col width="20%" />
+		<col />
+		
+	</colgroup>
+
+	<tbody>
+	<tr>
+		<th class="its-th-align center bold">↓아래의 고객이 볼 때</th>
+		<th class="its-th-align center">
+			<div class="bold">디스플레이</div>
+			<div class="desc">상품디스플레이, 상품상세페이지, 장바구니&주문페이지, 카테고리&브랜드페이지, 검색결과페이지</div>
+		</th>		
+	</tr>
+	<tr>
+		<td class="its-td-align left pdl5">비회원(또는 로그아웃)</td>
+		<td class="its-td-align left pdl5">
+			<label style="display:inline-block;width:80px;"><input type="radio" name="string_price_use" value="0" {?!string_price_use}checked{ / } /> 가격</label>
+			<label><input type="radio" name="string_price_use" value="1" {?string_price_use=='1'}checked{ / } /> 가격대체문구</label>
+			<span>
+			<input type="text" name="string_price" size="28" value="{string_price}" />
+			<select name="string_price_link">
+				<option value='' {?string_price_link==''}selected{/}>링크선택</option>
+				<option value='login' {?string_price_link=='login'}selected{/}>로그인</option>
+				<option value='1:1' {?string_price_link=='1:1'}selected{/}>1:1문의</option>
+				<option value='direct' {?string_price_link=='direct'}selected{/}>직접입력</option>
+			</select>
+			<input type="text" name="string_price_link_url" size="28" value="{string_price_link_url}" class="hide" />			
+			</span>
+		</td>
+	</tr>
+	<tr>
+		<td class="its-td-align left pdl5">일반 등급 회원</td>
+		<td class="its-td-align left pdl5">
+			<label style="display:inline-block;width:80px;"><input type="radio" name="member_string_price_use" value="0" {?!member_string_price_use}checked{ / } /> 가격</label>			
+			<label><input type="radio" name="member_string_price_use" value="1" {?member_string_price_use=='1'}checked{ / } /> 가격대체문구</label>
+			<span>
+			<input type="text" name="member_string_price"  size="28" value="{member_string_price}" />			
+			<select name="member_string_price_link">
+				<option value='' {?member_string_price_link==''}selected{/}>링크선택</option>				
+				<option value='1:1' {?member_string_price_link=='1:1'}selected{/}>1:1문의</option>
+				<option value='direct' {?member_string_price_link=='direct'}selected{/}>직접입력</option>				
+			</select>
+			<input type="text" name="member_string_price_link_url" size="28" value="{string_price_link_url}" class="hide"  />
+			</span>			
+		</td>
+	</tr>
+	<tr>
+		<td class="its-td-align left pdl5">모든 등급 회원(일반 제외)</td>
+		<td class="its-td-align left pdl5">
+			<label style="display:inline-block;width:80px;"><input type="radio" name="allmember_string_price_use" value="0" {?!allmember_string_price_use}checked{ / } /> 가격</label>
+			<label><input type="radio" name="allmember_string_price_use" value="1" {?allmember_string_price_use=='1'}checked{ / } /> 가격대체문구</label>			
+			<span>
+			<input type="text" name="allmember_string_price" size="28" value="{allmember_string_price}" />
+			<select name="allmember_string_price_link">
+				<option value='' {?allmember_string_price==''}selected{/}>링크선택</option>				
+				<option value='1:1' {?allmember_string_price=='1:1'}selected{/}>1:1문의</option>
+				<option value='direct' {?allmember_string_price=='direct'}selected{/}>직접입력</option>
+			</select>
+			<input type="text" name="allmember_string_price_link_url" size="28" value="{string_price_link_url}" class="hide"  />
+			</span>
+		</td>
+	</tr>	
+	</tbody>
+</table>
+<div id="setting_guide_msg" class="hide bold mt15 fx14"></div>
+<div class="center pdt10">
+<span class="btn large cyanblue"><button type="button" id="btn_apply_string" onclick='apply_string_price();'>적용하기</button></span>
+</div>
+<script>
+check_string_price();
+</script>
+
+

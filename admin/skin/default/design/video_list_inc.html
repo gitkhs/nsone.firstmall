@@ -1,0 +1,33 @@
+{ @ video_list }
+	<tr>
+		<td class="dlts-td center"><input type="checkbox" name="delete_video_seq[]" value="{.seq}" /> {.seq}</td>
+		<td class="dlts-td center">
+		{=showDesignVideo(.seq,'150X100')}
+		<!-- 	<img src="{=uccdomain('thumbnail',.file_key_w)}"  width="150" height="100" >
+		<embed src="{=uccdomain('fileswf',.file_key_w)}" width="150" height="100" allowfullscreen="true" wmode="transparent"></embed>-->
+		</td>
+		<td class="dlts-td left">{.r_date}</td>
+		<td class="dlts-td center">{? .memo} {.memo}<br/>{/}
+		{? .playtime} {.playtime}초<br/>{/}
+		{? .encoding_speed}{.encoding_speed}Kbps{/} {? .encoding_screen}, {.encoding_screen}Pixel<br/>{/}
+		</td>
+		<td class="dlts-td center">
+				동영상링크 &nbsp;&nbsp;&nbsp;&nbsp; <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{=uccdomain('fileswf',.file_key_w)}" htmlkey="{.file_key_w}" htmltype="link" >URL</button></span><br/>
+				HTML(Embed) <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{=uccdomain('fileswf',.file_key_w)}" htmlkey="{.file_key_w}"  htmltype="embed" >URL</button></span><br/>
+				HTML(Object) <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{=uccdomain('fileswf',.file_key_w)}" htmlkey="{.file_key_w}"  htmltype="object" >URL</button></span><br/>
+				동영상페이지 &nbsp; <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{=uccdomain('fileurl',.file_key_w)}"  htmltype="page" >URL</button></span><br/>
+				치환코드 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="btn small "><button type="button" class="videourlbtn" htmlurl=''  htmltype="tag" id="tag_video_{.seq}">TAG</button></span>
+		</td>
+		<td class="dlts-td center">
+			<span class="btn small red"><input type="button" value="선택" onclick="select_video('{.seq}','{=uccdomain('thumbnail',.file_key_w)}')" /></span>
+		</td>
+	</tr>
+	<script type="text/javascript">
+		var tag_video = "{" + "=showDesignVideo({.seq},\"widthXheight\")" + "}";
+		$("#tag_video_{.seq}").attr("htmlurl",tag_video);
+	</script>
+{ / }
+
+<script type="text/javascript">
+$("#videopagin").html('{videopagin}');
+</script>

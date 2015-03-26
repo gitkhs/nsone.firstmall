@@ -1,0 +1,357 @@
+{ #layout_header }
+
+<script type="text/javascript">
+// SEARCH FOLDER
+function showSearch(){
+	if($("#goods_search_form").css('display')=='none'){
+		$("#goods_search_form").show();
+		$.cookie("goods_list_folder", "folded");
+	}else{
+		$("#goods_search_form").hide();
+		$.cookie("goods_list_folder", "unfolded");
+	}
+}
+
+
+$(document).ready(function() {
+	$("#chkAll").click(function(){
+		if($(this).attr("checked")){
+			$(".chk").attr("checked",true).change();
+		}else{
+			$(".chk").attr("checked",false).change();
+		}
+	});
+
+	// 체크박스 색상
+	$("input[type='checkbox'][name='goods_seq[]']").live('change',function(){
+		if($(this).is(':checked')){
+			$(this).closest('tr').addClass('checked-tr-background');
+		}else{
+			$(this).closest('tr').removeClass('checked-tr-background');
+		}
+	}).change();
+
+	$("button[name='update_goods']").bind("click",function(){
+
+		var chk_val = false;
+		$(".chk").each(function(){
+			if( $(this).attr("checked") == "checked" ){
+				chk_val = true;
+			}
+		});
+		{ ? _GET.mode == 'price' || _GET.mode =='goods' }
+		if(!chk_val ){
+		{ : }
+		if(!chk_val && $("select.modify_list:visible").val()=='choice' ){
+		{ / }
+			openDialogAlert('변경할 상품을 선택해 주세요!',400,150,function(){},'');
+			return false;
+		}
+		openDialogConfirm('상품정보를 변경하겠습니까?<br/>변경된 데이터는 복구 되지 않습니다!',500,160,function(){
+			var search_val = "";
+			{ @ _GET }
+			search_val += "<input type='hidden' name='{.key_}' value='{.value_}'>";
+			{ / }
+			$("form#goodsForm").append(search_val);
+
+			var f = $("form#goodsForm")[0];
+			f.method = "post";
+			f.target = "actionFrame";
+			f.action = "../goods_process/batch_modify";
+			f.submit();
+		},function(){
+		});
+	});
+
+	$("select[name='orderby']").bind("click change",function(){
+		var url = "?page=1&{page.querystring}&orderby="+$(this).find("option:selected").val();
+		location.href = url;
+	});
+	$("select[name='perpage']").bind("click change",function(){
+		var url = "?page=1&{page.querystring}&perpage="+$(this).find("option:selected").val();
+		location.href = url;
+	});
+
+	$(".modify_list").bind("change",function(){
+		if( $(this).find("option:selected").val() != "all"){
+			$("input.chk").attr('disabled',false);
+			$("#chkAll").attr('disabled',false);
+		}else{
+			$("input.chk").attr('disabled',true);
+			$("#chkAll").attr('disabled',true);
+		}
+	});
+});
+
+function goodsView(seq){
+	$("input[name='no']").val(seq);
+	var search = location.search;
+	search = search.substring(1,search.length);
+	$("input[name='query_string']").val(search);
+	$("form[name='goodsForm']").attr('action','regist');
+	$("form[name='goodsForm']").submit();
+}
+
+function go_link_tab(mode)
+{
+	var url = "?page=1&{page.querystring}&mode="+mode;//amp;
+	url = url.replace("&mode={_GET.mode}","");
+	{ ? _GET.mode == 'price' || _GET.mode == 'goods' }
+	openDialogConfirm('현재 화면에서 나가시겠습니까?<br/>우측 상단의 ‘업데이트’ 버튼으로 저장하지 않은 데이터는 저장되지 않습니다!',500,160,function(){
+		location.href = url;
+	},function(){
+	});
+	{ : }
+	location.href = url;
+	{ / }
+}
+
+</script>
+
+
+<style>
+.mtab-left {background:url('../images/common/tab_mem_bg_left.gif');width:4px;height:55px;}
+.mtab-right {background:url('../images/common/tab_mem_bg_right.gif');width:4px;height:55px;}
+.mtab {background:url('../images/common/tab_mem_bg_center.gif');font-size:12px;font-family:Dotum;font-weight:bold;color:#757575;padding-top:5px;}
+.mtabon-left {background:url('../images/common/tab_mem_bg_left_on.gif');width:5px;height:55px;}
+.mtabon-right {background:url('../images/common/tab_mem_bg_right_on.gif');width:5px;height:55px;}
+.mtabon {background:url('../images/common/tab_mem_bg_center_on.gif');font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;padding-top:5px;}
+.pdr28 {padding-right:28px;}
+</style>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>상품 데이터 일괄 업데이트</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		<!--
+			<li><span class="btn large icon"><button><span class="arrowleft"></span>상품리스트</button></span></li>
+			-->
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large"><button type="button" name="update_goods{? _GET.mode == 'imagehosting'}_imagehosting{/}">업데이트하기</button></span></li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<form name="search_goods_form" enctype="multipart/form-data" id="search_goods_form">
+<input type="hidden" name="query_string"/>
+<input type="hidden" name="no" />
+<input type="hidden" name="mode" value="{_GET.mode}" />
+
+<!-- 상품 검색폼 : 시작 -->
+{ #goods_search_form }
+<!-- 상품 검색폼 : 끝 -->
+
+</form>
+<div class="clearbox"></div>
+<form name="goodsForm" id="goodsForm" enctype="multipart/form-data">
+<!-- 상단 단계 링크 : 시작 -->
+<style>
+.topmenuTitleContainer {margin-top:15px; border:1px solid #000; padding-left:10px; line-height:40px;}
+.topmenuTitleContainer .ptc-title {float:left; font-size:20px; color:#fff; font-weight:bold;}
+.topmenuTitleContainer .ptc-desc {padding-left:10px; float:left;}
+.batchmodify_ui-combobox {width:550px;height:40px;margin: 0;padding: 0.3em;font-size:18px;}
+</style>
+<div class="center">
+	<div class="topmenuTitleContainer clearbox" style="background-color:gray">
+		<div class="ptc-title">상품데이터 선택 : </div>
+		<div class="ptc-desc">
+				<div  >
+					<select name="batchmodify_selector" style="vertical-align:middle;" class="batchmodify_ui-combobox">
+					<!--option value="price" {? _GET.mode == 'price' || !_GET.mode } selected {/} >금액/재고/적립금/배송비/상태/노출 직접 업데이트</option>
+					<option value="ifprice" {? _GET.mode == 'ifprice'} selected {/} >금액/재고/적립금/배송비/상태/노출 조건 업데이트</option-->
+					<option value="price" {? _GET.mode == 'price' || !_GET.mode } selected {/} >금액/적립금/배송비 직접 업데이트</option>
+					<option value="ifprice" {? _GET.mode == 'ifprice'} selected {/} >금액/적립금/배송비 조건 업데이트</option>
+					<option value="stock" {? _GET.mode == 'stock' || !_GET.mode } selected {/} >재고/재고연동/상태/노출 업데이트</option>
+					<option value="goods" {? _GET.mode == 'goods'} selected {/} >상품명/간략설명/공용정보/관련상품 직접 업데이트</option>
+					<option value="ifgoods" {? _GET.mode == 'ifgoods'} selected {/} >상품명/간략설명/공용정보/관련상품 조건 업데이트</option>
+					<option value="category" {? _GET.mode == 'category'} selected {/} >카테고리 & 브랜드 & 지역 업데이트</option>
+					<option value="ifgoodscode" {? _GET.mode == 'ifgoodscode'} selected {/} >상품코드자동생성/청약철회제한상품 업데이트</option>
+					<option value="watermark" {? _GET.mode == 'watermark'} selected {/} >워터마크 직접 업데이트</option>
+					<option value="icon" {? _GET.mode == 'icon'} selected {/} >아이콘 업데이트</option>
+					<!--{ ? LINKAGE_SERVICE }-->
+					<option value="mprice" {? _GET.mode == 'mprice'} selected {/} >판매마켓별 상품 전송여부/판매가 조건 업데이트</option>
+					<!--{ / }-->
+					<option value="imagehosting" {? _GET.mode == 'imagehosting'} selected {/} >상품설명이미지 → 이미지 호스팅 일괄 업데이트</option>
+					</select>&nbsp;
+				</div>
+				<script>
+				$( "select[name='batchmodify_selector']" )
+				.change(function(){
+					if($(this).val()){
+						go_link_tab($(this).val());
+					}
+				});
+				</script>
+		</div>
+	</div>
+</div>
+<!-- 상단 단계 링크 : 끝 -->
+{#list_contents}
+</form>
+
+<br style="line-height:10px;" />
+
+
+<div class="paging_navigation" style="margin:auto;">{page.html}</div>
+
+<div class="hide" id="search_detail_dialog">
+<form name="set_search_detail" method="post" action="set_search_default" target="actionFrame">
+<div id="contents">
+	<table class="search-form-table" id="serch_tab">
+	<tr id="goods_search_form" style="display:block;">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th>카테고리</th>
+				<td colspan="7">
+					<select class="line" name="s_category1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="s_category2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="s_category3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="s_category4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+			</tr>
+			<tr>
+				<th>브랜드</th>
+				<td colspan="7">
+					<select class="line" name="s_brands1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="s_brands2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="s_brands3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="s_brands4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+			</tr>
+			<tr>
+				<th>지역</th>
+				<td colspan="7">
+					<select class="line" name="s_location1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+					<select class="line" name="s_location2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+					<select class="line" name="s_location3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+					<select class="line" name="s_location4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+				</td>
+			</tr>
+			<tr>
+				<th><select name="date_gb" class="search_select_pop">
+						<option value="regist_date" {?sc.date_gb=='regist_date'}selected{/}>등록일</option>
+						<option value="update_date" {?sc.date_gb=='update_date'}selected{/}>수정일</option>
+					</select></th>
+				<td colspan="7">
+					<label class="search_label"><input type="radio" name="regist_date" value="today" checked="checked" /> 오늘</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3day" /> 3일간</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="7day" /> 일주일</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="1mon" /> 1개월</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3mon" /> 3개월</label>
+				</td>
+			</tr>
+			<tr>
+				<th><select name="price_gb" class="search_select_pop">
+						<option value="consumer_price" {?sc.price_gb=='consumer_price'}selected{/}>정상가</option>
+						<option value="price" {?sc.price_gb=='price'}selected{/}>할인가</option>
+					</select></th>
+				<td>
+					<input type="text" name="sprice" value="{_GET.sprice}" size="5" class="line onlynumber" /> - <input type="text" name="eprice" value="{_GET.eprice}" size="5" class="line onlynumber"/>
+				</td>
+				<th>재고수량</th>
+				<td>
+					<input type="text" name="sstock" value="{_GET.sstock}" size="5" class="line onlynumber"/> - <input type="text" name="estock" value="{_GET.estock}" size="5" class="line onlynumber"/>
+				</td>
+				<th>페이지뷰</th>
+				<td>
+					<input type="text" name="spage_view" value="{_GET.spage_view}" class="line onlynumber" size="5"/> - <input type="text" name="epage_view" value="{_GET.epage_view}" class="line onlynumber" size="5"/>
+				</td>
+				<th></th>
+				<td></td>
+			</tr>
+			<tr>
+				<!--
+				<th>매입처</th>
+				<td>
+					<select name=""></select>
+				</td>
+				<th>판매처</th>
+				<td>
+					<select name=""></select>
+				</td>
+				-->
+				<th>모델명</th>
+				<td>
+					<select name="model" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ model }
+						<option value="{.contents}" {?sc.model==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>브랜드</th>
+				<td>
+					<select name="brand" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ brand }
+						<option value="{.contents}" {?sc.brand==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>상태</th>
+				<td colspan="3">
+					<label><input type="checkbox" name="goodsStatus[]" value="normal" {?sc.goodsStatus && in_array('normal',sc.goodsStatus)}checked{/}/>정상<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="runout" {?sc.goodsStatus && in_array('runout',sc.goodsStatus)}checked{/}/>품절<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="purchasing" {?sc.goodsStatus && in_array('purchasing',sc.goodsStatus)}checked{/}/>재고확보중<label>
+					<label><input type="checkbox" name="goodsStatus[]" value="unsold" {?sc.goodsStatus && in_array('unsold',sc.goodsStatus)}checked{/}/>판매중지<label>
+				</td>
+			</tr>
+			<tr>
+				<th>제조사</th>
+				<td>
+					<select name="manufacture" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ manufacture }
+						<option value="{.contents}" {?sc.manufacture==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>원산지</th>
+				<td>
+					<select name="orign" class="line">
+						<option value="">= 선택하세요 =</option>
+						{@ orign }
+						<option value="{.contents}" {?sc.orign==.contents}selected{/}>{.contents}</option>
+						{ / }
+					</select>
+				</td>
+				<th>노출</th>
+				<td>
+					<label><input type="checkbox" name="goodsView[]" value="look" {?sc.goodsView && in_array('look',sc.goodsView)}checked{/}/>보임<label>
+					<label><input type="checkbox" name="goodsView[]" value="notLook" {?sc.goodsView && in_array('notLook',sc.goodsView)}checked{/}/>안보임<label>
+				</td>
+				<th>과세/비과세</th>
+				<td>
+					<label><input type="checkbox" name="taxView[]" value="tax" {?sc.taxView && in_array('tax',sc.taxView)}checked{/}/>과세<label>
+					<label><input type="checkbox" name="taxView[]" value="exempt" {?sc.taxView && in_array('exempt',sc.taxView)}checked{/}/>비과세<label>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<div align="center" style="padding-top:10px;">
+	<span class="btn large black">
+		<button type="submit">저장하기<span class="arrowright"></span></button>
+	</span>
+</div>
+</form>
+</div>
+
+
+{ #layout_footer }

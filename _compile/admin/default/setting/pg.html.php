@@ -1,0 +1,363 @@
+<?php /* Template_ 2.2.6 2015/03/12 17:21:48 /www/nsone_firstmall_kr/admin/skin/default/setting/pg.html 000014419 */ ?>
+<?php $this->print_("layout_header",$TPL_SCP,1);?>
+
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+<script type="text/javascript" src="/app/javascript/plugin/zclip/jquery.zclip.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/jquery.uploadify.v2.1.4.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+
+<script type="text/javascript">
+
+function set_pg_popup(){
+	var url = $("form[name='pgSettingForm'] select[name='pgCompany']").val();
+	$.get(url, function(data) {
+		$('#pgSettingContents').html(data);
+	});
+
+	/* 카카오페이설정 호출 :: 2015-02-09 lwh */
+	$.get('kakaopay', function(data) {
+		$('#kakaopaySettingContents').html(data);
+	});
+
+	$("input[name='nonInterestTerms[]']:checked").each(function(){
+		$(this).attr('checked',false);
+	});
+}
+
+function check_not_use_pg(){
+	$("select[name='pgCompany']").attr("disabled",false);
+	if( $("input[name='not_use_pg']").attr("checked")){
+		$("select[name='pgCompany']").attr("disabled",true);
+	}
+}
+
+function view_virtual_info(){
+	var sel = $("input[name='virtual_info']:checked").val();		
+	$(".virtual_info").addClass("hide");
+	$("#virtual_info_"+sel).removeClass("hide");
+	$("div.ui-dialog-content").height($("#virtual_info_"+sel).height()+90);
+}
+
+$(document).ready(function() {
+
+	/* 설정하기 */
+	$("button[name='pgSetting']").live("click",function(){
+		set_pg_popup();
+		openDialog("통합 전자결제 설정 <span class='desc'>전자결제 정보를 설정합니다.</span>", "pgSettingContents", {"width":"95%","height":800});
+		event.preventDefault();
+		return false;
+	});
+
+	/* pg사 선택 */
+	$("select[name='pgCompany']").live("change",function(){
+		set_pg_popup();
+		return false;
+	});
+
+	/* 저장시 action조정 */
+	$("form[name='pgSettingForm']").submit( function () {
+		var url = '../pg_process/' + $("form[name='pgSettingForm'] select[name=pgCompany]").val();
+		$(this).attr('action',url);
+		return true;
+	});
+
+	/* 저장시 action조정 */
+<?php if($TPL_VAR["config_system"]["pgCompany"]){?>
+	$("form[name='pgSettingForm'] select[name='pgCompany']").val('<?php echo $TPL_VAR["config_system"]["pgCompany"]?>');
+	$("#now_operating").html($("form[name='pgSettingForm'] select[name='pgCompany'] option[value='<?php echo $TPL_VAR["config_system"]["pgCompany"]?>']").html()+' 사용, ');
+<?php }else{?>
+	$("#now_operating").html('통합전자결제 미사용, ');
+<?php }?>
+<?php if($TPL_VAR["config_system"]["not_use_kakao"]=='n'){?>
+	$("#now_operating").html($("#now_operating").html() + "카카오페이 사용");
+<?php }else{?>
+	$("#now_operating").html($("#now_operating").html() + "카카오페이 미사용");
+<?php }?>
+<?php if($TPL_VAR["config_system"]["not_use_pg"]=='y'){?>
+	$("input[name='not_use_pg']").attr("checked",true);
+<?php }?>
+<?php if($TPL_VAR["config_system"]["not_use_kakao"]=='y'||$TPL_VAR["config_system"]["not_use_kakao"]==''){?>
+	$("input[name='not_use_kakao']").attr("checked",true);
+<?php }?>
+	set_pg_popup();
+	check_not_use_pg();
+
+	$("button.button_virtual_info").live("click",function(){
+		view_virtual_info();
+		openDialog("입금확인 URL 세팅 방법", "virtual_info", {"width":"900","show" : "fade","hide" : "fade"});
+	});
+	$("input[name='virtual_info']").live("click",function(){
+		view_virtual_info();
+	});
+});
+
+
+</script>
+<style>
+ul.varturnl_url_contens li {padding-top:5px;}
+</style>
+<button class="hide" id="copy_btn"></button>
+<form name="pgSettingForm" method="post" enctype="multipart/form-data" action="../pg_process/lg" target="actionFrame">
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+<?php $this->print_("require_info",$TPL_SCP,1);?>
+
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2><span class="darkgray">설정 →</span> 전자결제</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button <?php if($TPL_VAR["isdemo"]["isdemo"]){?>  type="button" <?php echo $TPL_VAR["isdemo"]["isdemojs1"]?> <?php }else{?> type="submit" <?php }?>>저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<div class="sub-layout-container">
+
+	<!-- 서브메뉴 탭 : 시작 -->
+<?php $this->print_("setting_menu",$TPL_SCP,1);?>
+
+	<!-- 서브메뉴 탭 : 끝 -->
+
+	<!-- 서브메뉴 바디 : 시작-->
+	<div class='slc-body-wrap'>
+		<div class="slc-body">
+
+			<br class="table-gap" />
+
+			<table style="margin:auto;">
+			<tr>
+				<td><img src="/admin/skin/default/images/common/icon_setting_now.gif" align="absmiddle" hspace="5" /></td>
+				<td>
+					<span class="bold fx16">현재설정 : </span>
+					<span class="bold fx16 blue" id="now_operating"></span>
+				</td>
+			</tr>
+			</table>
+<?php if(!$TPL_VAR["config_system"]["pgCompany"]&&($TPL_VAR["config_system"]["not_use_kakao"]=='y'||!$TPL_VAR["config_system"]["not_use_kakao"])){?>
+
+			<br class="table-gap" />
+			<table align="center">
+				<td>
+					<div class="gabia-pannel" code="pg_request_banner" noAnimation="1"></div>
+				</td>
+			</table>
+<?php }?>
+
+			<br class="table-gap" />
+
+			<div class="item-title">신용카드 등의 전자결제 수단 <span class="desc" style="font-weight:normal;">운영자께서 설정한 아래의 사용중인 전자결제 정보는 상품 주문 시 보여지며, 구매자는 결제수단을 선택하여 주문을 완료하게 됩니다.</span></div>
+			<div align="center" class="gray-title">
+				<span class="bold">통합 전자결제 서비스</span>
+				<span>
+				<select name="pgCompany">
+				<option value="inicis">이니시스</option>
+<?php if($TPL_VAR["service_code"]!='P_STOR'){?>
+				<option value="lg">LG유플러스</option>
+				<option value="kcp">KCP</option>
+				<option value="allat">올앳</option>
+				<option value="kspay">KSNET</option>
+<?php }?>
+				</select>를 사용
+				</span>
+				<span><label>또는 <input type="checkbox" name="not_use_pg" value='y' onclick="check_not_use_pg();">미사용합니다.</label></span>
+
+				<span class="btn small red"><a href="#pg_information">아직 계약을 안하셨다면 ↓여기를 클릭하세요.</a></span>
+
+				<div style="width:960px; margin:auto; padding-top:15px; text-align:left; font-size:11px; color:#333">
+				<b>필독) 통합 전자결제 서비스 유의사항</b><br />
+				<span>1. 반드시 퍼스트몰에서 전자결제서비스를 신청 및 계약 해 주셔야 전자결제가 연동되어 정상 동작됩니다. PG사에 직접 신청한 경우 퍼스트몰과 연동이 되지 않아 전자결제가 동작되지 않습니다.<br />
+				2. 퍼스트몰은 KCP, LG, 이니시스, KSNET, 올앳 5곳의 PG사에 대해 연동을 지원해 드립니다. 퍼스트몰과 계약되어 있는 5곳의 PG사 외 타PG사와의 연동은 불가합니다.</span>
+				</div>
+			</div>
+
+			<br style="line-height:10px;" />
+
+			<div id="pgSettingContents"></div>
+
+			<!--/ 카카오 페이 :: START 2015-02-09 lwh /-->
+			<div class="item-title">카카오페이 설정</div>
+			<div align="center" class="gray-title">
+				<span><b>카카오페이</b>를 사용</span>
+				<span><label>또는 <input type="checkbox" name="not_use_kakao" value='y'>미사용합니다.</label></span>
+				<span class="btn small red"><a href="#pg_information">아직 계약을 안하셨다면 ↓여기를 클릭하세요.</a></span>
+
+				<div style="width:960px; margin:auto; padding-top:15px; text-align:left; font-size:11px; color:#333">
+				<b>필독) 카카오톡 서비스 유의사항</b><br />
+				<span>1. 반드시 퍼스트몰에서 카카오페이를 신청 및 계약 해 주셔야 카카오페이가 연동되어 정상 동작됩니다. 직접 신청한 경우 카카오페이가 동작되지 않습니다.</span>
+				</div>
+			</div>
+
+			<br style="line-height:10px;" />
+
+			<div id="kakaopaySettingContents"></div>
+			<!--/ 카카오 페이 :: END /-->
+
+
+			<br style="line-height:10px;" />
+			<br class="table-gap" />
+			<a name="pg_information"></a>
+
+			<!--/ 통합 전자결제 서비스 안내 :: START /-->
+			<div class="gabia-pannel" width="100%" code="pg_information"  isdemo="<?php echo $TPL_VAR["isdemo"]["isdemo"]?>" ></div>
+
+			<a name="pg_request"></a>
+			<br style="line-height:10px;" />
+			<div id="TaxContents" class="hide">
+				<span><b>[ 비과세 또는 복합과세 쇼핑몰 계약 안내 ]</b></span><br>
+				아래의 설명과 같이 <span style="color:red;">비과세 또는 복합과세(과세, 비과세)</span> 쇼핑몰은 <span style="color:red;">해당 계약 PG사에 비과세 또는 복합과세로 정확히 계약</span>해 주십시오.<br>
+				그래야만 <span style="color:red;">현금영수증과 신용카드매출전표에 물품가격과 부가세가 정확히 표기되어집니다!</span> <br>
+				쇼핑몰의 매출증빙자료 설정은 설정 > <a href="/admin/setting/sale" target="_blank"><span class="highlight-link">매출증빙</span></a>에서 할 수 있습니다.<br>
+
+				<br style="line-height:10px;" />
+				<img src="/admin/skin/default/images/common/img_setting_taxation01.gif"><br>
+				<br style="line-height:10px;" />
+				<img src="/admin/skin/default/images/common/img_setting_taxation02.gif"><br>
+				<br style="line-height:10px;" />
+				<img src="/admin/skin/default/images/common/img_setting_taxation03.gif">
+			</div>
+
+
+
+		</div>
+	</div>
+	<!-- 서브메뉴 바디 : 끝 -->
+</div>
+<!-- 서브 레이아웃 영역 : 끝 -->
+
+<!-- 가상계좌 입금통보 url 안내 컨텐츠 -->
+<div id="virtual_info" class="hide">
+	
+	<div class="bold">전자결제(pg)별 가상계좌 입금확인 URL 세팅 방법</div>
+	<div style="padding-top:20px;"></div>
+	<table width="100%" cellpadding="0" cellspacing="0">	
+	<tr>
+		<td>
+		<label>
+			<input type="radio" name="virtual_info" value="kcp" checked />
+			KCP 이용 상점
+		</label>
+		<span class="pdl5"></span>
+		<label>
+			<input type="radio" name="virtual_info" value="inicis" />
+			이니시스 이용 상점
+		</label>
+		<span class="pdl5"></span>
+		<label>
+			<input type="radio" name="virtual_info" value="lg" />
+			LG U+ 이용 상점
+		</label>
+		<span class="pdl5"></span>
+		<label>
+			<input type="radio" name="virtual_info" value="allat" />
+			올앳 이용 상점
+		</label>
+		<span class="pdl5"></span>
+		<label>
+			<input type="radio" name="virtual_info" value="kspay" />
+			KSNET 이용 상점
+		</label>
+		</td>
+	</tr>
+	<tr><td height="14"></td></tr>
+	<tr><td style="height:1px;background-color:#dadada"></td></tr>
+	<tr><td height="15"></td></tr>
+	<tr>
+		<td>
+			<div id="virtual_info_kcp" class="virtual_info">				
+				
+				<ul class="varturnl_url_contens">
+				<li>
+					KCP관리자페이지(<a href="http://admin.kcp.co.kr" target="_blank"><span class="blue">http://admin.kcp.co.kr</span></a>)에서 가상계좌 입금확인 URL을 입력해주세요.
+				</li>
+				<li>
+					가상계좌 입금 시, 퍼스트몰 관리자화면의 주문상태(주문접수→결제확인)가 자동 변경 됩니다.
+				</li>
+				<li>
+					가상계좌 입금확인 URL : <strong>http://<span class="red">쇼핑몰도메인입력</span>/payment/kcp_return</strong>
+				</li>
+				</ul>
+				
+				<div style="padding-top:16px;"></div>
+				<div style="border-top:1px dashed #dddddd;width:100%;"></div>
+				<div style="padding-top:36px;"></div>
+				<div>
+					<img src="/admin/skin/default/images/design/pg/img_setting_url_kcp.gif" />
+				</div>
+			</div>
+			<div id="virtual_info_inicis" class="virtual_info" class="hide">
+				
+				<ul class="varturnl_url_contens">
+					<li>
+						KG Inicis관리자페이지(<a href="https://iniweb.inicis.com" target="_blank"><span class="blue">https://iniweb.inicis.com</span></a>) 에서 가상계좌 입금확인 URL을 입력해주세요.
+					</li>
+					<li>
+						가상계좌 입금 시, 퍼스트몰 관리자화면의 주문상태(주문접수→결제확인)가 자동 변경 됩니다.
+					</li>
+					<li>
+						가상계좌 입금확인 URL : <strong>http://<span class="red">쇼핑몰도메인입력</span>/payment/inicis_return</strong>
+					</li>
+					<li>
+						이니시스는 일반결제와 에스크로결제 관리자가 분리되어 있어, 일반결제 관리자 계정과 에스크로관리자 계정에
+					</li>
+					<li>
+						각각 로그인하여 URL을 입력해 주셔야 합니다.
+					</li>
+				</ul>
+				
+				<div style="padding-top:16px;"></div>
+				<div style="border-top:1px dashed #dddddd;width:100%;"></div>
+				<div style="padding-top:36px;"></div>
+
+				<div>
+					<img src="/admin/skin/default/images/design/pg/img_setting_url_inisis.gif" />
+				</div>
+			</div>
+			<div id="virtual_info_lg" class="virtual_info" class="hide">
+				<ul class="varturnl_url_contens">
+					<li>
+						LG U+는 가상계좌 입금확인은 별도의 설정 없이 동작됩니다.
+					</li>					
+				</ul>
+			</div>
+			<div id="virtual_info_allat" class="virtual_info" class="hide">
+				
+				<ul class="varturnl_url_contens">
+					<li>
+						올엣 고객센터(02-3783-9990 )에 가상계좌 입금확인 URL 추가를 요청하여 주세요.
+					</li>
+					<li>
+						가상계좌 입금 시, 퍼스트몰 관리자화면의 주문상태(주문접수→결제확인)가 자동 변경 됩니다.
+					</li>
+					<li>
+						가상계좌 입금확인 URL : <strong>http://<span class="red">쇼핑몰도메인입력</span>/payment/allat_return</strong>
+					</li>
+				</ul>
+				
+			</div>
+			<div id="virtual_info_kspay" class="virtual_info" class="hide">
+				<ul class="varturnl_url_contens">
+					<li>
+						KSNET 고객센터(1544-6030 )에 가상계좌 입금확인 URL 추가를 요청하여 주세요.
+					</li>
+					<li>
+						가상계좌 입금 시, 퍼스트몰 관리자화면의 주문상태(주문접수→결제확인)가 자동 변경 됩니다.
+					</li>
+					<li>
+						가상계좌 입금확인 URL : <strong>http://<span class="red">쇼핑몰도메인입력</span>/payment/kspay_return</strong>
+					</li>
+				</ul>				
+			</div>
+		</td>
+	</tr>	
+	</table>
+</div>
+<?php $this->print_("layout_footer",$TPL_SCP,1);?>

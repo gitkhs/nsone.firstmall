@@ -1,0 +1,859 @@
+<?php
+class Goodsmodel extends CI_Model {
+	public function goods_temp_image_upload($filename,$folder){
+		$tmp = getimagesize($_FILES['Filedata']['tmp_name']);
+		$_FILES['Filedata']['type'] = $tmp['mime'];
+		$config['upload_path'] = $folder;
+		$config['allowed_types'] = 'jpg|png|gif';
+		$config['max_size']	= $this->config_system['uploadLimit'];
+		$config['file_name'] = $filename;
+		$this->load->library('upload', $config);
+		if ( ! $this->upload->do_upload('Filedata'))
+		{
+			$result = array('status' => '0','error' => $this->upload->display_errors());
+		}else{
+			$result = array('status' => 1,'fileInfo'=>$this->upload->data());
+		}
+		return $result;
+	}
+
+	public function goods_temp_image_resize($source,$target,$width,$height){
+		$this->load->library('image_lib');
+		$config['image_library'] = 'gd2';
+		$config['source_image'] = $source;
+		$config['new_image'] = $target;
+		$config['maintain_ratio'] = TRUE;
+		$config['width'] = $width;
+		$config['height'] = $height;
+		$this->image_lib->initialize($config);
+		if ( ! $this->image_lib->resize())
+		{
+			$result = array('status' => '0','error' => $this->image_lib->display_errors());
+		}else{
+			$result = array('status' => 1);
+		}
+		$this->image_lib->clear();
+		return $result;
+	}
+	/* 상품등록 파라미터 검증*/
+	public function check_param_regist(){
+		$_POST['chkPrice'] = $_POST['price'][0];
+		$_POST['chkStock'] = $_POST['stock'][0];
+
+		if( !isset($_POST['stringPriceUse']) ) $_POST['stringPriceUse'] = 0;
+		if( !isset($_POST['multiDiscountUse']) ) $_POST['multiDiscountUse'] = 0;
+		if( !isset($_POST['optionUse']) ) $_POST['optionUse'] = 0;
+		if( !isset($_POST['subOptionUse']) ) $_POST['subOptionUse'] = 0;
+		if( !isset($_POST['memberInputUse']) ) $_POST['memberInputUse'] = 0;
+
+		$chkArr['stringPrice']				= "";
+		$chkArr['multiDiscountEa']			= "";
+		$chkArr['multiDiscount']			= "";
+		$chkArr['multiDiscountUnit']		= "";
+		$chkArr['minPurchaseEa']			= "";
+		$chkArr['maxPurchaseOrderLimit']	= "";
+		$chkArr['maxPurchaseEa']			= "";
+		$chkArr['optionViewType']			= "";
+		$chkArr['goodsShippingPolicy']		= "";
+		$chkArr['unlimitShippingPrice']		= "";
+		$chkArr['limitShippingEa']			= "";
+		$chkArr['limitShippingPrice']		= "";
+		$chkArr['limitShippingSubPrice']	= "";
+		$chkArr['goodsWeight']				= "";
+
+		$this->validation->set_rules('firstCategory', '대표카테고리','trim|xss_clean');
+		$this->validation->set_rules('connectCategory[]', '카테고리연결','trim|xss_clean');
+		$this->validation->set_rules('viewLayout', '상품상세페이지','trim|required|xss_clean');
+		$this->validation->set_rules('goodsStatus', '상태','trim|required|xss_clean');
+		$this->validation->set_rules('goodsView', '노출','trim|required|xss_clean');
+		$this->validation->set_rules('goodsCode', '상품 코드','trim|xss_clean');
+		$this->validation->set_rules('goodsName', '상품명','trim|required|xss_clean');
+		$this->validation->set_rules('purchaseGoodsName', '매입용 상품명','trim|xss_clean');
+		$this->validation->set_rules('summary', '간략 설명','trim|xss_clean');
+		$this->validation->set_rules('keyword', '상품 검색 태그','trim|xss_clean');
+		$this->validation->set_rules('contents', '상품 설명','trim|xss_clean');
+		$this->validation->set_rules('commonContents', '공용 정보','trim|xss_clean');
+		$this->validation->set_rules('info_name', '공용 정보명','trim|required|xss_clean');
+		if( $_POST['stringPriceUse'] == 1 ){
+			$this->validation->set_rules('stringPrice', '가격 대체 문구','trim|required|xss_clean');
+			$chkArr['stringPrice']	= $_POST['stringPrice'];
+		}
+		$this->validation->set_rules('tax', '부가세','trim|required|xss_clean');
+		if( $_POST['multiDiscountUse'] == 1 ){
+			$this->validation->set_rules('multiDiscountEa', '복수구매할인','trim|required|xss_clean');
+			$this->validation->set_rules('multiDiscount', '복수구매할인','trim|numeric|required|xss_clean');
+			$this->validation->set_rules('multiDiscountUnit', '복수구매할인','trim|required|xss_clean');
+			$chkArr['multiDiscountEa'] 		= $_POST['multiDiscountEa'];
+			$chkArr['multiDiscount']		= $_POST['multiDiscount'];
+			$chkArr['multiDiscountUnit']	= $_POST['multiDiscountUnit'];
+		}
+		$this->validation->set_rules('minPurchaseLimit', '최소 구매수량','trim|required|xss_clean');
+		if( $_POST['multiDiscountUse'] == 'limit' ){
+			$this->validation->set_rules('minPurchaseEa', '최소 구매수량','trim|numeric|requiredd|xss_clean');
+			$chkArr['minPurchaseEa']	= $_POST['minPurchaseEa'];
+		}
+		$this->validation->set_rules('maxPurchaseLimit', '최대 구매수량','trim|required|xss_clean');
+		if( $_POST['maxPurchaseLimit'] == 'limit' ){
+			$this->validation->set_rules('maxPurchaseOrderLimit', '최대 구매수량','trim|numeric|required|xss_clean');
+			$this->validation->set_rules('maxPurchaseEa', '최대 구매수량','trim|numeric|required|xss_clean');
+			$chkArr['maxPurchaseOrderLimit']	= $_POST['maxPurchaseOrderLimit'];
+			$chkArr['maxPurchaseEa']			= $_POST['maxPurchaseEa'];
+		}
+		if( $_POST['optionUse'] == '1' ){
+			$this->validation->set_rules('optionViewType', '옵션 출력 형식','trim|required|xss_clean');
+			$chkArr['optionViewType']	= $_POST['optionViewType'];
+		}
+
+		$this->validation->set_rules('chkPrice', '할인가(판매가)','trim|numeric|required|xss_clean');
+		$this->validation->set_rules('chkStock', '재고','trim|numeric|required|xss_clean');
+		$this->validation->set_rules('shippingPolicy', '국내 배송','trim|required|xss_clean');
+		if( $_POST['shippingPolicy'] == 'goods' ){
+			$this->validation->set_rules('goodsShippingPolicy', '개별 배송비 정책','trim|required|xss_clean');
+			$chkArr['goodsShippingPolicy']	= $_POST['goodsShippingPolicy'];
+			if( $_POST['goodsShippingPolicy'] == 'unlimit' ){
+				$this->validation->set_rules('unlimitShippingPrice', '개별 배송비 정책','trim|numeric|required|xss_clean');
+				$chkArr['unlimitShippingPrice']	= $_POST['unlimitShippingPrice'];
+			}else if( $_POST['goodsShippingPolicy'] == 'limit' ){
+				$this->validation->set_rules('limitShippingEa', '개별 배송비 정책','trim|numeric|required|xss_clean');
+				$this->validation->set_rules('limitShippingPrice', '개별 배송비 정책','trim|numeric|required|xss_clean');
+				$this->validation->set_rules('limitShippingSubPrice', '개별 배송비 정책','trim|numeric|required|xss_clean');
+				$chkArr['limitShippingEa']			= $_POST['limitShippingEa'];
+				$chkArr['limitShippingPrice']		= $_POST['limitShippingPrice'];
+				$chkArr['limitShippingSubPrice']	= $_POST['limitShippingSubPrice'];
+			}
+		}
+		$this->validation->set_rules('shippingWeightPolicy', '해외 배송','trim|required|xss_clean');
+		if( $_POST['shippingWeightPolicy'] == 'goods' ){
+			$this->validation->set_rules('goodsWeight', '상품 중량 ','trim|numeric|required|xss_clean');
+			$chkArr['goodsWeight']	= $_POST['goodsWeight'];
+		}
+		$this->validation->set_rules('adminMemo', '관리자 메모','trim|xss_clean');
+		if($this->validation->exec()===false){
+			$err = $this->validation->error_array;
+			$callback = "if(parent.document.getElementsByName('{$err['key']}')[0]) parent.document.getElementsByName('{$err['key']}')[0].focus();";
+			openDialogAlert($err['value'],400,140,'parent',$callback);
+			exit;
+		}
+
+		$goods['view_layout'] 				= $_POST['viewLayout'];
+		$goods['goods_status']				= $_POST['goodsStatus'];
+		$goods['goods_view'] 				= $_POST['goodsView'];
+		$goods['goods_code'] 				= $_POST['goodsCode'];
+		$goods['goods_name'] 				= $_POST['goodsName'];
+		$goods['purchase_goods_name'] 		= $_POST['purchaseGoodsName'];
+		$goods['summary'] 					= $_POST['summary'];
+		$goods['keyword'] 					= $_POST['keyword'];
+		$goods['contents'] 					= $_POST['contents'];
+		$goods['common_contents'] 			= $_POST['commonContents'];
+		$goods['string_price_use'] 			= $_POST['stringPriceUse'];
+		$goods['string_price'] 				= $chkArr['stringPrice'];
+		$goods['tax'] 						= $_POST['tax'];
+		$goods['multi_discount_use'] 		= $_POST['multiDiscountUse'];
+		$goods['multi_discount_ea'] 		= $chkArr['multiDiscountEa'];
+		$goods['multi_discount'] 			= $chkArr['multiDiscount'];
+		$goods['multi_discount_unit'] 		= $chkArr['multiDiscountUnit'];
+		$goods['min_purchase_limit'] 		= $_POST['minPurchaseLimit'];
+		$goods['min_purchase_ea'] 			= $chkArr['minPurchaseEa'];
+		$goods['max_purchase_limit'] 		= $_POST['maxPurchaseLimit'];
+		$goods['max_purchase_order_limit'] 	= $chkArr['maxPurchaseOrderLimit'];
+		$goods['max_purchase_ea'] 			= $chkArr['maxPurchaseEa'];
+		$goods['option_use'] 				= $_POST['optionUse'];
+		$goods['reserve_policy'] 			= $_POST['reserve_policy'];
+		$goods['option_view_type'] 			= $chkArr['optionViewType'];
+		$goods['option_suboption_use']		= $_POST['subOptionUse'];
+		$goods['member_input_use'] 			= $_POST['memberInputUse'];
+		$goods['shipping_policy'] 			= $_POST['shippingPolicy'];
+		$goods['goods_shipping_policy'] 	= $chkArr['goodsShippingPolicy'];
+		$goods['unlimit_shipping_price'] 	= $chkArr['unlimitShippingPrice'];
+		$goods['limit_shipping_ea'] 		= $chkArr['limitShippingEa'];
+		$goods['limit_shipping_price'] 		= $chkArr['limitShippingPrice'];
+		$goods['limit_shipping_subprice'] 	= $chkArr['limitShippingSubPrice'];
+		$goods['shipping_weight_policy'] 	= $_POST['shippingWeightPolicy'];
+		$goods['goods_weight'] 				= $chkArr['goodsWeight'];
+		$goods['admin_memo'] 				= $_POST['adminMemo'];
+
+		$goods['relation_type'] 			= $_POST['relation_type'];
+		$goods['info_seq'] 					= $_POST['info_select'];
+
+		return $goods;
+	}
+
+	public function set_goodsImageSize($type,$width,$height){
+		$arrNames['large'] 			= '확대';
+		$arrNames['view'] 			= '상품상세';
+		$arrNames['list1'] 			= '리스트1';
+		$arrNames['list2'] 			= '리스트2';
+		$arrNames['thumbView'] 		= '상품상세-썸네일';
+		$arrNames['thumbCart'] 		= '장바구니-썸네일';
+		$arrNames['thumbScroll'] 	= '스크롤-썸네일';
+		config_save( 'goodsImageSize', array($type =>array('name'=>$arrNames[$type],'width'=>$width,'height'=>$height)));
+	}
+
+	public function upload_goodsImage_dir(){
+		$dir = '/data/goods/'.date("Ym");
+		@mkdir($dir);
+		@chmod($dir,0707);
+		return $dir;
+	}
+
+	public function get_target_goodsImage($file){
+		$dir = $this->upload_goodsImage_dir();
+		$arr = explode('/', $file);
+		$fn = $arr[count($arr)-1];
+		$target = $dir.'/'.$fn;
+		return $target;
+	}
+
+	public function upload_goodsImage($arr){
+		foreach( $arr as $i => $file ){
+			$target = $this->get_target_goodsImage($file);
+			copy('.'.$file,'.'.$target);
+		}
+	}
+
+	public function insert_goodsImage($key,$goodsSeq){
+		if(!isset($_POST[$key])) return false;
+		$tmp_cnt = 0;
+		foreach($_POST[$key] as $i => $img){
+			if($img){
+				$labelKey = str_replace('Image','Label',$key);
+				$type = str_replace('GoodsImage','',$key);
+				/*
+				if(isset($_POST[$key.'Seq'][$i])){
+					$imgs['image_seq'] = $_POST[$key.'Seq'][$i];
+				}
+				*/
+				$imgs['image_type'] = $type;
+				$imgs['goods_seq'] = $goodsSeq;
+				$imgs['cut_number'] = $i+1;
+				if(substr($key,0,4)=='list' && $tmp_cnt > 0){
+					$imgs['image'] = "";
+				}else{
+					$imgs['image'] = $this->get_target_goodsImage($img);
+				}
+				$imgs['label'] = $_POST[$labelKey][$i];
+
+				$result = $this->db->insert('fm_goods_image', $imgs);
+			}
+			$tmp_cnt++;
+		}
+	}
+
+	public function get_goods_category($no){
+		$result = false;
+		$query = "select c.title,l.* from fm_category_link l,fm_category c where l.category_code=c.category_code and l.goods_seq=?";
+		$query = $this->db->query($query,array($no));
+		foreach($query->result_array() as $data){
+			$result[] = $data;
+		}
+		return $result;
+	}
+
+	public function get_goods($no){
+		$result = false;
+		$this->db->limit(1,0);
+		$this->db->where('goods_seq', $no);
+		$query = $this->db->get('fm_goods');
+		$result = $query->result_array();
+
+		$ea = 1;
+		if($result[0]['min_purchase_limit'] == 'limit' && $result[0]['min_purchase_ea']){
+			$ea = $result[0]['min_purchase_ea'];
+		}
+		$result[0]['min_purchase_ea'] = $ea;
+
+		$ea = 0;
+		if($result[0]['max_purchase_limit'] == 'limit' && $result[0]['max_purchase_ea']){
+			$ea = $result[0]['max_purchase_ea'];
+		}
+		$result[0]['max_purchase_ea'] = $ea;
+
+		return $result[0];
+	}
+
+	public function get_goods_option($no){
+		$result = false;
+		$sql = "select o.*, s.stock, s.supply_price from fm_goods_option o left join fm_goods_supply s on o.option_seq=s.option_seq where o.goods_seq=?";
+		$query = $this->db->query($sql,array($no));
+		foreach($query->result_array() as $data){
+			$optJoin = "";
+			if( $data['option_title'] ) $data['option_divide_title'] = explode(',',$data['option_title']);
+			if( $data['option1'] ) $optJoin[] = $data['option1'];
+			if( $data['option2'] ) $optJoin[] = $data['option2'];
+			if( $data['option3'] ) $optJoin[] = $data['option3'];
+			if( $data['option4'] ) $optJoin[] = $data['option4'];
+			if( $data['option5'] ) $optJoin[] = $data['option5'];
+			if( $optJoin ){
+				$data['opts'] = $optJoin;
+			}
+			$result[] = $data;
+		}
+		return $result;
+	}
+
+	public function get_default_option($no){
+		$result = false;
+		$query = "select o.*,s.stock,s.supply_price from fm_goods_option o,fm_goods_supply s where o.option_seq=s.option_seq and o.default_option='y' and o.goods_seq=?";
+		$query = $this->db->query($query,array($no));
+		foreach($query->result_array() as $data){
+			$optJoin = "";
+			if( $data['option_title'] ) $data['option_divide_title'] = explode(',',$data['option_title']);
+			if( $data['option1'] ) $optJoin[] = $data['option1'];
+			if( $data['option2'] ) $optJoin[] = $data['option2'];
+			if( $data['option3'] ) $optJoin[] = $data['option3'];
+			if( $data['option4'] ) $optJoin[] = $data['option4'];
+			if( $data['option5'] ) $optJoin[] = $data['option5'];
+			if( $optJoin ){
+				$data['opts'] = $optJoin;
+			}
+			$result = $data;
+		}
+		return $result;
+	}
+
+	public function get_goods_addition ($no){
+		$result = false;
+		$this->db->where('goods_seq', $no);
+		$query = $this->db->get('fm_goods_addition');
+		foreach($query->result_array() as $data){
+			$result[] = $data;
+		}
+		return $result;
+	}
+
+	public function get_goods_icon ($no){
+		$result = false;
+		$this->db->where('goods_seq', $no);
+		$query = $this->db->get('fm_goods_icon');
+		foreach($query->result_array() as $data){
+			$result[] = $data;
+		}
+		return $result;
+	}
+
+	public function get_goods_suboption ($no){
+		$result = false;
+		$arr = array();
+		$query = "select o.*,s.stock,s.supply_price from fm_goods_suboption o,fm_goods_supply s where o.suboption_seq=s.suboption_seq and o.goods_seq=?";
+		$query = $this->db->query($query,array($no));
+		foreach($query->result_array() as $data){
+			if(!in_array($data['suboption_title'],$arr)) $arr[] = $data['suboption_title'];
+			list($key) = array_keys($arr,$data['suboption_title']);
+			$result[$key][] = $data;
+		}
+		return $result;
+	}
+
+	public function get_goods_image($no){
+		$result = false;
+		$this->db->where('goods_seq', $no);
+		$query = $this->db->get('fm_goods_image');
+		foreach($query->result_array()  as $data){
+			$result[$data['cut_number']][$data['image_type']] = $data;
+		}
+		return $result;
+	}
+
+	public function get_goods_input($no){
+		$result = false;
+		$this->db->where('goods_seq', $no);
+		$query = $this->db->get('fm_goods_input');
+		foreach($query->result_array() as $data){
+			$result[] = $data;
+		}
+		return $result;
+	}
+
+	/*
+	 상품(단품) 해당하는 배송정보를 가져온다. 가격비교 및 상품상세에서 사용
+	*/
+	public function get_goods_delivery($goods,$ea=1){
+		$delivery['policy'] = $goods['shipping_policy'];
+		if( $goods['shipping_policy']=='goods'){
+			$delivery['price'] = 0;
+			$delivery['type'] = 'delivery';
+			if( $goods['goods_shipping_policy'] == 'unlimit' ){
+				if( $goods['unlimit_shipping_price'] > 0 ) $delivery['price'] = $goods['unlimit_shipping_price'];
+			}else if( $goods['goods_shipping_policy'] == 'limit' ){
+				if( $goods['limit_shipping_price'] > 0 ){
+					$delivery['price'] = $goods['limit_shipping_price'];
+					if($ea > $goods['limit_shipping_ea']){
+						$delivery['price'] += ceil($ea / $goods['limit_shipping_ea']) * $goods['limit_shipping_subprice'];
+					}
+				}
+			}
+		}else{
+			$arr = array('delivery','quick','direct');
+			foreach($arr as $code){
+				if(isset($delivery['type'])) continue;
+				$scode = "shipping".$code;
+				$arrBasicPolicy = config_load($scode);
+				if($arrBasicPolicy['useYn'] == 'y'){
+					$delivery['type'] = $code;
+					$delivery['summary'] = $arrBasicPolicy['summary'];
+					$delivery['price'] = 0;
+					if($code == 'delivery'){
+						switch($arrBasicPolicy['deliveryCostPolicy']){
+							case "ifpay" :
+								if($arrBasicPolicy['ifpayFreePrice'] > 0){
+									$delivery['price'] = $arrBasicPolicy['payDeliveryCost'];
+									$delivery['free'] = $arrBasicPolicy['ifpayFreePrice'];
+								}
+								break;
+							case "pay" :
+								if($arrBasicPolicy['payDeliveryCost'] > 0){
+									$delivery['price'] = $arrBasicPolicy['payDeliveryCost'];
+								}
+								break;
+							case "free":
+									$delivery['price'] = 0;
+								break;
+						}
+					}else{
+						$delivery['type'] = $code;
+					}
+				}
+			}
+		}
+		return $delivery;
+	}
+
+	public function get_goods_list($arrNo,$imageType='list1'){
+		$where = "and g.goods_seq in (".implode(',',$arrNo).")";
+		$query = "select g.*,o.*,i.* from fm_goods g,fm_goods_image i,fm_goods_option o where g.goods_seq=i.goods_seq and i.image_type=? and g.goods_seq=o.goods_seq and o.default_option='y' ".$where;
+		$query = $this->db->query($query,array($imageType));
+		foreach($query->result_array() as $data){
+			$query2 = "select * from fm_goods_icon where goods_seq=?";
+			$query2 = $this->db->query($query2,$data['goods_seq']);
+			foreach($query2->result_array() as $data2){
+				$data['icons'][] = $data2;
+			}
+			$result[$data['goods_seq']] = $data;
+		}
+		return $result;
+	}
+
+	/* 상품 뷰 증가 */
+	public function increase_page_view($no){
+		$bind[] = $no;
+		$query = "update fm_goods set page_view=page_view+1 where goods_seq=?";
+		$this->db->query($query,$bind);
+	}
+
+	/* 사용자화면 상품리스트 */
+	public function goods_list($sc){
+		$data = array();
+
+		$sqlGroupbyClause = "";
+
+		$sqlSelectClause = "
+			select
+			SQL_CALC_FOUND_ROWS
+			g.goods_seq,
+			g.goods_name,
+			i.image,
+			o.consumer_price,
+			o.price,
+			o.reserve_rate,
+			o.reserve_unit,
+			o.reserve,
+			(select group_concat(c.codecd) from fm_goods_icon c where c.goods_seq=g.goods_seq) as icons
+		";
+		$sqlFromClause = " from
+		fm_goods g,
+		fm_goods_image i,
+		fm_goods_option o
+		 ";
+		$sqlWhereClause = "
+			where
+			g.goods_status = 'normal' and
+			i.goods_seq=g.goods_seq and
+			i.image_type ='{$sc['image_size']}' and
+			o.goods_seq=g.goods_seq and
+			o.default_option ='y'
+		";
+
+		if(!empty($sc['category']))
+		{
+			$sqlSelectClause .= ",l.category_code ";
+			$sqlFromClause .= ",fm_category_link l ";
+			$sqlWhereClause .= ' and l.goods_seq=g.goods_seq and ( l.category_code like "'.$sc['category'].'%") ';
+			$sqlGroupbyClause = " group by g.goods_seq";
+		}
+
+		if(!empty($sc['search_text'])){
+			switch($sc['search_text']){
+				case 'goods_name':
+					$sqlWhereClause .= " and g.goods_name like '%{$sc['search_text']}%'";
+				break;
+				case 'goods_code':
+					$sqlWhereClause .= " and g.goods_code = '{$sc['search_text']}'";
+				break;
+				case 'summary':
+					$sqlWhereClause .= " and g.summary like '%{$sc['search_text']}%'";
+				break;
+				case 'keyword':
+					$sqlWhereClause .= " and g.keyword like '%{$sc['search_text']}%'";
+				break;
+				default:
+					$sqlWhereClause .= " and
+					(
+						g.goods_name like '%{$sc['search_text']}%'
+						or g.goods_code = '{$sc['search_text']}'
+						or g.summary like '%{$sc['search_text']}%'
+						or g.keyword like '%{$sc['search_text']}%'
+					)
+					";
+				break;
+			}
+		}
+
+		switch($sc['sort'])
+		{
+			case "popular":
+				$sqlOrderbyClause =" order by g.page_view desc";
+			break;
+			case "newly":
+				$sqlOrderbyClause =" order by g.regist_date desc";
+			break;
+			case "popular_sales":
+				$sqlOrderbyClause =" order by g.purchase_ea desc";
+			break;
+			case "low_price":
+				$sqlOrderbyClause =" order by o.price asc";
+			break;
+			case "high_price":
+				$sqlOrderbyClause =" order by o.price desc";
+			break;
+			case "review":
+				$sqlOrderbyClause =" order by g.review_count desc";
+			break;
+			default:
+				$sqlOrderbyClause =" order by goods_seq desc";
+			break;
+
+		}
+
+		$sql = "
+			{$sqlSelectClause}
+			{$sqlFromClause}
+			{$sqlWhereClause}
+			{$sqlGroupbyClause}
+			{$sqlOrderbyClause}
+		";
+
+		$result = select_page($sc['perpage'],$sc['page'],10,$sql,array());
+		$result['page']['querystring'] = get_args_list();
+
+		return $result;
+	}
+
+	/* 상품 옵션 재고 */
+	public function get_goods_option_stock($goods_seq,$option1,$option2,$option3,$option4,$option5){
+		$query = "select s.stock from fm_goods_option o,fm_goods_supply s where o.option_seq=s.option_seq and o.goods_seq=? and o.option1=? and o.option2=? and o.option3=? and o.option4=? and o.option5=? limit 1";
+		$query = $this->db->query($query,array($goods_seq,$option1,$option2,$option3,$option4,$option5));
+		$data = $query->result_array();
+		return $data[0]['stock'];
+	}
+
+	/* 상품 옵션 가격 */
+	public function get_goods_option_price($goods_seq,$option1,$option2,$option3,$option4,$option5){
+		$query = "select price,reserve from fm_goods_option where goods_seq=? and option1=? and option2=? and option3=? and option4=? and option5=? limit 1";
+		$query = $this->db->query($query,array($goods_seq,$option1,$option2,$option3,$option4,$option5));
+		$data = $query->result_array();
+		return array($data[0]['price'],$data[0]['reserve']);
+	}
+
+
+	/* 상품 서브옵션 재고 */
+	public function get_goods_suboption_stock($goods_seq,$title,$suboption){
+		$query = "select s.stock from fm_goods_suboption o,fm_goods_supply s where o.goods_seq=? and o.suboption_seq=s.suboption_seq and o.suboption_title=? and o.suboption=? limit 1";
+		$query = $this->db->query($query,array($goods_seq,$title,$suboption));
+		$data = $query->result_array();
+		return $data[0]['stock'];
+	}
+
+	/* 상품 리스트 */
+	public function admin_goods_list($sc) {
+		$CI =& get_instance();
+
+<<<<<<< .mine
+		$sql = "select
+=======
+
+		$sql = "SELECT Z.* FROM
+			(select
+>>>>>>> .r720
+				A.*,
+				CASE WHEN A.goods_status = 'unsold' THEN '판매중지'
+					WHEN A.goods_status = 'runout' THEN '품절'
+<<<<<<< .mine
+=======
+					ELSE '정상' END AS goods_status_text,
+				B.consumer_price, B.price,
+				C.stock
+			from
+				fm_goods A
+				LEFT JOIN fm_goods_option B ON A.goods_seq = B.goods_seq
+				LEFT JOIN fm_goods_supply C ON A.goods_seq	= C.goods_seq AND B.option_seq = C.option_seq
+			where
+				B.default_option = 'y' ) Z LEFT OUTER JOIN fm_category_link E ON E.goods_seq = Z.goods_seq
+			WHERE
+				1
+		";
+		$sql .= " AND (E.link = '1' or E.link is null) ";
+
+		/*
+		$sql = "select
+				A.goods_seq, A.*,
+				CASE WHEN A.goods_status = 'unsold' THEN '판매중지'
+					WHEN A.goods_status = 'runout' THEN '품절'
+>>>>>>> .r720
+					ELSE '정상' END AS goods_status,
+				B.consumer_price, B.price,
+				C.stock,
+				D.image,
+				E.category_code
+			from
+				fm_goods A
+				LEFT JOIN fm_goods_option B ON A.goods_seq = B.goods_seq
+				LEFT JOIN fm_goods_supply C ON B.option_seq	= C.option_seq
+				LEFT JOIN fm_goods_image D ON A.goods_seq = D.goods_seq
+				LEFT JOIN fm_category_link E ON E.goods_seq = A.goods_seq
+			where 1";
+		$sql .= " AND B.default_option = 'y' ";
+		$sql .= " AND D.image_type = 'thumbView' AND D.cut_number = 1 ";
+		$sql .= " AND E.link = '1' ";
+
+		### CATEGORY
+		if( !empty($sc['category4']) ){
+			$sql .= " AND E.category_code = '{$sc[category4]}' ";
+		}else if( !empty($sc['category3']) ){
+			$sql .= " AND E.category_code like '{$sc[category3]}%' ";
+		}else if( !empty($sc['category2']) ){
+			$sql .= " AND E.category_code like '{$sc[category2]}%' ";
+		}else if( !empty($sc['category1']) ){
+			$sql .= " AND E.category_code like '{$sc[category1]}%' ";
+		}
+
+		### DATE
+		if( !empty($sc['sdate']) && !empty($sc['edate']))
+		{
+			$sql .= " AND A.{$sc['date_gb']} between '{$sc['sdate']}' and '{$sc['edate']}' ";
+		}
+		### PRICE
+		if( !empty($sc['sprice']) && !empty($sc['eprice']))
+		{
+			$sql .= " AND B.{$sc['price_gb']} between '{$sc['sprice']}' and '{$sc['eprice']}' ";
+		}
+		### STOCK
+		if( !empty($sc['sstock']) && !empty($sc['estock']))
+		{
+			$sql .= " AND C.stock between '{$sc['sstock']}' and '{$sc['estock']}' ";
+		}
+		### PAGE_VIEW
+		if( !empty($sc['spage_view']) && !empty($sc['epage_view']))
+		{
+			$sql .= " AND A.page_view between '{$sc['spage_view']}' and '{$sc['epage_view']}' ";
+		}
+
+		### GOODSVIEW
+		if( !empty($sc['goodsView']) && count($sc['goodsView'])=='1' )
+		{
+			$sql .= " AND A.goods_view = '{$sc['goodsView'][0]}' ";
+		}
+
+		### MOEDEL
+		if( !empty($sc['model']) )
+		{
+			$sql .= " AND A.goods_seq = ( select Z.goods_seq from fm_goods_addition Z where Z.goods_seq = A.goods_seq AND Z.contents = '{$sc['model']}' ) ";
+		}
+		### MOEDEL
+		if( !empty($sc['brand']) )
+		{
+			$sql .= " AND A.goods_seq = ( select Z.goods_seq from fm_goods_addition Z where Z.goods_seq = A.goods_seq AND Z.contents = '{$sc['brand']}' ) ";
+		}
+		### MANUFACTURE
+		if( !empty($sc['manufacture']) )
+		{
+			$sql .= " AND A.goods_seq = ( select Z.goods_seq from fm_goods_addition Z where Z.goods_seq = A.goods_seq AND Z.contents = '{$sc['manufacture']}' ) ";
+		}
+		### ORIGN
+		if( !empty($sc['orign']) )
+		{
+			$sql .= " AND A.goods_seq = ( select Z.goods_seq from fm_goods_addition Z where Z.goods_seq = A.goods_seq AND Z.contents = '{$sc['orign']}' ) ";
+		}
+
+
+		$sql .=" order by {$sc['orderby']} {$sc['sort']}";
+		$limit =" limit {$sc['page']}, {$sc['perpage']} ";
+		//echo $sql;
+		$query = $CI->db->query($sql.$limit);
+		$data['result'] = $query->result_array();
+
+		$query = $CI->db->query($sql);
+		$data['count'] = $query->num_rows();
+
+		return $data;
+	}
+
+
+	public function goods_addition_list($type) {
+		$sql = "select distinct A.contents, A.* from fm_goods_addition A where A.type = '{$type}' order by A.addition_seq desc";
+		$query = $this->db->query($sql);
+		$data = $query->result_array();
+		return $data;
+	}
+
+	###
+	public function delete_goods($goodSeq){
+		$result = $this->db->delete('fm_category_link', array('goods_seq' => $goodSeq));
+		$result = $this->db->delete('fm_goods_addition', array('goods_seq' => $goodSeq));
+		$result = $this->db->delete('fm_goods_icon', array('goods_seq' => $goodSeq));
+		$result = $this->db->delete('fm_goods_image', array('goods_seq' => $goodSeq));
+		$result = $this->db->delete('fm_goods_input', array('goods_seq' => $goodSeq));
+		$result = $this->db->delete('fm_goods_option', array('goods_seq' => $goodSeq));
+		$result = $this->db->delete('fm_goods_relation', array('goods_seq' => $goodSeq));
+		$result = $this->db->delete('fm_goods_suboption', array('goods_seq' => $goodSeq));
+		$result = $this->db->delete('fm_goods_supply', array('goods_seq' => $goodSeq));
+		$result = $this->db->delete('fm_goods', array('goods_seq' => $goodSeq));
+		return $result;
+	}
+
+
+	###
+	public function copy_goods($oldSeq){
+		/*
+		$this->db->where('goods_seq', $oldSeq);
+		$query = $this->db->get("fm_goods");
+		$data = $query->result_array();
+
+		$params = filter_keys($data, $this->db->list_fields('fm_goods'));
+		unset($params['goods_seq']);
+		unset($params['update_date']);
+		unset($params['admin_log']);
+		$params['regist_date'] = date("Y-m-d H:i:s");
+
+		$result = $this->db->insert('fm_goods', $params);
+		*/
+		$now = date("Y-m-d H:i:s");
+<<<<<<< .mine
+		$sql = "INSERT INTO fm_goods (view_layout, goods_status, goods_view, favorite_chk, goods_code, goods_name, purchase_goods_name, summary, keyword, contents, info_seq, common_contents, string_price_use, string_price, tax, multi_discount_use, multi_discount_ea, multi_discount, multi_discount_unit, min_purchase_limit, min_purchase_ea, max_purchase_limit, max_purchase_order_limit, max_purchase_ea, reserve_policy, option_use, option_view_type, option_suboption_use, member_input_use, shipping_policy, goods_shipping_policy, unlimit_shipping_price, limit_shipping_ea, limit_shipping_price, limit_shipping_subprice, shipping_weight_policy, goods_weight, relation_type,  admin_memo, admin_log, purchase_ea, regist_date) SELECT view_layout, goods_status, goods_view, favorite_chk, goods_code, goods_name, purchase_goods_name, summary, keyword, contents, info_seq, common_contents, string_price_use, string_price, tax, multi_discount_use, multi_discount_ea, multi_discount, multi_discount_unit, min_purchase_limit, min_purchase_ea, max_purchase_limit, max_purchase_order_limit, max_purchase_ea, reserve_policy, option_use, option_view_type, option_suboption_use, member_input_use, shipping_policy, goods_shipping_policy, unlimit_shipping_price, limit_shipping_ea, limit_shipping_price, limit_shipping_subprice, shipping_weight_policy, goods_weight, relation_type,  admin_memo, admin_log, purchase_ea, '{$now}' FROM fm_goods WHERE goods_seq = '{$oldSeq}'";
+=======
+		$sql = "INSERT INTO fm_goods
+			(view_layout, goods_status, goods_view, favorite_chk, goods_code, goods_name, purchase_goods_name, summary, keyword, contents, info_seq, common_contents, string_price_use, string_price, tax, multi_discount_use, multi_discount_ea, multi_discount, multi_discount_unit, min_purchase_limit, min_purchase_ea, max_purchase_limit, max_purchase_order_limit, max_purchase_ea, reserve_policy, option_use, option_view_type, option_suboption_use, member_input_use, shipping_policy, goods_shipping_policy, unlimit_shipping_price, limit_shipping_ea, limit_shipping_price, limit_shipping_subprice, shipping_weight_policy, goods_weight, relation_type,  admin_memo, admin_log, purchase_ea, regist_date)
+		SELECT
+			view_layout, goods_status, goods_view, favorite_chk, goods_code, goods_name, purchase_goods_name, summary, keyword, contents, info_seq, common_contents, string_price_use, string_price, tax, multi_discount_use, multi_discount_ea, multi_discount, multi_discount_unit, min_purchase_limit, min_purchase_ea, max_purchase_limit, max_purchase_order_limit, max_purchase_ea, reserve_policy, option_use, option_view_type, option_suboption_use, member_input_use, shipping_policy, goods_shipping_policy, unlimit_shipping_price, limit_shipping_ea, limit_shipping_price, limit_shipping_subprice, shipping_weight_policy, goods_weight, relation_type,  admin_memo, admin_log, purchase_ea, '{$now}'
+		FROM
+			fm_goods
+		WHERE
+			goods_seq = '{$oldSeq}'";
+>>>>>>> .r720
+		$result = $this->db->query($sql);
+		$goods_seq = $this->db->insert_id();
+		return $goods_seq;
+	}
+	###
+	public function copy_goods_default($table, $oldSeq, $goodSeq, $unset_seq){
+		$this->db->where('goods_seq', $oldSeq);
+		$query = $this->db->get($table);
+		foreach($query->result_array() as $data){
+			$params = filter_keys($data, $this->db->list_fields($table));
+			unset($params[$unset_seq]);
+			if(isset($params['regist_date'])) $params['regist_date'] = date("Y-m-d H:i:s");
+			$params['goods_seq'] = $goodSeq;
+			$result = $this->db->insert($table, $params);
+		}
+		return $result;
+	}
+
+<<<<<<< .mine
+=======
+	public function copy_goods_option($oldSeq, $goodsSeq){
+		### OPTION
+		$sql = "SELECT distinct A.option_seq, A.*, B.* FROM fm_goods_option A LEFT JOIN fm_goods_supply B ON A.option_seq = B.option_seq WHERE A.goods_seq = '{$oldSeq}'";
+		$query = $this->db->query($sql);
+		foreach($query->result_array() as $data){
+			$oparams['goods_seq']		= $goodsSeq;
+			$oparams['default_option']	= $data['default_option'];
+			$oparams['option_title']	= $data['option_title'];
+			$oparams['option1']			= $data['option1'];
+			$oparams['option2']			= $data['option2'];
+			$oparams['option3']			= $data['option3'];
+			$oparams['option4']			= $data['option4'];
+			$oparams['option5']			= $data['option5'];
+			$oparams['consumer_price']	= $data['consumer_price'];
+			$oparams['price']			= $data['price'];
+			$oparams['reserve_rate']	= $data['reserve_rate'];
+			$oparams['reserve_unit']	= $data['reserve_unit'];
+			$oparams['reserve']			= $data['reserve'];
+			$result = $this->db->insert('fm_goods_option', $oparams);
+			$option_seq = $this->db->insert_id();
+			$sparams['goods_seq']		= $goodsSeq;
+			$sparams['option_seq']		= $option_seq;
+			$sparams['supply_price']	= $data['supply_price'];
+			$sparams['stock']			= $data['stock'];
+			$result = $this->db->insert('fm_goods_supply', $sparams);
+		}
+		unset($oparams);
+		unset($sparams);
+		### SUBOPTION
+		$sql = "SELECT distinct A.suboption_seq, A.*, B.* FROM fm_goods_suboption A LEFT JOIN fm_goods_supply B ON A.suboption_seq = B.suboption_seq WHERE A.goods_seq = '{$oldSeq}'";
+		$query = $this->db->query($sql);
+		foreach($query->result_array() as $data){
+			$oparams['goods_seq']		= $goodsSeq;
+			$oparams['suboption_title']	= $data['suboption_title'];
+			$oparams['suboption']		= $data['suboption'];
+			$oparams['consumer_price']	= $data['consumer_price'];
+			$oparams['price']			= $data['price'];
+			$result = $this->db->insert('fm_goods_suboption', $oparams);
+			$suboption_seq = $this->db->insert_id();
+			$sparams['goods_seq']		= $goodsSeq;
+			$sparams['suboption_seq']	= $suboption_seq;
+			$sparams['supply_price']	= $data['supply_price'];
+			$sparams['stock']			= $data['stock'];
+			$result = $this->db->insert('fm_goods_supply', $sparams);
+		}
+		return $result;
+	}
+
+
+
+	###
+	public function copy_goods_image($table, $oldSeq, $goodSeq, $unset_seq){
+		$this->db->where('goods_seq', $oldSeq);
+		$query = $this->db->get($table);
+		$cnt = 0;
+		foreach($query->result_array() as $data){
+			$params = filter_keys($data, $this->db->list_fields($table));
+			unset($params[$unset_seq]);
+			if(isset($params['regist_date'])) $params['regist_date'] = date("Y-m-d H:i:s");
+			$params['goods_seq'] = $goodSeq;
+
+			###
+			if(strpos($data['image'],'goods')){
+				$target = $this->clone_image($params['image'], $cnt);
+				$params['image'] = $target;
+			}
+
+			$result = $this->db->insert($table, $params);
+			$cnt++;
+		}
+		return $result;
+	}
+
+	public function clone_image($file, $idx){
+		$dir = $this->upload_goodsImage_dir();
+		$filenm = end(explode('/', $file));
+		$filenm = substr($filenm,8,strlen($filenm));
+		$tmp	= substr(mktime(),-7).$idx;
+		$target = $dir.'/'.$tmp.$filenm;
+		$result = copy(ROOTPATH.$file, ROOTPATH.$target);
+		return $target;
+	}
+
+>>>>>>> .r720
+}
+
+/* End of file goods.php */
+/* Location: ./app/models/goods.php */

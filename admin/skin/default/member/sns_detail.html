@@ -1,0 +1,78 @@
+
+<style>
+.ui-dialog { background-color:#fff;border:2px solid #434444;padding:0px;width:300px; position: absolute; z-index: 10002; display: block;}
+table.in-sns {border:1px solid #f1f1f1; border-collapse: collapse; background-color:#ffffff;}
+table.in-sns th { background-color:#f1f1f1; padding:3px;border-bottom:1px solid #fff;}
+table.in-sns td { padding:3px;padding-left:10px; border-bottom:1px solid #f1f1f1;text-align:left;}
+.ui-dialog-titlebar { height:37px; }
+.ui-dialog .ui-dialog-titlebar-close { top: 42%; }
+.ui-dialog-titlebar .ui-dialog-title{ line-height:28px; }
+
+</style>
+
+<script type="text/javascript">
+	$(function(){
+		$(".ui-dialog-titlebar-close").bind("click",function(){
+			{? no }
+			$("div#snsdetailPopup{=no}").hide();
+			{:}
+			$("div#snsdetailPopup_{=snscd}").hide();
+			{/}
+		});
+	});
+</script>
+
+<!-- sns 연동 정보 상세 -->
+<div tabindex="-1" class="ui-dialog ui-widget ui-widget-content ui-corner-all" role="dialog" aria-labelledby="ui-dialog-title-snsdetailPopup">
+
+	<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+		<span class="ui-dialog-title" id="ui-dialog-title-snsdetailPopup"><img src="../images/sns/sns_{=substr(snscd,0,1)}0.gif" align="absmiddle"> {=data.rute_nm} 정보</span>
+		<a class="ui-dialog-titlebar-close ui-corner-all" role="button" href="#"><span class="ui-icon ui-icon-closethick">close</span></a>
+	</div>
+	<table width="100%" class="in-sns" >
+		<col width="100" />
+		{? data.message }
+		<tr>
+			<td colspan="2" colspan="center">연동 해제된 계정입니다.</td>
+		</tr>
+		{ : }
+			{? data.email }
+			<tr>
+				<th>이메일</th>
+				<td>{=data.email}</td>
+			</tr>
+			{ / }
+			{? data.user_name }
+			<tr>
+				<th>이름(닉네임)</th>
+				<td>{=data.user_name}</td>
+			</tr>
+			{ / }
+			{? data.sex }
+			<tr>
+				<th>성별</th>
+				<td>{=data.sex}</td>
+			</tr>
+			{ / }
+			{? data.birthday }
+			<tr>
+				<th>생일</th>
+				<td>{=data.birthdayV}</td>
+			</tr>
+			{ / }
+			{? data.rute == "facebook"}
+			<tr>
+				<th>프로필보기</th>
+				<td><a href="http://facebook.com/profile.php?id={data.sns_f}" target="_blank"><u>프로필 보기</u></a></td>
+			</tr>
+			{ / }
+			{ / }
+		{? member_seq}
+		<tr>
+			<th>회원상세</th>
+			<td><a href="../member/detail?member_seq={=member_seq}" target="_blank"><u>바로가기</u></a></td>
+		</tr>
+		{ / }
+	</table>
+
+</div>

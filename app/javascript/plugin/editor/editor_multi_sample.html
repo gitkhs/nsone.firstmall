@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko">
+<head>
+	<title>Daum 에디터 - 등록화면 예제</title>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta http-equiv="Content-Script-Type" content="text/javascript" />
+	<meta http-equiv="Content-Style-Type" content="text/css" />
+
+	<!-- 자바스크립트 [순서변경하지마세요] -->
+	<script type="text/javascript" src="/app/javascript/jquery/jquery.min.js"></script>
+	<script type="text/javascript" src="/app/javascript/jquery/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="/app/javascript/plugin/jquery.poshytip.min.js"></script>
+	<script type="text/javascript" src="/app/javascript/plugin/jquery.activity-indicator-1.0.0.min.js"></script>
+	<script type="text/javascript" src="/app/javascript/plugin/custom-select-box.js"></script>
+	<script type="text/javascript" src="/app/javascript/js/dev-tools.js"></script>
+	<script type="text/javascript" src="/app/javascript/js/common.js"></script>
+	<script type="text/javascript" src="/app/javascript/js/admin-layout.js"></script>
+	<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+	<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+
+	<link rel="stylesheet" href="/app/javascript/plugin/editor/css/editor.css" type="text/css"  charset="utf-8"/>
+
+</head>
+<body>
+
+<div class="body">
+
+	<form name="regForm1" action="process.php" method="post">
+		<textarea name="editor1" class="daumeditor">111</textarea>
+		<script>
+		EditorJSLoader.ready(function(Editor) {
+			DaumEditorLoader.init();
+		});
+		</script>
+		<input type="button" value="전송" onclick="submitEditorForm(document.regForm1)" />
+	 </form>
+
+	 <form name="regForm2" action="process.php" method="post">
+		<textarea name="editor2" class="daumeditor">222</textarea>
+		<script>
+		EditorJSLoader.ready(function(Editor) {
+			DaumEditorLoader.init();
+		});
+		</script>
+
+		<input type="button" value="전송" onclick="submitEditorForm(document.regForm2)"  />
+	 </form>
+
+</body>
+</html>

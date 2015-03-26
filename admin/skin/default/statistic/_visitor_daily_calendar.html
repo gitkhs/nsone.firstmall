@@ -1,0 +1,60 @@
+<style>
+table.calendar-table-style {border-collapse:collapse;}
+table.calendar-table-style th {padding:4px; font-size:11px; background-color:#f5f5f5;}
+table.calendar-table-style th,
+table.calendar-table-style td {border:1px solid #999;}
+table.calendar-table-inner {border-collapse:collapse;}
+table.calendar-table-inner td {border:0px; font-size:11px; padding:3px;}
+table.calendar-table-inner td b {color:#333;}
+</style>
+
+<table class="simpledata-table-style" width="100%">
+<col width="12.5%" />
+<col width="12.5%" />
+<col width="12.5%" />
+<col width="12.5%" />
+<col width="12.5%" />
+<col width="12.5%" />
+<col width="12.5%" />
+<col width="12.5%" />
+<tr>
+	<th>일</th>
+	<th>월</th>
+	<th>화</th>
+	<th>수</th>
+	<th>목</th>
+	<th>금</th>
+	<th>토</th>
+	<th>합계</th>
+</tr>
+{ @ range(0,c_row-1) }
+<tr>
+	<?php {c_pv_row_sum} = 0 ?>
+	<?php {c_visit_row_sum} = 0 ?>
+
+	{ @ range(0,7-1) }
+	<?php {c_day} = ({.value_}*7)+{..value_}-{c_start_idx}+1 ?>
+	<?php {c_pv_row_sum} += {dataForChart['페이지뷰'][c_day-1][1]} ?>	
+	<?php {c_visit_row_sum} += {dataForChart['방문자수'][c_day-1][1]} ?>	
+	
+	<td class="day-cell">
+		{?c_day>0 && c_day<=c_end_idx}
+		<table class="calendar-table-inner" width="100%">
+		<tr><td align="right" style="border-bottom:1px solid #ccc"><b>{c_day}</b></td></tr>
+		<tr><td align="right" style="border-bottom:1px dashed #ccc"><font color="{seriesColors[0]}">{=number_format(dataForChart['페이지뷰'][c_day-1][1])}</font></td></tr>
+		<tr><td align="right"><font color="{seriesColors[1]}">{=number_format(dataForChart['방문자수'][c_day-1][1])}</font></td></tr>
+		</table>
+		{/}
+	</td>
+	{ / }
+	
+	<td class="day-cell">
+		<table class="calendar-table-inner" width="100%">
+		<tr><td align="right" style="border-bottom:1px solid #ccc">&nbsp;</td></tr>
+		<tr><td align="right" style="border-bottom:1px dashed #ccc"><font color="{seriesColors[0]}">{=number_format(c_pv_row_sum)}</font></td></tr>
+		<tr><td align="right"><font color="{seriesColors[1]}">{=number_format(c_visit_row_sum)}</font></td></tr>
+		</table>
+	</td>
+</tr>
+{ / }
+</table>

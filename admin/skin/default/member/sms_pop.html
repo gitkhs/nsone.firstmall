@@ -1,0 +1,67 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	$("select[name='memo_type']").live('change',function(){
+		if($(this).val()=='direct'){
+			$("input[name='memo_direct']").show();
+		}else{
+			$("input[name='memo_direct']").hide();
+		}
+	});
+
+	$("input[name='send_sms']").bind('click',function(){
+		if($(this).attr("checked")){
+			$(".sms").attr("disabled",false);
+		}else{
+			$(".sms").attr("disabled",true);
+		}
+	});
+
+	$("#smsFrm input[name='msg']").bind("keydown",function(){
+		str = $(this).val();
+		$(this).parent().find(".sms_byte").html(chkByte(str));
+	});
+});
+</script>
+
+
+<form name="smsFrm" id="smsFrm" method="post" target="actionFrame" action="../member_process/sms_pop">
+<input type="hidden" name="member_seq" value="{member_seq}"/>
+<input type="hidden" name="board_id" value="{_GET.board_id}"/>
+<input type="hidden" name="board_seq" value="{_GET.board_seq}"/>
+
+<table width="100%" class="info-table-style">
+<tbody>
+<tr>
+	<th class="its-th-align">
+
+	<table width="100%">
+	<tr>
+		<td >
+			<div><input type="checkbox" name="send_sms" value="Y" {?count<1}disabled{/}> SMS 전송  [ 보유SMS건수 : {count}통, 90 bytes 이상 시 LMS로 발송이 되며 3건이 차감됩니다.]</div>
+			{? _GET.board_id }
+			<div align="left" style="padding-left:10px;" >
+				<input type="text" name="cellphone" value="{? bcellphone}{bcellphone}{:}{cellphone}{/}" class="line sms" title="수신번호를 입력하세요." disabled size="70"> ,(콤마)로 구분<br/>
+				<input type="text" name="msg" class="line sms" {? certify_code_msg } value="{certify_code_msg}" {/} title="메시지를 입력하세요." disabled size="70">
+				<b class="sms_byte">0</b>byte
+			</div>
+			{:}
+				<input type="text" name="cellphone" value="{? bcellphone}{bcellphone}{:}{cellphone}{/}" class="line sms" title="수신번호를 입력하세요."  disabled size="14">
+				<input type="text" name="msg" class="line sms" {? certify_code_msg } value="{certify_code_msg}" {/} title="메시지를 입력하세요." disabled size="50">
+				<b class="sms_byte">0</b>byte
+			{/}
+		</td>
+	</tr>
+	<tr><td height="10"></td></tr>
+	<tr>
+		<td>
+		<span class="btn large cyanblue"><button {? isdemo.isdemo }  type="button"  {isdemo.isdemojs1} {:}  type="submit"  id="send_submit" {/} >확인</button></span>
+		</td>
+	</tr>
+	</table>
+
+	</th>
+</tr>
+</tbody>
+</table>
+
+</form>

@@ -1,0 +1,29 @@
+
+<div class="slc-head pdt5">
+<ul>
+	<li><span class="mitem"><a href="sales_monthly">월별 매출</a></span></li>
+	<li><span class="mitem"><a href="sales_daily">일별 매출</a></span></li>
+	{?!statistic_sales_detail_limit}
+		<li><span class="mitem"><a href="sales_weekday">요일별 매출</a></span></li>
+		<li><span class="mitem"><a href="sales_hour">시간대별 매출</a></span></li>
+		<li><span class="mitem"><a href="sales_payment">결제수단별 매출</a></span></li>
+		<li><span class="mitem"><a href="sales_age">성별/연령별 매출</a></span></li>
+		<li><span class="mitem"><a href="sales_location">지역별 매출</a></span></li>		
+		<li><span class="mitem"><a href="sales_platform">판매환경별 매출</a></span></li>
+	{:}
+		<li><span class="nofreelinknone mitem"><a href="#">요일별 매출</a></span></li>
+		<li><span class="nofreelinknone mitem"><a href="#">시간대별 매출</a></span></li>
+		<li><span class="nofreelinknone mitem"><a href="#">결제수단별 매출</a></span></li>
+		<li><span class="nofreelinknone mitem"><a href="#">성별/연령별 매출</a></span></li>
+		<li><span class="nofreelinknone mitem"><a href="#">지역별 매출</a></span></li>		
+		<li><span class="nofreelinknone mitem"><a href="#">판매환경별 매출</a></span></li>		
+	{/}
+	
+</ul>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("div.slc-head a[href='{selected_sales_menu}']").parent().parent().addClass("selected");
+});
+</script>

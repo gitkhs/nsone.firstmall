@@ -1,0 +1,53 @@
+<table width="100%" class="simpledata-table-style" style="margin:auto;">
+<tr>
+	<th>월</th>
+	<th>주문건수</th>
+	<th>주문금액</th>
+	<th>쿠폰할인</th>
+	<th>적립금결제</th>
+	<th>좋아요할인</th>
+	<th>모바일할인</th>
+	<th>회원할인</th>
+	<th>결제금액 <span class="helpicon" title="<b>결제금액</b> = 주문금액-쿠폰할인-적립금결제-좋아요할인-모바일할인-회원할인"></span></th>
+	<th>환불건수</th>
+	<th>환불금액</th>
+	<th>배송비 <span class="helpicon" title="착불배송비 제외"></span></th>
+	<th>매출액 <span class="helpicon" title="<b>매출액</b> = 결제금액-결제취소-환불배송비"></span></th>
+	<th>순이익 <span class="helpicon" title="<b>순이익</b> = 매출액-매입금액"></span></th>
+</tr>
+<tr>
+	<td align="center">합계</td>
+	<td align="right" class="pdr5"><font>{=number_format(dataForTableSum.month_count_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(dataForTableSum.month_settleprice_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(dataForTableSum.month_coupon_sale_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(dataForTableSum.month_emoney_use_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(dataForTableSum.month_fblike_sale_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(dataForTableSum.month_mobile_sale_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(dataForTableSum.month_member_sale_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(dataForTableSum.month_settleprice_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(dataForTableSum.month_refund_count_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(dataForTableSum.month_refund_price_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(dataForTableSum.month_shipping_cost_sum)}</font></td>
+	<td align="right" class="pdr5"><font color="{seriesColors[0]}">{=number_format(dataForTableSum.sales_price)}</font></td>
+	<td align="right" class="pdr5"><font color="{seriesColors[1]}">{=number_format(dataForTableSum.interests)}</font></td>
+</tr>
+{@dataForTable}
+<tr>
+	<td align="center">{.key_+1}월</td>
+	<td align="right" class="pdr5"><font>{=number_format(.month_count_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(.month_settleprice_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(.month_coupon_sale_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(.month_emoney_use_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(.month_fblike_sale_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(.month_mobile_sale_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(.month_member_sale_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(.month_settleprice_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(.month_refund_count_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(.month_refund_price_sum)}</font></td>
+	<td align="right" class="pdr5"><font>{=number_format(.month_shipping_cost_sum)}</font></td>
+	<td align="right" class="pdr5"><font color="{seriesColors[0]}">{=number_format(.sales_price)}</font></td>
+	<td align="right" class="pdr5"><font color="{seriesColors[1]}">{=number_format(.interests)}</font></td>
+		
+</tr>
+{/}
+</table>

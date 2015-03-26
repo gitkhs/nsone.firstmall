@@ -1,0 +1,365 @@
+{ #layout_header } 
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>  
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/lib/util/dialog.css">
+<link rel="stylesheet" href="/app/javascript/plugin/codemirror/theme/cobalt.css">
+<script src="/app/javascript/plugin/codemirror/lib/codemirror.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/xml/xml.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/javascript/javascript.js"></script>
+<script src="/app/javascript/plugin/codemirror/lib/util/dialog.js"></script>
+<script src="/app/javascript/plugin/codemirror/lib/util/search.js"></script>
+<script src="/app/javascript/plugin/codemirror/lib/util/searchcursor.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/css/css.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+<script src="/app/javascript/plugin/codemirror/mode/htmlembedded/htmlembedded.js"></script>
+<script type="text/javascript"> 
+var originalSourceTextareaObj;
+var originalSourceTextareaObjall;
+var originalSourceTextareaObj_mobile;
+var originalSourceTextareaObjall_mobile;
+$(document).ready(function() {
+
+	$(".mobile, .download, .birthday, .anniversary, .shipping, .memberGroup, .member, .admin, .point, .use_offline,  .memberGroup_shipping,  .member_shipping , .admin_shipping,  .memberlogin,  .memberlogin_shipping,  .membermonths,  .membermonths_shipping,  .order").hide();
+	$(".{_GET.type}").show();
+
+	//소스수정
+	$('input.onlinecouponcodemodifybtn').click(function() {
+		{? coupons.type == 'birthday' || coupons.type == 'anniversary' || coupons.type == 'memberGroup'  || coupons.type == 'memberGroup_shipping' }
+			var href = "/promotion/{=getcouponpagepopup(coupons,'url')}?setDesignMode=on&setMode=pc&popup=1";
+		{:}
+			var href = "/promotion/{=getcouponpagepopup(coupons,'url')}?setDesignMode=on";
+		{/}
+		var a = window.open(href, 'coupon{coupons.type}_{coupons.coupon_seq}', '');
+		if ( a ) {
+			a.focus();
+		} 
+	});
+
+	$('input.onlinemobilecouponcodemodifybtn').click(function() { 
+		{? coupons.type == 'birthday' || coupons.type == 'anniversary' || coupons.type == 'memberGroup'  || coupons.type == 'memberGroup_shipping' }
+			var href = "http://m.{_SERVER.HTTP_HOST}/promotion/{=getcouponpagepopup(coupons,'url')}?setDesignMode=on&setMode=mobile&popup=1";
+		{:}
+			var href = "http://m.{_SERVER.HTTP_HOST}/promotion/{=getcouponpagepopup(coupons,'url')}?setDesignMode=on&setMode=mobile";
+		{/}
+		var a = window.open(href, 'mobilecoupon{coupons.type}_{coupons.coupon_seq}', '');
+		if ( a ) {
+			a.focus();
+		}		
+	});
+	
+	//미리보기
+	$('input.onlinecouponcodeviewbtn').click(function() {
+		{? coupons.type == 'memberGroup'  || coupons.type == 'memberGroup_shipping' }
+			var href = "/main/index?previewlayer=membergroup&setDesignMode=on&setMode=pc";
+		{:}
+			var href = "/main/index?previewlayer={coupons.type}&setDesignMode=on&setMode=pc";
+		{/}
+		var a = window.open(href, 'couponpreviewlayer{coupons.type}_{coupons.coupon_seq}', '');
+		if ( a ) {
+			a.focus();
+		} 
+	});
+
+	$('input.onlinemobilecouponcodeviewbtn').click(function() { 
+		{? coupons.type == 'memberGroup'  || coupons.type == 'memberGroup_shipping' }
+			var href = "http://m.{_SERVER.HTTP_HOST}/main/index?previewlayer=membergroup&setDesignMode=on&setMode=mobile";
+		{:}
+			var href = "http://m.{_SERVER.HTTP_HOST}/main/index?previewlayer={coupons.type}&setDesignMode=on&setMode=mobile";
+		{/}
+		var a = window.open(href, 'mobilecouponpreviewlayer{coupons.type}_{coupons.coupon_seq}', '');
+		if ( a ) {
+			a.focus();
+		}		
+	});
+	
+
+	// Textarea Obj
+	var originalSourceTextareaObjall = document.getElementById("originalSourceTextareaall");
+	originalSourceEditorObjall = CodeMirror.fromTextArea(originalSourceTextareaObjall, {
+		mode: "default",
+		lineNumbers: true,
+		lineWrapping :true,
+		theme: 'cobalt',
+		onCursorActivity: function() {
+			originalSourceEditorObjall.setLineClass(originalSourceEditorActiveLineall, null);
+			originalSourceEditorActiveLineall = originalSourceEditorObjall.setLineClass(originalSourceEditorObjall.getCursor().line, "originalSourceEditorActiveLineall");
+		},
+		onKeyEvent: function(editor, e){
+			if(!e.ctrlKey && e.keyCode!=122) e.target.blur();
+		}
+	});
+
+	// 커서라인 강조
+	var originalSourceEditorActiveLineall = originalSourceEditorObjall.setLineClass(0, "originalSourceEditorActiveLineall"); 
+	// Textarea Obj
+	var originalSourceTextareaObjall_mobile = document.getElementById("originalSourceTextareaall_mobile");
+	originalSourceEditorObjall_mobile = CodeMirror.fromTextArea(originalSourceTextareaObjall_mobile, {
+		mode: "default",
+		lineNumbers: true,
+		lineWrapping :true,
+		theme: 'cobalt',
+		onCursorActivity: function() {
+			originalSourceEditorObjall_mobile.setLineClass(originalSourceEditorActiveLineall_mobile, null);
+			originalSourceEditorActiveLineall_mobile = originalSourceEditorObjall_mobile.setLineClass(originalSourceEditorObjall_mobile.getCursor().line, "originalSourceEditorActiveLineall_mobile");
+		}, 
+		onKeyEvent: function(editor, e){
+			if(!e.ctrlKey && e.keyCode!=122) e.target.blur();
+		}
+	});
+
+	// 커서라인 강조
+	var originalSourceEditorActiveLineall_mobile = originalSourceEditorObjall_mobile.setLineClass(0, "originalSourceEditorActiveLineall_mobile"); 
+	var tagCopyClips = []; 
+	tagCopyClips[0] = new ZeroClipboard.Client();
+	tagCopyClips[0].setHandCursor( true );
+	tagCopyClips[0].setCSSEffects( true );
+	tagCopyClips[0].addEventListener( 'complete', function(client, text) {
+		alert("소스가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+	} );
+	tagCopyClips[0].setText($("#originalSourceTextareaallorgin").val());
+	tagCopyClips[0].glue('couponallhtml_btn');
+
+	tagCopyClips[1] = new ZeroClipboard.Client();
+	tagCopyClips[1].setHandCursor( true );
+	tagCopyClips[1].setCSSEffects( true );
+	tagCopyClips[1].addEventListener( 'complete', function(client, text) {
+		alert("소스가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+	} );
+	tagCopyClips[1].setText($("#originalSourceTextareaallorgin_mobile").val());
+	tagCopyClips[1].glue('couponallhtml_btn_mobile');
+
+	
+
+	$("#couponusesave").click(function(){
+		var coupon_popup_use = $("input:radio[name$='coupon_popup_use']:checked").val();
+		$.ajax({
+				'url' : '../coupon_process/couponpopupuse',
+				'data' : {'couponpopupuse':coupon_popup_use,'type':'{_GET.type}'},
+				'type' : 'post',
+				'dataType': 'json',
+				'success' : function(res){
+					if(res.result == true ){
+						alert(res.msg);
+						document.location.reload();
+					}else{
+						alert(res.msg);
+					}
+				}
+			});
+	});
+
+	$(".couponpageselect").click(function(){
+		$(this).toggleClass('opened');
+	});
+
+});
+</script> 
+<style type="text/css">
+	.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black;}
+	.CodeMirror-scroll {
+		display: block;
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		width: 100%;
+		height: 100%;
+		z-index: 9999 !important;
+		border: 0px;
+		background-color:#112435;
+	}
+
+	.originalSourceEditorActiveLine {background: #003355 !important;}
+	.originalSourceEditorActiveLineall {background: #003355 !important;}
+
+	#originalSourceTextareaContainerall {position:relative; width:100%; height:350px;}
+	#originalSourceTextareaContainer {position:relative; width:100%; height:300px;}
+
+	.originalSourceEditorActiveLine_mobile {background: #003355 !important;}
+	.originalSourceEditorActiveLineall_mobile {background: #003355 !important;}
+
+	#originalSourceTextareaContainerall_mobile {position:relative; width:100%; height:350px;}
+	#originalSourceTextareaContainer_mobile {position:relative; width:100%; height:300px;}
+</style>  
+<style> 
+#couponpageselect-header .couponpageselect-container {z-index:15; position:relative; height:42px;font-size:16px;}
+#couponpageselect-header .couponpageselect-container ul.header-snb {z-index:15; float:right; height:42px;}
+#couponpageselect-header .couponpageselect-container ul.header-snb li.item	{float:left; vertical-align:middle; line-height:42px;}
+#couponpageselect-header .couponpageselect-container ul.header-snb .item	{position:relative; padding-right:20px;}
+#couponpageselect-header .couponpageselect-container ul.header-snb .item a:link,
+#couponpageselect-header .couponpageselect-container ul.header-snb .item a:active,
+#couponpageselect-header .couponpageselect-container ul.header-snb .item a:visited	{color:#000;}
+#couponpageselect-header .couponpageselect-container ul.header-snb .item a:hover	{color:#fff;}
+#couponpageselect-header .couponpageselect-container ul.header-snb .couponpageselect {width:220px;position:relative; border:1px solid transparent;  padding:2px; line-height:26px;cursor:pointer; border:1px solid #666; background-color:#ddd; color:#666;}
+#couponpageselect-header .couponpageselect-container ul.header-snb .couponpageselect:hover, 
+#couponpageselect-header .header-snb-container ul.header-snb .couponpageselect.opened {cursor:pointer; border:1px solid #666; background-color:#ddd; color:#666;}
+#couponpageselect-header .couponpageselect-container ul.header-snb .couponpageselect .hsnbm-name {font-weight:bold; padding-right:35px; background:url('../images/common/btn_memo_check.gif') no-repeat right center;}
+#couponpageselect-header .couponpageselect-container ul.header-snb .couponpageselect ul.hsnbm-menu {display:none; width:220px; position:absolute; left:0px; top:100%; border-left:1px solid #000; border-right:1px solid #000; border-bottom:1px solid #000; background-color:#222; font-size:14px; letter-spacing:0px;}
+#couponpageselect-header .couponpageselect-container ul.header-snb .couponpageselect ul.hsnbm-menu li {display:block; line-height:20px;}
+#couponpageselect-header .couponpageselect-container ul.header-snb .couponpageselect ul.hsnbm-menu li a {display:block; color:#c2c2c2; height:20px; padding:0 5px 0 5px;}
+#couponpageselect-header .couponpageselect-container ul.header-snb .couponpageselect ul.hsnbm-menu li:hover a {color:#fff; display:block; background-color:#666;}
+#couponpageselect-header .couponpageselect-container ul.header-snb .couponpageselect.opened ul.hsnbm-menu{display:block;}
+</style>
+
+<div>  
+	<!-- 페이지 타이틀 바 : 시작 -->
+	<div id="page-title-bar-area"  class="gray-bar">
+		<div id="page-title-bar">
+			<!-- 좌측 버튼 -->
+			<ul class="page-buttons-left">
+				<li> 
+				<div id="couponpageselect-header" >
+					<div class="couponpageselect-container clearbox">
+						<ul class="header-snb clearbox">
+							<li class="item">
+								<div class="couponpageselect">
+									<span class="hsnbm-name"> 
+										쿠폰 제공 팝업/페이지
+									</span>
+									<ul class="hsnbm-menu">
+										<li><a href="./online_code?type=birthday">생일자 쿠폰 – 회원별 팝업</a></li>
+										<li><a href="./online_code?type=anniversary">기념일 쿠폰 – 회원별 팝업</a></li>
+										<li><a href="./online_code?type=memberGroup">회원등급조정쿠폰 – 회원별 팝업</a></li>
+										<li><a href="./online_code?type=shipping">배송비 쿠폰 - 페이지</a></li>
+										<li><a href="./online_code?type=member">신규가입 쿠폰 – 페이지</a></li>
+										<li><a href="./online_code?type=memberlogin">컴백회원 쿠폰 - 페이지</a></li> 
+										<li><a href="./online_code?type=membermonths">이달의 등급 쿠폰 -페이지</a></li> 
+										<li><a href="./online_code?type=order">첫 구매 쿠폰 -페이지</a></li> 
+									</ul>
+				</div> 
+							</li>
+						</ul>
+					</div>
+				</div>
+				</li>
+			</ul> 
+			<!-- 타이틀 -->
+			<div class="page-title">
+				<h2> {coupons.type_title} 쿠폰
+				<span class="birthday anniversary membergroup memberGroup memberGroup_shipping" >- 회원별 팝업</span>
+				<span class="shipping member member_shipping memberlogin memberlogin_shipping membermonths membermonths_shipping order " >- 페이지</span>
+				</h2>
+			</div> 
+			<ul class="page-buttons-right birthday anniversary membergroup memberGroup memberGroup_shipping"> 
+				<li><span class="btn large black "><button type="button" id="couponusesave">저장하기<span class="arrowright"></span></button></span></li>
+			</ul> 
+		</div>
+	</div>
+
+		<div class="birthday anniversary membergroup memberGroup memberGroup_shipping  shipping member member_shipping memberlogin memberlogin_shipping membermonths membermonths_shipping order hide" >
+			<div style="height:20px;"></div>
+			<div class="item-title">쿠폰 다운로드 안내
+				<span class=" birthday anniversary membergroup memberGroup memberGroup_shipping ">팝업</span>
+				<span class=" shipping member member_shipping memberlogin memberlogin_shipping membermonths membermonths_shipping order">페이지</span>
+			</div>
+			<table class="info-table-style" style="width:100%" >
+			<colgroup>
+				<col width="15%" />
+				<col /> 
+			</colgroup>
+			<tbody>
+			<tr class="birthday anniversary membergroup memberGroup memberGroup_shipping" >
+				<th class="its-th">팝업 제공</th>
+				<td class="its-td">
+					<div>
+						<label><input type="radio" name="coupon_popup_use" value="Y" {? coupons.popup_use == 'Y' } checked="checked"{/} > 
+						대상 회원 로그인 시 {coupons.type_title} 팝업으로 제공(미 다운로드시 다운로드 기간 내에 계속 제공) </label>
+						<br />
+						<label><input type="radio" name="coupon_popup_use" value="N" {? coupons.popup_use == 'N' || !coupons.popup_use } checked="checked"{/} > {coupons.type_title} 팝업 제공안함</label>
+					</div>
+				</td>
+			</tr>
+			<tr class=" shipping member member_shipping memberlogin memberlogin_shipping membermonths membermonths_shipping order  hide1" >
+				<td class="its-td" colspan="2" >고객에게 아래와 같은 쿠폰다운로드 안내 화면을 제공합니다.</td>
+			</tr>
+			<tr>
+				<td class="its-td-left" colspan="2" >
+					<table class="info-table-style " style="width:100%" >
+					<colgroup>
+						<col width="60%" />
+						<col width="40%" />
+					</colgroup>
+					<tbody>
+					<tr>
+						<th class="its-th center"> PC/Facebook </th>
+						<th class="its-th center"> Mobile </th>
+					</tr>
+					<tbody>
+					<tr>
+						<td class="its-td center">
+							<div>
+								 <span class="btn small gray"><input type="button" class="onlinecouponcodebtn_" onclick="document.location.href='#pc_coupon_code'" value="소스보기" /></span>
+								{? coupons.type == 'birthday' || coupons.type == 'anniversary' || coupons.type == 'memberGroup'  || coupons.type == 'memberGroup_shipping' }
+								<span class="btn small gray"><input type="button" class="onlinecouponcodeviewbtn"  value="화면보기/편집" /></span>
+								{:}
+								<span class="btn small gray"><input type="button" class="onlinecouponcodemodifybtn"  value="화면보기/편집" /></span>
+								{/}
+							</div>
+							
+							<div style="margin-top:5px;"> 
+								<img src="../images/design/coupon/{=getcouponpagepopup(coupons,'url')}.jpg"  style="border: 3px solid #000;">
+							</div>
+						</td> 
+						<td class="its-td center">
+							<div> 
+								<span class="btn small gray"><input type="button" onclick="document.location.href='#mobile_coupon_code'"  class="onlinemobilecouponcodebtn_"  value="소스보기" /></span> 
+								{? coupons.type == 'birthday' || coupons.type == 'anniversary' || coupons.type == 'memberGroup'  || coupons.type == 'memberGroup_shipping' }
+								<span class="btn small gray"><input type="button" class="onlinemobilecouponcodeviewbtn"  value="화면보기/편집" /></span>
+								{:}
+								<span class="btn small gray"><input type="button" class="onlinemobilecouponcodemodifybtn"  value="화면보기/편집" /></span>
+								{/}
+							</div>
+							<div style="margin-top:5px;"> 
+								<img src="../images/design/coupon/mobile_{=getcouponpagepopup(coupons,'url')}.jpg" style="border: 3px solid #000;">
+							</div>
+						</td> 
+					</tr>
+					<tr>
+						<th class="its-th" colspan="2"> 
+							<span class="desc">EYE-DESIGN 화면에서는 프로모션 폴더의  {couponfilename} 화면에서도 수정 가능합니다.</span>
+						</th> 
+					</tr>
+					</tbody>
+					</table>
+				</td> 
+			</tr>
+			</tbody>
+			</table>
+		</div>  
+</div> 
+
+<a name="pc_coupon_code"></a>
+<div id="onlinecouponcodepopup" class="hide{? coupons && !(coupons.type == 'download' || coupons.type == 'mobile')  }1 birthday anniversary membergroup memberGroup  member memberlogin membermonths order  download memberGroup_shipping  shipping member_shipping memberlogin_shipping membermonths_shipping  {/}">
+	<div > 
+			<div style="padding:5px;">
+				<table  class="info-table-style" width="100%" align="center">
+				<col width="140" />
+				<tr>
+					<td class="its-th">PC/Facebook용 소스
+					<span class="btn small gray" ><input type="button" id="couponallhtml_btn" value="소스복사" /></span>
+					</th>
+				</tr>
+				</table>
+				<div id="originalSourceTextareaContainerall"><textarea id="originalSourceTextareaall">{=htmlspecialchars(couponcodeallhtml)}</textarea></div>
+				<textarea id="originalSourceTextareaallorgin" class="hide">{couponcodeallhtml}</textarea> 
+			</div> 
+	</div>
+</div>
+
+<a name="mobile_coupon_code"></a>
+<div id="onlinecouponcodepopup_mobile" class="hide{? coupons && !(coupons.type == 'download' || coupons.type == 'mobile') }1 birthday anniversary  memberGroup  member memberlogin membermonths order  download memberGroup_shipping  shipping member_shipping memberlogin_shipping membermonths_shipping  {/}">
+	<div > 
+			<div style="padding:5px;">
+				<table  class="info-table-style" width="100%" align="center">
+				<col width="140" />
+				<tr>
+					<td class="its-th">Mobile용 소스
+					<span class="btn small gray" ><input type="button" id="couponallhtml_btn_mobile" value="소스복사" /></span> </th>
+				</tr>
+				</table>
+				<div id="originalSourceTextareaContainerall_mobile"><textarea id="originalSourceTextareaall_mobile">{=htmlspecialchars(couponcodeallhtml_mobile)}</textarea></div>
+				<textarea id="originalSourceTextareaallorgin_mobile" class="hide">{couponcodeallhtml_mobile}</textarea> 
+			</div> 
+	</div>
+</div>
+ 
+{ #layout_footer }

@@ -1,0 +1,126 @@
+<table width="100%" class="info-table-style">
+<col width="10%" /><col width="38%" /><col width="27%" /><col width="15%" />
+<tr>
+	<th class="its-th-align center">혜택구분</th>
+	<th class="its-th-align center">이 상품의 현재 혜택</th>
+	<th class="its-th-align center">노출 여부</th>
+	<th class="its-th-align center">혜택 설정</th>
+</tr>
+<tr>
+	<th class="its-th-align center">이벤트</th>
+	<td class="its-td">
+		<!--{ ? event.event_sale || event.event_reserve }-->
+		<div>
+		{event.title}
+		(
+		{=substr(event.start_date,5)}~{=substr(event.end_date,5)}
+		<!--{ ? event.event_sale }-->
+		{event.event_sale}%추가할인
+		<!--{ / }-->
+		<!--{ ? event.event_reserve }-->
+		{event.event_reserve}%추가적립
+		<!--{ / }-->
+		)
+		</div>
+		<!--{ ? event.event_sale_unit > 0 }-->
+		<div>{=number_format(price)}원  → <strong>{=number_format(price - event.event_sale_unit)}</strong>원</div>
+		<!--{ / }-->
+		<!--{ : }-->
+		해당 상품으로 진행중인 이벤트가 없습니다.
+		<!--{ / }-->
+	</td>
+	<td class="its-td">이벤트 상품인 경우</td>
+	<td class="its-td"><a href="../event/catalog" target="_blank"><span class="gray">프로모션/쿠폰 > 이벤트</span></a></td>
+</tr>
+<tr>
+	<th class="its-th-align center">회원등급-로그인</th>
+	<td class="its-td">
+	<!--{ ? member_group.sale_rate || member_group.sale || member_group.reserve_rate || member_group.reserve }-->
+	{member_group.group_name}
+	<!--{ ? member_group.sale_rate }-->
+	{member_group.sale_rate}% 추가할인
+	<!--{ : member_group.sale }-->
+	{=number_format(member_group.sale)}원 추가할인
+	<!--{ / }-->
+	<!--{ ? member_group.reserve_rate }-->
+	{member_group.reserve_rate}% 추가적립
+	<!--{ : member_group.reserve }-->
+	{=number_format(member_group.reserve)}원 추가적립
+	<!--{ / }-->
+	<!--{ : }-->
+	회원등급별 혜택이 없습니다.
+	<!--{ / }-->
+	</td>
+	<td class="its-td" rowspan="2">회원등급별 혜택 적용 상품인 경우	</td>
+	<td class="its-td" rowspan="2"><a href="../setting/member" target="_blank"><span class="gray">설정 > 회원</span></a></td>
+</tr>
+<tr>
+	<th class="its-th-align center">회원등급-로그아웃</th>
+	<td class="its-td">
+	<!--{ ? member_group.sale_rate || member_group.sale || member_group.reserve_rate || member_group.reserve }-->
+	최대
+	<!--{ ? member_group.sale_rate }-->
+	{member_group.sale_rate}% 추가할인
+	<!--{ : member_group.sale }-->
+	{=number_format(member_group.sale)}원 추가할인
+	<!--{ / }-->
+	<!--{ ? member_group.reserve_rate }-->
+	{member_group.reserve_rate}% 추가적립
+	<!--{ : member_group.reserve }-->
+	{=number_format(member_group.reserve)}원 추가적립
+	<!--{ / }-->
+	<!--{ : }-->
+	회원등급별 혜택이 없습니다.
+	<!--{ / }-->
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">모바일(테블릿)</th>
+	<td class="its-td">
+	<!--{ ? systemmobiles.sale_price || systemmobiles.sale_emoney }-->
+	모바일에서 구매시
+	<!--{ ? systemmobiles.sale_price  }-->
+	{systemmobiles.sale_price}% 추가할인
+	<!--{ / }-->
+	<!--{ ? systemmobiles.sale_emoney  }-->
+	{systemmobiles.sale_emoney}%추가적립
+	<!--{ / }-->
+	<!--{ : }-->
+	판매환경별 혜택이 없습니다.
+	<!--{ / }-->
+	</td>
+	<td class="its-td">모바일환경에서, 모바일 혜택 적용 상품인 경우</td>
+	<td class="its-td"><a href="../setting/config" target="_blank"><span class="gray">설정 > 판매환경</span></a></td>
+</tr>
+<tr>
+	<th class="its-th-align center">쿠폰</th>
+	<td class="its-td">
+	<!--{ ? max_coupon.percent_goods_sale || max_coupon.won_goods_sale }-->
+	바로 할인받는 쿠폰
+	<!--{ ? max_coupon.sale_type == 'percent' }-->
+	{max_coupon.percent_goods_sale}%
+	<!--{ : }-->
+	{=number_format(max_coupon.won_goods_sale)}원
+	<!--{ / }-->
+	<!--{ : }-->
+	모바일환경에서, 모바일 혜택 적용 상품인 경우
+	<!--{ / }-->
+	</td>
+	<td class="its-td">쿠폰이 있는 상품인 경우</td>
+	<td class="its-td"><a href="../coupon/catalog" target="_blank"><span class="gray">프로모션/쿠폰 > 쿠폰</span></a></td>
+</tr>
+<tr>
+	<th class="its-th-align center">무이자 할부</th>
+	<td class="its-td">
+	<!--{ ? nointerest }-->
+	<!--{ @ nointerest }-->
+	{.value_}개월
+	<!--{ / }-->
+	<!--{ : }-->
+	입력 정보가 없습니다
+	<!--{ / }-->
+	</td>
+	<td class="its-td">무이자할부 설정 시</td>
+	<td class="its-td"><a href="../setting/pg" target="_blank"><span class="gray">설정 > 전자결제</span></a></td>
+</tr>
+</table>

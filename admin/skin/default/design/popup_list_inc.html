@@ -1,0 +1,44 @@
+{ @ popup_list }
+	<tr>
+		<td class="dlts-td center"><input type="checkbox" name="delete_popup_seq[]" value="{.popup_seq}" /> {.popup_seq}</td>
+		<td class="dlts-td center">{popup_styles[.style]}</td>
+		<td class="dlts-td left">
+			<div>{.regdate}</div>
+		</td>
+		<td class="dlts-td center">
+			<div class="admin_comment" popup_seq="{.popup_seq}">{=htmlspecialchars(.admin_comment)}</div>
+			<div><font color=red>({.status_msg})</font></div>
+		</td>
+		<td class="dlts-td center">
+			<span id="tag_popup_{.popup_seq}"></span> <span class="btn small"><input type="button" value="태그복사" id="copy_popup_{.popup_seq}" /></span>
+		</td>
+		<td class="dlts-td center">
+			<span class="btn small red"><input type="button" value="선택" onclick="select_popup('{.popup_seq}','{.image}','{.contents_type}')" /></span>
+			<span class="btn small"><input type="button" value="수정" onclick="edit_popup('{.popup_seq}')" /></span>
+			<span class="btn small"><input type="button" value="복사" onclick="copy_popup('{.popup_seq}')" /></span>
+		</td>
+	</tr>
+	<script type="text/javascript">
+	
+		var tag_popup = "{" + "=showDesignPopup({.popup_seq})" + "}";
+		$("#tag_popup_{.popup_seq}").text(tag_popup);
+
+		var tagCopyClipIdx = tagCopyClips.length;
+		tagCopyClips[tagCopyClipIdx] = new ZeroClipboard.Client();
+		tagCopyClips[tagCopyClipIdx].setHandCursor( true );
+		tagCopyClips[tagCopyClipIdx].setCSSEffects( true );
+		tagCopyClips[tagCopyClipIdx].setText(tag_popup);	
+		tagCopyClips[tagCopyClipIdx].addEventListener( 'complete', function(client, text) {
+			alert("팝업 태그가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+		} );
+		tagCopyClips[tagCopyClipIdx].glue('copy_popup_{.popup_seq}');
+				
+		$("#ZeroClipboardMovie_"+(tagCopyClipIdx+1)).parent().css({
+				'left' : $("#copy_popup_{.popup_seq}").position().left,
+				'top' : $("#copy_popup_{.popup_seq}").position().top
+		});
+		
+		$("#copy_popup_{.popup_seq}").after($("#ZeroClipboardMovie_"+(tagCopyClipIdx+1)).parent());
+		
+	</script>
+{ / }

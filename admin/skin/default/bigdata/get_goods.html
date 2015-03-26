@@ -1,0 +1,227 @@
+<style>
+div.bigdata-wrap {width:100%;text-align:center;}
+div.bigdata_top_img {width:1000px;margin:0 auto;text-align:center;margin-bottom:40px;}
+div.goods-view {width:1000px;margin:0 auto;}
+
+.short_desc {color: #858585;font-size: 11px;letter-spacing: -1px;}
+.goods_name {color: #000000;font-size: 16px;letter-spacing: -1px;font-weight: bold;}
+.goods_spec_table th {text-align: left;color: #000000;font-weight: normal;letter-spacing: -1px;}
+.goods_spec_table td {text-align: left;color: #858585;font-size: 11px;letter-spacing: -1px;}
+.goods_spec_table .consumer {font-size: 11px;color: #858585;letter-spacing: 0px;}
+.goods_spec_table .price {font-size: 24px;font-family: "tahoma";color: #ff3528;font-weight: bold;}
+.bigdata-icon {width:300px;padding-right:20px;}
+.bigdata-icon img {border:1px solid #bfbfbf;}
+
+/* 상세내역 레이어 팝업 스타일 */
+.sale_price_layer {z-index:1000; border:1px solid #424242;background-color:#fff;padding:10px;}
+.sale_price_layer div.title_line	{ width:100%;font-size:12px;color:#272727;font-weight:bold;text-align:left;}
+.sale_price_layer table { border-top:1px solid #d8d8d8; }
+.sale_price_layer table th, .sale_price_layer table td {font-size:11px;color:#666;border-right:1px solid #d8d8d8;border-bottom:1px solid #d8d8d8;}
+.sale_price_layer table th { font-weight:bold;height:30px;line-height:30px;background-color:#ebebeb;text-align:center;}
+.sale_price_layer table td { font-weight:normal;height:24px;line-height:24px;background-color:#fff;text-align:left;padding-left:10px;}
+.sale_price_layer table td.gr {background-color:#f7f7f7;}
+.sale_price_layer table td.prices {text-align:right;padding:0;padding-right:10px;}
+.sale_price_layer table th.bolds, .sale_price_layer table td.bolds { color:#000;font-weight:bold; }
+.sale_price_layer table th.ends, .sale_price_layer table td.ends { border:none;border-bottom:1px solid #d8d8d8; }
+</style>
+<script type="text/javascript" src="/app/javascript/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/app/javascript/jquery/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/app/javascript/js/common-function.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery.activity-indicator-1.0.0.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){
+
+	$("#price_area").bind("mouseover",function(){
+		$(this).closest("td").find("div").removeClass("hide");
+		$(".goods_spec_table").find(".fb-like").hide();
+	}).bind("mouseout",function(){
+		$(this).closest("td").find("div").addClass("hide");
+		$(".goods_spec_table").find(".fb-like").show();
+	});
+
+	$("td.btn-goods-lay").find('img.hand').each(function(){
+		$(this).click(function(){
+			openDialogAlert('사용자 화면에서 클릭하세요!', 400, 150);
+		});
+	});
+
+	{? eventEnd}
+	timeInterval{goods.goods_seq} = setInterval(function(){
+		var time_tmp = showClockTime('text', '{eventEnd.year}', '{eventEnd.month}', '{eventEnd.day}', '{eventEnd.hour}', '{eventEnd.min}', '{eventEnd.second}', 'soloday{goods.goods_seq}', 'solohour{goods.goods_seq}', 'solomin{goods.goods_seq}', 'solosecond{goods.goods_seq}', '{goods.goods_seq}');
+		if(time_tmp == 0){
+			clearInterval(timeInterval{goods.goods_seq});
+			alert("단독이벤트가 종료되었습니다.");
+			document.location.reload();
+		}
+	},1000);
+	{/}
+});
+</script>
+<div class="bigdata-wrap">
+	<div class="bigdata_top_img"><img src="../images/design/bigdata_top_img.gif" /></div>
+	<div class="goods-view">
+		<table width="95%" cellpadding="0" cellspacing="0" border="0" style="margin:auto;">
+		<tr>
+			<td height="20"></td>
+		</tr>
+		<tr>
+			<td width="350" valign="top">
+				<!-- 상품 이미지 -->
+				<table cellpadding="0" cellspacing="0" style="width:300px;">
+				<tr>
+					<td>
+						<!--{ @ images }-->
+							<!--{ ? .index_ == 0 }-->
+								<!--{ ? .view.image_type == 'video'}-->
+						<div style="margin:auto;text-align:Center;"><embed src="{.view.image}" width="300" height="300" allowfullscreen="true" wmode="transparent"></embed></div>
+								<!--{ : }-->
+						<img src="{.view.image}" width="300" height="300" onerror="this.src='/data/skin/{skin}/images/common/noimage.gif'" title="{images.large.label}"/>
+								<!--{ / }-->
+							<!--{ / }-->
+						<!--{ / }-->
+					</td>
+				</tr>
+				</table>
+			</td>
+			<td valign="top">
+				<!-- 상품 스펙 -->
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr><td height="1" bgcolor="#cccccc"></td></tr>
+				<tr>
+					<td height="0">
+					<!--할인율 표기 시작-->
+						<!--{ ? goods.sale_rate }-->
+						<div style="float:right;" class="relative">
+							<div style="position:absolute;left:-70px;text-align:center;height:41px;width:73px;"><img src='/data/skin/{skin}/images/common/bg_spec_dc.png' /></div>
+							<div style="position:absolute;left:-70px;text-align:center;height:41px;width:73px;float:right;font-size:20px;font-family:tahoma;font-weight:bold;color:#ffffff">
+							{goods.sale_rate}%
+							</div>
+						</div>
+						<!--{ / }-->
+					<!--할인율 표기 끝-->
+					</td>
+				</tr>
+				<tr><td height="10"></td></tr>
+				<!-- 상품 짧은 설명 시작 -->
+				<tr>
+					<td align="left">
+						<span class="short_desc">{goods.summary}</span>
+					</td>
+				</tr>
+				<!-- 상품 짧은 설명 끝 -->
+				<tr><td height="5"></td></tr>
+				<!-- 상품명 시작 -->
+				<tr>
+					<td align="left">
+						<span class="goods_name">{goods.goods_name}</span>
+					</td>
+				</tr>
+				<!--{? eventEnd}-->
+				<tr>
+					<td height="10"></td>
+				</tr>
+				<tr>
+					<td height="44" style="border-top:1px solid #eaeaea;  border-bottom:1px solid #eaeaea; background:#fafafa">
+						<table width="97%" cellspacing="0" cellpadding="0" border="0" width="100%" align="center">
+							<tr>
+								<td width="30%" align="left" style="font-size:12px; color:#666666;">현재 <span style="font-size:18px; font-family:Verdana; color:#000000; font-weight:bold; letter-spacing:-1px">{=number_format(goods.event.event_order_ea)}</span>개 구매</td>
+								<td width="70%" align="right" >
+									<table cellspacing="0" cellpadding="0" border="0">
+										<td style="font-size:11px; color:#666666; padding-right:4px; letter-spacing:-1px; line-height:0.8">남은시간</td>
+										<td>
+											<table cellspacing="0" cellpadding="0" border="0" style="border:1px solid #858585;" bgcolor="#7b7b7b">
+												<td height="25" style="padding:0px 10px 0px 10px; font-size:16px; font-family:Tahoma; font-weight:bold; color:#ffffff;"><span id="soloday{goods.goods_seq}">0</span><span style="font-size:12px">일</span></td>
+												<td height="25" style="padding:0px 10px 0px 0px; font-size:16px; font-family:Tahoma; font-weight:bold; color:#ffffff;"><span id="solohour{goods.goods_seq}">00</span> : <span id="solomin{goods.goods_seq}">00</span> : <span id="solosecond{goods.goods_seq}">00</span></td>
+											</table>
+										</td>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td height="10"></td>
+				</tr>
+				<!--{ / }-->
+				<!-- 상품명 끝 -->
+				<tr><td height="10"></td></tr>
+				<tr><td height="10"></td></tr>
+				<tr>
+					<td>
+						<table class="goods_spec_table" width="100%" cellpadding="0" cellspacing="3" border="0">
+						<col width="100" />
+						<!-- 판매가격 시작-->
+						<tr>
+							<th>판매가</th>
+							<td>
+							<!--{? goods.string_price_use }-->
+								<b>{goods.string_price}</b>
+							<!--{ : }-->
+								<!--{ ? goods.org_price > goods.sale_price }-->
+								<span class="consumer">{=number_format(goods.org_price)}원</span>
+								&nbsp;<img src="/data/skin/{skin}/images/common/icon_dc_list.gif" alt="할인내역" id="price_area" {?goods.sum_sale_price}class="hand"{/} /><br/>
+								<!--{ / }-->
+
+								<!-- 할인내역 시작 -->
+								<!--{ ? goods.sum_sale_price }-->
+								<div class="absolute hide">
+									<div class="sale_price_layer" style="width:200px;">
+										<div class="title_line">할인내역</div>
+										<br style="line-height:10px;" />
+										<table width="100%" border="0" cellpadding="0" cellspacing="0" >
+										<col width="78" />
+										<tr>
+											<th>구분</th>
+											<th class="bolds ends">할인</th>
+										</tr>
+										<!--{ @ sales.sale_list }-->
+											<!--{ ? .value_ > 0 }-->
+										<tr>
+											<td class="gr">
+												{sales.title_list[.key_]}
+											</td>
+											<td class="bolds ends prices">
+												{=number_format(.value_)}원
+											</td>
+										</tr>
+											<!--{ / }-->
+										<!--{ / }-->
+										</table>
+									</div>
+								</div>
+								<!--{ / }-->
+								<!-- 할인내역 끝 -->
+
+								<b class="price">{? goods.sale_price > 0 }{=number_format(goods.sale_price)}{:}0{/}</b><b style="font-size:12px;  color:#ff3528">원</b>
+							<!--{ / }-->
+							</td>
+						</tr>
+						<!-- 판매가격 끝 -->
+						</table>
+					</td>
+				</tr>
+				<tr><td height="20"></td></tr>
+				<tr><td height="1" bgcolor="#cccccc"></td></tr>
+				<!-- 총 상품 금액 표기 시작-->
+				<tr><td height="30"></td></tr>
+				<!-- 구매하기,장바구니 버튼 시작-->
+				<tr>
+					<td align="right" class="btn-goods-lay">
+						<img src="../images/design/btn_detail.gif" class="btn-goods hand" />
+
+						<!--{ ? goods.goods_status != 'unsold'}-->
+						<img src="../images/design/btn_wish.gif" class="btn-wish hand" />
+						<!--{ / }-->
+					</td>
+				</tr>
+				<!-- 구매하기,장바구니 버튼 끝 -->
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td height="60"></td>
+		</tr>
+		</table>
+	</div>
+</div>

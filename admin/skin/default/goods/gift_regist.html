@@ -1,0 +1,2406 @@
+{ #layout_header }
+<style>
+div .connectCategory { width:97%; float:left; cursor:hand; }
+div .connectBrand { width:97%; float:left; cursor:hand; }
+span .sub_net_profit { width:70px ;}
+span .net_profit { width:70px ;}
+
+.goods_status_color_normal {color:blue;}
+.goods_status_color_runout {color:red;}
+.goods_status_color_purchasing {color:red;}
+.goods_status_color_unsold {color:gray;}
+.goods_view_color_look {color:blue;}
+.goods_view_color_notLook {color:red;}
+
+.providerTitleContainer {margin-top:15px; border:1px solid #000; padding-left:10px; line-height:40px;}
+.providerTitleContainer .ptc-title {float:left; font-size:20px; color:#fff; font-weight:bold;}
+.providerTitleContainer .ptc-desc {padding-left:10px; float:left;}
+.providerTitleContainer .ptc-charges {color:#eee;}
+</style>
+<script type="text/javascript" src="/app/javascript/js/admin-goodsRegist.js"></script>
+<script type="text/javascript">
+
+var save_flag = true;
+
+function get_default_commission_rate(){
+	var default_charge = num($("input[name='default_charge']").val());
+	if($("input[name='firstBrand']").length){
+		default_charge = num($("input[name='firstBrand']").attr('charge'));
+	}
+
+	{?provider_seq=='1'}
+		default_charge = 100;
+	{/}
+
+	return default_charge;
+}
+
+// GOODS IMG
+function default_img(){
+	var idx = $(".goodsview").parent().parent().index();
+	var src = $("input[name='viewGoodsImage[]']").eq(idx).val();
+	if(!src)return;
+
+	var cutname = "대표컷";
+	if(idx > 0){
+		cutname = idx + 1;
+		cutname += "번째";
+	}
+	var clone = $("#goodsImageMake").clone();
+	clone.find("th img").attr("src",src);
+	clone.find("td div").eq(0).html( cutname + " - 상품상세(기본)" );
+	$("#goodsImagePriview").html(clone);
+	$("#fileurl").html(src);
+	$("input[name='idx']").val(idx);
+	$("input[name='imgKind']").val('view');
+	$("form input[name='goodsImgLabel']").val($("form input[name='viewGoodsLable[]']").eq(idx).val());
+
+	<!--{? images[1].large.label }-->
+	$("input[name='goodsImgLabel']").val('{images[1].large.label}');
+	<!--{ / }-->
+}
+
+function index_img(idx, key, name){
+	var src = $("input[name='"+key+"GoodsImage[]']").eq(idx).val();
+	if(!src)return;
+	var cutname = "대표컷";
+	if(idx > 0){
+		cutname = idx + 1;
+		cutname += "번째";
+	}
+	var clone = $("#goodsImageMake").clone();
+	clone.find("th img").attr("src",src);
+	clone.find("td div").eq(0).html( cutname + " - " + name );
+	$("#goodsImagePriview").html(clone);
+	$("#fileurl").html(src);
+	$("input[name='idx']").val(idx);
+	$("input[name='imgKind']").val(key);
+	$("form input[name='goodsImgLabel']").val($("form input[name='"+key+"GoodsLable[]']").eq(idx).val());
+
+	<!--{? images[1].large.label }-->
+	$("input[name='goodsImgLabel']").val('{images[1].large.label}');
+	<!--{ / }-->
+}
+
+// RELATION GOODS
+function set_goods_list(displayId,inputGoods){
+	$.ajax({
+		type: "get",
+		url: "../goods/select",
+		data: "page=1&inputGoods="+inputGoods+"&displayId="+displayId,
+		success: function(result){
+			$("div#"+displayId).html(result);
+		}
+	});
+	openDialog("상품 검색", displayId, {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+}
+
+function relation_count_chk(){
+	var width	= $("input[name='relation_count_w']").val();
+	var height  = $("input[name='relation_count_h']").val();
+	var sum		= parseInt(width) * parseInt(height);
+	$("#relation_count_total").html(sum);
+}
+
+
+function optReplace(str){
+	var tmp = "";
+	tmp = str.replace(/\"/gi, "");
+	return tmp;
+}
+
+function reserve_policy(){
+	if($("select[name='reserve_policy'] option:selected").val() == 'shop'){
+		{ ? default_reserve_percent }
+		$("input[name='reserveRate[]']").val({default_reserve_percent});
+		$("select[name='reserveUnit[]'] option[value='percent']").attr('selected',true);
+		calulate_option_price();
+
+		$("input[name='subReserveRate[]']").val({default_reserve_percent});
+		$("select[name='subReserveUnit[]'] option[value='percent']").attr('selected',true);
+		calulate_subOption_price();
+		{ / }
+
+		$("input[name='reserveRate[]'], select[name='reserveUnit[]'], input[name='reserve[]'], input[name='subReserveRate[]'], select[name='subReserveUnit[]'], input[name='subReserve[]']").css('opacity',0.5);
+		$("input[name='reserveRate[]'], select[name='reserveUnit[]'], input[name='subReserveRate[]'], select[name='subReserveUnit[]']").attr('readonly',true);
+		$("select[name='reserveUnit[]'] option[value!='percent'], select[name='subReserveUnit[]'] option[value!='percent']").attr('disabled',true);
+	}else{
+		$("input[name='reserveRate[]'], select[name='reserveUnit[]'], input[name='reserve[]'], input[name='subReserveRate[]'], select[name='subReserveUnit[]'], input[name='subReserve[]']").css('opacity',1);
+		$("input[name='reserveRate[]'], select[name='reserveUnit[]'], input[name='subReserveRate[]'], select[name='subReserveUnit[]']").removeAttr('readonly');
+		$("select[name='reserveUnit[]'] option[value!='percent'], select[name='subReserveUnit[]'] option[value!='percent']").removeAttr('disabled');
+	}
+}
+
+function able_save(){
+	save_flag = true;
+}
+
+
+function chk_stockDesc()
+{
+	var totstock = 0;
+	$("#optionLayer input[name='stock[]']").each(function(){
+		totstock += parseInt($(this).val());
+	});
+	if(!totstock) totstock = 0;
+
+	var totUnusableStock = 0;
+	$("#optionLayer input[name='unUsableStock[]']").each(function(){
+		totUnusableStock += parseInt($(this).val());
+	});
+	if(!totUnusableStock) totUnusableStock = 0;
+
+	if($("input[name='goodsStatus'][value='normal']").is(":checked")){
+
+	}
+
+	return true;
+}
+
+/* 저장하기 */
+function goods_save(){
+	if($(".provider_seq").val()==''){
+		openDialogAlert("입점사를 선택해주세요.",400,150,function(){
+			$("select[name='provider_seq_selector']").next(".ui-combobox").children("input").eq(0).focus();
+		});
+		return false;
+	}
+	if(chk_stockDesc()){
+		//submitEditorForm(document.goodsRegist);
+		$("#goodsRegist").submit();
+	}
+}
+
+var nowPath;
+var arrGoodsImage = new Array();
+<!--{ @goodsImageSize }-->
+arrGoodsImage[{.index_}] = '{.key_}';
+<!--{ / }-->
+$(document).ready(function() {
+	<!--{ ? goods.tax }-->
+	$("input[name='tax'][value='{goods.tax}']").attr("checked",true);
+	<!--{ : }-->
+	$("input[name='tax'][value='tax']").attr("checked",true);
+	<!--{ / }-->
+
+	var defaultOption = $("form div#optionLayer").html();
+	<!--{ @goodsImageSize }-->
+	$(".goods{.key_}").live("click",function(){
+		var idx = $(this).parent().parent().index();
+		var src = $("input[name='{.key_}GoodsImage[]']").eq(idx).val();
+		if(!src)return;
+		var cutname = "대표컷";
+		if(idx > 0){
+			cutname = idx + 1;
+			cutname += "번째";
+		}
+		var clone = $("#goodsImageMake").clone();
+		clone.find("th img").attr("src",src);
+		clone.find("td div").eq(0).html( cutname + " - {.name}" );
+		$("#goodsImagePriview").html(clone);
+		$("#fileurl").html(src);
+		$("input[name='idx']").val(idx);
+		$("input[name='imgKind']").val('{.key_}');
+		$("form input[name='goodsImgLabel']").val($("form input[name='{.key_}GoodsLable[]']").eq(idx).val());
+
+		<!--{? images[1].large.label }-->
+		$("input[name='goodsImgLabel']").val('{images[1].large.label}');
+		<!--{ / }-->
+	});
+	<!--{ / }-->
+	$("#subOptionMake").live("click",function(){
+		openDialog("추가선택옵션", "subOptionMakeDialog", {"width":800,"height":400});
+	});
+
+	openDialog("이미지 업로드 <span class='desc'>이미지 파일을 업로드합니다.</span>", "imageUploadDialog", {"width":500,"height":300,"autoOpen":false,"close":function(){
+		$("#imageUploadButton").uploadifyCancel();
+		$("#imageUploadButtonQueue").empty();
+		$("#imageUploadButton").uploadifyClearQueue();
+	}});
+
+	$("#goodsRegist div.connectCategory").live("click",function(){
+		$(this).parent().parent().find("input[type='radio']").attr("checked",true);
+	});
+
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','');
+	$("select[name='category1']").bind("change",function(){
+		category_admin_select_load('category1','category2',$(this).val());
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").bind("change",function(){
+		category_admin_select_load('category2','category3',$(this).val());
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category3']").bind("change",function(){
+		category_admin_select_load('category3','category4',$(this).val());
+	});
+
+	/* 브랜드 불러오기 */
+	brand_admin_select_load('','brands1','');
+	$("select[name='brands1']").bind("change",function(){
+		brand_admin_select_load('brands1','brands2',$(this).val());
+		brand_admin_select_load('brands2','brands3',"");
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("select[name='brands2']").bind("change",function(){
+		brand_admin_select_load('brands2','brands3',$(this).val());
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("select[name='brands3']").bind("change",function(){
+		brand_admin_select_load('brands3','brands4',$(this).val());
+	});
+
+	/* 카테고리 연결 팝업*/
+	$("#categoryConnectPopup").bind("click",function(){
+		openDialog("카테고리 연결", "categoryPopup", {"width":800,"height":500});
+	});
+
+	/* 브랜드 연결 팝업*/
+	$("#brandConnectPopup").bind("click",function(){
+		if($(".provider_seq").val()=='1'){
+			$("#base_brand_container").show();
+			$("#provider_brand_container").hide();
+			$("form[name='brandConnectFrm'] input[name='provider_seq']").val('');
+			$("input[type='radio'][name='brandInputMethod'][value='select']").attr('checked',true);
+		}else{
+			$("#base_brand_container").hide();
+			$("#provider_brand_container").show();
+			$("form[name='brandConnectFrm'] input[name='provider_seq']").val($(".provider_seq").val());
+			$("input[type='radio'][name='brandInputMethod'][value='providerBrand']").attr('checked',true);
+
+			$.ajax({
+				'url' : 'provider_brand_list',
+				'data' : {'provider_seq':$(".provider_seq").val()},
+				'dataType' : 'json',
+				'success' : function(res){
+					var html = "";
+					$("#provider_brand_list").empty();
+					if(res.length){
+						for(var i=0;i<res.length;i++){
+							if(res[i].category_code!=''){
+								html += "<div><label><input type='radio' name='providerBrandCode' value='"+res[i].category_code+"' /> "+res[i].brand_name+" ("+res[i].charge+"%)</label></div>";
+							}
+						}
+					}else{
+						html = "입점사 "+$(".provider_seq").val()+" 에 설정된 브랜드가 없습니다.";
+					}
+					$("#provider_brand_list").html(html);
+
+				}
+			});
+		}
+		openDialog("브랜드 연결", "brandPopup", {"width":800,"height":500});
+	});
+
+	/* 연결카테고리 삭제 */
+	$(".categoryDelete").live("click",function(){
+		var cnt = $("input:[name='connectCategory[]']").length;
+		if(cnt>1){
+			if($(this).parent().parent().parent().parent().find("input[type='radio']").is(":checked")){
+				alert("대표 카테고리 변경 후 삭제해 주세요.");
+				return;
+			}
+		}
+		var ret = true;
+		var present = $(this).parent().parent().parent().parent().find("input[name='connectCategory[]']");
+		var flag = present.val();
+
+		$("input:[name='connectCategory[]']").each(function(idx){
+			if( $(this).val().substring(0,flag.length) == flag ){
+				if( present.val().length < $(this).val().length) ret = false;
+			}
+		});
+		if(!ret){
+			alert("하위 카테고리를 먼저 삭제하셔야 합니다.");
+			return;
+		}
+
+		$(this).parent().parent().parent().parent().remove();
+
+	});
+
+	/* 연결카테고리 삭제 */
+	$(".brandDelete").live("click",function(){
+		var cnt = $("input:[name='connectBrand[]']").length;
+		if(cnt>1){
+			if($(this).parent().parent().parent().parent().find("input[type='radio']").is(":checked")){
+				alert("대표 브랜드 변경 후 삭제해 주세요.");
+				return;
+			}
+		}
+		var ret = true;
+		var present = $(this).parent().parent().parent().parent().find("input[name='connectBrand[]']");
+		var flag = present.val();
+
+		$("input:[name='connectBrand[]']").each(function(idx){
+			if( $(this).val().substring(0,flag.length) == flag ){
+				if( present.val().length < $(this).val().length) ret = false;
+			}
+		});
+		if(!ret){
+			alert("하위 브랜드를 먼저 삭제하셔야 합니다.");
+			return;
+		}
+
+		$(this).parent().parent().parent().parent().remove();
+
+	});
+
+
+	//$("#iconViewTable").find(".datepicker").datepicker("destroy");
+	var iconClone = $("#iconViewTable tbody tr").eq(1).clone();
+	iconClone.find("input[type='text']").each(function(){
+		$(this).val("");
+	});
+
+
+	$("#iconViewTable").find("input[name='iconDate[]']").addClass('datepicker');
+	setDatepicker($("#iconViewTable").find("input[name='iconDate[]']"));
+
+
+	iconClone.find("select").each(function(){
+		$(this).find("option").eq(0).attr("selected",true);
+	});
+	<!-- {? !icons} -->
+	$("#iconViewTable tbody tr").eq(1).remove();
+	<!-- { / } -->
+	/* 아이콘 추가 */
+	$("#iconViewTable button#iconAdd").live("click",function(){
+		var newClone = iconClone.clone();
+		var trObj = $("#iconViewTable tbody tr");
+
+		newClone.find("input[type='text']").addClass('datepicker');
+
+		trObj.parent().append(newClone);
+
+		apply_input_style(newClone.find("input[type='text']"));
+	});
+
+	/* 아이콘 삭제 */
+	$("#iconViewTable button.iconDel").live("click",function(){
+		if($("#iconViewTable tbody tr").length > 1) $(this).parent().parent().parent().remove();
+	});
+
+	/* 선택된 아이콘 출력 */
+	$("#iconViewTable .goodsIcon").live("click",function(){
+		var trObj = $("#iconViewTable tbody").children("tr");
+		var idx = trObj.index(trObj.has(this));
+		$("input[name='iconIndex']").val(idx);
+		set_goods_icon();
+		closeDialog("goodsIconPopup");
+		openDialog("아이콘 선택  <span class='desc'>아이콘으로 사용할 이미지를 클릭하여 주세요.</span>", "goodsIconPopup", {"width":"570","height":"200","show" : "fade","hide" : "fade"});
+		//changeFileStyle();
+	});
+	changeFileStyle();
+
+	/* 아이콘 선택 */
+	$("#goodsIconPopup img.icon").live("click",function(){
+		var idx = $("input[name='iconIndex']").val();
+		$("#iconViewTable tbody tr").eq(idx).children("td").eq(1).find("img").attr("src",$(this).attr("src"));
+		var arr = $(this).attr("src").split(".");
+		var selectedIndex = arr[0].replace("/data/icon/goods/","");
+		$("input[name='goodsIcon[]']").eq(idx-1).val(selectedIndex);
+		closeDialog("goodsIconPopup");
+	});
+
+	/* 추가정보 추가*/
+	var etcClone = $("#etcViewTable tbody tr").eq(1).clone();
+	etcClone.find("input[type='text']").each(function(){
+		$(this).val("");
+	});
+	etcClone.find("input[type='hidden']").each(function(){
+		$(this).val("model");
+	});
+	etcClone.find("select").each(function(){
+		$(this).find("option").eq(0).attr("selected",true);
+	});
+	<!-- {? !additions} -->
+	$("#etcViewTable tbody tr").eq(1).remove();
+	<!-- { / } -->
+	$("#etcViewTable button#etcAdd").live("click",function(){
+		var trObj = $("#etcViewTable tbody tr");
+		trObj.parent().append(etcClone.clone());
+	});
+
+
+	$("#viewGoods").click(function(){
+		window.open("/goods/view?no="+$(this).attr("goods_seq"),'','');
+	});
+
+
+	/* 추가정보 삭제 */
+	$("#etcViewTable button.etcDel").live("click",function(){
+		if($("#etcViewTable tbody tr").length > 1) $(this).parent().parent().parent().remove();
+	});
+
+	/* 직업입력 선택시 */
+	$("select[name='selectEtcTitle[]']").live("click",function(){
+		if( $(this).find("option[value='direct']").attr('selected') == 'selected'){
+			$(this).parent().find("span").removeClass("hide");
+		}else{
+			$(this).parent().find("span").addClass("hide");
+		}
+	});
+
+	/* 필수옵션만들기*/
+	$("#optionMake").live("click",function(){
+		openDialog("필수옵션 만들기", "optionMakePopup", {"width":"700","height":"350","show" : "fade","hide" : "fade"});
+	});
+
+
+	$("#star_select").click(function(){
+		var status = "";
+		if($(this).hasClass("checked")){
+			$(this).removeClass("checked");
+			status = "none";
+		}else{
+			$(this).addClass("checked");
+			status = "checked";
+		}
+
+		$.ajax({
+			type: "get",
+			url: "../goods/set_favorite",
+			data: "status="+status+"&goods_seq="+$(this).attr("goods_seq"),
+			success: function(result){
+				//alert(result);
+			}
+		});
+	});
+
+	$(".batchImageRegist").live("click",function(){
+		var idx = $(this).parent().parent().parent().index();
+		window.open('popup_image?division=all&idx='+idx,'','width=500,height=250');
+		/*
+		showImageUploadDialog();
+		$("#imageUploadButton").uploadifySettings('scriptData', {'division':'all','idx':idx});
+		*/
+	});
+
+	$("form #eachImageRegist").live("click",function(){
+		var division = $("input[name='imgKind']").val();
+		var divisionIdx = $("input[name='idx']").val();
+		window.open('popup_image?division='+division+'&idx='+divisionIdx,'','width=500,height=300');
+		// $("#imageUploadButton").uploadifySettings('scriptData', {'division':division,'idx':divisionIdx});
+	});
+
+	$("form #imgDownload").live("click",function(){
+		var src = $("#viewImg").attr("src");
+		actionFrame.location.href = "../../common/download?downfile="+escape(src);
+	});
+
+	$("form #goodsImageAdd").bind("click",function(){
+		var objTr = $(this).parent().parent().parent();
+		var objTb = $(this).parent().parent().parent().parent();
+		var tag = '';
+		tag += '<tr>';
+		tag += '<td class="its-td-align center"><span class="btn-minus"><button type="button" class="goodsImageDel"></button></span></td>';
+		tag += '<td class="its-td-align center">대표</td>';
+		tag += '<td class="its-td-align center"><span class="btn small lightblue"><button type="button" class="batchImageRegist">일괄등록</button></span></td>';
+		tag += '<td class="its-td-align center"><span class="desc goodslarge view">보기<input type="hidden" name="largeGoodsImage[]" value=""><input type="hidden" name="largeGoodsLabel[]" value=""></span></td>';
+		tag += '<td class="its-td-align center"><span class="desc goodsview view">보기<input type="hidden" name="viewGoodsImage[]" value=""><input type="hidden" name="viewGoodsLabel[]" value=""></span></td>';
+		tag += '<td class="its-td-align center"><span class="desc goodslist1 view">보기<input type="hidden" name="list1GoodsImage[]" value=""><input type="hidden" name="list1GoodsLabel[]" value=""></span></td>';
+		tag += '<td class="its-td-align center"><span class="desc goodslist2 view">보기<input type="hidden" name="list2GoodsImage[]" value=""><input type="hidden" name="list2GoodsLabel[]" value=""></span></td>';
+		tag += '<td class="its-td-align center"><span class="desc goodsthumbView view">보기<input type="hidden" name="thumbViewGoodsImage[]" value=""><input type="hidden" name="thumbViewGoodsLabel[]" value=""></span></td>';
+		tag += '<td class="its-td-align center"><span class="desc goodsthumbCart view">－<input type="hidden" name="thumbCartGoodsImage[]" value=""><input type="hidden" name="thumbCartGoodsLabel[]" value=""></span></td>';
+		tag += '<td class="its-td-align center"><span class="desc goodsthumbScroll view">－<input type="hidden" name="thumbScrollGoodsImage[]" value=""><input type="hidden" name="thumbScrollGoodsLabel[]" value=""></span></td>';
+		tag += '</tr>';
+		objTb.append(tag);
+		set_goodsImage_cut();
+	});
+
+	$("form .goodsImageDel").live("click",function(){
+		$(this).parent().parent().parent().remove();
+		set_goodsImage_cut();
+	});
+
+	/* 필수옵션 만들기 폼 */
+	$("#addOptionMake").live("click",function(){
+		/* 원더플레이스 */
+		if($("#optionMakePopup table tbody tr").length>=2){
+			openDialogAlert("옵션은 2차까지만 등록 가능합니다.",400,140,'');
+			return false;
+		}
+		var clone = $(this).parent().parent().parent().clone();
+		clone.find("#addOptionMake").attr("id","").addClass("delOptionMake");
+		clone.find("span").removeClass("btn-plus");
+		clone.find("span").addClass("btn-minus");
+
+		/* 원더플레이스 */
+		clone.find("input[name='optionMakeName[]']").val("SIZE").removeAttr("readonly");
+
+		if($("#optionMakePopup table tbody tr").index() < 4) $("#optionMakePopup table tbody").append(clone);
+	});
+	/* 옵션만들기 폼 삭제하기 */
+	$(".delOptionMake").live("click",function(){
+		$(this).parent().parent().parent().remove();
+	});
+	/* 옵션만들기  */
+	$("#OptionMakeApply").live("click",function(){
+		//make_option();
+		//check_button_optionBatch();
+	});
+
+	/* 옵션가격 일괄 적용 */
+	$("button#optionBatch").bind("click",function(){
+		batch_option_price();
+		calulate_option_price();
+	});
+	$("input[name='defaultOption']").click(function(){
+		var index = $(this).attr("index");
+		$("input[name='defaultOption']").each(function(idx){
+			if(index!=idx){
+				$("input[name='defaultOption']").eq(idx).attr("checked",false);
+			}
+		});
+		$("input[name='defaultOption']").eq(index).attr("checked",true);
+	});
+
+	/* 옵션삭제하기  */
+	$(".removeOption").live("click",function(){
+		if( $(this).parent().parent().parent().parent().find("tr").length > 1 ) $(this).parent().parent().parent().remove();
+	});
+	$("input[name='supplyPrice[]']").live("blur",function(){calulate_option_price();});
+	$("input[name='consumerPrice[]']").live("blur",function(){calulate_option_price();});
+	$("input[name='price[]']").live("blur",function(){calulate_option_price();});
+	$("input[name='reserveRate[]']").live("blur",function(){calulate_option_price();});
+	$("select[name='reserveUnit[]']").live("change",function(){calulate_option_price();});
+	$("input[name='reserve[]']").live("blur",function(){calulate_option_price();});
+	$("input[name='subReserveRate[]']").live("blur",function(){calulate_subOption_price();});
+	$("select[name='subReserveUnit[]']").live("change",function(){calulate_subOption_price();});
+	$("input[name='subReserve[]']").live("blur",function(){calulate_subOption_price();});
+	$("input[name='tax']").live("click",function(){calulate_option_price();});
+	$("input[name='commissionRate[]']").live("blur",function(){calulate_option_price();});
+
+	/* 옵션만들기 초기가격 넣기*/
+	$("div#optionMakePopup input[name='optionMakeValue[]']").live("blur",function(){
+		var tmp = optReplace($(this).val());
+		$(this).val(tmp);
+
+		var obj = $(this).parent().next().find("input[name='optionMakePrice[]']");
+		var sArr = $(this).val().split(',');
+		var tArr = obj.val().split(',');
+		var tArrNew = new Array();
+		for(var i = 0;i<sArr.length;i++){
+			if(tArr[i]){
+				tArrNew[i] = tArr[i];
+			}else{
+				tArrNew[i] = 0;
+			}
+		}
+		obj.val(tArrNew.join(','));
+	});
+
+	/* 옵션 단일 추가*/
+	$("div#optionLayer button#addOption").live("click",function(){
+		$("div#optionLayer table").append( $("div#optionLayer tr.optionTr").last().clone() );
+	});
+
+
+	// 서브옵션 만들기
+	$("#suboptionMakeApply").live("click",function(){
+		make_suboption();
+	});
+
+	// 서브옵션 만들기폼 추가
+	$("#addSuboptionMake").bind("click",function(){
+		var objTr = $(this).parent().parent().parent();
+		var objTb = $(this).parent().parent().parent().parent();
+		var clone = objTr.clone();
+		clone.find("#addSuboptionMake").attr("id","").addClass("delSuboptionMake");
+		clone.find("span").removeClass("btn-plus");
+		clone.find("span").addClass("btn-minus");
+		objTb.append(clone);
+		calulate_subOption_price();
+	});
+	/* 옵션만들기 폼 삭제하기 */
+	$(".delSuboptionMake").live("click",function(){
+		$(this).parent().parent().parent().remove();
+	});
+
+	$("input[name='subSupplyPrice[]']").live("blur",function(){calulate_subOption_price();});
+	$("input[name='subConsumerPrice[]']").live("blur",function(){calulate_subOption_price();});
+	$("input[name='subPrice[]']").live("blur",function(){calulate_subOption_price();});
+	$("input[name='subCommissionRate[]']").live("blur",function(){calulate_subOption_price();});
+
+	$("form .delSuboptionButton").live("click",function(){
+		var removeVar = false;
+		var clickTitleInput = $(this).parent().parent().next().find("input").val();
+		if ( clickTitleInput ){
+			$("form .delSuboptionButton").each(function(){
+				var titleInput = $(this).parent().parent().next().find("input").val();
+				if( titleInput && titleInput == clickTitleInput ) removeVar = true;
+				if( titleInput && titleInput != clickTitleInput ) removeVar = false;
+				if( removeVar ) $(this).parent().parent().parent().remove();
+			});
+		}else{
+			$(this).parent().parent().parent().remove();
+		}
+
+		var objTr = $("div#suboptionLayer table").find("tr");
+		if( objTr.length <= 2 ) objTr.parent().parent().remove();
+	});
+
+	/* 서브 옵션만들기 초기가격 넣기*/
+	$("div#subOptionMakeDialog input[name='suboptionMakeValue[]']").live("blur",function(){
+		var tmp = optReplace($(this).val());
+		$(this).val(tmp);
+
+		var obj = $(this).parent().next().find("input[name='suboptionMakePrice[]']");
+		var sArr = $(this).val().split(',');
+		var tArr = obj.val().split(',');
+		var tArrNew = new Array();
+		for(var i = 0;i<sArr.length;i++){
+			if(tArr[i]){
+				tArrNew[i] = tArr[i];
+			}else{
+				tArrNew[i] = 0;
+			}
+		}
+		obj.val(tArrNew.join(','));
+	});
+
+	/* 추가옵션가격 일괄 적용 */
+	$("form button#subOptionBatch").live("click",function(){
+		batch_suboption_price();
+		calulate_subOption_price();
+	});
+
+	/* 구매자 추가입력 사용 만들기 다이얼로그박스 */
+	$("form button#memberInputMake").bind("click",function(){
+		openDialog("추가옵션 만들기", "memberInputDialog", {"width":"600","height":"350","show" : "fade","hide" : "fade"});
+	});
+
+	/* 구매자 추가입력 사용 만들기 */
+	$("button#addMemberInputMake").bind("click",function(){
+		var objTr = $(this).parent().parent().parent();
+		//var clone = $("div#memberInputDialog table tbody tr#firstMemberInput").clone();
+		var clone = objTr.clone();
+		clone.attr("id","");
+		clone.attr("class","memberInput");
+		clone.find("button").attr("id","");
+		clone.find("button").attr("class","delMemberInputMake");
+		clone.find("span").removeClass("btn-plus");
+		clone.find("span").addClass("btn-minus");
+		$("div#memberInputDialog table tbody").append(clone);
+	});
+
+	$("select[name='memberInputMakeForm[]']").live("change",function(){
+		check_memberInputMakeForm();
+	});
+
+	/* 구매자 추가입력  만들기삭제 */
+	$("div#memberInputDialog button.delMemberInputMake").live("click",function(){
+		$(this).parent().parent().parent().remove();
+	});
+
+	/* 구매자 추가입력 만들기 적용 */
+	$("div#memberInputDialog button#memberInputMakeApply").live("click",function(){
+		var tag = get_memberInput_title();
+		var target = $("form div#memberInputLayer");
+		target.html(tag);
+		tag = get_memberInput();
+		target.find("table").append(tag);
+		changeFileStyle();
+	});
+
+	/* 구매자 추가입력 삭제 */
+	$("form button.delMemberInput").live("click",function(){
+		if( $(this).parent().parent().parent().parent().children().length == 1 ) $("form div#memberInputLayer").html("");
+		else $(this).parent().parent().parent().remove();
+	});
+
+	check_memberInputMakeForm();
+
+	/* 가격 대체 문구 */
+	$("input[name='stringPriceUse']").bind("click",function(){
+		show_stringPrice();
+	});
+
+	/* 복수구매 할인 */
+	$("input[name='multiDiscountUse']").bind("click",function(){
+		show_multiDiscountUse();
+	});
+
+	$("input[name='minPurchaseLimit']").bind("click",function(){
+		show_minPurchaseLimit();
+	});
+
+	/* 최대 구매수량 */
+	$("input[name='maxPurchaseLimit']").bind("click",function(){
+		show_maxPurchaseLimit();
+	});
+
+	/* 필수옵션 사용 */
+	$("input[name='optionUse']").bind("click",function(){
+		<!--{? opts_loop }-->
+		if(!$(this).is(':checked')){
+			if(!confirm("필수옵션 사용을 해제 할 경우 기존에 작성한 내용은 사라집니다.\n다만, 필수옵션 만들기 클릭시 옵션명,값,가격등의 기초정보는 확인하실 수 있습니다.")){
+				$(this).attr("checked",true);
+				return;
+			}
+		}
+		<!--{ / }-->
+		show_optionUse();
+	});
+
+	/* 추가옵션 사용 */
+	$("input[name='subOptionUse']").bind("click",function(){
+		<!--{? sopts_loop }-->
+		if(!$(this).is(':checked')){
+			if(!confirm("추가구성옵션 사용을 해제 할 경우 기존에 작성한 내용은 사라집니다.\n다만, 추가구성옵션 만들기 클릭시 옵션명,값,가격등의 기초정보는 확인하실 수 있습니다.")){
+				$(this).attr("checked",true);
+				return;
+			}
+		}
+		<!--{ / }-->
+		show_subOptionUse();
+	});
+
+	/* 구매자 추가입력 */
+	$("input[name='memberInputUse']").bind("click",function(){
+		<!--{? inputs }-->
+		if(!$(this).is(':checked')){
+			if(!confirm("추가입력옵션 사용을 해제 할 경우 기존에 작성한 내용은 사라집니다.\n다만, 추가입력옵션 만들기 클릭시 확인하실 수 있습니다.")){
+				$(this).attr("checked",true);
+				return;
+			}
+		}
+		<!--{ / }-->
+		show_memberInputUse();
+	});
+
+	<!-- { ? goods.view_layout } -->
+	$("form[name='goodsRegist'] input[name='viewLayout'][value='{goods.view_layout}']").attr("checked",true);
+	<!-- { / } -->
+	<!-- { ? goods.goods_status } -->
+	$("form[name='goodsRegist'] input[name='goodsStatus'][value='{goods.goods_status}']").attr("checked",true);
+	<!-- { / } -->
+	<!-- { ? goods.goods_view } -->
+	$("form[name='goodsRegist'] input[name='goodsView'][value='{goods.goods_view}']").attr("checked",true);
+	<!-- { / } -->
+	<!-- { ? goods.string_price_use  } -->
+	$("form[name='goodsRegist'] input[name='stringPriceUse']").attr("checked",true);
+	show_stringPrice();
+	<!-- { / } -->
+
+	<!-- { ? goods.multi_discount_use  } -->
+	$("form[name='goodsRegist'] input[name='multiDiscountUse']").attr("checked",true);
+	show_multiDiscountUse();
+	<!-- { / } -->
+	<!-- { ? goods.multi_discount_unit } -->
+	$("form[name='goodsRegist'] select[name='multiDiscountUnit'] option[value='{goods.multi_discount_unit}']").attr("selected",true);
+	<!-- { / } -->
+	<!-- { ? goods.goods_view } -->
+	$("form[name='goodsRegist'] input[name='minPurchaseLimit'][value='{goods.min_purchase_limit}']").attr("checked",true);
+	show_minPurchaseLimit();
+	<!-- { / } -->
+	<!-- { ? goods.max_purchase_limit } -->
+	$("form[name='goodsRegist'] input[name='maxPurchaseLimit'][value='{goods.max_purchase_limit}']").attr("checked",true);
+	show_maxPurchaseLimit();
+	<!-- { / } -->
+	<!-- { ? goods.max_purchase_order_limit } -->
+	$("form[name='goodsRegist'] select[name='maxPurchaseOrderLimit'] option[value='{goods.max_purchase_order_limit}']").attr("selected",true);
+	<!-- { / } -->
+	<!-- { ? goods.option_use } -->
+	$("form[name='goodsRegist'] input[name='optionUse']").attr("checked",true);
+	show_optionUse();
+	<!-- { / } -->
+	<!-- { ? goods.option_view_type } -->
+	$("form[name='goodsRegist'] select[name='optionViewType'] option[value='{goods.option_view_type}']").attr("selected",true);
+	<!-- { / } -->
+	<!-- { ? goods.option_suboption_use } -->
+	$("form[name='goodsRegist'] input[name='subOptionUse']").attr("checked",true);
+	show_subOptionUse();
+	<!-- { / } -->
+	<!-- { ? goods.member_input_use } -->
+	$("form[name='goodsRegist'] input[name='memberInputUse']").attr("checked",true);
+	show_memberInputUse();
+	<!-- { / } -->
+	<!-- { ? goods.shipping_policy } -->
+	$("input[name='shippingPolicy'][value='{goods.shipping_policy}']").attr("checked",true);
+	<!-- { / } -->
+	<!-- { ? goods.goods_shipping_policy } -->
+	$("input[name='goodsShippingPolicy'][value='{goods.goods_shipping_policy}']").attr("checked",true);
+	<!-- { / } -->
+	<!-- { ? goods.shipping_weight_policy } -->
+	$("input[name='shippingWeightPolicy'][value='{goods.shipping_weight_policy}']").attr("checked",true);
+	<!-- { / } -->
+	<!-- { ? goods.option_view_type } -->
+	$("form[name='goodsRegist'] select[name='reserve_policy'] option[value='{goods.reserve_policy}']").attr("selected",true);
+	<!-- { / } -->
+
+	<!-- { ? goods.info_seq } -->
+	$("form[name='goodsRegist'] select[name='info_select'] option[value='{goods.info_seq}']").attr("selected",true);
+	if($("form[name='goodsRegist'] select[name='info_select'] option:selected").val()){
+		$("input[name='info_name']").val($("form[name='goodsRegist'] select[name='info_select'] option:selected").text());
+	}
+	<!-- { / } -->
+	<!-- { ? goods.relation_type } -->
+	$("input[name='relation_type'][value='{goods.relation_type}']").attr("checked",true);
+	if('{goods.relation_type}'=='MANUAL') $("#relation_btn").show();
+	<!-- { / } -->
+
+	<!--{ ? goods.goods_seq }-->
+	default_img();
+	<!--{ / }-->
+
+	// COMMON INFO
+	$("select[name='info_select']").live("change", function(){
+		var text = $("select[name='info_select'] option:selected").text();
+		if(!$(this).val()){
+			$("input[name='info_name']").val('');
+			return;
+		}
+		$("input[name='info_name']").val(text);
+		$.get('../goods_process/get_info?seq='+$(this).val(), function(response) {
+			var data = eval(response)[0];
+			Editor.switchEditor($("#commonContents").data("initializedId"));
+			Editor.modify({"content" : data.contents});
+		});
+	});
+
+	// RELATION GOODS
+	$("form#goodsRegist button#relationGoodsButton").bind("click",function(){
+		set_goods_list("relationGoodsSelect","relationGoods");
+		$("body").css("overflow-y","hidden");
+	});
+	$("#relationGoods").sortable();
+	$("#relationGoods").disableSelection();
+
+
+	<!--{? images[1].large.label }-->
+	$("input[name='goodsImgLabel']").val('{images[1].large.label}');
+	<!--{ / }-->
+
+
+	// RELATION RADIO
+	$("input[name='relation_type']").click(function(){
+		if($(this).val()=='AUTO'){
+			$("#relation_btn").hide();
+			$("#relationGoods").hide();
+		}else{
+			$("#relation_btn").show();
+			$("#relationGoods").show();
+		}
+	});
+
+	/*필수 옵션 미리보기*/
+	$("#optionPreview").click(function(){
+		var optCnt = $("input:[name='optionTitle[]']").length;
+		var html = "<div style='border:1px #aaaaaa solid;background-color:#eeeeee;'><table class=\"goods_option_table\" width=\"100%\" cellpadding=\"0\" cellspacing=\"5\" border=\"0\">";
+		if(optCnt>0){
+			var gb = $("select[name='optionViewType']").val();
+			var tmp = "";
+			if(gb=='divide'){
+				for(var i=0;i<optCnt;i++){
+					html += "<tr>";
+					html += "<th>"+$("input:[name='optionTitle[]']").eq(i).val()+"</th>";
+					html += "<td><select style='width:200px;'><option>- 선택 -</option>";
+					var opt = document.getElementsByName("opt["+i+"][]");
+					if(i==0){
+						for(var j=0;j<opt.length;j++){
+							if(tmp!=opt[j].value) html += "<option>"+opt[j].value+"</option>";
+							tmp = opt[j].value;
+						}
+					}else{
+						var opts = document.getElementsByName("optionMakeValue[]");
+						var tmp_arr = opts[i].value.split(",");
+						for(var j=0;j<tmp_arr.length;j++){
+							html += "<option>"+tmp_arr[j]+"</option>";
+						}
+					}
+					html += "</select><td>";
+					html += "</tr>";
+				}
+			}else{
+				html += "<tr>";
+				html += "<th>옵션</th>";
+				html += "<td><select style='width:200px;'><option>- 선택 -</option>";
+				var opt = document.getElementsByName("opt[0][]");
+				for(var i=0;i<opt.length;i++){
+					var opt_name = "";
+					for(var j=0;j<optCnt;j++){
+						var tmp_opt = document.getElementsByName("opt["+j+"][]");
+						opt_name += tmp_opt[i].value;
+						if(j!=optCnt-1) opt_name += " / ";
+					}
+					html += "<option>"+opt_name+"</option>";
+				}
+				html += "</select><td>";
+				html += "</tr>";
+			}
+			html += "</table></div>";
+
+
+			$("#popPreviewOpt").html(html);
+			openDialog("필수옵션 미리보기", "popPreviewOpt", {"width":"370","height":"180","show" : "fade","hide" : "fade"});
+
+		}
+	});
+
+
+	$("#subOptionPreview").click(function(){
+		var optCnt = $("input:[name='suboptTitle[]']").length;
+		if(optCnt>0){
+			var tmp_cnt = 0;
+			var html = "<div style='border:1px #aaaaaa solid;background-color:#eeeeee;'><table class=\"goods_option_table\" width=\"100%\" cellpadding=\"0\" cellspacing=\"5\" border=\"0\">";
+			for(var i=0;i<optCnt;i++){
+				html += "<tr>";
+				html += "<th>"+$("input:[name='suboptTitle[]']").eq(i).val()+"</th>";
+				html += "<td><select style='width:200px;'><option>선택안함</option>";
+
+				var opt	= document.getElementsByName("subopt["+i+"][]");
+				for(var j=0;j<opt.length;j++){
+					var price = $("input:[name='subPrice[]']").eq(tmp_cnt).val();
+					html += "<option>"+opt[j].value+" (추가 "+price+"원)</option>";
+				}
+				html += "</select><td>";
+				html += "</tr>";
+			}
+			html += "</table></div>";
+
+			$("#popPreviewOpt").html(html);
+			openDialog("추가구성옵션 미리보기", "popPreviewOpt", {"width":"370","height":"180","show" : "fade","hide" : "fade"});
+		}
+	});
+
+
+	$("#memberInputPreview").click(function(){
+		var optCnt = $("input:[name='memberInputForm[]']").length;
+		var height = 100;
+		if(optCnt){
+			var html = "<div style='border:1px #aaaaaa solid;background-color:#eeeeee;'><table class=\"goods_option_table\" width=\"100%\" cellpadding=\"0\" cellspacing=\"5\" border=\"0\">";
+
+			for(var i=0;i<optCnt;i++){
+				html += "<tr><th style='text-align:left;'>"+$("input:[name='memberInputName[]']").eq(i).val()+"</th></tr>";
+				html += "<tr><td>";
+				var value = $("input:[name='memberInputForm[]']").eq(i).val();
+				if(value=='edit'){
+					html += "<textarea style='width:300px;' rows='3'></textarea>";
+					height += 80;
+				}else if(value=='file'){
+					html += "<input type='file' class='line' style='width:300px;'>";
+					height += 50;
+				}else{
+					html += "<input type='text' class='line' style='width:300px;'			 style='width:300px;'>";
+					height += 50;
+				}
+				html += "</td></tr>";
+			}
+
+			html += "<tr>";
+			html += "</tr>";
+
+			html += "</table></div>";
+
+			$("#popPreviewOpt").html(html);
+			openDialog("추가입력 미리보기", "popPreviewOpt", {"width":"370","height":height,"show" : "fade","hide" : "fade"});
+		}
+	});
+
+
+	$("input[name='relation_count_w']").live("keyup",function(){
+		relation_count_chk();
+	});
+	$("input[name='relation_count_h']").live("keyup",function(){
+		relation_count_chk();
+	});
+
+
+	$("#manager_copy_btn").click(function(){
+		if(!confirm("이 상품을 복사해서 상품을 등록하시겠습니까?")) return;
+
+		$.ajax({
+			type: "get",
+			url: "../goods_process/goods_copy",
+			data: "goods_seq="+$(this).attr("goods_seq"),
+			success: function(result){
+				//alert(result);
+				alert("등록 되었습니다.");
+				location.href = "/admin/goods/gift_catalog";
+			}
+		});
+	});
+
+
+	// GOODS
+	$(document).bind('keydown', 'Ctrl+s', function(){
+		if(save_flag){
+			save_flag = false;
+			//submitEditorForm(document.goodsRegist);
+			$("#goodsRegist").submit();
+		}
+		return false;
+	});
+
+	$("input:text").bind('keydown', 'Ctrl+s', function(){
+		if(save_flag){
+			save_flag = false;
+			//submitEditorForm(document.goodsRegist);
+			$("#goodsRegist").submit();
+		}
+		return false;
+	});
+
+	$("select[name='reserve_policy']").bind("change",function(){
+		reserve_policy();
+	});
+
+	calulate_option_price();
+
+		// 추가혜택 통합설정
+	$("#goods_benefits_btn").live("click",function(){
+		$.ajax({
+			type: "get",
+			url: "../goods/benefits_info",
+			data: "goods_seq={goods.goods_seq}",
+			success: function(result){
+				$("#popup_benefits").html(result);
+			}
+		});
+		openDialog("추가 혜택  통합 설정", "popup_benefits", {"width":"1000","height":"340","show" : "fade","hide" : "fade"});
+		event.preventDefault();
+		return false;
+	});
+
+	// 추가혜택 보기
+	$.ajax({
+		type: "get",
+		url: "../goods/benefits",
+		data: "goods_seq={goods.goods_seq}",
+		success: function(result){
+			$("#goods_benefits").html(result);
+		}
+	});
+
+	calulate_option_price();
+	calulate_subOption_price();
+
+	reserve_policy();
+
+	/* 화면보기 버튼 */
+	$("#viewGoods").closest("li")
+	.bind('mouseenter',function(){
+		$("ul.gnb-subnb",this).stop(true,true).slideDown('fast');
+	})
+	.bind('mouseleave',function(){
+		$("ul.gnb-subnb",this).stop(true,true).slideUp('fast');
+	});
+
+	/* 상품상태 설명색상 */
+	$("input[name='goodsStatus']").change(function(){
+		if($(this).is(":checked")){
+			$(".goodsStatusDesc").css('opacity',0.5);
+			$(this).closest('tr').find(".goodsStatusDesc").css('opacity',1);
+		}
+	}).change();
+
+	/* 상품상태 변경시 가용재고체크 */
+	$("input[name='goodsStatus']").change(function(){
+		if($(this).is(":checked")){
+			if(!chk_stockDesc()){
+				{ ? goods.goods_status }
+				$("input[name='goodsStatus'][value='{goods.goods_status}']").attr('checked',true);
+				{ : }
+				$("input[name='goodsStatus'][value='runout']").attr('checked',true);
+				{ / }
+				return;
+			}
+		}
+	});
+
+	<!--{?goods.goods_seq}-->
+	chk_stockDesc();
+	<!--{/}-->
+
+	/* 상품상태별 이미지 세팅*/
+	$("#goodsStatusImage").live("click",function(e){
+		$('#popGoodsStatusImage').empty();
+
+		$.ajax({
+			type: "get",
+			url: "../goods/goods_status_images_setting?type=gift",
+			success: function(result){
+				$("#popGoodsStatusImage").html(result);
+			}
+		});
+		openDialog("사은품 상태별 이미지 세팅", "popGoodsStatusImage", {"width":"900","height":"250","show" : "fade","hide" : "fade"});
+		e.preventDefault();
+		return false;
+	});
+
+	/* 선택된 상품상태별이미지 변경창 출력 */
+	$(".goodsStatusImage").live("click",function(){
+		var codecd = $(this).attr('codecd');
+		$("input[name='goodsStatusImageCode']").val(codecd);
+		$(".nowGoodsStatusImage").html("<img src='"+$(this).attr('src')+"' />");
+		closeDialog("popGoodsStatusImageChoice");
+		openDialog("이미지 변경", "popGoodsStatusImageChoice", {"width":"570","height":"250","show" : "fade","hide" : "fade"});
+	});
+
+	/* 재고조정 기능 사용시 매입가, 재고수량 수정 차단
+	{?provider_seq=='1' && cfg_goods.stock_history_use}
+		$("input[name='supplyPrice[]'], input[name='stock[]']").live('keydown change focusin selectstart',function(){
+			$(this).blur();
+			return false;
+		});
+		$("input[name='subSupplyPrice[]'], input[name='subStock[]']").live('keydown change focusin selectstart',function(){
+			$(this).blur();
+			return false;
+		});
+	{/}
+	*/
+
+	/* 입점사 세션 수수료 수정 차단 */
+	{? adminSessionType == 'provider' || provider_seq=='1' }
+		$("input[name='commissionRate[]'], input[name='subCommissionRate[]']").live('keydown change focusin selectstart',function(){
+			$(this).blur();
+			return false;
+		});
+	{/}
+	{?provider_seq=='1'}
+		$("input[name='commissionRate[]'], input[name='subCommissionRate[]']").val('100');
+		$("input[name='commissionRate[]']").eq(0).change();
+		$("input[name='subCommissionRate[]']").eq(0).change();
+	{/}
+
+	/* 옵션 재고조정하기 버튼 */
+	$("button#optionStockEdit").click(function(){
+		var optionTitleData = [];
+		var optionData = [];
+		var optCnt = $("input:[name='optionTitle[]']").length;
+
+		var optTitle = document.getElementsByName("optionTitle[]");
+		var opt = document.getElementsByName("opt[0][]");
+		var supplyPrice = document.getElementsByName("supplyPrice[]");
+
+		for(var j=0;j<optTitle.length;j++){
+			optionTitleData[j] = optTitle[j].value;
+		}
+
+		for(var i=0;i<opt.length;i++){
+			var opt_names = [];
+			for(var j=0;j<optCnt;j++){
+				var tmp_opt = document.getElementsByName("opt["+j+"][]");
+				opt_names[j] = tmp_opt[i].value;
+			}
+			optionData[i] = {
+				'opt_names' : opt_names,
+				'supply_price' : supplyPrice[i].value
+			};
+		}
+
+		openDialogPopup("재고 조정","stockModifyPopup",{
+			'width':'700',
+			'height':'600',
+			'url':'stock_modify',
+			'data':{
+				'mode'			: 'optionStockEdit',
+				'goods_seq'		: '{goods.goods_seq}',
+				'optionTitle'	: optionTitleData,
+				'optionData'	: optionData
+			}
+		});
+	});
+
+	/* 추가옵션 재고조정하기 버튼 */
+	$("button#subOptionStockEdit").click(function(){
+		var subOptionTitleData = [];
+		var subOptionData = [];
+		var subOptCnt = $("input:[name='suboptTitle[]']").length;
+
+		var subOptTitle = document.getElementsByName("suboptTitle[]");
+		var subOpt = document.getElementsByName("subopt[0][]");
+		var subSupplyPrice = document.getElementsByName("subSupplyPrice[]");
+
+		for(var j=0;j<subOptTitle.length;j++){
+			subOptionTitleData[j] = subOptTitle[j].value;
+		}
+
+		for(var i=0;i<subOpt.length;i++){
+			var subOpt_names = [];
+			for(var j=0;j<subOptCnt;j++){
+				var tmp_opt = document.getElementsByName("subopt["+j+"][]");
+				subOpt_names[j] = tmp_opt[i].value;
+			}
+			subOptionData[i] = {
+				'opt_names' : subOpt_names,
+				'supply_price' : subSupplyPrice[i].value
+			};
+		}
+
+		openDialogPopup("재고 조정","stockModifyPopup",{
+			'width':'700',
+			'height':'600',
+			'url':'stock_modify',
+			'data':{
+				'mode'			: 'subOptionStockEdit',
+				'goods_seq'		: '{goods.goods_seq}',
+				'optionTitle'	: subOptionTitleData,
+				'optionData'	: subOptionData
+			}
+		});
+	});
+
+
+	/* 옵션 재고조정 히스토리 */
+	$("button#optionStockEditHistory, button#subOptionStockEditHistory").click(function(){
+		window.open("../stock/history_catalog?goods_seq={goods.goods_seq}");
+	});
+
+	/* 본사에서 입점사 상품등록시 입점사 수수료율 출력 */
+	$("select[name='provider_seq']").change(function(){
+		var provider_seq = $(this).val();
+		$.ajax({
+			'url' : 'provider_charge_list',
+			'data' : {'provider_seq':$(".provider_seq").val()},
+			'dataType' : 'json',
+			'global' : false,
+			'success' : function(res){
+				var html = "";
+				$(".ptc-charges").empty();
+				if(res.length){
+					for(var i=0;i<res.length;i++){
+						if(i) html += ' / ';
+						html += res[i].link=='1' ? '기본' : res[i].brand_name;
+						html += '(' + comma(num(res[i].charge)) + '%)';
+
+						if(res[i].link=='1'){
+							$("input[name='default_charge']").val(res[i].charge);
+							if($("input[name='commissionRate[]']").length==1 && $("input[name='commissionRate[]']").val()=='0'){
+								$("input[name='commissionRate[]']").val(res[i].charge);
+							}
+						}
+					}
+				}else{
+					html = "입점사 "+$(".provider_seq").val()+" 에 설정된 브랜드가 없습니다.";
+				}
+				$(".ptc-charges").html(html);
+			}
+		});
+	}).change();
+
+	/* 옵션 수정시 가용재고 재계산 */
+	$("#optionLayer input[name='stock[]']").live('change',function(){
+			/*
+		var idx = $("#optionLayer input[name='stock[]']").index($(this));
+		var stock = num($(this).val());
+		var unUsableStock = num($("#optionLayer input[name='unUsableStock[]']").eq(idx).val());
+		$("#optionLayer span.optionUsableStock").eq(idx).html(comma(stock-unUsableStock));
+		*/
+	});
+
+
+	{ ? service_code == 'P_FREE' }
+	$(".waterMarkImageSetting, .waterMarkImageApply, .waterMarkImageCancel").bind("click",function(){
+		openDialog('쇼핑몰 업그레이드 안내<span class=\'desc\'></span>', 'nofreeService', {'width':600,'height':200});
+	});
+	{ : }
+	$(".waterMarkImageSetting").bind("click",function(){
+		$.ajax({
+			type: "get",
+			url: "../setting/watermark_setting?layerid=watermark_setting_popup",
+			success: function(result){
+				$("div#watermark_setting_popup").html(result);
+			}
+		});
+		openDialog("워터마크 설정", "watermark_setting_popup", {"width":"700","height":"510","show" : "fade","hide" : "fade"});
+	});
+	$(".waterMarkImageApply").bind("click",function(){
+		watermark();
+	});
+	$(".waterMarkImageCancel").bind("click",function(){
+		watermark_recovery();
+	});
+	{ / }
+
+
+});
+
+/* 워터마크 적용 */
+function watermark()
+{
+	var target_image = new Array();
+	// largeGoodsImage[] viewGoodsImage[] list1GoodsImage[] list2GoodsImage[]
+	$("input[name='largeGoodsImage[]'],input[name='viewGoodsImage[]']").each(function(i){
+		target_image[i] = $(this).val();
+	});
+	target_image = target_image.join("|");
+	target_image = encodeURIComponent(target_image);
+	$.ajax({
+		type: "post",
+		url: "../goods_process/watermark_goods",
+		data: "goods_seq={goods.goods_seq}&target_image="+encodeURIComponent(target_image),
+		success: function(result){
+			if(result == 'OK') default_img();
+			if(result == 'ERRGIF'){
+				openDialogAlert("gif 이미지에 대한 워터마크 기능은 추후 지원 예정입니다.",400,140);
+			}
+		}
+
+	});
+
+}
+
+function watermark_recovery()
+{
+	var target_image = new Array();
+	// largeGoodsImage[] viewGoodsImage[] list1GoodsImage[] list2GoodsImage[]
+	$("input[name='largeGoodsImage[]'],input[name='viewGoodsImage[]'],input[name='list1GoodsImage[]'],input[name='list2GoodsImage[]']").each(function(i){
+		target_image[i] = $(this).val();
+	});
+	target_image = target_image.join("|");
+	target_image = encodeURIComponent(target_image);
+	$.ajax({
+		type: "post",
+		url: "../goods_process/watermark_recovery",
+		data: "goods_seq={goods.goods_seq}&target_image="+encodeURIComponent(target_image),
+		success: function(result){
+			if(result == 'OK') default_img();
+		}
+	});
+	default_img();
+}
+
+
+</script>
+
+{?provider_seq=='1' && cfg_goods.stock_history_use}
+<style>
+	input[name='commissionRate[]'], input[name='supplyPrice[]'], input[name='stock[]'],
+	input[name='commissionRate[]'], input[name='subSupplyPrice[]'], input[name='subStock[]'] {border:1px solid #ccc; background-color:#f6f6f6; color:#999 !important;}
+</style>
+{/}
+
+<!-- { ? goods.goods_seq } -->
+<form name="goodsRegist" id="goodsRegist" method="post" enctype="multipart/form-data" action="../goods_process/modify" target="actionFrame">
+<input type="hidden" name="goodsSeq" value="{goods.goods_seq}" />
+<input type="hidden" name="query_string" value="{query_string}"/>
+<input type="hidden" name="default_charge" value="{=provider.charge}" />
+<!-- { : } -->
+<form name="goodsRegist" id="goodsRegist" method="post" enctype="multipart/form-data" action="../goods_process/regist" target="actionFrame">
+<input type="hidden" name="default_charge" value="0" />
+<!-- { / } -->
+
+<input type="hidden" name="goods_type" value="gift" />
+
+
+	<!-- 페이지 타이틀 바 : 시작 -->
+	<div id="page-title-bar-area">
+		<div id="page-title-bar">
+
+			<!-- 타이틀 -->
+			<div class="page-title">
+			<!-- { ? goods.goods_seq } -->
+				<h2>
+				<span class="icon-star-gray {goods.favorite_chk}" id="star_select" goods_seq="{goods.goods_seq}"></span>
+					[{goods.goods_seq}]
+					{=getstrcut(goods.title,20)}
+					<span style="padding-left:20px;">
+						<span class="goods_status_color_{goods.goods_status}">{goods.goods_status_text}</span>,
+						<span class="goods_view_color_{goods.goods_view}">{goods.goods_view_text}</span>
+					</span>
+				</h2>
+			<!-- { : } -->
+				<h2>사은품등록</h2>
+			<!-- { / } -->
+			</div>
+
+			<!-- 좌측 버튼 -->
+			<ul class="page-buttons-left">
+				<li><span class="btn large white"><button type="button" onclick="document.location.href='/admin/goods/gift_catalog?{query_string}';">사은품리스트<span class="arrowright"></span></button></span></li>
+				<!-- { ? goods.goods_seq } -->
+				<li><span class="btn large black"><button type="button" id="manager_copy_btn"  goods_seq="{goods.goods_seq}">사은품복사 등록<span class="arrowright"></span></button></span></li>
+				<!-- { / } -->
+			</ul>
+
+			<!-- 우측 버튼 -->
+			<ul class="page-buttons-right">
+				<li><span class="btn large black"><button type="button" onclick="goods_save()">저장하기<span class="arrowright"></span></button></span></li>
+			</ul>
+			{? service_code!='P_FREE' }
+			<ul class="page-buttons-right">
+				<li>
+					<span class="btn large orange"><button type="button" class="waterMarkImageSetting">워터마크 설정</button></span>
+				</li>
+			</ul>
+			{ / }
+
+		</div>
+	</div>
+	<!-- 페이지 타이틀 바 : 끝 -->
+	<!-- 서브메뉴 바디 : 시작-->
+
+<!-- 본사매입 상품 -->
+<input type="hidden" class="provider_seq" name="provider_seq" value="1" />
+
+
+<!-- 혜택 현황
+<div id="goods_benefits"></div>
+-->
+<div class="clearbox"></div>
+	<div class="item-title">기본 정보 <!-- <span class="btn small cyanblue"><button type="button" id="goodsStatusImage">상태별 이미지 세팅</button></span> --></div>
+	<table class="info-table-style" style="width:100%">
+	<colgroup>
+		<col width="10%" />
+		<col width="40%" />
+		<col width="10%" />
+		<col />
+	</colgroup>
+
+	<tbody>
+
+
+	<input type="hidden" name="viewLayout" value="basic"/>
+	<!--### USE AFTER THE OPENED
+	<tr>
+		<th class="its-th-align center">상품상세페이지</th>
+		<td class="its-td" colspan="3">
+			<label><input type="radio" name="viewLayout" value="basic" checked="checked"> 기본 이미지형 레이아웃</label>
+			<label><input type="radio" name="viewLayout" value="extend"> 확장 이미지형 레이아웃</label>
+		</td>
+	</tr>
+	-->
+
+
+	<tr>
+		<th class="its-th-align center">상태</th>
+		<td class="its-td">
+			<table border="0">
+			<col width="100" />
+			<tr>
+				<td><label><input type="radio" name="goodsStatus" value="normal" {?provider_seq!='1'}checked="checked"{/}> 정상</label></td>
+			</tr>
+			<tr>
+				<td><label><input type="radio" name="goodsStatus" value="runout"> 품절</label></td>
+			</tr>
+			<tr>
+				<td><label><input type="radio" name="goodsStatus" value="purchasing"> 재고확보중</label></td>
+			</tr>
+			<tr>
+				<td class="pdr10"><label><input type="radio" name="goodsStatus" value="unsold" {?provider_seq=='1'}checked="checked"{/}> 판매중지</label></td>
+			</tr>
+			</table>
+		</td>
+		<th class="its-th-align center">상품판매 여부<br />설정 &gt; <a href="../setting/order" target="_blank"><span class="highlight-link">주문</span></a></th>
+		<td class="its-td">
+			<b>[통합세팅]</b><br />
+			<!--{ ? cfg_order.runout == 'stock' }-->
+			<b>재고가 1개 이상 있을 때 판매함</b><br />
+			그러므로 재고가 1개 이상 있을 때 '정상'상태 선택이 가능합니다.
+			<!--{ : cfg_order.runout == 'ableStock' }-->
+			<b>가용재고가 {cfg_order.ableStockLimit}개 이상 있을 때 판매함</b><br />
+			그러므로 재고가 {cfg_order.ableStockLimit}개 이상 있을 때 '정상'상태 선택이 가능합니다.
+			<!--{ : cfg_order.runout == 'unlimited' }-->
+			<b>재고와 상관없이 판매함</b><br />
+			그러므로 재고와 관계 없이 '정상'상태 선택이 가능합니다.
+			<!--{ / }-->
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">고유값</th>
+		<td class="its-td">
+			<!-- { ? goods.goods_seq } -->
+			{goods.goods_seq}
+			<!-- { : } -->
+			자동생성
+			<!-- { / } -->
+
+		</td>
+		<th class="its-th-align center">노출 <span class="helpicon" title="1. MY페이지 → 적립금/포인트 교환 페이지, 2. 주문 시 → 사은품 선택 영역(또는 팝업)"></th>
+		<td class="its-td">
+			<label><input type="radio" name="goodsView" value="look" checked="checked"> 노출</label>
+			<label><input type="radio" name="goodsView" value="notLook"> 미노출</label>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">사은품명 <span class="goods_required"></span></th>
+		<td class="its-td">
+			<input type="text" name="goodsName" class="line" size="50" value="{goods.goods_name}" title="HTML 사용가능" />
+		</td>
+		<th class="its-th-align center">상품 코드</th>
+		<td class="its-td">
+			<input type="text" name="goodsCode" class="line" value="{goods.goods_code}" />
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">간략 설명</th>
+		<td class="its-td">
+			<input type="text" name="summary" class="line" size="70" value="{goods.summary}" title="간략한 상품 설명을 입력하세요" />
+		</td>
+		<th class="its-th-align center">매입용 사은품명</th>
+		<td class="its-td">
+			<input type="text" name="purchaseGoodsName" class="line" size="50" value="{goods.purchase_goods_name}" title="매입처용 사은품명을 입력하세요" />
+		</td>
+	</tr>
+	</tbody>
+	</table>
+
+	<div class="item-title">사은품 정보</div>
+	<table class="info-table-style" style="width:100%">
+		<thead>
+		<tr>
+			<th class="its-th-align center">매입가</th>
+			<th class="its-th-align center">매입율</th>
+			<th class="its-th-align center">정가(소비자가)</th>
+			<th class="its-th-align center">마진 / 할인가(판매가)</th>
+			<th class="its-th-align center">할인율</th>
+			<th class="its-th-align center">부가세</th>
+			<th class="its-th-align center">재고 <span class="goods_required"></span></th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td class="its-td-align center">
+			<!-- 수수료율 100% 숨김처리 leewh 2014-08-20 -->
+			<input style="text-align: right;" class="line onlynumber input-box-default-text" name="commissionRate[]" value="100" size="3" type="hidden">
+			<input type="hidden" name="optionSeq[]" value="" />
+			<input type="text" name="supplyPrice[]" class="line onlynumber" style="text-align:right" size="10" value="{options[0].supply_price}"/>
+			</td>
+			<td class="its-td-align right supplyRate" style="padding-right:10px"></td>
+			<td class="its-td-align center"><input type="text" name="consumerPrice[]" class="line onlynumber" style="text-align:right" size="10" value="{options[0].consumer_price}"/></td>
+			<td class="its-td-align center">
+			<span class="net_profit">0</span> /
+			<input type="text" value="0" disabled size="10" />
+			<input type="hidden" name="price[]" class="line onlynumber" style="text-align:right" size="10" value="0"/>
+			</td>
+			<td class="its-td-align right discountRate" style="padding-right:10px"></td>
+			<td class="its-td-align right tax" style="padding-right:10px"></td>
+			<td class="its-td-align center"><input type="text" name="stock[]" class="line onlynumber" style="text-align:right" size="5" value="{options[0].stock}"/></td>
+		</tr>
+		</tbody>
+	</table>
+	</div>
+
+	<div class="item-title">배송 정보</div>
+	<table class="info-table-style" style="width:100%">
+	<colgroup>
+		<col width="50%" />
+		<col width="50%"/>
+	</colgroup>
+	<thead>
+		<tr>
+			<th class="its-th-align center">상품 주문할 때 → 선택한 사은품의 배송</th>
+			<th class="its-th-align center">MY페이지에서 보유 적립금/포인트로 교환할 때 → 선택한 사은품의 배송</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td class="its-td-align center">구매자에게 사은품에 대한 별도의 배송비를 부과하지 않음</td>
+			<td class="its-td-align center">구매자(회원)에게 사은품에 대한 별도의 배송비를 부과하지 않음<br>(그러므로 차감되는 적립금/포인트를 세팅 시 배송비를 고려 해 주세요)</td>
+		</tr>
+	</tbody>
+	</table>
+
+
+
+	<div class="item-title">사은품 사진 <span class="desc" style="font-weight:normal;">워터마크는 상품정보 수정 시 등록된 상품 사진에 적용이 가능합니다.</span></div>
+	<div id="goodsImagePriview"></div>
+	<table class="info-table-style" style="width:100%" id="goodsImageTable">
+		<colgroup>
+			<col width="5%" />
+			<col width="7%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align center" rowspan="2">상품컷</th>
+			<th class="its-th-align center" colspan="2">상품사진 종류</th>
+			<th class="its-th-align center">상품상세(확대)</th>
+			<th class="its-th-align center">상품상세(기본)</th>
+			<th class="its-th-align center">리스트(1)</th>
+			<th class="its-th-align center">리스트(2)</th>
+			<th class="its-th-align center">썸네일(상품상세)</th>
+			<th class="its-th-align center">썸네일(장바구니/주문)</th>
+			<th class="its-th-align center">썸네일(스크롤)</th>
+		</tr>
+		<tr>
+			<th class="its-th-align center" colspan="2">일괄등록 사이즈 설정 <span class="helpicon" title="<b>일괄등록 사이즈 설정 – 권장 사이즈 안내</b><br>상품상세(확대) : 가로 540 x (세로 가변)<br>상품상세(기본) : 가로 250 x (세로 가변)<br>상품상세 - 확장형 : 가로 780 x (세로 가변)<br>리스트(1-大) : 200 x 240(세로 가변)<br>리스트(2-小) : 150 x 180(세로 가변)<br>썸네일(상품상세) : 60 x 60<br>썸네일(장바구니/주문) : 60 x 60<br>썸네일(스크롤) 60 x 60"></span></th>
+			<th class="its-th-align center"><input type="text" name="largeImageWidth" size="4" class="line" value="{goodsImageSize.large.width}">×<input type="text" name="largeImageHeight" size="4" class="line" value="{goodsImageSize.large.height}"></th>
+			<th class="its-th-align center"><input type="text" name="viewImageWidth" size="4" class="line" value="{goodsImageSize.view.width}">×<input type="text" name="viewImageHeight" size="4" class="line" value="{goodsImageSize.view.height}"></th>
+			<th class="its-th-align center"><input type="text" name="list1ImageWidth" size="4" class="line" value="{goodsImageSize.list1.width}">×<input type="text" name="list1ImageHeight" size="4" class="line" value="{goodsImageSize.list1.height}"></th>
+			<th class="its-th-align center"><input type="text" name="list2ImageWidth" size="4" class="line" value="{goodsImageSize.list2.width}">×<input type="text"  name="list2ImageHeight" size="4" class="line" value="{goodsImageSize.list2.height}"></th>
+			<th class="its-th-align center"><input type="text" name="thumbViewWidth" size="4" class="line" value="{goodsImageSize.thumbView.width}">×<input type="text" name="thumbViewHeight" size="4" class="line" value="{goodsImageSize.thumbView.height}"></th>
+			<th class="its-th-align center"><input type="text" name="thumbCartWidth" size="4" class="line" value="{goodsImageSize.thumbCart.width}">×<input type="text" name="thumbCartHeight" size="4" class="line" value="{goodsImageSize.thumbCart.height}"></th>
+			<th class="its-th-align center"><input type="text" name="thumbScrollWidth" size="4" class="line" value="{goodsImageSize.thumbScroll.width}">×<input type="text" name="thumbScrollHeight" size="4" class="line" value="{goodsImageSize.thumbScroll.height}"></th>
+		</tr>
+		</thead>
+		<tbody>
+		<!-- {? !images } -->
+		<tr>
+			<td class="its-td-align center"></td>
+			<td class="its-td-align center">대표</td>
+			<td class="its-td-align center">
+				<span class="btn small lightblue"><button type="button" class="batchImageRegist">일괄등록</button></span> <span class="helpicon" title="<b>일괄등록이란?</b><br>쇼핑몰에서 상품 사진은 여러 페이지에서 보여지게 되며,<br>각각의 페이지에 알맞은 사이즈로 나타나야 합니다.<br>일괄등록이란 입력된 일괄등록 사이즈 설정값을 기준으로 <br>필요한 사이즈의 상품 사진을 한 번에 등록합니다.<br><br><b>개별등록이란?</b><br>일괄등록으로 등록된 상품사진을 개별적으로 변경하여 등록합니다."></span>
+			</td>
+			<td class="its-td-align center">
+				<span class="desc goodslarge view">보기</span>
+				<input type="hidden" name="largeGoodsImage[]" value="" />
+				<input type="hidden" name="largeGoodsLabel[]" value="" />
+				<input type="hidden" name="largeGoodsImageSeq[]" value="" />
+			</td>
+			<td class="its-td-align center">
+				<span class="desc goodsview view">보기</span>
+				<input type="hidden" name="viewGoodsImage[]" value="" />
+				<input type="hidden" name="viewGoodsLabel[]" value="" />
+				<input type="hidden" name="viewGoodsImageSeq[]" value="" />
+			</td>
+			<td class="its-td-align center">
+				<span class="desc goodslist1 view">보기</span>
+				<input type="hidden" name="list1GoodsImage[]" value="" />
+				<input type="hidden" name="list1GoodsLabel[]" value="" />
+				<input type="hidden" name="list1GoodsImageSeq[]" value="" />
+			</td>
+			<td class="its-td-align center">
+				<span class="desc goodslist2 view">보기</span>
+				<input type="hidden" name="list2GoodsImage[]" value="" />
+				<input type="hidden" name="list2GoodsLabel[]" value="" />
+				<input type="hidden" name="list2GoodsImageSeq[]" value="" />
+			</td>
+			<td class="its-td-align center">
+				<span class="desc goodsthumbView view">보기</span>
+				<input type="hidden" name="thumbViewGoodsImage[]" value="" />
+				<input type="hidden" name="thumbViewGoodsLabel[]" value="" />
+				<input type="hidden" name="thumbViewGoodsImageSeq[]" value="" />
+			</td>
+			<td class="its-td-align center">
+				<span class="desc goodsthumbCart view">보기</span>
+				<input type="hidden" name="thumbCartGoodsImage[]" value="" />
+				<input type="hidden" name="thumbCartGoodsLabel[]" value="" />
+				<input type="hidden" name="thumbCartGoodsImageSeq[]" value="" />
+			</td>
+			<td class="its-td-align center">
+				<span class="desc goodsthumbScroll view">보기</span>
+				<input type="hidden" name="thumbScrollGoodsImage[]" value="">
+				<input type="hidden" name="thumbScrollGoodsLabel[]" value="">
+				<input type="hidden" name="thumbScrollGoodsImageSeq[]" value="" />
+			</td>
+		</tr>
+		<!-- { / } -->
+		<!-- { @images } -->
+		<tr>
+			<!-- { ? .key_ == 1 } -->
+			<td class="its-td-align center"></td>
+			<td class="its-td-align center">대표</td>
+			<!-- { : } -->
+			<td class="its-td-align center"><span class="btn-minus"><button type="button" class="goodsImageDel"></button></span></td>
+			<td class="its-td-align center">{.key_}번째 컷</td>
+			<!-- { / } -->
+			<td class="its-td-align center"><span class="btn small lightblue"><button type="button" class="batchImageRegist">일괄등록</button></span></td>
+			<!-- { ? .large.image } -->
+			<td class="its-td-align center">
+				<span class="blue hand goodslarge view">보기</span>
+				<input type="hidden" name="largeGoodsImage[]" value="{.large.image}" />
+				<input type="hidden" name="largeGoodsLabel[]" value="{.large.label}" />
+				<input type="hidden" name="largeGoodsImageSeq[]" value="{.large.image_seq}" />
+			</td>
+			<!-- { : } -->
+			<td class="its-td-align center">
+				<span class="desc goodslarge view">보기</span>
+				<input type="hidden" name="largeGoodsImage[]" value="" />
+				<input type="hidden" name="largeGoodsLabel[]" value="" />
+				<input type="hidden" name="largeGoodsImageSeq[]" value="" />
+			</td>
+			<!-- { / } -->
+			<!-- { ? .view.image } -->
+			<td class="its-td-align center">
+				<span class="blue hand goodsview view">보기</span>
+				<input type="hidden" name="viewGoodsImage[]" value="{.view.image}" />
+				<input type="hidden" name="viewGoodsLabel[]" value="{.view.label}" />
+				<input type="hidden" name="viewGoodsImageSeq[]" value="{.view.image_seq}" />
+			</td>
+			<!-- { : } -->
+			<td class="its-td-align center">
+				<span class="desc goodsview view">보기</span>
+				<input type="hidden" name="viewGoodsImage[]" value="" />
+				<input type="hidden" name="viewGoodsLabel[]" value="" />
+				<input type="hidden" name="viewGoodsImageSeq[]" value="" />
+			</td>
+			<!-- { / } -->
+			<!-- { ? .list1.image } -->
+			<td class="its-td-align center">
+				<span class="blue hand goodslist1 view">보기</span>
+				<input type="hidden" name="list1GoodsImage[]" value="{.list1.image}" />
+				<input type="hidden" name="list1GoodsLabel[]" value="{.list1.label}" />
+				<input type="hidden" name="list1GoodsImageSeq[]" value="{.list1.image_seq}" />
+			</td>
+			<!-- { : } -->
+			<td class="its-td-align center">
+				<span class="blue hand goodslist1 view">보기</span>
+				<input type="hidden" name="list1GoodsImage[]" value="" />
+				<input type="hidden" name="list1GoodsLabel[]" value="" />
+				<input type="hidden" name="list1GoodsImageSeq[]" value="" />
+			</td>
+			<!-- { / } -->
+			<!-- { ? .list2.image } -->
+			<td class="its-td-align center">
+				<span class="blue hand goodslist2 view">보기</span>
+				<input type="hidden" name="list2GoodsImage[]" value="{.list2.image}" />
+				<input type="hidden" name="list2GoodsLabel[]" value="{.list2.label}" />
+				<input type="hidden" name="list2GoodsImageSeq[]" value="{.list2.image_seq}" />
+			</td>
+			<!-- { : } -->
+			<td class="its-td-align center">
+				<span class="blue hand goodslist2 view">보기</span>
+				<input type="hidden" name="list2GoodsImage[]" value="" />
+				<input type="hidden" name="list2GoodsLabel[]" value="" />
+				<input type="hidden" name="list2GoodsImageSeq[]" value="" />
+			</td>
+			<!-- { / } -->
+			<!-- { ? .thumbView.image } -->
+			<td class="its-td-align center">
+				<span class="blue hand goodsthumbView view">보기</span>
+				<input type="hidden" name="thumbViewGoodsImage[]" value="{.thumbView.image}" />
+				<input type="hidden" name="thumbViewGoodsLabel[]" value="{.thumbView.label}" />
+				<input type="hidden" name="thumbViewGoodsImageSeq[]" value="{.thumbView.image_seq}" />
+			</td>
+			<!-- { : } -->
+			<td class="its-td-align center">
+				<span class="desc goodsthumbView view">보기</span>
+				<input type="hidden" name="thumbViewGoodsImage[]" value="" />
+				<input type="hidden" name="thumbViewGoodsLabel[]" value="" />
+				<input type="hidden" name="thumbViewGoodsImageSeq[]" value="" />
+			</td>
+			<!-- { / } -->
+			<!-- { ? .thumbCart.image } -->
+			<td class="its-td-align center">
+				<span class="blue hand goodsthumbCart view">보기</span>
+				<input type="hidden" name="thumbCartGoodsImage[]" value="{.thumbCart.image}" />
+				<input type="hidden" name="thumbCartGoodsLabel[]" value="{.thumbCart.label}" />
+				<input type="hidden" name="thumbCartGoodsImageSeq[]" value="{.thumbCart.image_seq}" />
+			</td>
+			<!-- { : } -->
+			<td class="its-td-align center">
+				<span class="desc goodsthumbCart view">－</span>
+				<input type="hidden" name="thumbCartGoodsImage[]" value="" />
+				<input type="hidden" name="thumbCartGoodsLabel[]" value="" />
+				<input type="hidden" name="thumbCartGoodsImageSeq[]" value="" />
+			</td>
+			<!-- { / } -->
+			<!-- { ? .thumbScroll.image } -->
+			<td class="its-td-align center">
+				<span class="blue hand goodsthumbScroll view">보기</span>
+				<input type="hidden" name="thumbScrollGoodsImage[]" value="{.thumbScroll.image}" />
+				<input type="hidden" name="thumbScrollGoodsLabel[]" value="{.thumbScroll.label}" />
+				<input type="hidden" name="thumbScrollGoodsImageSeq[]" value="{.thumbScroll.image_seq}" />
+			</td>
+			<!-- { : } -->
+			<td class="its-td-align center">
+				<span class="desc goodsthumbScroll view">－</span>
+				<input type="hidden" name="thumbScrollGoodsImage[]" value="" />
+				<input type="hidden" name="thumbScrollGoodsLabel[]" value="" />
+				<input type="hidden" name="thumbScrollGoodsImageSeq[]" value="" />
+			</td>
+			<!-- { / } -->
+		</tr>
+		<!-- { / } -->
+		</tbody>
+	</table>
+
+	{ ? goods.goods_seq }
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="5%" />
+			<col width="7%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+			<col width="11%" />
+		</colgroup>
+		<tr>
+			<td colspan="3" class="its-td-align center">
+			<div>워터마크 <span class="helpicon" title="워터마크란? 사용자가 이미지를 보는데 지장을 주지 않으면서 로고와 같은 마크가 이미지 원본에 삽입되는 기능으로<br/>이미지 도용을 방지할 수 있게 됩니다.<br/><br/>워터마크를 적용할 원본이미지 크기는 680*3000 이하로 등록해 주세요."></span></div>
+			</td>
+			<td colspan="2" class="its-td-align center">
+			<span class="btn large cyanblue"><button type="button" class="waterMarkImageApply">워터마크 적용하기</button></span>
+			<span class="btn large gray"><button type="button" class="waterMarkImageCancel">워터마크 제거하기</button></span>
+			</td>
+			<td class="its-td-align center"></td>
+			<td class="its-td-align center"></td>
+			<td class="its-td-align center"></td>
+			<td class="its-td-align center"></td>
+			<td class="its-td-align center"></td>
+		</tr>
+	</table>
+
+	{ / }
+
+
+	<br class="table-gap" />
+
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="100%" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align center">상품 관리 메모</th>
+		</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td class="its-td-align center">
+					<textarea name="adminMemo"  style="width:98%" rows="5">{goods.admin_memo}</textarea>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+<!--
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="50%" />
+			<col width="50%" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align center">상품 관리 메모</th>
+			<th class="its-th-align center">처리 내역</th>
+		</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td class="its-td-align center">
+					<textarea name="adminMemo"  style="width:98%" rows="5">{goods.admin_memo}</textarea>
+				</td>
+				<td class="its-td-align center">
+					<div style="overflow:auto;height:60px;width:98%;border:1px solid #cccccc;padding: 10px 5px;background:#f7f7f7;text-align:left;">{goods.admin_log}</div>
+					<textarea name="admin_log" style="display:none;">{goods.admin_log}</textarea>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+-->
+
+</form>
+
+
+
+<!--카테고리 연결 레이어-->
+<div id="categoryPopup" class="hide">
+	<form name="categoryConnectFrm" method="post" action="../goods_process/category_connect" target="actionFrame">
+	<div class="clearbox">
+		<div style="float:left;width:3%;padding-top:40px;"><input type="radio" name="categoryInputMethod" value="select" checked="checked"></div>
+		<div style="float:left;width:97%">
+		<table  class="simplelist-table-style" style="width:100%">
+			<colgroup>
+				<col width="25%" />
+				<col width="25%" />
+				<col width="25%" />
+				<col width="25%" />
+			</colgroup>
+			<thead>
+				<tr>
+					<th>1차 카테고리</th>
+					<th>2차 카테고리</th>
+					<th>3차 카테고리</th>
+					<th>4차 카테고리</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td class="center">
+						<div><select class="line" name="category1" size="4" style="width:100%"></select></div>
+					</td>
+					<td class="center">
+						<div><select class="line" name="category2" size="4" style="width:100%"></select></div>
+					</td>
+					<td class="center">
+						<div><select class="line" name="category3" size="4" style="width:100%"></select></div>
+					</td>
+					<td class="center">
+						<div><select class="line" name="category4" size="4" style="width:100%"></select></div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</div>
+	</div>
+
+	<div style="height:30px"></div>
+
+	<div class="clearbox">
+		<div style="float:left;width:3%;padding-top:5px"><input type="radio" name="categoryInputMethod" value="lastSelect"></div>
+		<div style="float:left;width:97%">
+		<select class="line" name="categoryLastRegist" style="width:100%">
+			<option value="">-- 최근 등록한 카테고리 --</option>
+			<!--{ @last_categories }-->
+			<option value="{.category_code}">{.title}</option>
+			<!--{ / }-->
+		</select>
+		</div>
+	</div>
+
+	<div style="height:30px"></div>
+
+	<div class="clearbox">
+		<div style="float:left;width:3%;padding-top:5px"><input type="radio" name="categoryInputMethod" value="input"></div>
+		<div style="float:left;width:97%">
+		<input type="text" name="category_input[]" value="" style="width:23%" class="pcate_input"/>
+		<input type="text" name="category_input[]" value="" style="width:23%" class="pcate_input"/>
+		<input type="text" name="category_input[]" value="" style="width:23%" class="pcate_input"/>
+		<input type="text" name="category_input[]" value="" style="width:23%" class="pcate_input"/>
+		</div>
+	</div>
+	<div style="height:30px"></div>
+
+	<div align="center" style="padding:10px;"><span class="btn large black"><button type="submit" id="categoryConnect">카테고리 연결</button></span></div>
+
+	<div style="height:30px"></div>
+
+	<div class="clearbox">
+	<table width="100%" class="info-table-style">
+		<tr>
+			<th class="its-th">
+				카테고리 기능 안내
+			</th>
+		</tr>
+		<tr>
+			<td class="its-td">
+				카테고리 분류를 통하여 해당 상품을 체계적으로 관리하게 됩니다.<br/>
+				상품상세페이지에서는 대표카테고리가 해당 상품의 카테고리로 보여지며,<br/>
+				카테고리 페이지에서는 해당 카테고리에 속한 상품들이 보여집니다.
+			</td>
+		</tr>
+		</table>
+	</div>
+	</form>
+</div>
+
+<!--브랜드 연결 레이어 -->
+<div id="brandPopup" class="hide">
+	<form name="brandConnectFrm" method="post" action="../goods_process/brand_connect" target="actionFrame">
+	<input type="hidden" name="provider_seq" value="" />
+	<div id="base_brand_container">
+		<div class="clearbox">
+			<div style="float:left;width:3%;padding-top:40px;"><input type="radio" name="brandInputMethod" value="select" checked="checked"></div>
+			<div style="float:left;width:97%">
+			<table  class="simplelist-table-style" style="width:100%">
+				<colgroup>
+					<col width="25%" />
+					<col width="25%" />
+					<col width="25%" />
+					<col width="25%" />
+				</colgroup>
+				<thead>
+					<tr>
+						<th>1차 카테고리</th>
+						<th>2차 카테고리</th>
+						<th>3차 카테고리</th>
+						<th>4차 카테고리</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="center">
+							<div><select class="line" name="brands1" size="4" style="width:100%"></select></div>
+						</td>
+						<td class="center">
+							<div><select class="line" name="brands2" size="4" style="width:100%"></select></div>
+						</td>
+						<td class="center">
+							<div><select class="line" name="brands3" size="4" style="width:100%"></select></div>
+						</td>
+						<td class="center">
+							<div><select class="line" name="brands4" size="4" style="width:100%"></select></div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			</div>
+		</div>
+
+		<div style="height:30px"></div>
+
+		<div class="clearbox">
+			<div style="float:left;width:3%;padding-top:5px"><input type="radio" name="brandInputMethod" value="lastSelect"></div>
+			<div style="float:left;width:97%">
+			<select class="line" name="brandLastRegist" style="width:100%">
+				<option value="">-- 최근 등록한 카테고리 --</option>
+				<!--{ @last_brands }-->
+				<option value="{.category_code}">{.title}</option>
+				<!--{ / }-->
+			</select>
+			</div>
+		</div>
+
+		<div style="height:30px"></div>
+
+		<div class="clearbox">
+			<div style="float:left;width:3%;padding-top:5px"><input type="radio" name="brandInputMethod" value="input"></div>
+			<div style="float:left;width:97%">
+			<input type="text" name="brand_input[]" value="" style="width:23%" class="pcate_input"/>
+			<input type="text" name="brand_input[]" value="" style="width:23%" class="pcate_input"/>
+			<input type="text" name="brand_input[]" value="" style="width:23%" class="pcate_input"/>
+			<input type="text" name="brand_input[]" value="" style="width:23%" class="pcate_input"/>
+			</div>
+		</div>
+	</div>
+	<div id="provider_brand_container">
+		<input type="radio" name="brandInputMethod" value="providerBrand" class="hide">
+
+		<div id="provider_brand_list"></div>
+
+	</div>
+	<div style="height:30px"></div>
+	<div align="center" style="padding:10px;"><span class="btn large black"><button type="submit" id="brandConnect">브랜드 연결</button></span></div>
+	<div style="height:30px"></div>
+	<div class="clearbox">
+	<table width="100%" class="info-table-style">
+		<tr>
+			<th class="its-th">
+				브랜드 기능 안내
+			</th>
+		</tr>
+		<tr>
+			<td class="its-td">
+				브랜드 분류를 통하여 해당 상품을 체계적으로 관리하게 됩니다.<br/>
+				상품상세페이지에서는 대표브랜드가 해당 상품의 브랜드로 보여지며,<br/>
+				브랜드 페이지에서는 해당 브랜드에 속한 상품들이 보여집니다.<br/><br/>
+
+				브랜드 기능은 '브랜드'란 단어에 국한될 필요 없이 자유롭게 이용할 수 있습니다.<br/>
+				예를 들어 도서 같은 경우 저자나 출판사의 분류 체계나<br/>
+				신상품, 베스트상품 등의 분류 체계로 활용하셔도 됩니다.<br/>
+				물론 운동화 브랜드(나이O, 아디다O, 뉴발란O)의 분류 체계로 활용하셔도 됩니다.<br/><br/>
+
+				(브랜드 기능 활용 예시)<br/>
+				- 저자 : 다양한 저자명<br/>
+				- 출판사 : 다양한 출판사명<br/>
+				- 운동화브랜드 : 다양한 브랜드명<br/>
+				- 가격대별상품 : 다양한 가격대<br/>
+				- 기타 : 신상품, 베스트상품, 인기브랜드, MD추천, 이벤트상품<br/>
+			</td>
+		</tr>
+		</table>
+	</div>
+	</form>
+</div>
+
+
+<!-- 이미지 업로드 다이얼로그 -->
+<div id="imageUploadDialog" class="hide">
+	<table width="100%" class="info-table-style">
+	<col width="100" />
+	<tr>
+		<th class="its-th">업로드경로</th>
+		<td class="its-td">/<span class="uploadPath"></span></td>
+	</tr>
+	<tr>
+		<th class="its-th">파일찾기</th>
+		<td class="its-td">
+			<div class="pdr10">
+				<img class="imageUploadBtnImage hide" src="../images/common/btn_filesearch.gif">
+				<input id="imageUploadButton" type="file" name="file" value="" class="uploadify" />
+			</div>
+		</td>
+	</tr>
+	</table>
+	<div class="center pdt20 pdb20"><span class="btn medium"><input type="button" value="업로드" onclick="$('#imageUploadButton').uploadifyUpload();" /></span></div>
+</div>
+<!-- 이미지 수정 상세보기 -->
+<div class="hide">
+	<input type="hidden" name="idx" value="" />
+	<input type="hidden" name="imgKind" value="" />
+	<table width="100%" class="info-table-style" id="goodsImageMake">
+	<tr>
+		<th class="its-th-align center" width="{goodsImageSize.large.width}" style="padding:10px"><img id="viewImg"></th>
+		<td class="its-td">
+			<div style="font-weight:bold">대표컷 - 상품상세(기본)</div>
+			<div>
+				<span class="btn small gray"><button type="button" id="eachImageRegist">개별등록</button></span>
+				<!-- <span class="btn small gray"><button type="button" id="imgUrlCopy">주소복사</button></span>-->
+				<span class="btn small gray"><button type="button" id="imgDownload">PC저장</button></span>
+			</div>
+			<div style="padding-top:5px;">
+				레이블
+				<input type="text" name="goodsImgLabel" value="" onblur="set_goodsImage_label();" />
+
+			</div>
+			<!-- ### 수정시에 URL -->
+			<div style="padding-top:5px;">
+			주소 : <span id="fileurl"></span>
+			</div>
+		</td>
+	</tr>
+	</table>
+</div>
+<!-- 옵션만들기 다이얼로그 -->
+<div id="optionMakePopup" class="hide">
+	<table  class="simplelist-table-style" style="width:100%">
+		<colgroup>
+			<col />
+			<col />
+			<col />
+			<col width="5%" />
+		</colgroup>
+		<thead>
+			<tr>
+				<th class="its-th-align center">필수 옵션명</th>
+				<th class="its-th-align center">필수 옵션값 : ','(콤마)로 구분</th>
+				<th class="its-th-align center">필수 가격 : ','(콤마)로 구분</th>
+				<th class="its-th-align center"></th>
+			</tr>
+		</thead>
+		<tbody>
+		{? opts_loop }
+			{@ opts_loop}
+			<tr>
+				<td class="its-td-align center">
+					{?.index_==0 && .title=='컬러'}
+					<!-- /* 원더플레이스 */ -->
+					<input type="text" name="optionMakeName[]" class="line" size="10" value="{.title}" readonly />
+					{:}
+					<input type="text" name="optionMakeName[]" class="line" size="10" value="{.title}" />
+					{/}
+				</td>
+				<td class="its-td-align center">
+					<input type="text" name="optionMakeValue[]" class="line" size="45" value="{.opt}" />
+				</td>
+				<td class="its-td-align center">
+					<input type="text" name="optionMakePrice[]" class="line" size="25" value="{.price}" />
+				</td>
+				<td class="its-td-align center">
+					{? .index_==0 }
+					<span class="btn-plus"><button type="button" id="addOptionMake"></button></span>
+					{ : }
+					<span class="btn-minus"><button type="button" class="delOptionMake"></button></span>
+					{ / }
+				</td>
+			</tr>
+			{ / }
+		{ : }
+			<tr>
+				<td class="its-td-align center">
+					<!--<input type="text" name="optionMakeName[]" class="line" size="10" value="" />-->
+					<!-- /* 원더플레이스 */ -->
+					<input type="text" name="optionMakeName[]" class="line" size="10" value="컬러" readonly />
+				</td>
+				<td class="its-td-align center">
+					<input type="text" name="optionMakeValue[]" class="line" size="45" value="" />
+				</td>
+				<td class="its-td-align center">
+					<input type="text" name="optionMakePrice[]" class="line" size="25" value="" />
+				</td>
+				<td class="its-td-align center">
+					<!--<span class="btn-plus"><button type="button" id="addOptionMake"></button></span>-->
+				</td>
+			</tr>
+			<tr>
+				<td class="its-td-align center">
+					<input type="text" name="optionMakeName[]" class="line" size="10" value="SIZE" readonly />
+				</td>
+				<td class="its-td-align center">
+					<input type="text" name="optionMakeValue[]" class="line" size="45" value="" />
+				</td>
+				<td class="its-td-align center">
+					<input type="text" name="optionMakePrice[]" class="line" size="25" value="" />
+				</td>
+				<td class="its-td-align center">
+
+				</td>
+			</tr>
+		{ / }
+		</tbody>
+	</table>
+	<div class="center" style="padding:10px;"><span class="btn large black"><button type="button" id="OptionMakeApply">적용하기</button></span>	</div>
+</div>
+<!-- 추가옵션만들기 다이얼로그 -->
+<div id="subOptionMakeDialog" class="hide">
+	<table  class="simplelist-table-style" style="width:100%">
+		<colgroup>
+			<col width="25%" />
+			<col />
+			<col />
+			<col width="5%" />
+		</colgroup>
+		<thead>
+			<tr>
+				<th class="its-th-align center">추가 옵션명</th>
+				<th class="its-th-align center">추가 옵션값은 ','(콤마)로 구분</th>
+				<th class="its-th-align center">추가 옵션가격은  ','(콤마)로 구분</th>
+				<th class="its-th-align center"></th>
+			</tr>
+		</thead>
+		<tbody>
+		{? sopts_loop }
+			{@ sopts_loop }
+			<tr>
+				<td class="its-td-align center">
+					<input type="text" name="suboptionMakeName[]" size="10" class="line" value="{.title}" />
+				</td>
+				<td class="its-td-align center">
+					<input type="text" name="suboptionMakeValue[]" class="line" size="55" value="{.opt}" />
+				</td>
+				<td class="its-td-align center">
+					<input type="text" name="suboptionMakePrice[]" class="line" size="25" value="{.price}" />
+				</td>
+				<td class="its-td-align center">
+					{? .index_==0 }
+					<span class="btn-plus"><button type="button" id="addSuboptionMake"></button></span>
+					{ : }
+					<span class="btn-minus"><button type="button" class="delSuboptionMake"></button></span>
+					{ / }
+				</td>
+			</tr>
+			{ / }
+		{ : }
+			<tr>
+				<td class="its-td-align center">
+					<input type="text" name="suboptionMakeName[]" size="10" class="line" value="" />
+				</td>
+				<td class="its-td-align center">
+					<input type="text" name="suboptionMakeValue[]" class="line" size="55" value="" />
+				</td>
+				<td class="its-td-align center">
+					<input type="text" name="suboptionMakePrice[]" class="line" size="25" value="" />
+				</td>
+				<td class="its-td-align center">
+					<span class="btn-plus"><button type="button" id="addSuboptionMake"></button></span>
+				</td>
+			</tr>
+		{ / }
+		</tbody>
+	</table>
+	<div class="center" style="padding:10px;"><span class="btn large black"><button type="button" id="suboptionMakeApply">적용하기</button></span></div>
+</div>
+
+<!-- 구매자 추가입력만들기 다이얼로그 -->
+<div id="memberInputDialog" class="hide">
+	<table  class="simplelist-table-style" style="width:100%">
+		<colgroup>
+			<col />
+			<col />
+			<col />
+			<col />
+			<col width="5%" />
+		</colgroup>
+		<thead>
+			<tr>
+				<th class="its-th-align center">추가 입력명</th>
+				<th class="its-th-align center">추가입력 형식</th>
+				<th class="its-th-align center">추가입력 제한</th>
+				<th class="its-th-align center"></th>
+			</tr>
+		</thead>
+		<tbody>
+		<!-- { ? inputs } -->
+			<!-- { @ inputs } -->
+			<tr>
+				<td class="its-td-align center">
+					<input type="text" name="memberInputMakeName[]" class="line" size="10" value="{.input_name}" />
+				</td>
+				<td class="its-td-align center">
+					<select name="memberInputMakeForm[]">
+						<option value="text" {?.input_form=='text'}selected{/}>텍스트박스</option>
+						<option value="edit" {?.input_form=='edit'}selected{/}>에디트박스</option>
+						<option value="file" {?.input_form=='file'}selected{/}>이미지 업로드</option>
+					</select>
+				</td>
+				<td class="its-td">
+					<!-- { ? .input_form == 'text' || .input_form == 'edit' } -->
+						<div class="textLimit">
+						<input type="text" name="memberInputMakeLimit[]" class="line" size="2" value="{.input_limit}" />자 이내
+						</div>
+						<div class="uploadLimit"></div>
+					<!-- { : } -->
+						<div class="uploadLimit"><input type="hidden" name="memberInputMakeLimit[]" value="imageUpload" />2M이하</div>
+						<div class="textLimit" class="hide">
+						<input type="text" name="memberInputMakeLimit[]" class="line" size="2" value="{.input_limit}" />자 이내
+						</div>
+					<!-- { / } -->
+				</td>
+				<td class="its-td-align center">
+					{? .index_==0 }
+					<span class="btn-plus"><button type="button" id="addMemberInputMake"></button></span>
+					{ : }
+					<span class="btn-minus"><button type="button" class="delMemberInputMake"></button></span>
+					{ / }
+				</td>
+			</tr>
+			<!-- { / } -->
+		<!-- { : } -->
+			<tr>
+				<td class="its-td-align center">
+					<input type="text" name="memberInputMakeName[]" class="line" size="10" value="" />
+				</td>
+				<td class="its-td-align center">
+					<select name="memberInputMakeForm[]">
+						<option value="text">텍스트박스</option>
+						<option value="edit">에디트박스</option>
+						<option value="file">이미지 업로드</option>
+					</select>
+				</td>
+				<td class="its-td">
+					<div class="textLimit">
+					<input type="text" name="memberInputMakeLimit[]" class="line" size="2" value="" />자 이내
+					</div>
+					<div class="uploadLimit"></div>
+				</td>
+				<td class="its-td-align center">
+					<span class="btn-plus"><button type="button" id="addMemberInputMake"></button></span>
+				</td>
+			</tr>
+		<!-- { / } -->
+		</tbody>
+	</table>
+	<div class="center" style="padding:10px;"><span class="btn large black"><button type="button" id="memberInputMakeApply">적용하기</button></span></div>
+</div>
+
+
+<!-- 아이콘 선택 -->
+<div id="goodsIconPopup" class="hide">
+	<form enctype="multipart/form-data" method="post" action="../goods_process/icon" target="actionFrame">
+	<input type="hidden" name="iconIndex" value="0" />
+	<ul>
+	<!--{ @ code_load('goodsIcon') }-->
+	<li style="float:left;width:100px;height:30px;text-align:center">
+		<input type="hidden" name="goodsIconCode[]" value="{.codecd}">
+		<img src="/data/icon/goods/{.codecd}.gif" border="0" class="hand hover-select">
+	</li>
+	<!--{ / }-->
+	</ul>
+	<div class="clearbox"></div>
+	<div>
+	<input type="file" name="goodsIconImg" /> <span class="btn small black"><button type="submit">추가</button></span>
+	</div>
+	</form>
+</div>
+
+<!-- 상품상태별 이미지 선택 -->
+<div id="popGoodsStatusImageChoice" class="hide">
+	<form enctype="multipart/form-data" method="post" action="../goods_process/goods_status_image_upload" target="actionFrame">
+	<input type="hidden" name="goodsStatusImageCode" value="" />
+	<table align="center" height="160">
+	<tr>
+		<td><div class="nowGoodsStatusImage pd10"></div></td>
+		<td><input type="file" name="goodsStatusImage" /> <span class="btn small black"><button type="submit">확인</button></span></td>
+	</tr>
+	</table>
+	</form>
+</div>
+
+
+<!--### 필수옵션 미리보기 -->
+<div id="popPreviewOpt" class="hide"></div>
+<!--### 추가혜택 -->
+<div id="popup_benefits" class="hide"></div>
+<!--### 상품상태별 이미지세팅 -->
+<div id="popGoodsStatusImage" class="hide"></div>
+<!--### 워터마크세팅 -->
+<div id="watermark_setting_popup"></div>
+
+
+{ #layout_footer }

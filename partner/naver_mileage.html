@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>이미지 첨부</title>
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/editor/css/popup.css" />
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+<script type="text/javascript" src="/app/javascript/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/jquery.uploadify.v2.1.4.js"></script>
+</meta>
+<script type='text/javascript'>
+$.get('../naver_mileage/batch', function(data) {
+	$('#mileage_msg').html('주문정보 전송이 완료 되었습니다.');
+});
+</script>
+</head>
+<body>
+<div class="wrapper">
+	<div class="header">
+		<h1>네이버마 일리지</h1>
+	</div>
+	<div class="body">
+		<dl class="alert">
+		    <dt id="mileage_msg">네이버 마일리지에 주문정보를 보내고 있습니다.<br/>완료될때까지 페이지를 닫지 마세요.</dt>		    
+		</dl>
+	</div>
+	<div class="footer">
+		<p><a onclick="window.self.close();" title="닫기" class="close">닫기</a></p>		
+	</div>
+</div>
+</body>
+</html>

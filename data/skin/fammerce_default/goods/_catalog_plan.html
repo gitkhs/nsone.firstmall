@@ -1,0 +1,117 @@
+<style>
+.catalog_title {font-family:"맑은 고딕","나눔고딕","dotum"; letter-spacing:-1px; font-size:20px; font-weight:bold; padding-right:30px; padding-bottom:4px; border-bottom:3px solid #ddd;}
+.catalog_paging {height:30px; line-height:30px; padding:0 15px; font-size:10px; font-family:verdana; color:#656565; background-color:#f2f2f2;}
+.catalog_paging .on {color:#000; font-weight:bold; text-decoration:underline;}
+</style>
+<script>
+	function plan_onmouse(category_code, id, num){
+		 
+		var offset_td = $('#td_'+category_code).offset();
+		var date_left = offset_td.left + $('#td_'+category_code).width() - 137;
+		var date_top = offset_td.top;
+		var obj = $("#"+id);
+
+		$('#div_plan_date_'+num).css({
+			'z-index' : 999,
+			'left' : date_left,
+			'top' : date_top,
+		});
+
+		
+		var width = $(obj).width();
+		var height = $(obj).height();
+		var div_height = $(obj).height();
+		var left = offset_td.left;
+
+		var plan_text_height = 70;
+		if($('#div_plan_text_'+num).height() > 70){
+			plan_text_height = $('#div_plan_text_'+num).height();
+		}
+
+		
+		var top = offset_td.top + height - plan_text_height;
+		var background = "url(../images/design/wonder_offers_txt_bg.png) repeat";
+		var fontcolor = "#00d4f4";
+		
+		if(num == 2){
+			//background = "url(../images/design/wonder_offers_txt_bg_blue.png) repeat";
+			background = "#00969f";
+			fontcolor = "#fdf400";
+		}else if(num == 3){
+			//background = "url(../images/design/wonder_offers_txt_bg_red.png) repeat";
+			background = "#d00900";
+			fontcolor = "#fdf400";
+		}else{
+			background = "#000000";
+		}
+		
+		$('#div_plan_text_'+num).css({
+			'z-index' : 999,
+			'width' : width,
+			'height' : plan_text_height,
+			'left' : left,
+			'top' : top,
+			'background' : background
+		});
+		
+		$('#div_plan_text_'+num).html("<div style='position:absolute; top:30%; filter: alpha(opacity=100); padding-left:20px;'><div style='font-size:14px; color:"+fontcolor+"; filter: alpha(opacity=100);'><b>"+$(obj).attr("plan_title")+"</b></div>"+$(obj).attr("plan_desc")+"</div>");
+
+		if($(obj).attr("plan_date") != ""){
+			$('#div_plan_date_'+num).html($(obj).attr("plan_date"));
+			$('#div_plan_date_'+num).show();
+		}
+		
+		$('#div_plan_text_'+num).show();
+
+	}
+
+	function plan_onmouseout(num){
+		$('#div_plan_date_'+num).hide();
+		$('#div_plan_text_'+num).hide();
+
+	}
+</script>
+<!--[ 카테고리별 상단 꾸미기 HTML ]-->
+<!--{?categoryData.top_html}-->
+{categoryData.top_html}
+<!--{/}-->
+
+<!--[ 타이틀 ]-->
+<div class="clearbox">
+	<div class="fleft catalog_title"><a href="/goods/catalog?code={categoryCode}">{categoryTitle}</a></div>
+</div>
+
+
+
+<div style="height:20px"></div>
+
+<table align="center" cellpadding="0" cellspacing="0" border="0">
+<!--{@ childCategoryData}-->
+<!--{? childCategoryData.category_plan_banner}-->
+<tr>
+	<td id="td_{childCategoryData.category_code}">
+		<a href="/goods/catalog?code={childCategoryData.category_code}"><img src="{childCategoryData.category_plan_banner}" onmouseover="plan_onmouse('{childCategoryData.category_code}', 'img_{childCategoryData.index_}', '{childCategoryData.index_}');" onmouseout="plan_onmouseout('{childCategoryData.index_}');" plan_title="{childCategoryData.plan_title}" plan_desc="{childCategoryData.plan_desc}" plan_date="{? childCategoryData.catalog_allow == 'period'} {childCategoryData.catalog_allow_sdate}~{childCategoryData.catalog_allow_edate} { / }" id='img_{childCategoryData.index_}'></a>
+		<div id="div_plan_date_{childCategoryData.index_}" style="position:absolute; width:135px; height:18px; line-height:18px; text-align:center; background:#000000; color:#ffffff; display:none; opacity:1; filter:Alpha(opacity=80);" onmouseover="plan_onmouse('{childCategoryData.category_code}', 'img_{childCategoryData.index_}', '{childCategoryData.index_}');" onmouseout="plan_onmouseout('{childCategoryData.index_}');"></div>
+		<div id="div_plan_text_{childCategoryData.index_}" style="position:absolute; color:#ffffff; display:none;  opacity:0.6; filter:Alpha(opacity=60); margin:0; " onmouseover="plan_onmouse('{childCategoryData.category_code}', 'img_{childCategoryData.index_}', '{childCategoryData.index_}');" onmouseout="plan_onmouseout('{childCategoryData.index_}');"></div>
+	</td>
+</tr>
+<tr><td height="20"></td></tr>
+
+<!--{ / }-->
+<!--{ : }-->
+<tr>
+	<td>
+		<span class="small">등록된 기획 카테고리가 없습니다.</span>
+	</td>
+</tr>
+<!--{ / }-->
+<tr><td height="50"></td></tr>
+</table>
+
+<div style="height:30px"></div>
+
+<div class="clearbox">
+	<div class="fright catalog_paging_clone"></div>
+	<script>$(".catalog_paging").clone().appendTo($(".catalog_paging_clone"));</script>
+</div>
+

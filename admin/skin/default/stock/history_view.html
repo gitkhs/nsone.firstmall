@@ -1,0 +1,119 @@
+{ #layout_header }
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>{data.mreason}, {data.stock_date}</h2>			
+		</div>
+		
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large icon"><button type="button" onclick="location.href='history_catalog';"><span class="arrowleft"></span>재고 조정 리스트</button></span></li>				
+		</ul>
+		
+		
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<br style="line-height:30px;" />
+
+{?data.reason=='input'}
+<table class="info-table-style" width="100%" border="0" cellpadding="0" cellspacing="0">
+<col width="10%" />
+<col width="15%" />
+<col width="10%" />
+<col width="15%" />
+<col width="10%" />
+<col width="15%" />
+<col width="10%" />
+<col width="15%" />
+<tr>
+	<th class="its-th">입고(매입)전표</th>
+	<td class="its-td">{data.stock_code}</td>
+	<th class="its-th">{?data.reason=='input'}입고일{:}조정일{/}</th>
+	<td class="its-td">{data.stock_date}</td>
+	<th class="its-th">매입처</th>
+	<td class="its-td">{?data.supplier_name}{data.supplier_name}{:}-{/}</td>
+	<th class="its-th">행위자</th>
+	<td class="its-td">{data.manager_name}</td>
+</tr>
+</table>
+{:}
+<table class="info-table-style" width="100%" border="0" cellpadding="0" cellspacing="0">
+<col width="10%" />
+<col />
+<col width="10%" />
+<col />
+<tr>
+	<th class="its-th">구체적 사유</th>
+	<td class="its-td">{data.reason_detail}</td>
+	<th class="its-th">행위자</th>
+	<td class="its-td">{data.manager_name}</td>
+</tr>
+</table>
+{/}
+
+<div style="height:25px;"></div>
+<div style="height:1px; background-color:#ccc"></div>
+<div style="height:25px;"></div>
+
+<table class="simplelist-table-style" width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<th></th>
+	<th>번호</th>
+	<th>상품</th>
+	<th>옵션</th>
+	{?data.reason=='input'}
+	<th>매입(입고)가격</th>
+	<th>입고 수량</th>
+	<th>매입가 합계</th>
+	{:}
+	<th>매입가격 → 변경</th>
+	<th>조정 수량</th>
+	{/}	
+</tr>
+{@list}
+	<tr>
+		<td class="center"><input type="checkbox" name="seqs" /></td>
+		<td class="center">{=(.index_+1)}</td>
+		<td>{.goods_name}</td>
+		<td>
+			{?.title1 && .option1}{.title1} {.option1}{/}
+			{?.title2 && .option2} / {.title2} {.option2}{/}
+			{?.title3 && .option3} / {.title3} {.option3}{/}
+			{?.title4 && .option4} / {.title4} {.option4}{/}
+			{?.title5 && .option5} / {.title5} {.option5}{/}
+		</td>
+		{?data.reason=='input'}
+		<td class="center"><input type="text" size="10" value="{=number_format(.supply_price)}" class="number disabled black" readonly /></td>
+		<td class="center"><input type="text" size="10" value="{=number_format(.ea)}" class="number disabled black" readonly /></td>
+		<td class="center"><input type="text" size="10" value="{=number_format(.supply_price*.ea)}" class="number disabled black" readonly /></td>
+		{:}
+		<td class="center">
+			<input type="text" size="10" value="{=number_format(.prev_supply_price)}" class="number disabled black" readonly />
+			→
+			<input type="text" size="10" value="{=number_format(.supply_price)}" class="number disabled black" readonly /> 
+		</td>
+		<td class="center"><input type="text" size="10" value="{=number_format(.ea)}" class="number disabled black" readonly /></td>
+		{/}
+		
+	</tr>
+{/}
+<tr>
+	<td colspan="4" class="center">합계</td>
+	{?data.reason=='input'}
+	<td class="center"><input type="text" size="10" value="{=number_format(list_sum.supply_price)}" class="number disabled bold black" readonly /></td>
+	<td class="center"><input type="text" size="10" value="{=number_format(list_sum.ea)}" class="number disabled bold black" readonly /></td>
+	<td class="center"><input type="text" size="10" value="{=number_format(list_sum.total)}" class="number disabled bold black" readonly /></td>
+	{:}
+	<td class="center"></td>
+	<td class="center"><input type="text" size="10" value="{=number_format(list_sum.ea)}" class="number disabled bold black" readonly /></td>
+	{/}
+</tr>
+</table>
+
+{ #layout_footer }

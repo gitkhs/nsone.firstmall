@@ -1,0 +1,202 @@
+<script type="text/javascript">
+$(function(){	
+	apply_input_style();
+
+	$("button").bind("click",function(){
+		var f = document.batch_status;
+		$("input[name='mode']").val($(this).attr('id'));
+		loadingStart();
+		f.submit();
+	});
+	
+	$(".shipping_user_name")
+	.bind("mouseenter",function(){
+		$(this).parent().children(".relative").children().show();
+	})
+	.bind("mouseleave",function(){
+		$(this).parent().children(".relative").children().hide();
+	});
+	
+	$("select.delivery_company").bind("change",function(){
+		var thisValue = $(this).val() ? $(this).val() : '';
+		if(thisValue.substring(0,5)=='auto_'){
+			$("option",this).not(":selected").attr("disabled",true);
+			$(this).parent().find("input.delivery_number").attr("readonly",true).addClass("disabled");
+		}else{
+			$(this).parent().find("input.delivery_number").attr("readonly",false).removeClass("disabled");
+		}
+	}).change();
+
+	$("span#invoice_manual_button").bind("click",function(){
+		var title = '택배 업무 자동화 서비스 사용방법';
+		openDialog(title, "invoice_manual_dialog", {"width":"700"});
+	});
+
+	{ ? count(data_export) > 0 }{ : }closeExportPopup();{ / }
+});
+</script>
+<style>
+/* 출고내역 테이블 */
+table td.info {border:1px solid #ddd;}
+table td.null,table th.null { border:0px; background:#fff }
+span.goods_name {display:inline-block;height:white-space:nowrap;overflow:hidden;width:250px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+div.export-act {padding-bottom:5px;}
+</style>
+
+<div class="pdb10 center">
+	<!--{ ? config_system.invoice_use }-->
+	<span id="invoice_manual_button" class="hand"><img src="../images/common/btn_dliv_auto_on.gif" align="absmiddle" vspace="5" /></span>
+	<!--{ : }-->
+	<a href="../setting/shipping"><img src="../images/common/btn_dliv_auto_off.gif" align="absmiddle" vspace="5" /></a>
+	<!--{ / }-->
+</div>
+
+<form name="batch_status" id="batch_status" method="post" action="../export_process/batch_status" target="actionFrame">
+<input type="hidden" name="mode" value="" />
+<table class="simplelist-table-style" width="100%" border="0">
+	<colgroup>
+		<col />
+		<col />		
+		<col />
+		<col />
+		<col />
+	</colgroup>
+	<thead>
+		<tr>
+			<th>받는분</th>
+			<th>출고일</th>
+			<th>출고 번호</th>
+			<th>출고 상품</th>
+			<th>출고 수량</th>			
+			<th>배송 방법</th>			
+		</tr>		
+	</thead>	
+	<tbody>		
+		<!--{ @ data_export }-->	
+		<tr>
+			<td class="info pdl5 pdr5" align="center">
+				<b class="shipping_user_name">[{.order_shipping.recipient_user_name}]</b>
+				<div class="relative">
+					<div class="absolute hide" style="z-index:10; width:900px; border:2px solid #333; background-color:#fff; padding:10px; text-align:left;">
+
+						<table class="simplelist-table-style" width="100%">
+						<col width="80" />
+						<col width="70" />
+						<col width="300" />
+						<col width="100" />
+						<tr>
+							<th>받으실분</th>
+							<th>우편번호</th>
+							<th>주소</th>
+							<th>연락처</th>
+							{?.order_shipping.hope_date}
+							<th>배송희망일</th>
+							{/}
+							{?.order_shipping.memo}
+							<th width="300">배송메세지</th>
+							{/}
+						</tr>
+						<tr>
+							<td class="info center pd5">{.order_shipping.recipient_user_name}</td>
+							<td class="info center pd5">{.order_shipping.recipient_zipcode[0]}-{.order_shipping.recipient_zipcode[1]}</td>
+							<td class="info pd5">
+								{.order_shipping.recipient_address} {.order_shipping.recipient_address_detail}
+								{?.order_shipping.recipient_address_street}
+									<br />{.order_shipping.recipient_address_street} {.order_shipping.recipient_address_detail}
+								{/}
+							</td>
+							<td class="info center pd5">
+								{?.order_shipping.recipient_phone}{=implode('-',.order_shipping.recipient_phone)}<br />{/}
+								{?.order_shipping.recipient_cellphone}{=implode('-',.order_shipping.recipient_cellphone)}<br />{/}
+							</td>
+							{?.order_shipping.hope_date}
+							<td class="info center pd5">{.order_shipping.hope_date}</td>
+							{/}
+							{?.order_shipping.memo}
+							<td class="info center pd5">{.order_shipping.memo}</td>
+							{/}
+						</tr>
+						</table>
+					</div>
+				</div>
+			
+			</td>	
+			<td class="info" align="center"><input type="text" name="export_date[{.export_seq}]" value="{.export_date}" size='10'></td>
+			<td class="info" align="center">{.export_code}</td>
+			<td class="info" align="center"><span class="goods_name">{.goods_name}</span></td>
+			<td class="info" align="center">{.ea}</td>
+			<td class="info" align="center">
+			<input type=hidden name="export_code[{.export_seq}]" value="{.export_code}" />			
+			<input type=hidden name="international[{.export_seq}]" value="{.international}" />
+			<input type=hidden name="domestic_shipping_method[{.export_seq}]" value="{.domestic_shipping_method}" />
+			<!--{ ? .international == 'domestic' }-->			
+			<!--{ ? .domestic_shipping_method == 'quick' || .domestic_shipping_method == 'direct' }-->			
+			{ domestic_method[ .domestic_shipping_method ] }
+			<!--{ : }-->			
+			<select name="delivery_company[{.export_seq}]" class="delivery_company">					
+				<!--{ @ get_shipping_company(.international,.domestic_shipping_method) }-->
+					<!--{ ? substr(..key_,0,5)=='auto_' }-->
+					<option value="{..key_}" style="background-color:yellow" {?.delivery_company_code==..key_}selected{/}>{..company}</option>
+					<!--{ : }-->
+					<option value="{..key_}" {?.delivery_company_code==..key_}selected{/}>{..company}</option>
+					<!--{ / }
+				<!--{ / }-->
+			</select>
+			<input type="text" name="delivery_number[{.export_seq}]" value="{.delivery_number}" class="line delivery_number">			
+			<!--{ / }-->			
+			<!--{ / }-->		
+			<!--{ ? .international == 'international' }-->			
+			<!--{ ? shipping_policy.count[1] }-->
+			<select name="international_shipping_method[{.export_seq}]">
+				<!--{ @ shipping_policy.policy[1]  }-->
+				<!--{ ? .international_shipping_method == ..code }-->
+				<option value="{..code}" selected>{..method}</option>
+				<!--{ : }-->
+				<option value="{..code}">{..method}</option>
+				<!--{ / }-->				
+				<!--{ / }-->
+			</select>
+			<!--{ / }-->	
+			<input type="text" name="international_number[{.export_seq}]" class="line" value="{.international_delivery_no}">
+			(해외배송)
+			<!--{ / }-->
+			</td>			
+		</tr>			
+		<!--{ / }-->
+	</tbody>		
+</table>
+<br />
+<table width="100%" border="0">
+	<tr>
+		<td width="50%" align="center">
+			<div class="export-act">변경된 출고 정보만 저장하시겠습니까?</div>
+			<div><span class="btn large gray"><button type="button" id="save">저장</button></span></div>
+		</td>
+		<td width="50%" align="center">		
+		<!--{ ? _POST.mode == 'complete_export' }-->
+		<div class="export-act">출고완료를 처리 하시겠습니까?</div>
+		<div class="desc pdb5">
+			<!--{ ? cfg_order.export_err_handling == 'error' }-->
+			재고가 부족하면 출고완료 불가능
+			<!--{ : }-->
+			재고가 부족해도 출고완료 가능
+			<!--{ / }-->
+		</div>
+		<div><span class="btn large black"><button type="button" id="complete_export">출고완료</button></span></div>
+		<!--{ / }-->
+		<!--{ ?  _POST.mode == 'going_delivery' }-->
+		<div class="export-act">배송중을 처리 하시겠습니까?</div>
+		<div><span class="btn large black"><button type="button" id="going_delivery">배송중</button></span></div>
+		<!--{ / }-->
+		<!--{ ?  _POST.mode == 'complete_delivery' }-->
+		<div class="export-act">배송완료를 처리 하시겠습니까?</div>
+		<div><span class="btn large black"><button type="button" id="complete_delivery">배송완료</button></span></div>
+		<!--{ / }-->
+		</td>
+	</tr>
+</table>
+</form>
+
+<div id="invoice_manual_dialog" class="hide">
+	{#invoice_guide}
+</div>

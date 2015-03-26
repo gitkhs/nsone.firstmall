@@ -1,0 +1,820 @@
+{#layout_header_popup}
+
+<script type="text/javascript" src="/app/javascript/plugin/jquery.colorpicker.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-color-picker.js"></script>
+
+<script>
+$(function(){
+	
+	<!--{ ? mode != 'create' }-->
+		{?tpl_path=='basic'}
+			parent.DM_window_title_set("center","{skin}스킨의 ");
+			parent.DM_window_title_set("title","레이아웃/폰트/배경색 통합설정");
+		{:}
+			parent.DM_window_title_set("center","{tpl_desc}({tpl_path})  ");
+		{/}
+	<!--{ / }-->
+		
+	/* 폰트 셀렉트박스 변경시 예시 스타일 변경 */
+	$("select[name='font']").change(function(){
+		$(".font-view").css({
+			'font-family'	: $(this).val(),
+			'font-size'		: '12px',
+			'color'			: '#0000ff'
+		});
+	}).change();
+	
+	/* 레이아웃 미리보기 이벤트 */
+	$("input[name='width'],input[name='body_width']").bind('change',function(){
+		var width = $("input[name='width']").val();
+		var body_width = $("input[name='body_width']").val();
+		
+		$("#layout-preview-body").animate({'width':body_width/width*100 + '%'});
+	}).change();
+	
+	$("input[name='layoutHeaderChk']").bind('change click',function(){
+		if($(this).val()=='hidden') $("#layout-preview-header").hide();
+		else{
+			$("#layout-preview-header").show();
+		}
+	});
+
+	$("input[name='layoutTopBarChk']").bind('change click',function(){
+		if($(this).val()=='hidden') $("#layout-preview-topbar").hide();
+		else{
+			$("#layout-preview-topbar").show();
+		}
+	});
+	
+	$("input[name='layoutFooterChk']").bind('change click',function(){
+		if($(this).val()=='hidden') $("#layout-preview-footer").hide();
+		else{
+			$("#layout-preview-footer").show();
+		}
+	});
+	
+	$("input[name='layoutSideChk']").bind('change click',function(){
+		if($(this).val()=='hidden') {
+			$("#layout-preview-side-left").hide();
+			$("#layout-preview-side-right").hide();
+		}
+		else{
+			if($("select[name='layoutSideLocation']").val() == 'left'){
+				$("#layout-preview-side-left").show();
+				$("#layout-preview-side-right").hide();
+			}
+			if($("select[name='layoutSideLocation']").val() == 'right'){
+				$("#layout-preview-side-right").show();
+				$("#layout-preview-side-left").hide();				
+			}
+		}
+	});
+	$("select[name='layoutSideLocation']").change(function(){
+		$("input[name='layoutSideChk']:checked").change();	
+	});
+	
+	$("input[name='layoutScrollLeftChk']").bind('change click',function(){
+		if($(this).val()=='hidden') $("#layout-preview-scroll-left").hide();
+		else{
+			$("#layout-preview-scroll-left").show();
+		}
+	});
+	
+	$("input[name='layoutScrollRightChk']").bind('change click',function(){
+		if($(this).val()=='hidden') $("#layout-preview-scroll-right").hide();
+		else{
+			$("#layout-preview-scroll-right").show();
+		}
+	});
+	
+	/* 라디오,체크박스 변경시 텍스트항목에 disabled 효과 */
+	$("input[type='radio'],input[type='checkbox']")
+	.each(function(){
+		
+		$("input[name='"+$(this).attr('name')+"'][disableSelector]").each(function(){
+			$($(this).attr('disableSelector')).attr('disabled',true);
+		});
+		
+		$(this).bind('change',function(){
+			$("input[name='"+$(this).attr('name')+"'][disableSelector]").each(function(){
+				$($(this).attr('disableSelector')).attr('disabled',true);
+			});
+			if($(this).is(":checked") && $(this).attr('disableSelector')){
+				$($(this).attr('disableSelector')).removeAttr('disabled');
+			}
+		});
+	});
+	$("input[type='radio']:checked,input[type='checkbox']:checked").change();
+	
+	/* 수정여부 체크버튼 */
+	$(".edit-panel-chk").change(function(){
+		if($(this).is(':checked')){
+			$(this).parent().parent().children(".edit-panel").show();
+			$(this).parent().parent().children(".edit-panel").find("input,select option,textarea").each(function(){
+				$(this).data('original-value',$(this).val());		
+				$(this).data('original-checked',$(this).attr('checked')?true:false);
+				$(this).data('original-selected',$(this).attr('selected')?true:false);
+				$(this).data('original-disabled',$(this).attr('disabled')?true:false);
+				if($(this).is(':checked') || $(this).is(':selected')) $(this).change();
+			});
+		}
+		else{
+			$(this).parent().parent().children(".edit-panel").hide();
+			$(this).parent().parent().children(".edit-panel").find("input,select option,textarea").each(function(){
+				$(this).val($(this).data('original-value'));
+				$(this).attr('checked',$(this).data('original-checked')==undefined?false:$(this).data('original-checked'));
+				$(this).attr('selected',$(this).data('original-selected')==undefined?false:$(this).data('original-selected'));
+				$(this).attr('disabled',$(this).data('original-disabled')==undefined?false:$(this).data('original-disabled'));
+				if($(this).is(':checked') || $(this).is(':selected')) $(this).change();
+			});
+		}
+	});
+	
+	/* 새페이지 만들기 모드 */
+	<!--{ ? mode == 'create' }-->
+		$("select[name='tpl_folder']").change(function(){
+			if($(this).val().substring(0,7)=='layout_'){
+				$("#layout-preview, .layout-configuration-table, .layout-configuration-table *, .apply_type_select").attr("disabled",true);
+				$("#layout-preview, .layout-configuration-table, .apply_type_select").hide();
+			}else{
+				$("#layout-preview, .layout-configuration-table, .layout-configuration-table *, .apply_type_select").removeAttr("disabled");
+				$("#layout-preview, .layout-configuration-table, .apply_type_select").show();
+			}
+		}).change();
+		
+		
+		/* 새 페이지 파일명 중복확인 관련 */
+		$("select[name='tpl_folder'], input[name='tpl_file_name'], select[name='tpl_file_ext']").change(function(){
+			$("input[name='tpl_file_name_chk']").val('');
+		});
+		
+		$("#tpl_file_name_chk_btn").click(function(){
+			
+			if($("input[name='tpl_file_name']").val()==''){
+				openDialogAlert("파일명을 입력해주세요.",400,140,function(){$("input[name='tpl_file_name']").focus();});
+				return;
+			}
+			
+			var param = {
+				'tpl_folder'	: $("select[name='tpl_folder']") .val(),
+				'tpl_file_name'	: $("input[name='tpl_file_name']") .val(),
+				'tpl_file_ext'	: $("select[name='tpl_file_ext']") .val()
+			};
+
+			$.ajax({
+				'url' : '../design_process/tpl_file_name_chk',
+				'data' : param,
+				'success' : function(res){
+					if(res=='0'){
+						openDialogAlert("파일명을 사용할 수 없습니다.",400,140);
+						$("input[name='tpl_file_name_chk']").val('');
+					}else if(res=='1'){
+						openDialogAlert("같은 이름의 파일이 존재합니다.",400,140);
+						$("input[name='tpl_file_name_chk']").val('');
+					}else{
+						openDialogAlert("파일명을 사용할 수 있습니다.",400,140);
+						$("input[name='tpl_file_name_chk']").val('1');
+					}
+				}
+			});
+			
+		});
+		
+		
+	<!--{ / }-->
+	
+	/* 컬러피커 */
+	$(".colorpicker").customColorPicker({'hide':false});
+	
+});
+
+</script>
+
+<style>
+.edit-panel {display:none;}
+.edit-panel-chk-label {padding-right:15px;}
+
+#layout-preview {width:780px; margin:auto; padding-bottom:10px; position:relative;}
+#layout-preview .layout-preview-border {border:2px solid #4bc0e6;}
+#layout-preview-header			{}
+#layout-preview-footer			{}
+#layout-preview-side-left		{}
+#layout-preview-side-right		{}
+#layout-preview-body	.layout-preview-border {border:2px solid #0077c0; background-color:#dceaea}
+#layout-preview-scroll-left		{position:absolute; margin-top:5px; margin-left:-85px; width:80px;}
+#layout-preview-scroll-right	{position:absolute; margin-top:5px; margin-left:5px; left:100%; width:80px;}
+
+table.layout-configuration-table {margin:auto; border:2px solid #2b2b2b;}
+table.layout-configuration-table th,
+table.layout-configuration-table td {height:30px; line-height:30px; border-top:1px solid #d3d3d3; border-left:1px solid #d3d3d3; text-indent:10px;}
+table.layout-configuration-table th {background-color:#ededed}
+table.layout-configuration-table tr td:first-child {border-left:0px;}
+table.layout-configuration-table tr:first-child td {border-top:0px;}
+
+.apply_type_select {margin:5px 0 30px 0; text-align:center; font-size:11px;}
+.apply_type_select b {color:#c52a00; font-weight:normal;}
+.apply_type_select input {margin:0 10px;}
+
+.topbar{color:#ff0000;font-size:11px;line-height:15px;margin:0;padding-left:10px;text-indent:0}
+</style>
+
+<div style="padding:10px;">
+	
+	<form name="layout_setting_form" action="../design_process/layout" method="post" enctype="multipart/form-data" target="actionFrame" onsubmit="loadingStart()">
+	<input type="hidden" name="mode" value="{mode}" />
+	<!--{ ? mode == 'edit' }--><input type="hidden" name="tpl_path" value="{tpl_path}" /><!--{ / }-->
+
+	<!--{ ? mode == 'create' }-->
+	<input type="hidden" name="tpl_file_name_chk" value="" />
+	<table width="100%" class="info-table-style">
+	<col width="220" /><col />
+	<tr>
+		<th class="its-th">스킨 &gt; 디렉토리 &gt; 파일명</th>
+		<td class="its-td">
+			{* {workingSkin} &gt; *}
+			{designWorkingSkin} &gt;
+			<select name="tpl_folder">
+			<!--{ @ folders }-->
+				<option value="{.key_}" {?.key_=='etc'}selected{/}>{.key_}({.value_})</option>
+			<!--{ / }-->
+			</select> &gt;
+			<input type="text" name="tpl_file_name" value="newfile" class="line" />
+			<select name="tpl_file_ext">
+			<option value="html">.html</option>
+			</select>
+			<span class="btn small"><input type="button" value="중복확인" id="tpl_file_name_chk_btn" /></span>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">페이지 설명</th>
+		<td class="its-td">
+			<input type="text" name="tpl_desc" value="" class="line" />
+		</td>
+	</tr>
+	</table>
+	<br />
+	<!--{ / }-->
+
+	<div id="layout-configuration-tab-source" style="display:none">
+		소스편집기
+	</div>
+	
+	<div id="layout-configuration-tab-config">
+	
+		<!-- 레이아웃 미리보기 : 시작 -->
+		<div id="layout-preview">
+			<table id="layout-preview-header" class="layout-preview-border" width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td height="60">
+					<table style="margin:auto;" align="center" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td width="80"><b>상단(TOP)</b></td>
+						<td>
+							<input type="text" name="layout_header_tpl_text" class="line" size="60" value="{layoutHeader}" readonly/>
+							<span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor('{layoutHeader}')" /></span>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+
+			<!--{ ? !mobileMode && !storemobileMode && !fammerceMode && !storefammerceMode }-->
+			<table id="layout-preview-topbar" width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td height="5"></td></tr>
+			<tr>
+				<td>
+					<table class="layout-preview-border" width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td height="60">
+							<table style="margin:auto;" align="center" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td width="80"><b>상단바(top_bar)</b></td>
+								<td>
+									<input type="text" name="layout_topbar_tpl_text" class="line" size="60" value="{layoutTopBar}" readonly/>
+									<span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor('{layoutTopBar}')" /></span>
+								</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+			<!--{ / }-->
+
+			<!--{ ? (mobileMode || storemobileMode) && (tpl_path == "main/index.html") }-->
+			<table id="layout-preview-topbar" width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td height="5"></td></tr>
+			<tr>
+				<td>
+					<table class="layout-preview-border" width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td height="60">
+							<table style="margin:auto;" align="center" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td width="80"><b>메인 상단바(top_bar)</b></td>
+								<td>
+									<input type="text" name="layout_mainTopbar_tpl_text" class="line" size="60" value="{layoutMainTopBar}" readonly/>
+									<span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor('{layoutMainTopBar}')" /></span>
+								</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+			<!--{ / }-->
+
+			<!--{ ? !mobileMode && !storemobileMode && !fammerceMode && !storefammerceMode }-->
+			<table id="layout-preview-scroll-left" class="layout-preview-border" width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td height="80">
+					<table width="90%" style="margin:auto;" align="center" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td align="center"><b>좌측스크롤<br />(SCROLL)</b></td>
+					</tr>
+					<tr>
+						<td align="center"><span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor('{layoutScrollLeft}')" /></span></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+	
+			<table id="layout-preview-scroll-right" class="layout-preview-border" width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td height="80">
+					<table width="90%" style="margin:auto;" align="center" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td align="center"><b>우측스크롤<br />(SCROLL)</b></td>
+					</tr>
+					<tr>
+						<td align="center"><span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor('{layoutScrollRight}')" /></span></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+			<!--{ / }-->
+			
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr><td height="5"></td></tr>
+			<tr>
+				<!--{ ? !mobileMode && !storemobileMode && !fammerceMode && !storefammerceMode }-->
+				<td id="layout-preview-side-left" style="padding-right:5px;">
+					<table height="140" class="layout-preview-border" width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td>
+							<table width="90%" align="center" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td align="center"><b>측면(SIDE)</b></td>
+							</tr>
+							<tr>
+								<td align="center"><span class="btn small"><input type="button" value="소스편집"  onclick="parent.DM_window_sourceeditor('{layoutSide}')"/></span></td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+				<!--{ / }-->
+				<td id="layout-preview-body">
+					<table height="140" class="layout-preview-border" width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td>
+							<!--{ ? mode == 'create' }-->
+							<table width="90%" style="margin:auto;" align="center" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td><b>본문(BODY)</b></td>
+								<td>
+									<input type="text" name="layout_body_tpl_text" class="line" size="60" value="새 페이지" readonly/>
+								</td>
+							</tr>
+							</table>
+							<!--{ : }-->
+							<table width="90%" style="margin:auto;" align="center" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td><b>본문(BODY)</b></td>
+								<td>
+									<input type="text" name="layout_body_tpl_text" class="line" size="60" value="{tpl_path}" readonly/>
+									{?tpl_path!='basic'}
+									<span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor('{tpl_path}')" /></span>
+									{/}
+								</td>
+							</tr>
+							</table>
+							<!--{ / }-->
+						</td>
+					</tr>
+					</table>
+				</td>
+				<!--{ ? !mobileMode && !storemobileMode && !fammerceMode && !storefammerceMode }-->
+				<td id="layout-preview-side-right" style="padding-left:5px;">
+					<table height="140" class="layout-preview-border" width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td>
+							<table width="90%" style="margin:auto;" align="center" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+								<td align="center"><b>측면(SIDE)</b></td>
+							</tr>
+							<tr>
+								<td align="center"><span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor('{layoutSide}')" /></span></td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+				<!--{ / }-->
+			</tr>
+			<tr><td height="5"></td></tr>
+			</table>
+			
+			<table id="layout-preview-footer" class="layout-preview-border" width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td height="60">
+					<table style="margin:auto;" align="center" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td width="80"><b>하단(TOP)</b></td>
+						<td>
+							<input type="text" name="layout_footer_tpl_text" class="line" size="60" value="{layoutFooter}" readonly/>
+							<span class="btn small"><input type="button" value="소스편집" onclick="parent.DM_window_sourceeditor('{layoutFooter}')" /></span>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</div>
+		<!-- 레이아웃 미리보기 : 시작 -->
+	
+		<table class="layout-configuration-table" cellpadding="0" cellspacing="0">
+		<col width="130" /><col width="200" /><col width="450" />
+		<tr>
+			<th>항목</th>
+			<th>현재 설정</th>
+			<th>설정 변경</th>
+		</tr>
+		<!--{ ? mode == 'edit' }-->
+		<tr>
+			<td>설명</td>
+			<td>
+				{tpl_desc}
+			</td>
+			<td>
+				<input type="text" name="tpl_desc" value="{tpl_desc}" class="line" />
+			</td>
+		</tr>
+		<!--{ / }-->
+		<!--{ ? !mobileMode && !storemobileMode && !fammerceMode && !storefammerceMode }-->
+			<!--{ ? mode == 'edit' && tpl_path!='basic' }-->
+			<tr>
+				<td>사이즈</td>
+				<td>
+					전체 {=number_format(width)} pixel / 본문 {=number_format(body_width)} pixel
+				</td>
+				<td>
+					<label class="edit-panel-chk-label"><input type="checkbox" class="edit-panel-chk" />수정</label>
+					<span class="edit-panel">
+						전체 <input type="text" name="width" value="{width}" class="line" size="5" maxlength="4" /> pixel / 본문 <input type="text" name="body_width" value="{body_width}" class="line" size="5" maxlength="4" /> pixel
+					</span>
+				</td>
+			</tr>
+			<!--{ : }-->
+			<tr>
+				<td>사이즈</td>
+				<td>
+					전체 {=number_format(width)} pixel / 본문 {=number_format(body_width)} pixel
+				</td>
+				<td>
+					전체 <input type="text" name="width" value="{width}" class="line" size="5" maxlength="4" /> pixel / 본문 <input type="text" name="body_width" value="{body_width}" class="line" size="5" maxlength="4" /> pixel	
+				</td>
+			</tr>
+			<!--{ / }-->
+		<!--{ / }-->
+		<tr>
+			<td>정렬</td>
+			<td>
+				{?align=='center'}
+				가운데
+				{:align=='left'}
+				좌측
+				{/}
+			</td>
+			<td>
+				{?tpl_path=='basic' && mode!='create'}
+				<label><input type="radio" name="align" value="center" {?align=='center'}checked{/} />가운데(권장)</label>&nbsp;&nbsp;&nbsp;
+				<label><input type="radio" name="align" value="left" {?align=='left'}checked{/} />좌측</label>
+				{:}-{/}
+			</td>
+		</tr>
+		<tr>
+			<td>폰트</td>
+			<td>
+				{?font}{font}{:}기본(CSS){/}
+			</td>
+			<td>			
+				{?tpl_path=='basic' && mode!='create'}
+				<select name="font">
+					<option value="" font_service_seq="" {?!font}selected{/}>기본</option>
+					<!--{ @loop_font }-->
+					<option value="{.font_face}" font_service_seq="{.service_seq}" {?font==.font_face}selected{/}>{.font_name}</option>
+					<!--{ / }-->
+					<option value="dotum" font_service_seq="" {?font=='dotum'}selected{/}>돋움</option>
+					<option value="gulim" font_service_seq="" {?font=='gulim'}selected{/}>굴림</option>
+					<option value="batang" font_service_seq="" {?font=='batang'}selected{/}>바탕</option>
+					<option value="맑은 고딕" font_service_seq="" {?font=='맑은 고딕'}selected{/}>맑은 고딕</option>
+					
+				</select>
+				<input type="hidden" name="font_service_seq" value="" />
+				<script>
+				function check_font_service(){
+					var font_service_seq = $("select[name='font'] option:selected").attr('font_service_seq');
+					if( font_service_seq ){
+						$("input[name='font_service_seq']").val(font_service_seq);
+					}
+				}
+				$("select[name='font']").change(function(){
+					check_font_service();
+				});
+				check_font_service();
+				</script>
+				<span class="desc font-view">예) 가나다라1234</span>
+				{:}-{/}
+			</td>
+			
+		</tr>
+		<tr>
+			<td>스크롤색상</td>
+			<td>
+				{?scrollbarColor}{scrollbarColor}{:}기본(브라우저){/}
+			</td>
+			<td>
+				{?tpl_path=='basic' && mode!='create'}
+				<label><input type="radio" name="scrollbarChk" {?!scrollbarColor}checked{/} />기본</label>&nbsp;&nbsp;&nbsp;
+				<label><input type="radio" name="scrollbarChk" disableSelector=".scrollbarColorLabel" {?scrollbarColor}checked{/} /></label><input type="text" name="scrollbarColor" value="{scrollbarColor}" size="7" maxlength="20" class="line scrollbarColorLabel colorpicker" />
+				{:}-{/}
+			</td>
+		</tr>
+		<tr>
+			<td>배경색</td>
+			<td>
+				{?backgroundColor}{backgroundColor}{:backgroundImage}<img src="{backgroundImage}" width="20" height="20" align="absmiddle"/>{:}-{/}
+			</td>
+			<td>
+				<label class="edit-panel-chk-label"><input type="checkbox" name="backgroundSetChk" class="edit-panel-chk" />수정</label>
+				<span class="edit-panel">
+					<div>
+						<label><input type="radio" name="backgroundChk" value="color" disableSelector=".backgroundColorLabel" {?backgroundColor}checked{/} /></label><input type="text" name="backgroundColor" value="{?backgroundColor}{backgroundColor}{:}#ffffff{/}" size="7" maxlength="20" class="line backgroundColorLabel colorpicker" />
+					</div>
+					<div>
+						<label>
+						<input type="radio" name="backgroundChk" value="image" disableSelector=".backgroundImageLabel" {?backgroundImage}checked{/} /></label>
+						<span class="backgroundImageLabel">
+							<select name="backgroundRepeat">
+								<option value="repeat" {?backgroundRepeat=='repeat'}selected="selected"{/}>바둑판</option>
+								<option value="repeat-x" {?backgroundRepeat=='repeat-x'}selected="selected"{/}>수평반복</option>
+								<option value="repeat-y" {?backgroundRepeat=='repeat-y'}selected="selected"{/}>수직반복</option>
+								<option value="no-repeat" {?backgroundRepeat=='no-repeat'}selected="selected"{/}>원본 그대로</option>
+							</select>
+							<select name="backgroundPosition">
+								<option value="left top" {?backgroundPosition=='left top'}selected="selected"{/}>좌측상단</option>
+								<option value="left center" {?backgroundPosition=='left center'}selected="selected"{/}>좌측중단</option>
+								<option value="left bottom" {?backgroundPosition=='left bottom'}selected="selected"{/}>좌측하단</option>
+								<option value="center top" {?backgroundPosition=='center top'}selected="selected"{/}>중앙상단</option>
+								<option value="center center" {?backgroundPosition=='center center'}selected="selected"{/}>중앙중단</option>
+								<option value="center bottom" {?backgroundPosition=='center bottom'}selected="selected"{/}>중앙하단</option>
+								<option value="right top" {?backgroundPosition=='right top'}selected="selected"{/}>우측상단</option>
+								<option value="right center" {?backgroundPosition=='right center'}selected="selected"{/}>우측중단</option>
+								<option value="right bottom" {?backgroundPosition=='right bottom'}selected="selected"{/}>우측하단</option>
+							</select>
+							<input type="file" name="backgroundImage" size="7" maxlength="50" />
+							<input type="hidden" name="oBackgroundImage" value="{backgroundImage}" />
+						</span>
+						{?backgroundImage}<img src="{backgroundImage}" width="20" height="20" align="absmiddle"/>{/}
+					</div>
+				</span>
+			
+			</td>
+		</tr>
+		<tr>
+			<td>상단(top)</td>
+			<td>{layoutHeader}</td>
+			<td>
+				<label class="edit-panel-chk-label"><input type="checkbox" name="layoutHeaderSetChk" class="edit-panel-chk" />수정</label>
+				<span class="edit-panel">			
+	
+					<label><input type="radio" name="layoutHeaderChk" disableSelector=".layoutHeaderLabel" {?layoutHeader!='hidden'}checked{/} />선택</label>
+					<select name="layoutHeader" class="line layoutHeaderLabel">
+						<!--{ @ layout_header_config }-->
+						<option value="{layout_header_config.tpl_path}" {?layout_header_config.tpl_path==layoutHeader}selected{/}>{?layout_header_config.tpl_desc}[{layout_header_config.tpl_desc}] {/}{layout_header_config.tpl_path}</option>
+						<!--{ / }-->
+					</select>
+					&nbsp;&nbsp;&nbsp;
+					<label><input type="radio" name="layoutHeaderChk" value="hidden" {?layoutHeader=='hidden'}checked{/} />숨기기</label>
+				</span>
+			</td>
+		</tr>
+
+		<!--{ ? !mobileMode && !storemobileMode && !fammerceMode && !storefammerceMode }-->
+		<tr>
+			<td>상단바(top_bar)</td>
+			<td>{layoutTopBar}</td>
+			<td>
+				<label class="edit-panel-chk-label"><input type="checkbox" name="layoutTopBarSetChk" class="edit-panel-chk" />수정</label>
+				<span class="edit-panel">			
+	
+					<label><input type="radio" name="layoutTopBarChk" disableSelector=".layoutTopBarLabel" {?layoutTopbar!='hidden'}checked{/} />선택</label>
+					<select name="layoutTopBar" class="line layoutTopBarLabel">
+						<!--{ @ layout_TopBar_config }-->
+						<option value="{layout_TopBar_config.tpl_path}" {?layout_TopBar_config.tpl_path==layoutHeader}selected{/}>{?layout_TopBar_config.tpl_desc}[{layout_TopBar_config.tpl_desc}] {/}{layout_TopBar_config.tpl_path}</option>
+						<!--{ / }-->
+					</select>
+					&nbsp;&nbsp;&nbsp;
+					<label><input type="radio" name="layoutTopBarChk" value="hidden" {?layoutTopBar=='hidden' || !layoutTopBar}checked{/} />숨기기</label>
+					<p class="topbar">상단바 영역을 선택하셨는데도 보이지 않으세요?<br />
+					스킨 패치가 되셨는지 확인해 주십시오. <a href="https://firstmall.kr/ec_hosting/customer/patch.php?page=1&patchSeq=605&intRowCount=10&searchTargetShopCode=&searchKeyword=#p605" target="_blank">패치안내></a></p>
+				</span>
+			</td>
+		</tr>
+		<!--{ / }-->
+
+		<!--{ ? (mobileMode || storemobileMode) && (tpl_path == "main/index.html") }-->
+		<tr>
+			<td>메인 상단바(top_bar)</td>
+			<td>{layoutMainTopBar}</td>
+			<td>
+				<label class="edit-panel-chk-label"><input type="checkbox" name="layoutMainTopBarSetChk" class="edit-panel-chk" />수정</label>
+				<span class="edit-panel">			
+	
+					<label><input type="radio" name="layoutMainTopBarChk" disableSelector=".layoutMainTopBarLabel" {?layoutMainTopbar!='hidden'}checked{/} />선택</label>
+					<select name="layoutMainTopBar" class="line layoutMainTopBarLabel">
+						<option value="layout_MainTopBar/standard.html">layout_MainTopBar/standard.html</option>
+					</select>
+					&nbsp;&nbsp;&nbsp;
+					<label><input type="radio" name="layoutMainTopBarChk" value="hidden" {?layoutMainTopBar=='hidden'}checked{/} />숨기기</label><br />
+					<p class="topbar">상단바 영역을 선택하셨는데도 보이지 않으세요?<br />
+					스킨 패치가 되셨는지 확인해 주십시오. <a href="https://firstmall.kr/ec_hosting/customer/patch.php?page=1&patchSeq=605&intRowCount=10&searchTargetShopCode=&searchKeyword=#p605" target="_blank">패치안내></a></p>
+				</span>
+			</td>
+		</tr>
+		<!--{ / }-->
+
+		<!--{ ? !mobileMode && !storemobileMode && !fammerceMode && !storefammerceMode }-->
+			<!--{ ? is_fullsize_absolutly }-->
+			<tr>
+				<td>측면(side)</td>
+				<td>-</td>
+				<td>
+					이 페이지에서는 측면디자인을 설정 할 수 없습니다.
+					<input type="radio" name="layoutSideChk" value="hidden" checked class="hide" />
+				</td>
+			</tr>
+			<!--{ : }-->
+			<tr>
+				<td>측면(side)</td>
+				<td>{layoutSide}</td>
+				<td>
+					<label class="edit-panel-chk-label"><input type="checkbox" name="layoutSideSetChk" class="edit-panel-chk" />수정</label>
+					<span class="edit-panel">	
+						<label><input type="radio" name="layoutSideChk" disableSelector=".layoutSideLabel" {?layoutSide!='hidden'}checked{/} />선택</label>
+						<select name="layoutSideLocation" class="line layoutSideLabel">
+							<option value="left" {?layoutSideLocation=='left'}selected{/}>좌측</option>
+							<option value="right" {?layoutSideLocation=='right'}selected{/}>우측</option>
+						</select>
+						<select name="layoutSide" class="line layoutSideLabel">
+							<!--{ @ layout_side_config }-->
+							<option value="{layout_side_config.tpl_path}" {?layout_side_config.tpl_path==layoutSide}selected{/}>{?layout_side_config.tpl_desc}[{layout_side_config.tpl_desc}] {/}{layout_side_config.tpl_path}</option>
+							<!--{ / }-->
+						</select>
+						&nbsp;&nbsp;&nbsp;
+						<label><input type="radio" name="layoutSideChk" value="hidden" {?layoutSide=='hidden'}checked{/} />숨기기</label>
+					</span>
+				</td>
+			</tr>
+			<!--{ / }-->
+		<!--{ / }-->
+		<tr>
+			<td>본문(body)</td>
+			<td>
+				{?bodyBackgroundColor}{bodyBackgroundColor}{:bodyBackgroundImage}<img src="{bodyBackgroundImage}" width="20" height="20" align="absmiddle"/>{:}-{/}
+			</td>
+			<td>
+				<label class="edit-panel-chk-label"><input type="checkbox" name="bodyBackgroundSetChk" class="edit-panel-chk" />수정</label>
+				<span class="edit-panel">
+					<label><input type="radio" name="bodyBackgroundChk" value="color" disableSelector=".bodyBackgroundColorLabel" {?bodyBackgroundColor}checked{/} /></label><input type="text" name="bodyBackgroundColor" value="{bodyBackgroundColor}" size="7" maxlength="20" class="line bodyBackgroundColorLabel colorpicker" />&nbsp;&nbsp;&nbsp;
+					<label><input type="radio" name="bodyBackgroundChk" value="image" disableSelector=".bodyBackgroundImageLabel" {?bodyBackgroundImage}checked{/} /></label><span class="bodyBackgroundImageLabel"><input type="file" name="bodyBackgroundImage" size="7" maxlength="50" /></span>
+					<input type="hidden" name="oBodyBackgroundImage" value="{bodyBackgroundImage}" />
+					{?bodyBackgroundImage}<img src="{bodyBackgroundImage}" width="20" height="20" align="absmiddle"/>{/}
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td>하단(bottom)</td>
+			<td>{layoutFooter}</td>
+			<td>
+				<label class="edit-panel-chk-label"><input type="checkbox" name="layoutFooterSetChk" class="edit-panel-chk" />수정</label>
+				<span class="edit-panel">
+					<label><input type="radio" name="layoutFooterChk" disableSelector=".layoutFooterLabel" {?layoutFooter!='hidden'}checked{/} />선택</label>
+					<select name="layoutFooter" class="line layoutFooterLabel">
+						<!--{ @ layout_footer_config }-->
+						<option value="{layout_footer_config.tpl_path}" {?layout_footer_config.tpl_path==layoutFooter}selected{/}>{?layout_footer_config.tpl_desc}[{layout_footer_config.tpl_desc}] {/}{layout_footer_config.tpl_path}</option>
+						<!--{ / }-->
+					</select>
+					&nbsp;&nbsp;&nbsp;
+					<label><input type="radio" name="layoutFooterChk" value="hidden" {?layoutFooter=='hidden'}checked{/} />숨기기</label>
+				</span>
+			</td>
+		</tr>
+		<!--{ ? !mobileMode && !storemobileMode && !fammerceMode && !storefammerceMode }-->
+		<tr>
+			<td>(좌)스크롤(scroll)</td>
+			<td>{layoutScrollLeft}</td>
+			<td>
+				<label class="edit-panel-chk-label"><input type="checkbox" name="layoutScrollLeftSetChk" class="edit-panel-chk" />수정</label>
+				<span class="edit-panel">
+					<label><input type="radio" name="layoutScrollLeftChk" disableSelector=".layoutScrollLeftLabel" {?layoutScrollLeft!='hidden'}checked{/} />선택</label>
+					<select name="layoutScrollLeft" class="line layoutScrollLeftLabel">
+						<!--{ @ layout_scroll_config }-->
+						<option value="{layout_scroll_config.tpl_path}" {?layout_scroll_config.tpl_path==layoutScrollLeft}selected{/}>{?layout_scroll_config.tpl_desc}[{layout_scroll_config.tpl_desc}] {/}{layout_scroll_config.tpl_path}</option>
+						<!--{ / }-->
+					</select>
+					&nbsp;&nbsp;&nbsp;
+					<label><input type="radio" name="layoutScrollLeftChk" value="hidden" {?layoutScrollLeft=='hidden'}checked{/} />숨기기</label>
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td>(우)스크롤(scroll)</td>
+			<td>{layoutScrollRight}</td>
+			<td>
+				<label class="edit-panel-chk-label"><input type="checkbox" name="layoutScrollRightSetChk" class="edit-panel-chk" />수정</label>
+				<span class="edit-panel">
+					<label><input type="radio" name="layoutScrollRightChk" disableSelector=".layoutScrollRightLabel" {?layoutScrollRight!='hidden'}checked{/} />선택</label>
+					<select name="layoutScrollRight" class="line layoutScrollRightLabel">
+						<!--{ @ layout_scroll_config }-->
+						<option value="{layout_scroll_config.tpl_path}" {?layout_scroll_config.tpl_path==layoutScrollRight}selected{/}>{?layout_scroll_config.tpl_desc}[{layout_scroll_config.tpl_desc}] {/}{layout_scroll_config.tpl_path}</option>
+						<!--{ / }-->
+					</select>
+					&nbsp;&nbsp;&nbsp;
+					<label><input type="radio" name="layoutScrollRightChk" value="hidden" {?layoutScrollRight=='hidden'}checked{/} />숨기기</label>
+				</span>
+			</td>
+		</tr>
+		<!--{ / }-->
+		</table>
+	</div>
+	
+	<br />
+
+	<div class="apply_type_select">
+		{?tpl_path=='basic' && mode == 'edit'}
+		<table style="margin:auto;">
+		<tr>
+			<td align="left">
+				<input type="radio" name="apply_type" value="this" id="apply_type_this" checked /><label for="apply_type_this">위 설정값을 <b>모든 페이지에 일괄</b> 적용합니다.</label>
+				<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="desc"><span class="fx12">※</span> 단, 페이지별 항목 설정값이 위의 변경 설정값과 다를 경우 일괄적용에서 제외</span>
+			</td>
+			<!--{ ? !mobileMode && !storemobileMode && !fammerceMode && !storefammerceMode }-->
+			<td width="10"></td>
+			<td align="left">
+				<input type="radio" name="apply_type" value="all" id="apply_type_all" /><label for="apply_type_all">위 설정값을 <b>모든 페이지에 일괄</b> 적용합니다.   </label>
+				<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="desc"><span class="fx12">※</span> 단, 마이페이지에 적용된 측면만은 일괄 적용에서 제외</span>
+			</td>
+			<!--{ / }-->
+		</tr>
+		</table>
+		{:}
+		<input type="hidden" name="apply_type" value="this" />
+		<div class="pdb10">위 설정값을 <b>현재 페이지에</b> 적용합니다.</div>
+		{/}
+	</div>
+	
+	<div align="center"><span class="btn large cyanblue"><input type="submit" value="적용" /></span></div>
+	
+	</form>
+	
+	<div style="height:50px"></div>
+
+</div>
+
+<!-- 스킨업로드 레이어 -->
+<div id="skinUploadDialogLayer" class="hide">
+	<form action="../design_process/upload_skin" target="actionFrame" enctype="multipart/form-data" method="post" onsubmit="return upload_skin_submit(this)">
+		<table width="100%" class="info-table-style">
+		<tr>	
+			<td class="its-th">파일첨부</td>
+			<td><input type="file" name="skin_zipfile" /></td>
+		</tr>
+		</table>
+		<br />
+		
+		<div align="center"><span class="btn large"><input type="submit" value="업로드" /></span></div>
+	</form>
+</div>
+ 
+{#layout_footer_popup}

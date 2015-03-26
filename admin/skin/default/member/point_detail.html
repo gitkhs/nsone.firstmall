@@ -1,0 +1,129 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	$("select[name='gb']").live('change',function(){
+		if($(this).val()=='minus'){
+			$(".reserve_select_lay").hide();
+		}else{
+			$(".reserve_select_lay").show();
+		}
+	});
+	$("select[name='memo_type']").live('change',function(){
+		if($(this).val()=='direct'){
+			$("input[name='memo_direct']").show();
+		}else{
+			$("input[name='memo_direct']").hide();
+		}
+	});
+
+	$("input[name='send_sms']").bind('click',function(){
+		if($(this).attr("checked")){
+			$(".sms").attr("disabled",false);
+		}else{
+			$(".sms").attr("disabled",true);
+		}
+	});
+
+	$("select[name='reserve_select']").live("change",function(){
+		span_controller('reserve');
+	});
+});
+
+
+function span_controller(name){
+	var reserve_y = $("span[name='"+name+"_y']");
+	var reserve_d = $("span[name='"+name+"_d']");
+	var value = $("select[name='"+name+"_select'] option:selected").val();
+	if(value==""){
+		reserve_y.hide();
+		reserve_d.hide();
+	}else if(value=="year"){
+		reserve_y.show();
+		reserve_d.hide();
+	}else if(value=="direct"){
+		reserve_y.hide();
+		reserve_d.show();
+	}
+}
+</script>
+
+
+<form name="emoneyFrm" id="emoneyFrm" method="post" target="actionFrame" action="../member_process/point_detail">
+<input type="hidden" name="member_seq" value="{member_seq}"/>
+
+<table width="100%" class="info-table-style">
+<tbody>
+<tr>
+	<th class="its-th-align"><span style="font-size:14px;font-weight:bold;">{user_name}</span>({userid}) 회원님이 보유한 포인트는 <span style="font-size:14px;font-weight:bold;">{=number_format(point)}</span>p 입니다.</th>
+</tr>
+</table>
+
+
+<div class="item-title" style="width:92%">포인트 지급/차감 <span class="helpicon" title="수동으로 포인트를 지급 또는 차감할 수 있습니다."></span></div>
+
+<table width="100%" class="info-table-style">
+<tbody>
+<tr>
+	<th class="its-th-align">
+
+	<table width="100%">
+	<tr>
+		<td height="50">
+			금액 : <select name="gb">
+				<option value="plus">지급(+)</option>
+				<option value="minus">차감(-)</option>
+			</select>
+			<input type="text" name="point" class="line onlynumber" size="7">원
+
+
+			사유 :
+			<select name="memo_type">
+				<option value="">== 선택해 주세요 ==</option>
+				<option value="신규 회원가입 지급">신규 회원가입 지급</option>
+				<option value="상품구매 추가 적립">상품구매 추가 적립</option>
+				<option value="상품구매 사용 차감">상품구매 사용 차감</option>
+				<option value="direct">▶ 직접 입력</option>
+			</select>
+			<input type="text" name="memo_direct" class="line hide">
+		</td>
+	</tr>
+	<tr>
+		<td height="50">
+					<span class="reserve_select_lay">
+						유효기간 : <select name="reserve_select">
+							<option value="">제한하지 않음</option>
+							<option value="year" {?reserve.reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+							<option value="direct" {?reserve.reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+						</select>
+					<span name="reserve_y" class="hide">→ 지급연도 + <input type="text" name="reserve_year" class="line onlynumber" style="text-align:right" size="3" maxlength="3" value="{reserve.reserve_year}" />년 12월 31일</span>
+					<span name="reserve_d" class="hide">→ <input type="text" name="reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{reserve.reserve_direct}" />개월</span>
+			&nbsp;&nbsp;
+					</span>
+			처리자 : {mname}
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<div><input type="checkbox" name="send_sms" value="Y" {?count<1}disabled{/}>SMS 전송  [ 보유SMS건수 : {=number_format(count)}통, 80바이트 이상 시 여러 통으로 나눠 발송됩니다. ]</div>
+			<input type="text" name="cellphone" value="{cellphone}" class="line sms" disabled size="14">
+			<input type="text" name="msg" class="line sms" title="메시지를 입력하세요." disabled size="50">
+		</td>
+	</tr>
+	<tr><td height="10"></td></tr>
+	<tr>
+		<td>
+		<span class="btn large cyanblue"><button type="submit" id="send_submit">확인</button></span>
+		</td>
+	</tr>
+	</table>
+
+	</th>
+</tr>
+</tbody>
+</table>
+
+<div>
+<iframe id="mbcontainerpoint" src="point_list?member_seq={member_seq}" style="width:100%;" height="450"  scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+</form>

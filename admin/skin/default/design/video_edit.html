@@ -1,0 +1,141 @@
+{#layout_header_popup}
+<script type="text/javascript">
+$(function(){
+	parent.DM_window_title_set("left","<a href=\"javascript:;\" onmouseup=\"DM_window_sourceeditor('{template_path}','\{=showDesignVideo({seq},\\'{realwidth}X{realheight}\\')\}')\">◀ 동영상 영역의 HTML소스보기</a>");
+	parent.DM_window_title_set("center","{layout_config.tpl_desc}({layout_config.tpl_path})에 선택한 ");
+
+	//동영상 링크태그 보기
+	$(".videourlbtn").live("click",function(){
+		var htmltype = $(this).attr("htmltype");
+		var htmlurl = $(this).attr("htmlurl");
+		var htmlkey = $(this).attr("htmlkey");
+		var htmlwidth = '400';
+		var htmlheight = '300';
+		var htmltag = '';
+		//copy
+		if(htmltype == 'embed' ){
+			htmltag = '<embed src="'+htmlurl+'" width="'+htmlwidth+'" height="'+htmlheight+'" allowfullscreen="true" flashvars=""  wmode="transparent"></embed>';
+		}else if(htmltype == 'object' ){
+			htmltag = '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="priden" width="'+htmlwidth+'" height="'+htmlheight+'" codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"><param name="host" value="{cfg_goods.ucc_domain}"/><param name="k" value="'+htmlkey+'"/><param name="allowScriptAccess" value="always"/><param name="allowfullscreen" value="true"/><param name="bgcolor" value="#000000"/><param name="scale" value="noscale"/><param name="menu" value="false"/><param name="wmode" value="transparent"/><param name="movie" value="'+htmlurl+'"/><param name="flashvars" value=""/> <embed src="'+htmlurl+'" width="'+htmlwidth+'" height="'+htmlheight+'" allowfullscreen="true"  flashvars=""  wmode="transparent"></embed></object>';
+		}else if(htmltype == 'page' ){
+			htmltag = htmlurl+"&width="+htmlwidth+"&height="+htmlheight;
+		}else{
+			htmltag = htmlurl;
+		}
+		$("#realvideourl").val(htmltag);
+		openDialog("동영상 URL보기", "realvideourl_dialog", {"width":"450","height":"200"});
+	});
+
+	var tag_video = "{" + "=showDesignVideo({seq},\"widthXheight\")" + "}";
+	$("#tag_video_{seq}").attr("htmlurl",tag_video);
+
+});
+</script>
+<style>
+	#newVideoPriviewContainer {width:700px; margin:auto; min-height:20px; padding:10px;  border:1px solid #ddd; text-align:center;}
+</style>
+
+<!--### 동영상 URL 복사 -->
+<div id="realvideourl_dialog" class="hide">
+<table width="100%" ><tr>
+<td><textarea style='width:300px;' rows='5' id="realvideourl" readOnly>{realvideourl}</textarea></td>
+<td> <span class="btn small lightblue"><button type="button" id="videourlCopybtn" onclick="clip_copy()">URL 복사</button></span></td>
+</tr>
+</table>
+<script Language="JavaScript">
+<!--
+function clip_copy() {
+	var meintext = $("#realvideourl").val();//'{realvideourl}';
+
+　 if (window.clipboardData) {
+　 　 window.clipboardData.setData("Text", meintext);
+　 } else if (window.netscape) {
+　 　 netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
+　 　 var clip = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);
+　 　 if (!clip) return;
+　 　 var trans = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
+　 　 if (!trans) return;
+　 　 trans.addDataFlavor('text/unicode');
+　 　 var str = new Object();
+　 　 var len = new Object();
+　 　 var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+　 　 var copytext=meintext;
+　 　 str.data=copytext;
+　 　 trans.setTransferData("text/unicode",str,copytext.length*2);
+　 　 var clipid=Components.interfaces.nsIClipboard;
+　 　 if (!clip) return false;
+　 　 clip.setData(trans,null,clipid.kGlobalClipboard);
+　 }
+
+}
+// -->
+</script>
+
+</div>
+
+
+<form name="VideoManagerForm" action="../design_process/video_edit" method="post" enctype="multipart/form-data" target="actionFrame">
+<input type="hidden" name="template_path" value="{template_path}" />
+<input type="hidden" name="seq" value="{seq}" />
+<input type="hidden" name="old_realwidth" value="{realwidth}" />
+<input type="hidden" name="old_realheight" value="{realheight}" />
+<input type="hidden" name="setMode" value="{setMode}" />
+<div style="height:15px"></div>
+
+<div id="newVideoPriviewContainer">
+	<!--{? file_key_w && uccdomain('fileswf',file_key_w)}-->
+		<div class="content" >
+			<table align="center"><tr>
+			<td align="center"><embed src="{=uccdomain('fileswf',file_key_w)}" width="{? pc_width }{pc_width}{:}400{/}" height="{? pc_height }{pc_height}{:}200{/}" allowfullscreen="true" wmode="transparent"></embed></td>
+			<td align="left" >
+			<div style="margin-left:10px;">
+			동영상링크 &nbsp;&nbsp;&nbsp;&nbsp; <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{=uccdomain('fileswf',file_key_w)}" htmlkey="{file_key_w}" htmltype="link" >URL</button></span><br/>
+			HTML(Embed) <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{=uccdomain('fileswf',file_key_w)}" htmlkey="{file_key_w}"  htmltype="embed" >URL</button></span><br/>
+			HTML(Object) <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{=uccdomain('fileswf',file_key_w)}" htmlkey="{file_key_w}"  htmltype="object" >URL</button></span><br/>
+			동영상페이지 &nbsp; <span class="btn small "><button type="button" class="videourlbtn" htmlurl="{=uccdomain('fileurl',file_key_w)}"  htmltype="page" >URL</button></span><br/>
+			치환코드 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="btn small "><button type="button" class="videourlbtn" htmlurl=''  htmltype="tag" id="tag_video_{seq}">TAG</button></span>
+			</div>
+			</td>
+			</tr>
+			</table>
+		</div>
+	<!--{/}-->
+
+	<table class="design-simple-table-style" width="100%" align="center">
+	<tr>
+		<th class="dsts-th">관리지용 타이틀</th>
+		<td class="dsts-td left"> <input type="text" name="memo" value="{memo}" class="line" /></td>
+	</tr>
+	<tr>
+		<th class="dsts-th">사이즈</th>
+		<td class="dsts-td left">
+				{? setMode !='pc' }
+					모바일용:<input type="text" name="mobile_width"   size="3" value="{realwidth}" class="line onlynumber video_size_mobile"   />pixel X <input type="text" name="mobile_height"  size="3" value="{realheight}" class="line onlynumber video_size_mobile"   />pixel
+				{:}
+					PC/테블릿용:<input type="text" name="pc_width"   size="3" value="{realwidth}" class="line onlynumber video_size"   />pixel X <input type="text" name="pc_height"  size="3" value="{realheight}" class="line onlynumber video_size"   />pixel
+				{/}
+				 <span class="desc" >(예: 320X240, 400X300(기본), 640X480, 720X480)</span>
+		</td>
+	</tr>
+	</table>
+
+</div>
+
+<div style="height:15px"></div>
+
+<div style="padding:10px;">
+ 	<div class="center">
+		<label><input type="checkbox" name="removeDesignVideoArea" value="Y" /> 동영상 영역을 없앰 (동영상 파일은 삭제되지 않음)</label>
+	</div>
+
+	<div style="height:15px"></div>
+
+	<div class="center">
+		<span class="btn medium cyanblue"><input type="submit" value="적용" /></span>
+	</div>
+
+	</form>
+	{#mini_webftp}
+</div>
+
+{#layout_footer_popup}

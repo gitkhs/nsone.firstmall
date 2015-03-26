@@ -1,0 +1,27 @@
+/***********브라운1***********/
+#layout_header {background-color:#6a4b40;}
+#layout_header h1 a {color:#ffffff;}
+
+.btn_style {display:inline-block; padding:0 5px; font-size:13px; height:30px; line-height:30px; font-weight:bold; color:#737373; border:1px solid #d2d7d9; border-bottom:1px solid #a1a5a7; background-color:#ffffff;}
+.btn_important_large {display:inline-block; background-color:#ff602c; border:none; border-bottom:6px solid #e55729; height:48px; line-height:48px; font-size:18px; font-family:dotum; font-weight:bold; color:#ffffff; letter-spacing:-1px;}
+.btn_important_small {display:inline-block; background-color:#ff602c; border:none; border-bottom:4px solid #e55729; height:36px; line-height:32px; font-size:16px; font-family:dotum; font-weight:bold; color:#ffffff; letter-spacing:-1px;}
+.btn_normal_large {display:inline-block; background-color:#ae8579; border:none; border-bottom:6px solid #a27365; height:48px; line-height:48px; font-size:18px; font-family:dotum; font-weight:bold; color:#ffffff; letter-spacing:-1px;}
+.btn_normal_small {display:inline-block; background-color:#ae8579; border:none; border-bottom:6px solid #a27365; height:36px; line-height:32px; font-size:16px; font-family:dotum; font-weight:bold; color:#ffffff; letter-spacing:-1px;}
+.btn_cancel_large {display:inline-block; background-color:#c8c8c8; border:none; border-bottom:6px solid #b8b8b8; height:48px; line-height:48px; font-size:18px; font-family:dotum; font-weight:bold; color:#ffffff; letter-spacing:-1px;}
+.btn_cancel_small {display:inline-block; background-color:#c8c8c8; border:none; border-bottom:6px solid #b8b8b8; height:36px; line-height:32px; font-size:16px; font-family:dotum; font-weight:bold; color:#ffffff; letter-spacing:-1px;}
+.btn_black_large {display:inline-block; background-color:#6a4b40; border:none; border-bottom:6px solid #53382f; height:48px; line-height:48px; font-size:18px; font-family:dotum; font-weight:bold; color:#ffffff; letter-spacing:-1px;}
+.btn_black_small {display:inline-block; background-color:#6a4b40; border:none; border-bottom:6px solid #53382f; height:36px; line-height:32px; font-size:16px; font-family:dotum; font-weight:bold; color:#ffffff; letter-spacing:-1px;}
+.btn_arw_up {position:relative; display:inline-block; width:40px; height:28px; line-height:30px; padding-left:11px; padding-right:15px; font-size:13px; font-weight:bold; color:#ff5f2e; border:1px solid #d2d7d9; border-bottom:1px solid #a1a5a7; background-color:#fff; font-size:12px; text-align:left;}
+.btn_arw_up_icon {position:absolute; right:8px; top:50%; margin-top:-9px; width:15px; height:19px; background:url('../images/design/btn_arw_up_org.png') no-repeat right center; background-size:15px 9px;}
+.btn_arw_dn {position:relative; display:inline-block; height:28px; line-height:30px; padding-left:11px; padding-right:29px; font-size:13px; font-weight:bold; color:#ff5f2e; border:1px solid #d2d7d9; border-bottom:1px solid #a1a5a7; background-color:#fff; font-size:12px; text-align:left;}
+.btn_arw_dn_icon {position:absolute; right:8px; top:50%; margin-top:-9px; width:15px; height:19px; background:url('../images/design/btn_arw_dn_org.png') no-repeat right center; background-size:15px 9px;}
+.btn_arw_up_gray {position:relative; display:inline-block; width:40px; height:28px; line-height:30px; padding-left:11px; padding-right:15px; font-size:13px; font-weight:bold; color:#000; border:1px solid #d2d7d9; border-bottom:1px solid #a1a5a7; background-color:#fff; font-size:12px; text-align:left;}
+.btn_arw_dn_gray {position:relative; display:inline-block; height:28px; line-height:30px; padding-left:11px; padding-right:29px; font-size:13px; font-weight:bold; color:#000; border:1px solid #d2d7d9; border-bottom:1px solid #a1a5a7; background-color:#fff; font-size:12px; text-align:left;}
+
+/* 모바일 서브페이지 타이틀바 */
+.sub_title_bar {position:relative; background-color:#e4e4e4; border-bottom:1px solid #999999;}
+.sub_title_bar h2 {text-align:center; height:42px; line-height:42px;}
+.sub_title_bar h2,
+.sub_title_bar h2 a {color:#373737; font-size:16px; letter-spacing:-1px; font-family:dotum;}
+.sub_title_bar .stb_back_btn {position:absolute; left:10px; top:50%; margin-top:-14px;}
+.sub_title_bar .stb_back_btn img {width:28px; height:28px;}

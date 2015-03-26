@@ -1,0 +1,121 @@
+<style>
+.form_division {padding:20px;}
+</style>
+
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>회원가입</h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.gif" /></a>
+</div>
+
+
+<form name="registFrm" id="registFrm" target="actionFrame" method="post" action="{=sslAction('../member_process/register_ok')}">
+<input type="hidden" name="mtype" value="{mtype}"/>
+
+<div class="form_division">
+	{# form_member}
+
+	<div class="pd30 center">
+		<input type="submit" value="회원가입" class="button_style" style="width:140px" />
+	</div>
+</div>
+
+</form>
+
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("input[name='userid']").blur(function() {
+		if($(this).val()){
+			$.post("../member_process/id_chk", { userid : $(this).val() }, function(response){
+				//debug(response);
+				var text = response.return_result;
+				var userid = response.userid;
+				$("#id_info").html(text);
+				$("input[name='userid']").val(userid);
+			},'json');
+		}
+    });
+
+	{? mtype=='business' && joinform.bno_use=='Y'}
+	$("input[name='bno']").blur(function() {
+		if($(this).val()){
+			$.post("../member_process/bno_chk", { bno : $(this).val() }, function(response){
+				//debug(response);
+				var text = response.return_result;
+				var bno = response.bno;
+				$("#bno_info").html(text);
+				//$("input[name='bno']").val(bno);
+			},'json');
+		}
+    });
+	{/}
+
+	$('#find_email').change(function() {
+		$("input[name='email[1]']").val($(this).val());
+		if(!$(this).val()){
+			$("input[name='email[1]']").attr("readonly",false);
+		}else{
+			$("input[name='email[1]']").attr("readonly",true);
+		}
+	});
+
+});
+
+
+function filterKey() {
+	var filter = "[0-9a-z]";
+   if(filter){
+      // fromCharCode : 매개 변수에서 ASCII 값이 나타내는 문자들로 구성된 문자열을 반환합니다
+      var sKey = String.fromCharCode(event.keyCode);
+
+      // RegExp
+      // 정규표현을 취급하는 객체로 new를 사용하지 않고 정규표현 문자열을 변수에 대입하는 것으로도 동일한 결과
+      var re = new RegExp(filter);
+
+      // test() : 일치하는 문자열이 있는 경우 true, 없으면 false
+      if(!re.test(sKey)) event.returnValue=false;
+   }
+}
+</script>
+
+
+
+{? joinform.user_icon=='Y' } 
+<script type="text/javascript">
+$(document).ready(function() { 
+		
+		$("button#membericonUpdate").live("click",function(){
+			$('#membericonRegist')[0].reset();
+			$("input[name=user_icon][value='99']").attr("checked",true);
+			openDialog("아이콘", "membericonUpdatePopup", {"width":"380","height":"150","show" : "fade","hide" : "fade"});
+		});
+});
+	function membericonFileUpload(str){
+		if(str > 0) {
+			alert('로고를 선택해 주세요.');
+			return false;
+		}
+		var frm = $('#membericonRegist');
+		frm.attr("action","../member_process/membericonsave");
+		frm.submit();
+	}
+
+	function membericonDisplay(filenm){
+		$("#membericon_img").attr("src",filenm);
+		$("#membericon_img").css("display","block"); 
+		$("#membericonDelete").css("display","block");
+		$('#membericonRegist')[0].reset();
+		$("#membericonUpdatePopup").dialog("close");
+	}
+</script>
+
+
+<div id="membericonUpdatePopup" class="hide">
+	<form name="membericonRegist" id="membericonRegist" method="post" action="" enctype="multipart/form-data"  target="actionFrame">
+	<div style="height:20px;padding-left:30px;"><span class='desc'>사이즈는 30 × 30 으로 등록해 주세요.</span></div>
+	<div style="height:30px;padding-left:30px;"><input type="file" name="membericonFile" class="line"  style="height:25px;"  id="membericonFile" onChange="membericonFileUpload();" /></div>
+	</form>
+</div>
+{/}

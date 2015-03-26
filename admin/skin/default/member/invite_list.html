@@ -1,0 +1,129 @@
+{ #layout_header_popup }
+<style >
+table.mqs-menu {border:0px;border-collapse:collapse;}
+table.mqs-menu td {background-color:#fbfbfb; border:1px solid #dfdfe4; border-bottom:1px solid #c5c7ce;}
+table.mqs-menu td.selected {background-color:#fff; border-bottom:0px;}
+table.mqs-menu td a {display:inline-block; padding:4px 0px; width:135px; text-align:center; color:#9194a1}
+table.mqs-menu td.selected a {font-weight:bold; color:#333}
+</style>
+<!-- 타이틀 -->
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+});
+</script>
+<div style="height:8px;"></div>
+
+<table width="100%" class="info-table-style">
+<form name="invitelist" id="invitelist">
+<input type="hidden" name="member_seq" value="{_GET.member_seq}" />
+<colgroup>
+<col width="100" />
+<col />
+</colgroup>
+<tbody>
+<tr>
+	<th class="its-th-align">초대일</th>
+	<td class="its-td-align">&nbsp;
+		<input type="text" name="sdate" value="{sc.sdate}" class="datepicker line"  maxlength="10" size="10" />
+		&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+		<input type="text" name="edate" value="{sc.edate}" class="datepicker line" maxlength="10" size="10" />
+		&nbsp;&nbsp;
+		<span class="btn small"><input type="button" value="오늘" id="today" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="3일간" id="3day" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="일주일" id="1week" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="1개월" id="1month" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="3개월" id="3month" name="select_date"/></span>
+		<span class="btn small"><input type="button" value="전체" id="all" name="select_date"/></span>
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align">가입여부</th>
+	<td class="its-td-align">&nbsp;
+		<label><input type="checkbox" name="joinck[]" value="1" {?sc.joinck && in_array('1',sc.joinck)}checked{/}/>가입<label>
+		<label><input type="checkbox" name="joinck[]" value="0" {?sc.joinck && in_array('0',sc.joinck)}checked{/}/>미가입<label>
+	</td>
+</tr>
+<tr><td height="5"></td></tr>
+<tr>
+	<td colspan="2" align="center" >
+	<span class="btn small cyanblue"><button type="submit" id="send_submit">검색</button></span>
+	</td>
+</tr>
+</form>
+</table>
+<br/>
+
+
+<table class="info-table-style" style="width:100%">
+<colgroup>
+		<col width="20%" />
+		<col  />
+		<col  />
+	</colgroup>
+<thead>
+	<tr>
+		<th class="its-th-align center">번호</th>
+		<th class="its-th-align center">초대ID</th>
+		<th class="its-th-align center">초대일자</th>
+		<th class="its-th-align center">가입여부</th>
+	</tr>
+<tbody class="ltb">
+{? loop }
+	{@ loop }
+	<tr>
+		<td class="its-td-align center">{.number}</td>
+		<td class="its-td-align center">
+			<div class="bold">{.sns_f }</div>
+		</td>
+		<td class="its-td-align center">{.date}</td>
+		<td class="its-td-align center">{.joinck}</td>
+	</tr>
+	{/}
+{:}
+	<tr >
+		<td colspan="4" class="its-td-align center">
+			초대내역이 없습니다.
+		</td>
+	<tr>
+{/}
+</tbody>
+</table>
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin}</div>
+	</td>
+</tr>
+</table>

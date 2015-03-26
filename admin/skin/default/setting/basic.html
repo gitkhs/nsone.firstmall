@@ -1,0 +1,411 @@
+{ #layout_header }
+<script type="text/javascript">
+
+$(document).ready(function() {
+    // 우편번호 검색
+    $("#companyZipcodeButton").live("click",function(){
+        openDialogZipcode('company');
+    });
+
+    // 메일
+    $("select[name=emailList]").live("change",function(){
+        $(this).parent().children(".emailListInput").val($(this).val());
+    });
+
+    // 쇼핑몰 분류 2차 불러오기
+    $("select[name='shopBranchSel']").live("change",function(){
+		$("select[name='shopBranchSub'] option:gt(0)").remove();
+		$("select[name='shopBranchSub'] option:eq(0)").attr('selected','selected');
+
+		if($(this).val()){
+			var url = '../../common/code2json?groupcd=shopBranch'+$(this).val();
+			$.getJSON(url, function(data) {
+				for(var i=0;i<data.length;i++){
+					$("select[name='shopBranchSub']").append("<option value='"+data[i].codecd+"'>"+data[i].value+"</option>");
+				}
+			});
+		}
+    });
+
+	$(".branchDelete").live("click",function(){
+		$(this).parent().remove();
+    });
+
+	$("#faviconDelete").live("click",function(){
+		var url = '../setting_process/favicon_delete';
+		var obj = $(this);
+		$.getJSON(url, function(data) {
+			if(data['result'] == 'ok'){
+				obj.parent().remove();
+			}
+		});
+    });
+
+    $("#shopBranchButton").live("click",function(){
+        var sel1_val = $("select[name='shopBranchSel']").val();
+		var sel2_val = $("select[name='shopBranchSub']").val();
+		var sel1_opt = $("select[name='shopBranchSel'] option:selected").text();
+		var sel2_opt = $("select[name='shopBranchSub'] option:selected").text();
+
+		if(sel2_val == ''){
+			alert( sel2_opt );
+			return false;
+		}
+
+		if($("input[name='shopBranch[]'][value='"+sel2_val+"']").length >= 1) {
+			alert('이미 등록된 분류입니다!');
+			return false;
+		}
+
+        $("#shopBranchLayer").append("<div>"+sel1_opt+" > "+sel2_opt+"<input type='hidden' name='shopBranch[]' value='"+sel2_val+"'/> <a class='hand branchDelete'><img src='../images/common/icon_del.gif' align='absmiddle' /></a></div>");
+    });
+    $(":input[name=shopBranchChoice]").live("click",function(){
+        openDialog("쇼핑몰 분류 <span class='desc'>쇼핑몰 분류를 선택합니다.</span>", "shopBranchPopup", {"width":500,"height":150});
+    });
+
+    $("input[name='metaTagUse']").change(function(){
+    	if($(this).is(':checked')){
+	    	if($(this).val()=='1'){
+	    		//$(".metaTagDivision").show();
+	    		//$("textarea[name='metaTagDescription'], textarea[name='metaTagKeyword']").removeAttr('readonly');
+	    	}else{
+	    		//$(".metaTagDivision").hide();
+	    		//$("textarea[name='metaTagDescription'], textarea[name='metaTagKeyword']").attr('readonly',true);
+	    	}
+    	}
+    }).change();
+
+
+	$("#setting_reserve").click(function(){
+		document.location.href='/admin/setting/reserve';
+	});
+
+	$("select[name='book_reserve_select']").live("change",function(){
+		span_controller('reserve');
+	});
+
+	$("select[name='book_point_select']").live("change",function(){
+		span_controller('point');
+	});
+	span_controller('reserve');
+	span_controller('point');
+});
+
+
+function span_controller(name){
+	var reserve_y = $("span[name='"+name+"_y']");
+	var reserve_d = $("span[name='"+name+"_d']");
+	var value = $("select[name='book_"+name+"_select'] option:selected").val();
+	if(value==""){
+		reserve_y.hide();
+		reserve_d.hide();
+	}else if(value=="year"){
+		reserve_y.show();
+		reserve_d.hide();
+	}else if(value=="direct"){
+		reserve_y.hide();
+		reserve_d.show();
+	}
+}
+</script>
+<form name="settingForm" method="post" enctype="multipart/form-data" action="../setting_process/basic" target="actionFrame">
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+		{#require_info}
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2><span class="darkgray">설정 →</span> 일반정보</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<div class="sub-layout-container body-height-resizing">
+
+	<!-- 서브메뉴 탭 : 시작 -->
+	{ #setting_menu }
+	<!-- 서브메뉴 탭 : 끝 -->
+
+	<!-- 서브메뉴 바디 : 시작-->
+	<div class='slc-body-wrap'>
+		<div class="slc-body">
+
+			<div class="item-title">기본정보 <span class="helpicon" title="쇼핑몰의 기본적인 정보를 입력하세요."></span></div>
+
+			<table width="100%" class="info-table-style">
+			<col width="50" /><col width="150" /><col width="" /><col width="200" /><col width="" />
+			<tr>
+				<th class="its-th" colspan="2">쇼핑몰 도메인</th>
+				<td class="its-td">
+                    <table>
+                        <tr>
+                            <td>정식 : http:// <input type="text" name="domain" value="{config_system.domain}" size="30" class="line" /></td>
+                            <td>&nbsp;<span class="desc">브라우저로 접속이 가능한 연결된 도메인을 입력하세요!</td>
+                        </tr>
+                        <tr>
+                            <td>임시 : http:// <b>{config_system.subDomain}</b></td>
+                            <td>&nbsp;
+							<span class="desc">※ 도메인 연결 신청방법 : </span> <span class="desc" style="color:black">MY가비아 → (해당 쇼핑몰) 서비스관리 → 도메인연결</span>&nbsp;&nbsp;<a href="http://firstmall.kr/myshop/" target="_blank"><span class="highlight-link">바로가기</span></a>
+							<br/>
+							&nbsp;&nbsp;<span class="desc">※ SNS용 쇼핑몰 도메인 세팅 : </span> <span class="desc" style="color:black">설정 → SNS/외부연동</span>&nbsp;&nbsp;<a href="./snsconf"  ><span class="highlight-link">바로가기</span></a>
+							</td>
+                        </tr>
+                    </table>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th" colspan="2">쇼핑몰 이름</th>
+				<td class="its-td">
+					<input type="text" name="shopName" value="{shopName}" size="40" class="line" /> <span class="desc">예) 슬이나라</span>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th" colspan="2">쇼핑몰 분류 <span class="btn small"><input type="button" name="shopBranchChoice" value="선택" /></span></th>
+				<td class="its-td">
+				<div id="shopBranchLayer">
+					<!--{ @ shopBranch }-->
+					<div>{.groupcd1} > {.groupcd2}<input type='hidden' name='shopBranch[]' value='{.codecd}'/> <a class='hand branchDelete'><img src="../images/common/icon_del.gif" align="absmiddle" /></a></div>
+					<!--{ / }-->
+				</div>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th" rowspan="3">타<br />이<br />틀</th>
+				<th class="its-th">메인페이지 및 그 외</th>
+				<td class="its-td">
+					<input type="text" name="shopTitleTag" value="{shopTitleTag}" size="60" title="브라우저 상단에 표기되는 타이틀을 입력하세요" class="line" />
+					<span class="desc">예) 슬이나라 :: 슬이의 감각 패션, 이제 슬이시대~!!</span>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th">상품상세페이지</th>
+				<td class="its-td">
+					<input type="text" name="shopGoodsTitleTag" value="{shopGoodsTitleTag}" size="60" title="브라우저 상단에 표기되는 타이틀을 입력하세요" class="line" />
+					<span class="desc">예) 슬이나라 :: {<!--  -->상품명<!--  -->}</span>
+					<span class="desc"> → {<!--  -->상품명<!--  -->}에 해당 상품명이 보여집니다.
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th">카테고리페이지</th>
+				<td class="its-td">
+					<input type="text" name="shopCategoryTitleTag" value="{shopCategoryTitleTag}" size="60" title="브라우저 상단에 표기되는 타이틀을 입력하세요" class="line" />
+					<span class="desc">예) 슬이나라 :: {<!--  -->카테고리명<!--  -->}</span>
+					<span class="desc"> → {<!--  -->카테고리명<!--  -->}에 해당 카테고리명이 보여집니다.</span>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th" colspan="2">쇼핑몰 파비콘</th>
+				<td class="its-td">
+					<input type="file" name="faviconFile" size="30" class="line" style="height:20px;"  />
+					<!--{ ? config_system.favicon }-->
+					<span>
+					<img src="{config_system.favicon}" alt="파비콘" align="absmiddle" onerror="this.style.display='none'" />
+					<span class="black underline" style="cursor: pointer" id="faviconDelete">삭제</span>
+					</span>
+					<!--{ / }-->
+					<span class="desc">* 파비콘은 브라우저의 타이틀 옆에 표시되거나 즐겨찾기시 설명 옆에 표시, 이미지 사이즈는 16x16 ico 파일만 가능</span>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th" colspan="2">즐겨찾기(북마크)</th>
+				<td class="its-td">
+					&lt;a href="<b>{\bookmark}</b>"&gt;즐겨찾기&lt;/a&gt; : 좌측의 <b>치환코드</b>를 EYE-DESIGN 환경에서 즐겨찾기를 유도하는 이미지(또는 텍스트)의 링크주소로 삽입하면 즐겨찾기가 동작됨.<br />
+					또한 브라우저에 저장되는 즐겨찾기 이름의 기본 컨텐츠는 ↑위에 입력된 메인페이지용 타이틀입니다.<br />
+					<!--
+					<span class="desc">※ 만약 즐겨찾기 한 회원에 대한 적립금 지급하고 싶으시면 설정<span class="black"> ></span>  <span class="highlight-link hand" id="setting_reserve">적립금</span>에서 설정 가능합니다.</span>
+					-->
+					즐겨찾기(북마크)를 클릭한 회원에게 1회에 한해<br>
+					적립금 <input type="text" name="default_reserve_bookmark" style="text-align:right" size="5" class="line onlynumber" value="{reserve.default_reserve_bookmark}" />원. 지급 적립금의 유효기간은 <select name="book_reserve_select">
+						<option value="">제한하지 않음</option>
+						<option value="year" {?reserve.book_reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+						<option value="direct" {?reserve.book_reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+					</select>
+					<span name="reserve_y" class="hide">→ 지급연도 + <input type="text" name="book_reserve_year" class="line onlynumber" style="text-align:right" size="3" maxlength="3" value="{reserve.book_reserve_year}" min="0" max="9" />년 12월 31일</span>
+					<span name="reserve_d" class="hide">→ <input type="text" name="book_reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{reserve.book_reserve_direct}" />개월</span>                          <br/>
+					<span {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+					포인트 <input type="text" name="default_point_bookmark" style="text-align:right" size="5" class="line onlynumber" value="{reserve.default_point_bookmark}" />p. 지급 포인트의 유효기간은 <select name="book_point_select" {? !isplusfreenot || !isplusfreenot.ispoint } readonly="readonly" disabled='disabled'  class="gray readonly"  {/}  >
+						<option value="">제한하지 않음</option>
+						<option value="year" {?reserve.book_point_select=='year'}selected{/}>제한 - 12월31일</option>
+						<option value="direct" {?reserve.book_point_select=='direct'}selected{/}>제한 - 직접입력</option>
+					</select>
+					<span name="point_y" class="hide">→ 지급연도 + <input type="text" name="book_point_year" class="line onlynumber" min="0" max="9" style="text-align:right" size="3" maxlength="3" value="{reserve.book_point_year}" />년 12월 31일</span>
+					<span name="point_d" class="hide">→ <input type="text" name="book_point_direct" class="line onlynumber" style="text-align:right" size="3" value="{reserve.book_point_direct}" />개월</span>
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th" colspan="2">검색엔진 수집 여부</th>
+				<td class="its-td">
+
+					<label><input type="radio" name="metaTagUse" value="1" {?metaTagUse}checked{/} />검색엔진 정보수집 허용</label>
+					<label><input type="radio" name="metaTagUse" value="0" {?!metaTagUse}checked{/} />검색엔진 정보수집 미허용 (구글, 다음 등 각종 포털)</label>
+					</td>
+			</tr>
+			<tr>
+				<th class="its-th" colspan="2">검색 엔진 수집 데이타 </th>
+				<td class="its-td">
+					<table class="metaTagDivision">
+					<col width="" /><col width="15" /><col width="" />
+					<tr>
+						<td class="desc">- 메타태그 설명(Description) 및 SNS용 쇼핑몰간략설명</td>
+						<td></td>
+						<td class="desc">- 메타태그 키워드(Keyword) 및 SNS용 쇼핑몰키워드</td>
+					</tr>
+					<tr>
+						<td>
+							<textarea name="metaTagDescription" style="width:330px; height:70px;" rows="4" class="line" title="검색엔진에서 수집할 사이트의 설명을 입력하세요" >{metaTagDescription}</textarea>
+						</td>
+						<td></td>
+						<td>
+							<textarea name="metaTagKeyword" style="width:330px; height:70px;" class="line" title="검색엔진에서 수집할 사이트의 키워드(콤마구분)을 입력하세요.{=chr(10)}예) 여성의류, 캐주얼 패션, 청소년 의류">{metaTagKeyword}</textarea>
+						</td>
+					</tr>
+					</table>
+					<span class="desc">※ 검색 엔진 최적화(SEO; Search Engine Optimization)를 위해 메타정보를 필히 등록해 주세요.</span>
+				</td>
+			</tr>
+			</table>
+
+			<div class="item-title">사업자정보
+			<span class="helpicon" title="쇼핑몰 사업자의 정보를 입력하세요."></span>
+			<span class="null desc" style="font-weight:normal">사업자정보는 자동으로 쇼핑몰하단에 텍스트로 보여집니다. 또는 디자인환경(EYE-DESIGN)에서 이미지로 변경 가능합니다.</span>
+			</div>
+
+			<table width="100%" class="info-table-style">
+			<col width="200" /><col width="" /><col width="200" /><col width="" />
+			<tr>
+				<th class="its-th">상호(회사명)</th>
+				<td class="its-td">
+					<input type="text" name="companyName" value="{companyName}" class="line" />
+				</td>
+				<th class="its-th">업태/종목</th>
+				<td class="its-td">
+					<input type="text" name="businessConditions" value="{businessConditions}" class="line" title="예) 도소매" /> / <input type="text" name="businessLine" value="{businessLine}" title="예) 전자상거래" />
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th">사업자 번호</th>
+				<td class="its-td">
+					<input type="text" name="businessLicense[]" value="{businessLicense[0]}" size='4' class="line" />
+					- <input type="text" name="businessLicense[]" value="{businessLicense[1]}" size='3' class="line" />
+					- <input type="text" name="businessLicense[]" value="{businessLicense[2]}" size='6' class="line" />
+					<div>사업자 정보 확인 치환 코드: <b>{\=confirmLicenseLink("[사업자정보확인]")}</b></div>
+				</td>
+				<th class="its-th">대표 이메일</th>
+				<td class="its-td">
+					<input type="text" name="companyEmail[]" value="{companyEmail[0]}" size="10" class="line" /> @
+					<input type="text" name="companyEmail[]" value="{companyEmail[1]}" size="10" class="emailListInput line" />
+					<select class="line" name="emailList">
+						<option value="">직접입력</option>
+						<!--{ @ code_load('email') }-->
+						<option value="{.codecd}">{.value}</option>
+						<!--{ / }-->
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th">대표자</th>
+				<td class="its-td">
+					<input type="text" name="ceo" value="{ceo}" class="line" />
+				</td>
+				<th class="its-th">연락처</th>
+				<td class="its-td">
+
+					<!--
+					<select class="line" name="companyPhone[]">
+						<option value="">선택</option>
+						{ @ code_load('locationPhone') }
+						<option value="{.codecd}">{.value} {.codecd}</option>
+						{ / }
+					</select>
+					<script type="text/javascript">
+						$("select[name='companyPhone[]']").val('{companyPhone[0]}');
+					</script>
+					-->
+
+
+					<input type="text" name="companyPhone[]" value="{companyPhone[0]}" size="5" class="line" />
+					- <input type="text" name="companyPhone[]" value="{companyPhone[1]}" size="5" class="line" />
+					- <input type="text" name="companyPhone[]" value="{companyPhone[2]}" size="5" class="line" />
+				</td>
+			</tr>
+			<th class="its-th">개인정보관리 책임자</th>
+				<td class="its-td">
+					<input type="text" name="member_info_manager" value="{member_info_manager}" class="line" />
+				</td>
+				<th class="its-th">팩스번호</th>
+				<td class="its-td">
+					<input type="text" name="companyFax[]" value="{companyFax[0]}" size="5" class="line" />
+					- <input type="text" name="companyFax[]" value="{companyFax[1]}" size="5" class="line" />
+					- <input type="text" name="companyFax[]" value="{companyFax[2]}" size="5" class="line" />
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th">통신판매업 신고번호</th>
+				<td class="its-td" colspan="3">
+					<input type="text" name="mailsellingLicense" value="{mailsellingLicense}" class="line" /> <span class="desc">예) 강남 제 000호 (또는 간이과세자로서 통신판매신고번호가 없는 경우 '간이과세자'로 입력하세요)</span>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th">사업장 주소</th>
+				<td class="its-td" colspan="3">
+					<input type="text" name="companyZipcode[]" value="{companyZipcode[0]}" size="5" class="line" /> -
+					<input type="text" name="companyZipcode[]" value="{companyZipcode[1]}" size="5" class="line" />
+					<span class="btn small"><input type="button" id="companyZipcodeButton" value="우편번호" /></span><br>
+					<input type="text" name="companyAddress_type" value="{companyAddress_type}" class="hide" />
+					<span {? companyAddress_type != "street"}style="font-weight:bold;"{/}>(지번) </span><input type="text" name="companyAddress" value="{companyAddress}" size="98" class="line" /><br>
+					<span {? companyAddress_type == "street"}style="font-weight:bold;"{/}>(도로명) </span><input type="text" name="companyAddress_street" value="{companyAddress_street}" size="96" class="line" /><br>
+					(상세주소) <input type="text" name="companyAddressDetail" value="{companyAddressDetail}" size="100" class="line" />
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th">네이버 맵 키 <span class="helpicon" title="네이버에서 키를 발급 받으세요."></span></th>
+				<td class="its-td" colspan="3">					
+					<input type="text" name="mapKey" value="{mapKey}" size="40" class="line" /><a href="http://developer.naver.com/wiki/pages/MapAPI" target="_blank">키발급받기</a>
+					<div>네이버 맵 치환 코드: <b>{\=showNaverMapApi('가로사이즈', '세로사이즈', '주소')}</b>
+					<br/>(주소란을 비워두면 사업자 정보의 주소가 표시됩니다.)</div>
+				</td>
+			</tr>
+			</table>
+
+			{ ? config_system.mall_auth_yn!='y'}
+			<div class="pd10">
+				<span style="color:#d00000; font-weight:bold">※ 퍼스트몰은 전자상거래법 제 9조 3항 및 제 11조 2항에 의거 ‘호스팅 사업자의 신원확인의무’에 의해 개인 정보를 수집할 의무가 있습니다.<br />&nbsp;&nbsp;&nbsp;공정한 거래와 안전한 온라인 서비스 제공을 위해  쇼핑몰 대표자의 개인정보를 실명인증을 통해 수집합니다.</span><br />
+				&nbsp;&nbsp;&nbsp;<a href='http://firstmall.kr/myshop/spec/manager_information.php?num={config_system.shopSno}' target='_blank' style="color:#0251d4;font-weight:Bold;text-decoration:underline;">[My가비아 > 쇼핑몰관리 > 기본사양관리 > 쇼핑몰관리자 정보관리]</a><span style="color:#666">에서 인증절차를 진행 해 주시기 바랍니다.</span>
+			</div>
+			{/}
+
+		</div>
+	</div>
+	<!-- 서브메뉴 바디 : 끝 -->
+</div>
+<!-- 서브 레이아웃 영역 : 끝 -->
+</form>
+
+<div id="shopBranchPopup" style="display: none">
+	<div align="center">
+	<select name="shopBranchSel">
+		<option value="">쇼핑몰 분류1을 선택하세요.</option>
+		<!--{ @ code_load('shopBranch') }-->
+		<option value='{.codecd}'>{.value}</option>
+		<!--{ / }-->
+	</select>
+	<select name="shopBranchSub">
+		<option value="">쇼핑몰 분류2를 선택하세요.</option>
+	</select>
+	</div>
+
+	<div style="padding:10px 0 0 0" align="center"><span class="btn medium"><input type="button" value="추가" id="shopBranchButton" /></span></div>
+</div>
+
+{ #layout_footer }

@@ -1,0 +1,71 @@
+{ #common_html_header }
+<script>
+window.fbAsyncInit = function() {
+FB.init({
+appId : '{APP_ID}', //App ID
+status : true, // check login status
+cookie : true, // enable cookies to allow the server to access the session
+xfbml : true, // parse XFBML,
+oauth : true
+});
+// Additional initialization code here
+
+{? _GET.fbuserck }
+	opener.document.location.reload();
+	self.close();
+{: !fbuser }
+	FB.login(handelStatusChange);
+{: fbuser &&  permissionloginUrl }
+	document.location.href='{permissionloginUrl}';
+{:}
+
+{/}
+};
+// Load the SDK Asynchronously
+(function(d){
+var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+if (d.getElementById(id)) {return;}
+js = d.createElement('script'); js.id = id; js.async = true;
+js.src = "//connect.facebook.net/ko_KR/all.js";
+ref.parentNode.insertBefore(js, ref);
+}(document));
+$(document).load(function() {
+	loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+});
+</script>
+ <script type="text/javascript">
+  var fbUid = "";
+  var fbName = "";
+	function handelStatusChange(response) {
+		if (response && response.status == 'connected') {
+		FB.api('/me', function(response) {
+			 fbUid = response.email;
+			 fbName = response.name;
+			 if (fbName != "") {
+				document.frmaction.submit();
+				//self.close();
+			}
+		});
+	   } else if (response.status == 'not_authorized' || response.status == 'unknown') {
+			document.location.href='{loginUrl}';
+		}
+	}
+</script>
+<div id="fb-root"></div>
+{? (fbuser || access_token) && !_GET.fbuserck && !permissionloginUrl }
+<form name="frmaction" method="get" action="http://{? fblike_return_url }{fblike_return_url}{:}{? domain }{domain}{:}{subDomain}{/}{/}/admin/sns/domain_facebook" target="" >
+<input type="hidden" name="fbuserck" value="true">
+<input type="hidden" name="fbuser" value="{fbuser}">
+<input type="hidden" name="access_token" value="{access_token}">
+</form>
+<script language="javascript">
+	document.frmaction.submit();
+</script>
+{/}
+
+<form name="frmaction" method="get" action="http://{? fblike_return_url }{fblike_return_url}{:}{? domain }{domain}{:}{subDomain}{/}{/}/admin/sns/domain_facebook" target="" >
+<input type="hidden" name="fbuserck" value="true">
+<input type="hidden" name="fbuser" value="{fbuser}">
+<input type="hidden" name="access_token" value="{access_token}">
+</form>
+{ #common_html_footer }

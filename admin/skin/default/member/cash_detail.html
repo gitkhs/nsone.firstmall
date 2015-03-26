@@ -1,0 +1,58 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	$("select[name='memo_type']").live('change',function(){
+		if($(this).val()=='direct'){
+			$("input[name='memo_direct']").show();
+		}else{
+			$("input[name='memo_direct']").hide();
+		}
+	});
+
+	$("input[name='send_sms']").bind('click',function(){
+		if($(this).attr("checked")){
+			$(".sms").attr("disabled",false);
+		}else{
+			$(".sms").attr("disabled",true);
+		}
+	});
+
+	$("select[name='reserve_select']").live("change",function(){
+		span_controller('reserve');
+	});
+});
+
+
+function span_controller(name){
+	var reserve_y = $("span[name='"+name+"_y']");
+	var reserve_d = $("span[name='"+name+"_d']");
+	var value = $("select[name='"+name+"_select'] option:selected").val();
+	if(value==""){
+		reserve_y.hide();
+		reserve_d.hide();
+	}else if(value=="year"){
+		reserve_y.show();
+		reserve_d.hide();
+	}else if(value=="direct"){
+		reserve_y.hide();
+		reserve_d.show();
+	}
+}
+</script>
+
+
+<form name="emoneyFrm" id="emoneyFrm" method="post" target="actionFrame" action="../member_process/point_detail">
+<input type="hidden" name="member_seq" value="{member_seq}"/>
+
+<table width="100%" class="info-table-style">
+<tbody>
+<tr>
+	<th class="its-th-align"><span style="font-size:14px;font-weight:bold;">{user_name}</span>({userid}) 회원님이 보유한 이머니는 <span style="font-size:14px;font-weight:bold;">{=number_format(cash)}</span>원 입니다.</th>
+</tr>
+</table>
+
+<div>
+<iframe id="mbcontainercash" src="cash_list?member_seq={member_seq}" style="width:100%;" height="450" scrolling="no" frameborder="0"></iframe>
+</div>
+
+
+</form>

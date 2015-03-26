@@ -1,0 +1,229 @@
+<script type="text/javascript">
+function view_company_info()
+{
+	$(".msg_company_info").html("");
+	if($("select[name='company']").val()!='ups'){
+		$(".msg_company_info").html("※배송추적이 가능 합니다.");
+	}	
+}
+
+$(document).ready(function() {	
+	$("#addDeliveryButton").bind("click",function(){
+		var clone = $("#weightTable").clone();
+		var objTr = clone.find("tr");	
+		var objRegion = objTr.eq(0).find("td").eq(1);
+		var objCost = objTr.eq(1).find("td").eq(1);
+		var targetTr = $("#weightTable tr");
+		objRegion.find("input").val("");
+		objRegion.find("button").attr("id","").attr("class","delDeliveryButton").html("－");					
+		for(var i=0;i<objTr.length;i++){
+			if(i==0) targetTr.eq(i).append(objRegion);
+			else targetTr.eq(i).append(objCost.clone());
+		}
+		setDefaultText();	
+	});
+	
+	$(".delDeliveryButton").live("click",function(){		
+		var idx = $(this).parent().parent().parent().index();
+		$(this).parent().parent().parent().remove();	
+		var targetTr = $("#weightTable tr");	
+		for(var i=1;i<targetTr.length;i++){
+			targetTr.eq(i).find("td").eq(idx).remove();	
+		}
+	});
+	
+	$("#addWeightButton").bind("click",function(){
+		var clone = $("#weightTable").clone();
+		objTr = clone.find("tr").eq(1);
+		objTr.find("input").val("");
+		objTr.find("button").attr("id","").attr("class","delWeightButton").html("－");	
+		$("#weightTable tbody").append(objTr);
+		setDefaultText();
+	});
+	
+	$(".delWeightButton").live("click",function(){			
+		$(this).parent().parent().parent().remove();	
+	});
+
+	category_admin_select_load('','category1','');
+	$("select[name='category1']").bind("change",function(){
+		category_admin_select_load('category1','category2',$(this).val());
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").bind("change",function(){
+		category_admin_select_load('category2','category3',$(this).val());
+		category_admin_select_load('category3','category4',"");
+	});			
+	$("select[name='category3']").bind("change",function(){
+		category_admin_select_load('category3','category4',$(this).val());
+	});
+	$("#selectCategoryButton").live("click",function(){
+		var tag = "";
+		var code = $("select[name='category4'] option[selected='selected']").val();		
+		if(!code) code = $("select[name='category3'] option:selected").val();
+		if(!code) code = $("select[name='category2'] option:selected").val();
+		if(!code) code = $("select[name='category1'] option:selected").val();		
+		var str = $("select[name='category1'] option[value!='']:selected").html();
+		if(str) tag = str;		
+		str = $("select[name='category2'] option[value!='']:selected").html();
+		if(str) tag += " > " + str;
+		str = $("select[name='category3'] option[value!='']:selected").html();
+		if(str) tag += " > " + str;
+		str = $("select[name='category4'] option[value!='']:selected").html();
+		if(str) tag += " > " + str;
+		var ocode = $("input[name='exceptCategory[]'][value="+code+"]").val();		
+		if( code != ocode && code ){
+			$("#selectedCategoryLayer").append("<div><span style='display:inline-block; width:80%;'>" + tag+ "</span><input type='hidden' name='exceptCategory[]' value='"+code+"'><span class=\"btn small gray\"><button type=\"button\" class=\"delCategoryButton\">－</button></span></div>");
+		}
+	});
+	$(".delCategoryButton").live("click",function(){			
+		$(this).parent().parent().remove();	
+	});
+
+	<!--{? useYn }-->
+	$("input[name=useYn][value='{useYn}']").attr("checked",true);
+	<!--{ / }-->
+	<!--{? company }-->
+	$("select[name=company] option[value='{company}']").attr("selected",true);
+	<!--{ / }-->
+	
+	
+	view_company_info();
+});
+
+
+</script>
+<form name="shippingFrm" method="post" target="actionFrame" action="../setting_process/international_shipping">
+<input type="hidden" name="shipping" value="{_GET.code}" />
+<table width="100%" class="info-table-style">
+<colgroup>
+	<col width="100px" />
+	<col />	
+</colgroup>
+<tbody>
+<tr>
+	<th class="its-th-align center"><div style="width:100px;">사용설정</div></th>
+	<td class="its-td">
+	<label style="padding-right:30px;"><input type="radio" name="useYn" value="y" checked="checked" />사용</label>
+	<label><input type="radio" name="useYn" value="n" />미사용</label>
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">방법</th>
+	<td class="its-td">	
+	<select name="company" onchange="view_company_info();">
+		<!-- { @ code_load('internationalShipping') } -->
+		<option value="{.codecd}">{.value}</option>
+		<!-- { / } -->
+	</select>
+	<span class="msg_company_info desc"></span>
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">설명</th>
+	<td class="its-td">
+	<input type="text" name="summary" value="{summary}" class="line" size="70" title="설명" />
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">표준상품무게</th>
+	<td class="its-td">
+	<input type="text" name="defaultGoodsWeight"  class="line onlyfloat" value="{defaultGoodsWeight}" size="6" title="표준상품무게" /> Kg
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">무게 및 지역</th>
+	<td class="its-td" style="padding-right:15px;">
+	<table class="info-table-style" width="98%" id="weightTable">
+	<tr>
+		<td class="its-td-align center" style="background-color:#f1f1f1;"><div style="width:100px;">무게(Kg)</div></td>
+		<!-- { ? !region  } -->
+		<td class="its-td" style="background-color:#f1f1f1;padding-right:15px;">
+			<div>
+			<input type="text" name="region[]" value="" class="line" size="10" title="해외 지역" />
+			<span class="btn small gray"><button type="button" id="addDeliveryButton">＋</button></span>			
+			</div>
+			<div><input type="text" name="regionSummary[]" class="line" value="" size="15" title="설명" /></div>
+		</td>
+		<!-- { / } -->
+		<!-- { @ region  } -->
+		<!-- { ? .key_ == 0} -->
+		<td class="its-td" style="background-color:#f1f1f1;padding-right:15px;">
+			<div>
+			<input type="text" name="region[]" value="{.value_}" class="line" size="10" title="해외 지역" />
+			<span class="btn small gray"><button type="button" id="addDeliveryButton">＋</button></span>			
+			</div>
+			<div><input type="text" name="regionSummary[]" class="line" value="{regionSummary[.key_]}" size="15" title="설명" /></div>
+		</td>		
+		<!-- { : } -->
+		<td class="its-td" style="background-color:#f1f1f1;padding-right:15px;">
+			<div>
+			<input type="text" name="region[]" value="{.value_}" class="line" size="10" title="해외 지역" />
+			<span class="btn small gray"><button type="button" class="delDeliveryButton">－</button></span>			
+			</div>
+			<div><input type="text" name="regionSummary[]" class="line" value="{regionSummary[.key_]}" size="15" title="설명" /></div>
+		</td>
+		<!-- { / } -->		
+		<!-- { / } -->
+	</tr>	
+	<!-- { @ goodsWeight  } -->
+	<!-- { ? .key_ == 0  } -->
+	<tr>
+		<td class="its-td-align center"><input type="text" name="goodsWeight[]"  size="6" class="onlyfloat line" value="{.value_}" title="무게" /><span class="btn small gray"><button type="button" id="addWeightButton">+</button></span></td>		
+		<!-- { @ arrDeliveryCost[.key_] } -->
+		<td class="its-td"><input type="text" name="deliveryCost[]" size="6" class="onlyfloat line" value="{..value_}" title="배송비" /></td>
+		<!-- { / } -->	
+	</tr>
+	<!-- { : } -->	
+	<tr>
+		<td class="its-td-align center"><input type="text" name="goodsWeight[]"  size="6" class="onlyfloat line" value="{.value_}" title="무게" /><span class="btn small gray"><button type="button" class="delWeightButton">-</button></span></td>		
+		<!-- { @ arrDeliveryCost[.key_] } -->
+		<td class="its-td"><input type="text" name="deliveryCost[]" size="6" class="onlyfloat line" value="{..value_}" title="배송비" /></td>
+		<!-- { / } -->	
+	</tr>
+	<!-- { / } -->
+	<!-- { / } -->
+	<!-- { ? !goodsWeight  } -->
+	<tr>
+		<td class="its-td-align center"><input type="text" name="goodsWeight[]"  size="6" class="onlyfloat line" value="" title="무게" /><span class="btn small gray"><button type="button" id="addWeightButton">＋</button></span></td>		
+		<td class="its-td"><input type="text" name="deliveryCost[]" size="6" class="onlyfloat line" value="" title="배송비" /></td>			
+	</tr>
+	<!-- { / } -->
+	</table>	
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align center">해외 배송 불가 상품</th>
+	<td class="its-td">
+	<div>카테고리</div>
+	<div>	
+	<select class="line" name="category1" >
+	<option value="">1차 카테고리 선택</option>												
+	</select>				
+	<select class="line" name="category2" >
+	<option value="">2차 카테고리 선택</option>											
+	</select>
+	<select class="line" name="category3">
+	<option value="">3차 카테고리 선택</option>
+	</select>
+	<select class="line" name="category4">
+	<option value="">4차 카테고리 선택</option>									
+	</select>				
+	<span class="btn small gray"><button type="button" id="selectCategoryButton">선택</button></span>
+	</div>
+	<div id="selectedCategoryLayer">
+	<!-- { @exceptCategoryName } -->
+	<div>
+		<span style='display:inline-block; width:80%;'>{.value_}</span><input type='hidden' name='exceptCategory[]' value='{exceptCategory[.key_]}'><span class="btn small gray"><button type="button" class="delCategoryButton">－</button>	</span>
+	</div>
+	<!-- { / } -->
+	</div>
+	</td>
+</tr>
+</tbody>
+</table>
+<div style="padding:10px;" class="center">
+<span class="btn large black"><button type="submit" class="addDeliveryCost">저장하기</button></span>
+</div>
+</form>

@@ -1,0 +1,368 @@
+<!-- 회원설정 : 등급 -->
+<script type="text/javascript">
+$(document).ready(function() {
+    // 등급만들기
+    $("#reg_grade").bind("click",function(event){
+		/*
+		$.get('grade_modify', function(data) {		
+		  	$('#gradePopup').html(data);		
+			openDialog("등급만들기 <span class='desc'>회원 등급을 생성합니다.</span>", "gradePopup", {"width":"1000","height":"700"});
+		});		
+		*/
+		formMove('grade_write',4);
+    });
+	// 등급수정
+	$(".modifyButton").bind("click",function(){
+		/*
+		$.get('grade_modify?group_seq='+$(this).attr('seq'), function(data) {		
+		  	$('#gradePopup').html(data);		
+			openDialog("등급만들기 <span class='desc'>회원 등급을 생성합니다.</span>", "gradePopup", {"width":"1000","height":"700"});
+		});		
+		*/
+		location.href = "/admin/setting/member?grade=modify&seq="+$(this).attr('seq');
+		//formMove('grade_modify?group_seq='+$(this).attr('seq'),4);
+	});
+	// 등급삭제
+	$(".deleteButton").bind("click",function(){
+		var checkedCount = $("input:[name='group_seq[]']:checked").length;
+		if ( checkedCount == 0 ) {
+			alert('하나 이상을 체크하여 주십시오.');
+			return false;
+		} else {
+			var tmp = 0;
+			$("input:[name='group_seq[]']").each(function(){
+				if($(this).attr("checked")){
+					if($(this).attr("member")>0) tmp++;
+				}
+			});
+			if(tmp>0){
+				alert("삭제하시려는 등급에 회원이 존재합니다.\n회원 이동 후 삭제해 주세요.");
+				return;
+			}
+			if(confirm('등급을 삭제 하시겠습니까?')) {
+				$("input[name='grade_mode']").val('deleteGrade');
+				$("form[name='memberForm']").submit();
+			}
+		}
+	});
+
+	$("#grade_submit").click(function(){
+		$("form[name='memberForm']").submit();
+	});
+
+
+	$("select[name='start_month']").change(function(){
+		calcu_month();
+	});
+	$("select[name='chg_term']").change(function(){
+		calcu_month();
+	});
+	$("select[name='chg_day']").change(function(){
+		calcu_month();
+	});
+	$("select[name='chk_term']").change(function(){
+		calcu_month();
+	});
+	$("select[name='keep_term']").change(function(){
+		calcu_month();
+	});
+
+	
+	$("#chg_grade").click(function(){
+		if($(this).attr("checked")){
+			$("#chg_tab").show();
+			$("#grade_comment").show();
+		}else{
+			$("#chg_tab").hide();
+			$("#grade_comment").hide();
+		}
+	});
+
+	// 상단 매뉴얼 링크 변경 leewh 2014-10-01
+	$(".page-manual-btn a").attr('href','http://manual.firstmall.kr/html/manual.php?category=010014');
+});
+
+
+function calcu_month(){
+	var start_month		= $("select[name='start_month']").val();
+	var chg_term		= $("select[name='chg_term']").val();
+	var chg_day			= $("select[name='chg_day']").val();
+	var chk_term		= $("select[name='chk_term']").val();
+	var keep_term		= $("select[name='keep_term']").val();
+	var chg_text		= "";
+	var chk_text		= "";
+	var keep_text		= "";
+	var gdata = 'start_month='+start_month;
+	gdata += '&chg_term='+chg_term;
+	gdata += '&chg_day='+chg_day;
+	gdata += '&chg_term='+chg_term;
+	gdata += '&chk_term='+chk_term;
+	gdata += '&keep_term='+keep_term;	
+	$.ajax({
+		type: "get",
+		url: "grade_ajax",
+		data: gdata,
+		dataType: 'json',
+		success: function(data){
+			$("#chg_text").html(data.chg_text);
+			$("#chk_text").html(data.chk_text);
+			$("#keep_text").html(data.keep_text);
+			$("#keep_term_msg").html(keep_term);			
+		}
+	});
+	
+}
+</script>
+
+{? service_limit }
+<br style="line-height:10px;" />
+<div class="center" style="padding-left:20px;width:100%;text-align:center;">
+	<div style="border:2px #dddddd solid;padding:10px;width:95%;">
+		<table width="100%">
+		<tr>
+		<td align="left">
+			홈페이지샵 / 무료몰+ : 회원 등급(그룹)은 ‘4단계’까지 가능합니다.<br/>
+			회원 등급이 5단계 이상인 쇼핑몰을 운영하시려면 프리미엄몰+ 또는 독립몰+로 업그레이드 하시길 바랍니다.
+		</td>
+		<td align="right"><img src="../images/common/btn_upgrade.gif" class="hand" onclick="serviceUpgrade();" align="absmiddle" /></td>
+		</tr>
+		</table>
+	</div>
+	<br style="line-height:20px;" />
+</div>
+{ / }
+
+<div class="item-title">우수고객 제도 (등급 정책) </div>
+
+<div style="padding:10px;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+	<td width="280" align="center"><img src="../images/common/img_grade.gif"></td>
+	<td><div style="line-height:22px;">쇼핑몰의 우수고객 제도(또는 회원 등급 정책)는 구매실적(구매금액,구매건수,구매횟수)을 종합하여</div> 
+		<div style="line-height:22px;">회원의 기여도에 따라 회원등급을 나누고 해당 회원등급에게 혜택을 드리는 제도입니다.</div>
+		<div style="line-height:22px;">우수고객제도로 구매전환율, 재구매율, 재방문율을 높일 수 있으며, 충성고객을 확보하시게 됩니다</div>
+		<div style="line-height:22px;font-weight:bold;">쇼핑몰 운영자께서는 아래에서 회원등급을 나누는 기준과 혜택을 명확하게 결정하실 수 있습니다.</div></td>
+</tr>
+</table>
+</div>
+
+<div align="center" class="gray-title">
+	<span style="padding-left:72px;">현재 우수고객 정책</span>
+	<span style="float:right;padding-right:8px;"><span class="btn small black">
+		{? gcount >= 4 && (service_code=='P_FREE' || service_code=='P_STOR')}
+		<button type="button" class="noshopfreelinknone">등급만들기</button>
+		{:}
+		<button type="button" id="reg_grade">등급만들기</button>
+		{/}
+	</span></span>
+</div>
+
+<input type="hidden" name="grade_mode"/>
+<input type="hidden" name="gcount" id="gcount" value="{gcount}"/>
+
+<table width="100%" class="info-table-style">
+<col width="50" /><col width="" /><col width="" /><col width="" /><col width="" /><col width="" /><col width="" /><col width="" /><col width="" /><col width="" /><col width="" /><col width="" /><col width="" />
+<tr>
+	<th class="its-th-align" rowspan="2"><input type="checkbox" onclick="chkAll(this,'group_seq');"></th>
+	<th class="its-th-align" rowspan="2">자동관리</th>
+	<th class="its-th-align" rowspan="2">등급</th>
+	<th class="its-th-align" colspan="3">선정기준</th>
+	<th class="its-th-align" rowspan="2">현재통계</th>
+	<th class="its-th-align" rowspan="2">생성일시</th>
+	<th class="its-th-align" rowspan="2">관리</th>
+</tr>
+<tr>
+	<!-- 선정기준 -->
+	<th class="its-th-align center">총 구매금액</th>
+	<th class="its-th-align center">상품구매개수</th>
+	<th class="its-th-align center">주문횟수</th>
+	<!-- 혜택 -->
+	<!--
+	<th class="its-th-align center">적립금</th>
+	<th class="its-th-align center">배송비</th>
+	-->
+</tr>
+{ @ loop }
+<tr>
+	<td class="its-td"><input type="checkbox" value="{.group_seq}" {? .group_seq==1 }disabled{ / } name="group_seq[]" class="group_seq" member="{.count}"></td>
+	<td class="its-td-align" align="center">{? .use_type=='AUTO' || .use_type=='AUTOPART'}<img src="../images/common/thumb_auto.gif" align="absmiddle">{ : }<img src="../images/common/thumb_passive.gif" align="absmiddle">{ / }</td>
+	<td class="its-td">{?.icon}<img src="../../data/icon/common/{.icon}" align="absmiddle">{/}{.group_name}</td>
+	{? .use_type=='AUTO' || .use_type=='AUTOPART' }
+	<!-- 선정기준 -->
+	<td class="its-td">{=number_format(.order_sum_price)}원 이상</td>
+	<td class="its-td">{=number_format(.order_sum_ea)}건 이상</td>
+	<td class="its-td">{=number_format(.order_sum_cnt)}회 이상</td>
+	{ : }
+	<td class="its-td" colspan="3">{? .group_seq==1 }신규가입 시{ : }수동으로 관리되는 등급{ / }</td>
+	{ / }
+	<!-- 혜택 -->
+	<!--
+	<td class="its-td-align" align="center">{? .add_point>0 }Y{ : }N{ / }</td>
+	<td class="its-td-align" align="center">{? .add_delivery>0 }Y{ : }N{ / }</td>
+	-->
+	<td class="its-td-align" align="center">{=number_format(.count)}명 ({?.count}{=round(.count/tot*100,2)}{:}0{/}%)</td>
+	<td class="its-td-align" align="center">{.regist_date}</td>
+	<td class="its-td-align center">
+		<span class="btn small gray">
+		<button type="button" class="modifyButton" seq="{.group_seq}">수정</button>						
+		</span>		
+	</td>
+</tr>
+{ / }
+</table>
+<div style="padding:5px;">
+<span class="btn small gray"><button type="button" class="deleteButton hand">삭제</button></span>		
+</div>
+	
+<div style="padding-top:30px;"></div>
+
+
+
+<style>
+.fxgrade {font-size:14px;letter-spacing:-1px;font-weight:bold;}
+</style>
+
+<div class="item-title">자동 등급조정(갱신) 설정 </div>
+
+<div align="center" class="gray-title">
+	<span style="font-weight:bold;">현재 등급 조정(갱신) 정책 : {?clone.start_month}다음등급 조정일은 {result.next_grade_date}입니다.{:}다음 등급 조정일은 없습니다.{/}</span>
+	<div>당연히 수동 관리되어지는 등급에 속한 회원은 자동으로 등급이 조정 되지 않습니다!</div>
+</div>
+<table width="100%" class="info-table-style">
+<col width="16%" /><col width="16%" /><col width="16%" /><col width="16%" /><col width="16%" /><col width="16%" />
+<tr>
+	<th class="its-th-align" colspan="2">등급 조정(갱신)일</th>
+	<th class="its-th-align" colspan="2">산출 기간</th>
+	<th class="its-th-align" colspan="2">등급 유지 보장기간 <span class="helpicon" title="등급 조정일로부터 설정된 기간만큼은 등급을 유지합니다. 단, 기간내일지라도 등급 상승 조건이 충족될 등급조정일 도래시 상향조정 됩니다. (등급 유지 보장 기간에는 등급 하락은 없습니다. )"></span></th>
+</tr>
+<tr>
+	<td class="its-td-align center" colspan="2">
+		<div>등급 기준 월은 <span class="fxgrade">{?clone.start_month}{clone.start_month}{:}?{/}월</span>이며,</div>
+		<span class="fxgrade">{?clone.chg_term}{clone.chg_term}{:}?{/}개월마다</span> 해당 월 <span class="fxgrade">{?clone.chg_day}{clone.chg_day}{:}?{/}일</span>에
+	</td>
+	<td class="its-td-align center" colspan="2">
+		최근(직전) <span class="fxgrade">{?clone.chk_term}{clone.chk_term}{:}?{/}개월간</span>의<br>선정 기준(구매금액, 구매건수, 구매횟수)을 회원마다 계산
+	</td>
+	<td class="its-td-align center" colspan="2">
+		등급 조정일부터 <span class="fxgrade">{?clone.keep_term}{clone.keep_term}{:}?{/}개월간</span>의 등급 유지
+	</td>
+</tr>
+<tr>
+	<td class="its-td-align center">{result.chg_text}</td>
+	<td class="its-td-align center">
+		<span>새벽 2시에</span>
+	</td>
+	<td class="its-td-align center">{result.chk_text}</td>
+	<td class="its-td-align center">
+		<span>사이의 선정기준 계산</span>
+	</td>
+	<td class="its-td-align center">{result.keep_text}</td>
+	<td class="its-td-align center">
+		<span>동안 유지</span>
+	</td>
+</tr>
+</table>
+
+<div style="padding-top:30px;"></div>
+
+
+<div align="center" class="gray-title">
+	<span style="font-weight:bold;"><label><input type="checkbox" id="chg_grade"> 등급 조정(갱신) 정책 변경하기</label></span>
+	<div>현재 등급 조정 정책을 변경하려면 설정 후 저장하세요.</div>
+</div>
+<table width="100%" class="info-table-style hide" id="chg_tab">
+<col width="16%" /><col width="16%" /><col width="16%" /><col width="16%" /><col width="16%" /><col width="16%" />
+<tr>
+	<th class="its-th-align" colspan="2">등급 조정(갱신)일</th>
+	<th class="its-th-align" colspan="2">산출 기간</th>
+	<th class="its-th-align" colspan="2">등급 유지 보장기간 <span class="helpicon" title="등급 조정일로부터 설정된 기간만큼은 등급을 유지합니다. 단, 기간내일지라도 등급 상승 조건이 충족될 등급조정일 도래시 상향조정 됩니다. (등급 유지 보장 기간에는 등급 하락은 없습니다. )"></span></th>
+</tr>
+<tr>
+	<td class="its-td-align center" colspan="2">
+		<div>등급 기준 월은 <select name="start_month" >
+								<option value="1" {?clone.start_month=='1'}selected{/}>1월</option>
+								<option value="2" {?clone.start_month=='2'}selected{/}>2월</option>
+								<option value="3" {?clone.start_month=='3'}selected{/}>3월</option>
+								<option value="4" {?clone.start_month=='4'}selected{/}>4월</option>
+								<option value="5" {?clone.start_month=='5'}selected{/}>5월</option>
+								<option value="6" {?clone.start_month=='6'}selected{/}>6월</option>
+								<option value="7" {?clone.start_month=='7'}selected{/}>7월</option>
+								<option value="8" {?clone.start_month=='8'}selected{/}>8월</option>
+								<option value="9" {?clone.start_month=='9'}selected{/}>9월</option>
+								<option value="10" {?clone.start_month=='10'}selected{/}>10월</option>
+								<option value="11" {?clone.start_month=='11'}selected{/}>11월</option>
+								<option value="12" {?clone.start_month=='12'}selected{/}>12월</option>
+							</select>
+		월 이며,</div>
+		<select name="chg_term">
+			<option value="1" {?clone.chg_term=='1'}selected{/}>1개월마다</option>
+			<option value="3" {?clone.chg_term=='3'}selected{/}>3개월마다</option>
+			<option value="6" {?clone.chg_term=='6'}selected{/}>6개월마다</option>
+			<option value="12" {?clone.chg_term=='12'}selected{/}>12개월마다</option>
+			<option value="18" {?clone.chg_term=='18'}selected{/}>18개월마다</option>
+			<option value="24" {?clone.chg_term=='24'}selected{/}>24개월마다</option>
+			<option value="36" {?clone.chg_term=='36'}selected{/}>36개월마다</option>
+		</select>
+		해당 월 <select name="chg_day">
+					<option value="1" {?clone.chg_day=='1'}selected{/}>1일</option>
+					<option value="15" {?clone.chg_day=='15'}selected{/}>15일</option>
+				</select>에
+	</td>
+	<td class="its-td-align center" colspan="2">
+		최근(직전) <select name="chk_term">
+			<option value="1" {?clone.chk_term=='1'}selected{/}>1개월간</option>
+			<option value="3" {?clone.chk_term=='3'}selected{/}>3개월간</option>
+			<option value="6" {?clone.chk_term=='6'}selected{/}>6개월간</option>
+			<option value="12" {?clone.chk_term=='12'}selected{/}>12개월간</option>
+			<option value="18" {?clone.chk_term=='18'}selected{/}>18개월마다</option>
+			<option value="24" {?clone.chk_term=='24'}selected{/}>24개월마다</option>
+			<option value="36" {?clone.chk_term=='36'}selected{/}>36개월마다</option>
+		</select>의<br>선정 기준(구매금액, 구매건수, 구매횟수)을 회원마다 계산
+	</td>
+	<td class="its-td-align center" colspan="2">
+	
+		등급 조정일부터
+		<select name="keep_term">
+			<option value="1" {?clone.keep_term=='1'}selected{/}>1개월간</option>
+			<option value="3" {?clone.keep_term=='3'}selected{/}>3개월간</option>
+			<option value="6" {?clone.keep_term=='6'}selected{/}>6개월간</option>
+			<option value="12" {?clone.keep_term=='12'}selected{/}>12개월간</option>
+			<option value="18" {?clone.keep_term=='18'}selected{/}>18개월마다</option>
+			<option value="24" {?clone.keep_term=='24'}selected{/}>24개월마다</option>
+			<option value="36" {?clone.keep_term=='36'}selected{/}>36개월마다</option>
+		</select>
+		등급 유지
+		
+
+
+	</td>
+</tr>
+<tr>
+	<td class="its-td-align center">
+		<span id="chg_text">{result.chg_text}</span>
+	</td>
+	<td class="its-td-align center">
+		<span>새벽 2시에</span>
+	</td>
+	<td class="its-td-align center">
+		<span id="chk_text">{result.chk_text}</span>
+	</td>
+	<td class="its-td-align center">
+		<span>사이의 선정기준 계산</span>
+	</td>
+	<td class="its-td-align center">
+		<span id="keep_text">{result.keep_text}</span>
+	</td>
+	<td class="its-td-align center">
+		<span>동안 유지</span>
+	</td>
+</tr>
+</table>
+
+<div style="width:100%;text-align:center;" id="grade_comment" class="hide">
+	<div style="padding-top:10px;text-align:center;">현재 등급 조정 정책을 변경된 등급 조정 정책으로 변경하시겠습니까?</div>
+
+	<span style="text-align:center;"><span class="btn small red"><button type="button" id="grade_submit">등급 조정 정책 변경</button></span></span>
+</div>
+
+<div id="gradePopup"></div>

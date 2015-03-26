@@ -1,0 +1,162 @@
+{#layout_header_popup}
+
+<script type="text/javascript" src="/app/javascript/plugin/zeroclipboard/ZeroClipboard.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+
+
+<script>
+var tagCopyClips = [];
+var tagCopyClipsIdx = 0;
+
+$(function(){
+	
+	parent.DM_window_title_set("title","전체페이지 - {=htmlspecialchars(skin)}");
+	
+	$(".tpl_list li span.btn").live('click',function(){
+		$(".tpl_list li span.btn").removeClass('selected');
+		$(this).addClass('selected');
+		
+		$(".selected_tpl_path").html(get_selected_tpl_path());
+				
+		if(tagCopyClipsIdx>0) tagCopyClips[tagCopyClipsIdx-1].destroy();
+
+		tagCopyClips[tagCopyClipsIdx] = new ZeroClipboard.Client();
+		tagCopyClips[tagCopyClipsIdx].setHandCursor( true );
+		tagCopyClips[tagCopyClipsIdx].setCSSEffects( true );
+		tagCopyClips[tagCopyClipsIdx].addEventListener( 'complete', function(client, text) {
+			alert("주소가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+		} );
+		tagCopyClips[tagCopyClipsIdx].setText($(this).attr('url'));	
+		tagCopyClips[tagCopyClipsIdx].glue('selected_url_copy');
+				
+		tagCopyClipsIdx++;
+		
+		if($(this).attr('tpl_page')){
+			$("#selected_url_delete").removeAttr("disabled");
+			$("#selected_url_delete").parent().addClass("red");
+		}else{
+			$("#selected_url_delete").attr("disabled",true);
+			$("#selected_url_delete").parent().removeClass("red");
+		}
+ 	});
+	
+	$(".tpl_list li span.btn.selected").click();
+});
+
+function get_selected_tpl_path(){
+	var tpl_path = $(".tpl_list li span.btn.selected").attr("tpl_path");
+	if(!tpl_path){
+		openDialogAlert("페이지를 선택해주세요.",400,140);
+		return false;
+	}
+	return tpl_path;
+} 
+
+function del_selected_tpl_path(){
+	openDialogConfirm("정말 삭제하시겠습니까?",400,140,function(){
+			
+		var frm = $("form[name='processForm']");
+		frm.attr("action","../design_process/tpl_file_delete")
+		
+		$("input[name='tpl_path']",frm).val($(".tpl_list li span.btn.selected").attr("tpl_path"));
+		
+		frm.submit();
+	});
+}
+
+function go_window_sourceeditor(){
+	if(get_selected_tpl_path()) parent.DM_window_sourceeditor(get_selected_tpl_path());
+}
+
+function go_window_layout(){
+	var file_type = $(".tpl_list li span.btn.selected").attr("file_type");
+	var file_type_msg = $(".tpl_list li span.btn.selected").attr("file_type_msg");
+	if(file_type_msg){
+		openDialogAlert(file_type_msg,600,160);
+	}else{
+		if(get_selected_tpl_path()) parent.DM_window_layout(get_selected_tpl_path());
+	}
+}
+</script>
+
+<style>
+.tpl_directory {text-align:left; margin-bottom:5px;}
+.tpl_list {padding-top:2px; padding-bottom:20px;}
+.tpl_list li {display:inline-block; margin-bottom:3px; width:100px; overflow:hidden; font-size:11px; cursor:default}
+.selected_tpl_path {font-weight:bold;}
+
+.all_pages_header {height:50px;}
+.all_pages_body {height:536px; overflow:auto;}
+</style>
+
+<br />
+
+<form name="processForm" target="actionFrame" method="post">
+<input type="hidden" name="tpl_path" value="" />
+</form>
+
+<div class="all_pages_header">
+	<table width="98%" align="center" border="0" cellpadding="0" cellspacing="0" style="margin:auto">
+	<tr>
+		<td width="140" align="left">
+			<a href="#" onclick="parent.DM_window_layout_create();return false;" ><img src="../images/design/btn_all_newpage.gif" /></a>
+		</td>
+		<td align="center">
+			선택파일 : <span class="selected_tpl_path"></span> 
+			&nbsp;<span class="btn small"><input type="button" id="selected_url_copy" value="주소복사" /></span>
+			<span class="btn small"><input type="button" id="selected_url_delete" value="삭제" disabled onclick="del_selected_tpl_path()" /></span> 
+		</td>
+		<td width="370" align="right">
+			<span class="desc">선택된 페이지의</span>
+			<a href="#" onclick="go_window_sourceeditor();return false;" ><img src="../images/design/btn_all_html.gif" align="absmiddle" /></a>
+			<a href="#" onclick="go_window_layout();return false;" ><img src="../images/design/btn_all_design.gif" align="absmiddle" /></a>
+		</td>
+	</tr>
+	</table>
+</div>
+
+<div class="all_pages_body">
+	<table width="98%" align="center" border="0" cellpadding="0" cellspacing="0" style="margin:auto">
+		
+		{ @ folders }
+		<tr>
+			<td valign="top">
+				<div class="tpl_directory"><span class="btn bluegreen"><button style="width:96px;text-align:left"><span style="display:inline-block;width:20px;text-align:center;"><img src="../images/design/icon_{.icon}_all.gif" align="absmiddle" onerror="this.style.display='none'" /></span> {.name}</button></span></div>
+			</td>
+			<td width="10"></td>
+			<td>		
+				<ul class="tpl_list">
+					{ @ .files }
+					<li>
+						<span class="btn smallemboss {?..path==tpl_path}selected{/}" tpl_page="{..tpl_page}" tpl_path="{..path}" url="{..url}" {?..file_type}file_type="{..file_type}"{/} {?..file_type_msg}file_type_msg="{..file_type_msg}"{/}><button style="width:95px;text-align:left; padding-left:10px; overflow:hidden;">{..desc}</button></span>
+					</li>
+					{ / }
+				</ul>
+			</td>
+		</tr>
+		{ / }
+
+		{ @ boards }
+		{ ? .files }
+		<tr>
+			<td valign="top">
+				<div class="tpl_directory"><span class="btn bluegreen"><button style="width:96px;text-align:left"><span style="display:inline-block;width:20px;text-align:center;"><img src="../images/design/icon_{.icon}_all.gif" align="absmiddle" onerror="this.style.display='none'" /></span> {.name}</button></span></div>
+			</td>
+			<td width="10"></td>
+			<td>		
+				<ul class="tpl_list">
+					{ @ .files }
+					<li>
+						<span class="btn smallemboss {?..path==tpl_path}selected{/}" tpl_page="{..tpl_page}" tpl_path="{..path}" url="{..url}" {?..file_type}file_type="{..file_type}"{/} {?..file_type_msg}file_type_msg="{..file_type_msg}"{/}><button style="width:95px;text-align:left; padding-left:10px; overflow:hidden;">{..desc}</button></span>
+					</li>
+					{ / }
+				</ul>
+			</td>
+		</tr>
+		{ / }
+		{ / }
+		
+	</table>
+</div>
+
+{#layout_footer_popup}

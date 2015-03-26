@@ -1,0 +1,18 @@
+<table width="800" class="simpledata-table-style" style="margin:auto;">
+<col /><col width="100" />
+<tr>
+	<th>유입경로</th>
+	<th>방문자수</th>
+</tr>
+{@refererData}
+<?php {refererCountSum} += {.count}?>
+<tr>
+	<td class="pdl10">{?.referer}<a href="{.referer}" target="_blank">{.referer}</a>{:}직접입력{/}</td>
+	<td class="center"><font color="{seriesColors[1]}">{=number_format(.count)}</font></td>
+</tr>
+{/}
+<tr>
+	<td class="pdl10"><b>합계</b></td>
+	<td class="center"><font color="{seriesColors[1]}">{=number_format(refererCountSum)}</font></td>
+</tr>
+</table>

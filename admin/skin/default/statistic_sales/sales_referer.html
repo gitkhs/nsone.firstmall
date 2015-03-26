@@ -1,0 +1,331 @@
+{ #layout_header }
+  
+<!--[if IE]><script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/excanvas.min.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/jquery.jqplot.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.barRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.pointLabels.min.js"></script>
+    
+<link class="include" rel="stylesheet" type="text/css" href="/app/javascript/plugin/jqplot/jquery.jqplot.min.css" />
+<style type="text/css">
+table.simpledata-table-style td.ctd { text-align:center; }
+table.simpledata-table-style td.ltd { text-align:left; padding-left:5px; }
+table.simpledata-table-style td.rtd { text-align:right; padding-right:5px; }
+.chartBlock	{width:82%; margin:auto;}
+.tableBlock	{width:97%; margin:auto;}
+.sub_title	{width:100%;text-align:center;color:#000;margin:15px 0;font-size:15px;font-weight:bold;}
+span.add_info {font-size:11px;color:#838383;font-weight:normal;}
+</style>
+
+<div id="statsSettingLayer"></div>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+	
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		</ul>
+		
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>구매 통계</h2>
+		</div>
+		
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<div class="sub-layout-container body-height-resizing">
+	
+	{#sales_menu}
+	
+	<!-- 서브메뉴 바디 : 시작-->
+	<div class='slc-body-wrap'>
+		<div class="slc-body">
+					
+			<div class="chartBlock">
+				
+				<div class="item-title">구매 통계 - 유입경로</div>
+				
+				<br style="line-height:10px" />
+				
+				<form>
+					<div align="center">
+						<label><input type="radio" name="dateSel_type" value="month" {?sc.dateSel_type == 'month'}checked{/} /> 월별</label>
+						<label><input type="radio" name="dateSel_type" value="daily" {?sc.dateSel_type == 'daily'}checked{/} /> 일별</label>
+						<select name="year">
+						<option value="">= 연도 선택 =</option>
+						{@range(date('Y'),2010)}
+							<option value="{.value_}" {?_GET.year==.value_}selected{/}>{.value_} 년</option>
+						{/}
+						</select>
+
+						<span class="monthSpan {?sc.dateSel_type == 'month'}hide{/}">
+							<select name="month">
+							<option value="">= 월 선택 =</option>
+							{@range(1,12)}
+								<option value="{.value_}" {?_GET.month==.value_}selected{/}>{.value_} 월</option>
+							{/}
+							</select>
+						</span>
+				
+						<span class="btn small"><input type="submit" value="검색" /></span>
+						<span class="monthSpan {?sc.dateSel_type == 'month'}hide{/}">
+							<span class="btn small"><input type="button" value="이번달" class="setThisMonth" /></span>
+						</span>
+					</div>
+				</form>
+
+				<br style="line-height:10px" />
+
+				<div class="sub_title">구매건수</div>
+
+				<br style="line-height:10px" />
+				
+				<div id="cntChart" style="margin:auto; height:250px; width:100%;"></div>
+				
+				<br style="line-height:20px" />
+
+			</div>
+			<div class="tableBlock">
+
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="left" valign="bottom"><span class="add_info">(체크를 하시면 그래프로 표시됩니다.)</span></td>
+					<td align="right" valign="bottom"><span class="btn small"><input type="button" value="엑셀출력" onclick="divExcelDownload('{?sc.dateSel_type == 'd'}일별{:}월별{/}_매출유입경로통계_구매건수','#referer_cnt_table')" /></span></td>
+				</tr>
+				</table>
+				
+				<br style="line-height:10px" />
+				
+				<div id="referer_cnt_table">
+				{ #referer_cnt_table }
+				</div>
+
+			</div>
+			<div class="chartBlock">
+
+				<br style="line-height:10px" />
+				
+				<div class="sub_title">구매금액<span class="add_info">(단위:천원)</span></div>
+
+				<br style="line-height:10px" />
+				
+				<div id="priceChart" style="margin:auto; height:250px; width:100%;"></div>
+				
+				<br style="line-height:20px" />
+
+			</div>
+			<div class="tableBlock">
+
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td align="left" valign="bottom"><span class="add_info">(체크를 하시면 그래프로 표시됩니다.)</span></td>
+					<td align="right" valign="bottom"><span class="btn small"><input type="button" value="엑셀출력" onclick="divExcelDownload('{?sc.dateSel_type == 'd'}일별{:}월별{/}_매출유입경로통계_구매금액','#referer_price_table')" /></span></td>
+				</tr>
+				</table>
+				
+				<br style="line-height:10px" />
+				
+				<div id="referer_price_table">
+				{ #referer_price_table }
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<script class="code" type="text/javascript">
+$(document).ready(function(){
+
+	makePlotCnt();
+	makePlotPrice();
+
+	$("input[name='dateSel_type']").live('click', function(){
+		chgSearchForm();
+	});
+
+	$(".setThisMonth").live('click', function(){
+		$("select[name='year']").val('{=date('Y')}');
+		$("select[name='month']").val('{=date('n')}');
+	});
+
+	$(".setThisMonth").live('click', function(){
+		$("select[name='year']").val('{=date('Y')}');
+		$("select[name='month']").val('{=date('n')}');
+	});
+
+	$("input[name='cntCode[]']").each(function(){
+		$(this).live('click', function(){
+			if	(!chkCheckCode('cnt') > 0) {
+				alert('1개 이상 체크되어야 합니다.');
+				$(this).attr('checked', true);
+			}
+			makePlotCnt();
+		});
+	});
+	$("input[name='priceCode[]']").each(function(){
+		$(this).live('click', function(){
+			if	(!chkCheckCode('price') > 0) {
+				alert('1개 이상 체크되어야 합니다.');
+				$(this).attr('checked', true);
+			}
+			makePlotPrice();
+		});
+	});
+});
+
+function chgSearchForm(){
+	if	($("input[name='dateSel_type']:checked").val() == 'daily'){
+		$(".monthSpan").removeClass('hide');
+	}else{
+		$(".monthSpan").addClass('hide');
+	}
+}
+
+function chkCheckCode(type){
+	var retVal	= 0;
+	if	(type == 'cnt'){
+		$("input[name='cntCode[]']").each(function(){
+			if	($(this).attr('checked'))	retVal++;
+		});
+	}else{
+		$("input[name='priceCode[]']").each(function(){
+			if	($(this).attr('checked'))	retVal++;
+		});
+	}
+
+	return retVal;
+}
+
+function makePlotCnt(){
+
+	var listData	= new Object();
+	{ @ dataForChart['cnt'] }
+	listData['{.key_}']	= {=json_encode(.value_)};
+	{ / }
+
+	var dataList	= [];
+	var titles		= [];
+	var cnt			= 0;
+	$("input[name='cntCode[]']").each(function(){
+		if	($(this).attr('checked')){
+			cnt++;
+			dataList.push(listData[$(this).val()]);
+			titles.push({'label':$(this).attr('titleName')});
+		}
+	});
+
+	$("#cntChart").html('');
+	if	(cnt > 0){
+		var maxCnt		= '{maxCnt}';
+		var gapCnt		= parseInt(maxCnt.toString().substring(0,1)) < 2 ? Math.pow(10,maxCnt.toString().length-2) : Math.pow(10,maxCnt.toString().length-1);
+		var yaxisMaxCnt	= parseInt(maxCnt.toString().substring(0,1)) < 2 ? gapCnt * (parseInt(maxCnt.toString().substring(0,2))+2) : gapCnt * (parseInt(maxCnt.toString().substring(0,1))+2);
+		yaxisMaxCnt = yaxisMaxCnt > 100 ? yaxisMaxCnt : 100;
+		var cntPlot		= $.jqplot('cntChart', dataList, {
+			seriesDefaults: { 
+				showMarker:true,
+				pointLabels: { show:true }
+			},
+			seriesColors:{=json_encode(seriesColors)},
+			series: titles,
+			axes: {
+				xaxis: {
+					renderer: $.jqplot.CategoryAxisRenderer,
+				},
+				yaxis: {
+					min: 0,
+					max: yaxisMaxCnt,
+					numberTicks: 11
+				}
+			},
+			legend: { 
+				show:true, 
+				location: 'e',
+				xoffset: 15,
+				yoffset: 15,
+				placement: 'outside'
+			},
+			grid: {
+				drawGridLines: true,
+				gridLineColor: '#dddddd',
+				background: '#fffdf6',
+				borderWidth: 0,
+				shadow: false
+			}
+		});
+	}
+}
+
+function makePlotPrice(){
+
+	var listData	= new Object();
+	{ @ dataForChart['price'] }
+	listData['{.key_}']	= {=json_encode(.value_)};
+	{ / }
+
+	var dataList	= [];
+	var titles		= [];
+	var cnt			= 0;
+	$("input[name='priceCode[]']").each(function(){
+		if	($(this).attr('checked')){
+			cnt++;
+			dataList.push(listData[$(this).val()]);
+			titles.push({'label':$(this).attr('titleName')});
+		}
+	});
+
+	$("#priceChart").html('');
+
+	if	(cnt > 0){
+		var maxPrice		= '{maxPrice}';
+		var gapPrice		= parseInt(maxPrice.toString().substring(0,1)) < 2 ? Math.pow(10,maxPrice.toString().length-2) : Math.pow(10,maxPrice.toString().length-1);
+		var yaxisMaxPrice	= parseInt(maxPrice.toString().substring(0,1)) < 2 ? gapPrice * (parseInt(maxPrice.toString().substring(0,2))+2) : gapPrice * (parseInt(maxPrice.toString().substring(0,1))+2);
+		yaxisMaxPrice = yaxisMaxPrice > 100 ? yaxisMaxPrice : 100;
+
+		var pricePlot			= $.jqplot('priceChart', dataList, {
+			seriesDefaults: { 
+				showMarker:true,
+				pointLabels: { show:true }
+			},
+			seriesColors:{=json_encode(seriesColors)},
+			series: titles,
+			axes: {
+				xaxis: {
+					renderer: $.jqplot.CategoryAxisRenderer,
+				},
+				yaxis: {
+					min: 0,
+					max: yaxisMaxPrice,
+					numberTicks: 11
+				}
+			},
+			legend: { 
+				show:true, 
+				location: 'e',
+				xoffset: 15,
+				yoffset: 15,
+				placement: 'outside'
+			},
+			grid: {
+				drawGridLines: true,
+				gridLineColor: '#dddddd',
+				background: '#fffdf6',
+				borderWidth: 0,
+				shadow: false
+			}
+		});
+	}
+}
+
+</script>
+
+{ #layout_footer }

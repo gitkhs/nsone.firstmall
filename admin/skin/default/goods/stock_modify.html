@@ -1,0 +1,190 @@
+<script>
+$(function(){
+	
+	/* 매입가합계 계산 */
+	$("input[name='stock_supply_price[]'], input[name='stock_ea[]']").bind('change',function(){
+		var idx = $(this).closest('tr').attr('idx');
+		var stock_supply_price_sum = num($("input[name='stock_supply_price[]']").eq(idx).val()) * num($("input[name='stock_ea[]']").eq(idx).val());
+		$(".stock_supply_price_sum").eq(idx).html(comma(stock_supply_price_sum));
+	});
+	$("input[name='stock_ea[]']").change();
+	
+	/* 사유 변경 처리 */
+	$("input[name='reason']").bind('change',function(){
+		if($(this).is(':checked')){
+			if($(this).val()=='input'){
+				$(".action_name").html('입고');
+				$(".reason_input").show();
+				$(".reason_etc").hide();
+				$(".reason_detail_row").hide();
+				$(".stock_input_row").show();
+				
+				$("input[name='stock_supply_price[]']").removeAttr('disabled');
+				$("input[name='supply_price_replace']").removeAttr('checked');
+			}
+			else {
+				$(".action_name").html('조정');
+				$(".reason_input").hide();
+				$(".reason_etc").show();
+				$(".reason_detail_row").show();
+				$(".stock_input_row").hide();
+				
+				$("input[name='supply_price_replace']").change();
+			}
+		}
+	}).change();
+	
+	/* 매입처 검색 */
+	$("input[name='search_supplier']").each(function(){
+		var parentObj = $(this).parent();
+		var search_supplier = function(keyword){
+			$.ajax({
+				'url' : '../goods_process/search_supplier',
+				'dataType' : 'json',
+				'data' : {'keyword':keyword},
+				'success' : function(res){
+					if(res.length>1){
+						var openSearchSupplierPopup = function(keyword){
+							openDialogPopup("매입처 검색", "searchSupplierPopup", {
+								'url' : '../goods/supplier_search',
+								'data' : {'keyword':keyword},
+								'width' : 500,
+								'height' : 300
+							}, function(){
+								$("#searchSupplierPopup .supplier_name").bind('click',function(){
+									$("input[name='search_supplier']",parentObj).val('');
+									$("input[name='supplier_name']",parentObj).val("["+$(this).attr('supplier_seq')+"] " + $(this).text());
+									$("input[name='supplier_name']",parentObj).closest('form').find("input[name='supplier_seq']").val($(this).attr('supplier_seq'));
+									closeDialog('searchSupplierPopup');
+								});
+								
+								$("#searchSupplierPopup form").submit(function(){
+									openSearchSupplierPopup($("input[name='keyword']",this).val());
+									return false;
+								});
+							});
+						}
+						openSearchSupplierPopup(keyword);
+					}else if(res.length==1){
+						$("input[name='search_supplier']",parentObj).val('');
+						$("input[name='supplier_name']",parentObj).val("["+res[0].supplier_seq+"] " + res[0].supplier_name);
+						$("input[name='supplier_name']",parentObj).closest('form').find("input[name='supplier_seq']").val(res[0].supplier_seq);
+					}else{
+						openDialogAlert("검색 결과가 없습니다.",400,140);
+					}
+				}
+			});
+		};
+		$("input[name='search_supplier']",parentObj).bind('keydown',function(e){if(e.keyCode=='13') {search_supplier($("input[name='search_supplier']",parentObj).val());return false;}});
+		$("button[name='search_supplier_btn']",parentObj).bind('click',function(e){search_supplier($("input[name='search_supplier']",parentObj).val());});
+	});
+	
+	$("input[name='supply_price_replace']").bind('change',function(){
+		if($("input[name='reason']:checked").val()!='input'){
+			if($(this).is(":checked")){
+				$("input[name='stock_supply_price[]']").removeAttr('disabled');
+			}else{
+				$("input[name='stock_supply_price[]']").attr('disabled',true);
+			}
+		}
+	}).change();
+	
+});
+</script>
+<form action="../goods_process/stock_modify" target="actionFrame" method="post" onsubmit="loadingStart();">
+	<input type="hidden" name="mode" value="{_GET.mode}" />
+	<input type="hidden" name="goods_seq" value="{_GET.goods_seq}" />
+	<input type="hidden" name="supplier_seq" value="" />
+		
+	<table class="info-table-style" width="100%">
+	<colgroup>
+		<col width="17%" />
+	
+	</colgroup>
+	<tr>
+		<td class="its-th">사유</td>
+		<td class="its-td" colspan="3">
+			<label><input type="radio" name="reason" value="input" checked />입고</label>
+			<label><input type="radio" name="reason" value="lost" />분실</label>
+			<label><input type="radio" name="reason" value="error" />오류</label>
+			<label><input type="radio" name="reason" value="bad" />불량</label>
+			<label><input type="radio" name="reason" value="etc" />기타</label>
+		</td>
+	</tr>
+	<tr class="reason_detail_row">
+		<td class="its-th">구체적 사유</td>
+		<td class="its-td" colspan="3">
+			<input type="text" name="reason_detail" value="" size="75" class="line" />
+		</td>
+	</tr>
+	<tr class="stock_input_row">
+		<td class="its-th">입고일</td>
+		<td class="its-td"><input type="text" name="stock_date" value="{=date('Y-m-d')}" class="line datepicker" size="10" /></td>
+		<td class="its-th">매입처</td>
+		<td class="its-td">
+			<input type="text" name="search_supplier" value="" size="10" class="line" />
+			<span class="btn small"><button type="button" name="search_supplier_btn">검색</button></span>
+			<input type="text" name="supplier_name" vlaue="" readonly size="10" style="background-color:#e5e5e5" />
+		</td>
+	</tr>
+	</table>
+	
+	<div style="height:5px"></div>
+	
+	<table class="info-table-style" width="100%">
+	<tr>
+		{?_GET.optionTitle}
+		<td class="its-th-align center" colspan="{=count(_GET.optionTitle)}">
+			{?_GET.mode=='optionStockEdit'}
+			필수옵션
+			{:}
+			추가옵션
+			{/}
+		</td>
+		{/}
+		<td class="its-th-align center" rowspan="2">
+			<div class="reason_input">매입(입고)가격</div>
+			<div class="reason_etc"><label><input type="checkbox" name="supply_price_replace" value="1" /> 현재매입가격 → 변경</label></div>
+		</td>
+		<td class="its-th-align center" rowspan="2"><span class="action_name">입고</span> 수량</td>
+		<td class="its-th-align center reason_input" rowspan="2">매입가 합계</td>
+	</tr>
+	<tr>
+		{@_GET.optionTitle}
+		<td class="its-th-align center">
+			{.value_}
+			<input type="hidden" name="stock_opt_title[{.index_}]" value="{.value_}" size="10" readonly />
+		</td>
+		{/}
+	</tr>
+	{?_GET.optionTitle}
+		{@_GET.optionData}
+		<tr idx="{.index_}">
+			{@.opt_names}
+			<td class="its-td" align="center"><input type="text" class="left line" name="stock_opt[{..index_}][]" value="{..value_}" size="10" readonly /></td>
+			{/}
+			<td class="its-td-align center">
+				<span class="reason_etc"><input type="text" class="line rignt disabled" name="stock_prev_supply_price[]" value="{.supply_price}" size="7" style="text-align:right;" readonly /> →</span>
+				<input type="text" class="line rignt" name="stock_supply_price[]" value="{.supply_price}" size="7" style="text-align:right;" />
+			</td>
+			<td class="its-td-align center"><input type="text" class="line rignt onlynumber" name="stock_ea[]" value="0" size="3" style="text-align:right;" /></td>
+			<td class="its-td-align right pdr10 reason_input"><span class="stock_supply_price_sum"></span></td>
+		</tr>
+		{/}
+	{:}
+		<tr idx="0">
+			<td class="its-td-align center">
+				<span class="reason_etc"><input type="text" class="line rignt disabled" name="stock_prev_supply_price[]" value="" size="7" style="text-align:right;" readonly /> →</span>
+				<input type="text" class="line rignt" name="stock_supply_price[]" value="" size="7" style="text-align:right;" />
+			</td>
+			<td class="its-td-align center"><input type="text" class="line rignt onlynumber" name="stock_ea[]" value="0" size="3" style="text-align:right;" /></td>
+			<td class="its-td-align right pdr10 reason_input"><span class="stock_supply_price_sum"></span></td>
+		</tr>
+	{/}
+	</table>
+	
+	
+	<div class="pd10 center">
+		<span class="btn small cyanblue"><input type="submit" value="조정 완료"></span>
+	</div>
+</form>

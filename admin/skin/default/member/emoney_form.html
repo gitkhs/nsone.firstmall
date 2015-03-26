@@ -1,0 +1,181 @@
+{ #layout_header_popup }
+
+<script type="text/javascript">
+$(document).ready(function() {
+	// IFRAME RESIZING
+	$("#container", parent.document).height($(document).height()+50);
+
+	// CHECKBOX COUNT
+	parent.chkMemberCount();
+
+	$("#send_submit").click(function(){
+		sendMemberSum();
+		var memo = $("select[name='memo_type']").val();
+		if(memo=='direct'){
+			$("input[name='memo']").val($("input[name='memo_direct']").val());
+		}else{
+			$("input[name='memo']").val(memo);
+		}
+
+		var serialize = "";
+		if($("input[name='member']:checked").val()=='select'){
+			parent.$("input:checkbox[name='member_chk[]']:checked").each(function(){
+				serialize += ","+this.value;
+			});
+		}else if($("input[name='member']:checked").val()=='search'){
+			serialize = parent.$('#memberForm').serialize();
+		}
+		$("input[name='serialize']").val(serialize);
+
+		document.emoneyForm.submit();
+	});
+
+	$("select[name='memo_type']").live('change',function(){
+		if($(this).val()=='direct'){
+			$("input[name='memo_direct']").show();
+		}else{
+			$("input[name='memo_direct']").hide();
+		}
+	});
+
+	$("select[name='reserve_select']").live("change",function(){
+		span_controller('reserve');
+	});
+	$("select[name='gb']").live('change',function(){
+		if($(this).val()=='minus'){
+			$(".reserve_select_lay").hide();
+		}else{
+			$(".reserve_select_lay").show();
+		}
+	});
+});
+
+
+function sendMemberSum(){
+	var chk = $("input:radio[name='member']:checked").val();
+	var chk_cnt = 0;
+	if(chk=='all'){
+		chk_cnt = $("input:radio[name='member']:checked").attr("count");
+	}else if(chk=='search'){
+		chk_cnt = parent.$("input[name='searchcount']").val();
+	}else if(chk=='excel'){
+		chk_cnt = 0;
+	}else if(chk=='select'){
+		chk_cnt = parent.$("input:checkbox[name='member_chk[]']:checked").length;
+	}
+
+	var total = parseInt(chk_cnt);
+	$("input[name='send_member']").val(total);
+	//$("#send_member").html(total);
+}
+function span_controller(name){
+	var reserve_y = $("span[name='"+name+"_y']");
+	var reserve_d = $("span[name='"+name+"_d']");
+	var value = $("select[name='"+name+"_select'] option:selected").val();
+	if(value==""){
+		reserve_y.hide();
+		reserve_d.hide();
+	}else if(value=="year"){
+		reserve_y.show();
+		reserve_d.hide();
+	}else if(value=="direct"){
+		reserve_y.hide();
+		reserve_d.show();
+	}
+}
+</script>
+
+<form name="emoneyForm" id="emoneyForm" method="post" target="actionFrame" action="../member_process/set_emoney">
+<input type="hidden" name="send_member" />
+<input type="hidden" name="memo" />
+<input type="hidden" name="serialize"/>
+
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="250" />
+		<col width="/" />
+		<col width="250" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th colspan="3">적립금 수동 지급/차감</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb otb" >
+	<tr>
+		<td style="padding:10px;" valign="top">
+
+		<table width="100%" cellspacing="0">
+		<tr>
+			<td>
+				<label><input type="radio" name="member" value="all"   count="{mInfo.total}"/>전체 회원 ({mInfo.total}명)</label><br>
+				<label><input type="radio" name="member" value="select"  checked="checked" />선택된 회원 (<span id="selected_member">0</span>명)</label>
+			</td>
+		</tr>
+		</table>
+
+		</td>
+
+		<td style="padding:10px;" valign="top">
+			<table width="100%" cellspacing="0">
+			<tr>
+				<td>
+
+					<select name="gb">
+						<option value="plus">지급(+)</option>
+						<option value="minus">차감(-)</option>
+					</select>
+					<input type="text" name="emoney" class="line onlynumber" size="7">원
+
+
+					사유 :
+					<select name="memo_type">
+						<option value="">== 선택해 주세요 ==</option>
+						<option value="신규 회원가입 지급">신규 회원가입 지급</option>
+						<option value="상품구매 추가 적립">상품구매 추가 적립</option>
+						<option value="상품구매 사용 차감">상품구매 사용 차감</option>
+						<option value="direct">▶ 직접 입력</option>
+					</select>
+					<input type="text" name="memo_direct" class="line hide">
+
+					<span class="btn small cyanblue"><button type="button" id="send_submit">확인</button></span>
+
+				</td>
+			</tr></tr>
+			<tr>
+				<td height="30">
+					<span class="reserve_select_lay">
+						유효기간 : <select name="reserve_select">
+							<option value="">제한하지 않음</option>
+							<option value="year" {?reserve.reserve_select=='year'}selected{/}>제한 - 12월31일</option>
+							<option value="direct" {?reserve.reserve_select=='direct'}selected{/}>제한 - 직접입력</option>
+						</select>
+					<span name="reserve_y" class="hide">→ 지급연도 + <input type="text" name="reserve_year" class="line onlynumber"  min="0" max="3" style="text-align:right" size="3" maxlength="3" value="{reserve.reserve_year}" />년 12월 31일</span>
+					<span name="reserve_d" class="hide">→ <input type="text" name="reserve_direct" class="line onlynumber" style="text-align:right" size="3" value="{reserve.reserve_direct}" />개월</span>
+					</span>
+
+				</td>
+			</tr>
+			<tr>
+				<td height="25">
+
+				처리자 : {mname}
+
+				</td>
+			</tr>
+			</table>
+		</td>
+
+		<td style="padding:10px;" valign="top">
+		</td>
+	</tr>
+	</tbody>
+</table>
+
+</form>

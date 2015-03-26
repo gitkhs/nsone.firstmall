@@ -1,0 +1,256 @@
+		<input type="hidden" name="shipping_provider_seq" value="{_GET.provider_seq}"/>	
+		
+		<div class="clearbox" style="padding:3px;">
+			<table width="100%" class="info-table-style">
+				
+				<thead>
+				
+				<tr>
+				<th class="its-th-align center" rowspan="2">실물 배송 정책</th>
+				<th class="its-th-align center" rowspan="2">배송 방법</th>
+				<th class="its-th-align center" rowspan="2">사용 여부</th>
+				<th class="its-th-align center" colspan="4">배송비 계산</th>
+				</tr>
+				<tr>
+				<th class="its-th-align center">택배사</th>
+				<th class="its-th-align center">지정 상품 기준</th>
+				<th class="its-th-align center">실 결제금액 기준</th>				
+				<th class="its-th-align center">추가 배송 
+				{? _GET.provider_seq > 1}
+				<span class="btn small gray"><button type="button" class="modifyDeliveryButton" title="국내 – 택배 추가배송비" name="add_delivery">세팅</button></span>
+				{ / }
+				</th>
+				</tr>
+				
+			
+				</thead>
+				<tbody>				
+								
+				<tr>				
+					<td class="its-td" rowspan="4">기본 배송 상품</td>
+					<td class="its-td">
+						택배 (선불)							
+					</td>
+					<td class="its-td-align center">
+					{ ? data_providershipping.use_yn == 'y' }
+					<span style="color:blue">사용</span>
+					{ : }					
+					<span style="color:red">미사용</span>
+					{ / }
+					
+					{? _GET.provider_seq > 1}
+					<span class="btn small gray"><button type="button" class="modifyDeliveryButton" title="국내 – 택배 선불" name="delivery">세팅</button></span>					
+					{ / }
+					
+					</td>					
+					<td class="its-td-align left" style="padding-left:5px;">
+						{?config_system.invoice_use=='1' && _GET.provider_seq==1 }
+						<div> ● 현대택배(업무자동화)</div>
+						{ / }	
+						{ @ data_providershipping.deliveryCompany }
+						<div> ● {.value_}</div>
+						{ / }
+					</td>
+					<td class="its-td-align center">	
+						{ ? data_providershipping.order_delivery_free =='free' }						
+							<div>지정된 상품 구매 시 무료</div>
+							{ ? data_providershipping.data_issue_goods || data_providershipping.data_issue_category || data_providershipping.data_issue_brand }
+							<div>지정 상품 있음</div>
+							{ / }
+						{ / }
+					</td>
+					<td class="its-td-align center">
+						<div>
+						{ ? data_providershipping.delivery_cost_policy =='free' }
+							무료
+						{ / }
+						{ ? data_providershipping.delivery_cost_policy =='pay' }
+							{=number_format(data_providershipping.pay_delivery_cost)}원
+						{ / }
+							
+						{ ? data_providershipping.delivery_cost_policy =='ifpay' }
+							{=number_format(data_providershipping.ifpay_free_price)}원 이상 구매 시 무료, 미만  {=number_format(data_providershipping.ifpay_delivery_cost)}원
+						{ / }
+						</div>
+					</td>				
+					
+					<td class="its-td-align left" style="padding-left:5px;">
+						{ ? data_providershipping.use_yn == 'y' && data_providershipping.sigungu[0] }	
+							{ @ data_providershipping.sigungu }
+							<div> ● {.value_} {=number_format(data_providershipping.addDeliveryCost[.key_])}원 추가</div>
+							{ / }								
+						{ / }
+					</td>
+				</tr>
+				
+				<tr>				
+					
+					<td class="its-td">
+						택배 (착불)							
+					</td>
+					<td class="its-td-align center">
+					{ ? data_providershipping.postpaid_delivery_cost_yn == 'y' }
+					<span style="color:blue">사용</span>
+					{ : }					
+					<span style="color:red">미사용</span>
+					{ / }
+					
+					{? _GET.provider_seq > 1}
+					<span class="btn small gray"><button type="button" class="modifyDeliveryButton" title="국내 – 택배 착불" name="postpaid">세팅</button></span>
+					{ / }					
+					</td>					
+					<td class="its-td-align center" style="padding-left:5px;">	
+						↑상동						
+					</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">
+						<div>						
+						{?data_providershipping.postpaid_delivery_cost_yn=='y'}{=number_format(data_providershipping.postpaid_delivery_cost)}원{/}
+						</div>
+					</td>				
+					
+					<td class="its-td-align center">-</td>
+				</tr>
+				<tr>				
+					
+					<td class="its-td">
+						퀵서비스 (착불)						
+					</td>
+					<td class="its-td-align center">
+					{ ? data_providershipping.quick_use_yn == 'y' }
+					<span style="color:blue">사용</span>
+					{ : }					
+					<span style="color:red">미사용</span>
+					{ / }
+					
+					{? _GET.provider_seq > 1}
+					<span class="btn small gray"><button type="button" class="modifyDeliveryButton" title="국내 – 퀵서비스" name="quick">세팅</button></span>
+					{ / }				
+					</td>					
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+				</tr>				
+				<tr>
+					<td class="its-td">
+						직접수령						
+					</td>
+					<td class="its-td-align center">
+					{ ? data_providershipping.direct_use_yn == 'y' }
+					<span style="color:blue">사용</span>
+					{ : }					
+					<span style="color:red">미사용</span>
+					{ / }
+					
+					{? _GET.provider_seq > 1}
+					<span class="btn small gray"><button type="button" class="modifyDeliveryButton" title="국내 – 직접수령" name="direct">세팅</button></span>
+					{ / }				
+					</td>					
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+				</tr>
+				
+				<tr>				
+					<td class="its-td" rowspan="4">개별배송 정책</td>
+					<td class="its-td">
+						택배 (선불)						
+					</td>
+					<td class="its-td-align center">
+					상품별로 세팅<br/>
+					<a href="/admin/goods/catalog" target="_blank"><span class="highlight-link">바로가기></span></a>			
+					</td>					
+					<td class="its-td-align center">=기본배송 정책</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">=기본배송 정책</td>
+				</tr>
+				
+				<tr>
+					<td class="its-td">
+						택배 (착불)					
+					</td>
+					<td class="its-td-align center">
+					상품별로 세팅<br/>
+					<a href="/admin/goods/catalog" target="_blank"><span class="highlight-link">바로가기></span></a>			
+					</td>					
+					<td class="its-td-align center">=기본배송 정책</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+				</tr>
+				<tr>
+					<td class="its-td">
+						퀵서비스(착불)						
+					</td>
+					<td class="its-td-align center">
+					{ ? data_providershipping.quick_use_yn == 'y' }
+					<span style="color:blue">사용</span>
+					{ : }					
+					<span style="color:red">미사용</span>
+					{ / }
+					<span class="desc">(=기본 배송)</span>				
+					</td>					
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+				</tr>
+				<tr>
+					<td class="its-td">
+						직접수령						
+					</td>
+					<td class="its-td-align center">
+					{ ? data_providershipping.direct_use_yn == 'y' }
+					<span style="color:blue">사용</span>
+					{ : }					
+					<span style="color:red">미사용</span>
+					{ / }
+					<span class="desc">(=기본 배송)</span>				
+					</td>					
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+					<td class="its-td-align center">-</td>
+				</tr>
+				
+				
+				</tbody>
+			</table>		
+		</div>
+
+<div class="item-title" style="width:100%"><span style="display:inline-block;"></span>보내는 곳 주소 및 반송 주소 <span style="display:inline-block;width:50px;text-align:right">
+{? _GET.provider_seq > 1}
+<span class="btn small gray"><button type="button" class="modifyDeliveryButton" title="보내는 곳 주소 및 반송 주소" name="address">수정</button></span>
+{ / }
+</span></div>
+
+<table width="100%" class="info-table-style">
+<col width="200" /><col width="" /><col width="200" /><col width="" />
+<tr>
+	<th class="its-th">보내는 곳 주소</th>
+	<td class="its-td">
+		{ ? data_providershipping.sendding_zipcode }
+		{data_providershipping.sendding_zipcode}<br>
+		<span {? data_providershipping.sendding_address_type != 'street'}style="font-weight:bold;"{/}>(지번)</span> {data_providershipping.sendding_address}	<br>
+		<span {? data_providershipping.sendding_address_type == 'street'}style="font-weight:bold;"{/}>(도로명)</span> {data_providershipping.sendding_address_street} <br>
+		(공통상세) {data_providershipping.sendding_address_detail}<br>
+		{ / }
+		
+	</td>
+</tr>
+<tr>
+	<th class="its-th">반송 주소</th>
+	<td class="its-td">	
+		{ ? data_providershipping.return_zipcode }
+		{data_providershipping.return_zipcode}<br>
+		<span {? data_providershipping.return_address_type != 'street'}style="font-weight:bold;"{/}>(지번)</span> {data_providershipping.return_address}<br>
+		<span {? data_providershipping.return_address_type == 'street'}style="font-weight:bold;"{/}>(도로명)</span> {data_providershipping.return_address_street}<br>
+		(공통상세) {data_providershipping.return_address_detail}<br>
+		<span class="desc pdl10">↑ 상단의 주소는 구매자가 MY페이지에서 반품 할 때 반송 주소로 안내 되어집니다.</span>	
+		{ / }
+	</td>
+</tr>
+</table>

@@ -1,0 +1,40 @@
+<table class="main-support-service" cellspacing="0" cellpadding="0" border="0" width="100%">
+<tr>
+	<td rowspan="3" style="width:96px; font-size:13px; font-family:Dotum; border-top:none; border-right:none; background-color:#aeb6c1; color:#fff; text-align:center; padding-left:5px;" id="desc_area">
+		해당 서비스에<br/>
+		마우스를 올리세요.
+	</td>
+{@ serviceHtml}
+	{? .index_ != 0 && (.index_ % 7) == 0 }
+		</tr><tr>
+	{/}
+	{?!.nbsp_html }
+	<th class="myservice_area area{.num}" onmouseover="service_over('{.num}','{.overtxt}');">
+		{?.num==2}<div class="myservice_area_sms">{:}
+		<div class="myservice_area">{/}
+		{?.expire}<div class='myservice_{.expire}'><img src='/admin/skin/default/images/main/icon_{.expire}.gif' /></div>{/}
+		</div><span class="myservice_icon icon{.num}"></span>{.name}
+	</th>
+	<td class="myservice_area area{.num}" onmouseover="service_over('{.num}','{.overtxt}');">
+		{?.link}<a href='{.link}'>{/}
+			{? is_numeric(.servicetxt) && .servicetxt <= 7 }
+				{?.servicetxt==0}<span style="color:#eda72c;">신청</span>
+				{:.servicetxt==1}사용중
+				{:.servicetxt==2}사용(무료)
+				{:.servicetxt==3}사용(유료)
+				{:.servicetxt==4}발행안함
+				{:.servicetxt==5}<span style="color:#00aeef;">사용중</span>
+				{:.servicetxt==6}미사용
+				{:.servicetxt==7}<span style="color:#eda72c;">설정</span>
+				{/}
+			{:}
+				{.servicetxt}
+			{/}
+		{?.link}</a>{/}
+	</td>
+	{:}
+		{.nbsp_html}
+	{/}
+{/}
+</tr>
+</table>

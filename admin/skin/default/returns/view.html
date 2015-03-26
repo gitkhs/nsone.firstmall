@@ -1,0 +1,360 @@
+{ #layout_header }
+<style>
+span.goods_name1 {display:inline-block;white-space:nowrap;overflow:hidden;width:250px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+span.goods_name2 {display:inline-block;white-space:nowrap;overflow:hidden;width:500px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+.price {padding-right:5px;text-align:right}
+div.left {float:left;padding-right:10px}
+span.option {padding-right:10px;}
+span.reason {display:inline-block;width:60px;}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {
+
+	// 별표 설정
+	$("span.list-important").bind("click",function(){
+		var param = "?no="+$(this).attr('id');
+		if( $(this).hasClass('checked') ){
+			$(this).removeClass('checked');
+			param += "&val=0";
+			$.get('important'+param,function(data) {});
+		}else{
+			$(this).addClass('checked');
+			param += "&val=1";
+			$.get('important'+param,function(data) {});
+		}
+	});
+
+	$.get('../order/view?no={data_return.order_seq}&mode=return_view&return_code={data_return.return_code}', function(data) {
+		$('#order_info').html(data);
+	});
+
+	$("input.return_adjust_input").bind('keyup change',function(){
+		account_return_price();
+	});
+
+	// 우편번호 검색
+    $("#senderZipcodeButton").live("click",function(){
+        openDialogZipcode('sender');
+    });
+
+    {?data_return.status=='complete'}
+    $("input,select,textarea",$("form[name='return_form']")).each(function(){
+    	if($(this).attr('name')!='admin_memo' && $(this).attr('name')!='return_code' && $(this).attr('type')!='submit'){
+    		$(this).attr("disabled",true);
+    	}
+    });
+    {/}
+});
+
+
+
+</script>
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>
+
+			<!--{ ? data_return.important }-->
+			<!--<span class="icon-star-gray hand checked list-important" id="important_{data_return.return_seq}"></span>&nbsp;&nbsp;-->
+			<!--{ : }-->
+			<!--<span class="icon-star-gray hand list-important" id="important_{data_return.return_seq}"></span>&nbsp;&nbsp;-->
+			<!--{ / }-->
+			<span class="bold fx16" style="background-color:yellow">{data_return.return_code}</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<span class="bold fx16 blue" style="background-color:yellow">{data_return.mstatus}</span>
+			</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large icon"><button type="button" onclick="location.href='catalog';"><span class="arrowleft"></span>반품리스트</button></span></li>
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+
+<!-- 주문정보 테이블 : 시작 -->
+<div id="order_info"></div>
+
+
+<!-- 주문 상세 내역 -->
+
+<!--
+	# $summaryModeClass
+	# 주문리스트에서 보는 요약모드면 'summary-mode'
+	# 주문상세화면에서 볼때에는 ''
+-->
+<div class="item-title">반품정보</div>
+<form name="return_form" action="../returns_process/modify" method="post" target="actionFrame">
+<input type="hidden" name="return_code" value="{data_return.return_code}" />
+<input type="hidden" name="return_type" value="{data_return.return_type}" />
+<input type="hidden" name="order_seq" value="{data_return.order_seq}" />
+<table class="order-view-table" width="100%" border=0>
+	<colgroup>
+		<col width="300" />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+	</colgroup>
+	<thead class="oth">
+		<tr>
+			<th class="dark" rowspan="2">반품신청 상품</th>
+			<th class="dark" rowspan="2">반품수량</th>
+			<!--<th class="dark" rowspan="2">반품회수</th>-->
+			<th class="dark" rowspan="2">사유</th>
+			<th class="dark" rowspan="2">반품접수 일시</th>
+			<th class="dark" rowspan="2">반품완료 일시</th>
+			<!--<th class="dark" rowspan="2">처리자</th>-->
+			<th class="dark" colspan="2">처리상태</th>
+		</tr>
+		<tr>
+			<th class="dark">환불</th>
+			<th class="dark">반품</th>
+		</tr>
+	</thead>
+	<tbody class="otb">
+		<!--{ @ data_return_item }-->
+		<tr class="order-item-row">
+			<td class="info" nowrap>
+				<div class="left">
+					<a href='/goods/view?no={.goods_seq}' target='_blank'><span class="order-item-image"><img class="small_goods_image" src="{.image}" /></span>
+				<span class="goods_name">{? .cancel_type == '1' }<span class="order-item-cancel-type " >[청약철회불가]</span> {/}{.goods_name}</span></a>
+					<div class="desc" style="padding-left:40px;">
+						<!--{ ? .option1 || .option2 || .option3 || .option4 || .option5 }-->
+							<!--{ ? .opt_type == 'opt' }-->
+						<img src="../images/common/icon_option.gif" />
+							<!--{ / }-->
+							<!--{ ? .opt_type == 'sub' }-->
+						<img src="../images/common/icon_add.gif" />
+							<!--{ / }-->
+						<!--{ / }-->
+						<!--{ ? .option1 }-->
+						<span class="option">{.title1} : {.option1}</span>
+						<!--{ / }-->
+						<!--{ ? .option2 }-->
+						<span class="option">{.title2} : {.option2}</span>
+						<!--{ / }-->
+						<!--{ ? .option3 }-->
+						<span class="option">{.title3} : {.option3}</span>
+						<!--{ / }-->
+						<!--{ ? .option4 }-->
+						<span class="option">{.title4} : {.option4}</span>
+						<!--{ / }-->
+						<!--{ ? .option5 }-->
+						<span class="option">{.title5} : {.option5}</span>
+						<!--{ / }-->
+						{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+					</div>
+					<!--{ ? .inputs }-->
+					<div class="desc" style="padding-left:40px;">
+						<!--{ @ .inputs }-->
+							<!--{ ? ..key_ > 0 }--><br /><!--{ / }-->
+						<img src="../images/common/icon_input.gif" />
+							<!--{ ? ..title }-->{..title}:<!--{ / }-->
+						{..value}
+							<!--{ / }-->
+					</div>
+					<!--{ / }-->
+					<!--{ ? .goods_kind =='coupon' }-->
+					<div  class="desc" style="padding-left:40px;" >
+						{? .coupon_serial }<span class="order-item-coupon-serial" >쿠폰번호:{.coupon_serial}</span><br/>{/}
+						{? .refunditem.cancel_memo }
+							{=nl2br(.refunditem.cancel_memo)}
+						{:}
+							{ ?.goods_kind =='coupon' && .social_start_date && .social_end_date }<span class="order-item-coupon-date" >유효기간:{.social_start_date}~{.social_end_date}</span><br/>{ / }
+						<div class="goods-coupon-use-return">사용제한 : {.couponinfo.coupon_use_return}</div>
+						<div class="goods-coupon-cancel-day">취소 마감시간 : {.couponinfo.socialcp_cancel_refund_day}</div>
+						{/}
+					</div>
+					<!--{ / }-->
+				</div>
+			</td>
+			<td class="info center">{.ea}</td>
+			<!--<td class="info center">{.return_ea}</td>-->
+			<td class="info center">
+			<select name="reason[{.return_item_seq}]">
+			<!--{? .reasonLoop }-->
+				<!--{@ .reasonLoop }-->
+					<option value="{..codecd}">{..reason}</option>
+				<!--{ / }-->
+			<!--{ : }-->
+				<!--{ @ .reasons }-->
+				<!--{ ? ..codecd!='110'}-->
+				<option value="{..codecd}">{..value}</option>
+				<!--{ / }-->
+				<!--{ / }-->
+			<!--{ / }-->
+			</select>
+			<!--{? .reasonLoop }-->
+			<input type="hidden" name="reason_desc[{.return_item_seq}]" value="{.reason_desc}">
+			<script>
+				$.each($("select[name='reason[{.return_item_seq}]'] option"), function(){
+					if($(this).text() == "{.reason_desc}"){
+						$(this).attr("selected", true);
+					}
+				});
+				$("select[name='reason[{.return_item_seq}]']").change(function(){
+					var row = $(this).closest("tr");
+					var reason_desc = row.find("select[name='reason[{.return_item_seq}]'] option:selected").text();
+					row.find("input[name='reason_desc[{.return_item_seq}]']").val(reason_desc);
+				});
+			</script>
+			<!--{ : }-->
+			<script>$("select[name='reason[{.return_item_seq}]'] option[value='{.reason_code}']").attr('selected',true);</script>
+			<!--{ / }-->
+			</td>
+			<td class="info center">{data_return.regist_date}</td>
+			<td class="info center">{data_return.return_date}</td>
+			<!--<td class="info center">{data_return.mname}</td>-->
+			<td class="info center">{data_return.mrefund_status}</td>
+			<td class="info center">{data_return.mstatus}</td>
+		</tr>
+		<!--{ / }-->
+		<tr class="order-item-row">
+			<th class="dark pd10" align="right" style="padding-right:5px;" >소계</th>
+			<th class="dark" align="center"><strong>{tot.ea} ({tot.goods_cnt}종)</strong></th>
+			<!--<th class="dark">{tot.return_ea}</th>-->
+			<th class="dark">
+			<span class="reason">변심:{=number_format(tot.user_reason_cnt)}</span>
+			<span class="reason">오배송:{=number_format(tot.shop_reason_cnt)}</span>
+			<span class="reason">하자:{=number_format(tot.goods_reason_cnt)}</span>
+			</th>
+			<th class="dark" colspan="4">
+			</th>
+		</tr>
+	</tbody>
+</table>
+
+<div style="height:10px;"></div>
+
+<table width="100%" class="info-table-style">
+<col width="10%" /><col width="40%" /><col width="10%" /><col width="40%" />
+<tr>
+	<th class="its-th">휴대폰</th>
+	<td class="its-td">
+		<select name="cellphone[]">
+		<!--{ @ code_load('cellPhone') }-->
+		<option value="{.codecd}">{.value}</option>
+		<!--{ / }-->
+		</select>
+		<script>$("select[name='cellphone[]'] option[value='{data_return.cellphone[0]']}").attr('selected',true);</script>
+		<input type="text" name="cellphone[]" size="6" class="line" value="{data_return.cellphone[1]}" />
+		<input type="text" name="cellphone[]" size="6" class="line" value="{data_return.cellphone[2]}" />
+	</td>
+	<th class="its-th">연락처</th>
+	<td class="its-td">
+		<select name="phone[]">
+		<!--{ @ code_load('locationPhone') }-->
+		<option value="{.codecd}">{.value} {.codecd}</option>
+		<!--{ / }-->
+		</select>
+		<script>$("select[name='phone[]'] option[value='{data_return.phone[0]}']").attr('selected',true);</script>
+		<input type="text" name="phone[]" size="6" class="line" value="{data_return.phone[1]}" />
+		<input type="text" name="phone[]" size="6" class="line" value="{data_return.phone[2]}" />
+	</td>
+</tr>
+<tr>
+	<th class="its-th">회수방법</th>
+	<td class="its-td">
+		<label><input type="radio" name="return_method" value="user" /> 자가반품</label>
+		<label><input type="radio" name="return_method" value="shop" /> 택배회수</label>
+		<script>$("input[name='return_method'][value='{data_return.return_method}']").attr('checked',true);</script>
+	</td>
+	<th class="its-th">주소</th>
+	<td class="its-td">
+		<input type="text" name="senderZipcode[]" value="{data_return.sender_zipcode[0]}" size="5" class="line" /> -
+		<input type="text" name="senderZipcode[]" value="{data_return.sender_zipcode[1]}" size="5" class="line" />
+		<input type="hidden" name="senderAddress_type" value="{data_return.sender_address_type}">
+		<span class="btn small"><input type="button" id="senderZipcodeButton" value="우편번호" /></span><br>
+		<span {? data_return.sender_address_type == "street"}style="font-weight:bold;"{/}>(도로명)</span> <input type="text" name="senderAddress_street" value="{data_return.sender_address_street}" size="40" class="line" /><br>
+		<span {? data_return.sender_address_type != "street"}style="font-weight:bold;"{/}>(지번)</span> <input type="text" name="senderAddress" value="{data_return.sender_address}" size="40" class="line" /><br>
+		(공통상세)<input type="text" name="senderAddressDetail" value="{data_return.sender_address_detail}" size="40" class="line" />
+	</td>
+</tr>
+<tr>
+	<th class="its-th">반품 상세 사유</th>
+	<td class="its-td">
+		<textarea class="wp95 line" rows="3" name="return_reason">{data_return.return_reason}</textarea>
+	</td>
+	<th class="its-th">반품 관리 메모</th>
+	<td class="its-td">
+		<textarea class="wp95 line" rows="3" name="admin_memo">{data_return.admin_memo}</textarea>
+	</td>
+</tr>
+<tr>
+	<th class="its-th">반품 배송비</th>
+	<td class="its-td">
+		<input type="text" name="return_shipping_price" value="{data_return.return_shipping_price}" size="10" class="line number onlynumber" />
+		<span class="desc">반품 상품의 회수로 인하여 발생한 배송비로 구매자에게서 받아야 합니다. </span>
+	</td>
+	<th class="its-th">배송비 입금계좌</th>
+	<td class="its-td">
+		{?data_return.shipping_price_bank_account}{data_return.shipping_price_bank_account}{/}<br />
+		{?data_return.shipping_price_depositor}
+		입금자명 : {data_return.shipping_price_depositor}
+		{/}
+	</td>
+</tr>
+<tr>
+	<th class="its-th-align">처리내역로그</th>
+	<td class="its-td" colspan="3">
+		<textarea  class="wp95 line" rows="3" readOnly="readOnly">{ @process_log }[{.regist_date}] [{.actor}] {.title}{=chr(10)}{ / }</textarea>
+	</td>
+</tr>
+
+</table>
+
+<div style="height:10px;"></div>
+
+{?data_return.status=='complete'}
+	<table align="center" style="margin:auto;">
+	<tr>
+		<td>
+			<input type="hidden" name="status" value="complete" />
+			<select disabled readonly>
+			<option value="complete">반품 완료</option>
+			</select>
+		</td>
+		<td width="10"></td>
+		<td>
+			해당 반품건의 처리가 완료된 상태입니다.
+		</td>
+		<td width="10"></td>
+		<td><span class="btn large black"><input type="submit" value="확인" /></span></td>
+	</tr>
+	</table>
+{:}
+	<table align="center" style="margin:auto;">
+	<tr>
+		<td>
+			<select name="status" onchange="if(this.value=='complete'){$('.status_complete_msg').show();}else{$('.status_complete_msg').hide();}">
+				<option value="request">반품 신청</option>
+				<option value="ing">반품 처리중</option>
+				<option value="complete">반품 완료</option>
+			</select>
+			<script>$("select[name='status']").val("{data_return.status}").change();</script>
+		</td>
+		<td width="10"></td>
+		<td class="status_complete_msg hide">반품완료는 반품상품을 회수 받은 후 상품의 이상유무를 확인한 후 처리하는 것을 권장합니다.<br />반품완료 처리를 하면 해당 반품상품의 재고가 반품수량만큼 자동으로 증가(+) 됩니다.</td>
+		<td width="10" class="status_complete_msg hide"></td>
+		<td><span class="btn large black"><input type="submit" value="확인" /></span></td>
+	</tr>
+	</table>
+{/}
+
+</form>
+{ #layout_footer }

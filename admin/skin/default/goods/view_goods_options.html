@@ -1,0 +1,156 @@
+<div id="optionLayer">
+	<table class="info-table-style" style="width:100%">
+		<input type="hidden" name="optionAddPopup" value="y" />
+		<input type="hidden" name="reserve_policy" value="{options[0].tmp_policy}" />
+		<input type="hidden" name="stock[]" value="{totstock}" />
+		<input type="hidden" name="unUsableStock[]" value="{totunUsableStock}" />
+		<thead>
+		<tr>
+			<th class="its-th-align center" rowspan="2">기준할인가</th>
+			<th class="its-th-align center" colspan="{=count(options[0].option_divide_title)}">필수옵션<br/><span class="desc">[옵션코드]</span></th>
+			<th class="its-th-align center" rowspan="2">매입가</th>
+			<th class="its-th-align center" rowspan="2">매입율</th>
+			<th class="its-th-align center {? !_GET.socialcp_input_type }hide{/} couponinputtitle" rowspan="2">쿠폰1장→값어치<br/><span class="couponinputsubtitle">{? _GET.socialcp_input_type =='price' }금액{:}횟수{/}</span></th>
+			<th class="its-th-align center" rowspan="2">정가<br/>(소비자가/시중가)</th>
+			<th class="its-th-align center" rowspan="2">마진 / 할인가(판매가) <span class="goods_required"></span></th>
+			<th class="its-th-align center" rowspan="2">할인율</th>
+			<th class="its-th-align center" rowspan="2">부가세</th>
+			<th class="its-th-align center" rowspan="2">재고(가용)</th>
+			<th class="its-th-align center" rowspan="2">
+				지급 적립금
+				<div style="color:#999999;" class="point_text">
+					※지급 포인트(P)는
+					<!--{ ? options[0].tmp_policy == 'goods' || tmp_policy == 'goods' }-->개별정책<!--{:}--><a href="../setting/reserve" target="_blank"><u id="policy_str" style="color:#ff6600;">통합정책</u></a><!--{/}-->
+					이 자동적용됨
+				</div>
+			</th>
+			<th class="its-th-align center" rowspan="2">옵션설명</th>
+		</tr>
+		<tr>
+			<!--{ @ options[0].option_divide_title }-->
+			<th class="its-th-align center">{.value_}</th>
+			<!--{ / }-->
+		</tr>
+		</thead>
+	<!--{ ? options }-->
+		<tbody>
+		<!--{ @ options }-->
+		<!--{ ? !config_goods.option_view_count || config_goods.option_view_count > .index_ || islimit != 'limit' }-->
+		<tr class="optionTr">
+			<td class="its-td-align center">
+				<!--{ ?.default_option == 'y' }-->●<!--{ : }--><!--{ / }-->
+			</td>
+			<!--{ @ .opts }-->
+			<td class="its-td-align center optionTitle" >{..value_}
+				{? .optcodes[..index_] != ''  }<br/><span class="desc">[{.optcodes[..index_]}]</span>{/}
+				<!--{? .divide_newtype[..key_] }-->
+					<br/>
+					<!--{? .divide_newtype[..key_] == 'color' }-->
+						<input type="hidden"  name="optcolor[]" value="{.color}">
+						<div class="colorPickerBtn helpicon1" opttype="{.option_divide_type[..key_]}" style="background-color:{.color}" ></div>
+					<!--{: .divide_newtype[..key_] == 'address'  }-->
+						<span class="addrhelpicon helpicon" opttype="{.option_divide_type[..key_]}" title="{? .zipcode }[{.zipcode}]  <br> (지번) {.address} {.addressdetail}<br>(도로명) {.address_street} {.addressdetail} {/} {? .biztel}업체 연락처:{.biztel}{/}<br/>수수료 : {.address_commission} %">지역</span>
+					<!--{: .divide_newtype[..key_] == 'date'  }-->
+						<span class="codedatehelpicon helpicon" opttype="{.option_divide_type[..key_]}" title="{? .codedate && .codedate !='0000-00-00' }{.codedate}{/}">날짜</span>
+					<!--{: .divide_newtype[..key_] == 'dayinput'  }-->
+						<span class="dayinputhelpicon helpicon" opttype="{.option_divide_type[..key_]}" title="{? .sdayinput && .fdayinput }{.sdayinput} ~ {.fdayinput}{/}">수동기간</span>
+					<!--{: .divide_newtype[..key_] == 'dayauto'  }-->
+						<span class="dayautohelpicon helpicon"  opttype="{.option_divide_type[..key_]}" title="{? .dayauto_type }'결제확인' {.dayauto_type_title} {.sdayauto}일 {? .dayauto_type == 'day' }이후{/}부터 + {.fdayauto}일{.dayauto_day_title}{/}">자동기간</span>
+					<!--{ / }-->
+				<!--{ / }-->
+			</td>
+			<!--{ / }-->
+			<td class="its-td-align center">{=number_format(.supply_price)}</td>
+			<td style="padding-right: 10px;" class="its-td-align right">{=number_format(.supplyRate)}%</td>
+			<td class="its-td-align center {? !_GET.socialcp_input_type }hide{/} couponinputtitle">{=number_format(.coupon_input)}</td>
+			<td class="its-td-align center">{=number_format(.consumer_price)}</td>
+			<td class="its-td-align center pricetd">
+				{=number_format(.net_profit)} / <span class="priceSpan">{=number_format(.price)}</span>
+				<input type="hidden" name="price[]" value="{.price}" />
+			</td>
+			<td style="padding-right: 10px;" class="its-td-align right">{=number_format(.discountRate)}%</td>
+			<td style="padding-right: 10px;" class="its-td-align right">
+				<!--{ ? goodsTax == 'exempt' }-->0<!--{ : }-->
+				{=number_format(.tax)}
+				<!--{ / }-->
+			</td>
+			<td class="its-td-align center">
+				<input type="hidden" name="stock[]" value="{.stock}" />
+				{.stock} / {=number_format(.stock - .reservation15)}
+				<!--{ ? cfg_order.ableStockStep == 15 }-->
+				<input type="hidden" name="unUsableStock[]" value="{.stock - .badstock - .reservation15}" />
+				(<span class="optionUsableStock">{=number_format(.stock - .badstock - .reservation15)}</span>)
+				<!--{ / }-->
+				<!--{ ? cfg_order.ableStockStep == 25 }-->
+				<input type="hidden" name="unUsableStock[]" value="{.stock - .badstock - .reservation25}" />
+				(<span class="optionUsableStock">{=number_format(.stock - .badstock - .reservation25)}</span>)
+				<!--{ / }-->
+			</td>
+			<td class="its-td-align center">
+				<!--{? .reserve_unit == 'won' }-->
+				{=number_format(.reserve)}원
+				<!--{ : }-->
+				{=number_format(.reserve_rate)}% ({=number_format(.reserve)}원)
+				<!--{ / }-->
+			</td>
+			<td class="its-td-align center">
+				{.infomation}
+			</td>
+		</tr>
+		<!--{ / }-->
+		<!--{ / }-->
+		</tbody>
+	<!--{ / }-->
+	</table>
+</div>
+
+
+<div id="preview_option_divide">
+	{ ? options }
+	<table class="goods_option_table" width="100%" cellpadding="0" cellspacing="5" border="0">
+	{ @ options[0].option_divide_title }
+	<tr>
+		<th>{.value_}</th>
+		<td><select style='width:200px;'><option>- 선택 -</option>
+		{ @ options[0].optionArr[.index_] }
+			<option>{..value_}</option>
+		{/}
+		</select><td>
+	</tr>
+	{/}
+	</table>
+	{/}
+</div>
+<div id="preview_option_sum">
+	{ ? options }
+	<table class="goods_option_table" width="100%" cellpadding="0" cellspacing="5" border="0">
+	<tr>
+		<th>옵션</th>
+		<td><select style='width:200px;'><option>- 선택 -</option>
+		{ @ options }
+			<option>{ @ .opts }{ ? ..index_ > 0 } / { / }{..value_}{ / }</option>
+		{/}
+		</select><td>
+	</tr>
+	</table>
+	{/}
+</div>
+<script type="text/javascript">
+{ ? isAddr == 'Y' }
+parent.show_mapView();
+{ : }
+parent.hide_mapView();
+{ / }
+
+{ ? reload == 'y' }
+location.replace('?provider_seq={provider_seq}&mode=view&tmp_seq={tmp_seq}&tmp_policy={tmp_policy}&goodsTax={goodsTax}&goods_seq={goods_seq}&socialcp_input_type={_GET.socialcp_input_type}&islimit={islimit}');
+{ : }
+	{ ? options }
+		parent.document.goodsRegist.tmp_option_seq.value	= '{tmp_seq}';
+		parent.document.getElementById("optionLayer").innerHTML	= document.getElementById("optionLayer").innerHTML;
+		parent.document.getElementById("preview_option_divide").innerHTML	= document.getElementById("preview_option_divide").innerHTML;
+		parent.document.getElementById("preview_option_sum").innerHTML	= document.getElementById("preview_option_sum").innerHTML;
+		parent.help_tooltip();
+	{ / }
+{ / }
+</script>

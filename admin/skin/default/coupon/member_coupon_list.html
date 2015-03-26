@@ -1,0 +1,280 @@
+{ #layout_header_popup }
+<style >
+table.mqs-menu {border:0px;border-collapse:collapse;}
+table.mqs-menu td {background-color:#fbfbfb; border:1px solid #dfdfe4; border-bottom:1px solid #c5c7ce;}
+table.mqs-menu td.selected {background-color:#fff; border-bottom:0px;}
+table.mqs-menu td a {display:inline-block; padding:4px 0px; width:135px; text-align:center; color:#9194a1}
+table.mqs-menu td.selected a {font-weight:bold; color:#333}
+</style>
+<style>
+/* 검색폼 양식 */
+div.search-form-container {background:#e6e9e9; padding:15px 0 10px 0;}
+div.search-form-container table.search-form-table	{margin:auto;}
+div.search-form-container table.sf-option-table th	{height:22px; text-align:left; padding-right:10px;}
+div.search-form-container table.sf-keyword-table {width:510px; border:2px solid #000; border-collapse:collapse; background-color:#fff; table-layout:fixed;}
+div.search-form-container table.sf-keyword-table .sfk-td-txt {padding-right:5px;}
+div.search-form-container table.sf-keyword-table .sfk-td-txt input {width:100%; height:22px; padding:0px; border:0px; margin:0px; background-color:#fff; line-height:22px; text-align:center;}
+div.search-form-container table.sf-keyword-table .sfk-td-btn {width:31px; text-align:center;}
+div.search-form-container table.sf-keyword-table .sfk-td-btn button {width:32px; height:26px; border:0px; background:url('../images/common/btn_search.gif') no-repeat center center; cursor:pointer}
+div.search-form-container table.sf-keyword-table .sfk-td-btn button span {display:none}
+
+.icon-check {padding-left:10px; background:url('../images/common/icon_check.gif') no-repeat 0 2px;}
+</style>
+{? _GET.tab != '2'}
+<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"></script>
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" ></script>
+{/}
+<script>
+$(document).ready(function() {
+	setDefaultText();
+	$(".all-check").toggle(function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',true);
+	},function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',false);
+	});
+
+	// 쿠폰사용가능한 상품 조회하기 (적용대상조회)
+	$('.coupongoodsreviewbtn').live("click",function(){
+		var coupon_type = $(this).attr("coupon_type");
+		var use_type = $(this).attr("use_type");
+		var issue_type = $(this).attr("issue_type");
+		{? _GET.tab == '1'  || !_GET.tab }
+			var download_seq = $(this).attr("download_seq");
+			var coupon_seq = $(this).attr("coupon_seq");
+			var coupongoodsreviewerurl = '../coupon/coupongoodsreviewer?no='+download_seq+'&coupon_type='+coupon_type+'&coupon_seq='+coupon_seq+'&download_seq='+download_seq;
+		{:}
+			var coupon_seq = $(this).attr("coupon_seq"); 
+			var coupongoodsreviewerurl = '../coupon/coupongoodsreviewer?no='+coupon_seq+'&coupon_type='+coupon_type;
+		{/}
+		var coupon_name = $(this).attr("coupon_name");   
+		if( use_type == 'offline' ) {
+			addFormDialog(coupongoodsreviewerurl, '650', '', '쿠폰정보','false');
+		}else{
+			addFormDialog(coupongoodsreviewerurl, '450', '', '쿠폰정보','false');
+		}
+	});
+	//쿠폰상품 조회후 상품검색창
+	$("input:button[name=goodssearchbtn]").live("click",function(){
+		var goods_seq		= $("#coupongoods_goods_seq").val();
+		var coupon_seq	= $(this).attr("coupon_seq");
+
+		if(!goods_seq) {
+			openDialogAlert("상품번호를 정확히 입력해 주세요.",'260','140',function(){$("#coupongoods_goods_seq").focus();return;});
+		}else{ 
+			$.ajax({
+				'url' : '/admin/coupon/coupongoodssearch',
+				'data' : {'coupon':coupon_seq,'goods':goods_seq},
+				'type' : 'post',
+				'dataType': 'json',
+				'success' : function(res){ 
+					$(".coupongoodsreviewerno").hide();//상품사용불가
+					$(".coupongoodsrevieweryes").hide();//쿠폰사용가능
+					if( res.result == 'goodsyes' ) {  
+						var imgsrc = (eval("res.goods.src"))?res.goods.src:"/admin/skin/default/images/common/noimage_list.gif";
+						$(".coupongoodsrevieweryes").show(); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".image").html('<img class="goodsThumbView" alt="" src="'+imgsrc+'" width="50" height="50">'); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".name").html(res.goods.name);
+						$(".coupongoodsrevieweryes .issueGoods").find(".price").html(res.goods.price);
+						$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq",goods_seq); 
+						
+						openDialog('상품번호 찾기',"coupongoodsreviewerpopup",{"width":"480","height":"250"});
+					}else if( res.result == 'goodsno' ) {  
+						var imgsrc = (eval("res.goods.src"))?res.goods.src:"/admin/skin/default/images/common/noimage_list.gif";
+						$(".coupongoodsreviewerno").show();
+						$(".coupongoodsrevieweryes .issueGoods").find(".image").html('<img class="goodsThumbView" alt="" src="'+imgsrc+'" width="50" height="50">'); 
+						$(".coupongoodsrevieweryes .issueGoods").find(".name").html(res.goods.name);
+						$(".coupongoodsrevieweryes .issueGoods").find(".price").html(res.goods.price);
+						$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq",goods_seq); 
+						
+						openDialog('상품번호 찾기',"coupongoodsreviewerpopup",{"width":"400","height":"250"});
+					}else{ 
+						openDialogAlert("상품을 찾을 수 없습니다.<br/>확인 후 다시 입력하시기 바랍니다.",'250','160'); 
+					}
+				}
+			});
+		}
+	});
+	
+	//상품상세보기
+	$('.coupongoodsdetail').live("click",function(){ 
+		window.open("/goods/view?no="+$(".coupongoodsrevieweryes .issueGoods").attr("goods_seq"),'','');
+	});
+
+ 
+	$("[name='select_date']").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+	$(".offline_use").click(function (){
+		$("#download_seq").val($(this).attr('download_seq'));
+		openDialog("<span class='desc'>쿠폰사용하기</span>", "couponuse_area", {"width":"370","height":"200"});
+	});
+
+});
+
+function issue_list(coupon_seq){
+	window.open('/popup/issue_list?coupon_seq='+coupon_seq+'','issue_list','width=500,height=350');
+}
+
+
+</script>
+
+
+<!-- 타이틀 -->
+<div id="main-qna-summary">
+	<table width="100%" height="30">
+	<tr>
+		<td align="right">
+			<table class="mqs-menu fl">
+			<tr>
+				<td {? _GET.tab == '1' || !_GET.tab}class="selected" {/} ><a href="?tab=1&member_seq={_GET.member_seq}">보유한 쿠폰({unusedcount}/{totalcount}) </a></td>
+				<td {? _GET.tab == '2'}class="selected" {/} ><a href="?tab=2&member_seq={_GET.member_seq}">다운로드 가능쿠폰({svcount}) </a></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<div class="main-summary-contents"></div>
+</div>
+<div style="height:8px;"></div>
+<div style="height:4px;"></div>
+{? _GET.tab == '1'  || !_GET.tab}
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+	<thead style="height:36px; background:url('../images/design/tbl_th_bg.gif') repeat-x 0 100%; border-left:1px solid #e0e0e0; border-bottom:1px solid #bbbbbb; font-weight:normal;">
+		<tr >
+			<th width="50" >번호</th>
+			<th width="80" >발급일</th>
+			<th >쿠폰명 </th>
+			<th width="70" >혜택</th>
+			<th width="80" >유효기간</th>
+			<th width="80" >남은 일자</th>
+			<th width="100" >제한 금액</th>
+			<th width="60" >적용대상</th>
+			<th width="60" >상태</th>
+			<th width="80" >구매/<br/>적립쿠폰</th>
+		</tr>
+	</thead>
+	<tbody>
+	{? loop }
+		{@ loop }
+			{? .use_type=='offline' && .use_status == 'unused'}
+				<tr class="offline_use hand" coupon_seq="{.coupon_seq}" download_seq="{.download_seq}">
+			{:}
+				<tr>
+			{/} 
+				<td class="cell" >{.number}</td>
+				<td class="cell" >{.date}</td>
+				<td class="cell left" nowrap="nowrap">
+					<div class="bold">{.cp_name}{? .sale_agent == 'm' }<img src="../images/common/icon_mobile.gif" >{/}</div>
+				</td>
+				<td class="cell left" >{.salepricetitle}</td>
+				<td class="cell" >{.issuedate}</td>
+				<td class="cell" >{.issuedaylimit}</td>
+				<td class="cell" >
+					{? (.type == 'offline_emoney' || .use_type == 'offline') }
+						-
+					{:}
+						{.limit_goods_price}원 이상<br/> 구매 시&nbsp;&nbsp;
+					{/}
+				</td>
+				<td class="cell" >
+						{? .type == 'offline_emoney' } 
+							-
+						{:}
+							<span class="btn small gray "><input type="button" class="coupongoodsreviewbtn" coupon_type="{? .type == 'offline_coupon' }offline{:}online{/}" coupon_seq="{.coupon_seq}" download_seq="{.download_seq}"  use_type="{.use_type}"  issue_type="{.issue_type}"   coupon_name="{.coupon_name}" value="조회" /></span> 
+						{/}  
+				</td>
+				<td class="cell" >{.use_status_title}</td>
+				<td class="cell" >{.goodsview}</td> 
+			<tr>
+		{/}
+	{:}
+		<tr >
+			<td colspan="10" align="center" class="cell">
+				보유한 쿠폰이 없습니다.
+			</td>
+		<tr>
+	{/} 
+	</tbody>
+	</table>
+{:}
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+	<thead>
+		<tr style="height:50px; background:#f5f5f5;">
+			<th >쿠폰명 / 할인액(율) / 종류</th>
+			<th width="150" >제한금액</th>
+			<th width="150" >다운로드 가능기간<br/>or <br/>포인트 전환 조건</th>
+			<th width="150">유효기간</th>
+			<th width="60" >적용대상</th>
+			<th width="100">&nbsp;</th>
+		</tr>
+	</thead>
+	<tbody>
+	{? loop }
+		{@ loop }
+		<tr>
+			<td class="cell">
+				<div class="bold">{.coupon_name}</div>
+				<div >{.salepricetitle}</div>
+				<div >{.issuebtn}</div>
+			</td>
+			<td class="cell">{.limit_goods_price}원 이상 구매 시</td>
+			<td class="cell">{.downdate}</td>
+			<td class="cell">{.downloaddate}</td> 
+			<td class="cell" >
+					{? .type != 'offline_emoney' } 
+						<span class="btn small gray "><input type="button" class="coupongoodsreviewbtn" coupon_type="{? .type == 'offline_coupon' }offline{:}online{/}" coupon_seq="{.coupon_seq}" download_seq="{.download_seq}"  use_type="{.use_type}"  issue_type="{.issue_type}"   coupon_name="{.coupon_name}" value="조회" /></span> 
+					{/}  
+			</td>
+			<td class="cell">{? .downckbtn }다운가능{:} &nbsp;{/}</td>
+		</tr>
+		{/}
+	{:}
+		<tr >
+			<td colspan="6" align="center" class="cell">
+				다운가능한 쿠폰이 없습니다.
+			</td>
+		<tr>
+	{/}
+	</tbody>
+	</table>
+
+{/}
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin}</div>
+	</td>
+</tr>
+</table>
+
+<div id="showList" class="hide"> </div>
+
+{ #coupongoodslayer }
+{#layout_footer_popup}

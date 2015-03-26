@@ -1,0 +1,147 @@
+{ #layout_header }
+
+<script>
+//체크박스 색상
+$("input[type='checkbox'][name='del[]']").live('change',function(){
+	if($(this).is(':checked')){
+		$(this).closest('tr').addClass('checked-tr-background');
+	}else{
+		$(this).closest('tr').removeClass('checked-tr-background');
+	}
+}).change();
+</script>
+
+{ #searchform }
+<!-- 게시글리스트테이블 : 시작 -->
+<table class="list-table-style " cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+	<col width="20" />
+	<col width="40" />
+	<col width="110" />
+	<col width="80" />
+	{? categorylist}<col width="150" />{/}
+	<col />
+	<col width="110" />
+	<col width="100" />
+	<col width="50" />
+	<col width="150" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th><input type="checkbox" name="checkboxAll" value="" id="checkboxAll" /></th>
+		<th>번호</th>
+		<th>작성자</th>
+		<th>IP</th>
+		{? categorylist}<th><select  name="category" id="searchcategory" class="line">
+		<option value="" selected="selected" >- 질문유형전체 -</option>
+		{@ categorylist}
+			<option value="{.value_}" {? _GET.category == .value_} selected="selected"  {/}>{.value_}</option>
+		{/}
+		</select></th>{/}
+		<th>제목</th>
+		<th>문의일</th>
+		<th><select  name="reply" id="selreply" class="line">
+		<option value="" selected="selected" >- 답변상태 -</option>
+		<option value="y" {? _GET.searchreply == 'y'} selected="selected"  {/}> 답변대기 </option>
+		<option value="n"  {? _GET.searchreply == 'n'} selected="selected"  {/}> 답변완료 </option>
+		</select></th>
+		<th>적립금</th>
+		<th>관리</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb otb"  id="ajaxTable">
+		<!-- 공지리스트데이터 : 시작 -->
+		{? noticeloop }
+			{@ noticeloop }
+			<tr class="list-row  noticetr  {.onlynoticeclass}">
+				<td align="center"> </td>
+				<td align="center" class="number">{.number}</td>
+				<td align="center" class="name" >{.name}</td>
+				<td align="center" class="ip" >{.ip}</td>
+				{? categorylist}<td align="center" class="category" >{.category}</td>{/}
+				<td align="left" >
+					{.iconmobile}
+					{.subject}
+					{.iconimage}
+					{.iconfile}
+					{.iconnew}
+					{.iconhot}
+					{.iconhidden}
+				</td>
+				<td align="center" class="date">{.date}</td>
+				<td align="center" > </td>
+				<td align="center"> </td>
+				<td align="center" nowrap>
+					{.modifybtn}
+					{.replaybtn}
+					{.deletebtn}
+				</td>
+			</tr>
+			{/}
+		{/}
+		<!--공지 리스트 : 끝 -->
+
+		<!-- 리스트데이터 : 시작 -->
+		{? loop }
+			{@ loop }
+			<tr class="list-row {? .display == 1}gray{/} {.tdclass}">
+				<td align="center"><input type="checkbox" name="del[]" value="{.seq}"  class="checkeds"  /></td>
+				<td align="center" class="number">{.number}</td>
+				<td align="center" class="name">{.name}</td>
+				<td align="center" class="ip" >{.ip}</td>
+				{? categorylist}<td align="center" class="category" >{.category}</td>{/}
+				<td align="left">
+					{.iconmobile}
+					{.subject}
+					{.iconimage}
+					{.iconfile}
+					{.iconnew}
+					{.iconhot}
+					{.iconhidden}
+				</td>
+				<td align="center" class="date">{.date}</td>
+				<td align="center">{.reply_title}</td>
+				<td align="center">{.emoneylay}</td>
+				<td align="center" nowrap>
+					{.modifybtn}
+					{.replaybtn}
+					{.deletebtn}
+				</td>
+			</tr>
+			{/}
+		{:}
+			<tr class="list-row">
+				<td colspan="all" align="center">
+					{ ? search_text }
+						'{search_text}' 검색된 게시글이 없습니다.
+					{:}
+						등록된 게시글이 없습니다.
+					{/}
+				</td>
+			<tr>
+		{/}
+
+	</tbody>
+	<!-- 리스트 : 끝 -->
+</table>
+<!-- 게시글리스트테이블 : 끝 -->
+
+<br style="line-height:10px;" />
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{pagin}</div>
+
+<!--{ ? !loop }-->
+<script>
+// colspan 계산
+$("td[colspan='all']").each(function(){
+	$(this).attr('colspan',$(this).closest("table").children("thead").first().children("tr").first().children("th").length);
+});
+</script>
+<!--{ / }-->
+
+{ #layout_footer }

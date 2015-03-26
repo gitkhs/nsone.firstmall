@@ -1,0 +1,91 @@
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" charset="utf8"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery_pagination/jquery.pager.js" charset="utf8"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	getAjaxOfflineList();
+
+	$("#submitbtn").click(function() {
+		getAjaxOfflineList();
+	});
+
+});
+
+/**
+ * 상품을 ajax로 검색한다.
+ * @param int page 페이지번호
+ */
+function getAjaxOfflineList(page) {
+	var pageNumber = page ? page : 1;
+   $("#getpage").val(pageNumber);
+	var queryString = $('#offlinecoupon_search').formSerialize();
+	var perpage = 20;
+	$.ajax({
+		type: 'post',
+		url: '/admin/coupon_process/offline_coupon_list',
+		data: queryString + '&perpage=' + perpage,
+		dataType: 'json',
+		success: function(data) {
+			$('#ajaxTable').html(data.content);
+			$('#searchcount').html(setComma(data.searchcount));
+			$('#totalcount').html(setComma(data.totalcount));
+			$('#nowpage').html(setComma(data.nowpage));
+			$('#total_page').html(setComma(data.total_page));
+			$("#pager").pager({ pagenumber: data.page, pagecount: data.pagecount, buttonClickCallback: pageClick });
+		}
+	});
+}
+
+/**
+ * 페이징 클릭시 페이지를 로딩한다.
+ * @param int page 페이지번호
+ */
+function pageClick(page) {
+	$("#getpage").val(page);
+	getAjaxOfflineList(page);
+}
+
+</script>
+
+<form name="offlinecoupon_search" id="offlinecoupon_search"  method="post" >
+<input type="hidden" name="no" value="{coupons.coupon_seq}" >
+<input type="hidden" name="page" id="getpage" value="{_GET.page}" >
+<input type="hidden" name="orderby" id="orderby" value="{_GET.orderby}" >
+<!-- 리스트검색폼 : 시작 -->
+<div class="search-form-container">
+	<table class="sf-keyword-table">
+	<tr>
+		<td class="sfk-td-txt"><input type="text" name="search_text" id="search_text" value="{_GET.search_text}" title="인증번호" /></td>
+		<td class="sfk-td-btn"><button type="button" id="submitbtn"><span>검색</span></button></td>
+	</tr>
+	</table>
+</div>
+	</form>
+<!-- 리스트검색폼 : 끝 -->
+
+<ul class="left-btns clearbox">
+	<li class="left"><div style="margin-top:rpx;">검색 <span id="searchcount" style="color:#000000; font-size:11px; font-weight: bold">{sc.searchcount}</span>/총 <span id="totalcount" style="color:#000000; font-size:11px; font-weight: bold">{sc.totalcount}</span>개(현재 <span id="nowpage" ></span>/총 <span id="total_page" >{sc.total_page}</span>페이지)</div></li>
+</ul>
+<div class="clearbox"></div>
+<div >
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="3%" />
+			<col width="8%" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align center">번호</th>
+			<th class="its-th-align center">인증번호(<span class="red" >사용</span>)</th>
+		</tr>
+		</thead>
+		<tbody id="ajaxTable"></tbody>
+	</table>
+</div>
+<!-- 서브 레이아웃 영역 : 끝 -->
+
+<!-- 페이징 -->
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td align="center" ><div id="pager" style='clear: both'></div></td>
+</tr>
+</table>

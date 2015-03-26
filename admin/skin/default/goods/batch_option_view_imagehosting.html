@@ -1,0 +1,65 @@
+<style>
+.default_option {background-color:#efefef;}
+</style>
+<table class="list-table-style" cellspacing="0" border="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col /> 
+		<col width="300" /><!--옵션--> 
+		<col width="140" /><!--정가--> 
+		<col width="140" /><!--할인가(판매가)--> 
+		<col width="100" /><!--부가세--> 
+		<col width="140" /><!--재고(가용)--> 
+		<col width="140" /><!--이미지 호스팅 변환-->
+	</colgroup>
+	<!--{ @ loop }-->
+	<!--{ ? .default_option == 'y'}-->
+	<tr style="height:30px;" class="default_option">
+	<!--{ : }-->
+	<tr style="height:30px;">
+	<!--{ / }-->
+		<td>
+		<span class="detail_default_option_select">
+		<!--{ ? .option_divide_title[0] }-->
+		{.option_divide_title[0]} :
+		<!--{ / }-->
+		{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+		{.option1}
+		<!--{ ? .option2 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[1] }-->
+		{.option_divide_title[1]} :
+		<!--{ / }-->
+		{.option2}
+		<!--{ / }-->
+		<!--{ ? .option3 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[2] }-->
+		{.option_divide_title[2]} :
+		<!--{ / }-->
+		{.option3}
+		<!--{ / }-->
+		<!--{ ? .option4 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[3] }-->
+		{.option_divide_title[3]} :
+		<!--{ / }-->
+		{.option4}
+		<!--{ / }-->
+		<!--{ ? .option5 }-->
+		&nbsp;
+		<!--{ ? .option_divide_title[4] }-->
+		{.option_divide_title[4]} :
+		<!--{ / }-->
+		{.option5}
+		<!--{ / }-->
+		</span>
+		</td>
+		<td align="right" style="padding-right:5px;">{=number_format(.consumer_price)}</td>
+		<td align="right" style="padding-right:5px;">{=number_format(.price)}</td>
+		<td align="right" style="padding-right:5px;">{=number_format(.price*0.1)}</td>
+		<td align="center">{.stock} ({.able_stock})</td> 
+		<td align="center">-</td>
+	</tr>
+	<!--{ / }-->
+</table>

@@ -1,0 +1,114 @@
+
+<br style="line-height:40px" />
+
+<div id="shop_member_daily_location_chart" style="margin:auto; height:250px; width:100%;"></div>
+
+<br style="line-height:10px" />
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td align="right" valign="bottom"><span class="btn small"><input type="button" value="엑셀출력" onclick="divExcelDownload('지역별_회원가입현황','#shop_member_daily_location_table')" /></span></td>
+</tr>
+</table>
+
+<br style="line-height:10px" />
+
+<div id="shop_member_daily_location_table">
+	<table width="100%" class="simpledata-table-style" style="margin:auto;">
+
+	<tr>
+		<td rowspan="2" bgcolor="eeeeee"></td>
+		{@arr_location}
+		<th colspan="3">{.value_}</th>
+		{/}
+	</tr>
+	<tr>
+		{@arr_location}
+			<th width="2%">남</th>
+			<th width="2%">여</th>
+			<th width="2%">합</th>				
+		{/}
+	</tr>
+	<tr>
+		<td align="center">합계</td>
+		{@arr_location}
+			{@(arr_sex)}
+				<td class="right fx11 tahoma" style="padding-right:3px">{?dataForTableSum[.value_][..value_]}<span>{:}<span class="desc">{/}{=number_format(dataForTableSum[.value_][..value_])}</span></td>
+			{/}				
+		{/}
+	</tr>
+	{@dataForTable}
+	<tr>
+		<td align="center">{=.key_+1}일</td>
+		{@.value_}
+			{@..value_}
+				<td class="right fx11 tahoma" style="padding-right:3px">{?...value_}<span>{:}<span class="desc">{/}{=number_format(...value_)}</span></td>
+			{/}				
+		{/}
+	</tr>
+	{/}
+	</table>
+</div>
+
+<script class="code" type="text/javascript">
+$(document).ready(function(){
+	
+	var maxValue = {maxValue};
+	var gap = parseInt(maxValue.toString().substring(0,1)) < 2 ? Math.pow(10,maxValue.toString().length-2) : Math.pow(10,maxValue.toString().length-1);
+	var yaxisMax = parseInt(maxValue.toString().substring(0,1)) < 2 ? gap * (parseInt(maxValue.toString().substring(0,2))+2) : gap * (parseInt(maxValue.toString().substring(0,1))+2);
+	yaxisMax = Math.ceil(yaxisMax/10)*10;
+	yaxisMax = yaxisMax > 10 ? yaxisMax : 10;
+	
+	var line1 = {=json_encode(dataForChart['남'])};
+	var line2 = {=json_encode(dataForChart['여'])};
+	var line3 = {=json_encode(dataForChart['합계'])};
+	var ticks = ['{=implode("','",arr_location)}'];
+
+	
+	var plot1 = $.jqplot('shop_member_daily_location_chart', [line1,line2,line3], {
+		stackSeries: false,
+		seriesDefaults: { 
+			renderer:$.jqplot.BarRenderer,
+			rendererOptions: {
+				// Put a 30 pixel margin between bars.
+				barMargin: 7,
+				// Highlight bars when mouse button pressed.
+				// Disables default highlighting on mouse over.
+				highlightMouseDown: true   
+			},
+			pointLabels: {show: true},
+			showMarker:true
+		},
+		seriesColors:{=json_encode(seriesColors)},
+		series:[
+			{@arr_sex}
+			{?.index_},{/}{label:'{.value_}'}
+			{/}
+		],
+		axes: {
+			xaxis: {
+				renderer: $.jqplot.CategoryAxisRenderer,
+				ticks: ticks
+			},
+			yaxis: {
+				min: 0,
+		        max: yaxisMax,
+		        numberTicks: 11
+			}
+		},
+		legend: {      
+			show: true,      
+			location: 'e',      
+			placement: 'outside'    
+		},
+		grid: {
+	        drawGridLines: true,
+	        gridLineColor: '#dddddd',
+	        background: '#fffdf6',
+	        borderWidth: 0,
+	        shadow: false
+	    }
+	});
+	
+});
+</script>

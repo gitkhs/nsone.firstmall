@@ -1,0 +1,332 @@
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" charset="utf8"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery_pagination/jquery.pager.js" charset="utf8"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	// 쿠폰사용가능한 상품 조회하기 (적용대상조회)
+	$('.coupongoodsreviewbtnpopup').live("click",function(){
+		var coupon_type = $(this).attr("coupon_type");
+		var use_type = $(this).attr("use_type");
+		var issue_type = $(this).attr("issue_type"); 
+		var download_seq = $(this).attr("download_seq");
+		var coupon_seq = $(this).attr("coupon_seq");
+		var coupongoodsreviewerurl = '../coupon/coupongoodsreviewer?no='+download_seq+'&coupon_type='+coupon_type+'&coupon_seq='+coupon_seq+'&download_seq='+download_seq;
+		var coupon_name = $(this).attr("coupon_name");   
+		if( use_type == 'offline' ) { 
+			openDialogPopup("쿠폰정보","onlinecoupontypePopupNew",{
+		   'width':'650',
+		   'url':'../coupon/coupongoodsreviewer',
+		   'data':{
+			'no'   : download_seq,
+			'coupon_type'  : coupon_type,
+			'coupon_seq' : coupon_seq,
+			'download_seq' : download_seq
+		   }
+			});
+		}else{ 
+			openDialogPopup("쿠폰정보","onlinecoupontypePopupNew",{
+		   'width':'450',
+		   'url':'../coupon/coupongoodsreviewer',
+		   'data':{
+			'no'   : download_seq,
+			'coupon_type'  : coupon_type,
+			'coupon_seq' : coupon_seq,
+			'download_seq' : download_seq
+		   }
+			});
+		}
+	});
+	$("#submitbtn").click(function() {
+		getDownAjaxList();
+	});
+	$(".select_date").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+	$('#display_quantity').bind('change', function() {
+		$("#perpage").val($(this).val());
+		$("#couponsearch").submit();
+	});
+
+	$('#display_orderby').bind('change', function() {
+		$("#orderby").val($(this).val());
+		$("#couponsearch").submit();
+	});
+
+	$("#download_search_text").click( function(){
+		if($(this).val() == "아이디, 이름" ){
+			$(this).val('');
+		}
+	});
+
+	$(".userinfo").click(function(){
+		var mseq = $(this).attr("mseq");
+		alert(mseq);
+		var href = "/admin/member/detail?member_seq="+mseq;
+		var a = window.open(href, 'mbdetail', '');
+		if ( a ) {
+			a.focus();
+		}
+	});
+
+	$('#checkboxAll').click(function() {
+		checkAll(this, '.checkeds');
+	});
+
+
+	// 삭제
+	$("#downloaddelete_btn").click(function() {
+		var delseq = '';
+		$('.checkeds').each(function(e, el) {
+			if( $(el).attr('checked') == 'checked' ){
+				delseq += $(el).val() + ",";
+			}
+		});
+		if(!delseq){
+			alert('발급(인증) 쿠폰을 선택해 주세요.');
+			return false;
+		}
+		openDialogConfirm('회원에게 발급된 쿠폰을<br>운영자의 권한으로 삭제하시겠습니까?',400,150,function(){
+			$.ajax({
+				'url' : '../coupon_process/download_delete',
+				'data' : {'delseqar':delseq},
+				'type' : 'post',
+				'dataType': 'json',
+				'success' : function(res){
+					if(res.result){
+						openDialogAlert(res.msg,400,150,function(){getDownAjaxList();});
+					}else{
+						openDialogAlert(res.msg,400,150,function(){getDownAjaxList();});
+					}
+				}
+			});
+		},function(){});
+	});
+
+	getDownAjaxList();
+});
+
+/**
+ * 체크박스 전체 선택
+ * @param string el 전체 선택 체크박스
+ * @param string targetEl 적용될 체크박스 클래스명
+ */
+function checkAll(el, targetEl) {
+	if( $(el).attr('rel') == 'yes' ) {
+		var do_check = false;
+		$(el).attr('rel', 'no');
+	} else {
+		var do_check = true;
+		$(el).attr('rel', 'yes');
+	}
+	$(targetEl).each(function(e, el) {
+		if( $(el).attr('disabled') != 'disabled' ){//제외
+			$(el).attr('checked', do_check).change();
+		}
+	});
+}
+
+function orderinfo(order_seq) {
+	var href = "/admin/order/view?no="+order_seq;
+	var a = window.open(href, 'orderdetail'+order_seq, '');
+	if ( a ) {
+		a.focus();
+	}
+}
+
+
+function goodsinfo(goods_seq) {
+	var href = "/admin/goods/regist?no="+goods_seq;
+	var a = window.open(href, 'goodsdetail'+goods_seq, '');
+	if ( a ) {
+		a.focus();
+	}
+}
+
+function userinfo(mseq){
+	var href = "/admin/member/detail?member_seq="+mseq;
+	var a = window.open(href, 'mbdetail'+mseq, '');
+	if ( a ) {
+		a.focus();
+	}
+}
+
+/**
+ * 상품을 ajax로 검색한다.
+ * @param int page 페이지번호
+ */
+function getDownAjaxList(page) {
+	var pageNumber = page ? page : 1;
+   $("#getpage").val(pageNumber);
+	var queryString = $('#downloadsearch').formSerialize();
+	var perpage = 10;
+	$.ajax({
+		type: 'post',
+		url: '/admin/coupon/downloadlist',
+		data: queryString + '&perpage=' + perpage,
+		dataType: 'json',
+		success: function(data) {
+			if(data) {
+				$('#ajaxTable').html(data.content);
+				$('#totalsaleprcie').html(setComma(data.totalsaleprcie));
+				$('#searchcount').html(setComma(data.searchcount));
+				$('#totalcount').html(setComma(data.totalcount));
+				$('#nowpage').html(setComma(data.nowpage));
+				$('#total_page').html(setComma(data.total_page));
+				$("#pager").pager({ pagenumber: data.page, pagecount: data.pagecount, buttonClickCallback: pageClick });
+			}
+		}
+	});
+}
+
+/**
+ * 페이징 클릭시 페이지를 로딩한다.
+ * @param int page 페이지번호
+ */
+function pageClick(page) {
+	$("#getpage").val(page);
+	getDownAjaxList(page);
+}
+
+//체크박스 색상
+$("input[type='checkbox'][name='del[]']").live('change',function(){
+	if($(this).is(':checked')){
+		$(this).closest('tr').addClass('checked-tr-background');
+	}else{
+		$(this).closest('tr').removeClass('checked-tr-background');
+	}
+}).change();
+
+</script>
+<!-- 서브 레이아웃 영역 : 시작 -->
+
+<!-- 리스트검색폼 : 시작 -->
+<div class="search-form-container">
+	<form name="downloadsearch" id="downloadsearch" >
+	<input type="hidden" name="no" value="{coupons.coupon_seq}" >
+	<input type="hidden" name="page" id="getpage" value="{_GET.page}" >
+	<input type="hidden" name="orderby" id="orderby" value="{_GET.orderby}" >
+	<table class="search-form-table">
+	<tr>
+		<td width="500">
+			<table class="sf-keyword-table">
+				<td class="sfk-td-txt"><input type="text" name="search_text" id="download_search_text" value="{? _GET.search_text && _GET.search_text != '아이디, 이름' }{_GET.search_text}{:}아이디, 이름{/}" title="아이디, 이름" /></td>
+				<td class="sfk-td-btn"><button type="button" id="submitbtn"><span>검색</span></button></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th><span>{coupons.downloaddatetitle}</span></th>
+				<td>
+					<input type="text" name="sdate" id="sdate_down" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" id="edate_down" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button"  id="today" value="오늘" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="3day" value="3일간" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="1week" value="일주일" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="1month" value="1개월" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="3month" value="3개월" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="select_date_all"  value="전체" class="select_date"  /></span>
+					<input type="checkbox" name="use_status" id="use_status" value="used" {? _GET.use_status == 'used' } checked="checked" {/}/><label for="use_status" > 쿠폰사용</label>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</form>
+	</table>
+</div>
+<!-- 리스트검색폼 : 끝 -->
+
+<ul class="left-btns clearbox">
+	<li><div style="margin-top:rpx;">검색 <span id="searchcount" style="color:#000000; font-size:11px; font-weight: bold">{sc.searchcount}</span>/총 <span id="totalcount" style="color:#000000; font-size:11px; font-weight: bold">{sc.totalcount}</span>개(현재 <span id="nowpage" ></span>/총 <span id="total_page" >{sc.total_page}</span>페이지)</div></li>
+</ul>
+<ul class="right-btns clearbox">
+	<li ><div >총 할인금액 : <span id="totalsaleprcie" class=""></span>원 </div></li>
+</ul>
+
+<div class="clearbox"></div>
+<div >
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="3%" />
+			<col width="5%" />
+			<col width="8%" />
+			<col width="8%" />
+			<col width="10%" />
+			{?coupons.use_type=='online'}<col />{/}
+			<col width="10%" />
+			{?coupons.use_type=='online'}<col width="10%" />{/}
+			{?coupons.use_type=='online'}<col width="10%" />{/}
+			<col width="5%" />
+			<col width="5%" />
+			<col width="10%" />
+			<col width="8%" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align center"><input type="checkbox" name="checkboxAll" value="" id="checkboxAll" /></th>
+			<th class="its-th-align center">번호</th>
+			<th class="its-th-align center">아이디</th>
+			<th class="its-th-align center">이름</th>
+			<th class="its-th-align center">{coupons.downloaddatetitle}</th>
+			{?coupons.use_type=='online'}<th class="its-th-align center" nowrap>사용제한<br/><div >단독/금액/상품/환경/결제/유입</div></th>{/}
+			<th class="its-th-align center">유효기간</th>
+			{?coupons.use_type=='online'}<th class="its-th-align center">혜택</th>{/}
+			{?coupons.use_type=='online'}<th class="its-th-align center">할인금액</th>{/}
+			<th class="its-th-align center">조회</th>
+			<th class="its-th-align center">사용여부</th>
+			<th class="its-th-align center">구매상품</th>
+			<th class="its-th-align center">사용일</th>
+		</tr>
+		</thead>
+		<tbody id="ajaxTable"></tbody>
+	</table>
+</div>
+
+<!-- 서브 레이아웃 영역 : 끝 -->
+
+<!-- 페이징 -->
+<table align="center" border="0" cellpadding="0" cellspacing="0"  width="100%">
+<colgroup>
+	<col width="3%">
+	<col >
+</colgroup>
+<tr>
+	<td align="center" class="left-btns" ><span class="btn small gray"><button type="button" id="downloaddelete_btn">삭제</button></span></td>
+	<td align="center" ><div id="pager" style='clear: both'></div></td>
+</tr>
+</table>
+<div id="onlinecoupontypePopupNew" class="hide"></div>

@@ -1,0 +1,308 @@
+
+<style>
+span.goods_name1 {display:inline-block;white-space:nowrap;overflow:hidden;width:250px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+span.goods_name2 {display:inline-block;white-space:nowrap;overflow:hidden;width:500px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+.price {padding-right:5px;text-align:right}
+div.left {float:left;padding-right:10px}
+span.option {padding-right:10px;}
+table.order-inner-table {width:100%}
+table.order-inner-table td,table.order-inner-table th {border:0 !important;height:9px !important;}
+.ea {font-size:14px; font-family:dotum; color:#a400ff; font-weight:bold;}
+span.coupon_serial {margin-left:10px;}
+</style>
+
+
+<!--
+<div class="item-title">주문배송</div>
+ -->
+<table class="order-view-table" width="100%" border=0>
+	<colgroup>
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+		<col />
+	</colgroup>
+	<thead class="oth">
+		<tr>
+			<th class="dark">출고상품</th>
+			<th class="dark">배송지수량 / 주문수량</th>
+			<th class="dark">
+				재고/가용
+				<!--{ @config_load('order','ableStockStep') }-->
+				<!--{ ? .value_ == '25' }-->
+				<span class="helpicon" title="가용 = 재고-출고예약량<br/>출고예약량 = 결제확인+상품준비+출고준비"></span>
+				<!--{ : }-->
+				<span class="helpicon" title="가용 = 재고-출고예약량<br/>출고예약량 = 주문접수+결제확인+상품준비+출고준비"></span>
+				<!--{ / }-->
+				<!--{ / }-->
+			</th>
+			<th class="dark">준비 <span class="helpicon" title="[주문상품 기준 합계]<br />결제확인+상품준비"></span></th>
+			<th class="dark">발송 <span class="helpicon" title="[주문상품 기준 합계]<br />출고준비+출고완료+배송중+배송완료"></span></th>
+			<th class="dark">취소 <span class="helpicon" title="[주문상품 기준 합계]<br />결제취소"></span></th>
+			<th class="dark">출고수량 <span class="helpicon" title="주문상품을<br />해당 배송지로<br />보내는 수량"></span></th>
+			<th class="dark">적립금액</th>
+		</tr>
+	</thead>
+
+	<tbody class="otb">
+	<!--{ @ data_export_item }-->
+		<!--{?.opt_type=='sub'||.goods_type == 'gift'}-->
+		<tr class="order-item-row" bgcolor="#f6f6f6">
+		<!--{:}-->
+		<tr class="order-item-row">
+		<!--{/}-->
+			<td class="info">
+		<!--{?.opt_type=='opt'}-->
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<col width="40" /><col />
+					<tr>
+						<td align="center" style="border:none;height:5px;" valign="top">
+							<a href='/goods/view?no={.goods_seq}' target='_blank'>
+							<span class="order-item-image"><img class="small_goods_image" src="{.image}" /></span>
+							</a>
+						</td>
+						<td style="border:none;height:5px;">
+							<!--{? .goods_type == "gift" }-->
+							<img src="/admin/skin/default/images/common/icon_gift.gif" />
+							<!--{ / }-->
+							<!--{? .cancel_type == '1' }-->
+							<span class="order-item-cancel-type" >[청약철회불가]</span>
+							<!--{ / }-->
+							<a href='../goods/regist?no={.goods_seq}'>{.goods_name}</a>
+							<img src="../images/design/btn_stats.gif" style="cursor:pointer;" onclick="openAdvancedStatistic('{.goods_seq}');" align="absmiddle"  />
+
+							<!-- { ? .goods_kind == 'coupon' } -->
+							<span class="coupon_serial">{.coupon_serial}</span> /
+							<span class="coupon_input">{=number_format(.coupon_input)}{?socialcp_input_type=='price'}원{:}회{/}</span> /
+							<span class="coupon_remain_value red">잔여{=number_format(.coupon_remain_value)}{?socialcp_input_type=='price'}원{:}회{/}</span>
+							<span class="btn"><img src="../images/common/btn_ok_use.gif" class="coupon_use_btn" order_seq="{data_export.order_seq}" /></span>
+							<!-- { / } -->
+							<!--{ ? .event_seq && .event_title }-->
+							<a href="/admin/event/{? .event_type =='solo' }solo{/}regist?event_seq={.event_seq}" target='_blank'><span class="btn small gray"><button type="button" class="goods_event hand">{.event_title}</button></span></a>
+							<!--{ / }-->
+
+							<br />
+							<!--{ ? .option1 }-->
+							<span class="option">
+								<img src="/admin/skin/default/images/common/icon_option.gif" />
+								{.title1} : {.option1}
+							</span>
+							<!--{ / }-->
+							<!--{ ? .option2 }-->
+							<span class="option">
+								{.title2} : {.option2}
+							</span>
+							<!--{ / }-->
+							<!--{ ? .option3 }-->
+							<span class="option">
+								{.title3} : {.option3}
+							</span>
+							<!--{ / }-->
+							<!--{ ? .option4 }-->
+							<span class="option">
+								{.title4} : {.option4}
+							</span>
+							<!--{ / }-->
+							<!--{ ? .option5 }-->
+							<span class="option">
+								{.title5} : {.option5}
+							</span>
+							<!--{ / }-->
+							{? .goods_code }<br><span class="desc">[상품코드: {.goods_code}]</span>{/}
+
+							<!--{ ? .inputs }-->
+								<!--{ @ .inputs }-->
+									<!--{ ? ..value }-->
+							<div class="goods_input">
+								<img src="/admin/skin/default/images/common/icon_input.gif" />
+								<!--{?..title}-->{..title}:<!--{ / }-->
+								<!--{?..type=='file'}-->
+								<a href="../order_process/filedown?file={..value}" target="actionFrame">{..value}</a>
+								<!--{:}-->{..value}<!--{ / }-->
+							</div>
+									<!--{ / }-->
+								<!--{ / }-->
+							<!--{ / }-->
+						</td>
+					</tr>
+				</table>
+			<!--{:}-->
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<col width="40" /><col />
+					<tr>
+						<td align="right" style="border:none;height:5px;" valign="top">
+							<a href='/goods/view?no={.goods_seq}' target='_blank'>
+							<span class="order-item-image"><img class="small_goods_image" src="{.image}" /></span>
+							</a>
+						</td>
+						<td style="border:none;height:5px;">
+							<div>
+								<!--{ ? .option1 }-->
+								<span class="option">
+									<img src="../images/common/icon_add.gif" />
+									{.title1} : {.option1}
+								</span>
+								<!--{ / }-->
+								<!--{ ? .option2 }-->
+								<span class="option">
+									{.title2} : {.option2}
+								</span>
+								<!--{ / }-->
+								<!--{ ? .option3 }-->
+								<span class="option">
+									{.title3} : {.option3}
+								</span>
+								<!--{ / }-->
+								<!--{ ? .option4 }-->
+								<span class="option">
+									{.title4} : {.option4}
+								</span>
+								<!--{ / }-->
+								<!--{ ? .option5 }-->
+								<span class="option">
+									{.title5} : {.option5}
+								</span>
+								<!--{ / }-->
+								{? .goods_code }<br><span class="desc">[상품코드: {.goods_code}]</span>{/}
+								<!--{ ? .inputs }-->
+									<!--{ @ .inputs }-->
+										<!--{ ? ..value }-->
+								<div class="goods_input">
+									<img src="/admin/skin/default/images/common/icon_input.gif" />
+									<!--{?..title}-->{..title}:<!--{ / }-->
+									<!--{?..type=='file'}-->
+									<a href="../order_process/filedown?file={..value}" target="actionFrame">{..value}</a>
+									<!--{:}-->{..value}<!--{ / }-->
+								</div>
+										<!--{ / }-->
+									<!--{ / }-->
+								<!--{ / }-->
+							</div>
+							<div class="desc">
+								<!--{? .goods_type == "gift" }-->
+								<img src="/admin/skin/default/images/common/icon_gift.gif" />
+								<!--{ / }-->
+								<!--{? .cancel_type == '1' }-->
+								<span class="order-item-cancel-type ">[청약철회불가]</span>
+								<!--{ / }-->
+								<a href='../goods/regist?no={.goods_seq}'>({.goods_name})</a>
+							</div>
+						</td>
+					</tr>
+				</table>
+			<!--{/}-->
+			</td>
+			<td class="info center"><span class="icon-goods-kind-{.goods_kind}-order"></span> <span class="ea">{.shipping_ea}</span> / {.opt_ea}</td>
+
+			<td class="info center" style="color:#b00000;">
+			<!--{ ? .real_stock > 0 }-->
+			<span class="blue bold">{=number_format(.real_stock)}</span>
+			<!--{ : }-->
+			<span class="red bold">{=number_format(.real_stock)}</span>
+			<!--{ / }-->
+			/
+			<!--{ ? .stock > 0 }-->
+			<span class="blue bold">{=number_format(.stock)}</span>
+			<!--{ : }-->
+			<span class="red bold">{=number_format(.stock)}</span>
+			<!--{ / }-->
+			</td>
+
+			<td class="info center ea">
+			{=number_format(.shipping_ea - .step_complete - .step85)}
+			</td>
+			<td class="info center ea">
+			{=number_format(.step_complete)}
+			</td>
+			<td class="info center ea">
+			{=number_format(.step85)}
+			</td>
+
+
+			<td class="info center" style="color:#b00000;">
+		<!--{ ? data_export.status == 45 }-->
+			<form method="post" action="../export_process/ea_modify?export_code={data_export.export_code}" target="actionFrame">
+			<input type="text" name="ea[{.export_item_seq}]" size="3" class="onlynumber line" value="{.ea}" />
+			<span class="btn small cyanblue"><button type="submit" class="ea_modify">변경</button></span>
+			</form>
+		<!--{ : }-->
+			<strong>{.ea}</strong>
+		<!--{ / }-->
+			</td>
+
+			<td class="price info">
+				<table class="order-inner-table">
+				<col width="30%"/><col  />
+				<tr>
+					<td><img src="../images/common/icon/icon_ord_emn.gif" title="적립금" /></td>
+					<td class="right">{=number_format(.out_reserve)}</td>
+				</tr>
+				<tr>
+					<td><img src="../images/common/icon/icon_ord_point.gif" title="포인트" /></td>
+					<td class="right">{=number_format(.out_point)}</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+	<!--{ / }-->
+
+		<tr class="order-item-row">
+			<td style="padding-left:10px; border-right:0px;">
+				배송지 : {export_shipping.recipient_user_name}
+				({=implode('-',export_shipping.recipient_zipcode)}) {export_shipping.recipient_address} {export_shipping.recipient_address_detail}
+				{?export_shipping.recipient_phone} / {=implode('-',export_shipping.recipient_phone)}{/}
+				{?export_shipping.recipient_cellphone} / {=implode('-',export_shipping.recipient_cellphone)}{/}
+				{?export_shipping.hope_date} / 배송희망일 : {export_shipping.hope_date}{/}
+			</td>
+			<td  align="right" style="padding-right:5px;" colspan="5">소계</td>
+			<td class="info" align="center" style="color:#b00000;"><strong>{tot.ea} ({tot.goods_cnt}종)</strong></td>
+			<td class="price info">
+			<table class="order-inner-table">
+			<col width="30%"/><col  />
+			<tr>
+				<td><img src="../images/common/icon/icon_ord_emn.gif" title="적립금" /></td>
+				<td class="right">{=number_format(tot.reserve)}</td>
+			</tr>
+			<tr>
+				<td><img src="../images/common/icon/icon_ord_point.gif" title="포인트" /></td>
+				<td class="right">{=number_format(tot.point)}</td>
+			</tr>
+			</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<!-- 주문자 정보 테이블 : 끝 -->
+<script type="text/javascript">
+
+$(".helpicon").poshytip({
+	className: 'tip-darkgray',
+	bgImageFrameSize: 8,
+	alignTo: 'target',
+	alignX: 'right',
+	alignY: 'center',
+	offsetX: 10,
+	allowTipHover: false,
+	slide: false,
+	showTimeout : 0
+});
+setDatepicker();
+
+function openAdvancedStatistic(goods_seq){
+	$.ajax({
+		type: "get",
+		url: "../statistic/advanced_statistics",
+		data: "ispop=pop&goods_seq="+goods_seq,
+		success: function(result){
+			$(document).find('body').append('<div id="Advanced_Statistics"></div>');
+			$("#Advanced_Statistics").html(result);
+			openDialog("Advanced Statistics", "Advanced_Statistics", {"width":"1000","height":"700","show" : "fade","hide" : "fade"});
+		}
+	});
+}
+</script>

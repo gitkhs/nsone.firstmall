@@ -1,0 +1,32 @@
+<!--{? inputs }-->
+	<!--{@ inputs }-->
+	<tr>
+		<td class="its-td-align center">
+			<input type="text" name="memberInputMakeName[]" class="line" size="10" value="{.input_name}" />
+		</td>
+		<td class="its-td-align center">
+			<select name="memberInputMakeForm[]">
+				<option value="text" {?.input_form=='text'}selected{/}>텍스트박스</option>
+				<option value="edit" {?.input_form=='edit'}selected{/}>에디트박스</option>
+				<option value="file" {?.input_form=='file'}selected{/}>이미지 업로드</option>
+			</select>
+		</td>
+		<td class="its-td">
+			<!--{ ? .input_form == 'text' || .input_form == 'edit' }-->
+				<div class="textLimit">
+				<input type="text" name="memberInputMakeLimit[]" class="line onlynumber" size="2" value="{.input_limit}" max="255" />자 이내
+				</div>
+				<div class="uploadLimit" style="display:none;">2M이하</div>
+			<!--{ : }-->
+				<div class="uploadLimit">2M이하</div>
+				<div class="textLimit" style="display:none;">
+				<input type="text" name="memberInputMakeLimit[]" class="line onlynumber" size="2" value="imageUpload" max="255" />자 이내
+				</div>
+			<!--{ / }-->
+		</td>
+		<td class="its-td-align center">
+			<span class="btn-minus"><button type="button" class="delMemberInputMake"></button></span>
+		</td>
+	</tr>
+	<!--{ / }-->
+<!--{ / }-->

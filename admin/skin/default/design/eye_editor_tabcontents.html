@@ -1,0 +1,83 @@
+<script>
+$("#sourceTextarea{tabIdx}").each(function(){
+	var tabIdx = {tabIdx};
+	var objId = $(this).attr('id');
+
+	// Textarea Obj 
+	var sourceTextareaObj = this;
+	
+	// 검색어
+	var searchKeyword = "{searchKeyword}";
+
+	// 에디터 생성
+	sourceEditorObjs[tabIdx] = CodeMirror.fromTextArea(sourceTextareaObj, {
+		mode: "{code_mode}",
+		lineNumbers: true,
+		lineWrapping :true,
+		keyMap:'default',
+		theme: 'default',
+		indentUnit: 4,
+		tabSize: 4,
+		onChange: function(){
+			sourceeditor_edited_mark_on(tabIdx);
+		},
+		onCursorActivity: function() {
+			sourceEditorObjs[tabIdx].setLineClass(sourceEditorActiveLine, null);
+			sourceEditorActiveLine = sourceEditorObjs[tabIdx].setLineClass(sourceEditorObjs[tabIdx].getCursor().line, "sourceEditorActiveLine");
+		}
+	});
+
+	// 커서라인 강조
+	var sourceEditorActiveLine = sourceEditorObjs[tabIdx].setLineClass(0, "sourceEditorActiveLine");
+
+	// 검색어 찾아가기
+	if(searchKeyword.length>1){
+		var searchKeywordRow = null;
+		for (var cursor = sourceEditorObjs[tabIdx].getSearchCursor(searchKeyword); cursor.findNext();){
+			var_dump(cursor);
+			sourceEditorObjs[tabIdx].markText(cursor.from(), cursor.to(), "CodeMirror-searching")
+			if(searchKeywordRow==null){
+				searchKeywordRow = cursor.from().line;
+				sourceEditorObjs[tabIdx].setCursor(sourceEditorObjs[tabIdx].lineInfo(searchKeywordRow));
+			}else{
+				searchKeywordRow = cursor.from().line;
+			}
+		}		
+	}
+
+	$("#btnViewOriginalSource{tabIdx}").live("click",function(){
+		source_view_popup('original','{skin}','{skinTplPath}');
+	});
+	
+	
+
+});
+
+reMakeHelpIcon();
+</script>
+
+<input type="hidden" class="filemtime" value="{filemtime}" />
+<input type="hidden" class="skin" value="{skin}" />
+<input type="hidden" class="tpl_name" value="{tpl_name}" />
+<input type="hidden" class="tpl_url" value="{tpl_url}" />
+
+<table class="info-table-style" width="100%" align="center">
+<col width="10%" />
+<col />
+<col width="105" />
+<tr>
+	<td class="its-th-align center">백업파일 <span class="helpicon addHelpIcon" title="최근 저장된 5개의 파일을 백업합니다."></span></th>
+	<td class="its-td">
+		{@backup_files}
+			 <span class="btn small"><input type="button" value="{=date('Y-m-d H:i:s',.value_.time)}" onclick="file_view_popup('backup','{.value_.path}')"/></span>
+		{/}
+	</th>
+	<td class="its-td">
+		{?skin}
+			<span class="btn small"><input type="button" value="원본소스보기" id="btnViewOriginalSource{tabIdx}" /></span>
+		{/}
+	</td>
+</tr>
+</table>
+
+<textarea id="sourceTextarea{tabIdx}" class="sourceTextarea" name="tpl_source">{=htmlspecialchars(tpl_source)}</textarea>

@@ -1,0 +1,97 @@
+<style>
+#warningDialogLayer {line-height:20px; text-align:center; padding-bottom:25px;}
+</style>
+
+<div id="warningDialogLayer">
+	
+	<!--[ 유료몰 : 만료일 전 10~0일 이내일때]-->
+	<!--{ ? service_code!='P_FREE' && substr(code,-1) == '1' && uri_string()=='admin/main/index'}-->
+	쇼핑몰 서비스 사용기간이 <b class="red">{=number_format(intval)}</b>일 남았습니다.<br /><br />
+	사용기간 만료 후 30일이 경과되면 쇼핑몰의 모든 데이타가 삭제됩니다.<br />
+	쇼핑몰 데이터가 삭제되면 복구가 불가능하니<br />
+	MY퍼스트몰(<a href="http://www.firstmall.kr/myshop" target="_blank">http://www.firstmall.kr/myshop</a>)에 접속하셔서 사용기간을 연장해 주시기 바랍니다.
+	<div class="pdt20">
+		<span class="btn large cyanblue"><input type="button" value="연장" style="width:100px" onclick="openFirstmallExtendLayer()" /></span>
+		<span class="btn large cyanblue"><input type="button" value="확인" style="width:100px" onclick="$('#warningDialogLayer').dialog('close')" /></span>
+	</div>
+	
+	<script type="text/javascript">
+	openDialog("쇼핑몰 이용안내","warningDialogLayer",{'width':700});
+	</script>
+	<!--{ / }-->
+	
+	<!--[ 유료몰 : 만료일 후 1~29일 이내일때]-->
+	<!--{ ? service_code!='P_FREE' && substr(code,-1) == '2' }-->
+	쇼핑몰 서비스 사용기간 만료 후 <b class="red">{=number_format(abs(intval))}</b>일이 경과되었습니다.<br /><br />
+	사용기간 만료 후 30일이 경과되면 쇼핑몰의 모든 데이타가 삭제됩니다.<br />
+	쇼핑몰 데이터가 삭제되면 복구가 불가능하니<br />
+	MY퍼스트몰(<a href="http://www.firstmall.kr/myshop" target="_blank">http://www.firstmall.kr/myshop</a>)에 접속하셔서 사용기간을 연장해 주시기 바랍니다.
+
+	<div class="pdt20">
+		<span class="btn large cyanblue"><input type="button" value="연장" style="width:100px" onclick="openFirstmallExtendLayer()" /></span>
+	</div>
+	
+	<script type="text/javascript">
+	openDialog("쇼핑몰 이용안내","warningDialogLayer",{'width':700,'noClose':true});
+	</script>
+	<!--{ / }-->
+	
+	<!--[ 유료몰 : 만료일 후 30~60일 이내일때]-->
+	<!--{ ? service_code!='P_FREE' && substr(code,-1) == '3' }-->
+	쇼핑몰 서비스 사용기간 만료 후 <b class="red">{=number_format(abs(intval))}</b>일이 경과되었습니다.<br /><br />
+	사용기간 만료 후 30일이 경과되어 삭제 대상 쇼핑몰입니다.<br />
+	쇼핑몰 삭제가 곧 진행됩니다. 지금 즉시 MY퍼스트몰(<a href="http://www.firstmall.kr/myshop" target="_blank">http://www.firstmall.kr/myshop</a>)에 접속하셔서 사용기간을 연장해 주시기 바랍니다.
+
+	<div class="pdt20">
+		<span class="btn large cyanblue"><input type="button" value="연장" style="width:100px" onclick="openFirstmallExtendLayer()" /></span>
+	</div>
+	
+	<script type="text/javascript">
+	openDialog("쇼핑몰 이용안내","warningDialogLayer",{'width':700,'noClose':true});
+	</script>
+	<!--{ / }-->
+	
+	<!--[ 유료몰 : 만료일 후 60일 경과시]-->
+	<!--{ ? service_code!='P_FREE' && substr(code,-1) == '4' }-->
+	쇼핑몰 서비스 사용기간 만료 후 <b class="red">{=number_format(abs(intval))}</b>일이 경과되었습니다.<br /><br />
+	사용기간 만료 후 30일이 경과되어 삭제 대상 쇼핑몰입니다.<br />
+	쇼핑몰 삭제가 곧 진행됩니다. 지금 즉시 MY퍼스트몰(<a href="http://www.firstmall.kr/myshop" target="_blank">http://www.firstmall.kr/myshop</a>)에 접속하셔서 사용기간을 연장해 주시기 바랍니다.
+	
+	<script type="text/javascript">
+	openDialog("쇼핑몰 이용안내","warningDialogLayer",{'width':700,'noClose':true});
+	</script>
+	<!--{ / }-->
+	
+	<!--[ 무료몰 : 마지막접속일 이후 30~60일 이내일때]-->
+	<!--{ ? service_code=='P_FREE' && substr(code,-1) == '3' && uri_string()=='admin/main/index' }-->
+	<b>관리자환경 최종 로그인일로부터 <b class="red">{=number_format(abs(intval))}</b>일만에 로그인하셨습니다.</b><br /><br />
+	쇼핑몰 사용자(소비자)화면의 접속제한이 해제되었습니다.<br />
+	아래 내용을 숙지하여 쇼핑몰 운영에 지장이 없으시길 바랍니다 <br /><br />
+	<span class="desc">- 관리자환경 최종 로그인일로부터 30일간 로그인이 한번도 없으면 
+	사전 통보 없이 쇼핑몰 사용자(소비자)화면의 접속이 제한됩니다.<br /></span>
+	<span class="desc">- 관리자환경 최종 로그인일로부터 60일간 로그인이 한번도 없으면 
+	사전 통보 없이 쇼핑몰은 삭제 됩니다.<br /></span>
+	<div class="pdt20"><span class="btn large cyanblue"><input type="button" value="확인" style="width:100px" onclick="$('#warningDialogLayer').dialog('close')" /></span></div>
+	
+	<script type="text/javascript">
+	openDialog("쇼핑몰 이용안내","warningDialogLayer",{'width':700});
+	</script>
+	<!--{ / }-->
+	
+	<!--[ 무료몰 : 마지막접속일 이후 60일 경과시]-->
+	<!--{ ? service_code=='P_FREE' && substr(code,-1) == '4'  && uri_string()=='admin/main/index' }-->
+	<b>관리자환경 최종 로그인일로부터 <b class="red">{=number_format(abs(intval))}</b>일만에 로그인하셨습니다.</b><br /><br />
+	쇼핑몰 사용자(소비자)화면의 접속제한이 해제되었습니다.<br />
+	아래 내용을 숙지하여 쇼핑몰 운영에 지장이 없으시길 바랍니다 <br /><br />
+	<span class="desc">- 관리자환경 최종 로그인일로부터 30일간 로그인이 한번도 없으면 
+	사전 통보 없이 쇼핑몰 사용자(소비자)화면의 접속이 제한됩니다.<br /></span>
+	<span class="desc">- 관리자환경 최종 로그인일로부터 60일간 로그인이 한번도 없으면 
+	사전 통보 없이 쇼핑몰은 삭제 됩니다.<br /></span>
+	<div class="pdt20"><span class="btn large cyanblue"><input type="button" value="확인" style="width:100px" onclick="$('#warningDialogLayer').dialog('close')" /></span></div>
+	
+	<script type="text/javascript">
+	openDialog("쇼핑몰 이용안내","warningDialogLayer",{'width':700});
+	</script>
+	<!--{ / }-->
+	
+</div>

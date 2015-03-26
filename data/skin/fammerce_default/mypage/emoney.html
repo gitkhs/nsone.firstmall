@@ -1,0 +1,61 @@
+<!-- 타이틀 -->
+<div class="sub_title_bar">
+	<h2>적립금관리</a></h2>
+	<a href="javascript:history.back();" class="stb_back_btn"><img src="../images/design/btn_back.gif" /></a>
+</div>
+<table width="100%" class="list_table_style">
+<tbody>
+<tr>
+	<th class="cell"><span style="font-size:14px;font-weight:bold;">{user_name}</span>({userid}) 회원님이 보유한 적립금은 <span style="font-size:14px;font-weight:bold;" class="totalprice" >{=number_format(emoney)}</span>원 입니다.</th>
+</tr>
+</table>
+
+
+<div style="height:8px;"></div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+	<colgroup>
+		<col width="40" />
+		<col width="15%" />
+		<col width="15%" />
+		<col />
+		<col width="25%" />
+		<col width="10%" />
+	</colgroup>
+	<thead >
+	<tr>
+		<th>번호</th>
+		<th>날짜</th>
+		<th>지급/차감 금액</th>
+		<th>사유</th>
+		<th>내역</th>
+		<th>유효기간</th>
+	</tr>
+	</thead>
+	<tbody  >
+{? loop }
+	{@ loop }
+	<tr >
+		<td align="center" class="cell">{.number}</td>
+		<td align="center" class="cell">{.regist_date}</td>
+		<td class="cell">{?.gb=='plus'}<span style="color:red;">(+)</span>{:}<span style="color:blue;">(-)</span>{/} {=number_format(.emoney)}</td>
+		<td class="cell" style="text-align:left;padding-left:5px;">{.memo}</td>
+		<td class="cell" style="text-align:left;padding-left:5px;">{.contents}</td>
+		<td class="cell">{?.limit_date}~ {.limit_date}{ : }-{ / }</td>
+	</tr>
+	{ / }
+{ : }
+	<tr  >
+		<td align="center" colspan="4"  class="cell">적립금 내역이 없습니다.</td>
+	</tr>
+{ / }
+	</tbody>
+</table>
+
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td align="center">
+		<div class="paging_navigation">{pagin}</div>
+	</td>
+</tr>
+</table>

@@ -1,0 +1,759 @@
+<?php /* Template_ 2.2.6 2014/11/03 11:38:03 /www/nsone_firstmall_kr/admin/skin/default/category/ifrm_category_info.html 000030185 */ 
+$TPL_groups_1=empty($TPL_VAR["groups"])||!is_array($TPL_VAR["groups"])?0:count($TPL_VAR["groups"]);?>
+<?php $this->print_("layout_header_popup",$TPL_SCP,1);?>
+
+
+<script type="text/javascript" src="/app/javascript/plugin/zclip/jquery.zclip.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquery.colorpicker.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-color-picker.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/custom-font-decoration.js"></script>
+<script type="text/javascript" src="/app/javascript/js/base64.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/jquery.uploadify.v2.1.4.js"></script>
+
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+
+<style>
+.info-table-style .its-th {padding-left:10px !important;}
+</style>
+
+<script type="text/javascript">
+
+var categoryUrl = "http://<?php echo $_SERVER["HTTP_HOST"]?>/goods/catalog?code=";
+
+$(function () {
+
+	// 주소 복사 크로스브라우징을 위해 추가 leewh 2014-10-17
+	initClipBoard();
+
+	$(document).resize(function(){
+		$('#ifrmCategorySetting',parent.document).height($('form').height()+200);
+	}).resize();
+
+	Editor.onPanelLoadComplete(function(){
+		$(document).resize();
+	});
+
+	/* 업로드버튼 세팅 */
+	setUploadifyButton('nodeImageNormalUploadButton');
+	setUploadifyButton('nodeImageOverUploadButton');
+	setUploadifyButton('nodeCatalogImageNormalUploadButton');
+	setUploadifyButton('nodeCatalogImageOverUploadButton');
+	setUploadifyButton('nodeGnbImageNormalUploadButton');
+	setUploadifyButton('nodeGnbImageOverUploadButton');
+
+	$("#setGroup").live("click",function(){
+		openDialog("접속제한 <span class='desc'>카테고리를 접속할 회원그룹을 설정합니다.</span>", "setGroupsPopup", {"width":"500","height":300,"position":[100,100]});
+	});
+
+	$("input[name=memberGroup]").live("click",function(){
+		groupsMsg();
+	});
+	
+	$("input[name=userType]").live("click",function(){
+		groupsMsg();
+	});
+	
+	$("#saveGroupBtn").click(function(){
+		closeDialog("setGroupsPopup");
+	});
+
+	$("input[name='node_type']").live("change",function(){
+		disableNodeTypeDecoration();
+	});
+	$("input[name='node_catalog_type']").live("change",function(){
+		disableNodeCatalogTypeDecoration();
+	});
+	$("input[name='node_gnb_type']").live("change",function(){
+		disableNodeGnbTypeDecoration();
+	});
+
+	$.ajax({
+		global:false,
+		type: "POST",
+		url: "view",
+		data: "category=<?php echo $TPL_VAR["categoryCode"]?>",
+		dataType: 'json',
+		success: function(result){
+			$("input[name='categoryCode']").val('<?php echo $TPL_VAR["categoryCode"]?>');
+			view(result);
+		}
+	});
+
+});
+
+function view(result){
+
+	var len = result.length - 1;
+	var arr = new Array();
+	var isGroups = false;
+	for(var i=0;i<=len;i++){
+		arr[i] = result[i].title;
+		if(i == len){
+
+			$("input[name='catalog_allow'][value='"+result[i].catalog_allow+"']").attr("checked",true);
+			$("input[name='catalog_allow_sdate']").val(result[i].catalog_allow_sdate=='0000-00-00'?'':result[i].catalog_allow_sdate);
+			$("input[name='catalog_allow_edate']").val(result[i].catalog_allow_edate=='0000-00-00'?'':result[i].catalog_allow_edate);
+			$("input[name='hide'][value='"+result[i].hide+"']").attr("checked",true);
+			$("input[name='hide_in_navigation'][value='"+result[i].hide_in_navigation+"']").attr("checked",true);
+			$("input[name='hide_in_gnb'][value='"+result[i].hide_in_gnb+"']").attr("checked",true);
+			$("input[name='hide_in_brand'][value='"+result[i].hide_in_brand+"']").attr("checked",true);
+			$("input[name='node_type'][value='"+result[i].node_type+"']").attr("checked",true);
+			$("input[name='node_text_normal']").val(result[i].node_text_normal).change();
+			$("input[name='node_text_over']").val(result[i].node_text_over).change();
+			$("input[name='node_image_normal']").val(result[i].node_image_normal).change();
+			$("input[name='node_image_over']").val(result[i].node_image_over).change();
+			if(result[i].node_image_normal){
+				$("#node_image_normal_preview").attr('src',result[i].node_image_normal).show();
+			}else{
+				$("#node_image_normal_preview").hide();
+			}
+			if(result[i].node_image_over){
+				$("#node_image_over_preview").attr('src',result[i].node_image_over).show();
+			}else{
+				$("#node_image_over_preview").hide();
+			}
+			$("input[name='node_catalog_type'][value='"+result[i].node_catalog_type+"']").attr("checked",true);
+			$("input[name='node_catalog_text_normal']").val(result[i].node_catalog_text_normal).change();
+			$("input[name='node_catalog_text_over']").val(result[i].node_catalog_text_over).change();
+			$("input[name='node_catalog_image_normal']").val(result[i].node_catalog_image_normal).change();
+			$("input[name='node_catalog_image_over']").val(result[i].node_catalog_image_over).change();
+			if(result[i].node_catalog_image_normal){
+				$("#node_catalog_image_normal_preview").attr('src',result[i].node_catalog_image_normal).show();
+			}else{
+				$("#node_catalog_image_normal_preview").hide();
+			}
+			if(result[i].node_catalog_image_over){
+				$("#node_catalog_image_over_preview").attr('src',result[i].node_catalog_image_over).show();
+			}else{
+				$("#node_catalog_image_over_preview").hide();
+			}
+			$("input[name='node_gnb_type'][value='"+result[i].node_gnb_type+"']").attr("checked",true);
+			$("input[name='node_gnb_text_normal']").val(result[i].node_gnb_text_normal).change();
+			$("input[name='node_gnb_text_over']").val(result[i].node_gnb_text_over).change();
+			$("input[name='node_gnb_image_normal']").val(result[i].node_gnb_image_normal).change();
+			$("input[name='node_gnb_image_over']").val(result[i].node_gnb_image_over).change();
+			if(result[i].node_gnb_image_normal){
+				$("#node_gnb_image_normal_preview").attr('src',result[i].node_gnb_image_normal).show();
+			}else{
+				$("#node_gnb_image_normal_preview").hide();
+			}
+			if(result[i].node_gnb_image_over){
+				$("#node_gnb_image_over_preview").attr('src',result[i].node_gnb_image_over).show();
+			}else{
+				$("#node_gnb_image_over_preview").hide();
+			}
+
+			$(".groupsMsg").hide();
+
+			if(result[i].groups){
+				for(var j=0;j<result[i].groups.length;j++){
+					$("input[type='checkbox'][name='memberGroup'][value='"+ result[i].groups[j].group_seq +"']").attr('checked',true);
+				}
+				isGroups = true;
+			}
+			
+			if(result[i].types){
+				$(result[i].types).each(function(idx, data){
+					$("input[type='checkbox'][name='userType'][value='"+ data.user_type +"']").attr('checked',true);
+				});
+			}
+
+			$("#goodsCnt").html(comma(result[i].goodsCnt));
+			$("input[name='categoryCode']").val(result[i].category_code);
+			var categoryCode = $("input[name='categoryCode']").val();
+			$("#urlCategory").html(categoryUrl+categoryCode);
+		}
+	}
+	if(!isGroups)$("input[type='checkbox'][name='memberGroup']").attr("checked",false);
+	$("#categoryNavi").html(arr.join(" > "));
+	groupsMsg();
+
+	$(".customFontDecoration").customFontDecoration();
+
+	disableNodeTypeDecoration();
+	disableNodeCatalogTypeDecoration();
+	disableNodeGnbTypeDecoration();
+}
+
+function groupsMsg(){
+	var str='';
+	var str1='';
+	var tag='';
+	var msg = "이 카테고리는 누구나 볼 수 있습니다.";
+	//$("#groupsMsg").html("이 브랜드는 누구나 볼 수 있습니다.");
+	$("input[type='checkbox'][name='memberGroup']:checked").each(function(){
+		var clone = $(this).parent().clone();
+		clone.find("input").remove();
+		str += clone.html() + ',';
+		tag += "<input type='hidden' name='memberGroups[]' value='"+$(this).val()+"'>";
+	});
+	
+	$("input[type='checkbox'][name='userType']:checked").each(function(){
+		var clone = $(this).parent().clone();
+		clone.find("input").remove();
+		str1 += clone.html() + ',';
+		tag += "<input type='hidden' name='userType[]' value='"+$(this).val()+"'>";
+	});
+	if(str && str1) {
+		var msg = "이 카테고리 접속권한은 " + str.substr(0,str.length-1) + " 등급이고 " + str1.substr(0,str1.length-1) + "회원에게 있습니다." + tag;
+		var msg = "이 카테고리 접속권한은 " + str.substr(0,str.length-1) + " 등급이고 " + str1.substr(0,str1.length-1) + "회원에게 있습니다." + tag;
+	}
+	else if(str && !str1) {
+		var msg = "이 카테고리 접속권한은 " + str.substr(0,str.length-1) + " 등급의 회원에게 있습니다." + tag;
+	}
+	else if(!str && str1) {
+		var msg = "이 카테고리 접속권한은 " + str1.substr(0,str1.length-1) + " 회원에게 있습니다." + tag;
+	}
+	$("#groupsMsg").html(msg);
+
+}
+
+function disableNodeTypeDecoration(){
+	switch($("input[name='node_type']:checked").val()){
+		case "text":
+			$(".node_type_image .font_decoration *").attr("disabled",true);
+			$(".node_type_text .font_decoration *").removeAttr("disabled");
+			$(".node_type_image object, .node_type_image .btn").hide();
+		break;
+		case "image":
+			$(".node_type_text .font_decoration *").attr("disabled",true);
+			$(".node_type_image .font_decoration *").removeAttr("disabled");
+			$(".node_type_image object, .node_type_image .btn").show();
+		break;
+		default:
+			$(".node_type_image .font_decoration *").attr("disabled",true);
+			$(".node_type_text .font_decoration *").attr("disabled",true);
+			$(".node_type_image object, .node_type_image .btn").hide();
+		break;
+	}
+}
+
+function disableNodeCatalogTypeDecoration(){
+	switch($("input[name='node_catalog_type']:checked").val()){
+		case "text":
+			$(".node_catalog_type_image .font_decoration *").attr("disabled",true);
+			$(".node_catalog_type_text .font_decoration *").removeAttr("disabled");
+			$(".node_catalog_type_image object, .node_catalog_type_image .btn").hide();
+		break;
+		case "image":
+			$(".node_catalog_type_text .font_decoration *").attr("disabled",true);
+			$(".node_catalog_type_image .font_decoration *").removeAttr("disabled");
+			$(".node_catalog_type_image object, .node_catalog_type_image .btn").show();
+		break;
+		default:
+			$(".node_catalog_type_image .font_decoration *").attr("disabled",true);
+			$(".node_catalog_type_text .font_decoration *").attr("disabled",true);
+			$(".node_catalog_type_image object, .node_catalog_type_image .btn").hide();
+		break;
+	}
+}
+
+function disableNodeGnbTypeDecoration(){
+	switch($("input[name='node_gnb_type']:checked").val()){
+		case "text":
+			$(".node_gnb_type_image .font_decoration *").attr("disabled",true);
+			$(".node_gnb_type_text .font_decoration *").removeAttr("disabled");
+			$(".node_gnb_type_image object, .node_gnb_type_image .btn").hide();
+		break;
+		case "image":
+			$(".node_gnb_type_text .font_decoration *").attr("disabled",true);
+			$(".node_gnb_type_image .font_decoration *").removeAttr("disabled");
+			$(".node_gnb_type_image object, .node_gnb_type_image .btn").show();
+		break;
+		default:
+			$(".node_gnb_type_image .font_decoration *").attr("disabled",true);
+			$(".node_gnb_type_text .font_decoration *").attr("disabled",true);
+			$(".node_gnb_type_image object, .node_gnb_type_image .btn").hide();
+		break;
+	}
+}
+
+function changeNodeImage(){
+	var node_image_normal = $("input[name='node_image_normal']").val();
+	var node_image_over = $("input[name='node_image_over']").val();
+
+	$("input[name='node_image_normal']").val(node_image_over);
+	$("input[name='node_image_over']").val(node_image_normal);
+
+	if(node_image_normal.substring(0,1)!='/') node_image_normal = '/' + node_image_normal;
+	if(node_image_over.substring(0,1)!='/') node_image_over = '/' + node_image_over;
+
+	$("#node_image_normal_preview").show().attr('src',node_image_over);
+	$("#node_image_over_preview").show().attr('src',node_image_normal);
+}
+
+function changeNodeCatalogImage(){
+	var node_image_normal = $("input[name='node_catalog_image_normal']").val();
+	var node_image_over = $("input[name='node_catalog_image_over']").val();
+
+	$("input[name='node_catalog_image_normal']").val(node_image_over);
+	$("input[name='node_catalog_image_over']").val(node_image_normal);
+
+	if(node_image_normal.substring(0,1)!='/') node_image_normal = '/' + node_image_normal;
+	if(node_image_over.substring(0,1)!='/') node_image_over = '/' + node_image_over;
+
+	$("#node_catalog_image_normal_preview").show().attr('src',node_image_over);
+	$("#node_catalog_image_over_preview").show().attr('src',node_image_normal);
+}
+
+function changeNodeGnbImage(){
+	var node_image_normal = $("input[name='node_gnb_image_normal']").val();
+	var node_image_over = $("input[name='node_gnb_image_over']").val();
+
+	$("input[name='node_gnb_image_normal']").val(node_image_over);
+	$("input[name='node_gnb_image_over']").val(node_image_normal);
+
+	if(node_image_normal.substring(0,1)!='/') node_image_normal = '/' + node_image_normal;
+	if(node_image_over.substring(0,1)!='/') node_image_over = '/' + node_image_over;
+
+	$("#node_gnb_image_normal_preview").show().attr('src',node_image_over);
+	$("#node_gnb_image_over_preview").show().attr('src',node_image_normal);
+}
+
+function initClipBoard() {
+	if( navigator.appName.indexOf("Microsoft") > -1 ) { //IE
+		// 크로스 브라우저용이나 IE에서 왼쪽 카테고리명 클릭할 때 마다 flash 정의 오류 발생으로 조건 추가함.
+		$("#clipboard").live("click",function(){
+			var categoryCode = $("input[name='categoryCode']").val();
+			if(categoryCode){
+				var str = categoryUrl+categoryCode;
+				copyContent(str);
+			}
+		});
+	} else {
+		$("#clipboard").zclip({
+			path: "/app/javascript/plugin/zclip/ZeroClipboard.swf",
+			copy: function(){
+				var categoryCode = $("input[name='categoryCode']").val();
+				if(categoryCode){
+					var str = categoryUrl+categoryCode;
+					return str;
+				}
+			},
+			afterCopy: function () {
+				alert('클립보드에 저장되었습니다.');
+			}
+		});
+	}
+}
+</script>
+
+<!-- 서브메뉴 바디 : 시작-->
+<form name="categorySettingForm" method="post" target="actionFrame" action="../category_process/category_info">
+<input type="hidden" name="categoryCode" value="" />
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr>
+	<td valign="top">
+
+		<table width="100%" class="info-table-style">
+		<col />
+		<tr>
+			<th class="its-th center" style="height:20px" colspan="3">[<?php echo $TPL_VAR["categoryData"]["title"]?>] 카테고리 정보</th>
+		</tr>
+		<tbody>
+		<tr>
+			<th class="its-th" colspan="2">카테고리 코드값</th>
+			<td class="its-td">
+<?php if($TPL_VAR["service_code"]=='P_FREE'){?>
+				<span class="desc">코드값 기능은 업그레이드가 필요합니다.</span> <img src="/admin/skin/default/images/common/btn_upgrade.gif" class="hand" onclick="serviceUpgrade();" align="absmiddle" />
+<?php }else{?>
+<?php if($TPL_VAR["categoryData"]["parentcodetext"]){?><?php echo $TPL_VAR["categoryData"]["parentcodetext"]?> > <?php }?><input type="text" name="category_goods_code" value="<?php echo $TPL_VAR["categoryData"]["category_goods_code"]?>" > <span class="desc">카테고리의 코드값은 해당 카테고리가 대표카테고리로 연결된 상품의 상품코드에 포함될 수 있습니다.</span>
+			<br/><span class="desc">※ 상품코드 규칙은 설정 > <a href="/admin/setting/goods" target="_blank"><span class=" highlight-link hand">상품 코드/정보</span></a>에서 설정하세요.
+<?php }?>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th" colspan="2">카테고리의 상품 수</th>
+			<td class="its-td">
+			<span id="goodsCnt"></span>개 (하위 카테고리 포함)
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th" colspan="2">카테고리페이지 접속 허용</th>
+			<td class="its-td">
+				<label><input type="radio" name="catalog_allow" value="show" /> 허가</label>&nbsp;&nbsp;&nbsp;&nbsp;
+				<input type="radio" name="catalog_allow" value="period" id="catalog_allow_period" class="hand" /> <input type="text" name="catalog_allow_sdate" class="line datepicker" size="10" maxlength="10" /> ~ <input type="text" name="catalog_allow_edate" class="line datepicker" size="10" maxlength="10" /> <label for="catalog_allow_period">기간에만 허가</label>&nbsp;&nbsp;&nbsp;&nbsp;
+				<label><input type="radio" name="catalog_allow" value="none" /> 금지</label><br />
+				<span class="desc">관리자인 경우 위 세팅과 무관하게 카테고리페이지를 확인 할 수 있습니다.</span>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th" colspan="2">카테고리페이지 접속 권한</th>
+			<td class="its-td">
+				<div style="float:left;" id="groupsMsg"></div>
+<?php if($TPL_VAR["groups"]){?>
+				<span class="btn small gray"><input type="button" id="setGroup" value="변경"/></span>
+<?php }?>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th" colspan="2">카테고리페이지 접속 주소(URL)</th>
+			<td class="its-td">
+			이 카테고리 주소(URL)는 <span id="urlCategory"></span>
+			<span class="btn small gray"><input type="button" id="clipboard" value="복사"/></span>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th" colspan="2">카테고리페이지 QR 코드</th>
+			<td class="its-td">
+				<a href="javascript:;" class="qrcodeGuideBtn fx11 lsp-1" target="parent" key="category" value="<?php echo $TPL_VAR["categoryCode"]?>">자세히▶</a>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th" rowspan="4">
+				카테고리<br />네비게이션<br />
+				<span class="btn small orange"><input type="button" value="안내) 이미지 보기" onclick="openDialog('설정안내 이미지', 'category_navigation_desc_img',{'width':'530','height':410})" /></span>
+				<div id="category_navigation_desc_img" class="center hide">
+					<img src="/admin/skin/default/images/common/cate_img1.gif" />
+				</div>
+			</th>
+			<th class="its-th">스타일</th>
+			<td class="its-td">
+				EYE-DESIGN 환경 'ON'상태에서 카테고리 네비게이션 클릭하여 스타일 선택 가능
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th" rowspan="2">
+				카테고리
+			</th>
+			<td class="its-td">
+				<label><input type="radio" name="hide" value="0" checked="checked" /> 네비게이션에 포함</label>
+				<label><input type="radio" name="hide" value="1" /> 네비게이션에서 제외 (카테고리에 속한 상품이  안 보이는 것은 아님)</label>
+			</td>
+		</tr>
+		<tr>
+			<td class="its-td">
+				<div class="node_type_text">
+					<table>
+					<col width="120" />
+					<tr>
+						<td colspan="3" valign="top">
+							<label><input type="radio" name="node_type" value="" checked="checked" /> 꾸미기 없음</label>
+						</td>
+					</tr>
+					<tr>
+						<td rowspan="2" valign="top">
+							<label><input type="radio" name="node_type" value="text" /> 텍스트 꾸밈</label>
+						</td>
+						<td align="right">
+							보통 때 &nbsp;
+						</td>
+						<td>
+							<input type="text" name="node_text_normal" value="" class="customFontDecoration" />
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							마우스오버일 때 &nbsp;
+						</td>
+						<td>
+							<input type="text" name="node_text_over" value="" class="customFontDecoration" />
+						<td>
+					</tr>
+					</table>
+
+				</div>
+				<div class="node_type_image">
+					<table>
+					<col width="120" />
+					<tr>
+						<td rowspan="2" valign="top">
+							<label><input type="radio" name="node_type" value="image" /> 이미지 꾸밈 </label>
+						</td>
+						<td align="right">
+							<span class="btn small"><input type="button" value="↕" onclick="changeNodeImage()" /></span> 보통 때 &nbsp;
+						</td>
+						<td>
+							<div class="webftpFormItem" >
+								<input type="radio" name="webftpFormItemSelector" class="hide" />
+								<img id="node_image_normal_preview" src="" class="webftpFormItemPreview" onerror="$(this).hide()" />
+								<input type="text" name="node_image_normal" value="" size="30" class="webftpFormItemInput hide" readonly="readonly" />
+								<input id="nodeImageNormalUploadButton" type="file" value="" class="uploadify" />
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							마우스오버일 때 &nbsp;
+						</td>
+						<td>
+							<div class="webftpFormItem" >
+								<input type="radio" name="webftpFormItemSelector" class="hide" />
+								<img id="node_image_over_preview" src="" class="webftpFormItemPreview" onerror="$(this).hide()" />
+								<input type="text" name="node_image_over" value="" size="30" class="webftpFormItemInput hide" readonly="readonly" />
+								<input id="nodeImageOverUploadButton" type="file" value="" class="uploadify" />
+							</div>
+						<td>
+					</tr>
+					</table>
+
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th">
+				배너
+			</th>
+			<td class="its-td">
+<?php if($TPL_VAR["service_code"]=='P_FREE'){?>
+					<span class="desc">배너 영역 기능은 업그레이드가 필요합니다.</span> <img src="/admin/skin/default/images/common/btn_upgrade.gif" class="hand" onclick="serviceUpgrade();" align="absmiddle" />
+<?php }else{?>
+					<textarea name="node_banner" class="daumeditor" contentHeight="150"><?php echo $TPL_VAR["categoryData"]["node_banner"]?></textarea>
+<?php }?>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th" rowspan="3">
+				전체 카테고리<br />네비게이션<br />
+				<span class="btn small orange"><input type="button" value="안내) 이미지 보기" onclick="openDialog('설정안내 이미지', 'category_gnb_desc_img',{'width':'840','height':470})" /></span>
+				<div id="category_gnb_desc_img" class="center hide">
+					<img src="/admin/skin/default/images/common/cate_img2.gif" />
+				</div>
+			</th>
+			<th class="its-th" rowspan="2">
+				카테고리
+			</th>
+			<td class="its-td">
+				<label><input type="radio" name="hide_in_gnb" value="0" checked="checked" /> 네비게이션에 포함</label>
+				<label><input type="radio" name="hide_in_gnb" value="1" /> 네비게이션에서 제외 (카테고리에 속한 상품이  안 보이는 것은 아님)</label>
+			</td>
+		</tr>
+		<tr>
+			<td class="its-td">
+				<div class="node_gnb_type_text">
+					<table>
+					<col width="120" />
+					<tr>
+						<td colspan="3" valign="top">
+							<label><input type="radio" name="node_gnb_type" value="" checked="checked" /> 꾸미기 없음</label>
+						</td>
+					</tr>
+					<tr>
+						<td rowspan="2" valign="top">
+							<label><input type="radio" name="node_gnb_type" value="text" /> 텍스트 꾸밈</label>
+						</td>
+						<td align="right">
+							보통 때 &nbsp;
+						</td>
+						<td>
+							<input type="text" name="node_gnb_text_normal" value="" class="customFontDecoration" />
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							마우스오버일 때 &nbsp;
+						</td>
+						<td>
+							<input type="text" name="node_gnb_text_over" value="" class="customFontDecoration" />
+						<td>
+					</tr>
+					</table>
+
+				</div>
+				<div class="node_gnb_type_image">
+					<table>
+					<col width="120" />
+					<tr>
+						<td rowspan="2" valign="top">
+							<label><input type="radio" name="node_gnb_type" value="image" /> 이미지 꾸밈 </label>
+						</td>
+						<td align="right">
+							<span class="btn small"><input type="button" value="↕" onclick="changeNodeGnbImage()" /></span> 보통 때 &nbsp;
+						</td>
+						<td>
+							<div class="webftpFormItem" >
+								<input type="radio" name="webftpFormItemSelector" class="hide" />
+								<img id="node_gnb_image_normal_preview" src="" class="webftpFormItemPreview" onerror="$(this).hide()" />
+								<input type="text" name="node_gnb_image_normal" value="" size="30" class="webftpFormItemInput hide" readonly="readonly" />
+								<input id="nodeGnbImageNormalUploadButton" type="file" value="" class="uploadify" />
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							마우스오버일 때 &nbsp;
+						</td>
+						<td>
+							<div class="webftpFormItem" >
+								<input type="radio" name="webftpFormItemSelector" class="hide" />
+								<img id="node_gnb_image_over_preview" src="" class="webftpFormItemPreview" onerror="$(this).hide()" />
+								<input type="text" name="node_gnb_image_over" value="" size="30" class="webftpFormItemInput hide" readonly="readonly" />
+								<input id="nodeGnbImageOverUploadButton" type="file" value="" class="uploadify" />
+							</div>
+						<td>
+					</tr>
+					</table>
+
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th">
+				배너
+			</th>
+			<td class="its-td">
+<?php if($TPL_VAR["service_code"]=='P_FREE'){?>
+					<span class="desc">배너 영역 기능은 업그레이드가 필요합니다.</span> <img src="/admin/skin/default/images/common/btn_upgrade.gif" class="hand" onclick="serviceUpgrade();" align="absmiddle" />
+<?php }else{?>
+					<textarea name="node_gnb_banner" class="daumeditor" contentHeight="150"><?php echo $TPL_VAR["categoryData"]["node_gnb_banner"]?></textarea>
+<?php }?>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th" rowspan="4">
+				해당 카테고리<br />페이지<br />네비게이션<br />
+				<span class="btn small orange"><input type="button" value="안내) 이미지 보기" onclick="openDialog('설정안내 이미지', 'category_page_desc_img',{'width':'840','height':420})" /></span>
+				<div id="category_page_desc_img" class="center hide">
+					<img src="/admin/skin/default/images/common/cate_img3.gif" />
+				</div>
+			</th>
+			<th class="its-th">스타일</th>
+			<td class="its-td">
+				관리자 환경 '카테고리 페이지 한꺼번에 꾸미기'에서 스타일 선택 가능
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th" rowspan="2">
+				카테고리
+			</th>
+			<td class="its-td">
+				<label><input type="radio" name="hide_in_navigation" value="0" checked="checked" /> 네비게이션에 포함</label>
+				<label><input type="radio" name="hide_in_navigation" value="1" /> 네비게이션에서 제외 (카테고리에 속한 상품이  안 보이는 것은 아님)</label>
+			</td>
+		</tr>
+		<tr>
+			<td class="its-td">
+				<div class="node_catalog_type_text">
+					<table>
+					<col width="120" />
+					<tr>
+						<td colspan="3" valign="top">
+							<label><input type="radio" name="node_catalog_type" value="" checked="checked" /> 꾸미기 없음</label>
+						</td>
+					</tr>
+					<tr>
+						<td rowspan="2" valign="top">
+							<label><input type="radio" name="node_catalog_type" value="text" /> 텍스트 꾸밈</label>
+						</td>
+						<td align="right">
+							보통 때 &nbsp;
+						</td>
+						<td>
+							<input type="text" name="node_catalog_text_normal" value="" class="customFontDecoration" />
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							마우스오버일 때 &nbsp;
+						</td>
+						<td>
+							<input type="text" name="node_catalog_text_over" value="" class="customFontDecoration" />
+						<td>
+					</tr>
+					</table>
+
+				</div>
+				<div class="node_catalog_type_image">
+					<table>
+					<col width="120" />
+					<tr>
+						<td rowspan="2" valign="top">
+							<label><input type="radio" name="node_catalog_type" value="image" /> 이미지 꾸밈 </label>
+						</td>
+						<td align="right">
+							<span class="btn small"><input type="button" value="↕" onclick="changeNodeCatalogImage()" /></span> 보통 때 &nbsp;
+						</td>
+						<td>
+							<div class="webftpFormItem" >
+								<input type="radio" name="webftpFormItemSelector" class="hide" />
+								<img id="node_catalog_image_normal_preview" src="" class="webftpFormItemPreview" onerror="$(this).hide()" />
+								<input type="text" name="node_catalog_image_normal" value="" size="30" class="webftpFormItemInput hide" readonly="readonly" />
+								<input id="nodeCatalogImageNormalUploadButton" type="file" value="" class="uploadify" />
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							마우스오버일 때 &nbsp;
+						</td>
+						<td>
+							<div class="webftpFormItem" >
+								<input type="radio" name="webftpFormItemSelector" class="hide" />
+								<img id="node_catalog_image_over_preview" src="" class="webftpFormItemPreview" onerror="$(this).hide()" />
+								<input type="text" name="node_catalog_image_over" value="" size="30" class="webftpFormItemInput hide" readonly="readonly" />
+								<input id="nodeCatalogImageOverUploadButton" type="file" value="" class="uploadify" />
+							</div>
+						<td>
+					</tr>
+					</table>
+
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th">브랜드</th>
+			<td class="its-td">
+				해당 카테고리에 속한 상품의 브랜드들을 노출합니다.
+			<td>
+		</tr>
+		</tbody>
+		</table>
+
+	</td>
+</tr>
+<tr>
+	<td height="20px">
+	</td>
+</tr>
+<tr>
+	<td>
+		<table width="100%" class="info-table-style">
+		<tr>
+			<th class="its-th">
+				카테고리 기능 안내
+			</th>
+		</tr>
+		<tr>
+			<td class="its-td">
+				카테고리 분류를 통하여 해당 상품을 체계적으로 관리하게 됩니다.<br/>
+				상품상세페이지에서는 대표카테고리가 해당 상품의 카테고리로 보여지며,<br/>
+				카테고리 페이지에서는 해당 카테고리에 속한 상품들이 보여집니다.
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+</table>
+
+<?php if($TPL_VAR["groups"]){?>
+<div id="setGroupsPopup" class="hide">
+<p class="mt10 bold">조건1) 선택된 회원등급만 접속을 허용</p>
+<p class="mt10">
+<?php if($TPL_groups_1){foreach($TPL_VAR["groups"] as $TPL_V1){?>
+	<label><input type="checkbox" name="memberGroup" value="<?php echo $TPL_V1["group_seq"]?>" class="line" ><?php echo $TPL_V1["group_name"]?></label>
+<?php }}?>
+</p>
+
+<p class="mt20 bold">조건2) 선택된 회원 유형만 접속을 허용</p>
+
+<p class="mt10">
+	<label><input type="checkbox" name="userType" value="default" class="line" >개인</label>
+	<label><input type="checkbox" name="userType" value="business" class="line" >기업</label>
+</p>
+
+<p class="center mt20 red"><strong>조건1</strong>과 <strong>조건2</strong>를 모두 만족해야만 접속이 가능합니다.</p>
+<p class="center mt10">
+	<span class="btn large cyanblue"><a id="saveGroupBtn">저장</a></span>
+</p>
+</div>
+<?php }?>
+
+</form>
+
+<!-- 서브메뉴 바디 : 끝 -->
+
+<?php $this->print_("layout_footer_popup",$TPL_SCP,1);?>

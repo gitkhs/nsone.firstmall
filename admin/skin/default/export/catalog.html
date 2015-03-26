@@ -1,0 +1,1204 @@
+{ #layout_header }
+
+<style>
+.goods_name {display:inline-block;white-space:nowrap;overflow:hidden;width:290px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+.search_label 	{display:inline-block;width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+span.price {display:inline-block;width:80px;text-align:right;}
+/*span.icon-buy-confirm{display:inline-block;width:22px;height:15px;background:url('../images/common/icon/icon_buy_decide.gif')}*/
+span.icon-buy-confirm{display:inline-block;width:16px;height:15px;background:url('../images/common/icon/icon_order_dcd.gif'); vertical-align:middle;}
+span.icon-buy-none{display:none;/*inline-block;width:22px;height:15px;*/}
+div.btn-open-all{position:absolute;top:3px;left:-62px;}
+div.btn-open-all img { cursor:pointer; }
+
+.waybill_number {font-size:11px;}
+.delivery_number {width:90%; padding:0px !important; text-indent:2px; line-height:20px; height:20px;}
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".all-check").toggle(function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',true);
+	},function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',false);
+	});
+
+	$("span.list-important").bind("click",function(){
+		var param = "?no="+$(this).attr('id');
+		if( $(this).hasClass('checked') ){
+			$(this).removeClass('checked');
+			param += "&val=0";
+			$.get('important'+param,function(data) {});
+
+		}else{
+			$(this).addClass('checked');
+			param += "&val=1";
+			$.get('important'+param,function(data) {});
+		}
+	});
+
+	$("select.list-select").bind("change",function(){
+		var nm = $(this).attr("name");
+		var value_str = $(this).val();
+		var that = this;
+
+		$("select[name='"+nm+"']").not(this).each(function(idx){
+			$(this).find("option[value='"+value_str+"']").attr("selected",true);
+			this.selectedIndex = that.selectedIndex;
+			$(this).customSelectBox("selectIndex",that.selectedIndex);
+		});
+
+		var step = nm.replace('select_', "");
+		var obj = $(".important-"+step);
+		obj.each(function(){
+			if( value_str ){
+				$(this).parent().parent().find("td").eq(0).find("input").attr("checked",false);
+				if(  value_str == 'important' && $(this).hasClass('checked') ){
+					$(this).parent().parent().find("td").eq(0).find("input").attr("checked",true);
+				}else if( value_str == 'not-important' && !$(this).hasClass('checked') ){
+					$(this).parent().parent().find("td").eq(0).find("input").attr("checked",true);
+				}else if(  value_str == 'select' ){
+					$(this).parent().parent().find("td").eq(0).find("input").attr("checked",true);
+				}
+			}
+		});
+	});
+
+	// 일괄출고완료
+	$("button[name='complete_export']").bind("click",function(){
+		var st = '.export_code_' + $(this).attr('id');
+		var export_code = new Array();
+		$(st+":checked").each(function(idx){
+			export_code[idx] = 'code[]='+$(this).val();
+		});
+
+		if(export_code.length > 0){
+			var str = 'mode=complete_export&' + export_code.join('&');
+			$.ajax({
+				type: "POST",
+				url: "../export/batch_status",
+				data: str,
+				success: function(result){
+					$("#goods_export_dialog").html(result);
+				}
+			});
+			openDialog("일괄 출고 완료<span class='desc'> - " + export_code.length + "건</span>", "goods_export_dialog", {"width":"1100","height":"700"});
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+
+	$("button[name='going_delivery']").bind("click",function(){
+		var st = '.export_code_' + $(this).attr('id');
+		var export_code = new Array();
+		$(st+":checked").each(function(idx){
+			export_code[idx] = 'code[]='+$(this).val();
+		});
+
+		if(export_code.length > 0){
+			var str = 'mode=going_delivery&' + export_code.join('&');
+			$.ajax({
+				type: "POST",
+				url: "../export/batch_status",
+				data: str,
+				success: function(result){
+					$("#goods_export_dialog").html(result);
+				}
+			});
+			openDialog("일괄 배송중 처리<span class='desc'> - " + export_code.length + "건</span>", "goods_export_dialog", {"width":"1100","height":"700"});
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+
+	$("button[name='complete_delivery']").bind("click",function(){
+		var st = '.export_code_' + $(this).attr('id');
+		var export_code = new Array();
+		$(st+":checked").each(function(idx){
+			export_code[idx] = 'code[]='+$(this).val();
+		});
+
+		if(export_code.length > 0){
+			var str = 'mode=complete_delivery&' + export_code.join('&');
+			$.ajax({
+				type: "POST",
+				url: "../export/batch_status",
+				data: str,
+				success: function(result){
+					$("#goods_export_dialog").html(result);
+				}
+			});
+			openDialog("일괄 배송 완료<span class='desc'> - " + export_code.length + "건</span>", "goods_export_dialog", {"width":"1100","height":"700"});
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+
+	//
+	$("img[name='goods_print']").bind("click",function(){
+		var st = '.export_code_' + $(this).attr('id');
+		var temp1 = "";
+		var temp2 = "";
+		$(st+":checked").each(function(idx){
+			temp1	+= $(this).val() + "|";
+			temp2	+= $(this).attr("order_seq") + "|";
+		});
+
+		if(temp1){
+			printExportView(temp2,temp1);
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+
+	// 출고 정보수정
+	$("button#waybill_number_modify").live("click",function(){
+		var f = $("form[name='batch_form']");
+		f.html($(".waybill_number"));
+		f[0].submit();
+	});
+
+
+	$("span.reverse_export").bind("click",function(){
+		var st = '.export_code_' + $(this).attr('id');
+		var export_code = new Array();
+		$(st+":checked").each(function(idx){
+			export_code[idx] = 'code[]='+$(this).val();
+		});
+
+		if(export_code.length > 0){
+			var str = export_code.join('&');
+			$.ajax({
+				type: "POST",
+				url: "../export_process/batch_reverse_export",
+				data: str,
+				success: function(result){
+					openDialogAlert(result,400,140,function(){
+						document.location.reload();
+					});
+				}
+			});
+
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+
+	// 체크박스 색상
+	$("input[type='checkbox'][name='export_code[]']").live('change',function(){
+		if($(this).is(':checked')){
+			$(this).closest('tr').addClass('checked-tr-background');
+		}else{
+			$(this).closest('tr').removeClass('checked-tr-background');
+		}
+	}).change();
+
+	// 기본검색 조건 불러오기
+	$("button#get_default_button").live("click",function(){
+		$.getJSON('get_search_default', function(result) {
+			var patt;
+			$(".mod_chkbox").removeAttr("checked");
+			for(var i=0;i<result.length;i++){
+				patt=/_date/g;
+				if( patt.test(result[i][0]) ){
+					if(result[i][1] == 'today'){
+						set_date('{=date('Y-m-d')}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3day'){
+						set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '7day'){
+						set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '1mon'){
+						set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}');
+					}else if(result[i][1] == '3mon'){
+						set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}');
+					}
+				}
+				//patt=/chk_/;
+				if(result[i][0]){
+					$("form[name='search-form'] input[name='"+result[i][0]+"']").attr("checked",true);
+				}
+			}
+		});
+	});
+
+	// 기본검색 조건 저장하기
+	$("span#set_default_button").bind("click",function(){
+		openDialog("기본검색 설정<span style=\"font-size:11px; margin-left:26px;\"> - 아래서 원하는 검색조건을 설정하여 편하게 쇼핑몰을 운영하세요</span>", "search_detail_dialog", {"width":"800","height":"220"});
+	});
+
+	// 다운로드항목설정
+	$("button[name='download_list']").click(function(){
+		openDialogPopup("항목설정", "download_list_setting", {
+			'url' : 'download_write',
+			'width' : 800,
+			'height' : 460
+		});
+	});
+
+	$("button[name='excel_down']").click(function(){
+		var status = $(this).attr("status");
+		var export_code = "";
+
+		$("tr.step"+status).find("input[type='checkbox'][name='export_code[]']:checked").each(function(idx){
+			export_code += $(this).val() + "|";
+		});
+		if(!export_code){
+			alert("선택값이 없습니다.");
+			return;
+		}
+
+		if(!$("#select_down_"+status).val()){
+			alert("양식을 선택해 주세요.");
+			return;
+		}
+		//actionFrame.location.href="/admin/export_process/excel_down?export_code="+export_code+"&criteria="+$("#select_down_"+status).val();
+		ajaxexceldown('/admin/export_process/excel_down', export_code, $("#select_down_"+status).val(), status);
+	});
+
+
+	// export_upload
+	$("button[name='excel_upload']").live("click",function(){
+		var status = $(this).attr("status");
+		openDialog("출고완료일/택배사코드/송장번호 - 엑셀 일괄 업로드", "export_upload", {"width":"600","height":"550","show" : "fade","hide" : "fade"});
+	});
+
+
+	$(".btn_open_all").live("click",function(){
+		var step	= $(this).attr("id");
+		$("tr.step"+step).find("span.btn-direct-open").each(function(){
+			orderViewOnOff('open', $(this));
+		});
+		var src	= $(this).attr('src');
+		$(this).attr('src', src.replace('_open_', '_close_'));
+		$(this).attr("class", "btn_close_all");
+	});
+
+	$(".btn_close_all").live("click",function(){
+		var step	= $(this).attr("id");
+		$("tr.step"+step).find("span.btn-direct-open").each(function(){
+			orderViewOnOff('close', $(this));
+		});
+		var src	= $(this).attr('src');
+		$(this).attr('src', src.replace('_close_', '_open_'));
+		$(this).attr("class", "btn_open_all");
+	});
+
+	$(".btn-direct-open").live("click", function(){
+		var nClass		= $(this).attr("class");
+		if	(nClass.search(/opened/) == -1)	orderViewOnOff('open', $(this));
+		else								orderViewOnOff('close', $(this));
+	});
+
+/*
+	// 바로열기
+	$(".btn-direct-open").toggle(function(){
+		var nextTr = $(this).parent().parent().next();
+		var order_seq = $(this).parent().parent().find("input[type='checkbox']").val();
+		$.get('view?no='+order_seq+'&mode=export_list', function(data) {
+			nextTr.find('div.detail').html(data);
+		});
+		nextTr.removeClass('hide');
+		$(this).addClass("opened");
+
+	},function(){
+		var nextTr = $(this).parent().parent().next();
+		nextTr.find('div.detail').html('');
+		nextTr.addClass('hide');
+		$(this).removeClass("opened");
+	});
+*/
+
+	//
+	$("img[name='invoice_print']").bind("click",function(){
+		var st = '.export_code_' + $(this).attr('id');
+		var temp1 = "";
+		var temp2 = "";
+		$(st+":checked").each(function(idx){
+			temp1	+= $(this).val() + "|";
+			temp2	+= $(this).attr("order_seq") + "|";
+		});
+
+		if(temp1){
+			printInvoiceView(temp2,temp1);
+		}else{
+			alert("선택값이 없습니다.");
+			return;
+		}
+	});
+
+	$("select.waybill_number").bind('change',function(){
+		if($(this).val().substring(0,5)=='auto_' || $(this).closest(".list-row").hasClass("step75") ){
+			$("option",this).not(":selected").attr("disabled",true);
+			$(this).closest('tr').find("input.delivery_number").attr("readonly",true).addClass("disabled");
+		}else{
+			$(this).closest('tr').find("input.delivery_number").attr("readonly",false).removeClass("disabled");
+		}
+	}).change();
+
+	$(".coupon_use_btn").live('click', function(){
+		$.ajax({
+			type: "post",
+			url: "../export/coupon_use",
+			data: "order_seq="+$(this).attr('order_seq'),
+			success: function(result){
+				if	(result){
+					$("#coupon_use_lay").html(result);
+					openDialog("쿠폰사용 확인 / 쿠폰번호 재발송", "coupon_use_lay", {"width":"1000","height":"700"});
+				}
+			}
+		});
+	});
+
+	$("button[name='print_setting']").click(function(){
+		openDialog("출고내역서 프린트 설정", "print_setting_dialog", {"width":"700"});
+	});
+
+	$("#coupon_use_excel_btn").click(function(){
+		openDialog("쿠폰사용내역 다운로드", "coupon_use_excel_dialog", {"width":"430"});
+	});
+
+	//쿠폰상품 > 사용내역
+	$("button[name='coupon_use_excel']").click(function(){
+		if( $("input[name='use_regist_date[]']").eq(0).val() || $("input[name='use_regist_date[]']").eq(1).val()) {
+			var searchdate = $("input[name='use_regist_date[]']").eq(0).val() + " ~ " + $("input[name='use_regist_date[]']").eq(1).val();
+		}else{
+			var searchdate = '';
+		}
+		ajaxexceldowncouponuse('/admin/export_process/coupon_use_excel', searchdate);
+	});
+
+	$("input[name='not_linkage_order']").live("change", function(){
+		if($(this).is(":checked")){
+			$("select[name='referer']").removeAttr('disabled');
+		}else{
+			$("select[name='referer']").attr('disabled',true);
+		}
+	}).change();
+
+	$("button[name='openmarket_order_receive_guide']").live("click", function(){
+		openDialog("외부 판매마켓 주문 자동수집 안내<span class='desc'></span>", "openmarket_order_receive_guide", {"width":"400","height":"200","show" : "fade","hide" : "fade"});
+	});
+	$("button[name='openmarket_service_guide']").live("click", function(){
+		openDialog("다중 판매마켓 서비스 안내<span class='desc'></span>", "openmarket_service_guide", {"width":"400","height":"200","show" : "fade","hide" : "fade"});
+	});
+
+});
+
+// 배송조회
+function goDeliverySearch(obj){
+	var code	= $(obj).closest('tr').find('.delivery_company_code').val();
+	var number	= $(obj).closest('td').find('.delivery_number').val();
+	open_search_delivery(code, number, '');
+}
+
+function orderViewOnOff(openType, thisObj){
+	var nextTr		= $(thisObj).parent().parent().next();
+	var nClass		= $(thisObj).attr('class');
+	if	(openType == 'open'){
+		if	(nClass.search(/opened/) == -1){
+			var order_seq	= $(thisObj).parent().parent().find("input[type='checkbox']").val();
+			$.get('view?no='+order_seq+'&mode=export_list', function(data) {
+				nextTr.find('div.detail').html(data);
+			});
+			nextTr.removeClass('hide');
+			$(thisObj).addClass("opened");
+		}
+	}else{
+		if	(nClass.search(/opened/) != -1){
+			nextTr.find('div.detail').html('');
+			nextTr.addClass('hide');
+			$(thisObj).removeClass("opened");
+		}
+	}
+}
+
+function ajaxexceldowncouponuse(url, searchdate){
+		var inputs ='<input type="hidden" name="searchdate" value="'+ searchdate +'" />';
+		jQuery('<form action="'+ url +'" method="post" target="actionFrame" >'+inputs+'</form>')
+		.appendTo('body').submit().remove();
+}
+
+
+function ajaxexceldown(url, export_code, criteria, status){
+		var inputs ='<input type="hidden" name="export_code" value="'+ export_code +'" />';
+		inputs +='<input type="hidden" name="criteria" value="'+ criteria +'" />';
+		inputs +='<input type="hidden" name="status" value="'+ status +'" />';
+		jQuery('<form action="'+ url +'" method="post" target="actionFrame" >'+inputs+'</form>')
+		.appendTo('body').submit().remove();
+}
+
+function set_date(start,end){
+	$("input[name='regist_date[]']").eq(0).val(start);
+	$("input[name='regist_date[]']").eq(1).val(end);
+}
+
+function use_set_date(start,end){
+	$("input[name='use_regist_date[]']").eq(0).val(start);
+	$("input[name='use_regist_date[]']").eq(1).val(end);
+}
+
+function closeExportPopup(){
+	openDialogAlert("처리할 주문이 없습니다.", 400, 150, function(){closeDialog("goods_export_dialog");});
+}
+
+function invoice_export_resend(btnObj,export_code){
+	$.ajax({
+		'url' : '../export_process/invoice_export_resend',
+		'data' : {'export_code':export_code},
+		'success' : function(res){
+			if(typeof res == 'string'){
+				res = eval("("+res+")");
+			}
+			if(res.code=='success'){
+				$(btnObj).parent().remove();
+				$("input[name='delivery_number["+export_code+"]']").val(res.resultDeliveryNumber[0]);
+			}
+		}
+	});
+	return false;
+}
+
+//주문한 sns 계정 정보 확인
+function snsdetailview(m,snscd,mem_seq,no){
+
+	var disp = $("div#snsdetailPopup"+no).css("display");
+	$(".snsdetailPopup").hide();
+
+	var obj	= $("div#snsdetailPopup"+no);
+	if(obj.html() == ''){
+		$.get('../member/sns_detail?snscd='+snscd+'&member_seq='+mem_seq+'&no='+no, function(data) {
+			obj.html(data);
+		});
+	}
+
+	if(disp == "none"){ obj.show(); }
+}
+</script>
+<div class="hide">
+<form name="batch_form" method="post" action="../export_process/batch_waybill_number" target="actionFrame"></form>
+</div>
+
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<a href="../setting/order" target="_blank"><img src="../images/common/btn_now_prcs.gif" align="absmiddle" style="margin-left:-115px;" /></a>
+			<h2>출고리스트</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		{? service_code=='P_STOR' || service_code=='P_EXPA'}
+			<li><span class="btn large green"><button type="button" id="coupon_use_excel_btn"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 쿠폰사용내역 다운로드</button></span></li>
+		{:}
+			<li><span class="btn large green"><button type="button" class="nofreelinknone"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 쿠폰사용내역 다운로드</button></span></li>
+		{/}
+		<li><span class="btn large"><button type="button" id="waybill_number_modify">출고정보수정</button></span></li>
+		<li><span class="btn large"><button name="print_setting">프린트설정<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 주문리스트 검색폼 : 시작 -->
+<div class="search-form-container">
+	<form name="search-form" method="get">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table>
+			<tr>
+				<td width="600">
+					<table class="sf-keyword-table">
+					<tr>
+						<td width="100" align="center">
+							<select name="keyword_type" style="width:94px;">
+							<option value="">통합검색</option>
+							<option value="exp.export_code">출고번호</option>
+							<option value="ord.order_seq">주문번호</option>
+							<option value="ord.order_user_name">주문자명</option>
+							<option value="ord.depositor">입금자명</option>
+							<option value="mem.userid">아이디</option>
+							</select>
+							<script>$("select[name='keyword_type']").val("{_GET.keyword_type}");</script>
+						</td>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{_GET.keyword}" title="주문자, 수령자, 입금자, 아이디, 이메일, 휴대폰, 상품명, 상품 고유값, 상품코드, 사은품, 운송장번호, 주문번호, 출고번호, 반품번호, 환불번호" /></td>
+						<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td>
+				<span class="btn small gray"><button type="button" id="get_default_button">기본검색적용</button></span>
+				<span class="icon-arrow-down" style="cursor:pointer;" id="set_default_button">기본검색설정</span>
+				</td>
+				<td>&nbsp;&nbsp;&nbsp;</td>
+				<td></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<table class="search-form-table" id="search_detail_table">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th>
+				<select class="line" name="date">
+					<option value="order" {?_GET.date == 'order'}selected{/}>주문일</option>
+					<option value="export"  {?_GET.date == 'export'}selected{/}>출고일(입력)</option>
+					<option value="regist_date"  {?_GET.date == 'regist_date'}selected{/}>출고일</option>
+					<option value="shipping"  {?_GET.date == 'shipping'}selected{/}>배송완료일</option>
+					<option value="confirm_date"  {?_GET.date == 'confirm_date'}selected{/}>구매확정일</option>
+				</select>
+				</th>
+				<td>
+					<input type="text" name="regist_date[]" value="{_GET.regist_date[0]}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="regist_date[]" value="{_GET.regist_date[1]}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button" value="오늘" onclick="set_date('{=date('Y-m-d')}','{=date('Y-m-d')}')" /></span>
+					<span class="btn small"><input type="button" value="3일간" onclick="set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}')" /></span>
+					<span class="btn small"><input type="button" value="일주일" onclick="set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}')"/></span>
+					<span class="btn small"><input type="button" value="1개월" onclick="set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}')"/></span>
+					<span class="btn small"><input type="button" value="3개월" onclick="set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}')" /></span>
+					<span class="btn small"><input type="button" value="전체" onclick="set_date('','')" /></span>
+				</td>
+			</tr>
+
+			<tr>
+				<th>출고 상태</th>
+				<td>
+					<!--{ @ config_load('export_status')}-->
+					<label style="display:inline-block;width:100px;"><input type="checkbox" name="export_status[{.key_}]" value="1" class="mod_chkbox" /> <span class="icon-order-step-{.key_}">{.value_}</span></label>
+					<!--{ ? _GET.export_status[.key_] == 1 }-->
+					<script type="text/javascript">$("input[name='export_status[{.key_}]']").attr('checked',true);</script>
+					<!--{ / }-->
+					<!--{ / }-->
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			<tr>
+				<th>출고 방법</th>
+				<td>
+					<label style="display:inline-block;width:100px;"><input type="checkbox" name="search_shipping_method[]" class="mod_chkbox" value="delivery" /> 택배(선불)</label>
+					<label style="display:inline-block;width:100px;"><input type="checkbox" name="search_shipping_method[]" class="mod_chkbox" value="postpaid" /> 택배(착불)</label>
+					<label style="display:inline-block;width:100px;"><input type="checkbox" name="search_shipping_method[]" class="mod_chkbox" value="quick" /> 퀵서비스</label>
+					<label style="display:inline-block;width:100px;"><input type="checkbox" name="search_shipping_method[]" class="mod_chkbox" value="direct" /> 직접수령</label>
+					<label style="display:inline-block;width:100px;"><input type="checkbox" name="search_international" class="mod_chkbox" value="international" /> 해외택배(선불)</label>
+					<span style="display:inline-block;width:10px"></span><span class="icon-check hand all-check"><b>전체</b></span>
+					<script type="text/javascript">
+					{ ? _GET.search_shipping_method }
+					{ @ _GET.search_shipping_method }
+					$("input[name='search_shipping_method[]'][value='{.value_}']").attr('checked',true);
+					{ / }
+					{ / }
+					{ ? _GET.search_international }
+					$("input[name='search_international'][value='{_GET.search_international}']").attr('checked',true);
+					{ / }
+					</script>
+				</td>
+			</tr>
+			<tr>
+				<th>출고 정보</th>
+				<td>
+					<!--{ ? delivery_company_array || international_company_array }-->
+					<select name="search_delivery_company_code" class="waybill_number">
+						<option value=''>전체</option>
+						<!--{ @ delivery_company_array }-->
+						<!--{ ? .key_ == _GET.search_delivery_company_code }-->
+						<option value='{.key_}' selected>{.company}</option>
+						<!--{ : }-->
+						<option value='{.key_}'>{.company}</option>
+						<!--{ / }-->
+						<!--{ / }-->
+						<!--{ @ international_company_array }-->
+						<!--{ ? .company == _GET.search_delivery_company_code }-->
+						<option value='{.company}' selected>{=str_replace('선불 > ','',.method)}</option>
+						<!--{ : }-->
+						<option value='{.company}'>{=str_replace('선불 > ','',.method)}</option>
+						<!--{ / }-->
+						<!--{ / }-->
+					</select>
+					<!--{ / }-->
+					<input type="text" name="search_delivery_number" class="line" value="{_GET.search_delivery_number}" />
+					<label><input type="checkbox" class="mod_chkbox" name="null_delivery_number" value= "1" /> 운송장번호 없음</label>
+					<!--{ ? _GET.null_delivery_number }-->
+					<script type="text/javascript">
+					$("input[name='null_delivery_number']").attr('checked',true);
+					</script>
+					<!--{ / }-->
+				</td>
+			</tr>
+			<tr>
+				<th>구매 확정</th>
+				<td colspan="3">
+					<label style="display:inline-block;width:150px;"><input type="checkbox" name="buy_confirm[user]" value="1" class="mod_chkbox" /> 했음(판매자)</label>
+					<label style="display:inline-block;width:150px;"><input type="checkbox" name="buy_confirm[admin]" value="1" class="mod_chkbox" /> 했음(구매자)</label>
+					<label style="display:inline-block;width:150px;"><input type="checkbox" name="buy_confirm[system]" value="1" class="mod_chkbox" /> 했음(시스템)</label>
+					<label style="display:inline-block;width:150px;"><input type="checkbox" name="buy_confirm[none]" value="1" class="mod_chkbox" /> 안했음</label>
+					<!--{ @ _GET.buy_confirm }-->
+					<!--{ ? _GET.buy_confirm[.key_] == 1 }-->
+					<script type="text/javascript">$("input[name='buy_confirm[{.key_}]']").attr('checked',true);</script>
+					<!--{ / }-->
+					<!--{ / }-->
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			<!--{ ? linkage_mallnames_for_search }-->
+			<tr>
+				<th>판매마켓</th>
+				<td colspan="3">
+					<label class="search_label" style="height:20px;"><input type="checkbox" name="not_linkage_order" value="1" {?_GET.not_linkage_order}checked="checked"{/} /> 운영쇼핑몰</label>
+					<select name="referer">
+						<option value="">선택하세요</option>
+						{ @ referer_list }
+						<option value="{ . referer_group_name }" { ? _GET.referer == .referer_group_name }selected{/}>{ . referer_group_name }</option>
+						{ / }
+						<option value="기타" { ? _GET.referer == '기타' }selected{/}>기타</option>
+					</select>
+					<br />
+					<!--{ @ linkage_mallnames_for_search }-->
+						<!--{ ? .index_ && .index_%5==0 }--><br /><!--{ / }-->
+						<!--{ ? _GET.linkage_mall_code[.mall_code] }-->
+						<label class="search_label"><input type="checkbox" name="linkage_mall_code[{.mall_code}]" value="{.mall_code}" checked="checked" /> {.mall_name}</label>
+						<!--{ : }-->
+						<label class="search_label"><input type="checkbox" name="linkage_mall_code[{.mall_code}]" value="{.mall_code}" /> {.mall_name}</label>
+						<!--{ / }-->
+					<!--{ / }-->
+					<label class="search_label" style="height:20px;"><input type="checkbox" name="etc_linkage_order" value="1" {?_GET.etc_linkage_order}checked="checked"{/} /> 그 외 마켓</label>
+					<span class="icon-check hand all-check"><b>전체</b></span>
+
+					<span class="btn medium"><button type="button" name="openmarket_order_receive_guide">자동수집 안내<span class="arrowright"></span></button></span>
+				</td>
+			</tr>
+			<!--{ / }-->
+			</table>
+		</td>
+	</tr>
+	</table>
+	</form>
+</div>
+<!-- 주문리스트 검색폼 : 끝 -->
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="25" />
+		<col width="20" />
+		<col width="35" />
+		<col width="85" />
+		<col width="120" />
+		<col width="240"/>
+		<col />
+		<col width="60" />
+		<col width="160" />
+		<col width="80" />
+		<col width="60" />
+		<col width="150"/>
+		<col width="120" />
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th><input type="checkbox" name="" value="" /></th>
+		<th><span class="icon-star-gray"></span></th>
+		<th>번호</th>
+		<th>출고일</th>
+		<th>
+		<img src='../images/common/btn_orig_order.gif' border="0" align="absmiddle" alt="해당 출고의 주문을 확인합니다">
+		<img src="../images/common/btn_list_release.gif" align="absmiddle" alt="해당 출고의 주문을 기준으로 모든 출고리스트를 확인합니다">
+		<span class="helpicon" title="원주문 : 클릭 → (새창) 해당 출고의 원래 주문내역을 바로 확인합니다.<br/>출고리스트 : 클릭 → (현재창) 해당 출고의 원래 주문에 대한 모든 출고를 리스트에서 확인합니다."></span>
+		</th>
+		<th>
+			{?config_system.invoice_use}
+				<span class="icon-invoice-auto"></span>
+				<span class="helpicon" title="택배 업무 자동화 서비스로 출고된 출고건"></span>
+			{/}
+			출고번호
+		</th>
+		<th>출고상품</th>
+		<th>출고/주문</th>
+		<th>받는분 / 주문자</th>
+		<th>결제</th>
+		<th>출고금액</th>
+		<th>배송</th>
+		<th>운송장번호</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+		<!--{ ? !record }-->
+		<tr class="list-row">
+			<td colspan="13" align="center">검색어가 없거나 검색 결과가 없습니다.</td>
+		</tr>
+		<!--{ : }-->
+		<!--{ @ record }-->
+		<!--{ ? .start }-->
+		<!-- 리스트타이틀(주문상태 및 버튼) : 시작 -->
+		<tr class="list-title-row">
+			<td colspan="13" class="list-title-row-td list-title-row-td-step-{.status}">
+				<div class="relative">
+					<div class="ltr-title ltr-title-step-{.status}">
+					<div class="btn-open-all">
+						<img src="../images/common/icon/btn_open_all.gif" class="btn_open_all" id="{.status}" />
+					</div>
+					<!--{ ? .status == 45 }-->
+					<span class="small_group">출고준비</span> <span class="helpicon" title="출고완료를 처리하세요.출고수량만큼 재고가 자동 차감됩니다."></span>
+					<!--{ : .status == 55 }-->
+					<span class="small_group">출고완료</span> <span class="helpicon" title="배송완료를 처리하세요.."></span>
+					<!--{ : .status == 65 }-->
+					<span class="small_group">배송중</span> <span class="helpicon" title="배송완료를 처리하세요."></span>
+					<!--{ : .status == 75 }-->
+					<span class="small_group">배송완료</span> <span class="helpicon" title="배송이 완료되었습니다."></span>
+					<!--{ / }-->
+					</div>
+					<ul class="left-btns clearbox">
+						<li>
+							<select class="list-select custom-select-box-multi" name="select_{.status}"  rows="4">
+							<option value="select">전체선택</option>
+							<option value="not-select">선택안함</option>
+							<option value="important">별표선택</option>
+							<option value="not-important">별표없음</option>
+							</select>
+						</li>
+						<li>
+							<!--{ ? .status == '45' }-->
+							<span class="btn small deepblue"><button name="complete_export"  id="{.status}">출고완료</button></span>
+							<!--{ : .status == '55' }-->
+							<span class="btn small violet"><button name="going_delivery"  id="{.status}">배송중</button></span>
+							<span class="btn small pink"><button name="complete_delivery"  id="{.status}">배송완료</button></span>
+							<!--{ : .status == '65' }-->
+							<span class="btn small pink"><button name="complete_delivery"  id="{.status}">배송완료</button></span>
+							<!--{ / }-->
+							<img src="../images/common/btn_print_m_rls.gif" name="goods_print" id="{.status}" class="hand" align="absmiddle" />
+							<!--{ ? status_invoice_cnt[.status] }-->
+							<img src="../images/common/btn_print_m_ivc.gif" name="invoice_print" id="{.status}" class="hand" align="absmiddle" />
+							<!--{ / }-->
+
+							<span class="hand reverse_export" id="{.status}">
+							<!--{ ? .status == '45' }-->
+							<span class="helpicon" title="출고 준비된 상품을 상품준비로 되돌릴 수 있습니다."></span> '상품준비'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+							<!--{ : .status == '55' }-->
+							<span class="helpicon" title="출고 완료된 상품을 출고준비로 되돌릴 수 있습니다.<br/>이 때 출고완료 시 차감된 재고 수량이 환원됩니다."></span> '출고준비'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+							<!--{ : .status == '65' }-->
+							<span class="helpicon" title="배송 중인 상품을 출고완료로 되돌릴 수 있습니다."></span> '출고완료'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+							<!--{ / }-->
+							</span>
+						</li>
+					</ul>
+					<!-- EXCEL -->
+
+					<ul class="right-btns clearbox">
+						<li>
+							<select class="custom-select-box" id="select_down_{.status}">
+								<option value="">양식선택</option>
+								<option value="EXPORT">출고번호별 한줄</option>
+								<option value="ITEM">상품별 한줄</option>
+							</select>
+
+							<span class="btn small"><button name="download_list">항목설정<span class="arrowright"></span></button></span>
+							<span class="btn small"><button name="excel_down" status="{.status}"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 일괄다운로드</button></span>
+							<span class="btn small"><button name="excel_upload" status="{.status}"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 일괄업로드(출고)</button></span>
+						</li>
+					</ul>
+
+				</div>
+			</td>
+		</tr>
+		<!-- 리스트타이틀(주문상태 및 버튼) : 끝 -->
+		<!--{ / }-->
+		<tr class="list-row step{.status}">
+			<td align="center"><input type="checkbox" name="export_code[]" class="export_code_{.status}" value="{.export_code}" order_seq="{.order_seq}" /></td>
+			<td align="center">
+			<!--{ ? .important }-->
+			<span class="icon-star-gray hand checked list-important important-{.status}" id="important_{.export_seq}"></span>
+			<!--{ : }-->
+			<span class="icon-star-gray hand list-important important-{.status}" id="important_{.export_seq}"></span>
+			<!--{ / }-->
+			</td>
+			<td align="center">{.no}</td>
+			<td align="center">
+			<input type="text" name="export_date[{.export_code}]" class="line datepicker waybill_number tahoma" size="7" value="{.export_date}" style="font-size:9px;" />
+			</td>
+			<td align="center">
+				<a href="../order/catalog?hsb_kind=order&header_search_keyword={.order_seq}" target="_blank"><img src='../images/common/btn_orig_order.gif' border="0" align="absmiddle" alt="해당 출고의 주문을 확인합니다"></a>
+				<a href="../export/catalog?hsb_kind=export&header_search_keyword={.order_seq}" target="_blank"><img src="../images/common/btn_list_release.gif" align="absmiddle" alt="해당 출고의 주문을 기준으로 모든 출고리스트를 확인합니다"></a>
+			</td>
+			<td style="padding:0 0 0 0;" align="left">
+				<a href="view?no={.export_code}" target="_blank">
+				{?.invoice_send_yn=='y'}
+				<span class="icon-invoice-auto"></span>
+				{/}
+				{?.buy_confirm=='none'}
+				<span class="icon-buy-none"></span>
+				{ : }
+				<span class="icon-buy-confirm"></span>
+				{ / }
+				<span class="hand bold order-step-color-{.status}">{.export_code}</span>
+				</a>
+				<a href="javascript:printExportView('{.order_seq}','{.export_code}')"><span class="icon-print-export"></span></a>
+				{?.invoice_send_yn=='y'}
+				<a href="javascript:printInvoiceView('{.order_seq}','{.export_code}')"><span class="icon-print-invoice"></span></a>
+				{/}
+				<a href="view?no={.export_code}" target="_blank"><span class="btn-administration"><span class="hide">새창</span></span></a>
+				<span class="btn-direct-open"><span class="hide">바로열기</span></span>
+				{?.linkage_mall_code}
+				<div class="left pdl30 blue bold">&nbsp;{linkage_mallnames[.linkage_mall_code]}</div>
+				{/}
+			</td>
+			<td align="left" style='line-height:17px;'>
+				{ ? .goods_type == 'gift'}
+				<img src="/admin/skin/default/images/common/icon_gift.gif" align="absmiddle" />
+				{ / }
+				{ ? .opt_type == 'sub'}
+				<img src="../images/common/icon_add.gif" align="absmiddle" />
+				{ / }
+				{? .item_title }
+				{.item_title}
+				<span class="desc">({.goods_name})</span>
+				{ : }
+				{.goods_name}
+				{ / }
+				{ ? .item_count > 1}외{ / }
+				{ ? .goods_kind == 'coupon' }
+				<span class="btn"><img src="../images/common/btn_ok_use.gif" class="coupon_use_btn" order_seq="{.order_seq}" /></span>
+				{ / }
+			</td>
+			<td align="center">{.ea}/{.opt_ea + .sub_ea}</td>
+			<td>
+				<!--{ ? .shipping_recipient_user_name && .shipping_recipient_user_name != .order_user_name}-->
+					<div style="margin-top:5px;">{.shipping_recipient_user_name}</div>
+				<!--{ / }-->
+				<!--{ ? .member_seq }-->
+					{?.member_type=='개인'}<img src="../images/common/icon/icon_personal.gif" title="개인" />
+					{:.member_type=='기업'}<img src="../images/common/icon/icon_besiness.gif" title="기업" />{/}
+					{.order_user_name}
+					{? .sns_rute }
+						<span>(<img src="../images/sns/sns_{=substr(.sns_rute,0,1)}0.gif" align="absmiddle" snscd="{.sns_rute}" mem_seq="{.member_seq}" no="{=.step}{=.key_}" onclick="snsdetailview('open','{.sns_rute}','{.member_seq}','{=.step}{=.key_}')" class="btnsnsdetail hand">/<span class="blue">{.group_name}</span>)
+						<div id="snsdetailPopup{=.step}{.key_}" class="snsdetailPopup absolute hide" style="margin-left:73px;margin-top:-16px;"></div>
+						</span>
+					{ : }
+					<!--{ ? .mbinfo_rute == 'facebook' //facebook 회원인경우 }-->
+						(<a href="/admin/member/detail?member_seq={.member_seq}" target="_blank"><span style="color:#d13b00;"><img src="../images/board/icon/sns_f0.gif" align="absmiddle">{.mbinfo_email}</span>/<span class="blue">{.group_name}</span></a>)
+					<!--{ : }-->
+						(<a href="/admin/member/detail?member_seq={.member_seq}" target="_blank"><span style="color:#d13b00;">{.userid}</span>/<span class="blue">{.group_name}</span></a>)
+					<!--{ / }-->
+					{ / }
+				<!--{ : }-->
+					<img src="../images/common/icon/icon_personal.gif" /> {.order_user_name} (<span class="desc">비회원</span>)
+				<!--{ / }-->
+			</td>
+			<td align="right">
+			<!--{ ? .payment=='bank' }-->
+			<!--{ ? .order_user_name == .depositor }-->
+			<span class="black"><span title="입금자명">{.depositor}</span></span>
+			<!--{ : }-->
+			<span class="blue"><span title="입금자명">{.depositor}</span></span>
+			<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? .payment == 'escrow_account' }-->
+			<span class="icon-pay-escrow"><span>에스크로</span></span>
+			<span class="icon-pay-account"><span>{.mpayment}</span></span>
+			<!--{ : .payment == 'escrow_virtual' }-->
+			<span class="icon-pay-escrow"><span>에스크로</span></span>
+			<span class="icon-pay-virtual"><span>{.mpayment}</span></span>
+			<!--{ : .pg == 'kakaopay' }-->
+			<span class="icon-pay-{.pg}"><span>{.pg}</span></span>
+			<!--{ : }-->
+			<span class="icon-pay-{.payment}"><span>{.mpayment}</span></span>
+			<!--{ / }-->
+			</td>
+			<td align="right">{=number_format(.price)}</td>
+			<td align=center>
+			<!--{ ? .international == 'domestic' && .delivery_company_array && (.domestic_shipping_method == 'delivery'||.domestic_shipping_method == 'postpaid') }-->
+				<select name="delivery_company_code[{.export_code}]" class="waybill_number delivery_company_code">
+				<!--{ @ .delivery_company_array }-->
+					<!--{ ? ..key_ == .delivery_company_code }-->
+					<option value='{..key_}' style='background-color:yellow' selected="selected">{..company}</option>
+					<!--{ : }-->
+					<option value='{..key_}'>{..company}</option>
+					<!--{ / }-->
+				<!--{ / }-->
+				</select>
+				<!--{ ? .mdelivery }-->
+				<!-- <div class="fx11" style="padding-top:2px;">{.mdelivery}</div> -->
+				<!--{ : !.delivery_company_array }-->
+				<a href="../setting/shipping" target="_blank" style="color:#06C">설정하기 ></a>
+				<!--{ / }-->
+				<!--{ : .international == 'international' && .international_company_array }-->
+				<select name="international_shipping_method[{.export_code}]" class="waybill_number">
+				<!--{ @.international_company_array }-->
+					<!--{ ? ..company == .international_shipping_method }-->
+					<option value='{..company}' style='background-color:yellow' selected>{=str_replace('선불 > ','',..method)}</option>
+					<!--{ : }-->
+					<option value='{..company}'>{=str_replace('선불 > ','',..method)}</option>
+					<!--{ / }-->
+				<!--{ / }-->
+				</select>
+				<!--{ ? .mdelivery }-->
+				<!-- <div class="fx11" style="padding-top:2px;">{=str_replace('선불 > ','',.mdelivery)}</div> -->
+				<!--{ : !.international_company_array }-->
+				<a href="../setting/shipping" target="_blank" style="color:#06C">설정하기 ></a>
+				<!--{ / }-->
+			<!--{ : }-->
+			<!-- {.mdelivery} -->
+			<!--{ / }-->
+			</td>
+			<td align="center">
+			<!--{ ? .international == 'domestic' && (.domestic_shipping_method == 'delivery'||.domestic_shipping_method == 'postpaid') }-->
+			<input type="text" name="delivery_number[{.export_code}]" class="line waybill_number delivery_number" value="{.delivery_number}" style="width:50%;"/>
+			<!--{ ? .delivery_company_code && !preg_match('/^auto/', .delivery_company_code) && .delivery_company_array }-->
+			<span class="btn small cyanblue"><button type="button" class="hand" onclick="goDeliverySearch(this);">조회</button></span>
+			<!--{ / }-->
+				{?.delivery_company_code=='auto_hlc' && !.delivery_number}
+			<div><a href="javascript:;" onclick="invoice_export_resend(this,'{.export_code}')"><span class='red'>[송장재발급]</span></a></div>
+				{/}
+			<!--{ : .international == 'international'}-->
+			<input type="text" name="international_delivery_no[{.export_code}]" class="line waybill_number delivery_number" value="{.international_delivery_no}" style="width:90%;" />
+			<!--{ : }-->
+			-
+			<!--{ / }-->
+			</td>
+
+		</tr>
+		<tr class="list-row hide">
+			<td colspan="13" class="list-end-row-td"><div class="detail"></div></td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+		<!--{ ? .end }-->
+		<!-- 합계 : 시작 -->
+		<tr class="list-end-row">
+			<td colspan="13" class="list-end-row-td">
+				<ul class="left-btns clearbox">
+					<li>
+						<select class="list-select custom-select-box-multi" name="select_{.status}"  rows="4">
+						<option value="select">전체선택</option>
+						<option value="not-select">선택안함</option>
+						<option value="important">별표선택</option>
+						<option value="not-important">별표없음</option>
+						</select>
+					</li>
+					<li>
+						<!--{ ? .status == '45' }-->
+						<span class="btn small deepblue"><button name="complete_export"  id="{.status}">출고완료</button></span>
+						<!--{ : .status == '55' }-->
+						<span class="btn small violet"><button name="going_delivery"  id="{.status}">배송중</button></span>
+						<span class="btn small pink"><button name="complete_delivery"  id="{.status}">배송완료</button></span>
+						<!--{ : .status == '65' }-->
+						<span class="btn small pink"><button name="complete_delivery"  id="{.status}">배송완료</button></span>
+						<!--{ / }-->
+						<img src="../images/common/btn_print_m_rls.gif" name="goods_print" id="{.status}" class="hand" align="absmiddle" />
+						<!--{ ? status_invoice_cnt[.status] }-->
+						<img src="../images/common/btn_print_m_ivc.gif" name="invoice_print" id="{.status}" class="hand" align="absmiddle" />
+						<!--{ / }-->
+						<span class="hand reverse_export" id="{.status}">
+						<!--{ ? .status == '45' }-->
+						<span class="helpicon" title="출고 준비된 상품을 상품준비로 되돌릴 수 있습니다."></span> '상품준비'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+						<!--{ : .status == '55' }-->
+						<span class="helpicon" title="출고 완료된 상품을 출고준비로 되돌릴 수 있습니다.<br/>이 때 출고완료 시 차감된 재고 수량이 환원됩니다."></span> '출고준비'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+						<!--{ : .status == '65' }-->
+						<span class="helpicon" title="배송 중인 상품을 출고완료로 되돌릴 수 있습니다."></span> '출고완료'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+						<!--{ / }-->
+						</span>
+					</li>
+				</ul>
+				<div class="list-end-total-amount">
+					<span class="order-step-color-{.step}">{.mstatus}</span> <span class="darkgray">합계</span> &nbsp; {=number_format(.status_cnt[.status])}건
+					&nbsp;&nbsp;&nbsp;
+					￦ <span class="fx14 order-step-color-{.step}">{=number_format(.tot_price[.status])}</span>
+				</div>
+			</td>
+		</tr>
+		<!-- 합계 : 끝 -->
+		<!--{ / }-->
+		<!--{ / }-->
+		<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+</table>
+<!-- 주문리스트 테이블 : 끝 -->
+<div class="hide" id="search_detail_dialog">
+<form name="set_search_detail" method="post" action="set_search_default" target="actionFrame">
+<div id="contents">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<tr>
+				<th width="100">
+				<select class="line" name="date">
+					<option value="order">주문일</option>
+					<option value="export" selected>출고일</option>
+				</select>
+				</th>
+				<td class="date" height="30">
+					<label class="search_label"><input type="radio" name="regist_date" value="today" {? !_GET.regist_date_type || _GET.regist_date_type=='today' } checked="checked" {/}/> 오늘</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3day" {? _GET.regist_date_type=='3day' } checked="checked" {/}/> 3일간</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="7day" {? _GET.regist_date_type=='7day' } checked="checked" {/}/> 일주일</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="1mon" {? _GET.regist_date_type=='1mon' } checked="checked" {/}/> 1개월</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="3mon" {? _GET.regist_date_type=='3mon' } checked="checked" {/}/> 3개월</label>
+					<label class="search_label"><input type="radio" name="regist_date" value="all" {? _GET.regist_date_type=='all' } checked="checked" {/}/> 전체</label>
+				</td>
+			</tr>
+
+			<tr>
+				<th>출고 상태</th>
+				<td>
+					<!--{ @ config_load('export_status')}-->
+						<!--{ ? _GET.export_status[.key_] }-->
+						<label style="display:inline-block;width:100px;"><input type="checkbox" name="export_status[{.key_}]" value="1" checked="checked" /> <span class="icon-order-step-{.key_}">{.value_}</span></label>
+						<!--{ : }-->
+						<label style="display:inline-block;width:100px;"><input type="checkbox" name="export_status[{.key_}]" value="1"/> <span class="icon-order-step-{.key_}">{.value_}</span></label>
+						<!--{ / }-->
+					<!--{ / }-->
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<div align="center" style="padding-top:10px;">
+	<span class="btn large black">
+		<button type="submit">저장하기<span class="arrowright"></span></button>
+	</span>
+</div>
+</form>
+</div>
+<div id="goods_export_dialog"></div>
+
+<div id="export_upload" class="hide">
+<form name="excelRegist" id="excelRegist" method="post" action="../export_process/excel_upload" enctype="multipart/form-data"  target="actionFrame" onsubmit="loadingStart();">
+<table class="search-form-table" style="width:100%;">
+<tr>
+	<td height="20">① <b class="red">출고내역</b>을 파일 다운로드(.xls) 하십시오.</td>
+</tr>
+<tr>
+	<td height="20">② 파일을 수정(출고완료일, 택배사코드, 송장번호) 하십시오.</td>
+</tr>
+{?config_system.invoice_use}
+<tr>
+	<td height="20" class="bold red">　 단, 택배업무자동화 서비스가 되는 택배사코드는 송장번호를 입력하지 마십시오.</td>
+</tr>
+<tr>
+	<td height="20" class="bold red">　 택배업무 자동화 서비스 : {@get_invoice_company()}{.company} / {.key_}{/}</td>
+</tr>
+{/}
+<tr>
+	<td height="20">③ 수정된 파일을 'EXCEL 97~2003 통합문서(*.xls)'로 저장하십시오.</td>
+</tr>
+<tr>
+	<td height="20">④ 아래에서 수정된 파일을 업로드 하십시오.</td>
+</tr>
+<tr>
+	<td style="height:30px; line-height:30px; text-align:center;"><input type="file" name="excel_file" id="excel_file"/></td>
+</tr>
+<tr><td height="15"></td></tr>
+</table>
+
+<table class="info-table-style" style="width:100%">
+<tr>
+	<th class="its-th-align left" style="padding-left:20px;">
+		<div style="height:25px;line-height:25px;">* 업로드 후 처리완료 메시지를 확인하십시오.</div>
+		<div style="height:25px;line-height:25px;">* 메시지 확인 후 바로 처리 결과내역을 엑셀로 다운로드 받을 수 있습니다.</div>
+		<div style="height:25px;line-height:25px;">* 반드시 처리 결과내역을 확인하십시오.</div>
+	</th>
+</tr>
+</table>
+
+<div style="width:100%;text-align:center;padding-top:10px;">
+<span class="btn large cyanblue"><button id="upload_submit">확인</button></span>
+</div>
+
+<div class="item-title">택배사 코드 안내</div>
+<table class="info-table-style" style="width:100%">
+<colgroup>
+	<col width="25%" />
+	<col width="25%" />
+	<col width="25%" />
+	<col width="25%" />
+</colgroup>
+<thead>
+<tr>
+	<th class="its-th-align center">택배사</th>
+	<th class="its-th-align center">코드</th>
+	<th class="its-th-align center">택배사</th>
+	<th class="its-th-align center">코드</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<!-- { @ array_merge(get_invoice_company(), config_load('delivery_url')) } -->
+{? .index_%2==0 && .index_!=0 }</tr><tr>{ / }
+<td class="its-td-align center">{.company}</td>
+<td class="its-td-align center">{.key_}</td>
+<!-- { / } -->
+</tr>
+</tbody>
+</table>
+<br /><br />
+</form>
+</div>
+
+<div id="coupon_use_lay" class="hide"></div>
+
+<div id="coupon_use_excel_dialog" class="hide">
+	<div class="desc">
+	본 엑셀 다운로드는 구매자의 쿠폰(티켓) 사용에 대하여<br/>
+	쿠폰(티켓) 사용 매장(지점)별 정산 자료를 확인할 수 있는 기능입니다.<br/><br/>
+	</div>
+
+	쿠폰 사용 기간 :
+	<input type="text" name="use_regist_date[]" value="{_GET.regist_date[0]}" class="datepicker line"  maxlength="10" size="10" />
+	&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+	<input type="text" name="use_regist_date[]" value="{_GET.regist_date[1]}" class="datepicker line" maxlength="10" size="10" />
+	&nbsp;&nbsp;
+<div >
+
+	<span class="btn small"><input type="button" value="오늘" onclick="use_set_date('{=date('Y-m-d')}','{=date('Y-m-d')}')" /></span>
+	<span class="btn small"><input type="button" value="3일간" onclick="use_set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}')" /></span>
+	<span class="btn small"><input type="button" value="일주일" onclick="use_set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}')"/></span>
+	<span class="btn small"><input type="button" value="1개월" onclick="use_set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}')"/></span>
+	<span class="btn small"><input type="button" value="3개월" onclick="use_set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}')" /></span>
+	<span class="btn small"><input type="button" value="6개월" onclick="use_set_date('{=date('Y-m-d',strtotime("-6 month"))}','{=date('Y-m-d')}')" /></span>
+	<!-- <span class="btn small"><input type="button" value="전체" onclick="use_set_date('','')" /></span> -->
+	</div>
+<br />
+<div  class="center"><span class="btn large green"><button name="coupon_use_excel">엑셀 다운로드</button></span></div>
+</div>
+
+<div id="print_setting_dialog" class="hide" style="line-height:20px;">
+	<form action="../export_process/print_setting" method="post" target="actionFrame">
+	<span class="fx12 black">1. 주문내역서에 출고번호를 바코드로 출력하시겠습니까?</span><br />
+	<span class="fx11 gray">출고 검색창에서 바코드를 스캔하면 해당 출고건의 출고화면으로 바로 이동하여 출고처리가 편리해집니다.</span><br />
+	<label><input type="radio" name="exportPrintExportcodeBarcode" value="1" {?exportPrintExportcodeBarcode}checked{/} /> 예</label> &nbsp; <label><input type="radio" name="exportPrintExportcodeBarcode" value="" {?!exportPrintExportcodeBarcode}checked{/} /> 아니오</label><br />
+	<br />
+	<span class="fx12 black">2. 출고내역서에 출고상품의 상품코드를 출력하시겠습니까?</span><br />
+	<label><input type="radio" name="exportPrintGoodsCode" value="1" {?exportPrintGoodsCode}checked{/} /> 예</label> &nbsp; <label><input type="radio" name="exportPrintGoodsCode" value="" {?!exportPrintGoodsCode}checked{/} /> 아니오</label><br />
+	<br />
+	<span class="fx12 black">3. 출고내역서에 출고상품의 상품코드를 바코드로 출력하시겠습니까?</span><br />
+	<span class="fx11 gray">해당 출고의 출고처리화면에서 실제 상품의 바코드를 스캔하면 출고상품이 맞는지 검증하여 <br />
+	오배송 없이 정확하게 출고가 가능합니다. 해당 상품의 바코드를 계속 스캔하면 출고수량이 +1씩 증가합니다.</span><br />
+	<label><input type="radio" name="exportPrintGoodsBarcode" value="1" {?exportPrintGoodsBarcode}checked{/} /> 예</label> &nbsp; <label><input type="radio" name="exportPrintGoodsBarcode" value="" {?!exportPrintGoodsBarcode}checked{/} /> 아니오</label><br />
+	<br />
+	<div class="center">
+		<span class="btn medium cyanblue"><input type="submit" value="저장" /></span>
+	</div>
+</div>
+
+<div id="openmarket_order_receive_guide" class="hide">
+	외부 판매마켓에서 발생한 주문은<br />
+	1시간에 2번씩 자동으로 수집합니다.<br />
+	자동으로 수집되는 시간을 기다리기 힘드시면<br />
+	[지금바로 주문수집] 버튼을 클릭하십시오.
+</div>
+
+{ #layout_footer }

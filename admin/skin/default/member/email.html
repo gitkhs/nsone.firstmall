@@ -1,0 +1,343 @@
+{ #layout_header }
+<script type="text/javascript">
+$(document).ready(function() {
+	//
+	$(".selectMail").live("click",function(){
+		//var id = $(this).parent().parent().find(".title").html();
+		$("input[name='mail_form']").val($(this).val());
+		getMailForm($(this).val());
+	});
+
+	$("input[name='mail']").val(['join']);
+	$("input[name='mail_form']").val(["join"]);
+	getMailForm('join');
+
+	$("#btn_replace").bind("click",function(event){
+		$.get('../member/replace_pop', function(data) {
+			$('#replace_pop').html(data);
+			openDialog("사용 가능한 치환코드", "replace_pop", {"width":"400","height":"500"});
+		});
+    });
+});
+
+function getMailForm(id) {
+	$.get('../member_process/getmail?id='+id, function(response) {
+		var data = eval(response)[0];
+		//alert(data);
+		$("#title").val(data.title);
+		Editor.switchEditor($("#contents").data("initializedId"));
+		Editor.modify({"content" : data.contents});
+		$("#email_chk").html(data.html);
+	});
+}
+</script>
+
+
+<style>
+.ctab {border-top:1px solid #d6d6d6;border-right:1px solid #d6d6d6;border-bottom:1px solid #d6d6d6;width:150px;line-height:30px;text-align:center;background-color:#eeeeee;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#757575;}
+.ctab-on {border-top:1px solid #d6d6d6;border-bottom:1px solid #ffffff;border-right:1px solid #d6d6d6;width:150px;line-height:30px;text-align:center;background-color:#ffffff;float:left;font-size:12px;font-family:Dotum;font-weight:bold;color:#000000;}
+</style>
+
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+
+<form name="memberForm" id="memberForm" method="post" target="actionFrame" action="../member_process/email">
+<input type="hidden" name="mail_form" />
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>이메일 발송 관리</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<!--
+			<li><span class="btn large icon"><button><span class="arrowleft"></span>이동버튼</button></span></li>
+			<li><span class="btn large icon"><button><span class="arrowleft"></span>이동버튼</button></span></li>
+			-->
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			<li><span class="btn large black"><button type="submit" onclick="submitEditorForm(document.memberForm)">저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+
+<!-- 상단 단계 링크 : 시작 -->
+<div class="left" id="rn_join">
+	<br style="line-height:20px;" />
+
+	<div style="position:absolute;">
+	<table cellpadding="0" cellspacing="0">
+		<td class="ctab-on t1"><span class="hand" onclick="location.href='email';">이메일 자동발송</span></td>
+		<td class="ctab t2"><span class="hand" onclick="location.href='email_history';">이메일 발송내역</span></td>
+	</tr>
+	</table>
+	</div>
+	<table height="32" width="100%" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #d6d6d6;">
+	<tr>
+		<td align="center"></td>
+	</tr>
+	</table>
+
+</div>
+<!-- 상단 단계 링크 : 끝 -->
+
+<br class="table-gap" />
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<div class="item-title" style="width:92%">이메일 자동발송 <span class="helpicon" title="각 상황이 일어나면 설정된 이메일이 자동으로 발송됩니다."></span></div>
+
+<div class="clearbox">
+	<table class="info-table-style" style="width:100%">
+		<tbody>
+		<!-- { @ loop } -->
+		<tr>
+			<!-- { ? .index_ == 0 } -->
+			<th class="its-th-align center" width="10%" rowspan="{=count(group_name)}">이메일 선택</th>
+			<!-- { / } -->
+			<th class="its-th-align center" width="12%">{group_name[.key_]}</th>
+			<!-- { @ .list } -->				
+			<td class="its-td-align left pdl5" {?..index_>0}style="border-left:none;"{/} {?..col>0}colspan="{..col}"{/}>
+				<!-- {? service_code == 'P_STOR' && (..name == 'released' || ..name == 'delivery' || ..name == 'cancel' || ..name == 'refund') } -->
+				<label onclick="openDialog('쇼핑몰 업그레이드 안내', 'noService', {'width':600,'height':350});"><input type="radio" name="mail" class="selectMail" value="{..name}" disabled /> {..text}</label>
+				<!-- {: (service_code == 'P_FREE' || service_code == 'P_PREM') && (..name == 'coupon_released' || ..name == 'coupon_delivery' || ..name == 'coupon_cancel' || ..name == 'coupon_refund') } -->
+				<label onclick="openDialog('쇼핑몰 업그레이드 안내', 'noService', {'width':600,'height':350});"><input type="radio" name="mail" class="selectMail" value="{..name}" disabled /> {..text}</label>
+				<!-- { : } -->
+				<label><input type="radio" name="mail" class="selectMail" value="{..name}" /> {..text}</label>
+				<!-- { / } -->
+			</td>
+			<!-- { / } -->
+		</tr>
+		<!-- { / } -->
+	</table>
+</div>
+
+<br style="line-height:16px;" />
+
+<div class="clearbox">
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="15%" />
+			<col />
+		</colgroup>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">보내는 메일</th>
+			<td class="its-td-align left"  style="padding-left:10px;" style="padding-left:10px;">
+				{email}
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">발송대상</th>
+			<td class="its-td-align left"  style="padding-left:10px;" style="padding-left:10px;">
+				<span id="email_chk"></span>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">제목</th>
+			<td class="its-td-align left"  style="padding-left:10px;" style="padding-left:10px;">
+				<input type="text" name="title" id="title" value="" size="100"/>
+				<span class="btn small cyanblue valign-middle"><input type="button" id="btn_replace" value="사용 가능한 치환코드" /></span>
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">내용</th>
+			<td class="its-td-align left"  style="padding-left:10px;" style="padding-left:10px;">
+				<textarea name="contents" id="contents" class="daumeditor"></textarea>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+
+</form>
+
+<div id="replace_pop" class="hide"></div>
+
+<!-- 서브 레이아웃 영역 : 시작 
+<div class="item-title" style="float:left;width:92%">이메일 발송용 치환코드 안내</div>
+<table class="info-table-style" style="width:100%">
+<colgroup>
+	<col width="20%"/>
+	<col width="25%"/>
+	<col width="25%"/>
+	<col width="30%"/>
+</colgroup>
+<thead>
+<tr>
+	<th class="its-th-align center">치환코드</th>
+	<th class="its-th-align center">치환코드 설명</th>
+	<th class="its-th-align center">실제 출력 예시</th>
+	<th class="its-th-align center">사용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;shopName&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">쇼핑몰 이름</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 퍼스트샵 </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;userid&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">회원 아이디</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) firstmall </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;user_name&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">회원 이름</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 홍길동 </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;password&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">임시 비밀번호</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 12345</td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;goods_name&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">상품명</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 핑크 미니스커트 </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;옵션&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;"></td>
+	<td class="its-td-align left"  style="padding-left:10px;"></td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;주문자명&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">주문자 이름</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 유관순 </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;ordno&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">주문번호</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 20110420133755</td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;주문수량&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;"></td>
+	<td class="its-td-align left"  style="padding-left:10px;"></td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;쿠폰번호&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;"></td>
+	<td class="its-td-align left"  style="padding-left:10px;"></td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;송장번호&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">주문의 송장번호</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 12345678</td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;배송회사&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">주문의 배송사</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 현대택배 </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;결제금액&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">주문의 결제금액</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 110,000 </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;은행&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">무통장 또는 가상계좌 주문의 입금 은행명</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 하나은행 </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;계좌번호&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">무통장 또는 가상계좌 주문의 입금 계좌번호</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 12-365-8953 </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;예금주&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">무통장 주문의 예금주</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 이순신 </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;문의제목&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">사용자가 작성한 문의 제목</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 사이즈 문의드려요~ </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;문의내용&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">사용자가 작성한 문의내용</td>
+	<td class="its-td-align left"  style="padding-left:10px;"></td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123작성일시&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">사용자가 문의일시</td>
+	<td class="its-td-align left"  style="padding-left:10px;"></td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;답변제목&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">사용자가 작성한 답변 제목</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 사이즈 답변드려요~ </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;답변내용&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">사용자가 작성한 답변내용</td>
+	<td class="its-td-align left"  style="padding-left:10px;"></td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;답변일시&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">관리자가 답변일시</td>
+	<td class="its-td-align left"  style="padding-left:10px;"></td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<!-- <tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;상품후기제목&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">사용자가 작성한 상품후기 제목</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 가격대비 최고예요~!! </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;1:1문의제목&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">사용자가 작성한 1:1문의 제목</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 상품이 언제 배송되나요? </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+<tr>
+	<td class="its-td-align left"  style="padding-left:10px;">&#123;상품문의제목&#125;</td>
+	<td class="its-td-align left"  style="padding-left:10px;">사용자가 작성한 상품문의 제목</td>
+	<td class="its-td-align left"  style="padding-left:10px;">ex) 사이즈 문의드려요~ </td>
+	<td class="its-td-align left"  style="padding-left:10px;">&nbsp;</td>
+</tr>
+</tbody>
+</table>
+
+-->
+
+{ #layout_footer }

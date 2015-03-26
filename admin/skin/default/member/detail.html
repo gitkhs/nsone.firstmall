@@ -1,0 +1,1077 @@
+{ #layout_header }
+
+<style>
+td.member-order-work {border-left:1px solid #dadada; border-bottom:1px solid #dadada; padding:5px 10px 5px 15px; line-height:180%; letter-spacing:0px; text-align:right }
+</style>
+
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/editor_loader.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/editor/js/daum_editor_loader.js"></script>
+<script type="text/javascript">
+$(function(){
+	$(".selectLabelSet").each(function(){
+		var selectLabelSetObj = $(this);
+		$("select.selectLabelDepth1",selectLabelSetObj).bind('change',function(){
+			var childs = $("option:selected",this).attr('childs').split(';');
+			var joinform_seq = $(this).attr('joinform_seq');
+			var select2 = $("input.hiddenLabelDepth[type='hidden'][joinform_seq='"+joinform_seq+"']").val();
+			if(childs[0]){
+				$(".selectsubDepth",selectLabelSetObj).show();
+				$("select.selectLabelDepth2[joinform_seq='"+joinform_seq+"']").empty();
+				for(var i=0; i< childs.length ; i++){
+					$("select.selectLabelDepth2[joinform_seq='"+joinform_seq+"']")
+					.append("<option value='"+childs[i]+"'>"+childs[i]+"</option>");
+				}
+			}else{
+				$(".selectsubDepth",selectLabelSetObj).hide();
+			}
+
+
+			$("select.selectLabelDepth2 option[value='"+select2+"']").attr('selected',true);
+
+		}).trigger('change');
+	});
+	<!--{? rute != 'none'}-->
+	$("input[name='passwd_chg']").attr('disabled',true);
+	<!--{/}-->
+
+
+	{ ? member_seq }
+	// Member Statistics
+	$.ajax({
+		type: "get",
+		url: "../statistic/member_statistics",
+		data: "referer_name="+encodeURIComponent('{referer_name}')+"&referer_domain="+encodeURIComponent('{referer_domain}')+"&referer="+encodeURIComponent('{referer}'),
+		success: function(result){
+			$("#Member_Statistics").html(result);
+		}
+	});
+	{ / }
+
+});
+</script>
+
+<form name="memberForm" id="memberForm" method="post" target="actionFrame" action="../member_process/member_modify">
+<input type="hidden" name="member_seq" value="{member_seq}"/>
+<input type="hidden" name="business_seq" value="{business_seq}"/>
+<input type="hidden" name="query_string" value="{query_string}"/>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>{userid}&nbsp;&nbsp;&nbsp;{?withdrawal_seq}<span class="blue">회원탈퇴</span>{:}{user_name}&nbsp;&nbsp;&nbsp;<span class="blue">{status_nm}&nbsp;/&nbsp;{group_name}</span>{/}</h2>
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+		{? !withdrawal_seq }
+			<li><span class="btn large white"><button type="button" onclick="document.location.href='/admin/member/catalog?{query_string}';">회원리스트<span class="arrowright"></span></button></span></li>
+		{ : }
+			<li><span class="btn large white"><button type="button" onclick="document.location.href='withdrawal';">탈퇴리스트<span class="arrowright"></span></button></span></li>
+		{ / }
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+		{? !withdrawal_seq }
+			<li><span class="btn large black"><button type="button" onclick="emoney_pop();">적립금지급<span class="arrowright"></span></button></span></li>
+			<li><span class="btn large black"><button type="button" onclick="with_pop();">탈퇴시키기<span class="arrowright"></span></button></span></li>
+			<li><span class="btn large black"><button type="submit" name="manager_write_btn" id="manager_write_btn">저장하기<span class="arrowright"></span></button></span></li>
+		{ / }
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<br style="line-height:20px;"/>
+
+{ ? member_seq }
+<!-- Member_Statistics -->
+<div id="Member_Statistics"></div>
+{ / }
+
+
+<!-- 서브메뉴 바디 : 시작-->
+<div >
+
+	<table style="width:100%">
+	<tr>
+		<td width="50%" valign="top" style="vertical-align:top;">
+		<div class="item-title">기본정보 </div>
+
+			<table class="info-table-style" style="width:100%">
+			<colgroup>
+				<col width="25%" />
+				<col width="75%" />
+			</colgroup>
+			<thead class="hide">
+			<tr>
+				<th class="its-th-align center" colspan="4">기본정보</th>
+			</tr>
+			</thead>
+			<tbody>
+
+			<tr>
+				<th class="its-th-align center">가입일</th>
+				<td class="its-td">{regist_date}</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">유형 / 승인여부</th>
+				<td class="its-td">
+				{? !withdrawal_seq }
+					<select name="user_type" id="user_type" onchange="userSelect();">
+						<option value="default">개인</option>
+						<option value="business">기업</option>
+					</select>
+
+					/
+
+					<select name="status">
+						<option value="done">승인</option>
+						<option value="hold">미승인</option>
+					</select>
+				{ / }
+				</td>
+			</tr>
+			{? joinform.user_icon=='Y' }
+			<tr>
+				<th class="its-th-align center">아이콘</th>
+				<td class="its-td">
+				<ul style=" ">
+					{@ memberIcondata } 
+					<li style="float:left; padding:5px 0 5px 20px;width:40px;" >
+						<label>
+							<div style="margin-top:5px;" ><input type="radio" name="user_icon" value="{=(.index_+1)}" {? user_icon == (.index_+1) } checked="checked" {/} /></div> 
+							<img src="/data/icon/member/{.value_}" class="icon_membericon" align="absmiddle" style="vertical-align:middle;" />
+						</label>
+					</li>
+					{/}
+					<li style="float:left; padding:5px 0 5px 10px;width:80px;">
+						<label> 
+							<input type="radio" name="user_icon" value="99" {? user_icon==99 &&  user_icon_file } checked="checked" {/} style="margin-left:17px;" /><br/>
+							<img src="/data/icon/member/{user_icon_file}" id="membericon_img" align="absmiddle" style="margin-left:15px;vertical-align:middle;" {? !user_icon_file } class="hide" {/} />
+						</label>
+						<div  style="margin-top:5px;" ><span class="btn small cyanblue valign-middle"><button type="button" class="black btn" id="membericonUpdate">직접등록</button></span></label></div>
+					</li> 
+				</ul>
+				</td>
+				</tr>
+			{ / } 
+			</table>
+
+		<div class="item-title user_tab">개인정보 <span class="helpicon" title="개인 회원의 정보입니다."></span><span class="btn small" style="padding-left:20px;"><button type="button" class="delivery_address hand" >자주 쓰는 배송지</button></span></div>
+			<table class="info-table-style user_tab" style="width:100%">
+			<colgroup>
+				<col width="25%" />
+				<col width="75%" />
+			</colgroup>
+			<thead class="hide">
+			<tr>
+				<th class="its-th-align center" colspan="4">기본정보</th>
+			</tr>
+			</thead>
+			<tbody>
+
+			<!--{? snslist }-->
+			<tr>
+				<th class="its-th-align center" >사용중인 SNS</th>
+				<td class="its-td">
+					<!--{@ snslist }-->
+						<img src="../images/sns/sns_{=substr(.rute,0,1)}0.gif" align="absmiddle" class="btnsnsdetail hand" snscd="{.rute}" title="{.rute_nm} 정보확인">
+						<div id="snsdetailPopup_{.rute}" class="snsdetailPopup absolute hide"></div>
+					<!--{ / }-->
+				</td>
+			</tr>
+			<!--{ / }-->
+
+			<tr>
+				<th class="its-th-align center">아이디 / 이름</th>
+				<td class="its-td">
+					{userid} {? !withdrawal_seq }/ <input type="text" name="user_name" value="{user_name}" size="12"/>{ / }
+				</td>
+			</tr>
+
+			<tr>
+				<th class="its-th-align center">닉네임</th>
+				<td class="its-td">
+					<input type="text" name="nickname" value="{nickname}" maxlength="10" />
+				</td>
+			</tr>
+
+			<!-- ### PASSWD -->
+			<!--{? rute == 'none' }-->
+			<tr>
+				<th class="its-th-align center">비밀번호 변경 <input type="checkbox" name="passwd_chg"></th>
+				<td class="its-td"><span id="passwd"></span></td>
+			</tr>
+			{?!business_seq}
+			<tr id="manager_passwd_confirm" class="hide">
+				<th class="its-th-align center"><span class="red bold">*</span> 관리자 비밀번호 확인</th>
+				<td class="its-td">
+					<input type="password" name="manager_password" value="" />
+					<span class="helpicon" title="보안을 위하여 '{managerInfo.mname}({managerInfo.manager_id})'의 패스워드를 입력해주세요"></span>
+				</td>
+			</tr>
+			{/}
+			<!--{ / }-->
+			<tr>
+				<th class="its-th-align center">이메일 / 수신여부</th>
+				<td class="its-td">
+				{? !withdrawal_seq }
+					<input type="text" name="email" value="{email}" class="uphonemail"/> /
+					<select name="mailing" class="uphonemail">
+						<option value="y">동의</option>
+						<option value="n">거부</option>
+					</select>
+					<span class="btn small cyanblue valign-middle"><input type="button" id="email_pop" value="이메일 보내기" /></span>
+				{ / }
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">핸드폰 / 수신여부</th>
+				<td class="its-td">
+				{? !withdrawal_seq }
+					<input type="text" name="cellphone" value="{cellphone}" /> /
+					<select name="sms">
+						<option value="y">동의</option>
+						<option value="n">거부</option>
+					</select>
+					<span class="btn small cyanblue valign-middle"><input type="button" id="sms_pop" value="SMS 보내기" /></span>
+				{ / }
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">전화번호</th>
+				<td class="its-td">
+					{? !withdrawal_seq }
+					<input type="text" name="phone" value="{phone}"/>
+					{ / }
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">주소</th>
+				<td class="its-td">
+					{? !withdrawal_seq }
+					<input type="hidden" name="Address_type" value="{address_type}"/>
+					<div class="pdt3">
+						<input type="text" name="Zipcode[]" value="{zip_arr[0]}" size="5"/> - <input type="text" name="Zipcode[]" value="{zip_arr[1]}" size="5"/> <span class="btn small"><input type="button" id="zipcodeButton" value="우편번호" /></span>
+					</div>
+					<div class="pdt5">
+						<span class="address_title" style="font-weight:{? address_type!="street"}bold{:}nomal{/}">(지번)</span>
+						<input type="text" name="Address" value="{address}" size="40"/>
+					</div>
+					<div class="pdt5">
+						<span class="address_title" style="font-weight:{? address_type=="street"}bold{:}nomal{/}">(도로명)</span>
+						<input type="text" name="Address_street" value="{address_street}" size="40"/>
+					</div>
+					<div class="pdt5">
+						<span class="address_title">(공통상세)</span>
+						<input type="text" name="address_detail" value="{address_detail}" size="40"/>
+					</div>
+					{ / }
+
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">실명확인</th>
+				<td class="its-td">
+					{? !withdrawal_seq }
+						{auth_type}
+					{ / }
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">추천인</th>
+				<td class="its-td">
+					{? !withdrawal_seq }
+					<input type="text" name="recommend" id="recommend" value="{recommend}" class="uphonemail"/>
+					<img src="../images/board/btn/btn_search_file.gif" onclick="chkRecommend('u');" align="absmiddle" class="hand" />
+					<span id="recommend_return_txt" class="small" style="padding-top:5px;color:#d13b00;"></span>
+					{ / }
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">Facebook 초대인</th>
+				<td class="its-td">
+					{? !withdrawal_seq }
+					<input type="text" name="fb_invite" value="{fb_invite_id}"/>
+					{ / }
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">생일</th>
+				<td class="its-td">
+					{? !withdrawal_seq }
+					<input type="text" name="birthday" class="datepicker line" value="{birthday}" readonly />
+					{ / }
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">기념일</th>
+				<td class="its-td">
+					{? !withdrawal_seq }
+					<select name="anniversary[]">
+						<option value=""></option>
+					<!--{ @ m_arr }-->
+						<option value="{.value_}" {?substr(anniversary,0,2)==.value_ }selected{/}>{.value_}</option>
+					<!--{ / }-->
+					</select>월
+					<select name="anniversary[]">
+						<option value=""></option>
+					<!--{ @ d_arr }-->
+						<option value="{.value_}" {?substr(anniversary,3,2)==.value_ }selected{/}>{.value_}</option>
+					<!--{ / }-->
+					</select>일
+					{ / }
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">성별</th>
+				<td class="its-td">
+				{? !withdrawal_seq }
+					<select name="sex">
+						<option value="none">없음</option>
+						<option value="male">남</option>
+						<option value="female">여</option>
+					</select>
+				{ / }
+				</td>
+			</tr>
+
+			</tbody>
+			{? form_sub}
+				{@ form_sub}
+				{? .used == 'Y' && .join_type=='user' }
+				<tr>
+				<th class="its-th-align center">{.label_title}</th>
+				<td class="its-td">{.label_view}</td>
+				</tr>
+				{/}
+				{/}
+			{/}
+			</table>
+
+
+
+			<div class="item-title buss_tab">기업정보 <span class="helpicon" title="사업자 회원의 정보입니다."></span><span class="btn small" style="padding-left:20px;"><button type="button" class="delivery_address hand" >자주 쓰는 배송지</button></span></div>
+			<table class="info-table-style buss_tab" style="width:100%">
+			<colgroup>
+				<col width="25%" />
+				<col width="75%" />
+			</colgroup>
+			<thead class="hide">
+			<tr>
+				<th class="its-th-align center" colspan="4">기업정보</th>
+			</tr>
+			</thead>
+			<tbody>
+
+			<!--{? snslist }-->
+			<tr>
+				<th class="its-th-align center" >사용중인 SNS</th>
+				<td class="its-td">
+					<!--{@ snslist }-->
+						<img src="../images/sns/sns_{=substr(.rute,0,1)}0.gif" align="absmiddle" class="btnsnsdetail hand" snscd="{.rute}" title="{.rute_nm} 정보확인">
+						<div id="snsdetailPopup_{.rute}" class="snsdetailPopup absolute hide"></div>
+					<!--{ / }-->
+				</td>
+			</tr>
+			<!--{ / }-->
+			<tr>
+				<th class="its-th-align center">아이디 </th>
+				<td class="its-td">
+					{userid} {? !withdrawal_seq }{ / }
+				</td>
+			</tr>
+
+			<!-- ### PASSWD -->
+			<!--{? rute == 'none' }-->
+			<tr>
+				<th class="its-th-align center">비밀번호 변경 <input type="checkbox" name="busi_passwd_chg"></th>
+				<td class="its-td"><span id="busi_passwd"></span></td>
+			</tr>
+			{?business_seq}
+			<tr id="busi_manager_passwd_confirm" class="hide">
+				<th class="its-th-align center">관리자 비밀번호 확인 <span class="red bold">*</span></th>
+				<td class="its-td" colspan="3">
+					<input type="password" name="manager_password" value="" class="line" />
+					<span class="helpicon" title="보안을 위하여 현재 로그인된 '{managerInfo.mname}({managerInfo.manager_id})'의 패스워드를 입력해주세요"></span>
+				</td>
+			</tr>
+			{/}
+			<!--{ / }-->
+			<tr>
+				<th class="its-th-align center">업체명</th>
+				<td class="its-td">
+					<input type="text" name="bname" value="{bname}"/>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">대표자명</th>
+				<td class="its-td">
+					<input type="text" name="bceo" value="{bceo}"/>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">사업자 등록번호</th>
+				<td class="its-td">
+					<input type="text" name="bno" value="{bno}"/>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">업태/종목</th>
+				<td class="its-td">
+					<input type="text" name="bitem" value="{bitem}"/> /
+					<input type="text" name="bstatus" value="{bstatus}"/>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">사업장주소</th>
+				<td class="its-td">
+					<input type="hidden" name="companyAddress_type" value="{baddress_type}" size="60"/>
+					<div class="pdt3">
+						<input type="text" name="companyZipcode[]" value="{bzip_arr[0]}" size="5"/> - <input type="text" name="companyZipcode[]" value="{bzip_arr[1]}" size="5"/> <span class="btn small"><input type="button" id="zipcodeButton2" value="우편번호" /></span>
+					</div>
+					<div class="pdt5">
+						<span class="address_title" style="font-weight:{? baddress_type!="street"}bold{:}nomal{/}">(지번)</span>
+						<input type="text" name="companyAddress" value="{baddress}" size="60"/>
+					</div>
+					<div class="pdt5">
+						<span class="address_title" style="font-weight:{? baddress_type=="street"}bold{:}nomal{/}">(도로명)</span>
+						<input type="text" name="companyAddress_street" value="{baddress_street}" size="58"/>
+					</div>
+					<div class="pdt5">
+						<span class="address_title">(공통상세)</span>
+						<input type="text" name="baddress_detail" value="{baddress_detail}" size="56"/>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">담당자 명</th>
+				<td class="its-td">
+					<input type="text" name="bperson" value="{bperson}"/>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">담당자 부서명</th>
+				<td class="its-td">
+					<input type="text" name="bpart" value="{bpart}"/>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">담당자 전화번호</th>
+				<td class="its-td">
+					<input type="text" name="bphone" value="{bphone}"/>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">담당자 핸드폰</th>
+				<td class="its-td">
+					<input type="text" name="bcellphone" value="{bcellphone}" /> /
+					<select name="sms" class="bphonemail">
+						<option value="y">동의</option>
+						<option value="n">거부</option>
+					</select>
+					<span class="btn small cyanblue valign-middle"><input type="button" id="b_sms_pop" value="SMS 보내기" /></span>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">이메일 / 수신여부</th>
+				<td class="its-td">
+				{? !withdrawal_seq }
+					<input type="text" name="email" value="{email}" class="bphonemail"/> /
+					<select name="mailing" class="bphonemail">
+						<option value="y">동의</option>
+						<option value="n">거부</option>
+					</select>
+					<span class="btn small cyanblue valign-middle"><input type="button" id="email_pop" value="이메일 보내기" /></span>
+				{ / }
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">추천인</th>
+				<td class="its-td">
+					{? !withdrawal_seq }
+					<input type="text" name="recommend" id="brecommend" value="{recommend}" class="bphonemail"/>
+					<img src="../images/board/btn/btn_search_file.gif" onclick="chkRecommend('b');" align="absmiddle" class="hand" />
+					<span id="brecommend_return_txt" class="small" style="padding-top:5px;color:#d13b00;"></span>
+					{ / }
+				</td>
+			</tr>
+			</tbody>
+			{? form_sub}
+				{@ form_sub}
+				{? .used == 'Y' && .join_type=='order' }
+				<tr>
+				<th class="its-th-align center">{.label_title}</th>
+				<td class="its-td">{.label_view}</td>
+				</tr>
+				{/}
+				{/}
+			{/}
+			</table>
+
+		</td>
+		<td width="50%" valign="top">
+
+		<div class="item-title">활동정보  <span class="desc" style="font-weight:normal"> 해당 회원이 쇼핑몰에서 활동한 정보입니다.</span></div>
+		<table class="info-table-style" style="width:100%">
+			<colgroup>
+				<col width="20%" />
+				<col width="30%" />
+				<col width="20%" />
+				<col width="30%" />
+			</colgroup>
+			<thead class="hide">
+			<tr>
+				<th class="its-th-align center" colspan="4">활동정보</th>
+			</tr>
+			</thead>
+			<tbody>
+
+			{? !withdrawal_seq }
+			<tr>
+				<th class="its-th-align center">최근로그인</th>
+				<td class="its-td">
+					{lastlogin_date} {? login_addr }<div>(접속아이피 : {login_addr})</div>{ / }
+				</td>
+				<th class="its-th-align center">최근수정일</th>
+				<td class="its-td" colspan="3">
+					{update_date}
+				</td>
+			</tr>
+			{ : }
+			<tr>
+				<th class="its-th-align center">탈퇴일시</th>
+				<td class="its-td" colspan="3">
+					{withdrawal_date} (접속아이피 {regist_ip})
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">탈퇴사유</th>
+				<td class="its-td" colspan="3">
+					{reason}
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">탈퇴내용</th>
+				<td class="its-td" colspan="3">
+					{memo}
+				</td>
+			</tr>
+			{ / }
+			<tr>
+				<th class="its-th-align center">회원등급</th>
+				<td class="its-td" colspan="3">
+					<span id="group_icon">{?icon}<img src="../../data/icon/common/{icon}" align="absmiddle">{/}</span>
+					<select name="group_seq" style="border:0px;">
+					{ @ grade_list }
+						<option value="{.group_seq}" gicon="{.icon}" use_type="{.use_type}" {?group_seq==.group_seq}selected{/}>{.group_name}</option>
+					{ / }
+					</select>
+					<input type="hidden" name="group_name" value="{group_name}"/>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">포인트</th>
+				<td class="its-td">
+					{=number_format(point)}P
+					<a href="#" id="point_history"><span class="blue">내역 > </span></a>
+				</td>
+				<th class="its-th-align center">적립금</th>
+				<td class="its-td">
+					{=number_format(emoney)}원
+					<a href="#" id="emoney_history"><span class="blue">내역 > </span></a>
+				</td>
+			</tr>
+
+
+			<tr>
+				<th class="its-th-align center">보유쿠폰</th>
+				<td class="its-td">
+					{=number_format(coupondownloadtotal)}장
+					<a href="#" id="coupon_history"><span class="blue">내역 > </span></a>
+				</td>
+				<th class="its-th-align center">이머니(캐쉬)</th>
+				<td class="its-td">
+					{=number_format(cash)}원
+					<a href="#" id="cash_history"><span class="blue">내역 > </span></a>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">구매금액</th>
+				<td class="its-td">
+					{=number_format(order_sum)}원
+					<a href="../order/catalog?keyword_type=userid&keyword={userid}" target="_blank"><span class="blue">내역 > </span></a>
+				</td>
+				<th class="its-th-align center">주문횟수</th>
+				<td class="its-td">
+					{=number_format(order_cnt)}회
+					(평균 {? order_cnt>0 }{=number_format(round(order_sum/order_cnt))}{ : }0{ / }원)
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">방문횟수</th>
+				<td class="its-td">
+					{login_cnt}회
+					<!--
+					<a href="#" target="_blank"><span class="blue">방문내역 > <span></a>
+					-->
+				</td>
+				<th class="its-th-align center">리뷰</th>
+				<td class="its-td">
+					{=number_format(review_cnt)}개
+					<a href="/admin/board/board?id=goods_review&search_text={userid}" target="_blank"><span class="blue">내역 > </span></a>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">상품문의</th>
+				<td class="its-td">
+					{=number_format(gdqna_sum)}개
+					<a href="/admin/board/board?id=goods_qna&search_text={userid}" target="_blank"><span class="blue">내역 > </span></a>
+				</td>
+				<th class="its-th-align center">1:1문의</th>
+				<td class="its-td">
+					{=number_format(mbqna_reply)}개 / {=number_format(mbqna_sum)}개
+					<a href="/admin/board/board?id=mbqna&search_text={userid}" target="_blank"><span class="blue">내역 > </span></a>
+				</td>
+			</tr>
+			<tr>
+				<th class="its-th-align center">추천</th>
+				<td class="its-td">
+					{=number_format(totalrecommend)}명 <a href="#" id="recommend_history"><span class="blue">추천내역 > </span></a>
+				</td>
+				<th class="its-th-align center">Facebook<br/>친구 추천</th>
+				<td class="its-td">
+					{=number_format(totalinviteck)}명 <a href="#" id="invite_history"><span class="blue">초대내역 > </span></a>
+					<br />(회원가입 {=number_format(totalinvitejoin)}명)
+				</td>
+			</tr>
+
+			</tbody>
+		</table>
+
+		<div class="item-title">처리해야 할 주문 <span class="desc" style="font-weight:normal"> 해당 회원을 위해 처리해 주셔야하는 주문입니다. </span> </div>
+		<table class="info-table-style" style="width:100%">
+			<colgroup>
+				<col width="40%" />
+				<col width="24%" />
+				<col width="12%" />
+				<col width="24%" />
+			</colgroup>
+			<thead class="hide">
+			<tr>
+				<th class="its-th-align center" colspan="4">활동정보</th>
+			</tr>
+			</thead>
+			<tbody>
+			<!--{ @order_summary }-->
+			<tr>
+				<th class="its-th-align center">{.title}</th>
+				<td class="member-order-work"><a href="{.link}">{=number_format(.settleprice)}원</a></td>
+				<td class="member-order-work">{=number_format(.count)}건</td>
+				<td class="member-order-work">{=number_format(.ea)}개의 상품</td>
+			</tr>
+			<!--{ / }-->
+			<tr>
+				<th class="its-td">합계</th>
+				<td class="member-order-work">{=number_format(tot_order_summary.settleprice)}원</td>
+				<td class="member-order-work">{=number_format(tot_order_summary.count)}건</td>
+				<td class="member-order-work">{=number_format(tot_order_summary.ea)}개의 상품</td>
+			</tr>
+			</tbody>
+		</table>
+
+		</td>
+	</tr>
+	</table>
+
+
+</div>
+
+<div style="padding:10px;"></div>
+
+<table class="info-table-style" style="width:100%">
+<colgroup>
+	<col width="50%" />
+	<col width="50%" />
+</colgroup>
+<thead>
+<tr>
+	<th class="its-th-align center" >처리 로그</th>
+	<th class="its-th-align center" >관리 메모</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+	<td valign="top">
+		<div style="overflow:auto;height:60px;width:98%;border:1px solid #cccccc;padding: 10px 5px;background:#f7f7f7">{admin_log}</div>
+		<textarea name="admin_log" style="display:none;">{admin_log}</textarea>
+	</td>
+	<td valign="top">
+		<textarea name="admin_memo" style="width:100%;height:72px;">{admin_memo}</textarea>
+	</td>
+</tr>
+</tbody>
+</table>
+
+</form>
+
+
+
+<!-- 아이콘 선택 -->
+<div id="deliveryPopup" class="hide"></div>
+<div id="sendPopup" class="hide"></div>
+<div id="emoneyPopup" class="hide"></div>
+<div id="pointPopup" class="hide"></div>
+<div id="cashPopup" class="hide"></div>
+<div id="couponPopup" class="hide"><iframe id="couponiframe" src="" style="width:100%;height:680px"  frameborder="0"></iframe></div>
+<div id="invitePopup" class="hide"><iframe id="inviteiframe" src="" style="width:100%;height:430px;"  frameborder="0"  scrolling="no" allowTransparency="true"></iframe></div>
+<div id="recommendPopup" class="hide"><iframe id="recommendiframe" src="" style="width:100%;height:480px;"  frameborder="0"  scrolling="no" allowTransparency="true"></iframe></div>
+
+
+<div id="withdrawalPopup" class="hide">
+	<form name="withdrawalForm" id="withdrawalForm" method="post" target="actionFrame" action="../member_process/member_withdrawal">
+	<input type="hidden" name="member_seq" value="{member_seq}"/>
+	<table class="info-table-style" style="width:100%">
+	<tbody>
+	<tr>
+		<th class="its-th-align center" width="80">탈퇴사유</th>
+		<td class="its-td">
+			{@ withdrawal_arr }
+			{?.index_%3==0 && .index_!=0}<br>{/}
+			<label><input type="radio" name="reason" value="{.codecd}"/>{.value}</label>&nbsp;&nbsp;
+			{ / }
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th-align center">내용</th>
+		<td class="its-td">
+			<input type="text" name="memo" class="line" size="40">
+		</td>
+	</tr>
+	<tr>
+		<td class="its-td-align center" colspan="2">
+			<div>회원 탈퇴 시 회원의 모든 정보가 바로 삭제되어집니다!</div>
+			<div>정말로 회원({userid})을 탈퇴시키시겠습니까?</div>
+		</td>
+	</tr>
+	</table>
+	<div style="width:100%;text-align:center;padding-top:10px;">
+	<span class="btn large cyanblue"><button type="submit" id="send_submit">확인</button></span>
+	</div>
+	</form>
+</div>
+
+<div id="minishopPopup" class="hide">
+	<table class="info-table-style" style="width:100%">
+	<colgroup>
+		<col width="30%" />
+		<col />
+		<col />
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="its-th-align center">단골 미니샵 등록일</th>
+		<th class="its-th-align center">업체명</th>
+		<th class="its-th-align center">입점사ID</th>
+	</tr>
+	</thead>
+	<tbody>
+	{ @ minisohp }
+	<tr>
+		<td class="its-td-align center">{ .regist_date }</td>
+		<td class="its-td">{ .provider_name }</td>
+		<td class="its-td">{ .provider_id }</td>
+	</tr>
+	{ / }
+	</tbody>
+	</table>
+</div>
+
+
+<script type="text/javascript"> 
+function membericonFileUpload(str){
+	if(str > 0) {
+		alert('로고를 선택해 주세요.');
+		return false;
+	}
+	var frm = $('#membericonRegist');
+	frm.attr("action","../member_process/membericonsave?mseq={_GET.member_seq}");
+	frm.submit();
+}
+
+function membericonDisplay(filenm){
+	$("#membericon_img").attr("src",filenm);
+	$("#membericon_img").css("display","block"); 
+	$("#membericonDelete").css("display","block");
+	$('#membericonRegist')[0].reset();
+	$("#membericonUpdatePopup").dialog("close");
+}
+</script>
+
+
+<div id="membericonUpdatePopup" class="hide">
+	<form name="membericonRegist" id="membericonRegist" method="post" action="" enctype="multipart/form-data"  target="actionFrame">
+	<div style="height:20px;padding-left:30px;"><span class='desc'>사이즈는 30 × 30 으로 등록해 주세요.</span></div>
+	<div style="height:30px;padding-left:30px;"><input type="file" name="membericonFile" class="line"  id="membericonFile" onChange="membericonFileUpload();" /></div>
+	</form>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("button#membericonUpdate").click(function(){
+		$('#membericonRegist')[0].reset();
+		$("input[name='user_icon'][value='99']").attr("checked",true);
+		openDialog("아이콘", "membericonUpdatePopup", {"width":"380","height":"150","show" : "fade","hide" : "fade"});
+	});
+
+	$("select[name='status']").val(['{status}']);
+	$("select[name='sms']").val(['{sms}']);
+	$("select[name='mailing']").val(['{mailing}']);
+	$("select[name='sex']").val(['{sex}']);
+	if(!'{business_seq}'){
+		$("select[name='user_type']").val(['default']);
+	}else{
+		$("select[name='user_type']").val(['business']);
+	}
+	userSelect();
+
+	$("select[name='group_seq']").change(function(){
+		var img		= $("select[name='group_seq'] option:selected").attr("gicon");
+		if(img){
+			var icon = "<img src='../../data/icon/common/"+$("select[name='group_seq'] option:selected").attr("gicon")+"' align='absmiddle'>";
+			$("#group_icon").html(icon);
+		}else{
+			$("#group_icon").html('');
+		}
+		$("input[name='group_name']").val($("select[name='group_seq'] option:selected").text());
+	});
+
+	$("#emoney_history").bind("click",function(event){
+		<!--{? !auth_promotion }-->
+			alert("권한이 없습니다.");
+			return;
+		<!--{ / }-->
+		emoney_pop();
+    });
+
+	$("#point_history").bind("click",function(event){
+		<!--{? !auth_promotion }-->
+			alert("권한이 없습니다.");
+			return;
+		<!--{ / }-->
+		point_pop();
+    });
+
+	$("#cash_history").bind("click",function(event){
+		<!--{? !auth_promotion }-->
+			alert("권한이 없습니다.");
+			return;
+		<!--{ / }-->
+		cash_pop();
+    });
+
+	$("#coupon_history").bind("click",function(event){
+		$("#couponiframe").attr("src","../coupon/member_coupon_list?member_seq={member_seq}");
+		openDialog("쿠폰 보유쿠폰/다운가능쿠폰 <span class=desc>해당 회원의 쿠폰 보유쿠폰과 다운가능쿠폰입니다.</span> ", "couponPopup", {"width":"900","height":"780"});
+	});
+
+	//추천내역
+	$("#recommend_history").bind("click",function(event){
+		$("#recommendiframe").attr("src","./recommend_list?member_seq={member_seq}");
+		openDialog("{user_name}님의 추천내역 <span class=desc>해당 회원의 추천내역입니다.</span> ", "recommendPopup", {"width":"700","height":"550"});
+	});
+
+
+	//초대내역
+	$("#invite_history").bind("click",function(event){
+		$("#inviteiframe").attr("src","./invite_list?member_seq={member_seq}");
+		openDialog("{user_name}님의 초대내역 <span class=desc>해당 회원의 초대내역입니다.</span> ", "invitePopup", {"width":"700","height":"550"});
+	});
+
+	$("#sms_pop").bind("click",function(event){
+		<!--{? !auth_send }-->
+			alert("권한이 없습니다.");
+			return;
+		<!--{ / }-->
+		$.get('sms_pop?member_seq={member_seq}', function(data) {
+			$('#sendPopup').html(data);
+			openDialog("SMS 발송", "sendPopup", {"width":"600","height":"200"});
+		});
+    });
+
+	$("#b_sms_pop").bind("click",function(event){
+		<!--{? !auth_send }-->
+			alert("권한이 없습니다.");
+			return;
+		<!--{ / }-->
+		$.get('sms_pop?member_seq={member_seq}', function(data) {
+			$('#sendPopup').html(data);
+			openDialog("SMS 발송", "sendPopup", {"width":"600","height":"200"});
+		});
+    });
+
+	$("#email_pop").bind("click",function(event){
+		<!--{? !auth_send }-->
+			alert("권한이 없습니다.");
+			return;
+		<!--{ / }-->
+		$.get('email_pop?member_seq={member_seq}', function(data) {
+			$('#sendPopup').html(data);
+			openDialog("EMAIL 발송", "sendPopup", {"width":"600","height":"720"});
+		});
+    });
+
+
+	/* PASSWORD */
+	$("input[name='passwd_chg']").bind("click",function(){
+		var input = "<input type='password' name='password'/>";
+		if($(this).attr("checked")){
+			$("#passwd").html(input);
+			$("#manager_passwd_confirm").show();
+		}else{
+			$("#passwd").html('');
+			$("#manager_passwd_confirm").hide();
+		}
+	});
+
+	/* 기업 PASSWORD */
+	$("input[name='busi_passwd_chg']").bind("click",function(){
+		var input = "<input type='password' name='password'/>";
+		if($(this).attr("checked")){
+			$("#busi_passwd").html(input);
+			$("#busi_manager_passwd_confirm").show();
+		}else{
+			$("#busi_passwd").html('');
+			$("#busi_manager_passwd_confirm").show();
+		}
+	});
+
+
+	$("#zipcodeButton").live("click",function(){
+        openDialogZipcode('');
+    });
+	$("#zipcodeButton2").live("click",function(){
+        openDialogZipcode('company');
+    });
+
+	$(document).bind('keydown', 'Ctrl+s', function(){
+		$("#memberForm").submit();
+		return false;
+	});
+
+	/*
+	$(":text").bind('keydown', 'Ctrl+s', function(){
+		$("#memberForm").submit();
+		return false;
+	});
+	*/
+
+	$(".delivery_address").bind("click", function(){
+		var title ="자주쓰는 배송지"
+			$.get('delivery?tab=1&member_seq={member_seq}', function(data) {
+				$("div#deliveryPopup").html(data);
+			});
+		openDialog(title,'deliveryPopup', {"width":700,"height":400})
+	});
+	
+	// sns 계정 정보 확인
+	$(".btnsnsdetail").bind("click",function(){
+
+		var snscd	= $(this).attr("snscd");
+		var obj		= $("div#snsdetailPopup_"+snscd);
+		var disp	= obj.css("display");
+		$(".snsdetailPopup").hide();
+		if(obj.html() == ''){
+			$.get('sns_detail?snscd='+snscd+'&member_seq={member_seq}', function(data) {
+				obj.html(data);
+			});
+		}
+		if(disp == "none"){ obj.show(); }
+
+	});
+
+
+});
+
+// 추천인 확인
+function chkRecommend(type){
+	var recommend	= $("#recommend").val();
+	if(type=="b")	recommend = $("#brecommend").val();
+	if	(!recommend){
+		openDialogAlert('추천인 ID를 입력하세요', 400, 150);
+		return;
+	}
+	actionFrame.location.href	= '/member/recommend_confirm?recomid='+recommend+'&type='+type;
+}
+
+function emoney_pop(){
+	<!--{? !auth_promotion }-->
+		alert("권한이 없습니다.");
+		return;
+	<!--{ / }-->
+	$.get('emoney_detail?member_seq={member_seq}', function(data) {
+		$('#emoneyPopup').html(data);
+		openDialog("적립금 내역 <span class='desc'>해당 회원의 적립금 내역 및 수동으로 지급/차감을 하실 수 있습니다.</span>", "emoneyPopup", {"width":"900","height":"820"});
+	});
+}
+
+function point_pop(){
+	<!--{? !auth_promotion }-->
+		alert("권한이 없습니다.");
+		return;
+	<!--{ / }-->
+	$.get('point_detail?member_seq={member_seq}', function(data) {
+		$('#pointPopup').html(data);
+		openDialog("포인트 내역 <span class='desc'>해당 회원의 포인트 내역 및 수동 지급/차감을 하실 수 있습니다.</span>", "pointPopup", {"width":"800","height":"820"});
+	});
+}
+
+function cash_pop(){
+	<!--{? !auth_promotion }-->
+		alert("권한이 없습니다.");
+		return;
+	<!--{ / }-->
+	$.get('cash_detail?member_seq={member_seq}', function(data) {
+		$('#cashPopup').html(data);
+		openDialog("이머니 내역 <span class='desc'>해당 회원의 이머니 내역.</span>", "cashPopup", {"width":"800","height":"820"});
+	});
+}
+
+function with_pop(){
+	<!--{? !auth_act }-->
+		alert("권한이 없습니다.");
+		return;
+	<!--{ / }-->
+	openDialog("회원 탈퇴", "withdrawalPopup", {"width":"500","height":"300"});
+}
+
+
+function userSelect(){
+	var value = '{withdrawal_seq}';
+	if(value){
+		$(".user_tab").show();
+		$(".buss_tab").hide();
+		$(".uphonemail").removeAttr('disabled');
+		$(".bphonemail").attr('disabled', true);
+		return;
+	}
+	if($("#user_type").val()=='default'){
+		$(".user_tab").show();
+		$(".buss_tab").hide();
+		$(".uphonemail").removeAttr('disabled');
+		$(".bphonemail").attr('disabled', true);
+	}else{
+		$(".user_tab").hide();
+		$(".buss_tab").show();
+		$(".bphonemail").removeAttr('disabled');
+		$(".uphonemail").attr('disabled', true);
+
+	}
+}
+</script>
+
+{ #layout_footer }

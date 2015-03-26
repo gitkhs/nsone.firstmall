@@ -1,0 +1,408 @@
+<!--{ ? !record && page == 1 }-->
+		<tr class="list-row">
+			<td colspan="15" align="center">검색어가 없거나 검색 결과가 없습니다.</td>
+		</tr>
+<!--{ : }-->
+	<!--{ @ record }-->
+
+
+		<!--{ ? .end_step_cnt }-->
+		<!-- 합계 : 시작 -->
+		<tr class="list-end-row">
+			<td colspan="15" class="list-end-row-td">
+				<ul class="left-btns clearbox">
+					<li>
+						<select class="list-select custom-select-box-multi" name="select_{.end_step}"  rows="4">
+						<option value="select" {? stepBox[.end_step] == 'select'}selected{/}>전체선택</option>
+						<option value="not-select" {? stepBox[.end_step] == 'not-select'}selected{/}>선택안함</option>
+						<option value="important" {? stepBox[.end_step] == 'important'}selected{/}>별표선택</option>
+						<option value="not-important" {? stepBox[.end_step] == 'not-important'}selected{/}>별표없음</option>
+						</select>
+					</li>
+					<li>
+						<!--{ ? .end_step == '15' }-->
+						<span class="btn small green"><button name="order_deposit" id="{.end_step}">결제확인</button></span>
+						<span class="btn small gray"><button name="cancel_order" id="{.end_step}">주문무효</button></span>
+						<!--{ / }-->
+						<!--{ ? in_array(.end_step,able_step_action['goods_ready']) }-->
+						<span class="btn small deepgreen"><button name="batch_goods_ready" id="{.end_step}">상품준비</button></span>
+						<!--{ / }-->
+						<!--{ ? in_array(.end_step,array('25','35')) }-->
+						<span class="btn small red"><button name="goods_export" id="{.end_step}">주문별출고</button></span>
+						<span class="btn small red"><button name="order_export" id="{.end_step}">상품별출고</button></span>
+						<!--{ / }-->
+						<!--{ ? .end_step == '45' }-->
+						<span class="btn small deepblue"><button name="complete_export" id="{.end_step}">출고완료</button></span>
+						<!--{ / }-->
+						<!--{ ? .end_step == '50' }-->
+						<span class="btn small red"><button name="order_export" id="{.end_step}">상품별출고</button></span>
+						<!--{ / }-->
+						<!--{ ? .end_step == '55' }-->
+						<span class="btn small violet"><button name="going_delivery" id="{.end_step}">배송중</button></span>
+						<span class="btn small pink"><button name="complete_delivery" id="{.end_step}">배송완료</button></span>
+						<!--{ / }-->
+						<!--{ ? .end_step == '65' }-->
+						<span class="btn small pink"><button name="complete_delivery" id="{.end_step}">배송완료</button></span>
+						<!--{ / }-->
+						<!--{ ? in_array(.end_step,array('95','99')) }-->
+						<span class="btn small"><button name="goods_temps" id="{.end_step}">삭제처리</button></span>
+						<!--{ / }-->
+
+						<img src="../images/common/btn_print_m_odr.gif" name="goods_print" id="{.end_step}" class="hand" align="absmiddle" />
+
+						<span class="hand batch_reverse" id="{.end_step}">
+						<!--{ ? .end_step == '25' }-->
+						<span class="helpicon" title="취소, 반품, 환불이 없는 무통장 주문건을 주문접수(미입금)로 되돌릴 수 있습니다."></span> '주문접수'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+						<!--{ : .end_step == '35' }-->
+						<span class="helpicon" title="상품준비 중인 주문을 결제확인으로 되돌릴 수 있습니다."></span> '결제확인'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+						<!--{ : .end_step == '95' }-->
+						<span class="helpicon" title="주문이 무효된 주문을 다시 주문접수로 되돌릴 수 있습니다."></span> '주문접수'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+						<!--{ / }-->
+						</span>
+					</li>
+				</ul>
+				<div class="list-end-total-amount">
+					<span class="order-step-color-{.end_step}">{.end_mstep}</span> <span class="darkgray">합계</span> &nbsp; {=number_format(.end_step_cnt)}건
+					&nbsp;&nbsp;&nbsp;
+					￦ <span class="fx14 order-step-color-{.end_step}">{=number_format(.end_step_settleprice)}</span>
+				</div>
+			</td>
+		</tr>
+		<!-- 합계 : 끝 -->
+		<!--{ / }-->
+
+
+		<!--{ ? .start_step }-->
+		<!-- 리스트타이틀(주문상태 및 버튼) : 시작 -->
+		<tr class="list-title-row">
+			<td colspan="15" class="list-title-row-td list-title-row-td-step-{.step}">
+				<div class="relative">
+					<!--{ ? .step == 15 }-->
+					<div class="ltr-title ltr-title-step-{.step}">
+					<!--{ : }-->
+					<div class="ltr-title ltr-title-step-{.step}">
+					<!--{ / }-->
+					<div class="btn-open-all"><img src="../images/common/icon/btn_open_all.gif" class="btn_open_all" id="{.step}" /></div>
+					<!--{ ? .step == 15 }-->					
+					<span class="step_title">(출고 전)</span>주문접수
+					<span class="helpicon" title="접수된 주문의 입금을 확인하세요"></span>					
+					<!--{ : .step == 25 }-->					
+					<span class="step_title">(출고 전)</span>결제확인
+					<span class="helpicon" title="결제가 확인된 주문의 상품을 출고하세요"></span>					
+					<!--{ : .step == 35 }-->					
+					<span class="step_title">(출고 전)</span>상품준비
+					<span class="helpicon" title="보내지 못했던 상품의 재고가 확보되셨다면 상품을 출고하세요"></span>					
+					<!--{ : .step == 40 }-->					
+					<span class="step_title">(출고 전)</span>부분 출고준비
+					<span class="helpicon" title="보내지 못했던 상품의 재고가 확보되셨다면 상품을 출고하세요"></span>
+					<a href='../export/catalog?export_status[45]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>					
+					<!--{ : .step == 45 }-->					
+					<span class="step_title">(출고 전)</span> 출고준비
+					<span class="helpicon" title="출고리스트에서 출고완료를 처리하세요. 출고수량만큼 재고가 자동 차감됩니다"></span>
+					<a href='../export/catalog?export_status[45]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>					
+					<!--{ : .step == 50 }-->					
+					<span class="step_title">(출고 후)</span>
+					부분 출고완료 <span class="helpicon" title="보내지 못했던 상품의 재고가 확보되셨다면 상품을 출고하세요"></span>
+					<a href='../export/catalog?export_status[55]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>					
+					<!--{ : .step == 55 }-->					
+					<span class="step_title">(출고 후)</span>출고완료
+					<span class="helpicon" title="출고리스트에서 배송완료를 처리하세요."></span>
+					<a href='../export/catalog?export_status[55]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>					
+					<!--{ : .step == 60 }-->					
+					<span class="step_title">(출고 후)</span>부분 배송 중
+					<span class="helpicon" title="보내지 못했던 상품의 재고가 확보되셨다면 상품을 출고하세요"></span>
+					<a href='../export/catalog?export_status[65]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>					
+					<!--{ : .step == 65 }-->					
+					<span class="step_title">(출고 후)</span>배송 중
+					<span class="helpicon" title="출고리스트에서 배송완료를 처리하세요."></span>
+					<a href='../export/catalog?export_status[65]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>					
+					<!--{ : .step == 70 }-->					
+					<span class="step_title">(출고 후)</span>부분 배송완료
+					<span class="helpicon" title="보내지 못했던 상품의 재고가 확보되셨다면 상품을 출고하세요"></span>
+					<a href='../export/catalog?export_status[75]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>					
+					<!--{ : .step == 75 }-->					
+					<span class="step_title">(출고 후)</span>배송완료
+					<span class="helpicon" title="배송이 완료되었습니다."></span>
+					<a href='../export/catalog?export_status[75]=1'><span class="export-list"><span class="hide">출고리스트</span></span></a>					
+					<!--{ : .step == 85 }-->					
+					<span class="step_title">(출고 전)</span>결제취소(전체)
+					<span class="helpicon" title="결제를 취소한 주문입니다. 환불리스트에서 환불을 처리하세요."></span>					
+					<!--{ : .step == 95 }-->					
+					<span class="step_title">(출고 전)</span>주문무효
+					<span class="helpicon" title="입금이 안되어 무효 처리된 주문입니다"></span>					
+					<!--{ : .step == 99 }-->					
+					<span class="step_title">(출고 전)</span>결제실패
+					<span class="helpicon" title="주문할 때 오류가 발생한 주문입니다"></span>					
+					<!--{ / }-->
+					</div>
+
+					<ul class="left-btns clearbox">
+						<li>
+							<select class="list-select custom-select-box-multi" name="select_{.step}"  rows="4">
+							<option value="select">전체선택</option>
+							<option value="not-select">선택안함</option>
+							<option value="important">별표선택</option>
+							<option value="not-important">별표없음</option>
+							</select>
+						</li>
+						<li>
+							<!--{ ? .step == '15' }-->
+							<span class="btn small green"><button name="order_deposit" id="{.step}">결제확인</button></span>
+							<span class="btn small gray"><button name="cancel_order" id="{.step}">주문무효</button></span>
+							<!--{ / }-->
+							<!--{ ? in_array(.step,able_step_action['goods_ready']) }-->
+							<span class="btn small deepgreen"><button name="batch_goods_ready" id="{.step}">상품준비</button></span>
+							<!--{ / }-->
+							<!--{ ? in_array(.step,array('25','35')) }-->
+							<span class="btn small red"><button name="goods_export" id="{.step}">주문별출고</button></span>
+							<span class="btn small red"><button name="order_export" id="{.step}">상품별출고</button></span>
+							<!--{ / }-->
+							<!--{ ? .step == '45' }-->
+							<span class="btn small deepblue"><button name="complete_export" id="{.step}">출고완료</button></span>
+							<!--{ / }-->
+							<!--{ ? .step == '50' }-->
+							<span class="btn small red"><button name="order_export" id="{.step}">상품별출고</button></span>
+							<!--{ / }-->
+							<!--{ ? .step == '55' }-->
+							<span class="btn small violet"><button name="going_delivery" id="{.step}">배송중</button></span>
+							<span class="btn small pink"><button name="complete_delivery" id="{.step}">배송완료</button></span>
+							<!--{ / }-->
+							<!--{ ? .step == '65' }-->
+							<span class="btn small pink"><button name="complete_delivery" id="{.step}">배송완료</button></span>
+							<!--{ / }-->
+							<!--{ ? in_array(.step,array('95','99')) }-->
+							<span class="btn small"><button name="goods_temps" id="{.step}">삭제처리</button></span>
+							<!--{ / }-->
+
+							<img src="../images/common/btn_print_m_odr.gif" name="goods_print" id="{.step}" class="hand" align="absmiddle" />
+
+						</li>
+					</ul>
+
+					<!-- EXCEL -->
+					<ul class="right-btns clearbox">
+						<li>
+							<select class="custom-select-box" id="select_down_{.step}">
+								<option value="">양식선택</option>
+								{@ .loop }
+								<option value="{..seq}">{..name}</option>
+								{ / }
+							</select>
+
+							<span class="btn small"><button name="excel_down" step="{.step}"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 일괄다운로드(선택)</button></span>
+							<span class="btn small"><button name="excel_down_all" step="{.step}"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 일괄다운로드(전체)</button></span>
+							{? .step < 45 && .step > 15 }
+							<span class="btn small"><button name="excel_upload"><img src="../images/common/btn_img_ex.gif" align="absmiddle" /> 일괄업로드(송장)</button></span>
+							{ / }
+						</li>
+					</ul>
+					
+				</div>
+			</td>
+		</tr>
+		<!-- 리스트타이틀(주문상태 및 버튼) : 끝 -->
+		<!--{ / }-->
+
+
+		<tr class="list-row step{.step} important_{.order_seq} { ? .thischeck }checked-tr-background{/}">
+			<td align="center"><input type="checkbox" name="order_seq[]" value="{.order_seq}" { ? .thischeck }checked{/} /></td>
+			<td align="center">
+			<!--{ ? .important }-->
+			<span class="icon-star-gray hand checked list-important important-{.step}" id="important_{.order_seq}"></span>
+			<!--{ : }-->
+			<span class="icon-star-gray hand list-important important-{.step}" id="important_{.order_seq}"></span>
+			<!--{ / }-->
+			</td>
+			<td align="center" class="ft11">{.no}</td>
+			<td align="center">
+				<!--{ ? .linkage_mall_code }-->
+				{?is_numeric(mb_substr(linkage_mallnames[.linkage_mall_code],0,1))}
+					{=mb_substr(linkage_mallnames[.linkage_mall_code],0,2)}
+				{:}
+					{=mb_substr(linkage_mallnames[.linkage_mall_code],0,1)}
+				{/}
+				<!--{ : }-->
+				{ ? .referer }<a href="{.referer}" target="_blank">{ / }
+				<span class="help" title="{.referer_name} {.referer}" style="font-size:11px;font-weight:bold;color:#006666;">{=getstrcut(.referer_name, 1, '')}</span>
+				{ ? .referer }</a>{ / }
+				<!--{ / }-->
+			</td>
+			<td align="center" class="ft11">{=substr(.regist_date,2,-3)}</td>
+			<td align="center" class="ft11">
+				{.sitetypetitle}
+				{? .marketplacetitle && .marketplace!='etc' }<span style="display:inline-block;">{.marketplacetitle}</span>{ / }
+				{? .orign_order_seq }<span title="맞교환 주문"><img src="../images/design/icon_order_exchange.gif" /></span>{ / }
+				{? .admin_order }<img src="../images/design/icon_order_admin.gif">{ / }
+				{? .person_seq }<img src="../images/design/icon_order_personal.gif">{ / }
+			</td>
+			<td align="left" class="ft11">
+				<a href="view?no={.order_seq}"><span class="order-step-color-{.step} bold">{.order_seq}</span></a>
+
+				<a href="javascript:printOrderView('{.order_seq}')"><span class="icon-print-order"></span></a>
+
+
+				<a href="view?no={.order_seq}" target="_blank"><span class="btn-administration"><span class="hide">새창</span></span></a>
+				<span class="btn-direct-open"><span class="hide">바로열기</span></span>
+				
+				{?.linkage_mall_order_id}
+				<div class="blue bold">{.linkage_mall_order_id}</div>
+				{/}
+			</td>
+			<td align="left">			
+			<div class="goods_name">{?.gift_cnt>0}<span title="사은품 주문"><img src="../images/design/icon_order_gift.gif" align="absmiddle"/></span>{ / } {.goods_name}</div>
+			</td>
+			<td class="right">			
+			{.tot_ea}({.item_cnt}종)
+			</td>
+			<td align="center" class="ft11">
+			{ ? .step >= 40 && .step <= 75 }
+			<a href="../export/catalog?hsb_kind=export&header_search_keyword={.order_seq}" target="_blank"><span class="order-step-color-{.step} hand">출고☞</span></a>
+			{ / }
+			</td>
+			<td class="ft11">
+				<!--{ ? .shipping_cnt > 1 || .shipping_recipient_user_name != .order_user_name}-->
+					<div style="margin-top:5px;">{.shipping_recipient_user_name} <!--{ ? .shipping_cnt > 1 }-->외 {=(.shipping_cnt-1)}명<!--{ / }--></div> 
+				<!--{ / }-->
+				
+					<div style="margin-bottom:3px;">
+				<!--{ ? .member_seq }-->
+					{?.member_type=='개인'}<img src="../images/common/icon/icon_personal.gif" vspace="0" align="absmiddle" />
+					{:.member_type=='기업'}<img src="../images/common/icon/icon_besiness.gif" vspace="0" align="absmiddle" />{/}
+					<span>{.order_user_name}</span>
+					{? .sns_rute }
+						<span>(<img src="../images/sns/sns_{=substr(.sns_rute,0,1)}0.gif" align="absmiddle" snscd="{.sns_rute}" mem_seq="{.member_seq}" no="{=.step}{=.key_}" onclick="snsdetailview('open','{.sns_rute}','{.member_seq}','{=.step}{=.key_}')" class="btnsnsdetail hand">/<span class="blue">{.group_name}</span>)
+						<div id="snsdetailPopup{=.step}{.key_}" class="snsdetailPopup absolute hide" style="margin-left:73px;margin-top:-16px;"></div>
+						</span>
+					{ : }
+						(<a href="/admin/member/detail?member_seq={.member_seq}" target="_blank"><span style="color:#d13b00;">{.userid}</span>/<span class="blue">{.group_name}</span></a>)
+					{ / }
+				<!--{ : }-->
+					<img src="../images/common/icon/icon_personal.gif" /> {.order_user_name} (<span class="desc">비회원</span>)
+				<!--{ / }-->
+					</div>
+				
+			</td>
+			
+			<!--// 결제 수단 //-->
+			<td align="right" class="ft11">
+			<!--{ ? .payment=='bank' }-->
+				<!--{ ? .order_user_name == .depositor }-->
+				<span class="darkgray"><span title="입금자명">{.depositor}</span></span>
+				<!--{ : }-->
+				<span class="blue"><span title="입금자명">{.depositor}</span></span>
+				<!--{ / }-->
+			<!--{ / }-->
+			<!--{ ? .payment == 'escrow_account' }-->
+			<span class="icon-pay-escrow"><span>에스크로</span></span>
+			<span class="icon-pay-account"><span>{.mpayment}</span></span>
+			<!--{ : .payment == 'escrow_virtual' }-->
+			<span class="icon-pay-escrow"><span>에스크로</span></span>
+			<span class="icon-pay-virtual"><span>{.mpayment}</span></span>
+			<!--{ : .pg == 'kakaopay' }-->
+			<span class="icon-pay-{.pg}"><span>{.pg}</span></span>
+			<!--{ : }-->
+			<span class="icon-pay-{.payment}"><span>{.mpayment}</span></span>
+			<!--{ / }-->
+			<!--{ ? .payment=='bank' && .bank_name }-->
+			<span class="darkgray"><span title="은행명">{.bank_name}</span></span>
+			<!--{ / }-->
+			</td>
+			<td align="right" style="padding-right:5px;"><b>{=number_format(.settleprice)}</b></td>
+			<td align="center" class="ft11">{? .deposit_date}{=substr(.deposit_date,2,-3)}{/}</td>
+			<td align="center" class="ft11">
+			<div>{.mstep}</div>
+			{ ? .cancel_list_ea || .exchange_list_ea || .return_list_ea  || .refund_list_ea }
+			<div>
+				{ ? .cancel_list_ea }
+				<a href="/admin/refund/catalog?keyword={.order_seq}" target="_blank"><img src='../images/common/icon/icon_list_cancel.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{.cancel_list_ea}</span></a>
+				{ / }
+				{ ? .exchange_list_ea }
+				<a href="/admin/returns/catalog?keyword={.order_seq}" target="_blank"><img src='../images/common/icon/icon_list_return_exchange.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{.exchange_list_ea}</span></a>
+				{ / }
+				{ ? .return_list_ea }
+				<a href="/admin/returns/catalog?keyword={.order_seq}" target="_blank"><img src='../images/common/icon/icon_list_return.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{.return_list_ea}</span></a>
+				{ / }
+				{ ? .refund_list_ea }
+				<a href="/admin/refund/catalog?keyword={.order_seq}" target="_blank"><img src='../images/common/icon/icon_list_refund.gif' align="absmiddle"><span style="font-size:11px;color:#ea3b91">{.refund_list_ea}</span></a>
+				{ / }
+			</div>			
+			{ / }
+			</td>
+		</tr>
+		<!--<tr><td colspan="12" style="padding-top:3px;"></td></tr>-->
+		<tr class="order-list-summary-row hide">
+			<td colspan="15" class="order-list-summary-row-td"><div class="order_info"></div></td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+
+
+		<!--{ ? .last_step_cnt }-->
+		<!-- 합계 : 시작 -->
+		<tr class="list-end-row">
+			<td colspan="15" class="list-end-row-td">
+				<ul class="left-btns clearbox">
+					<li>
+						<select class="list-select custom-select-box-multi" name="select_{.last_step}"  rows="4">
+						<option value="select" {? stepBox[.last_step] == 'select'}selected{/}>전체선택</option>
+						<option value="not-select" {? stepBox[.last_step] == 'not-select'}selected{/}>선택안함</option>
+						<option value="important" {? stepBox[.last_step] == 'important'}selected{/}>별표선택</option>
+						<option value="not-important" {? stepBox[.last_step] == 'not-important'}selected{/}>별표없음</option>
+						</select>
+					</li>
+					<li>
+						<!--{ ? .last_step == '15' }-->
+						<span class="btn small green"><button name="order_deposit" id="{.last_step}">결제확인</button></span>
+						<span class="btn small gray"><button name="cancel_order" id="{.last_step}">주문무효</button></span>
+						<!--{ / }-->
+						<!--{ ? in_array(.last_step,able_step_action['goods_ready']) }-->
+						<span class="btn small deepgreen"><button name="batch_goods_ready" id="{.last_step}">상품준비</button></span>
+						<!--{ / }-->
+						<!--{ ? in_array(.last_step,array('25','35')) }-->
+						<span class="btn small red"><button name="goods_export" id="{.step}">주문별출고</button></span>
+						<span class="btn small red"><button name="order_export" id="{.step}">상품별출고</button></span>
+						<!--{ / }-->
+						<!--{ ? .last_step == '45' }-->
+						<span class="btn small deepblue"><button name="complete_export" id="{.last_step}">출고완료</button></span>
+						<!--{ / }-->
+						<!--{ ? .last_step == '50' }-->
+						<span class="btn small red"><button name="order_export" id="{.step}">상품별출고</button></span>
+						<!--{ / }-->
+						<!--{ ? .last_step == '55' }-->
+						<span class="btn small violet"><button name="going_delivery" id="{.last_step}">배송중</button></span>
+						<span class="btn small pink"><button name="complete_delivery" id="{.last_step}">배송완료</button></span>
+						<!--{ / }-->
+						<!--{ ? .last_step == '65' }-->
+						<span class="btn small pink"><button name="complete_delivery" id="{.last_step}">배송완료</button></span>
+						<!--{ / }-->
+						<!--{ ? in_array(.last_step,array('95','99')) }-->
+						<span class="btn small"><button name="goods_temps" id="{.last_step}">삭제처리</button></span>
+						<!--{ / }-->
+
+						<img src="../images/common/btn_print_m_odr.gif" name="goods_print" id="{.last_step}" class="hand" align="absmiddle" />
+
+						<span class="hand batch_reverse" id="{.last_step}">
+						<!--{ ? .last_step == '25' }-->
+						<span class="helpicon" title="취소, 반품, 환불이 없는 무통장 주문건을 주문접수(미입금)로 되돌릴 수 있습니다."></span> '주문접수'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+						<!--{ : .last_step == '35' }-->
+						<span class="helpicon" title="상품준비 중인 주문을 결제확인으로 되돌릴 수 있습니다."></span> '결제확인'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+						<!--{ : .last_step == '95' }-->
+						<span class="helpicon" title="주문이 무효된 주문을 다시 주문접수로 되돌릴 수 있습니다."></span> '주문접수'로 되돌리기 <img src="../images/common/icon_arrow_back.gif" align="absmiddle" />
+						<!--{ / }-->
+						</span>
+					</li>
+				</ul>
+				<div class="list-end-total-amount">
+					<span class="order-step-color-{.last_step}">{.mstep}</span> <span class="darkgray">합계</span> &nbsp; {=number_format(.last_step_cnt)}건
+					&nbsp;&nbsp;&nbsp;
+					￦ <span class="fx14 order-step-color-{.last_step}">{=number_format(.last_step_settleprice)}</span>
+				</div>
+			</td>
+		</tr>
+		<!-- 합계 : 끝 -->
+		<!--{ / }-->
+
+	<!--{ / }-->
+<!--{ / }-->
+		<input type="hidden" id="{page}_no" value="{final_no}" />
+		<input type="hidden" id="{page}_step" value="{final_step}" />
+		

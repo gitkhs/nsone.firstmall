@@ -1,0 +1,297 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#multicouponhelper").click(function() {
+			openDialog("다중 발급이란?", "multicouponhelperPopup", {"width":"630","height":"470"});
+	}); 
+
+	$(".onlinecptype_memberlogin_btn").click(function() {
+			openDialog("이달의 컴백회원 쿠폰 발급 대상 안내", "onlinecptypememberloginhelperPopup", {"width":"760","height":"275"});
+	}); 
+	
+	$("input[type='radio'][name='onlinecptype']").click(function() {
+		$(".onlinecptype").removeClass('checked-tr-background');
+		$(".tr_"+$(this).attr("id")).addClass('checked-tr-background'); 
+	});
+	
+	$(".onlinecptype").click(function() {
+		$(".onlinecptype").removeClass('checked-tr-background');
+		$(".tr_onlinecptype_"+$(this).attr("onlinecptype")).addClass('checked-tr-background'); 
+		$("input[name='onlinecptype'][value='"+$(this).attr("onlinecptype")+"']").attr('checked',true);
+	});
+	
+
+	$("#onlinecoupontypebtn").live("click",function(){
+		
+		var coopon_usetype = $("input[type='radio'][name='coopon_usetype']:checked").val(); 
+		if(coopon_usetype=='online'){
+			$(".use_online").show();
+			$(".use_offline").hide();
+			$("#couponImg1").attr("checked","checked");
+		}else if(coopon_usetype=='offline'){
+			$(".use_offline").show();
+			$(".use_online").hide();
+			$("#couponImg5").attr("checked","checked");
+		}
+		var onlinecptype = $("input[type='radio'][name='onlinecptype']:checked").val(); 
+		$("#couponType").val(onlinecptype);
+		$('.onlinecptypetr').hide();
+		$('.'+onlinecptype+'tbllay').show();
+		$("input[name='couponType'][value='"+onlinecptype+"']").attr('checked',true);
+		if( onlinecptype == 'member'  || onlinecptype == 'member_shipping' || onlinecptype == 'admin' || onlinecptype == 'admin_shipping'  || onlinecptype == 'point' ) {
+			$("#onlinedowntypetitle").text("자동");
+			$("#onlinedowntypetitle").removeClass('red');
+			$("#onlinedowntypetitle").addClass('blue');
+			$('.onlinedowntypehelppopup').hide();
+		}else{
+			$("#onlinedowntypetitle").text("다운로드");
+			$("#onlinedowntypetitle").removeClass('blue');
+			$("#onlinedowntypetitle").addClass('red');
+			$('.onlinedowntypehelppopup').show();
+		}
+		set_coupon_form();
+		$("#onlinecoupontypePopup").dialog('close');
+	});  
+
+}); 
+</script>
+<ul class="right-btns clearbox">
+	<li class="right">다중 발급이란 <span class="hand " id="multicouponhelper" align="absmiddle" ><img src="../images/common/btn_help.gif" ></span>
+	</li>
+</ul>
+<div class="clearbox"></div>
+<div >
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="40" />
+			<col />
+			<col />
+			<col />
+			<col  width="115" />
+			<col />
+		</colgroup>
+		<thead>
+		<tr> 
+			<th class="its-th-align center" colspan="2">종류</th>
+			<th class="its-th-align center" colspan="2">발급 대상 → 발급 방식</th>
+			<th class="its-th-align center">발급 주기</th>
+			<th class="its-th-align center">다중 발급</th>
+		</tr>
+		</thead>
+		<tr class="onlinecptype tr_onlinecptype_download checked-tr-background hand" onlinecptype="download" >
+			<td class="its-td-align center"><input type="radio" name="onlinecptype" value="download" id="onlinecptype_download"  checked="checked" ></td>
+			<td class="its-td left">상품 쿠폰</label></td>
+			<td class="its-td left">발급된 상품 쿠폰을 회원이</td>
+			<td class="its-td left"><span class="red">→ 쿠폰 다운로드</span></td>
+			<td class="its-td left">자유</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_birthday hand"  onlinecptype="birthday" >
+			<td class="its-td-align center"><input type="radio" name="onlinecptype" value="birthday" id="onlinecptype_birthday" > </td>
+			<td class="its-td left"><label for="onlinecptype_birthday">생일자 쿠폰</label></td>
+			<td class="its-td left">생일을 맞이한 회원이 </td>
+			<td class="its-td left"><span class="red">→ 쿠폰 다운로드</span></td>
+			<td class="its-td left">1년에 한번</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr class="onlinecptype  onlinecptype_use_online  tr_onlinecptype_anniversary  hand"  onlinecptype="anniversary" >
+			<td class="its-td-align center"><input type="radio" name="onlinecptype" value="anniversary" id="onlinecptype_anniversary" > </td>
+			<td class="its-td left"><label for="onlinecptype_anniversary">기념일 쿠폰</label></td>
+			<td class="its-td left">기념일을 맞이한 회원이 </td>
+			<td class="its-td left"><span class="red">→ 쿠폰 다운로드</span></td>
+			<td class="its-td left">1년에 한번</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_shipping  hand"  onlinecptype="shipping" >
+			<td class="its-td-align center"><input type="radio" name="onlinecptype" value="shipping" id="onlinecptype_shipping" > </td>
+			<td class="its-td left"><label for="onlinecptype_shipping">배송비 쿠폰</label></td>
+			<td class="its-td left">발급된 배송비 쿠폰을 회원이 </td>
+			<td class="its-td left"><span class="red">→ 쿠폰 다운로드</span></td>
+			<td class="its-td left">자유</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr  class="onlinecptype onlinecptype_use_online  tr_onlinecptype_memberGroup  hand"  onlinecptype="memberGroup" >
+			<td class="its-td-align center"><input type="radio" name="onlinecptype" value="memberGroup" id="onlinecptype_memberGroup" > </td>
+			<td class="its-td left"><label for="onlinecptype_memberGroup">회원등급조정  쿠폰</label></td>
+			<td class="its-td left">자동으로 회원등급이 조정된 후 회원이  </td>
+			<td class="its-td left"><span class="red">→ 쿠폰 다운로드</span></td>
+			<td class="its-td left">등급조정 시마다</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr  class="onlinecptype onlinecptype_use_online  tr_onlinecptype_memberGroup_shipping  hand"    {? !(service_code=='P_FREE' || service_code=='P_STOR')} onlinecptype="memberGroup_shipping"  {/}>
+			<td class="its-td-align center">
+			{?service_code=='P_FREE' || service_code=='P_STOR'} 
+				<img src='../images/common/btn_upgrade.gif' class='hand' onclick='serviceUpgrade();' align='absmiddle' />
+			{:}
+				<input type="radio" name="onlinecptype" value="memberGroup_shipping" id="onlinecptype_memberGroup_shipping" >  
+			{/}
+			</td>
+			<td class="its-td left"><label for="onlinecptype_memberGroup_shipping">회원등급조정 쿠폰 (배송비)</label></td>
+			<td class="its-td left">자동으로 회원등급이 조정된 후 회원이 </td>
+			<td class="its-td left"><span class="red">→ 쿠폰 다운로드</span></td>
+			<td class="its-td left">등급조정 시마다</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_member  hand"  onlinecptype="member" >
+			<td class="its-td-align center"><input type="radio" name="onlinecptype" value="member" id="onlinecptype_member" > </td>
+			<td class="its-td left"><label for="onlinecptype_member">신규가입  쿠폰</label></td>
+			<td class="its-td left">신규가입 회원에게</td>
+			<td class="its-td left"><span class="blue">→ 쿠폰 자동 제공</span></td>
+			<td class="its-td left">최초 1회</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_member_shipping  hand"  {? !(service_code=='P_FREE' || service_code=='P_STOR')} onlinecptype="member_shipping" {/} >
+			<td class="its-td-align center">
+			{?service_code=='P_FREE' || service_code=='P_STOR'} 
+				<img src='../images/common/btn_upgrade.gif' class='hand' onclick='serviceUpgrade();' align='absmiddle' />
+			{:}
+				<input type="radio" name="onlinecptype" value="member_shipping" id="onlinecptype_member_shipping" > 
+			{/}
+			</td>
+			<td class="its-td left"><label for="onlinecptype_member_shipping">신규가입 쿠폰 (배송비)</label></td>
+			<td class="its-td left">신규가입 회원에게</td>
+			<td class="its-td left"><span class="blue">→ 쿠폰 자동 제공</span></td>
+			<td class="its-td left">최초 1회</td>
+			<td class="its-td left">가능</td>
+		</tr> 
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_memberlogin  hand"  {? !(service_code=='P_FREE' || service_code=='P_STOR')} onlinecptype="memberlogin" {/} >
+			<td class="its-td-align center"> 
+			{?service_code=='P_FREE' || service_code=='P_STOR'} 
+				<img src='../images/common/btn_upgrade.gif' class='hand' onclick='serviceUpgrade();' align='absmiddle' />
+			{:}
+				<input type="radio" name="onlinecptype" value="memberlogin" id="onlinecptype_memberlogin" > 
+			{/}
+			 </td>
+			<td class="its-td left"><label for="onlinecptype_memberlogin">이달의 컴백회원 쿠폰</label></td>
+			<td class="its-td left">구매 내역이 있으나 최근 <span class="btn small orange "><button type="button" class="onlinecptype_memberlogin_btn hand" >자세히</button></span>에 구매하지 않은 회원이 </td>
+			<td class="its-td left"><span class="red">→ 쿠폰 다운로드</span></td>
+			<td class="its-td left">월 1회</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_memberlogin_shipping  hand"  {? !(service_code=='P_FREE' || service_code=='P_STOR')} onlinecptype="memberlogin_shipping" {/} >
+			<td class="its-td-align center">
+			{?service_code=='P_FREE' || service_code=='P_STOR'} 
+				<img src='../images/common/btn_upgrade.gif' class='hand' onclick='serviceUpgrade();' align='absmiddle' />
+			{:}
+				<input type="radio" name="onlinecptype" value="memberlogin_shipping" id="onlinecptype_memberlogin_shipping" >
+			{/}
+			 </td>
+			<td class="its-td left"><label for="onlinecptype_memberlogin_shipping">이달의 컴백회원 쿠폰 (배송비)</label></td>
+			<td class="its-td left">구매 내역이 있으나 최근 <span class="btn small orange "><button type="button" class="onlinecptype_memberlogin_btn hand" >자세히</button></span>에 구매하지 않은 회원이 </td>
+			<td class="its-td left"><span class="red">→ 쿠폰 다운로드</span></td>
+			<td class="its-td left">월 1회</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_membermonths  hand"   {? !(service_code=='P_FREE' || service_code=='P_STOR')} onlinecptype="membermonths" {/} >
+			<td class="its-td-align center"> 
+			{?service_code=='P_FREE' || service_code=='P_STOR'} 
+				<img src='../images/common/btn_upgrade.gif' class='hand' onclick='serviceUpgrade();' align='absmiddle' />
+			{:}
+				<input type="radio" name="onlinecptype" value="membermonths" id="onlinecptype_membermonths" >
+			{/}
+			 </td>
+			<td class="its-td left"><label for="onlinecptype_membermonths">이달의 등급 쿠폰</label></td>
+			<td class="its-td left">해당 등급의 회원이 </td>
+			<td class="its-td left"><span class="red">→ 쿠폰 다운로드</span></td>
+			<td class="its-td left">월 1회</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_membermonths_shipping  hand"   {? !(service_code=='P_FREE' || service_code=='P_STOR')} onlinecptype="membermonths_shipping" {/}>
+			<td class="its-td-align center">
+			{?service_code=='P_FREE' || service_code=='P_STOR'} 
+				<img src='../images/common/btn_upgrade.gif' class='hand' onclick='serviceUpgrade();' align='absmiddle' />
+			{:}
+				<input type="radio" name="onlinecptype" value="membermonths_shipping" id="onlinecptype_membermonths_shipping" >
+			{/}
+			 </td>
+			<td class="its-td left"><label for="onlinecptype_membermonths_shipping">이달의 등급 쿠폰 (배송비)</label></td>
+			<td class="its-td left">해당 등급의 회원이 </td>
+			<td class="its-td left"><span class="red">→ 쿠폰 다운로드</span></td>
+			<td class="its-td left">월 1회</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_order  hand" {? !(service_code=='P_FREE' || service_code=='P_STOR')} onlinecptype="order" {/}>
+			<td class="its-td-align center">
+			{?service_code=='P_FREE' || service_code=='P_STOR'}
+				<img src='../images/common/btn_upgrade.gif' class='hand' onclick='serviceUpgrade();' align='absmiddle' />
+			{:}
+				<input type="radio" name="onlinecptype" value="order" id="onlinecptype_order" > 
+			{/}
+			</td>
+			<td class="its-td left"><label for="onlinecptype_order">첫 구매 쿠폰</label></td>
+			<td class="its-td left">지금까지 한 번도 구매하지 않은 회원이 </td>
+			<td class="its-td left"><span class="red">→ 쿠폰 다운로드</span></td>
+			<td class="its-td left">월 1회</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_admin  hand"  onlinecptype="admin" >
+			<td class="its-td-align center"><input type="radio" name="onlinecptype" value="admin" id="onlinecptype_admin" > </td>
+			<td class="its-td left"><label for="onlinecptype_admin">직접 발급 쿠폰</label></td>
+			<td class="its-td left">특정 회원에게 </td>
+			<td class="its-td left"><span class="blue">→ 쿠폰 자동 제공</span></td>
+			<td class="its-td left">자유</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_admin_shipping  hand"  onlinecptype="admin_shipping" >
+			<td class="its-td-align center"><input type="radio" name="onlinecptype" value="admin_shipping" id="onlinecptype_admin_shipping" > </td>
+			<td class="its-td left"><label for="onlinecptype_admin_shipping">직접 발급 쿠폰 (배송비)</label></td>
+			<td class="its-td left">특정 회원에게 </td>
+			<td class="its-td left"><span class="blue">→ 쿠폰 자동 제공</span></td>
+			<td class="its-td left">자유</td>
+			<td class="its-td left">가능</td>
+		</tr>
+		
+		<!-- {? isplusfreenot && isplusfreenot.ispoint } -->
+		<tr class="onlinecptype onlinecptype_use_online  tr_onlinecptype_point  hand"  onlinecptype="point" >
+			<td class="its-td-align center"><input type="radio" name="onlinecptype" value="point" id="onlinecptype_point" > </td>
+			<td class="its-td left"><label for="onlinecptype_point">포인트 전환 쿠폰</label></td>
+			<td class="its-td left">회원이 보유 포인트를 사용하면</td>
+			<td class="its-td left"><span class="blue">→ 쿠폰 자동 제공</span></td>
+			<td class="its-td left">자유</td>
+			<td class="its-td left">가능</td>
+		</tr> 
+		<!-- {/} --> 
+
+		<tr >
+			<td colspan="5" class="center"><br/>
+				<div ><span class="btn large cyanblue"><button type="button" id="onlinecoupontypebtn" >확인</button></span></div>
+			</td>
+		</tr>
+	</table> 
+	
+</div>
+<!-- 서브 레이아웃 영역 : 끝 -->
+
+<!-- 페이징 -->
+<div id="multicouponhelperPopup" class="hide">
+	<div>다중 발급이란 하나의 쿠폰 종류로 여러 개의 쿠폰을 제공할 수 있는 기능입니다.</div>
+	<br/>
+
+	예시)<br/>
+	<div class="pdb20">
+	<span class="bold">신규가입 기념 3종 쿠폰</span><br/>
+	&nbsp;- 1,000원 할인 (5천원 이상 구매 시)<br/>
+	&nbsp;- 10% 할인 (최대 5천원 할인)<br/>
+	&nbsp;- 5,000원 할인 (5만원 이상 구매 시)<br/>
+	</div>
+
+	<div class="pdb20">
+	<span class="bold">컴백회원 기념 3종 쿠폰</span><br/>
+	&nbsp;- 1,000원 할인 (5천원 이상 구매 시)<br/>
+	&nbsp;- 10% 할인 (최대 5천원 할인)<br/>
+	&nbsp;- 5,000원 할인 (5만원 이상 구매 시)<br/>
+	</div>
+
+	<div class="pdb20">
+		<span class="bold">이달의 등급 쿠폰</span><br/>
+		&nbsp;- 1,000원 할인 (5천원 이상 구매 시) - 새내기 회원<br/>
+		&nbsp;- 2,000원 할인 (3만원 이상 구매 시) - 새내기 회원<br/>
+		&nbsp;- 1,000원 할인 (5천원 이상 구매 시) - 골드 회원<br/>
+		&nbsp;- 2,000원 할인 (3만원 이상 구매 시) - 골드 회원<br/>
+		&nbsp;- 10% 할인 (최대 1만원 할인) - 골드 회원<br/>
+		&nbsp;- 1,000원 할인 (5천원 이상 구매 시) - VIP 회원<br/>
+		&nbsp;- 2,000원 할인 (3만원 이상 구매 시) - VIP 회원<br/>
+		&nbsp;- 10% 할인 (최대 1만원 할인) - VIP 회원<br/>
+		&nbsp;- 무료 배송 (최대 2,500원 할인) - VIP 회원<br/>
+	</div>
+
+</div>

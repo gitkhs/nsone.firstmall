@@ -1,0 +1,1377 @@
+{ #layout_header }
+<!--[if IE]><script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/excanvas.min.js"></script><![endif]-->
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/jquery.jqplot.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.barRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.pointLabels.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.pieRenderer.min.js"></script>
+<script language="javascript" type="text/javascript" src="/app/javascript/plugin/jqplot/plugins/jqplot.donutRenderer.min.js"></script>
+<link class="include" rel="stylesheet" type="text/css" href="/app/javascript/plugin/jqplot/jquery.jqplot.min.css" />
+
+<script type="text/javascript" src="/app/javascript/js/admin-providershipping.js"></script>
+
+<style type="text/css">
+.status-isY { background-color:blue;color:white; }
+.status-isN { background-color:red;color:white; }
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+
+	{? provider_id }
+	$("form[name='settingForm'] select[name='provider_status'] option[value='{provider_status}']").attr("selected",true);
+
+	$("form[name='settingForm'] select[name='provider_status']").addClass('status-is'+$("form[name='settingForm'] select[name='provider_status'] option:selected").val());
+
+	$("form[name='settingForm'] select[name='provider_gb'] option[value='{provider_gb}']").attr("selected",true);
+
+	$("form[name='settingForm'] select[name='deli_group'] option[value='{deli_group}']").attr("selected",true);
+
+	upload_btn_cont('bank');
+	upload_btn_cont('busi');
+	{ / }
+
+	$("form[name='settingForm'] select[name='provider_status']").change(function(){
+		if	($(this).find("option:selected").val() == 'N'){
+			$(this).removeClass('status-isY');
+			$(this).addClass('status-isN');
+		}else{
+			$(this).removeClass('status-isN');
+			$(this).addClass('status-isY');
+		}
+	});
+
+	$("#infoZipcodeButton").live("click",function(){
+		openDialogZipcode('info_');
+	});
+
+    $("#senderZipcodeButton").live("click",function(){
+        openDialogZipcode('sender');
+    });
+	$("#returnZipcodeButton").live("click",function(){
+        openDialogZipcode('return');
+    });
+
+
+	$("input[name='passwd_chg']").bind("click",function(){
+		if($(this).attr("checked")){
+			$("#r_pass").show();
+			$("#manager_passwd_confirm").show();
+		}else{
+			$("#r_pass").hide();
+			$("#manager_passwd_confirm").hide();
+		}
+	});
+
+
+	$("#calcu_set").bind("click",function(){
+		openDialog("기본 수수료 세팅  <span class='desc'></span>", "calcuPopup", {"width":"350","height":"250","show" : "fade","hide" : "fade"});
+	});
+
+	$("#etcAdd").bind("click", function(){
+		add_brand();
+	});
+
+	$("#calcu_select").bind("click",function(){
+		if(!$("input[name='brand_charge']").val()){
+			alert("기본 수수료는 필수입니다.");
+			return;
+		}
+		var def = "<div>기본 : "+$("input[name='brand_charge']").val()+"%</div>";
+		$("input[name='charge']").val($("input[name='brand_charge']").val());
+
+		var brand = document.getElementsByName("brand[]");
+		var brand_charge = document.getElementsByName("brand_charge[]");
+		for(var i=0;i<brand.length;i++){
+			if(brand[i].value && brand_charge[i].value){
+				var temp_arr = brand[i].value.split("|");
+				def += "<div>"+temp_arr[1]+"("+temp_arr[0]+") : "+brand_charge[i].value+"% <input type='hidden' name='brand_ch[]' value='"+brand[i].value+"'/><input type='hidden' name='brand_per[]' value='"+brand_charge[i].value+"'/></div>";
+			}
+		}
+
+		$("#calcu_div").html(def);
+		closeDialog("calcuPopup");
+	});
+
+	$("#id_chk").click(function(){
+		var id = $("input[name='provider_id']").val();
+		if(!id){
+			alert("입접사ID를 입력해 주세요.");
+			$("input[name='provider_id']").focus();
+			return;
+		}
+		$.post("../provider_process/provider_chk", { provider_id : id }, function(response){
+			//debug(response);
+			//var text = response.return_result;
+			//var manager_id = response.manager_id;
+			alert(response.return_result);
+		},'json');
+	});
+
+	<!--{? charge_loop }-->
+	var temp_cnt = 0;
+	{@ charge_loop }
+		add_brand();
+		$("#sel_"+temp_cnt+" option[value='{.category_code}|{.title}']").attr("selected",true);
+		$("#text_"+temp_cnt).val({.charge});
+		temp_cnt++;
+	{ / }
+	<!--{ / }-->
+
+	// ICON
+	$("button#bankBtn").live("click",function(){
+		openDialog("계좌 사본  <span class='desc'></span>", "bankPopup", {"width":"350","height":"250","show" : "fade","hide" : "fade"});
+	});
+
+	$("button#busiBtn").live("click",function(){
+		openDialog("사업자등록증 사본  <span class='desc'></span>", "busiPopup", {"width":"350","height":"250","show" : "fade","hide" : "fade"});
+	});
+
+	$(".registMshopVisualimage").live("click",function(){
+		$provider_id	= {? provider_id }'{provider_id}'{ : }$("input[name='provider_id']").val(){ / };
+		window.open('../setting/mshop_popup_image?id='+$provider_id+'&target=main_visual','','width=500,height=250');
+	});
+
+	$("#main_visual_name").live('mouseover',	function(){$('#preview_main_visual').show();});
+	$("#main_visual_name").live('mouseout',		function(){$('#preview_main_visual').hide();});
+	{ ? main_visual }
+	$(".deleteVisual").live("click",function(){
+		$("input[name='del_main_visual']").val('y');
+		$("#btn_deletevidual").hide();
+		$("#main_visual_name").html('');
+		$("#preview_main_visual").html('');
+	});
+	{ / }
+
+	$("select[name='provider_statistic']").live('change', function(){
+		var this_css	= $(".head-rbtn").attr('class');
+		if	(this_css.search(/open/) != -1){
+			getProviderStatistic('');
+		}
+	});
+
+	$(".head-rbtn").live("click", function(){
+		var this_css	= $(this).attr('class');
+		if	(this_css.search(/open/) == -1){
+			getProviderStatistic('');
+			$(this).addClass('open');
+			$(this).html('x 닫기');
+		}else{
+			$(".statistics_area").slideUp();
+			$(this).removeClass('open');
+			$(this).html('↓ 열기');
+		}
+	});
+
+
+	/******** 쿠폰사용 확인코드 관련 **********/
+
+	//SMS보내기
+	$(".manager_sms_send").live("click",function(event){
+		if( $(this).parent().parent().find("input[name='certify_code[]']").val() == $(this).parent().parent().find("input[name='certify_code[]']").attr('title') ){
+			openDialogAlert("확인코드를 입력해주세요.", 300, 150, function(){$(parent).find("input[name='certify_code[]']").focus()});
+			return false;
+		}
+		if(  $(this).parent().parent().find("input[name='certify_code_chk[]']").val() != 'ok' ){
+			openDialogAlert("사용가능한 확인코드인지 [인증]해 주세요!", 350, 150, function(){});
+			return false;
+		}
+
+		var certify_code = $(this).parent().parent().find("input[name='certify_code[]']").val();
+		$.get('../member/sms_pop?certify_code='+certify_code, function(data) {
+			$('#sendPopup').html(data);
+			openDialog("SMS 발송 <span class='desc'></span>", "sendPopup", {"width":"600","height":"200"});
+		});
+    });
+
+	// 직원추가
+	$("#addManager").bind("click", function(){
+		var addHTML	= '';
+		addHTML	+= '<div>'+"\n";
+		addHTML	+= '<input type="hidden" name="certify_seq[]" value="" size="10" class="line" />'+"\n";
+		addHTML	+= '<input type="text" name="manager_name[]" value="" size="45" class="line" title="해당 확인코드를 사용하는 매장 정보를 입력하세요." />'+"\n";
+		addHTML	+= '<input type="hidden" name="certify_code_chk[]" value="" /><input type="text" name="certify_code[]" value="" size="50"  class="line" title="확인코드 (6자리 이상. 16자리 이하 영문 또는 숫자)" />'+"\n";
+		addHTML	+= '<span class="btn small black"><button type="button" class="certify_btn">인증</button></span>'+"\n";
+		addHTML	+= '<span class="btn-minus btnplusminus"><button type="button" class="delManager"></button></span>'+"\n";
+		addHTML	+= '<span class="btn small cyanblue"><button type="button" class="manager_sms_send">매장 담당자에게 SMS 보내기</button></span></div>'+"\n";
+
+		$("#cerfify_manager").append(addHTML);
+		setDefaultText();
+	});
+
+	// 직원 삭제
+	$(".delManager").live('click', function(){
+		$(this).parent().parent().remove();
+	});
+
+	// 인증
+	$(".certify_btn").live('click', function(){
+		var parent			= $(this).parent().parent();
+		$(parent).find("input[name='certify_code_chk[]']").val('');//초기화
+		var certify_seq		= $(parent).find("input[name='certify_seq[]']").val();
+		var certify_code	= $(parent).find("input[name='certify_code[]']").val();
+		var titles			= $(parent).find("input[name='certify_code[]']").attr('title');
+		certify_code		= certify_code.replace(titles, '');
+
+		if	(!certify_code){
+			openDialogAlert("확인코드를 입력해주세요.", 300, 150, function(){$(parent).find("input[name='certify_code[]']").focus()});
+			return;
+		}
+		if	(certify_code.length < 6 || certify_code.length > 16){
+			openDialogAlert("확인코드는 6자리 이상 16자리 이하로 입력해주세요.", 400, 150, function(){$(parent).find("input[name='certify_code[]']").focus()});
+			return;
+		}
+		if	(certify_code.search(/[^0-9a-zA-Z]/) != -1){
+			openDialogAlert("확인코드는 영문 또는 숫자로 입력해주세요.", 300, 150, function(){$(parent).find("input[name='certify_code[]']").focus()});
+			return;
+		}
+		var dup = false;
+		var $inp = $("input[name='certify_code[]']");
+		var certify_code_idx = $(".certify_btn").index(this);
+		$inp.each(function() {
+			var selidx = $("input[name='certify_code[]']").index(this);
+			var codenew = $(this).val();
+			var codetitle = $(this).attr('title');
+			codenew = codenew.replace(codetitle, '');
+			if( certify_code == codenew && certify_code_idx != selidx ) {
+				dup = true;
+				return false;
+			}
+		});
+
+		if(dup){
+			openDialogAlert("중복된 확인코드입니다.", 300, 150, function(){$(parent).find("input[name='certify_code[]']").focus()});
+			return false;
+		}
+
+		$.ajax({
+			type: "get",
+			url: "chk_certify_code",
+			data: "certify_code="+certify_code+"&certify_seq="+certify_seq,
+			success: function(result){
+				if	(result == 'ok')
+					openDialogAlert("사용 가능한 확인코드입니다.", 300, 150, function(){$(parent).find("input[name='certify_code_chk[]']").val('ok')});
+				else if	(result == 'duple')
+					openDialogAlert("중복된 확인코드입니다.", 300, 150, function(){$(parent).find("input[name='certify_code[]']").focus()});
+				else if	(result == 'error_1')
+					openDialogAlert("확인코드를 입력해주세요.", 300, 150, function(){$(parent).find("input[name='certify_code[]']").focus()});
+				else if	(result == 'error_2')
+					openDialogAlert("확인코드는 6자리 이상 16자리 이하로 입력해주세요.", 400, 150, function(){$(parent).find("input[name='certify_code[]']").focus()});
+				else if	(result == 'error_3')
+					openDialogAlert("확인코드는 영문 또는 숫자로 입력해주세요.", 300, 150, function(){$(parent).find("input[name='certify_code[]']").focus()});
+				else
+					openDialogAlert("확인코드 인증에 실패하였습니다.", 400, 150, function(){$(parent).find("input[name='certify_code[]']").focus()});
+			}
+		});
+	});
+
+
+	/* 아이피 추가 */
+	$("#ipViewTable button#ipAdd").live("click",function(){
+		var html="";	
+		html = '<tr>';
+		html += '	<td>';
+		html += '	<input type="text" name="limit_ip1[]" value="" class="line limit_ip" size=4 maxlength=3 />.';
+		html += '	<input type="text" name="limit_ip2[]" value="" class="line limit_ip" size=4 maxlength=3 />.';
+		html += '	<input type="text" name="limit_ip3[]" value="" class="line limit_ip" size=4 maxlength=3 />.';
+		html += '	<input type="text" name="limit_ip4[]" value="" class="line limit_ip" size=4 maxlength=3 />';
+		html += '	<span class="btn-minus"><button type="button" id="ipDel"></button></span>';
+		html += '	</td>';
+		html += '</tr>';
+		
+		$("#ipViewTable").append(html);
+		init_func();
+	});
+
+	/* 아이피 삭제 */
+	$("#ipViewTable button#ipDel").live("click",function(){
+		if($("#ipViewTable tr").length > 1) $(this).parent().parent().parent().remove();
+	});
+
+
+	$("input[name='ip_chk']").click(function(){
+		init_func();
+	});
+
+	$("input[name='hp_chk']").click(function(){
+		init_hp();
+	});
+
+
+	/******** /쿠폰사용 확인코드 관련 **********/
+
+	set_calcu_day();
+	init_func();
+	init_hp();
+
+	//check_account_period_type();
+});
+
+function init_func(){
+	
+	if($("input[name='ip_chk']").attr("checked")){
+		$(".limit_ip").attr("disabled",false);
+	}else{
+		$(".limit_ip").attr("disabled",true);
+	}
+}
+
+
+function init_hp(){
+	if($("input[name='hp_chk']").attr("checked")){
+		$(".auth_hp").attr("disabled",false);
+	}else{
+		$(".auth_hp").attr("disabled",true);
+	}
+}
+
+function getProviderStatistic(addParams){
+	var pageType = $("select[name='provider_statistic'] option:selected").val();
+
+	$(".statistics_area").html('');
+	$(".statistics_area").show();
+
+	$.ajax({
+		type: "get",
+		url: "provider_statistic",
+		data: "pageType="+pageType+"&provider_seq={ provider_seq }"+addParams,
+		success: function(result){
+			$(".statistics_area").html(result);
+			$(".statistics_area").hide();
+			$(".statistics_area").slideDown();
+		}
+	});
+}
+
+
+var select_cnt = 0;
+function add_brand(){
+	var table = document.getElementById("brand_table");
+	var row = table.insertRow();
+	row.onmouseover=function(){table.clickedRowIndex=this.rowIndex;};
+	var cell1 = row.insertCell();
+
+	var limit = '{brand_cnt}';
+
+	var obj = document.getElementsByName("brand_charge[]");
+	if(obj.length >= parseInt(limit)){
+		alert(limit+"개 이상은 생성하실 수 없습니다.");
+		return;
+	}
+
+	var html = "<span class=\"btn-minus\"><button type=\"button\" onclick=\"del_brand();\"></button></span>";
+	html += "<select name=\"brand[]\" id='sel_"+select_cnt+"' onchange='option_check(this);'>";
+	html += "<option value=''>= 선택해주세요 =</option>";
+	<!--{@ brand }-->
+	html += "<option value=\"{.category_code}|{.title}\">{.title}</option>";
+	<!--{ / }-->
+	html += "</select>";
+	html += "<input type=\"text\" id='text_"+select_cnt+"' name=\"brand_charge[]\" size=\"5\" class=\"line\"/>%";
+
+	cell1.innerHTML = html;
+	select_cnt++;
+}
+
+
+function del_brand(){
+	var bum_table = document.getElementById("brand_table");
+	var row_length = bum_table.rows.length;
+	bum_table.deleteRow(bum_table.clickedRowIndex);
+}
+
+function option_check(sel){
+	var obj = document.getElementsByName("brand[]");
+	var cnt = 0;
+	for(var i=0;i<obj.length;i++){
+		if(sel.value==obj[i].value){
+			cnt++;
+		}
+	}
+	if(cnt>1){
+		alert("브랜드가 중복되었습니다.");
+		sel.value ='';
+	}
+}
+
+function calcuFileUpload(){
+	var frm = $('#iconRegist');
+	frm.attr("action","../provider_process/bankUpload?type=bank");
+	frm.submit();
+}
+
+function busiFileUpload(){
+	var frm = $('#iconRegist2');
+	frm.attr("action","../provider_process/bankUpload?type=busi");
+	frm.submit();
+}
+
+function bankHidden(str){
+	$("input[name='calcu_file_hidden']").val(str);
+	closeDialog("bankPopup");
+	upload_btn_cont('bank');
+}
+
+function busiHidden(str){
+	$("input[name='info_file_hidden']").val(str);
+	closeDialog("busiPopup");
+	upload_btn_cont('busi');
+}
+
+function upload_btn_cont(str){
+	if(str=='bank'){
+		if($("input[name='calcu_file_hidden']").val()){
+			$("#b_cont_btn").show();
+			$("#b_reg_btn").hide();
+		}else{
+			$("#b_cont_btn").hide();
+			$("#b_reg_btn").show();
+		}
+	}else{
+		if($("input[name='info_file_hidden']").val()){
+			$("#b_cont_btn2").show();
+			$("#b_reg_btn2").hide();
+		}else{
+			$("#b_cont_btn2").hide();
+			$("#b_reg_btn2").show();
+		}
+	}
+}
+
+function deleteFile(str){
+	if(!confirm("정말 삭제하시겠습니까?")) return;
+	if(str=='bank'){
+		$("input[name='calcu_file_hidden']").val('');
+		upload_btn_cont('bank');
+	}else{
+		$("input[name='info_file_hidden']").val('');
+		upload_btn_cont('busi');
+	}
+	alert("삭제되었습니다.");
+}
+
+function viewFile(str){
+	var filenm = "";
+	if(str=='bank'){
+		filenm = $("input[name='calcu_file_hidden']").val();
+	}else{
+		filenm = $("input[name='info_file_hidden']").val();
+	}
+	if(!filenm) return;
+	window.open("/data/provider/"+filenm,"","");
+}
+
+function selladmin_login(){
+	document.selladminLoginForm.submit();
+}
+
+function set_calcu_day(){
+	var select_obj = $("select[name='calcu_count']");
+	var cnt = select_obj.find("option:selected").val();
+	var td_obj = select_obj.closest("td").next();
+	var calcu_day1 = '{calcu_day}';
+	var calcu_day2 = '{calcu_day2}';
+	var calcu_day3 = '{calcu_day3}';
+	var calcu_day4 = '{calcu_day4}';
+	td_obj.html('');
+	if(cnt == 4){
+		for(var i=0;i<cnt;i++){
+			if(i==0){
+				td_obj.append("<div><strong>1일 ~ 7일</strong> 사이에 매출(배송완료 기준) 및 환불에 대한 정산금액을 <input type=\"text\" name=\"calcu_day[]\" value=\""+calcu_day1+"\" class=\"line\" maxlength=\"30\" size=\"30\" title=\"예시) 익월 00일에 지급합니다.\" /></div>");
+			}
+			if(i==1){
+				td_obj.append("<div><strong>8일 ~ 14일</strong> 사이에 매출(배송완료 기준) 및 환불에 대한 정산금액을 <input type=\"text\" name=\"calcu_day[]\" value=\""+calcu_day2+"\" class=\"line\" maxlength=\"30\" size=\"30\" title=\"예시) 익월 00일에 지급합니다.\" /></div>");
+			}
+			if(i==2){
+				td_obj.append("<div><strong>15일 ~ 21일</strong> 사이에 매출(배송완료 기준) 및 환불에 대한 정산금액을 <input type=\"text\" name=\"calcu_day[]\" value=\""+calcu_day3+"\" class=\"line\" maxlength=\"30\" size=\"30\" title=\"예시) 익월 00일에 지급합니다.\" /></div>");
+			}
+			if(i==3){
+				td_obj.append("<div><strong>22일 ~ 말일</strong> 사이에 매출(배송완료 기준) 및 환불에 대한 정산금액을 <input type=\"text\" name=\"calcu_day[]\" value=\""+calcu_day4+"\" class=\"line\" maxlength=\"30\" size=\"30\" title=\"예시) 익월 00일에 지급합니다.\" /></div>");
+			}
+		}
+	}else if(cnt == 2){
+		for(var i=0;i<cnt;i++){
+			if(i==0){
+				td_obj.append("<div><strong>1일 ~ 15일</strong> 사이에 매출(배송완료 기준) 및 환불에 대한 정산금액을 <input type=\"text\" name=\"calcu_day[]\" value=\""+calcu_day1+"\" class=\"line\" maxlength=\"30\" size=\"30\" title=\"예시) 익월 00일에 지급합니다.\" /></div>");
+			}
+			if(i==1){
+				td_obj.append("<div><strong>16일 ~ 말일</strong> 사이에 매출(배송완료 기준) 및 환불에 대한 정산금액을 <input type=\"text\" name=\"calcu_day[]\" value=\""+calcu_day2+"\" class=\"line\" maxlength=\"30\" size=\"30\" title=\"예시) 익월 00일에 지급합니다.\" /></div>");
+			}
+		}
+	}else if(cnt == 7){
+		td_obj.append("<div><strong>월요일~일요일</strong> 사이에 매출(배송완료 기준) 및 환불에 대한 정산금액을 <input type=\"text\" name=\"calcu_day[]\" value=\""+calcu_day1+"\" class=\"line\" maxlength=\"30\" size=\"30\" title=\"예시) 다다음주 수요일에 지급합니다.\" /></div>");
+	}else{
+		td_obj.append("<div><strong>1일 ~ 말일</strong> 사이에 매출(배송완료 기준) 및 환불에 대한 정산금액을 <input type=\"text\" name=\"calcu_day[]\" value=\""+calcu_day1+"\" class=\"line\" maxlength=\"30\" size=\"30\" title=\"예시) 익월 00일에 지급합니다.\" /></div>");
+	}
+
+	apply_input_style();
+	$("select[name='deli_group']").change(function(){
+		get_provider_shipping();
+	});
+	get_provider_shipping();
+
+}
+
+function info_policy(){
+	openDialog('안내) 개인정보 보호 법률','admin_policy_info',{'width':800,'height':380});
+}
+
+
+</script>
+<style type="text/css">
+#main_visual_name		{cursor:pointer;}
+#preview_main_visual	{position:absolute;border:1px solid #e4e4e4;
+						z-index:1000;background-color:#ffffff;display:none;}
+table.change_password tr th {font-weight:normal;padding-right:10px;text-align:right;}
+</style>
+<form name="selladminLoginForm" method="post" action="../../selleradmin/login_process/login" target="_blank">
+
+<input type="hidden" name="provider_seq" value="{provider_seq}"/>
+
+<input type="hidden" name="superadmin_login" value="1" />
+<input type="hidden" name="out_login" value="1" />
+<input type="hidden" name="main_id" value="{provider_id}" />
+<input type="hidden" name="main_pwd" value="-" />
+</form>
+
+<!-- { ? provider_seq } -->
+<form name="settingForm" method="post" enctype="multipart/form-data" action="../provider_process/provider_modify" target="actionFrame">
+<input type="hidden" name="provider_seq" value="{provider_seq}"/>
+<!-- { : } -->
+<form name="settingForm" method="post" enctype="multipart/form-data" action="../provider_process/provider_reg" target="actionFrame">
+<!-- { / } -->
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+		{? provider_id }
+			<h2>{? provider_gb=='provider'}입점(업체){:}입점(본사){/} – {provider_id}</h2>
+			<select name="provider_status" class="status-isY">
+				<option value="Y" class="status-isY">정상 (판매활동가능)</option>
+				<option value="N" class="status-isN">종료 (판매활동불가)</option>
+			</select>
+		{ : }
+			<h2>입점사 등록</h2>
+			<input type="hidden" name="provider_status" value="N">
+			<span> - 최초 등록 시 입점사 상태는 '종료(판매활동불가)'이며, 입점사 등록 후 '정상(판매활동가능)'상태로 변경 가능합니다.</span>
+		{ / }
+		</div>
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large white"><button type="button" onclick="document.location.href='provider';">입점사 리스트<span class="arrowright"></span></button></span></li>
+		</ul>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			{?provider_id}
+			<li><span class="btn large"><button type="button" onclick="selladmin_login()">입점사관리자 로그인</button></span></li>
+			{/}
+			<li><span class="btn large black"><button type="submit">저장하기<span class="arrowright"></span></button></span></li>
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- { ? provider_seq } -->
+
+<br style="line-height:20px;" />
+
+<div class="provider-statistic">
+	<table class="statistic-headbar" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="10"><img src="/admin/skin/default/images/design/statsbar_bg_f.gif" /></td>
+		<td class="head-title">
+			이 판매자의
+			<select name="provider_statistic"><!--class="statistic-select-title"-->
+				<option value="order">실매출</option>
+				<option value="account">정산금액(예정+확정)</option>
+				<option value="charge">수수료</option>
+				<option value="mshop">단골미니샵</option>
+			</select>
+		</td>
+		<td class="head-rbtn">↓ 열기</td>
+		<td width="10"><img src="/admin/skin/default/images/design/statsbar_bg_b.gif" /></td>
+	</tr>
+	</table>
+	<div class="statistics_area" style="display:none;"></div>
+</div>
+
+<!-- { / } -->
+
+
+<div class="slc-body">
+
+<!-- { ? provider_seq } -->
+	<div class="item-title">입점판매자의 미니샵</div>
+	<table width="100%" class="info-table-style">
+	<col width="13%" /><col width="37%" /><col width="13%" /><col />
+	<tr>
+		<th class="its-th">단골 미니샵</th>
+		<td class="its-td">
+			누적 <a href="../member/catalog?provider_seq={provider_seq}&provider_name={provider_name}" target="_blank"><span class="red">{=number_format(mshop_cnt)}</span></a>명
+			{?!minishop_service_limit}
+			<span class="btn small"><button type="button" onclick="window.open('{mshop_url}');">미니샵 바로가기</button></span>
+			{/}
+		</td>
+		<th class="its-th">미니샵 이미지</th>
+		<td class="its-td">
+			<!--{ ? main_visual }-->
+				<input type="hidden" name="del_main_visual" value="n" />
+				<input type="hidden" name="org_main_visual" value="{main_visual}" />
+				<span id="main_visual_name">{main_visual_name}</span>
+				<span id="btn_deletevidual" class="btn small black"><button type="button" class="deleteVisual">삭제하기</button></span>
+				<div id="preview_main_visual"><img src="{main_visual}" /></div>
+			<!--{ : }-->
+				<span id="main_visual_name"></span>
+				<div id="preview_main_visual"></div>
+			<!--{ / }-->
+			<input type="hidden" name="main_visual" value="" />
+			<span class="btn small lightblue"><button type="button" class="registMshopVisualimage">이미지 등록</button></span>
+		</td>
+	</tr>
+	</table>
+	<div class="clearbox"></div>
+<!-- { / } -->
+
+	<div class="item-title">기본</div>
+	<table width="100%" class="info-table-style">
+	<col width="16" /><col width="19%" />
+	<col width="13%" /><col width="19%" />
+	<col width="13%" /><col width="19%" />
+	<tr>
+		<th class="its-th">최초 입점일</th>
+		<td class="its-td">{regdate}</td>
+		<th class="its-th">최근 접속일</th>
+		<td class="its-td">{lastlogin_date}</td>
+		<th class="its-th">최근 변경(정상/종료)일</th>
+		<td class="its-td">{update_date}</td>
+	</tr>
+	<tr>
+		<th class="its-th">구분 <span class="goods_required"></span></th>
+		<td class="its-td">
+			<select name="provider_gb">
+				<option value="">= 선택하세요 =</option>
+				<option value="provider">입점(업체)</option>
+				<option value="company">입점(본사)</option>
+			</select>
+		</td>
+		<th class="its-th">입점사(업체)명 <span class="goods_required"></span></th>
+		<td class="its-td" colspan="3"><input type="text" name="provider_name" value="{provider_name}" class="line" /></td>
+	</tr>
+	<tr>
+		<th class="its-th">입점사 ID <span class="goods_required"></span></th>
+		<td class="its-td">
+			{? provider_id }
+			{provider_id}
+			{ : }
+			<input type="text" name="provider_id" value="{provider_id}" class="line" />
+			<span class="btn small gray"><button type="button" id="id_chk">중복확인</button></span>
+			{ / }
+		</td>
+		<th class="its-th">판매등급</th>
+		<td class="its-td" colspan="3">
+			<select name="pgroup_seq">			
+			{@ pgroup_list}
+			<option value="{=.pgroup_seq}" {? pgroup_seq == .pgroup_seq || (!pgroup_seq && .pgroup_seq==1)}selected{/}>{=.pgroup_name}</option>
+			{/}
+			</select>
+			{? pgroup_date && pgroup_date != "0000-00-00 00:00:00"} <span style="color:#569a75;font-size:11px;line-height:28px;">(변경일 : {=pgroup_date})</span> {/}
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">입점사 비밀번호 <span class="goods_required"></span>{? provider_id }
+			<label><input type="checkbox" name="passwd_chg" value="Y" /> 변경</label>
+			{ / }
+			<div style="height:3px;"></div>
+			<span class="btn small orange"><button type="button" onclick="info_policy();">안내) 정보보호 법률</button></span>			
+			</th>
+		<td class="its-td" colspan="5">
+			{? provider_id }
+			<span id="r_pass" {? provider_id }style="display:none;"{ : }style="display:block;"{ / }>
+			<table class="change_password">
+				<tr>
+					<th class="left">현재 비밀번호</td>
+					<td>
+						<input type="password" name="manager_password" value="" class="line" />
+					</td>
+					<td id="msg_passwd">
+						<span class="desc">해당 입점사의 현재 비밀번호를 대신 현재 로그인된 관리자 비밀번호를 입력하세요.</span>
+					</td>
+				</tr>
+				<tr>
+					<th  class="left">비밀번호 변경</td>
+					<td><input type="password" name="provider_passwd" class="line" /></td>
+					<td id="msg_passwd" rowspan="2">
+						<span class="desc">
+						* 10-20자, 영문 대소문자 또는 숫자, 특수문자 중 2가지 이상 조합<br>
+						* 사용 가능 특수문자 : ! # $ % & ( ) * + - / : < = > ? @ [ ＼ ] ^ _ { | } ~ 
+						</span>
+					</td>
+				</tr>
+				<tr>
+					<th  class="left">비밀번호 변경 확인</td>
+					<td ><input type="password" name="re_provider_passwd" class="line" /></td>
+				</tr>
+			</table>
+			</span>
+			{ : }
+			<table class="change_password">
+				<tr>
+					<th  class="left">비밀번호</td>
+					<td><input type="password" name="provider_passwd" class="line" /></td>
+					<td id="msg_passwd" rowspan="2">
+						<span class="desc">
+						* 10-20자, 영문 대소문자 또는 숫자, 특수문자 중 2가지 이상 조합<br>
+						* 사용 가능 특수문자 : ! # $ % & ( ) * + - / : < = > ? @ [ ＼ ] ^ _ { | } ~ 
+						</span>
+					</td>
+				</tr>
+				<tr>
+					<th  class="left">비밀번호 확인</td>
+					<td><input type="password" name="re_provider_passwd" class="line" /></td>
+				</tr>
+			</table>
+			{ / }
+		</td>
+	</tr>
+	</table>
+
+	<div class="clearbox"></div>
+	<div class="item-title">
+		관리자 로그인 보안
+	</div>
+
+	<table width="100%" class="info-table-style">
+	<col width="15%" /><col width="35%" /><col width="15%" /><col width="35%" />
+	<tr>
+		<th class="its-th">비밀번호 변경</th>
+		<td class="its-td">
+			비밀번호 변경 후 90일 경과 시 비밀번호 변경 자동 안내
+		</td>
+		<th class="its-th">자동 로그아웃</th>
+		<td class="its-td">
+			미사용
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">접속허용 IP</th>
+		<td class="its-td">
+		{? managerInfo.manager_yn=='Y' }	
+			<label><input type="checkbox" name="ip_chk" value="Y" {? limit_ip }checked{ / }/>아래의 IP에서만 관리자 접속<label><br>
+			<table id="ipViewTable">
+			{? !limit_ip}
+				<tr>
+					<td>
+					<input type="text" name="limit_ip1[]" value="" class="line limit_ip" size=4 maxlength=3/>.
+					<input type="text" name="limit_ip2[]" value="" class="line limit_ip" size=4 maxlength=3/>.
+					<input type="text" name="limit_ip3[]" value="" class="line limit_ip" size=4 maxlength=3/>.
+					<input type="text" name="limit_ip4[]" value="" class="line limit_ip" size=4 maxlength=3/>
+					<span class="btn-plus"><button type="button" id="ipAdd"></button></span>
+					</td>
+				</tr>
+
+			{:}
+			{@limit_ip}
+				<tr>
+					<td>
+					<input type="text" name="limit_ip1[]" value="{.value_[0]}" class="line limit_ip" size=4 maxlength=3/>.
+					<input type="text" name="limit_ip2[]" value="{.value_[1]}" class="line limit_ip" size=4 maxlength=3/>.
+					<input type="text" name="limit_ip3[]" value="{.value_[2]}" class="line limit_ip" size=4 maxlength=3/>.
+					<input type="text" name="limit_ip4[]" value="{.value_[3]}" class="line limit_ip" size=4 maxlength=3/>
+					{? .index_ == 0}
+					<span class="btn-plus"><button type="button" id="ipAdd"></button></span>
+					{:}
+					<span class="btn-minus"><button type="button" id="ipDel"></button></span>
+					{/}
+					</td>
+				</tr>
+			{/}
+			{/}
+			</table>
+		{:}
+			{? !limit_ip}
+			제한없음
+			{:}
+			{@limit_ip}
+				{.value_[0]}.{.value_[1]}.{.value_[2]}{? .value_[3]}.{.value_[3]}{:}.0~255{/}
+				<br>
+			{/}
+			{/}
+		{/}
+		</td>
+		<th class="its-th">휴대폰 인증</th>
+		<td class="its-td">
+		{? managerInfo.manager_yn=='Y' }
+			<label><input type="checkbox" name="hp_chk" value="Y" {? auth_hp }checked{ / }/><label>
+			<input type="text" name="auth_hp" value="{auth_hp}" class="line auth_hp"/>으로 핸드폰 인증 시 관리자 접속
+		{:}
+			{? !auth_hp}
+				인증없음
+			{:}
+				{auth_hp}으로 핸드폰 인증 시 관리자 접속
+			{/}
+		{/}
+			<div class="desc">1일 1회 1기기에 한해 인증 필요, 문자 잔여건수가 없을 경우 미동작</div>
+		</td>
+	</tr>
+	</table>
+
+	<div class="clearbox"></div>
+	<div class="item-title">
+		관리자 환경 메뉴 상단에 표기되는 처리 업무 건수 표기
+	</div>
+	<table width="100%" class="info-table-style">
+	<col width="15%" /><col width="35%" /><col width="15%" /><col width="35%" />
+	<tr>
+		<th class="its-th">주문</th>
+		<td class="its-td">
+			최근
+			{noti_acount_priod.order}일
+			동안 처리해야 할 주문 건수 표시
+			<div class="desc">※ 입금, 출고, 출고완료, 배송완료, 반품회수</div>
+		</td>
+		<th class="its-th">게시판</th>
+		<td class="its-td">
+			최근
+			{noti_acount_priod.board}일
+			동안 처리해야 할 게시물 건수 표시
+			<div class="desc">※ 상품문의</div>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">정산</th>
+		<td class="its-td" colspan="3">
+			최근
+			{noti_acount_priod.account}일
+			동안 처리해야 할 정산 건수 표시
+		</td>
+	</tr>
+	</table>
+
+	{?service_code != 'P_ADVL'}
+	<div class="clearbox"></div>
+	<div class="item-title">
+		쿠폰(티켓)상품 확인코드
+		<span class="desc">매장 직원이 쿠폰(티켓)을 확인할 때 반드시 입력해야 하는 확인코드입니다.
+		<span class="red">외부에 유출되지 않도록 유의하십시오.</span></span>
+	</div>
+	<table width="100%" class="info-table-style">
+	<colgroup>
+		<col width="15%" />
+		<col />
+		<col width="40%" />
+	</colgroup>
+	<tr>
+		<th class="its-th center" style="padding:0;">
+			사용 확인코드
+			<br/>
+			<span class="red" >(판매자-매장간의 정산 기준)</span>
+		</th>
+		<td class="its-td" id="cerfify_manager">
+			{ ? certify}
+				{ @ certify }
+			<div>
+				<input type="hidden" name="certify_seq[]" value="{.seq}" size="10" class="line" />
+				<input type="text" name="manager_name[]" value="{.manager_name}" size="45" class="line" title="해당 확인코드를 사용하는 매장 정보를 입력하세요." />
+				<input type="hidden" name="certify_code_chk[]" value="ok" />
+				<input type="text" name="certify_code[]" value="{.certify_code}" size="50" class="line" title="확인코드 (6자리 이상. 16자리 이하 영문 또는 숫자)" />
+				<span class="btn small black"><button type="button" class="certify_btn">인증</button></span>
+					{ ? .index_ > 0 }
+				<span class="btn-minus btnplusminus"><button type="button" class="delManager"></button></span>
+					{ : }
+				<span class="btn-plus btnplusminus"><button type="button" id="addManager"></button></span>
+					{ / }
+				<span class="btn small cyanblue"><button type="button" class="manager_sms_send">매장 담당자에게 SMS 보내기</button></span>
+			</div>
+				{ / }
+			{ : }
+			<div>
+				<input type="hidden" name="certify_seq[]" value="" size="10" class="line" />
+				<input type="text" name="manager_name[]" value="" size="45" class="line" title="해당 확인코드를 사용하는 매장 정보를 입력하세요." />
+				<input type="hidden" name="certify_code_chk[]" value="" />
+				<input type="text" name="certify_code[]" value="" size="50" class="line" title="확인코드 (6자리 이상. 16자리 이하 영문 또는 숫자)" />
+				<span class="btn small black"><button type="button" class="certify_btn">인증</button></span>
+				<span class="btn-plus btnplusminus"><button type="button" id="addManager"></button></span>
+				<span class="btn small cyanblue"><button type="button" class="manager_sms_send">매장 담당자에게 SMS 보내기</button></span>
+			</div>
+			{ / }
+		</td>
+	</tr>
+
+	<tr>
+		<th class="its-th center" style="padding:0;">안내</th>
+		<td class="its-td" >
+			<table width="80%"  class="center  desc" >
+			<tr>
+				<td width="150"><img src="/admin/skin/default/images/design/coupon_code_help_buyers.jpg" />
+				<div class="desc"> 스마트폰 or 쿠폰번호 제시</div>
+				</td>
+				<td   ><img src="/admin/skin/default/images/design/coupon_code_depth.jpg" /></td>
+				<td width="150" ><img src="/admin/skin/default/images/design/coupon_code_help_burial.jpg" />
+				<div class="desc"> 확인코드로 쿠폰 사용 확인</div>
+				</td>
+				<td  ><img src="/admin/skin/default/images/design/coupon_code_depth.jpg" /></td>
+				<td width="100"  valign="bottom"  class="left desc" >
+				<ul style="list-style:disc;" >
+					<li> 확인코드</li>
+					<li> 사용 매장(장소)</li>
+					<li> 사용 횟수(금액)</li>
+					<li> 사용 일시</li>
+					<li> 메모</li>
+				</ul>
+				사용 내역 자동 저장
+				</td>
+				<td ><img src="/admin/skin/default/images/design/coupon_code_depth.jpg" /></td>
+				<td width="150" valign="bottom" class="left  desc" >
+				<div class="info-table-style">
+					판매 상품에 정의된<br/>
+					해당 매장의 수수료를 <br/>
+					차감한 금액을 정산
+				</div><br/>
+				판매자-매장간 정산
+				</td>
+			</tr>
+			</table>
+			<!-- <div>쿠폰상품 사용 확인 방법 안내</div>
+			<div>1. 구매자의 스마트폰(모바일)에서 바로 쿠폰 사용을 확인할 수 있습니다.</div>
+			<div>2. 직원이 판매 관리자로 로그인하여 쿠폰 사용을 확인 할 수 있습니다.</div> -->
+		</td>
+	</tr>
+	</table>
+	{/}
+
+	<div class="clearbox"></div>
+	<div class="item-title">정산</div>
+	<table width="100%" class="info-table-style">
+	<col width="13%" /><col width="37%" />
+	<col width="13%" /><col width="37%" />
+	<tr>
+		<th class="its-th">기본 수수료 <span class="goods_required"></span><br>
+		<span class="btn small cyanblue"><button type="button" id="calcu_set">세팅</button></span></th>
+		<td class="its-td">
+			<input type="hidden" name="charge" value="{charge}"/>
+			<div id="calcu_div">
+				기본 : {charge}%
+				{@ charge_loop }
+				<div>{.title}({.category_code}) : {.charge}%</div>
+				<input type="hidden" name="brand_ch[]" value="{.category_code}|{.title}"> <input type="hidden" name="brand_per[]" value="{.charge}">
+				{ / }
+			</div>
+		</td>
+
+		<th class="its-th">입금계좌 정보</th>
+		<td class="its-td">
+			<table>
+				<tr>
+					<td>
+						은행 / 예금주
+					</td>
+					<td class="pdl5">
+						<input type="text" name="calcu_bank" value="{calcu_bank}" class="line" size="12"/> / <input type="text" name="calcu_name" value="{calcu_name}" class="line" size="10"/>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						계좌번호
+					</td>
+					<td class="pdl5">
+						<input type="text" name="calcu_num" value="{calcu_num}" class="line" />
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						계좌사본
+					</td>
+					<td class="pdl5">
+						<input type="hidden" name="calcu_file_hidden" value="{calcu_file}">
+						<span class="btn small black" id="b_reg_btn"><button type="button" id="bankBtn">등록하기</button></span>
+						<span id="b_cont_btn" class="hide"><a href="javascript:viewFile('bank');">보기</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:deleteFile('bank');">삭제</a></span>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+
+		<th class="its-th">정산기간 <span class="goods_required"></span></th>
+		<td class="its-td" colspan="3">
+			<div id="week_account" class="hide pd5">
+				이전 주에 배송완료된 출고,반품 환불 건을 이주에 정산 합니다.
+			</div>
+			<div id="mon_account" class="pd5">
+			<table>
+				<tr>
+					<td>
+					<select name="calcu_count" onchange="set_calcu_day();">
+						{@calcu_count_limit}
+						<option value='{.value_}' {?calcu_count == .value_} selected{/}>월 {.value_}회</option>
+						{/}
+						<!--<option value='7' {?account_period_type=='week_account'} selected{/}>7일</option>-->
+					</select>
+					</td>
+					<td class="pdl10">
+						<div>1일 ~ 말일에 배송이 완료된 매출에 대한 정산금액을 <input type="text" name="calcu_day[]" value="{calcu_day}" class="line" size="30" title="예시) 익월 00일에 지급합니다." /></div>
+					</td>
+				</tr>
+			</table>
+			</div>
+		</td>
+
+
+	</tr>
+	</table>
+
+	<div class="clearbox"></div>
+	<div class="item-title" style="width:92%">국내 - 기본 배송정책
+	<!--{ ? provider_seq }-->
+	<span class="desc" style="font-weight:normal">본 입점사는
+	<select name="deli_group">
+		<option value="provider">입점사 배송</option>
+		<option value="company">본사 배송</option>
+	</select>
+	 으로 입점사의 상품을 입점사에서 배송합니다.</span>
+	</div>
+	<div id="providershipping"></div>
+	<!--{ : }-->
+	</div>
+	<div class="clearbox" style="padding:3px;">
+		<table width="100%" class="info-table-style">				
+			<thead>
+			
+			<tr>
+			<th class="its-th-align center" rowspan="2">실물 배송 정책</th>
+			<th class="its-th-align center" rowspan="2">배송 방법</th>
+			<th class="its-th-align center" rowspan="2">사용 여부</th>
+			<th class="its-th-align center" colspan="4">배송비 계산</th>
+			</tr>
+			<tr>
+			<th class="its-th-align center">택배사</th>
+			<th class="its-th-align center">지정 상품 기준</th>
+			<th class="its-th-align center">실 결제금액 기준</th>				
+			<th class="its-th-align center">추가 배송 
+			{? _GET.provider_seq > 1}
+			<span class="btn small gray"><button type="button" class="modifyDeliveryButton" title="국내 – 택배 추가배송비" name="add_delivery">세팅</button></span>
+			{ / }
+			</th>
+			</tr>
+			
+		
+			</thead>
+			<tbody>
+			<tr>
+				<td class="its-td-align center" colspan="7">입점사 등록 후 세팅하실 수 있습니다.</td>
+			</tr>
+		</table>
+	</div>
+	<div class="item-title" style="width:100%">보내는 곳 주소 및 반송 주소</div>
+	<table width="100%" class="info-table-style">
+	<col width="200" /><col width="" /><col width="200" /><col width="" />
+	<tr>
+		<th class="its-th">보내는 곳 주소</th>
+		<td class="its-td-align center" rowspan="2">		
+			입점사 등록 후 세팅하실 수 있습니다.			
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">반송 주소</th>		
+	</tr>
+	</table>
+	<!--{ / }-->
+
+	<div class="clearbox"></div>
+	<div class="item-title">사업자</div>
+	<table width="100%" class="info-table-style">
+	<col width="13%" /><col width="21%" />
+	<col width="13%" /><col width="20%" />
+	<col width="13%" /><col width="20%" />
+	<tr>
+		<th class="its-th">상호</th>
+		<td class="its-td"><input type="text" name="info_name" value="{info_name}" class="line"/></td>
+		<th class="its-th">사업자등록번호</th>
+		<td class="its-td"><input type="text" name="info_num" value="{info_num}" class="line"/></td>
+		<th class="its-th">대표자</th>
+		<td class="its-td"><input type="text" name="info_ceo" value="{info_ceo}" class="line"/></td>
+	</tr>
+	<tr>
+		<th class="its-th">주민(법인)번호</th>
+		<td class="its-td">
+			<label><input type="radio" name="info_type" value="개인" {? info_type=='개인' || !info_type }checked{ / }>개인</label>
+			<label><input type="radio" name="info_type" value="법인" {? info_type=='법인' }checked{ / }>법인</label>
+			<input type="text" name="info_type_num" value="{info_type_num}" class="line"/></td>
+		<th class="its-th">업태/업종</th>
+		<td class="its-td"><input type="text" name="info_item" value="{info_item}" class="line" size="10"/>/<input type="text" name="info_status" value="{info_status}" class="line" size="10"/></td>
+		<th class="its-th">사업자등록증 사본</th>
+		<td class="its-td">
+			<input type="hidden" name="info_file_hidden" value="{info_file}">
+
+			<span class="btn small black" id="b_reg_btn2"><button type="button" id="busiBtn">등록하기</button></span>
+			<span id="b_cont_btn2" class="hide"><a href="javascript:viewFile('busi');">보기</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:deleteFile('busi');">삭제</a></span>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">사업장 주소</th>
+		<td class="its-td" colspan="5">
+
+			<input type="hidden" name="info_address_type" value="{info_address1_type}" />
+			<table border="0">
+				<col width="100" /><col />
+				<tr>
+					<td colspan="2">
+					<input type="text" name="info_zipcode[]" value="{info_zipcode[0]}" size="5" class="line" /> - <input type="text" name="info_zipcode[]" value="{info_zipcode[1]}" size="5" class="line" />
+					<span class="btn small"><input type="button" id="infoZipcodeButton" value="우편번호" /></span>
+					</td>					
+				</tr>
+				<tr>
+					<td>
+					<span {? info_address1_type != "street"}style="font-weight:bold;"{/}>(지번)</span> 
+					</td>
+					<td>
+					<input type="text" name="info_address" value="{info_address1}" size="80" class="line" />
+					</td>
+				</tr>				
+				<tr>
+					<td>
+					<span {? info_address1_type == "street"}style="font-weight:bold;"{/}>(도로명)</span> 
+					</td>
+					<td>
+					<input type="text" name="info_address_street" value="{info_address1_street}" size="80" class="line" />
+					</td>
+				</tr>
+				<tr>
+					<td>
+					(공통상세) 
+					</td>
+					<td>
+					<input type="text" name="info_address2" value="{info_address2}" size="80" class="line" />
+					</td>
+				</tr>
+			</table>		
+		</td>
+	</tr>
+	</table>
+
+	<div class="clearbox"></div>
+	<div class="item-title">
+		담당자
+		<span class="desc" style="color:red;margin-left:10px;">판매자(입점사)는 자신의 실물상품과 쿠폰상품이 판매되면 그 사실을 SMS로 알 수 있습니다. 수신 여부는 통신판매중계자와 협의 해 주십시오</span>
+	</div>
+	<table width="100%" class="info-table-style">
+	<colgroup>
+		<col width="16%" /><col width="28%" />
+		<col width="28%" /><col width="28%" />
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="its-th center" style="padding-left:0;">입점사 물류 담당자<br/>SMS 수신</th>
+		<th class="its-th center" style="padding-left:0;">실물 상품</th>
+		<th class="its-th center" style="padding-left:0;">쿠폰 상품</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<th class="its-th center" style="padding-left:0;">결제확인</th>
+		<td class="its-td center" style="padding-left:0;">입점사의 실물 상품이 판매되면 → 입점사에게도 SMS통보</td>
+		<td class="its-td center" style="padding-left:0;">입점사의 쿠폰 상품이 판매되면 → 입점사에게도 SMS통보</td>		
+	</tr>
+	<tr>
+		<th class="its-th center" style="padding-left:0;">배송완료</th>
+		<td class="its-td center" style="padding-left:0;">입점사의 실물 상품이 배송완료 처리되면 → 입점사에게도 SMS통보</td>
+		<td class="its-td center" style="padding-left:0;">입점사의 쿠폰 상품이 사용되면 → 입점사에게도 SMS통보</td>		
+	</tr>
+	</tbody>
+	</table>	
+	<br style="line-height:15px;" />
+	<table width="100%" class="info-table-style">
+	<col width="13%" /><col width="15%" />
+	<col width="13%" /><col width="15%" />
+	<col width="13%" /><col />
+	<tr>
+		<th class="its-th">물류 담당자 (1)</th>
+		<td class="its-td"><input type="text" name="ds1_name" value="{ds1.name}" class="line"/></td>
+		<th class="its-th">물류 담당자 이메일</th>
+		<td class="its-td"><input type="text" name="ds1_email" value="{ds1.email}" class="line"/></td>
+		<th class="its-th">물류 담당자 연락처</th>
+		<td class="its-td">
+			<input type="text" name="ds1_phone" value="{ds1.phone}" class="line" title="전화번호"/>/
+			<input type="text" name="ds1_mobile" value="{ds1.mobile}" class="line" title="핸드폰번호"/>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">물류 담당자 (2)</th>
+		<td class="its-td"><input type="text" name="ds2_name" value="{ds2.name}" class="line"/></td>
+		<th class="its-th">물류 담당자 이메일</th>
+		<td class="its-td"><input type="text" name="ds2_email" value="{ds2.email}" class="line"/></td>
+		<th class="its-th">물류 담당자 연락처</th>
+		<td class="its-td">
+			<input type="text" name="ds2_phone" value="{ds2.phone}" class="line" title="전화번호"/>/
+			<input type="text" name="ds2_mobile" value="{ds2.mobile}" class="line" title="핸드폰번호"/>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">CS 담당자</th>
+		<td class="its-td"><input type="text" name="cs_name" value="{cs.name}" class="line"/></td>
+		<th class="its-th">CS 담당자 이메일</th>
+		<td class="its-td"><input type="text" name="cs_email" value="{cs.email}" class="line"/></td>
+		<th class="its-th">CS 담당자 연락처</th>
+		<td class="its-td">
+			<input type="text" name="cs_phone" value="{cs.phone}" class="line" title="전화번호"/>/
+			<input type="text" name="cs_mobile" value="{cs.mobile}" class="line" title="핸드폰번호"/>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">담당MD</th>
+		<td class="its-td"><input type="text" name="md_name" value="{md.name}" class="line"/></td>
+		<th class="its-th">담당MD 이메일</th>
+		<td class="its-td"><input type="text" name="md_email" value="{md.email}" class="line"/></td>
+		<th class="its-th">담당MD 연락처</th>
+		<td class="its-td">
+			<input type="text" name="md_phone" value="{md.phone}" class="line" title="전화번호"/>/
+			<input type="text" name="md_mobile" value="{md.mobile}" class="line" title="핸드폰번호"/>
+		</td>
+	</tr>
+	<tr>
+		<th class="its-th">정산 담당자</th>
+		<td class="its-td"><input type="text" name="calcus_name" value="{calcu.name}" class="line"/></td>
+		<th class="its-th">정산 담당자 이메일</th>
+		<td class="its-td"><input type="text" name="calcus_email" value="{calcu.email}" class="line"/></td>
+		<th class="its-th">정산 담당자 연락처</th>
+		<td class="its-td">
+			<input type="text" name="calcus_phone" value="{calcu.phone}" class="line" title="전화번호"/>/
+			<input type="text" name="calcus_mobile" value="{calcu.mobile}" class="line" title="핸드폰번호"/>
+		</td>
+	</tr>
+	</table>
+
+	<div class="clearbox"></div>
+
+	<div style="padding:10px;"></div>
+
+	<table class="info-table-style" style="width:100%">
+	<colgroup>
+		<col width="50%" />
+		<col width="50%" />
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="its-th-align center" >관리 메모 (본사용)</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td valign="top" align="right" style="border:1px solid #cccccc; background:#f7f7f7">
+			<textarea name="admin_memo" style="width:99%; padding:10px 0px; height:72px; border:0px;background-color:transparent">{admin_memo}</textarea>
+		</td>
+	</tr>
+	</tbody>
+	</table>
+
+	<div style="padding:10px;"></div>
+
+	<table class="info-table-style" style="width:100%">
+	<colgroup>
+		<col width="50%" />
+		<col width="50%" />
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="its-th-align center" >처리 내역</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+		<td valign="top">
+			<div style="overflow:auto;height:60px;width:98%;border:1px solid #cccccc;padding: 10px 5px;background:#f7f7f7">{provider_log}</div>
+		</td>
+	</tr>
+	</tbody>
+	</table>
+
+
+</div>
+
+
+</form>
+
+
+<!-- 아이콘 선택 -->
+<div id="calcuPopup" style="display:none;">
+	<form name="calcuRegist" id="calcuRegist" method="post" action="" enctype="multipart/form-data"  target="actionFrame">
+
+	<table width="100%" cellpadding="0" id="brand_table">
+	<tr>
+		<td>
+			<!-- <span class="btn-plus"><button type="button" id="etcAdd"></button></span> --> 기본 <input type="text" name="brand_charge" value="{charge}" size="5" class="line"/>%</td>
+	</tr>
+	<!--
+	<tr>
+		<td>
+			<span class="btn-minus"><button type="button" id="etcDel"></button></span>
+			<select name="brand[]">
+				<option value="">= 선택해주세요 =</option>
+				{@ brand }
+				<option value="{.category_code}|{.title}">{.title}</option>
+				{ / }
+			</select>
+			<input type="text" name="brand_charge[]" value="" size="5" class="line"/>%
+		</td>
+	</tr>
+	-->
+	</table>
+	<ul>
+		<li style="text-align:center;padding-top:10px;"><span class="btn large cyanblue"><input type="button" value="저장하기" id="calcu_select"><span class="arrowright"></span></button></span></li>
+		</li>
+	</ul>
+	</form>
+</div>
+
+<div id="shippingModifyPopup" style="display:none"></div>
+
+<div id="bankPopup" style="display:none;">
+	<form name="iconRegist" id="iconRegist" method="post" action="" enctype="multipart/form-data"  target="actionFrame">
+
+	<input type="file" name="calcu_file" id="calcu_file" class="line"/>
+
+	<div style="padding:10px;" class="center">
+	<span class="btn large black"><input type="button" value="저장하기" onclick="calcuFileUpload();"/></button></span>
+	</div>
+	</form>
+</div>
+
+
+<div id="busiPopup" style="display:none;">
+	<form name="iconRegist2" id="iconRegist2" method="post" action="" enctype="multipart/form-data"  target="actionFrame">
+
+	<input type="file" name="busi_file" id="busi_file" class="line"/>
+
+	<div style="padding:10px;" class="center">
+	<span class="btn large black"><input type="button" value="저장하기" onclick="busiFileUpload();"/></button></span>
+	</div>
+	</form>
+</div>
+
+<div id="sendPopup" class="hide"></div>
+<div id="admin_policy_info" class="hide">
+	개인정보의 기술적, 관리적 보호조치 기준에 의거(「정보통신망 이용촉진 및 정보보호 등에 관한 법률」(이하 “법”이라 한다) <br>
+	제28조제1항 및 같은 법 시행령 제15조제6항)에 따른 방통위 고시 제2012-50호<br>
+	<br>
+	다음 각 목의 문자 종류 중 2종류 이상을 조합하여 최소 10자리 이상 또는 3종류 이상을 조합하여 최소 8자리 이상의 길이로 구성<br>
+	가. 영문 대문자(26개)<br>
+	나. 영문 소문자(26개)<br>
+	다. 숫자(10개)<br>
+	라. 특수문자(32개)<br>
+	<br>
+	<hr>
+	<br>
+	상기 정보통신망 이용촉진 및 정보보호 등에 관한 법률에 따른 방통위 시행령에 따라 <br>
+	개인정보 관리 책임자의 비밀번호는 10자 이상의 영문 대소문자 또는 숫자, 특수문자 중 <br>
+	2가지 이상을 조합해서 만들어야 하며 주기적(90일)으로 변경을 하셔야 합니다.
+	<br><br>
+	<div class="center">
+		<span class="btn large black"><button type="button" onclick="closeDialog('admin_policy_info');">확인</button></span>
+	</div>
+</div>
+
+{ #layout_footer }

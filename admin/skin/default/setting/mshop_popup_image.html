@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>이미지 첨부</title>
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/editor/css/popup.css" />
+<link rel="stylesheet" type="text/css" href="/app/javascript/plugin/jquploadify/uploadify.css" />
+<script type="text/javascript" src="/app/javascript/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/swfobject.js"></script>
+<script type="text/javascript" src="/app/javascript/plugin/jquploadify/jquery.uploadify.v2.1.4.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+//한글도메인체크@2013-03-12
+var fdomain = document.domain;
+var krdomain = 'http://{config_system.subDomain}';
+var kordomainck = false;
+for(i=0; i<fdomain.length; i++){
+ if (((fdomain.charCodeAt(i) > 0x3130 && fdomain.charCodeAt(i) < 0x318F) || (fdomain.charCodeAt(i) >= 0xAC00 && fdomain.charCodeAt(i) <= 0xD7A3)))
+{
+	kordomainck = true;
+	break;
+}
+}
+if( !kordomainck ){
+krdomain = '';
+}
+//]]>
+</script>
+<script type="text/javascript">
+var _mockdata;
+
+$(function(){
+	var setting = {
+		'script'			: krdomain+'/admin/provider_process/upload_file',
+	    'uploader'			: '/app/javascript/plugin/jquploadify/uploadify.swf',
+	    'buttonImg'			: '/app/javascript/plugin/jquploadify/uploadify-search.gif',
+	    'cancelImg'			: '/app/javascript/plugin/jquploadify/uploadify-cancel.png',
+	    'fileTypeExts'		: '*.jpg;*.gif;*.png;*.jpeg',
+	    'fileTypeDesc'		: 'Image Files (.JPG, .GIF, .PNG)',
+	    'fileSizeLimit'		: '10MB',
+	    'removeCompleted'	: false,
+		'width'				: 64,
+		'height'			: 20,
+		'folder'			: '/data/tmp',
+	    'auto'				: true,
+	    'multi'				: false,
+	    'scriptData'		: {'provider_seq':'{_GET.no}','provider_id':'{_GET.id}'},
+	    'completeMsg'		: '첨부 가능',
+	    'onComplete'		: function (event, ID, fileObj, response, data) {
+			$data = eval(response)[0];
+			$result_value	= $data.newFile + $data.ext;
+			$("#result_filename").val($result_value);
+			$("#result_fileext").val($data.ext);
+		},
+		'onError'			: function (event,ID,fileObj,errorObj) {
+			alert(errorObj.type + ' Error: ' + errorObj.info);
+		}
+	};
+
+	$("#uploader").uploadify(setting);
+});
+
+function openerAdd(){
+	if	($("#result_filename").val()){
+		$result_value	= $("#result_filename").val();
+		$("input[name='{_GET.target}']", opener.document).val($result_value);
+
+		if	($("#{_GET.target}_name", opener.document)){
+			$filename	= '{_GET.id}_visual'+$("#result_fileext").val();
+			$("#{_GET.target}_name", opener.document).html($filename);
+		}
+
+		if	($("#preview_{_GET.target}", opener.document))
+			$("#preview_{_GET.target}", opener.document).html('<img src="'+$result_value+'" />');
+	}
+
+	window.self.close();
+}
+</script>
+
+</head>
+<body>
+<input type="hidden" id="result_filename" value="" />
+<input type="hidden" id="result_fileext" value="" />
+<div class="wrapper">
+	<div class="header">
+		<h1>이미지 첨부</h1>
+	</div>
+	<div class="body">
+		<dl class="alert">
+		    <dt>이미지 첨부 확인</dt>
+		    <dd>
+				<div><input type="file" id="uploader" /></div>
+			</dd>
+		</dl>
+	</div>
+	<div class="footer">
+		<p><a onclick="window.self.close();" title="닫기" class="close" style="cursor:pointer;">닫기</a></p>
+		<ul>
+			<li class="submit" style="cursor:pointer;"><a onclick="openerAdd();" title="등록" class="btnlink" >등록</a> </li>
+			<li class="cancel" style="cursor:pointer;"><a onclick="window.self.close();" title="취소" class="btnlink">취소</a></li>
+		</ul>
+	</div>
+
+</div>
+</body>
+</html>

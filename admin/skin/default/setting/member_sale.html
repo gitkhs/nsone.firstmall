@@ -1,0 +1,366 @@
+
+<!-- 회원설정 : 등급 -->
+<script type="text/javascript">
+
+function sale_write(){
+	{? config_system.service.max_member_sale_cnt > use_member_sale_cnt}
+
+	$.get('member_sale_write', function(data) {
+		$('#gradePopup').html(data);
+		openDialog("혜택 세트 만들기", "gradePopup", {"width":"100%","height":"700"});
+	});
+
+	{:}
+
+	$.get('member_payment?type=full&totalCnt={config_system.service.max_member_sale_cnt}', function(data) {
+		$('#PaymentPopup').html(data);
+		openDialog("등급별 구매혜택 세트 추가 신청", "PaymentPopup", {"width":"800","height":"650"});
+	});
+	{/}
+
+}
+
+function member_account_log(){
+	$.get('member_account_log', function(data) {
+		$('#PaymentPopup').html(data);
+		openDialog("결제내역", "PaymentPopup", {"width":"800","height":"650"});
+	});
+}
+
+
+function goods_select_method(){
+	openDialog("상품별 구매혜택", "goodsSelectMethod", {"width":"800","height":"400"});
+}
+
+function member_sale_payment(){
+
+	$.get('member_payment', function(data) {
+		$('#PaymentPopup').html(data);
+		openDialog("등급별 구매혜택 세트 추가 신청", "PaymentPopup", {"width":"800","height":"650"});
+	});
+
+}
+
+function sale_modify(sale_seq){
+	$.get('member_sale_write?sale_seq='+sale_seq, function(data) {
+
+		$('#gradePopup').html(data);
+		openDialog("혜택 세트 수정하기", "gradePopup", {"width":"100%","height":"700"});
+	});
+}
+
+function sale_del(sale_seq, sale_title){
+	$.get('../setting/member_sale_delete?sale_seq='+sale_seq, function(data) {
+
+		$('#gradePopup').html(data);
+		openDialog("세트 삭제", "gradePopup", {"width":"600","height":"250"});
+	});
+}
+$(document).ready(function() {
+	$("button[name='grade_help']").bind("click",function(){
+		openDialog("회원등급별 구매혜택 세트 안내", "grade_help", {"width":1000,"height":450});
+	});
+	apply_input_style();
+
+	// 상단 매뉴얼 링크 변경 leewh 2014-10-01
+	$(".page-manual-btn a").attr('href','http://manual.firstmall.kr/html/manual.php?category=010020');
+});
+
+
+$('#board_charge').live('click', function (){
+});
+
+
+</script>
+
+<br style="line-height:10px;" />
+<div class="center" style="padding-left:20px;width:100%;text-align:center;">
+	<div style="border:2px #528fd0 solid;padding:10px;width:95%;">
+		<table width="100%">
+		<tr>
+		<td align="left" style="padding-top:10px;">
+			<span style="font-size:16px; font-family:Dotum; font-weight:bold; color:#000000;">
+				현재, <font color="#ff0000">최대 {config_system.service.max_member_sale_cnt}개</font>의 구매혜택 세트를 설정하여 → 구매자(비회원 및 회원)별 구매 혜택을 각각의 상품마다 부여할 수 있습니다.<br>
+			</span>
+			<div style="padding-top:16px;"></div>
+			· 기본 세트 : <b>{default_member_sale_cnt}</b>개 ({config_system.service.name}무료제공)<br>
+			<div style="padding-top:3px;"></div>
+			· 추가 세트 : <b>{config_system.service.max_member_sale_cnt - default_member_sale_cnt}</b>개 <span class="btn small cyanblue"><input type="button" value="결제내역"  {? isdemo.isdemo }  {isdemo.isdemojs1} {:} onclick="member_account_log();" {/}  style="width:100px;"></span><br>
+			<div style="padding-top:3px;"></div>
+			· 이용 세트 : <b>{use_member_sale_cnt}</b>개 (잔여 <b>{config_system.service.max_member_sale_cnt - use_member_sale_cnt}</b>개)
+			<div style="padding-top:20px;"></div>
+			{? service_code == "P_FREE"}
+			<span style="font-size:12px; font-family:Dotum; color:#979797;">※ 구매 혜택 세트를 2개 이상으로 운영하시려면 프리미엄몰Plus+(기본 세트 3개) 또는 독립몰Plus+(기본 세트 5개)로 업그레이드 하세요. <span class="btn small cyanblue"><input type="button" value="업그레이드" onclick="openDialog('쇼핑몰 업그레이드 안내<span class=\'desc\'></span>', 'nofreeService', {'width':600,'height':200});" style="width:100px;"></span><br>
+			{/}
+			※ {? service_code == "P_FREE"}또는 {/}구매 혜택 세트(세트 1개당 22,000원 : 최초 1회 결제 후 계속 사용 가능)를 추가해 주세요. <span class="btn small cyanblue" style="padding-left:20px;"><input type="button" value="혜택 세트 추가"  {? isdemo.isdemo }  {isdemo.isdemojs1} {:} onclick="member_sale_payment();" {/} style="width:100px;"></span>
+			</span>
+		</td>
+		</tr>
+		</table>
+	</div>
+	<br style="line-height:20px;" />
+</div>
+
+
+<div class="item-title">회원등급별 구매혜택 
+<span class="desc" style="font-weight: normal;">- 아래의 세트를 상품에서 선택하여 상품마다 회원등급별 혜택을 정할 수 있습니다. 
+<span class="btn small orange"><input type="button" value="안내) 상품별 구매혜택 지정 방법" onclick="goods_select_method();"></span>
+<span class="btn small orange addsaleGuideBtn "><button type="button" class="hand" >안내) 추가 혜택 적용 범위</button></span>
+</span> 
+</div>
+<input type="hidden" name="grade_mode"/>
+
+<table width="100%" class="info-table-style">
+<col width="40" /><col width="100" /><col width="80" /><col width="80" />{ @ loop }<col width="" />{ / }
+
+<tr>
+	<th class="its-th-align center" rowspan="2" colspan="4">세트 종류</th>
+	<th class="its-th-align" colspan="{gcount}">등급</th>
+</tr>
+
+<tr>
+	{ @ loop }
+	<th class="its-th-align center">{.group_name}</th>
+	{ / }
+</tr>
+{ ? data }
+{ @ data }
+<tr>
+	<td rowspan="8" class="its-td-align center">{.totalcount - ._no + 1}</td>
+	<td rowspan="8" class="its-td-align center">[{.sale_seq}]{.sale_title}<br><span class="btn small cyanblue"><button onclick="sale_modify('{.sale_seq}');">수정</button></span>{? .index_ > 0 || _GET.page > 1}<br><span class="btn small red"><input type="button" id="sale_del_btn" onclick="sale_del('{.sale_seq}', '{.sale_title}');" value="삭제"></span>{/}</td>
+	<td rowspan="4" class="its-td-align center">추가할인</td>
+	<td class="its-td-align center">조건 <span class="helpicon" title="{상품 할인가(판매가) x 수량}+{좌동}+…{좌동}의 합이 얼마 이상일 때만 추가할인"></td>
+	{ @ .loop }
+	<td class="its-td-align center">{? .value_[..group_seq].sale_use}{.value_[..group_seq].sale_use}{:}조건없음{/}</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">할인 <span class="helpicon" title="상품 할인가(판매가) x 수량 x % = 추가할인 금액"></span></td>
+	{ @ .loop }
+	<td class="its-td-align center">{? .value_[..group_seq].sale_price}{.value_[..group_seq].sale_price} {.value_[..group_seq].sale_price_type}{:}0% 할인{/}</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">추가옵션 <span class="helpicon" title="추가상품 할인가(판매가) x 수량 x % = 추가할인 금액"></span></td>
+	{ @ .loop }
+	<td class="its-td-align center">{? .value_[..group_seq].sale_option_price}{.value_[..group_seq].sale_option_price} {.value_[..group_seq].sale_option_price_type}{:}0% 할인{/}</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">예외</td>
+	<td class="its-td-align" colspan="{.gcount}" style="padding-left:5px;">
+		<!--{ @ .issuegoods }-->
+		<!--{ ? ..type == 'sale' }-->
+		<div class='goods' style='float:left;'>
+		<div align='center' class='image'>
+			<img class="goodsThumbView" alt="" src="{=viewImg(..goods_seq,'thumbView')}" width="50" height="50">
+		</div>
+		<div align='center' class='name' style='width:80px;overflow:hidden;white-space:nowrap;'>{..goods_name}</div>
+		<div align='center' class='price'>{=number_format(..price)}</div>
+		</div>
+		<!--{ / }-->
+		<!--{ / }-->
+
+		<!--{ @ .issuecategorys }-->
+		<!--{ ? ..type == 'sale' }-->
+		<div style='padding:5px;'>
+		<span style='display:inline-block;width:300px'>{..title}</span>
+		</div>
+		<!--{ / }-->
+		<!--{ / }-->
+	</td>
+</tr>
+
+<tr>
+	<td rowspan="4" class="its-td-align center">추가적립</td>
+	<td class="its-td-align center">조건 <span class="helpicon" title="{상품 할인가(판매가) x 수량}+{좌동}+…{좌동}의 합이 얼마 이상일 때만 추가적립"></span></td>
+	{ @ .loop }
+	<td class="its-td-align center">{? .value_[..group_seq].point_use}{.value_[..group_seq].point_use}{:}조건 없음{/}</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">포인트 <span class="helpicon" title="실 결제금액 x % = 추가포인트 금액"></span></td>
+	{ @ .loop }
+	<td class="its-td-align center">{? .value_[..group_seq].point_price}{.value_[..group_seq].point_price} {.value_[..group_seq].point_price_type}{:}0원 적립{/}</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">적립금 <span class="helpicon" title="실 결제금액 x % = 추가적립금 금액"></span></td>
+	{ @ .loop }
+	<td class="its-td-align center">{? .value_[..group_seq].reserve_price}{.value_[..group_seq].reserve_price} {.value_[..group_seq].reserve_price_type}{:}0원 적립{/}</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">예외</td>
+	<td class="its-td-align" colspan="{.gcount}" style="padding-left:5px;">
+		<!--{ @ .issuegoods }-->
+		<!--{ ? ..type == 'emoney' }-->
+		<div class='goods' style='float:left;'>
+		<div align='center' class='image'>
+			<img class="goodsThumbView" alt="" src="{=viewImg(..goods_seq,'thumbView')}" width="50" height="50">
+		</div>
+		<div align='center' class='name' style='width:70px;overflow:hidden;white-space:nowrap;'>{..goods_name}</div>
+		<div align='center' class='price'>{=number_format(..price)}</div>
+		</div>
+		<!--{ / }-->
+		<!--{ / }-->
+
+		<!--{ @ .issuecategorys }-->
+		<!--{ ? ..type == 'emoney' }-->
+		<div style='padding:5px;'>
+		<span style='display:inline-block;width:300px'>{..title}</span>
+		</div>
+		<!--{ / }-->
+		<!--{ / }-->
+	</td>
+</tr>
+{ / }
+{ : }
+<tr>
+	<td rowspan="8" class="its-td-align center">기본할인<br><span class="btn small cyanblue"><button onclick="sale_write();">수정</button></span></td>
+	<td rowspan="4" class="its-td-align center">추가할인</td>
+	<td class="its-td-align center">조건 <span class="helpicon" title="{상품 할인가(판매가) x 수량}+{좌동}+…{좌동}의 합이 얼마 이상일 때만 추가할인"></span></td>
+	{ @ loop }
+	<td class="its-td-align center">조건 없음</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">할인 <span class="helpicon" title="상품 할인가(판매가) x 수량 x % = 추가할인 금액"></span></td>
+	{ @ loop }
+	<td class="its-td-align center">0% 할인</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">추가옵션 <span class="helpicon" title="추가상품 할인가(판매가) x 수량 x % = 추가할인 금액"></span></td>
+	{ @ loop }
+	<td class="its-td-align center">0% 할인</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">예외</td>
+	<td class="its-td-align" colspan="{gcount}" style="padding-left:5px;">예외 없음</td>
+</tr>
+
+<tr>
+	<td rowspan="4" class="its-td-align center">추가적립</td>
+	<td class="its-td-align center">조건 <span class="helpicon" title="{상품 할인가(판매가) x 수량}+{좌동}+…{좌동}의 합이 얼마 이상일 때만 추가적립"></span></td>
+	{ @ loop }
+	<td class="its-td-align center">조건 없음</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">적립금 <span class="helpicon" title="실 결제금액 x % = 추가적립금 금액"></span></td>
+	{ @ loop }
+	<td class="its-td-align center">0% 적립</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">포인트 <span class="helpicon" title="실 결제금액 x % = 추가포인트 금액"></span></td>
+	{ @ loop }
+	<td class="its-td-align center">0% 적립</td>
+	{ / }
+</tr>
+<tr>
+	<td class="its-td-align center">예외</td>
+	<td class="its-td-align" colspan="{gcount}" style="padding-left:5px;">예외 없음</td>
+</tr>
+{ / }
+
+</table>
+
+
+<!-- paging start -->
+<div class="paging_navigation" style="margin:auto;">
+<!--{ ? page.first }-->
+<a href="/admin/setting/member?gb=member_sale&page={page.first}">
+<input type="button" class="first btn" /></a>&nbsp;
+<!--{ / }-->
+<!--{ ? page.prev }-->
+<a href="/admin/setting/member?gb=member_sale&page={page.prev}" class="prev">
+<input type="button" class="prev btn" /></a>&nbsp;
+<!--{ / }-->
+<!--{ @ page.page }-->
+<!--{ ? page.nowpage ==  .value_ }-->
+<a class="on red">{.value_ }</a>&nbsp;
+<!--{ : }-->
+<a href="/admin/setting/member?gb=member_sale&page={.value_}">{.value_ }</a>&nbsp;
+<!--{ / }-->
+<!--{ / }-->
+<!--{ ? page.next }-->
+<a href="/admin/setting/member?gb=member_sale&page={page.next}" class="next">
+<input type="button" class="next btn " /></a>&nbsp;
+<!--{ / }-->
+<!--{ ? page.last }-->
+<a href="/admin/setting/member?gb=member_sale&page={page.last}"><input type="button" class="end btn" /></a>
+<!--{ / }-->
+</div>
+<!-- paging end -->
+
+<div style="padding-top:30px;"></div>
+
+
+
+
+<div id="grade_help" style="display:none;">
+<table width="100%" class="info-table-style">
+<col width="70" /><col width="70" /><col width="80" /><col width="160" /><col width="" />
+
+<tr>
+	<th class="its-th-align center" colspan="3">세트 종류</th>
+	<th class="its-th-align" colspan="2">등급 별 세팅안내</th>
+</tr>
+<tr>
+	<td rowspan="8" class="its-td-align center">세트명</td>
+	<td rowspan="4" class="its-td-align center">추가할인</td>
+	<td class="its-td-align center">조건</td>
+	<td class="its-td-align left" style="padding-left:5px;">얼마 이상 구매 시 추가 할인</td>
+	<td class="its-td-align left" style="padding-left:5px;">조건 구매금액 계산식 : 구매금액 = <span style="color:red;">&#123;상품 할인가(판매가) x 수량&#125;+&#123;좌동&#125;+&#123;좌동&#125;</span></td>
+</tr>
+<tr>
+	<td class="its-td-align center">할인</td>
+	<td class="its-td-align left" style="padding-left:5px;">기본 상품의 추가 할인금액</td>
+	<td class="its-td-align left" style="padding-left:5px;">상품별 추가 할인금액 계산식 : 상품 추가할인 금액 = 상품 할인가(판매가) x 수량 x 할인%</td>
+</tr>
+<tr>
+	<td class="its-td-align center">추가옵션</td>
+	<td class="its-td-align left" style="padding-left:5px;">추가 상품의 추가 할인금액</td>
+	<td class="its-td-align left" style="padding-left:5px;">추가 상품별 추가 할인금액 계산식 : 추가 상품 추가할인 금액 = 추가 상품 할인가(판매가) x 수량 x 할인%</td>
+</tr>
+<tr>
+	<td class="its-td-align center">예외</td>
+	<td class="its-td-align left" style="padding-left:5px;">추가할인 제외 상품</td>
+	<td class="its-td-align left" style="padding-left:5px;">추가 할인이 적용되지 않아야 하는 예외 상품을 상품 또는 카테고리로 선정하여 등록할 수 있습니다.</td>
+</tr>
+
+<tr>
+	<td rowspan="4" class="its-td-align center">추가적립</td>
+	<td class="its-td-align center">조건</td>
+	<td class="its-td-align left" style="padding-left:5px;">얼마 이상 구매 시 추가 적립</td>
+	<td class="its-td-align left" style="padding-left:5px;">조건 구매금액 계산식 : 구매금액 = <span style="color:red;">&#123;상품 할인가(판매가) x 수량&#125;+&#123;좌동&#125;+&#123;좌동&#125;</span></td>
+</tr>
+<tr>
+	<td class="its-td-align center">적립금</td>
+	<td class="its-td-align left" style="padding-left:5px;">추가 적립금 금액</td>
+	<td class="its-td-align left" style="padding-left:5px;">상품별 추가 적립금 계산식 : 추가 적립금 금액 = 상품 실결제금액 x 추가적립금%<br>※ 상품 실결제금액 = <span style="color:red;">&#123;상품 할인가(판매가) x 수량&#125;</span> – 할인(쿠폰/프로모션코드/등급/Like/모바일)</td>
+</tr>
+<tr>
+	<td class="its-td-align center">포인트</td>
+	<td class="its-td-align left" style="padding-left:5px;">추가 포인트 금액</td>
+	<td class="its-td-align left" style="padding-left:5px;">상품별 추가 포인트 계산식 : 추가 포인트 금액 = 상품 실결제금액 x 추가포인트%<br>※ 상품 실결제금액 = <span style="color:red;">&#123;상품 할인가(판매가) x 수량&#125;</span> – 할인(쿠폰/프로모션코드/등급/Like/모바일)</td>
+</tr>
+<tr>
+	<td class="its-td-align center">예외</td>
+	<td class="its-td-align left" style="padding-left:5px;">추가적립 제외 상품</td>
+	<td class="its-td-align left" style="padding-left:5px;">추가 할인이 적용되지 않아야 하는 예외 상품을 상품 또는 카테고리로 선정하여 등록할 수 있습니다.</td>
+</tr>
+</table>
+
+</div>
+
+<div id="gradePopup"></div>
+<div id="PaymentPopup" class="hide"></div>
+<div id="goodsSelectMethod" class="hide">
+	<center>
+		<img src="../images/design/bnfset_i_slct.gif">
+	</center>
+</div>

@@ -1,0 +1,461 @@
+{ #layout_header_popup }
+
+<script type="text/javascript">
+$(document).ready(function() {
+	// IFRAME RESIZING
+	$("#container", parent.document).height($(document).height()+100);
+
+	// CHECKBOX COUNT
+	parent.chkMemberCount();
+	parent.searchMemberCount();
+
+	if(parent.$("input[name='type']").val()=='select'){
+		$("input[name='member'][value='select']").attr('checked','checked');
+	}
+
+	// ADD SMS FORM
+	$("#add_sms_form").click(function(){
+		openDialog("보관 메시지 추가", "add_sms_popup", {"width":"300","height":"300","show" : "fade","hide" : "fade"});
+		$("#sms_form_group").val('');
+		$("input[name='album_seq']").val('');
+		$("#sms_form_text").val('');
+	});
+	//
+	$(".mod_form").live("click",function(){
+		openDialog("보관 메시지 수정", "add_sms_popup", {"width":"300","height":"300","show" : "fade","hide" : "fade"});
+		$("#sms_form_group").val($(this).parents().find("textarea").attr("codecd"));
+		$("input[name='album_seq']").val($(this).attr("seq"));
+		$("#sms_form_text").val($(this).parents().find("textarea").val());
+		send_byte_chk($("#sms_form_text"));
+
+	});
+	$(".del_form").live("click",function(){
+		parent.actionFrame.location.href = "../member_process/delete_smsform?seq="+$(this).attr("seq");
+	});
+
+
+	// SMS "+" CLICK
+	$("#send_to_add_btn").click(function(){
+		var cellphoneNo = $("input[name='send_to_add']").val();
+		var bool = true;
+		if(cellphoneNo){
+			$("select[name='send_to_list'] option").each(function(e, data) {
+				if(data.value == cellphoneNo) bool = false;
+			});
+
+			if(bool){
+				$("select[name='send_to_list']").append("<option value='"+cellphoneNo+"'>"+cellphoneNo+"</option>");
+				$("input[name='send_to_add']").val('');
+			} else {
+				alert("동일한 번호가 입력되어 있습니다.");
+				return true;
+			}
+		}
+		sendMemberSum();
+	});
+	// SMS "-" CLICK
+	$("#send_to_del_btn").click(function(){
+		$("select[name='send_to_list'] option:selected").remove();
+	});
+
+
+
+	// POPUP SMS ADD FORM
+	$("#add_sms_group").click(function(){
+		$("#sms_form_id").show();
+		$("select[name='sms_form_group']").attr('disabled',true);
+		$("input[name='sms_form_name']").attr('disabled',false);
+	});
+	$("#del_sms_group").click(function(){
+		$("#sms_form_id").hide();
+		$("select[name='sms_form_group']").attr('disabled',false);
+		$("input[name='sms_form_name']").attr('disabled',true);
+	});
+
+	// SPECIAL CHARACTER
+	$("#special_cont").click(function(){
+		if($("#special_view").css("display")=='none') $("#special_view").show();
+		else $("#special_view").hide();
+	});
+	$(".special_char").click(function(){
+		var str = $("#send_message").val();
+		$("#send_message").val(str+$(this).attr('conts'));
+		send_byte_chk($("#send_message"));
+	});
+
+	// MEMBER COUNT
+	$("input[name='add_num_chk']").click(function(){
+		sendMemberSum();
+	});
+	$("input[name='member']").click(function(){
+		if($(this).val()=='excel'){
+			//parent.openDialog("SMS 엑셀 등록", "excel_popup", {"width":"300","height":"350","show" : "fade","hide" : "fade"});
+			$.get('../member_process/getExcelPopup', function(data) {
+				parent.$('#excel_popup').html(data);
+				parent.openDialog("SMS 엑셀 등록 <span class='desc'>&nbsp;</span>", "excel_popup", {"width":"300","height":"350"});
+			});
+		}
+		sendMemberSum();
+	});
+
+
+	$("#send_submit").click(function(){
+		$("input[name='send_num']").val($("#send_member").attr("count"));
+
+		var cellNoList = "";
+		$("select[name='send_to_list'] option").each(function(e, data) {
+			cellNoList += ","+String(data.value);
+		});
+		$("input[name='send_to']").val(cellNoList);
+
+		var serialize = "";
+		{?table=='fm_goods_restock_notify'}
+			if($("input[name='member']:checked").val()=='select'){
+				parent.$("input:checkbox[name='restock_notify_seq[]']:checked").each(function(){
+					serialize += ","+this.value;
+				});
+			}else if($("input[name='member']:checked").val()=='search'){
+				serialize = parent.$('#goodsForm').serialize();
+			}
+		{:}
+			if($("input[name='member']:checked").val()=='select'){
+				parent.$("input:checkbox[name='member_chk[]']:checked").each(function(){
+					serialize += ","+this.value;
+				});
+			}else if($("input[name='member']:checked").val()=='search'){
+				serialize = parent.$('#memberForm').serialize();
+			}
+		{/}
+		$("input[name='serialize']").val(serialize);
+
+		$("#send_submit_span").hide();
+		$(".sms_form_table").css({'opacity':'0.5'}).activity({segments: 8, steps: 3, width: 7, space: 1, length: 3, color: '#000', speed: 1.5});
+
+
+		document.smsForm.submit();
+	});
+
+	sms_form_container();
+
+	if ("{chk}" == ''){
+		$.get('../member_process/getAuthPopup?type=B', function(data) {
+		  	$('#authPopup').html(data);
+			openDialog("SMS 인증번호 <span class='desc'>&nbsp;</span>", "authPopup", {"width":"800","height":"200"});
+		});
+		return;
+	}
+
+	$("#sms_charge").click(function(){
+		parent.location.href = "/admin/member/sms_charge";
+	});
+
+
+	$("textarea.sms_contents").live('keyup change',function(){
+		send_byte_chk(this);
+	});
+
+	$(".del_message").click(function(){
+		$(this).parent().parent().parent().find("textarea.sms_contents").val('').change();
+	});
+
+	send_byte_chk($("#send_message"));
+});
+
+function sms_loading_stop(){
+	$(".sms_form_table").css({'opacity':'1'}).activity(false);
+	$("#send_submit_span").show();
+}
+
+// SEND MEMBER COUNT - IFRAME CONTROLLER
+function sendMemberSum(){
+	var add_cnt = $("select[name='send_to_list'] option").size();
+	var chk = $("input:radio[name='member']:checked").val();
+	var chk_cnt = 0;
+	if(chk=='all'){
+		chk_cnt = $("input:radio[name='member']:checked").attr("count");
+	}else if(chk=='search'){
+		chk_cnt = parent.$("input[name='searchcount']").val();
+	}else if(chk=='excel'){
+		chk_cnt = 0;
+	}else if(chk=='select'){
+		{?table=='fm_goods_restock_notify'}
+		chk_cnt = parent.$("input:checkbox[name='restock_notify_seq[]']:checked").length;
+		{:}
+		chk_cnt = parent.$("input:checkbox[name='member_chk[]']:checked").length;
+		{/}
+	}
+
+	var add_chk = $("input[name='add_num_chk']").attr('checked');
+	if(add_chk=='checked'){
+		chk_cnt = 0;
+	}
+	var total = parseInt(add_cnt) + parseInt(chk_cnt);
+	$("#send_member").attr("count",total);
+	$("#send_member").html(total);
+}
+
+function sms_form_container(){
+	var pageNumber = $("input[name='page']").val();
+	var queryString = $('#smsForm').serialize();
+	$.ajax({
+		type: 'post',
+		url: '../member_process/getSmsForm',
+		data: queryString + '&perpage=4&page=' + pageNumber,
+		dataType: 'json',
+		success: function(data) {
+			$('#sms_form_container').html(data);
+
+			$('#sms_form_container .sms_contents').each(function(){
+				send_byte_chk(this);
+			});
+
+		}
+	});
+	sendMemberSum();
+}
+
+//
+function loadSmsForm(value){
+	$("input[name='category']").val(value);
+	$("input[name='page']").val('');
+	sms_form_container();
+}
+
+function send_byte_chk(textareaObj){
+
+	var str = $(textareaObj).val();
+	$(textareaObj).parent().find(".send_byte").html(chkByte(str));
+
+	//var str = $("#send_message").val();
+	//$("#send_byte").html(chkByte(str));
+}
+
+function chkByte(str){
+	var cnt = 0;
+	for(i=0;i<str.length;i++) {
+		cnt += str.charCodeAt(i) > 128 ? 2 : 1;
+		if(str.charCodeAt(i)==10) cnt++;
+	}
+	return cnt;
+}
+</script>
+
+<style>
+.scrollbox03{ font-size: 12px;  overflow:auto;  padding:0px;  border:1px;  border-style:solid;border-color:#d1d1d1;scrollbar-face-color: #ffffff; scrollbar-highlight-color: #f7f7f7; scrollbar-shadow-color: #B1B1B1; scrollbar-3dlight-color: #B1B1B1; scrollbar-arrow-color: #A1A1A1;
+scrollbar-darkshadow-color: #ffffff; width:95%;}
+</style>
+
+<form name="smsForm" id="smsForm" method="post" target="actionFrame" action="{action}">
+<input type="hidden" name="table" value="{table}" />
+<input type="hidden" name="page" value="{_GET.page}"/>
+<input type="hidden" name="category"/>
+<input type="hidden" name="send_num"/>
+<input type="hidden" name="send_to"/>
+<input type="hidden" name="serialize"/>
+
+<a name="sms_form"></a>
+
+<!-- 주문리스트 테이블 : 시작 -->
+<table class="info-table-style sms_form_table" cellspacing="0" width="100%">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="230" />
+		<col width="/" />
+		<col width="270" />
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="its-section-bg" colspan="3">SMS 전송 [보유 SMS건수 : {count}건] <span class="btn small cyanblue"><button type="button" id="sms_charge">충전</button></span></th>
+	</tr>
+	<tr>
+		<th class="its-section-bg">받는 사람</th>
+		<th class="its-section-bg">보낸 메시지 (기존 보관 메시지 선택할 수 있습니다)</th>
+		<th class="its-section-bg">전송</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody>
+		<td class="its-td" style="padding:10px;padding-left:10px;" valign="top">
+
+		<!-- ### RECEIVE USER FORM -->
+		<table width="100%" cellspacing="0">
+		{?table=='fm_goods_restock_notify'}
+		<tr>
+			<td>
+				<label><input type="radio" name="member" value="search" checked/>검색된 요청건 (<span id="search_member">0</span>명)</label>
+				<span class="desc">단 통보된 요청건 제외</span><br />
+				<label><input type="radio" name="member" value="select"/>선택된 요청건 (<span id="selected_member">0</span>명)</label><br>
+			</td>
+		</tr>
+		{:}
+		<tr>
+			<td>
+				<label><input type="radio" name="member" value="all"   count="{mInfo.total}"/>전체 회원 ({mInfo.total}명)</label><br>
+				<label><input type="radio" name="member" value="search"/>검색된 회원 (<span id="search_member">0</span>명)</label><br>
+				<label><input type="radio" name="member" value="select"  checked="checked" />선택된 회원 (<span id="selected_member">0</span>명)</label><br>
+				<!--
+				<label><input type="radio" name="member" value="excel"/>엑셀파일등록</label><br>
+				-->
+			</td>
+		</tr>
+		{/}
+
+		{?table!='fm_goods_restock_notify'}
+		<tr>
+			<td>
+				<table width="100%" cellspacing="0">
+				<tr>
+					<td width="120"><input type="text" name="send_to_add" style="width:113px;"></td>
+					<td><span class="btn small gray"><button type="button" id="send_to_add_btn">+</button></span></td>
+				</tr>
+				<tr>
+					<td><select name="send_to_list" size="8" class="scrollbox03" style="width:123px;"></select></td>
+					<td valign="top"><span class="btn small gray"><button type="button" id="send_to_del_btn">-</button></span></td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<label><input type="checkbox" name="add_num_chk" value="Y">추가번호만 보냄</label>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		{/}
+		</table>
+
+		</td>
+		<td style="padding:10px;" valign="top">
+
+		<!-- ### RECEIVE MESSAGE FORM -->
+		<table width="100%" cellspacing="0">
+		<tr>
+			<td>
+				<table width="100%" cellspacing="0">
+				<tr>
+					<td valign="top">
+
+						<table width="100%" class="info-table-style">
+						<tr>
+						{@ sms_loop}
+							{?.index_%5==0}</tr><tr>{ / }
+							<td class="its-td-align" style="border-top:1px solid #dddddd;border-right:1px solid #dddddd;text-align:center;width:20%;">{? .index_==0 }<a href="javascript:loadSmsForm('');">{ : }<a href="javascript:loadSmsForm('{.category}');">{ / }{.category}</a> (<b>{.total}</b>)</td>
+						{ / }
+						</tr>
+						</table>
+
+					</td>
+					<td valign="top" align="right">
+					<span class="btn small gray"><button type="button" id="add_sms_form">추가</button></span>
+					<span class="btn small orange"><button type="button" id="special_cont">특수문자</button></span>
+					</td>
+				</tr>
+				</table>
+
+				<div id="special_view" style="position:absolute;width:340px;z-index:100;display:none; margin-left: 200px; margin-top: 0px;border:2px solid #aaaaaa;padding:3px;background-color:#eeffee;">
+				<table cellpadding="5" cellspacing="1" border="0" width="100%">
+				<tr>
+				{@ sms_cont}
+					{?.index_%15==0}</tr><tr>{/}
+					<td align="center"><span class="special_char" conts="{.value_}" style="cursor:pointer;">{.value_}</span></td>
+				{ / }
+				</tr>
+				</table>
+				</div>
+
+			</td>
+		</tr>
+		<tr><td height="10"></td></tr>
+		<tr>
+			<td align="center">
+				<input type="text" name="sms_search" class="line" style="height:12px;"/><span class="btn small gray"><button type="button" id="sms_form">검색</button></span>
+			</td>
+		</tr>
+		<tr><td height="10"></td></tr>
+		<tr>
+			<td align="center">
+
+			<div id="sms_form_container"></div>
+
+			<div id="sms_form_page" style="width:100%;text-align:center;"></div>
+
+			</td>
+		</tr>
+		</table>
+
+		</td>
+		<td style="padding:10px;" valign="top" class="fx11">
+
+			받는사람 : <span id="send_member" count="0">0</span>명<br>
+			보내는사람 : <input type="text" name="send_sms" value="{number}"/><br>
+			<div class="pdt5 pdb5 desc">90 bytes 이상 시 LMS로 발송이 되며 3건이 차감됩니다.<br>
+			문자 작성시 특수문자는 특수문자 버튼을 이용하여 작성하셔야 문자깨짐 및 잘림 현상을 예방할 수 있습니다. 
+			</div>
+
+			<div style="padding:2px;">
+				<div class="sms-define-form">
+					<div class="sdf-head clearbox">
+						<div class="fl"><img src="../images/common/sms_i_antena.gif"></div>
+						<div class="fr"><img src="../images/common/sms_i_battery.gif"></div>
+					</div>
+					<div class="sdf-body-wrap">
+						<div class="sdf-body">
+							<textarea name="send_message" id="send_message" class="sms_contents">{send_message}</textarea>
+							<div class="sdf-body-foot clearbox">
+								<div class="fl"><b id="send_byte" class="send_byte">0</b>byte</div>
+								<div class="fr"><img src="../images/common/sms_btn_send.gif" align="absmiddle" class="del_message" /></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<span class="btn small gray" id="send_submit_span"><button type="button" {? isdemo.isdemo } {isdemo.isdemojs1} {:}   id="send_submit"   {/}>전송</button></span>
+
+		</td>
+	</tbody>
+</table>
+
+</form>
+
+<div id="add_sms_popup" class="hide">
+<form name="popForm" method="post" action="../member_process/sms_process" target="actionFrame">
+<input type="hidden" name="mode" value="sms_form"/>
+<input type="hidden" name="album_seq"/>
+	<table width="100%" cellspacing="0">
+	<tr><td>
+			<select name="sms_form_group" id="sms_form_group">
+				<option value="">= 그룹을 선택하세요 =</option>
+				{@ sms_loop}
+				<option value="{.category}">{.category}</option>
+				{ / }
+			</select> <span class="btn small gray"><button type="button" id="add_sms_group">그룹추가</button></span>
+			<span id="sms_form_id" class="hide"><input type="text" name="sms_form_name"> <span class="btn small gray"><button type="button" id="del_sms_group">취소</button></span></span>
+	</td></tr>
+	<tr><td>
+		<div style="padding:2px;">
+			<div class="sms-define-form">
+				<div class="sdf-head clearbox">
+					<div class="fl"><img src="../images/common/sms_i_antena.gif"></div>
+					<div class="fr"><img src="../images/common/sms_i_battery.gif"></div>
+				</div>
+				<div class="sdf-body-wrap">
+					<div class="sdf-body">
+						<textarea name="sms_form_text" id="sms_form_text"  class="sms_contents"></textarea>
+						<div class="sdf-body-foot clearbox">
+							<div class="fl"><b id="send_byte" class="send_byte">0</b>byte</div>
+							<div class="fr"><img src="../images/common/sms_btn_send.gif" align="absmiddle" class="del_message" /></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</td></tr>
+	</table>
+	<span class="btn small gray center"><button type="button" onclick="document.popForm.submit();">확인</button></span>
+</form>
+</div>
+
+
+<div id="authPopup" class="hide"></div>

@@ -1,0 +1,279 @@
+<script type="text/javascript">
+$(document).ready(function() {
+	 
+	// 바로열기
+	$(".btn-direct-open").toggle(function(){
+		var nextTr = $(this).parent().parent().next();
+		var goods_seq = $(this).parent().parent().find("input[type='checkbox']").val();
+		$.get('batch_option_view_imagehosting?mode=view&no='+goods_seq, function(data) {
+			nextTr.find('div.option_info').html(data);
+		});
+		nextTr.removeClass('hide');
+		$(this).addClass("opened");
+
+		$(this).parent().parent().find(".option_td input,select").each(function(){
+			$(this).attr('disabled',true);
+			$(this).attr('readonly',true);
+		});
+
+	},function(){
+		var nextTr = $(this).parent().parent().next();
+		nextTr.find('div.order_info').html('');
+		nextTr.addClass('hide');
+		$(this).removeClass("opened");
+
+		$(this).parent().parent().find(".option_td input,select").each(function(){
+			$(this).attr('disabled',false);
+			$(this).attr('readonly',false);
+		});
+	});
+
+	/* 이미지 호스팅 일괄 업데이트 팝업*/
+	$("button[name='update_goods_imagehosting']").bind("click",function(){
+		
+		var chk_val = false;
+		$(".chk").each(function(){
+			if( $(this).attr("checked") == "checked" ){
+				chk_val = true;
+			}
+		});
+		{ ? _GET.mode == 'price' || _GET.mode =='goods' }
+		if(!chk_val ){
+		{ : }
+		if(!chk_val && $("select.modify_list:visible").val()=='choice' ){
+		{ / }
+			openDialogAlert('변경할 상품을 선택해 주세요!',400,150,function(){closeDialog('openmarketimghostinglay');},'');
+			return false;
+		}
+
+		openDialog("이미지 호스팅 일괄 업데이트", "openmarketimghostinglay", {"width":525,"height":355});
+	}); 
+
+	//원본이미지 삭제여부
+	$("#imagedelete").bind("click",function(){ 
+		if( $("#imagedelete").is(':checked') ) {
+			openDialogConfirm('원본이미지를 삭제하겠습니까?<br/>삭제된 이미지는 복구 되지 않습니다!',500,160,function(){
+				$("#imagedelete").attr("checked",true);
+			},function(){
+				$("#imagedelete").removeAttr("checked");
+			});
+		}
+	}); 
+
+	/* 이미지 호스팅 일괄업데이트 >개별 이미지호스팅 FTP 일괄업데이트 */
+	$("#imagehostinggoodssave").bind("click",function(){
+		var hostname = $("#imghostinghostname").val();
+		var username	= $("#imghostingusername").val();
+		var password	= $("#imghostingpassword").val(); 
+		
+		if( !hostname || !username || !password ){
+			alert("이미지 호스팅 FTP 정보를 정확히 입력해 주세요!");
+			return;
+		}
+		
+		var chk_val = false;
+		$(".chk").each(function(){
+			if( $(this).attr("checked") == "checked" ){
+				chk_val = true;
+			}
+		});
+		if(!chk_val && $("select.modify_list:visible").val()=='choice' ){
+			openDialogAlert('변경할 상품을 선택해 주세요!',400,150,function(){closeDialog('openmarketimghostinglay');},'');
+			return false;
+		} 
+
+		openDialogConfirm('PC/테블릿용 상품설명정보를를 변경하겠습니까?<br/>변경된 데이터는 복구 되지 않습니다!',500,160,function(){
+				closeDialog('openmarketimghostinglay');
+				loadingStart("body",{segments: 12, width: 15.5, space: 6, length: 13, color: '#000000', speed: 1.5});
+				var search_val = "";
+				{ @ _GET }
+				search_val += "<input type='hidden' name='{.key_}' value='{.value_}'>";
+				{ / }
+				search_val += "<input type='hidden' name='hostname' value='"+hostname+"'>";
+				search_val += "<input type='hidden' name='username' value='"+username+"'>";
+				search_val += "<input type='hidden' name='password' value='"+password+"'>";
+				$("form#goodsForm").append(search_val);
+
+				var f = $("form#goodsForm")[0];
+				f.method = "post";
+				f.target = "actionFrame";
+				f.action = "../goods_process/batch_modify";//_imagehostgin
+				f.submit();
+			},function(){
+		});
+	});
+});
+</script>
+<br class="table-gap" />
+
+<table class="list-table-style" cellspacing="0">
+	<colgroup>
+		<col width="15%" /><!--대상 상품-->
+		<col /><!--아래와 같이 업데이트-->
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>대상 상품</th>
+		<th>아래와 같이 업데이트</th>
+	</tr>
+	</thead>
+</table>
+<table cellspacing="0" width="100%">
+	<col width="15%" /><!--대상 상품-->
+	<col /><!--아래와 같이 업데이트-->
+	<tbody class="ltb if_category">
+		<tr class="list-row" style="height:70px;">
+			<td align="center" class="td">
+			검색된 상품에서  →
+			<select name="modify_list"  class="modify_list">
+				<option value="choice">선택 </option>
+				<option value="all">전체 </option>
+			</select>
+			</td>
+			<td>
+			<table width="100%">
+			<col width="30%"/>
+			<col />
+			<tr>
+			<td valign="top"> 
+				<div style="padding-top:10px">
+				상품 설명 이미지를 이미지 호스팅에 일괄 업로드({imagehostingftp.imagehostingdir} 디렉토리) 합니다.<br/>
+				상품 설명 이미지의 주소(URL)을 이미지 호스팅 주소로 일괄 업데이트 합니다.
+				</div>
+			</td> 
+			</tr>
+			</table>
+			</td>
+		</tr>
+
+	</tbody>
+</table>
+<script type="text/javascript">
+{ ? config_watermark.watermark_type }
+$("input[name='watermark_type'][value='{config_watermark.watermark_type}']").attr('checked',true);
+{ / }
+{ @ config_watermark.watermark_position }
+$("input[name='watermark_position[]'][value='{.value_}']").attr('checked',true);
+{ / }
+</script>
+
+<br class="table-gap" />
+
+<ul class="left-btns clearbox">
+	<li><div style="margin-top:rpx;">
+	<!--{ ? search_yn == 'y' }-->
+	검색 <b>{=number_format(page.totalcount)}</b> 개
+	<!--{ : }-->
+	총 <b>{=number_format(page.totalcount)}</b> 개</div>
+	<!--{ / }-->
+	</li>
+	<li><span class="desc">※ 이용방법 : [검색하기]버튼으로 검색 후 상품정보를 조건 업데이트 하세요!</span></li>
+</ul>
+
+<div class="fr">
+	<div class="clearbox">
+		<ul class="right-btns clearbox">
+		<li><select class="custom-select-box-multi" name="orderby">
+			<option value="goods_seq" {?orderby=='goods_seq'}selected{/}>최근등록순</option>
+			<option value="goods_name" {?orderby=='goods_name'}selected{/}>상품명순</option>
+			<option value="page_view" {?orderby=='page_view'}selected{/}>페이지뷰순</option>
+		</select></li>
+		<li><select  class="custom-select-box-multi" name="perpage">
+			<option id="dp_qty10" value="10" {? perpage == 10 } selected{/} >10개씩</option>
+		</select></li>
+	</ul>
+	</div>
+</div>
+<br style="line-height:2px;" />
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="30" /><!--체크-->   
+		<col width="60" /><!--상품이미지-->
+		<col  /><!--상품명-->
+		<col width="40" /><!--옵션--> 
+		<col width="140" /><!--정가--> 
+		<col width="140" /><!--할인가(판매가)--> 
+		<col width="100" /><!--부가세--> 
+		<col width="140" /><!--재고(가용)--> 
+		<col width="140" /><!--이미지 호스팅 변환-->
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th><input type="checkbox" id="chkAll" /></th> 
+		<th colspan="2">상품명</th>
+		<th>옵션</th>
+		<th>정가</th>
+		<th>할인가(판매가)</th>
+		<th>부가세</th>
+		<th>재고 (가용)</th>
+		<th>이미지 호스팅 변환<br/>
+		<span class="desc">변환갯수/미변환갯수</span>
+		</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb">
+	<!--{? loop }-->
+	<!--{@ loop }-->
+		<tr class="list-row" style="height:70px;">
+			<td align="center"><input type="checkbox" class="chk" name="goods_seq[]" value="{.goods_seq}" /></td>
+			<td align="center"><a href="/goods/view?no={.goods_seq}" target="_blank"><img src="{=viewImg(.goods_seq,'thumbView')}" width="50"></a></td>
+			<td align="left" style="padding-left:10px;">
+				{? .tax=='exempt' && .cancel_type == '1'}
+					<div>
+					<span style="color:red;" class="left" >[비과세]</span>
+					<span class="order-item-cancel-type left" >[청약철회불가]</span>
+					</div>
+				{: .tax=='exempt' }
+					<div>
+					<span style="color:red;" class="left" >[비과세]</span>
+					</div>
+				{: .cancel_type == '1'}
+					<div>
+					<span class="order-item-cancel-type left" >[청약철회불가]</span>
+					</div>
+				{/}
+				{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+			<a href="../goods/regist?no={.goods_seq}" target="_blank">{=getstrcut(.goods_name,80)}</a> <div style="padding-top:5px;">{.catename}</div>
+			</td> 
+			<td align="center"><span class="btn-direct-open"><span class="hide">바로열기</span></span></td>
+			<td class="option_td" style="text-align:right;padding-right:5px;">{=number_format(.consumer_price)}</td>
+			<td class="option_td" style="text-align:right;padding-right:5px;">{=number_format(.price)}</td>
+			<td class="option_td" style="text-align:right;padding-right:5px;">{? .tax=='exempt'}0{:}{=number_format(.price - (.price / 1.1))}{/}</td>
+			<td class="option_td" align="center">{=number_format(.stock)} ({.able_stock})</td>
+			<td style="padding-left:15px;" align="center">
+				{? imagehostingftp.hostname && .convert_image_date > 0 }
+					<span class="hand" alt="이미지 호스팅에 있는 이미지 수" title="이미지 호스팅에 있는 이미지 수" >{=number_format(.convert_image_cnt)}</span> /	<span class="hand"  alt="이미지 호스팅에 없는 이미지 수" title="이미지 호스팅에 없는 이미지 수" >{=number_format(.noconvert_image_cnt)}</span>
+				{:}
+					<span class="gray">한적없음</span>
+				{/}
+			</td>
+		</tr>
+		<tr class="order-list-summary-row hide">
+			<td colspan="9" class="order-list-summary-row-td"><div class="option_info"></div></td>
+		</tr>
+	<!--{ / }-->
+	<!--{ : }-->
+	<tr class="list-row">
+		<td align="center" colspan="9">
+			<!--{ ? search_text }-->
+				'{search_text}' 검색된 상품이 없습니다.
+			<!--{:}-->
+				등록된 상품이 없습니다.
+			<!--{/}-->
+		</td>
+	</tr>
+	<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+</table>
+<!-- 주문리스트 테이블 : 끝 -->
+
+
+{? openmarketuse }
+<div id="openmarketimghostinglay" class="hide">{ #openmarketimghosting }</div>
+{/}

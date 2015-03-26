@@ -1,0 +1,65 @@
+<!--{? managerview.auth_recommend_use == 'Y' }-->
+<div >
+		<!--{? managerview.recommend_type == '3' }--> 
+		<table style="width:300px;margin:auto;border:0px dashed black;padding:5px;"> 
+			<tbody >
+			<tr  align="center">  
+				<td>
+					<div><span class=" idx-recommend1-{seq}">{=number_format(recommend1)}</span></div>
+					<div><span class="icon_recommend1_{seq}_lay{is_recommend}  icon_recommend1_lay{is_recommend} hand"  board_recommend="recommend1"   board_seq="{seq}" board_id="{boardid}" ><img src="{managerview.icon_recommend1_src}" class="icon_recommend1_img" /></span></div>
+					<div {? is_recommend } class="hide" {/} style="margin-top:5px;"><span class="icon_recommend1_lay{is_recommend}  input-recommend-{seq} hand"   board_recommend="recommend1" ><input type="radio" name="input-recommend[{seq}]"   /></span></div>
+				</td>
+				<td>
+					<div><span class=" idx-recommend2-{seq}">{=number_format(recommend2)}</span></div>
+					<div><span class="icon_recommend2_{seq}_lay{is_recommend}  icon_recommend2_lay{is_recommend} hand"  board_recommend="recommend2"   board_seq="{seq}" board_id="{boardid}" ><img src="{managerview.icon_recommend2_src}" class="icon_recommend2_img" /></span></div>
+					<div {? is_recommend } class="hide" {/} style="margin-top:5px;"><span class="icon_recommend2_lay{is_recommend}  input-recommend-{seq} hand"   board_recommend="recommend2" ><input type="radio"  name="input-recommend[{seq}]" /></span></div>
+				</td>
+				<td>
+					<div><span class=" idx-recommend3-{seq}">{=number_format(recommend3)}</span></div>
+					<div><span class="icon_recommend3_{seq}_lay{is_recommend}  icon_recommend3_lay{is_recommend} hand"  board_recommend="recommend3"   board_seq="{seq}" board_id="{boardid}" ><img src="{managerview.icon_recommend3_src}" class="icon_recommend3_img" /></span></div>
+					<div {? is_recommend } class="hide" {/} style="margin-top:5px;"><span class="icon_recommend3_lay{is_recommend}  input-recommend-{seq} hand"   board_recommend="recommend3" ><input type="radio"  name="input-recommend[{seq}]" /></span></div>
+				</td>
+				<td>
+					<div><span class=" idx-recommend4-{seq}">{=number_format(recommend4)}</span></div>
+					<div><span class="icon_recommend4_{seq}_lay{is_recommend}  icon_recommend4_lay{is_recommend} hand"  board_recommend="recommend4"   board_seq="{seq}" board_id="{boardid}" ><img src="{managerview.icon_recommend4_src}" class="icon_recommend4_img" /></span></div>
+					<div {? is_recommend } class="hide" {/} style="margin-top:5px;"><span class="icon_recommend4_lay{is_recommend}  input-recommend-{seq} hand"   board_recommend="recommend4" ><input type="radio"  name="input-recommend[{seq}]" /></span></div>
+				</td>
+				<td>
+					<div><span class=" idx-recommend5-{seq}">{=number_format(recommend5)}</span></div>
+					<div><span class="icon_recommend5_{seq}_lay{is_recommend}  icon_recommend5_lay{is_recommend} hand"  board_recommend="recommend5"   board_seq="{seq}" board_id="{boardid}" ><img src="{managerview.icon_recommend5_src}" class="icon_recommend5_img" /></span></div>
+					<div {? is_recommend } class="hide" {/} style="margin-top:5px;"><span class="icon_recommend5_lay{is_recommend}  input-recommend-{seq} hand"   board_recommend="recommend5" ><input type="radio"  name="input-recommend[{seq}]" /></span></div>
+				</td>
+			</tr>
+		</tbody>
+		</table>
+	<!--{: managerview.recommend_type == '2' }--> 
+		{? managerview.icon_recommend_src && managerview.icon_none_rec_src }
+		<table style="width:100px;margin:auto;border:0px dashed black;padding:5px;"> 
+			<tbody >
+			<tr align="center"> 
+				<td >
+					<span class="icon_recommend_{seq}_lay{is_recommend} icon_recommend_lay{is_recommend} hand"  board_recommend="recommend"   board_seq="{seq}" board_id="{boardid}" ><img src="{managerview.icon_recommend_src}" class="icon_recommend_img" /></span>
+				</td>
+				<td><span class="idx-recommend-{seq}">{=number_format(recommend)}</span></td>  
+				<td><span class="icon_none_rec_{seq}_lay{is_recommend}  icon_none_rec_lay{is_recommend} hand"  board_recommend="none_rec"   board_seq="{seq}" board_id="{boardid}" ><img src="{managerview.icon_none_rec_src}"  class="icon_none_rec_img"  /></span></td>
+				<td><span class=" idx-none_rec-{seq}">{=number_format(none_rec)}</span></td> 
+			</tr>
+		</tbody>
+		</table> 
+		{/} 
+	<!--{: managerview.recommend_type == '1' }--> 
+		{? managerview.icon_recommend_src }
+		<table style="width:50px;margin:auto;border:0px dashed black;padding:5px;"> 
+			<tbody >
+			<tr align="center"> 
+				<td >
+					<span class="icon_recommend_{seq}_lay{is_recommend} icon_recommend_lay{is_recommend} hand"  board_recommend="recommend"  board_seq="{seq}" board_id="{boardid}" ><img src="{managerview.icon_recommend_src}" class="icon_recommend_img" /></span>
+				</td>
+				<td><span class=" idx-recommend-{seq}">{=number_format(recommend)}</span></td>  
+			</tr>
+		</tbody>
+		</table> 
+		{/}
+	<!--{/}-->
+</div>
+<!--{/}--> 

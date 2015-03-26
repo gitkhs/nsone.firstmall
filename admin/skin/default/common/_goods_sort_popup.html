@@ -1,0 +1,209 @@
+<?
+if({goodsImageSize.thumbCart.width}*{count_w}>700){
+	{tmpImageWidth} = round(700/{count_w});
+	{tmpImageHeight} = round({goodsImageSize.thumbCart.height}*({tmpImageWidth}/{goodsImageSize.thumbCart.width}));
+}else{
+	{tmpImageWidth} = {goodsImageSize.thumbCart.width};
+	{tmpImageHeight} = {goodsImageSize.thumbCart.height};
+}
+?>
+<script type="text/javascript" src="/app/javascript/plugin/jquery_pagination/jquery.pager.js" charset="utf8"></script>
+<script>
+var now_page = 1;
+var kind = '{_GET.kind}';
+var code = '{_GET.code}';
+var count_w = '{_GET.count_w}';
+var count_h = '{_GET.count_h}';
+
+$(function(){
+	$(".goods-sort-list li").die().live('click',function(){
+		$(this).toggleClass('selected');
+		set_sort_panel();
+	});
+	
+	get_sort_list();
+});
+
+// 우측 컨트롤 패널 
+function set_sort_panel(){
+	if($(".goods-sort-list li.selected").length){
+		$(".goods-sort-panel-container .single-sort-desc").hide();
+		$(".goods-sort-panel-container .multi-sort-desc").show();
+		$(".goods-sort-panel-container .multi-sort-desc .multi-sort-cnt").html(comma($(".goods-sort-list li.selected").length));
+	}else{
+		$(".goods-sort-panel-container .single-sort-desc").show();
+		$(".goods-sort-panel-container .multi-sort-desc").hide();
+		
+	}
+}
+
+// 리스트 출력
+function set_sort_list(result){
+	$(".goods-sort-page").show().pager({pagenumber: result.page.nowpage, pagecount: result.page.totalpage, buttonClickCallback:function(clicked_page){
+		get_sort_list(clicked_page);
+	}});
+	$("select[name='sort_target_page']").empty();
+	for(var i=0;i<result.page.totalpage;i++){
+		if(i+1==now_page) $("select[name='sort_target_page']").append("<option value='"+(i+1)+"' selected>"+(i+1)+"</option>");
+		else $("select[name='sort_target_page']").append("<option value='"+(i+1)+"'>"+(i+1)+"</option>");		
+	}
+	
+	
+	html = "";
+
+	for(var i=0;i<result.record.length;i++){
+		html += "<li title='"+result.record[i].goods_name_chars+"'>";
+		html += "<input type='hidden' name='goods_seq[]' value='"+result.record[i].goods_seq+"' />";
+		html += "<input type='hidden' name='sort[]' value='"+result.record[i].sort+"' />";
+		html += "<img src='"+result.record[i].image+"' onerror=\"this.src='../images/common/noimage_list.gif'\">";
+		html += "<div><span class='desc'>["+result.record[i].goods_seq+"]</span><br />"+result.record[i].goods_status_char+"<br />"+result.record[i].goods_name_chars+"</div>";
+		html += "</li>";
+	}
+	
+	if(result.record.length==0){
+		html = '<div class="pd5 desc center">검색된 상품이 없습니다.</div>';
+		$(".goods-sort-page").hide();
+	}
+	
+	$(".goods-sort-list").html(html).sortable({
+		delay: 1,
+		placeholder: "ui-state-highlight",
+		start: function( event, ui ) {
+			$(".goods-sort-list li.selected").removeClass('selected');
+			set_sort_panel();
+		},
+		update: function( event, ui ) {
+			chg_sort_list();
+		}
+	}).disableSelection();
+	
+	set_sort_panel();
+}
+
+// 페이지 이동
+function get_sort_list(page){
+	now_page = page ? page : now_page;
+
+	loadingStart("#goods-sort-popup",{'color':'#000'});
+	
+	$.ajax({
+		'url' : '../common/goods_sort_popup_process',
+		'data' : {'mode':'list','kind':kind,'code':code,'page':now_page,'count_w':count_w,'count_h':count_h},
+		'type' : 'get',
+		'dataType' : 'json',
+		'global' : false,
+		'success' : function(result){
+			loadingStop("#goods-sort-popup",true);
+			set_sort_list(result);
+		}
+	});
+}
+
+// 정렬 처리
+function chg_sort_list(){
+	loadingStart("#goods-sort-popup",{'color':'#000'});
+	
+	var data = {'kind':kind,'code':code,'page':now_page,'count_w':count_w,'count_h':count_h};
+	data['mode'] = $(".goods-sort-list li.selected").length ? 'multi' : 'single';
+		
+	if(data['mode'] == 'multi'){
+		data['goods_seqs'] = new Array();
+		data['sort_target_page'] = $("select[name='sort_target_page']").val();
+		data['sort_target_location'] = $("select[name='sort_target_location']").val();
+		$(".goods-sort-list li.selected input[name='goods_seq[]']").each(function(){
+			data['goods_seqs'].push($(this).val());
+		});
+		
+		if(data['goods_seqs'].length==count_w*count_h && data['sort_target_page']==now_page) {
+			loadingStop("#goods-sort-popup",true);
+			return;
+		}
+		
+		var sort_target = $("select[name='sort_target_location'] option:selected").text();
+
+	}else{
+		data['goods_seqs'] = new Array();
+		$(".goods-sort-list li input[name='goods_seq[]']").each(function(){
+			data['goods_seqs'].push($(this).val());
+		});
+		data['goods_sorts'] = new Array();
+		$(".goods-sort-list li input[name='sort[]']").each(function(){
+			data['goods_sorts'].push($(this).val());
+		});
+	}
+	
+	$.ajax({
+		'url' : '../common/goods_sort_popup_process',
+		'data' : data,
+		'type' : 'get',
+		'dataType' : 'json',
+		'global' : false,
+		'success' : function(result){
+			loadingStop("#goods-sort-popup",true);
+
+			if(data['mode'] == 'multi' && data['sort_target_page']!=now_page){
+				openDialogConfirm("선택한 "+comma(data['goods_seqs'].length)+"개의 상품을 "+data['sort_target_page']+"페이지에서 "+sort_target+" 순서 변경하였습니다.<br />"+data['sort_target_page']+"페이지로 이동하시겠습니까?",500,150,function(){
+					get_sort_list(data['sort_target_page']);
+				},function(){
+					set_sort_list(result);
+				});
+			}else{
+				set_sort_list(result);
+			}
+		}
+	});
+}
+
+
+</script>
+<style>
+.goods-sort-container {padding-right:160px;}
+.goods-sort-page {margin:auto; width:{=tmpImageWidth*count_w+35*count_w}px; min-width:300px;}
+.goods-sort-list {margin:auto; width:{=tmpImageWidth*count_w+35*count_w}px; *zoom:1}
+.goods-sort-list:after {content:""; display:block; clear:both;}
+.goods-sort-list li {float:left; width:{=tmpImageWidth+25}px; height:{=tmpImageHeight+55}px; padding-top:5px; margin-right:5px; margin-bottom:5px; overflow:hidden; border:1px solid #fff; background-color:#fff; cursor:move; text-align:center}
+.goods-sort-list li img {width:{tmpImageWidth}px; height:{tmpImageHeight}px;}
+.goods-sort-list li div {text-align:center; padding-top:5px; margin-bottom:5px; font-size:10px;}
+.goods-sort-list li.selected {border:1px solid #555}
+
+.goods-sort-panel-container {position:absolute; top:30%; right:5px; width:140px; padding:8px; border:1px solid #ddd; background-color:#f5f5f5;}
+.goods-sort-panel-container .multi-sort-desc input[type=text] {margin:0 0 2px 0; padding:2px;}
+.goods-sort-panel-container .multi-sort-desc select {margin:0 0 2px 0;}
+
+.pager {margin-top:5px;}
+.pager .pages {text-align:center;}
+.pager .pages span {display:inline-block; padding:3px; font-size:11px; color:#666; cursor:pointer;}
+.pager .pages span.first {width:10px; padding:5px 0 3px 0; background:url("../images/main/btn_memo_prev.gif") repeat-x 0px center;}
+.pager .pages span.prev {padding-top:5px; padding-right:12px; background:url("../images/main/btn_memo_prev.gif") no-repeat center center;}
+.pager .pages span.next {padding-top:5px; padding-left:12px; background:url("../images/main/btn_memo_next.gif") no-repeat center center;}
+.pager .pages span.last {width:10px; padding:5px 0 3px 0; background:url("../images/main/btn_memo_next.gif") repeat-x 0px center;}
+.pager .pages span.pgCurrent {font-weight:bold;}
+</style>
+
+<form name="goods-sort-form">
+	<div class="goods-sort-container">
+	
+		<ul class="goods-sort-list">로딩중입니다.</ul>
+			
+		<div class="goods-sort-page pager"></div>
+	</div>
+	
+	<div class="goods-sort-panel-container">
+		<div class="single-sort-desc">
+			상품을<br />
+			마우스로 클릭하거나 <br />
+			드래그하여 <br />
+			순서를 변경하세요.
+		</div>
+		<div class="multi-sort-desc">
+			선택한<br />
+			<span class="multi-sort-cnt"></span>개의 상품을<br />
+			<select name="sort_target_page"></select> 페이지의<br />
+			<select name="sort_target_location">
+				<option value="first">맨 위로</option>
+				<option value="last">맨 아래로</option>
+			</select><br />
+			<span class="btn small"><input type="button" value="순서를 변경하기" onclick="chg_sort_list()" /></span>		
+		</div>
+	</div>
+</form>

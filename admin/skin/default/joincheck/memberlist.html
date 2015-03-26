@@ -1,0 +1,365 @@
+{ #layout_header }
+<style>
+.goods_name {display:inline-block;white-space:nowrap;overflow:hidden;width:290px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+.search_label 	{display:inline-block;width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+span.step_title { font-weight:normal;padding-right:5px }
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".all-check").toggle(function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',true);	
+	},function(){
+		$(this).parent().find('input[type=checkbox]').attr('checked',false);
+	});
+	
+	
+	
+
+	$("#search_set").click(function(){
+		openDialog("기본검색 설정", "search_detail_dialog", {"width":"800","height":"300"});
+	});
+	
+	
+	$("select.list-select").bind("change",function(){
+		var value_str = $(this).val();
+		if( value_str ){
+			$(".chk").attr("checked",false).change();	
+		
+			if( value_str=='select' ){
+				$(".chk").attr("checked",true).change();			
+			}
+		}
+	});
+	
+	
+	<!--{? rc.check_SMS}-->
+	var str = "{ rc.check_SMS }";		
+	$(".sms_byte").html(chkByte(str));
+	<!--{/}-->
+	
+	$(".board_sms_contents").live("keyup",function(){
+		str = $(this).val();
+		$(this).parent().parent().parent().find(".sms_byte").html(chkByte(str));
+	});
+
+	
+	$("#paySMS").live("click",function(){
+		$('#ReviewEmoneytPopup')[0].reset();
+		
+		var jcresult_seq = new Array();
+		
+		$("input[name='jcresult_seq[]']:checked").each(function(){
+			jcresult_seq.push($(this).val());
+		});		
+		
+		var mcount = jcresult_seq.length;
+		//alert(arrCheckedMemberSeq.join(","));
+		var mid = $("input[name='jcresult_seq[]']:checked").eq(0).attr('userid');
+		
+		
+		$('#emoney_mid').val(mid);		
+		$('#j_seq').val(jcresult_seq);
+		
+		if(mcount > 1){
+		$('#mbname').html(mid + " 외  " + (mcount-1) + " 명");
+		}else{	$('#mbname').html(mid);
+		}
+		openDialog("적립금지급", "ReviewEmoneytlayList", {"width":"550","height":"300","show" : "fade","hide" : "fade"});
+	});
+	
+	/* 선택된 아이콘 출력 */
+	$("button.review_emoneyt_btn").live("click",function(){
+		$('#ReviewEmoneytPopup')[0].reset();
+						
+		var userid = $(this).attr('userid');		
+		var jcresult= $(this).attr('jcresult_seq');
+		
+		$('#j_seq').val(jcresult);
+		$('#emoney_mid').val(userid);
+		$('#mbname').html(userid);
+		openDialog("적립금지급", "ReviewEmoneytlayList", {"width":"550","height":"300","show" : "fade","hide" : "fade"});
+	});
+	
+	/* 선택된 아이콘 출력 */
+	$("button#emoney_pay_cancel").live("click",function(){
+		$('#ReviewEmoneytlayList').dialog('close');
+	});
+	
+	$('#ReviewEmoneytPopup').validate({
+		onkeyup: false,
+		rules: {
+			emoney_pay_memo: { required:true},
+			emoney_pay_emoney: { required:true, number: true},
+		},
+		messages: {
+			emoney_pay_memo: { required:'입력해 주세요.'},
+			emoney_pay_emoney: { required:'입력해 주세요.'}
+		},
+		errorPlacement: function(error, element) {
+			error.appendTo(element.parent());
+		},
+		submitHandler: function(f) {			
+				if( !$(".board_sms_contents").val() ) {
+					$(".board_sms_contents").focus();
+					return false;			
+			}
+			f.submit();
+		}
+	});
+	
+
+});
+
+
+	function set_date(start,end){	
+		$("input[name='sdate']").val(start);
+		$("input[name='edate']").val(end);
+	}
+	
+	function jc_copy_btn(seq){	
+		var str="../joincheck_process?mode=joincheck_copy&joincheck_seq=" + seq;
+		$("iframe[name='actionFrame']").attr('src',str);
+	}
+	
+	function jc_delete_btn(seq){
+		var str="../joincheck_process?mode=joincheck_delete&joincheck_seq=" + seq;
+		$("iframe[name='actionFrame']").attr('src',str);
+		
+	}
+
+	
+	// 문자를 byte로 변경 해주는 스크립트
+	function chkByte(str){
+		var cnt = 0;
+		for(i=0;i<str.length;i++) {
+			cnt += str.charCodeAt(i) > 128 ? 2 : 1;
+			if(str.charCodeAt(i)==10) cnt++;
+		}
+		return cnt;
+	}
+	
+	function emoneyclose(){
+		document.location.reload();
+	}
+	
+</script>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar">
+		
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>{rc.title} ({=number_format(page.totalcount)}/{=number_format(rc.sum_clear)}/{=number_format(rc.sum_emoney)})</h2>
+		</div>
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+			<li><span class="btn large white"><button type="button" onclick="document.location.href='/admin/joincheck/catalog?{query_string}';">출석체크리스트<span class="arrowright"></span></button></span></li>				
+		</ul>
+		
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<form name="searchForm" id="searchForm"  >
+<input type="hidden" name="joincheck_seq" value="{_GET.joincheck_seq}" >
+<!-- 출석체크 리스트 검색폼 : 시작 -->
+<div class="search-form-container">
+	<table class="search-form-table">
+	<tr>
+		<td>
+			<table>
+			<tr>
+				<td width="500">
+					<table class="sf-keyword-table">
+					<tr>
+						<td class="sfk-td-txt"><input type="text" name="keyword" value="{=htmlspecialchars(sc.keyword)}" title="회원명, 회원아이디" /></td>
+						<td class="sfk-td-btn"><button type="submit" ><span>검색</span></button></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+
+	<table class="search-form-table" id="serch_tab">
+	<tr id="goods_search_form" style="display:block;">
+	<tr>
+		<td>
+			<table class="sf-option-table">
+			<colgroup>
+				<col width="80" />
+				<col width="" />
+			</colgroup>		
+			<tr>
+				<th>상태</th>
+				<td>				
+					<label class="search_label"><input type="checkbox" name="clear_success[]" value="N" {?sc.clear_success && in_array('N',sc.clear_success)}checked{/}/>미달성</label>
+					<label class="search_label"><input type="checkbox" name="clear_success[]" value="Y" {?sc.clear_success && in_array('Y',sc.clear_success)}checked{/}/>달성</label>				
+					
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>
+			<tr>
+				<th>적립금</th>
+				<td>				
+					<label class="search_label"><input type="checkbox" name="emoney_pay[]" value="N" {?sc.emoney_pay && in_array('N',sc.emoney_pay)}checked{/}/>미지급</label>
+					<label class="search_label"><input type="checkbox" name="emoney_pay[]" value="Y" {?sc.emoney_pay && in_array('Y',sc.emoney_pay)}checked{/}/>지급</label>											
+					
+					<span class="icon-check hand all-check"><b>전체</b></span>
+				</td>
+			</tr>			
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<!-- 출석체크 리스트 검색폼 : 끝 -->
+
+</form>
+
+<ul class="left-btns clearbox">
+	<li>
+		<select class="list-select custom-select-box-multi" name="select_chk"  rows="2">							
+		<option value="select">전체선택</option>
+		<option value="not-select">선택안함</option>							
+		</select>
+	</li>						
+	<li>				
+		<span class="btn small black"><button name="paySMS" id="paySMS">적립금 지급</button></span>		
+	</li>
+	
+</ul>
+
+	
+	
+<form name='joinchecklist' id='joinchecklist' method='POST' >
+<!-- 출석체크 리스트 테이블 : 시작 -->
+<table class="list-table-style" cellspacing="0" >
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="30" />
+		<col width="30" />
+		<col width="180" />
+		<col width="140" />
+		<col width="70" />
+		<col width="140" />			
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th>선택	</th>
+		<th>번호</th>
+		<th>회원명</th>
+		<th>출석체크</th>
+		<th>달성여부</th>
+		<th>적립금</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb otb" >
+{? loop }
+	{@ loop }
+	
+		<!-- 출석체크 리스트(이벤트상태 및 버튼) : 시작 -->
+		<tr class="list-row">
+			<td align="center"><input type="checkbox" class="chk" name="jcresult_seq[]" value="{.jcresult_seq}" userid="{.userid}" /></td>						
+			<td align="center">{._rno} <br/> </td>
+			<td align="center">{.user_name}({.userid})</td>
+			<td align="center"><font {?.clear_success == 'Y' }color="gray"{:} color="black" {/}>{.usercount}회</font>({.allcount}회)</td>
+			<td align="center">{.mclear_success}</td>
+			<td align="center">{.memoney}
+			{?.emoney_pay == 'N'}<span class="btn small cyanblue"><button type="button"  name="review_emoneyt_btn" mbname="{.user_name}"  userid="{.userid}"  jcresult_seq="{.jcresult_seq}" member_seq="{.member_seq}"   class="review_emoneyt_btn">지급</button></span>
+			 {:} {/}</td>			
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+	{ / }
+{ : }
+		<!-- 리스트타이틀(이벤트상태 및 버튼) : 시작 -->
+		<tr class="list-row">
+			<td align="center" colspan="6">
+				{ ? keyword }
+					'{keyword}' 검색된 회원이 없습니다.
+				{:}
+					참여한 회원이 없습니다.
+				{/}
+			</td>
+		</tr>
+		<!-- 리스트데이터 : 끝 -->
+{ / }
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+</table>
+<!-- 출석체크 리스트 테이블 : 끝 -->
+
+</form>
+
+<br style="line-height:10px;" />
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{pagin}</div>
+
+
+<div id="ReviewEmoneytlayList" style="display:none">
+<form name="ReviewEmoneyPopup" id="ReviewEmoneytPopup" method="post" action="../joincheck_process/emoney_pay" target="actionFrame">
+<input type="hidden" name="mode" id="mode" value="emoney_pay" />
+<input type="hidden" name="joincheck_seq" id="joincheck_seq" value="{_GET.joincheck_seq}" />
+<input type="hidden" name="jcresult_seq" id="j_seq" value="" />
+<input type="hidden" name="mid" id="emoney_mid" value="{mid}" />
+<input type="hidden" name="mseq" id="emoney_mseq" value="{mseq}" />
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="20%" />
+			<col width="80%" />
+		</colgroup>
+		<thead   class="hide">
+		<tr>
+			<th class="its-th-align center" >항목</th>
+			<th class="its-th-align center" ></th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center" >지급대상</th>
+			<td class="its-td" id="mbname"></td>
+		</tr>
+		<tr>
+			<th class="its-th-align center" >지급사유</th>
+			<td class="its-td">
+				<input type="text" name="emoney_pay_memo"  id="emoney_pay_memo"  size="40" value="출석체크 이벤트 달성" title=""  class="line" />
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center" >지급액</th>
+			<td class="its-td">
+				<input type="text" name="emoney_pay_emoney"  id="emoney_pay_emoney"  size="3" value="" title="" class="line" />
+			</td>
+		</tr>
+
+		<tr>
+			<th class="its-th-align center" >SMS <input type="hidden" name="board_sms" id="board_sms" value="1" /></th>
+			<td class="its-td">
+				<div>
+					<ul>
+					<li><textarea name="emoney_pay_sms" class="board_sms_contents">{rc.check_SMS}</textarea></li>
+					<li><font color="#5a84a1"><span class="sms_byte">0</span>bytes</font></li>
+					</ul>
+				</div>
+			</td>
+		</tr>
+		</tbody>
+		</table>
+		<div class="center" style="padding:10px;">
+		<span class="btn large black"><button type="submit" id="emoney_pay_save">적용하기</button></span>
+		<span class="btn large black"><button type="button"  id="emoney_pay_cancel">취소하기</button></span>
+		</div>
+</form>
+</div>
+<div class="paging_navigation" style="margin:auto;">{page.html}</div>
+
+{ #layout_footer }

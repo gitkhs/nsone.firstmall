@@ -1,0 +1,192 @@
+<div  style="margin-bottom:5px;" class="left">
+	<span class="blue hand " id="commentlayshow"> 댓글 <span id="comment_num" >{comment}</span>개 <span id="comment_arrow" class="comment_arrow" >▲</span></span> {cmt_iconnew}
+</div>
+<div  class="cmtlistlay left" >
+	<div id="cmtlist" class="box" >
+		<div id="cmtlistlay"  class="{? !_GET.cmtlist && intval(comment)<1}hide{/}" >
+			<table class="bbslist_table_style box" width="100%" border="0" cellpadding="0" cellspacing="0" summary="[{subject}] 댓글리스트 입니다.">
+			<colgroup>
+			<col><col>
+			</colgroup>
+				<!--{@ cmtloop }-->
+					<tr class="comment " >
+						<td class="left cell" >
+								<span class="iconhidden">{.iconhidden}</span>  <span style="padding:10px 0 10px 0;color:#000000;" >{.name}</span>{.iconnew}
+								<span class="date cell"style="padding:10px 0 10px 0;color:#c0c0c0;font-weight:normal;"  >{.date}</span>
+								<!--{? (cmtreplyloop.size_) }--><span class="blue " style="font-weight:normal;">답글{=number_format(cmtreplyloop.size_)}개</span><!--{/}-->
+								<img src="{templateskin}/images/board/btn/btn_comment_reply.gif"  name="boad_cmt_reply_btn{managerview.isperm_write_cmt}"  board_cmt_seq="{.seq}" board_cmt_idx="{.idx}"class="hand {? commentlay == 'N' }hide{/}" title="답글쓰기" alt="답글쓰기" >
+						</td>
+						<td class="right  cell" >
+							<img src="{templateskin}/images/board/btn/btn_comment_modify.gif"  name="boad_cmt_modify_btn{.isperm_moddel}"  board_cmt_seq="{.seq}" class="hand {.isperm_hide}" alt="답글수정" title="답글수정">
+							<img src="{templateskin}/images/board/btn/btn_comment_del.gif" name="boad_cmt_delete_btn{.isperm_moddel}"   board_cmt_seq="{.seq}" class="hand  {.isperm_hide}"  alt="답글삭제" title="답글삭제" >
+						</td>
+					</tr>
+
+					<tr  class=" cmtcontent{.seq}" >
+						<td class="cmtcontent left " style="padding-bottom:5px;font-weight:normal;" colspan="2" >
+							{=nl2br(.content)}
+						</td>
+					</tr>
+
+					<!--{? .cmtreplyloop }-->
+					<tr  class=" cmtcontent{.seq}" >
+						<td class="cmtcontent left bottom {? .cmtreplyloop }cell{/}" style="padding-bottom:10px" colspan="2" >
+								<div style="margin-left:30px;">
+									<table width="100%" border="0" cellpadding="0" cellspacing="0" summary=" 댓글 > 답글 리스트 입니다.">
+									<!--{@ .cmtreplyloop }-->
+										<tr class="comment"  style="padding:0 0 15px 0;color:#c0c0c0;font-weight:bold;" >
+											<td class="left cell cmtreply" >
+													<img src="{templateskin}/images/board/icon/icon_comment_reply.gif"  title="답변" alt="답변">
+													<span class="iconhidden">{..iconhidden}</span>
+													<span style="padding:10px 0 10px 0;color:#000000;">{..name}</span>{..iconnew}
+												<span class="date cell" style="padding:10px 0 10px 0;color:#c0c0c0;font-weight:normal;" >{..date}</span>
+											</td>
+											<td class="right  cell" >
+												<img src="{templateskin}/images/board/btn/btn_comment_modify.gif"  name="boad_cmt_modify_reply_btn{..isperm_moddel}"  board_cmt_seq="{.seq}" board_cmt_reply_seq="{..seq}" board_cmt_idx="{.idx}" alt="답글수정" title="답글수정" class="hand {..isperm_hide}">
+													<img src="{templateskin}/images/board/btn/btn_comment_del.gif" name="boad_cmt_delete_reply_btn{..isperm_moddel}"   board_cmt_seq="{.seq}"  board_cmt_reply_seq="{..seq}" board_cmt_idx="{.idx}"  alt="답글삭제" title="답글삭제"  class="hand {..isperm_hide}">
+											</td>
+										</tr>
+										<tr  class=" cmtcontent{.seq}" >
+											<td class="left " style="padding:5px;font-weight:normal;" colspan="2">
+												 <div style="padding-left:10px">
+													 {=nl2br(..content)}
+												 </div>
+											</td>
+										</tr>
+									<!--{/}-->
+									</table>
+								</div>
+						</td>
+					</tr>
+					<!--{/}-->
+
+					<tr class=" hide cmtreplylay cmtreplyform{.idx} " >
+						<td class="left cell" colspan="2" >
+							<div class="wbox" style="padding:10px 0" id="cmtreplyform{.idx}">
+								<!--{? managerview.isperm_write_cmt == "_no" }-->
+									<div class="box center hand"  style="width:100%;color:gray;padding:5px 0px;margin-bottom:3px;">로그인 또는 댓글권한이 있을 경우 등록하실 수 있습니다.</div>
+								<!--{:}-->
+									<table class="box" style="width:100%" border="0">
+										<thead class="hide">
+										<tr>
+											<th class="its-th-align center" >답글쓰기</th>
+										</tr>
+										</thead>
+										<tbody>
+											<!--{? defined('__ISUSER__') === true && (user_name) //회원}-->
+											<tr>
+												<td class="its-td" >
+												<input type="hidden" name="name" id="cmtname{.seq}" board_cmt_seq="{.seq}"  value="{user_name}"  />
+												<input type="text" value="{user_name}"  readonly="readonly" disabled="disabled" class="required line" />
+												<a class="its-td pwchecklay {? defined('__ISUSER__') === true }hide{/}"><input type="password"  password="password" name="pw" board_cmt_seq="{.seq}"id="cmtpw{.seq}" class="required line"  size="25" title="비밀번호를 입력해 주세요." value="" /></a>
+
+												<span class="{cmthiddenlay}" ><label > <input type="checkbox" name="hidden"  id="cmthidden{.seq}"   value="1" {hiddenckeck} />비밀답글</label></span>
+												</td>
+											</tr>
+											<!--{:}-->
+											<tr>
+												<td class="its-td" >
+												<input type="text" name="name" id="cmtname{.seq}" board_cmt_seq="{.seq}" class="required line" size="25" title="이름을 입력해 주세요." value="{user_name}" />
+												<a class="its-td pwchecklay {? defined('__ISUSER__') === true }hide{/}"><input type="password"  password="password" name="pw" board_cmt_seq="{.seq}"id="cmtpw{.seq}" class="required line"  size="25" title="비밀번호를 입력해 주세요." value="" /></a>
+
+												<span class="{cmthiddenlay}" ><label  > <input type="checkbox" name="hidden"  id="cmthidden{.seq}"  value="1" {hiddenckeck} />비밀답글</label></span>
+												</td>
+											</tr>
+											<!--{/}-->
+											<tr>
+											<td  class="its-td"><textarea name="content" id="cmtcontent{.seq}" board_cmt_seq="{.seq}" class="required line" title="{?managerview.isperm_write_cmt == "_no" }로그인 후 이용해 주세요.{:}내용을 입력해 주세요.{/}" style='width:90%;height:60px;overflow:auto' title=" "></textarea></td>
+											</tr>
+
+											<!--{? manager.autowrite_use == 'Y' && captcha_image}-->
+											<tr>
+												<td class="its-td"  >{#securimage}</td>
+											</tr>
+											<!--{/}-->
+											<tr><td  align="center"  class="its-td"><span class="btn small black"><button type="button" name="board_commentsend_reply" id="board_commentsend_reply{.seq}" board_cmt_seq="{.seq}"  board_cmt_reply_seq=""  board_cmt_idx="{.idx}" >답글등록</button></span> <span class="btn small black"><button type="reset" name="board_comment_reply_cancel" id="board_comment_reply_cancel{.seq}" board_cmt_seq="{.seq}" board_cmt_reply_seq=""  board_cmt_idx="{.idx}" >답글취소</button></span></td>
+											</tr>
+										</tbody>
+									</table>
+								<!--{/}-->
+							</div>
+						</td>
+					</tr>
+				<!--{/}-->
+			</table>
+			<div style="border-bottom:#dfdfdf solid 1px;background:#FCFCFC;">&nbsp;</div>
+			<!-- 페이징 --><div id="cmtpager" align="center"  class="paging_navigation" >{cmtpagin}</div><!-- 페이징 --><br/>
+		</div>
+		<a name="cwriteform"></a>
+		<div id="cwrite{managerview.isperm_write_cmt}"  class="{? commentlay == 'N' }hide{/}" >
+
+			<form name="cmtform1" id="cmtform1" method="post"  action="../board_comment_process"  target="commentactionFrame">
+			<input type="hidden" name="mode" id="cmtmode" value="board_comment_write" />
+			<input type="hidden" name="board_id"  value="{manager.id}" />
+			<input type="hidden" name="seq"  value="{seq}" />
+			<input type="hidden" name="cmtseq" id="cmtseq" value="{cmtseq}" />
+			<input type="hidden" name="returnurl" id="cmtreturnurl" value="{boardurl->cmtview}" />
+			<input type="hidden" name="cmtpage" id="cmtpage" value="{_GET.cmtpage}" />
+			<!--{? managerview.isperm_write_cmt == "_no" }-->
+				<div class="box center hand"  style="width:100%;color:gray;padding:5px 0px;margin-bottom:3px;">로그인 또는 댓글권한이 있을 경우 등록하실 수 있습니다.</div>
+			<!--{:}-->
+				<table class="box" style="width:100%" border="0">
+					<thead class="hide">
+					<tr>
+						<th class="its-th-align left" >댓글쓰기</th>
+					</tr>
+					</thead>
+					<tbody>
+						<!--{? defined('__ISUSER__') === true  && user_name //회원}-->
+							<tr>
+								<td class="its-td" >
+									<input type="hidden" name="name" id="cmtname" class="required line" size="25" value="{user_name}" /><input type="text" value="{user_name}"  readonly="readonly" disabled="disabled" class="required line" />
+									<a class="its-td pwchecklay "><input type="hidden" password="password"  name="pw" id="cmtpw" class="required line" size="25" title="비밀번호를 입력해 주세요." value="" /></a>
+
+									<span class="{cmthiddenlay}" ><label > <input type="checkbox" name="hidden"   id="cmthidden"  value="1" {cmthiddenckeck} />비밀댓글</label></span>
+								</td>
+							</tr>
+						<!--{:}-->
+							<tr>
+								<td class="its-td" ><input type="text" name="name" id="cmtname" class="required line" size="25" title="이름을 입력해 주세요." value="{user_name}" />
+								<a class="its-td pwchecklay {? defined('__ISUSER__') === true }hide{/} "><input type="password" password="password"  name="pw" id="cmtpw" class="required line " size="25" title="비밀번호를 입력해 주세요." value="" /></a>
+								<span class="{cmthiddenlay}" ><label><input type="checkbox" name="hidden"  id="cmthidden"  value="1" {cmthiddenckeck} />비밀댓글</label></span>
+								</td>
+							</tr>
+						<!--{/}-->
+						<tr>
+						<td  class="its-td"><textarea name="content" id="cmtcontent" class="required line" title="{?managerview.isperm_write_cmt == "_no" }로그인 후 이용해 주세요.{:}내용을 입력해 주세요.{/}" style='width:90%;height:60px;overflow:auto' title=" "></textarea></td>
+						</tr>
+
+						<!--{? manager.autowrite_use == 'Y' && captcha_image}-->
+						<tr>
+							<td class="its-td"  >{#securimage}</td>
+						</tr>
+						<!--{/}-->
+						<tr><td  align="center"  class="its-td"><span class="btn small black"><button type="submit" name="board_commentsend" id="board_commentsend" >댓글등록</button></span> <span class="btn small black"><button type="reset" name="board_comment_cancel" id="board_comment_cancel" >댓글취소</button></span></td>
+						</tr>
+					</tbody>
+				</table>
+			<!--{/}-->
+			</form>
+		</div>
+	</div>
+</div>
+
+<div id="CmtBoardPwCkNew" class="hide BoardPwCk">
+	<div class="msg">
+		<!-- <h3> 비밀번호 확인</h3> -->
+		<div>댓글/답글 등록시에 입력했던 비밀번호를 입력해 주세요.</div>
+	</div>
+	<form name="BoardPwcheckFormNew" id="CmtBoardPwcheckFormNew" method="post" >
+	<input type="hidden" name="modetype" id="cmtmodetype_new" value="" />
+	<input type="hidden" name="seq" id="cmt_pwck_seq_new" value="" />
+	<input type="hidden" name="cmtseq" id="cmt_pwck_cmtseq_new" value="" />
+	<input type="hidden" name="cmtparentseq" id="cmt_pwck_cmtreplyseq_new" value="" />
+	<input type="hidden" name="cmtreplyidx" id="cmt_pwck_cmtreplyidx_new" value="" />
+	<div class="ibox">
+		<input type="password" name="pw" id="cmt_pwck_pw_new" class="input" />
+		<input type="submit" id="CmtBoardPwcheckBtnNew" value=" 확인 " class="hand round_btn" />
+		<input type="button" value=" 취소 " class="hand round_btn" onclick="$('#CmtBoardPwCkNew').dialog('close');" />
+	</div>
+	</form>
+</div>
+<iframe name="commentactionFrame" src="" frameborder="0" width="0" height="0"></iframe>

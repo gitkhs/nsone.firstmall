@@ -1,0 +1,426 @@
+			<div><b>개인결제타이틀 : </b>{record.title}</div>
+			<br>
+			<div  style="border-top:2px solid #d0d0d0"></div>
+			<br>
+			<!-- 주문자 및 배송정보 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr><td><img src="../images/design/mybag_stit_info_order.gif" designImgSrcOri='Li4vaW1hZ2VzL2Rlc2lnbi9teWJhZ19zdGl0X2luZm9fb3JkZXIuZ2lm' designTplPath='RDovd2Vic2VydmljZS9nc2Rldl9taW0vZGF0YS9za2luL3dvbmRlcnBsYWNlL29yZGVyL3NldHRsZS5odG1s' designImgSrc='L2RhdGEvc2tpbi93b25kZXJwbGFjZS9pbWFnZXMvZGVzaWduL215YmFnX3N0aXRfaW5mb19vcmRlci5naWY=' designElement='image' />&nbsp;</td></tr>
+				<tr><td height="5"></td></tr>
+			</table>
+
+			<!-- 주문정보/배송지정보 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<col width="49%" valign="top" />
+			<col width="2%" valign="top" />
+			<col width="49%" valign="top" />
+			<input type="hidden" name="member_seq" value="" />
+			<input type="hidden" name="order_zipcode[]" value="" />
+			<input type="hidden" name="order_zipcode[]" value="" />
+			<input type="hidden" name="order_address_type" value="" />
+			<input type="hidden" name="order_address" value="" />
+			<input type="hidden" name="order_address_street" value="" />
+			<input type="hidden" name="order_address_detail" value="" />
+			<tr>
+				<td style="vertical-align:top !important">
+					<!-- 주문정보 -->
+					<table width="100%" border="0" cellpadding="4" cellspacing="0" style="border:1px solid #cfcfcf">
+						<tr>
+							<td class="pdl10 bold black" bgcolor="ebebeb" align="left" height="25">01. 주문하시는 분</td>
+						</tr>
+						<tr>
+							<td>
+								<table width="97%" align="center" border="0" cellpadding="0" cellspacing="0">
+								<col width="70" />
+								<tr><td height="8"></td></tr>
+								<tr>
+									<td height="30">이름</td>
+									<td class="fx12">{record.order_user_name}</td>
+								</tr>
+								<tr><td height="8"></td></tr>
+								<tr>
+									<td height="30">유선전화</td>
+									<td class="fx12">{record.order_phone}</td>
+								</tr>
+								<tr><td height="8"></td></tr>
+								<tr>
+									<td height="30">휴대폰</td>
+									<td class="fx12">{record.order_cellphone}</td>
+								</tr>
+								<tr><td height="8"></td></tr>
+								<tr>
+									<td height="30">이메일</td>
+									<td class="fx12">{record.order_email}</td>
+								</tr>
+							</table>
+
+							<div style="height:20px"></div>
+
+							<!-- 설명 -->
+							<div style="height:10px"></div>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td></td>
+				<td id="ship_usㅔer_info">
+					<!-- 배송지정보 -->
+					<table width="100%" border="0" cellpadding="4" cellspacing="0" style="border:1px solid #cfcfcf">
+						<tr>
+							<td class="pdl10 bold black" bgcolor="ebebeb" align="left" height="25">02. 배송 받는 분</td>
+						</tr>
+						<tr>
+							<td style="padding-top:5px;">
+								<table width="97%" align="center" border="0" cellpadding="0" cellspacing="0">
+									<col width="90" />
+									<tr>
+										<td>이름</td>
+										<td class="fx12">{orderData.recipient_user_name}</td>
+									</tr>
+									<tr><td height="8"></td></tr>
+									<tr class="domestic">
+										<td>주소</td>
+										<td class="fx12">{orderData.recipient_zipcode}
+										</td>
+									</tr>
+									<tr><td height="8"></td></tr>
+									<tr class="domestic">
+										<td></td>
+										<td class="fx12">
+										{? orderData.recipient_address_street}
+										<span {? orderData.recipient_address_type != "street"}style="font-weight:bold;"{/}>(지번)</span> {orderData.recipient_address}<br>
+										<span {? orderData.recipient_address_type == "street"}style="font-weight:bold;"{/}>(도로명)</span> {orderData.recipient_address_street}
+										{:}
+										{orderData.recipient_address}
+										{/}
+										</td>
+									</tr>
+									<tr class="domestic"><td height="8"></td></tr>
+									<tr class="domestic">
+										<td></td>
+										<td class="fx12">(공통상세) {orderData.recipient_address_detail}</td>
+									</tr>
+									<!--tr class="international">
+										<td></td>
+										<td class="fx12">
+											<span id="region">
+												<select name="region">
+													<option value="0">미국</option>
+												</select>
+											</span>
+											<span class="desc">지역</span></td>
+									</tr>
+									<tr><td height="8" class="international"></td></tr>
+									<tr class="international">
+										<td></td>
+										<td class="fx12"><input type="text" name="international_address" value="" size="45" class="line" disabled /> <span class="desc">주소</span></td>
+									</tr>
+									<tr class="international"><td height="8"></td></tr>
+									<tr class="international">
+										<td></td>
+										<td class="fx12"><input type="text" name="international_town_city" value="" size="30" class="line" disabled /> <span class="desc">시도</span></td>
+									</tr>
+									<tr class="international"><td height="8"></td></tr>
+									<tr class="international">
+										<td></td>
+										<td class="fx12"><input type="text" name="international_county" value="" size="22" class="line" disabled /> <span class="desc">주</span></td>
+									</tr>
+									<tr class="international"><td height="8"></td></tr>
+									<tr class="international">
+										<td></td>
+										<td class="fx12"><input type="text" name="international_postcode" value="" size="15" class="line" disabled /> <span class="desc">우편번호</span></td>
+									</tr>
+									<tr class="international"><td height="8"></td></tr>
+									<tr class="international">
+										<td></td>
+										<td class="fx12"><input type="text" name="international_country" value="" size="30" class="line" disabled /> <span class="desc">국가</span></td>
+									</tr-->
+									<tr><td height="8"></td></tr>
+									<tr>
+										<td>유선전화</td>
+										<td class="fx12">{orderData.recipient_phone}</td>
+									</tr>
+									<tr><td height="8"></td></tr>
+									<tr>
+										<td>휴대폰</td>
+										<td class="fx12">{orderData.recipient_cellphone}</td>
+									</tr>
+
+									<tr><td height="8"></td></tr>
+									<tr>
+										<td>배송메세지</td>
+										<td class="fx12"><div style="padding:5px; border:1px solid #ddd; height:70px">{orderData.memo}</div></td>
+									</tr>
+									<tr><td height="15"></td></tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+			<br>
+			<div  style="border-top:2px solid #d0d0d0"></div>
+			<br>
+
+			<br>
+
+			<div class="cart_list">
+			<input type="hidden" name="total_price_temp" value="{=number_format(total_price)}">
+			<!-- List -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" class="list_table_style">
+			<thead>
+				<tr>
+					<th width="20"></th>
+					<th>상품명</th>
+					<th width="70">수량</th>
+					<th width="90">판매가격</th>
+					<th width="90">Code</th>
+					<th width="90">포인트</th>
+					<th width="120" class="cell_left_line">배송분류/배송비</th>
+				</tr>
+			</thead>
+			<tbody>
+				<!--{ ? list }-->
+				<!--{ @ list }-->
+				{?.index_&&.shipping_provider_division}<tr><td colspan="7" height="2" bgcolor="d0d0d0"></td></tr>{/}
+				<tr>
+					<td align="center"><span title="삭제" style="color:rgb(255, 255, 255); background-color:rgb(155, 155, 155); cursor:pointer;" onclick="cart_delete('{.cart_seq}');"><b>X</b></span></td>
+					<td class="cell">
+						<table width="100%" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td class="left" width="80" valign="top">
+							<a href="/goods/view?no={.goods_seq}"><img src="{.image}" align="absmiddle" hspace="5" style="border:1px solid #ddd;" onerror="this.src='../images/common/noimage_list.gif'" /></a>
+							</td>
+							<td class="left">
+								<div class="goods_name"><a href="/goods/view?no={.goods_seq}" target="_blank">{.goods_name}</a></div>
+						<!--{ ? .cart_options[0].option1 || isset(.cart_suboptions[0].suboption) }-->
+						<div style="padding-top:10px; padding-left:80px;">
+							<table cellpadding="0" cellspacing="0" border="0" width="98%">
+							<col width="75%" /><col width="10%"><col width="15%" />
+							<!--{ @ .cart_options }-->
+							<tr>
+								<td class="desc">
+									<input type="hidden" name="coupon_download[{.cart_seq}][{..cart_option_seq}]" value="" />
+									<div style="float:left;padding-right:10px">{?..title1}{..title1} : { / }{..option1}</div>
+									<!--{ ? ..option2 }-->
+									<div style="float:left;padding-right:10px">{?..title2}{..title2} : { / }{..option2}</div>
+									<!--{ / }-->
+									<!--{ ? ..option3 }-->
+									<div style="float:left;padding-right:10px">{?..title3}{..title3} : { / }{..option3}</div>
+									<!--{ / }-->
+									<!--{ ? ..option4 }-->
+									<div style="float:left;padding-right:10px">{?..title4}{..title4} : { / }{..option4}</div>
+									<!--{ / }-->
+									<!--{ ? ..option5 }-->
+									<div style="float:left;padding-right:10px">{?..title5}{..title5} : { / }{..option5}</div>
+									<!--{ / }-->
+								</td>
+								<td class="desc" align='right'>{..ea}개</td>
+								<td class="desc" align='right'>￦{=number_format(..price)}</td>
+							</tr>
+							<!--{ / }-->
+							<!--{ @ .cart_suboptions }-->
+							<tr>
+								<td class="desc">
+									<div style="float:left;padding-right:10px">{..suboption_title} : {..suboption}</div>
+								</td>
+								<td class="desc" align='right'>{..ea}개</td>
+								<td class="desc" align='right'>￦{=number_format(..price)}</td>
+							</tr>
+							<!--{ / }-->
+							</table>
+						</div>
+						<!--{ : }-->
+
+						<!--{ / }-->
+							</td>
+						</tr>
+						</table>
+						<div style="display:none;" class="optional_view"></div>
+					</td>
+					<td class="cell">
+						<table align="center" border="0" cellpadding="1" cellspacing="0">
+						<!--{? .sub_cnt > 0 || .opt_cnt > 0 }-->
+						<tr>
+							<td>{.ea}</td>
+						</tr>
+						<!--{ : }-->
+						<tr>
+							<td>{.ea}</td>
+						</tr>
+						<!--{ / }-->
+						</table>
+					</td>
+					<td class="cell">￦{=number_format(.tot_price)}</td>
+					<td class="cell red" class="cartpromotioncode">-￦<span id="promotioncode_sale_717">0</span></td>
+					<td class="cell">P{=number_format(.reserve)}</td>
+					{?.shipping_provider_division}
+					<td class="cell cell_left_line" rowspan="{=shipping_company_cnt[.shipping_provider_seq]}" style="vertical-align:middle">
+						{?array_sum(provider_shipping_price[.shipping_provider_seq])}
+						<div>￦{=number_format(array_sum(provider_shipping_price[.shipping_provider_seq]))}</div>
+						{:}
+						<div>무료배송</div>
+						{/}
+					</td>
+					{/}
+				</tr>
+				<!--{ / }-->
+				<!--{ : }-->
+				<tr>
+					<td class="cell" colspan="7"  height="80">장바구니에 담긴 상품이 없습니다.</td>
+				</tr>
+				<!--{ / }-->
+				</tbody>
+			</table>
+
+			</div>
+
+
+			<div style="height:60px"></div>
+
+			<!-- 결제정보입력/결제하기 -->
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr><td><img src="../images/design/mybag_stit_pay.gif" /></td></tr>
+				<tr><td height="16"></td></tr>
+			</table>
+
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<col /><col width="280" />
+				<tr><td height="1" bgcolor="dddddd" colspan="2"></td></tr>
+			</table>
+
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #dbdbdb;">
+			<col /><col width="280" />
+				<tr>
+					<td valign="top" style="padding:23px 0">
+
+						<!-- 결제정보입력 -->
+						<table width="100%" border="0" cellpadding="0" cellspacing="0">
+							<col width="90" />
+							<tr>
+								<td>결제수단</td>
+								<td class="fx12" style="letter-spacing:-1px">
+									{@pay_types}
+									{.value_}&nbsp;&nbsp;&nbsp;&nbsp;
+									{/}
+								</td>
+							</tr>
+							<!-- {? orderData.payment == 'bank' } -->
+							<!-- 무통장 정보 입력줄 시작 -->
+							<tr class="hide">
+								<td></td>
+								<td style="padding-top:15px;">
+									<table width="100%" border="0" cellpadding="0" cellspacing="0">
+									<col width="60" />
+									<tr>
+										<td>
+											<span style="font-family:'arial black'; line-height:10px; ">·</span> 입금자명
+										</td>
+										<td>{orderData.depositor}</td>
+									</tr>
+									<tr><td height="4"></td></tr>
+									<tr>
+										<td>
+											<span style="font-family:'arial black'; line-height:10px;">·</span> 입금은행
+										</td>
+										<td>
+											{orderData.bank_account}
+										</td>
+									</tr>
+									</table>
+								</td>
+							</tr>
+							<!-- 무통장 정보 입력줄 끝 -->
+							<!-- { / } -->
+							<tr><td height="15"></td></tr>
+							<tr>
+								<td><b>에누리</b></td>
+								<td>&nbsp;{=number_format(record.enuri)}원</td>
+							</tr>
+						</table>
+
+						<!-- ~~~~~~~ 현금영수증 신청 부분 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >
+						<div id="cash_container" class="hide typereceiptlay" style="padding-top:15px;">
+							<table width="100%" border="0"  class="list_table_style">
+								<tr>
+									<td align="center">발행용도</td>
+									<td>
+										<label for="cuse0"><input type="radio" name="cuse"  id="cuse0"  value="0" checked="checked" onclick="cashBilltype(0)" />개인 소득공제용</label>
+										<label for="cuse1"><input type="radio" name="cuse"  id="cuse1"  value="1" onclick="cashBilltype(1)"/>사업자지출 증빙용</label>
+									</td>
+								</tr>
+								<tr>
+									<td align="center">인증번호</td>
+									<td>
+										<div id="personallay"  >
+										  휴대폰번호 <input type="text" name="creceipt_number[0]" class="line number" maxlength="13"/>(<span class="comment">"-" 없이 입력.</span>)
+										</div>
+										<div id="businesslay" class="hide" >
+										 사업자번호 <input type="text" name="creceipt_number[1]" class="line number" maxlength="10"/>(<span class="comment">"-" 없이 입력</span>)
+										</div>
+									</td>
+								</tr>
+							</table>
+						</div>
+						<!-- ~~~~~~~ 세금계산서 신청 부분 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ >
+						<div id="tax_container" class="hide typereceiptlay" style="padding-top:15px;">
+							<table width="100%" border="0"  class="list_table_style">
+								<tr>
+									<td align="center">상호명</td>
+									<td  class="fx12">
+										<input type="text" name="co_name" id="co_name" value="" />
+									</td>
+								</tr>
+								<tr>
+									<td align="center">대표자</td>
+									<td  class="fx12">
+										<input type="text" name="co_ceo" id="co_ceo" value=""/>
+									</td>
+								</tr>
+								<tr>
+									<td align="center">업태/업종</td>
+									<td  class="fx12">
+										<input type="text" name="co_status" id="co_status" value=""/> -
+										<input type="text" name="co_type" id="co_type" value=""/>
+									</td>
+								</tr>
+								<tr>
+									<td align="center">사업자번호</td>
+									<td  class="fx12">
+										<input type="text" name="busi_no" id="busi_no" value=""/> ex)123-12-12345
+									</td>
+								</tr>
+								<tr>
+									<td align="center">주소</td>
+									<td class="fx12">
+										<input type="text" name="co_zipcode[]" value="" size="10" /> -
+										<input type="text" name="co_zipcode[]" value="" size="10" />
+										<img src="../images/design/btn_zipsearch.gif" hspace="1" alt="우편번호검색" class="hand" onclick="window.open('../popup/zipcode?mtype=co_','popup_zipcode','width=500,height=350')" designImgSrcOri='Li4vaW1hZ2VzL2Rlc2lnbi9idG5femlwc2VhcmNoLmdpZg==' designTplPath='RDovd2Vic2VydmljZS9nc2Rldl9taW0vZGF0YS9za2luL3dvbmRlcnBsYWNlL29yZGVyL3NldHRsZS5odG1s' designImgSrc='L2RhdGEvc2tpbi93b25kZXJwbGFjZS9pbWFnZXMvZGVzaWduL2J0bl96aXBzZWFyY2guZ2lm' designElement='image' /> <br />
+										<input type="text" name="co_address" id="co_address" size="40"  value=""/>
+									</td>
+								</tr>
+							</table>
+						</div>
+						-->
+
+					</td>
+					<td valign="top" style="padding:23px 0; border-left:1px solid #dbdbdb">
+						<!-- 최종결제금액 -->
+						<table align="center" border="0" cellpadding="0" cellspacing="0" >
+							<tr>
+								<td>최종결제금액</td>
+							</tr>
+							<tr><td height="7"></td></tr>
+							<tr>
+								<td width="257" height="60" background="../images/design/order_price_bg.gif" style="text-align:right; font-weight:bold; color:#fff;" designImgSrcOri='Li4vaW1hZ2VzL2Rlc2lnbi9vcmRlcl9wcmljZV9iZy5naWY=' >
+									<input type="hidden" name="total_price" value="">
+									<span style="font-size:24px; font-family:tahoma;" class="settle_price" id="total_settle_price">{=number_format(orderData.settleprice)}</span>
+									<span style="padding-right:10px; font-size:12px">원</span>
+								</td>
+							</tr>
+							<tr><td height="80" colspan="2"></td></tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			</form>

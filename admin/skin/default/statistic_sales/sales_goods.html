@@ -1,0 +1,468 @@
+{ #layout_header }
+
+<style>
+/* 간단 데이터 테이블 스타일 */
+table.salesgoods-table-style {border-collapse:collapse;}
+table.salesgoods-table-style th {background-color:#f3f3f3; min-height:24px; line-height:24px; border:1px solid #c8c8c8; color:#666; font-weight:normal;}
+table.salesgoods-table-style td {padding:5px 5px; border:1px solid #d7d7d7; color:#666}
+table.salesgoods-table-style th.tdLineRight,
+table.salesgoods-table-style td.tdLineRight {border-right:2px solid #000;}
+table.salesgoods-table-style tr.trLineBottom th,
+table.salesgoods-table-style tr.trLineBottom td {border-bottom:2px solid #000;}
+table.salesgoods-table-style tr.trLineTop th,
+table.salesgoods-table-style tr.trLineTop td {border-top:2px solid #000;}
+</style>
+
+<script>
+$(function(){
+	/* 카테고리 불러오기 */
+	category_admin_select_load('','category1','',function(){
+		<!--{?sc.category1}-->
+		$("select[name='category1']").val('{_GET.category1}').change();
+		<!--{/}-->
+	});
+	$("select[name='category1']").bind("change",function(){
+		category_admin_select_load('category1','category2',$(this).val(),function(){
+			<!--{?sc.category2}-->
+			$("select[name='category2']").val('{_GET.category2}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category2','category3',"");
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category2']").bind("change",function(){
+		category_admin_select_load('category2','category3',$(this).val(),function(){
+			<!--{?sc.category3}-->
+			$("select[name='category3']").val('{_GET.category3}').change();
+			<!--{/}-->
+		});
+		category_admin_select_load('category3','category4',"");
+	});
+	$("select[name='category3']").bind("change",function(){
+		category_admin_select_load('category3','category4',$(this).val(),function(){
+			<!--{?sc.category4}-->
+			$("select[name='category4']").val('{_GET.category4}').change();
+			<!--{/}-->
+		});
+	});
+
+	/* 브랜드 불러오기 */
+	brand_admin_select_load('','brands1','',function(){
+		<!--{?sc.brands1}-->
+		$("select[name='brands1']").val('{_GET.brands1}').change();
+		<!--{/}-->
+	});
+	$("select[name='brands1']").bind("change",function(){
+		brand_admin_select_load('brands1','brands2',$(this).val(),function(){
+			<!--{?sc.brands2}-->
+			$("select[name='brands2']").val('{_GET.brands2}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('brands2','brands3',"");
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("select[name='brands2']").bind("change",function(){
+		brand_admin_select_load('brands2','brands3',$(this).val(),function(){
+			<!--{?sc.brands3}-->
+			$("select[name='brands3']").val('{_GET.brands3}').change();
+			<!--{/}-->
+		});
+		brand_admin_select_load('brands3','brands4',"");
+	});
+	$("select[name='brands3']").bind("change",function(){
+		brand_admin_select_load('brands3','brands4',$(this).val(),function(){
+			<!--{?sc.brands4}-->
+			$("select[name='brands1']").val('{_GET.brands1}').change();
+			<!--{/}-->
+		});
+	});
+});
+</script>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar" class="gray-bar">
+
+		<!-- 좌측 버튼 -->
+		<ul class="page-buttons-left">
+
+		</ul>
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2>매출 통계</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+
+		</ul>
+
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+<div class="sub-layout-container body-height-resizing">
+
+	{#sales_menu}
+
+	<!-- 서브메뉴 바디 : 시작-->
+	<div class='slc-body-wrap'>
+		<div class="slc-body">
+
+			<div class="item-title" style="margin-left:25px;">상품별 매출 통계 <span class="helpicon" title="특정 상품별 매출을 볼 수 있습니다."></span></div>
+
+			<div style="padding:0 20px">
+
+				<br style="line-height:10px" />
+
+				<form>
+					<div class="search-form-container">
+					<table class="search-form-table">
+					<tr>
+						<td>
+							<table>
+							<tr>
+								<td width="500">
+									<table class="sf-keyword-table">
+									<tr>
+										<td class="sfk-td-txt"><input type="text" name="keyword" value="{_GET.keyword}" title="상품명, 상품코드, 거래처" /></td>
+										<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+									</tr>
+									</table>
+								</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+					</div>
+
+					<table width="100%" class="info-table-style">
+					<col width="10%" />
+					<col width="40%" />
+					<col width="10%" />
+					<col width="40%" />
+					<tr>
+						<th class="its-th">매출기간 <span class="helpicon" title="입금완료일 기준입니다"></span></th>
+						<td class="its-td">
+							<input type="text" name="s_date" value="{_GET.s_date}" size="10" class="line datepicker" /> ~
+							<input type="text" name="e_date" value="{_GET.e_date}" size="10" class="line datepicker" />
+						</td>
+						<th class="its-th">입점사</th>
+						<td class="its-td">
+							<div class="ui-widget">
+								<select name="provider_seq_select" class="provider_seq_select" style="vertical-align:middle;">
+								<option value="" selected="selected" ></option>
+								<option value="1" >본사</option>
+								{@provider}
+								<option value="{.provider_seq}">{.provider_name}({.provider_id})</option>
+								{/}
+								</select>
+
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+								<input type="hidden" class="provider_seq" name="provider_seq" value="{_GET.provider_seq}" />
+								<input type="text" name="provider_name" value="{_GET.provider_name}" readonly />
+							</div>
+							<span class="ptc-charges hide"></span>
+
+							<style>
+							.ui-combobox {
+								position: relative;
+								display: inline-block;
+							}
+							.ui-combobox-toggle {
+								position: absolute;
+								top: 0;
+								bottom: 0;
+								margin-left: -1px;
+								padding: 0;
+								/* adjust styles for IE 6/7 */
+								*height: 1.7em;
+								*top: 0.1em;
+							}
+							.ui-combobox-input {
+								margin: 0;
+								padding: 0.3em;
+							}
+							.ui-autocomplete {
+								max-height: 200px;
+								overflow-y: auto;
+								/* prevent horizontal scrollbar */
+								overflow-x: hidden;
+							}
+
+							</style>
+
+							<script>
+							$( ".provider_seq_select" )
+							.combobox()
+							.change(function(){
+								$("input[name='provider_base']").removeAttr('checked').change();
+								$("input[name='provider_seq']").val($(this).val());
+								$("input[name='provider_name']").val($("option:selected",this).text());
+							});
+							</script>
+						</td>
+					</tr>
+					<tr>
+						<th class="its-th">카테고리</th>
+						<td class="its-td">
+							<select class="line" name="category1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+							<select class="line" name="category2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+							<select class="line" name="category3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+							<select class="line" name="category4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+						</td>
+						<th class="its-th">브랜드</th>
+						<td class="its-td">
+							<select class="line" name="brands1" size="1" style="width:100px;"><option value="">= 1차 분류 =</option></select>
+							<select class="line" name="brands2" size="1" style="width:100px;"><option value="">= 2차 분류 =</option></select>
+							<select class="line" name="brands3" size="1" style="width:100px;"><option value="">= 3차 분류 =</option></select>
+							<select class="line" name="brands4" size="1" style="width:100px;"><option value="">= 4차 분류 =</option></select>
+						</td>
+					</tr>
+					</table>
+
+					<br style="line-height:10px" />
+
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td align="right" valign="bottom">
+						<select name="sort" onchange="$(this.form).submit();">
+						<option value="deposit_ymd desc">최근매출일↑</option>
+						<option value="ea desc">판매수량↑</option>
+						<option value="ea asc">판매수량↓</option>						
+						<option value="goods_price desc">매출합계↑</option>
+						<option value="goods_price asc">매출합계↓</option>
+						</select>
+						<span class="btn small"><input type="button" value="엑셀출력" onclick="divExcelDownload('판매수단별_매출','#sales_goods_table')" /></span>
+						<script>
+						{?_GET.sort}
+						$("select[name='sort']").val('{_GET.sort}');
+						{/}
+						</script>
+						</td>
+					</tr>
+					</table>
+
+				</form>
+
+				<br style="line-height:10px" />
+				
+				<div id="sales_goods_table">
+					<table width="100%" class="salesgoods-table-style" style="margin:auto;" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<th rowspan="2" width="40">번호</th>
+						<th rowspan="2" width="80">매출일</th>
+						<th rowspan="2" width="150">입점(배송)</th>
+						<th rowspan="2" colspan="2">판매상품</th>
+						<th rowspan="2" width="80">매입가</th>
+						<th rowspan="2" width="80">정가</th>
+						<th rowspan="2">할인가</th>
+						<th rowspan="2">수량</th>
+						<th rowspan="2" class="tdLineRight"><b>매출합계</b></th>
+						<th rowspan="2">개별배송비</th>
+						<th colspan="5">할인</th>
+					</tr>
+					<tr>
+						<th>상품쿠폰</th>
+						<th>회원등급</th>
+						<th>상품Like</th>
+						<th>모바일</th>
+						<th>코드</th>
+					</tr>
+{@statsData}
+<tr>
+<td align="center">{=number_format(.index_+1)}</td>
+<td align="center">{.deposit_ymd}</td>
+<td align="center">{.provider_name} ({?.provider_gb=='company'}본사배송{:}입점사배송{/})</td>
+<td width="180" align="center">{.goods_name}</td>
+<td width="70" class="desc" align="left">
+	{?.title1}{.title1} : {.option1}<br />{/}
+	{?.title2}{.title2} : {.option2}<br />{/}
+	{?.title3}{.title3} : {.option3}<br />{/}
+	{?.title4}{.title4} : {.option4}<br />{/}
+	{?.title5}{.title5} : {.option5}<br />{/}
+</td>
+<td align="right">{=number_format(.supply_price)}</td>
+<td align="right">{=number_format(.consumer_price)}</td>
+<td align="right">{=number_format(.price)}</td>
+<td align="right">{=number_format(.ea)}</td>
+<td align="right" class="tdLineRight"><b>{=number_format(.goods_price)}</b></td>
+<td align="right">{=number_format(.goods_shipping_cost)}</td>
+<td align="right">{=number_format(.coupon_sale)}</td>
+<td align="right">{=number_format(.member_sale)}</td>
+<td align="right">{=number_format(.fblike_sale)}</td>
+<td align="right">{=number_format(.mobile_sale)}</td>
+<td align="right">{=number_format(.promotion_code_sale)}</td>
+</tr>
+{/}
+					<tr class="trLineBottom">
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td align="right">소계</td>
+						<td align="right" class="tdLineRight"><b>{=number_format(statsDataSum.goods_price)}</b></td>
+						<td align="right"><b>{=number_format(statsDataSum.goods_shipping_cost)}</b></td>
+						<td align="right"><b>{=number_format(statsDataSum.coupon_sale)}</b></td>
+						<td align="right"><b>{=number_format(statsDataSum.member_sale)}</b></td>
+						<td align="right"><b>{=number_format(statsDataSum.fblike_sale)}</b></td>
+						<td align="right"><b>{=number_format(statsDataSum.mobile_sale)}</b></td>
+						<td align="right"><b>{=number_format(statsDataSum.promotion_code_sale)}</b></td>
+					</tr>
+					{?search_mode=='order'}
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td colspan="2" align="right">(+)기본배송비</td>
+						<td align="right" class="tdLineRight"><b>{=number_format(orderData.shipping_cost_sum)}</b></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td colspan="2" align="right">(-)배송비쿠폰</td>
+						<td align="right" class="tdLineRight"><b>{=number_format(orderData.coupon_sale_sum)}</b></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td colspan="2" align="right">(-)배송비코드</td>
+						<td align="right" class="tdLineRight"><b>{=number_format(orderData.promotion_code_sale_sum)}</b></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td colspan="2" align="right">(-)적립금사용</td>
+						<td align="right" class="tdLineRight"><b>{=number_format(orderData.emoney_use_sum)}</b></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td colspan="2" align="right">(-)이머니사용</td>
+						<td align="right" class="tdLineRight"><b>{=number_format(orderData.cash_use_sum)}</b></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td colspan="2" align="right">(-)에누리</td>
+						<td align="right" class="tdLineRight"><b>{=number_format(orderData.enuri_sum)}</b></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr class="trLineTop">
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td colspan="2" align="right">(-)환불</td>
+						<td align="right" class="tdLineRight"><b>{=number_format(refundData.refund_price_sum)}</b></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					<tr class="trLineTop">
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td colspan="2" align="right">최종 매출합계</td>
+						<td align="right" class="tdLineRight"><b>{=number_format(orderData.sales_price_sum-refundData.refund_price_sum)}</b></td>
+						<td colspan="6" align="center">
+							<b>
+							+ {=number_format(statsDataSum.goods_shipping_cost)} (개별배송비)
+							- {=number_format(statsDataSum.goods_shipping_cost+statsDataSum.coupon_sale+statsDataSum.member_sale+statsDataSum.fblike_sale+statsDataSum.mobile_sale+statsDataSum.promotion_code_sale)} (할인)
+							= {=number_format(orderData.settleprice_sum-refundData.refund_price_sum)}
+							</b>
+						</td>
+					</tr>
+					{/}
+					</table>
+				</div>
+
+			</div>
+
+		</div>
+	</div>
+</div>
+
+{ #layout_footer }

@@ -1,0 +1,49 @@
+{ @ display_list }
+	<tr>
+		<td class="dlts-td center">{?.display_seq>10}<input type="checkbox" name="delete_display_seq[]" value="{.display_seq}" />{/} {.display_seq}</td>
+		<td class="dlts-td center">
+			{?styles[.style].custom}
+				<div class="desc">[추가 스타일]</div>
+				{.style}
+			{:}
+				{styles[.style].name}
+			{/}
+		</td>
+		<td class="dlts-td left">{.regdate}</td>
+		<td class="dlts-td center">
+			<div class="admin_comment" display_seq="{.display_seq}">{=htmlspecialchars(.admin_comment)}</div>
+			<span>{.title}</span>
+		</td>
+		<td class="dlts-td center">
+			<span id="tag_display_{.display_seq}"></span> <span class="btn small"><input type="button" value="태그복사" id="copy_display_{.display_seq}" /></span>
+		</td>
+		<td class="dlts-td center">
+			<span class="btn small red"><input type="button" value="선택" onclick="select_display('{.display_seq}','{.image}','{.style}')" /></span>
+			<span class="btn small"><input type="button" value="수정" onclick="edit_display('{.display_seq}', '{.kind}')" /></span>
+			<span class="btn small"><input type="button" value="복사" onclick="copy_display('{.display_seq}')" /></span>
+		</td>
+	</tr>
+	<script type="text/javascript">
+
+		var tag_display = "{" + "=showDesignDisplay({.display_seq})" + "}";
+		$("#tag_display_{.display_seq}").text(tag_display);
+
+		var tagCopyClipIdx = tagCopyClips.length;
+		tagCopyClips[tagCopyClipIdx] = new ZeroClipboard.Client();
+		tagCopyClips[tagCopyClipIdx].setHandCursor( true );
+		tagCopyClips[tagCopyClipIdx].setCSSEffects( true );
+		tagCopyClips[tagCopyClipIdx].setText(tag_display);
+		tagCopyClips[tagCopyClipIdx].addEventListener( 'complete', function(client, text) {
+			alert("상품디스플레이 태그가 복사되었습니다.\nHTML소스의 원하시는 위치에 Ctrl+V로 붙여넣기 하세요.");
+		} );
+		tagCopyClips[tagCopyClipIdx].glue('copy_display_{.display_seq}');
+
+		$("#ZeroClipboardMovie_"+(tagCopyClipIdx+1)).parent().css({
+				'left' : $("#copy_display_{.display_seq}").position().left,
+				'top' : $("#copy_display_{.display_seq}").position().top
+		});
+
+		$("#copy_display_{.display_seq}").after($("#ZeroClipboardMovie_"+(tagCopyClipIdx+1)).parent());
+
+	</script>
+{ / }

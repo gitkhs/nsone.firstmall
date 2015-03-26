@@ -1,0 +1,34 @@
+<table width="800" class="simpledata-table-style" style="margin:auto;">
+<col width="15%" />
+<col width="15%" />
+<col width="15%" />
+<col width="15%" />
+<col width="15%" />
+<col width="15%" />
+<tr>
+	<th>월</th>
+	<th>페이지뷰</th>
+	<th>전월대비(페이지뷰)</th>
+	<th>방문자수</th>
+	<th>전월대비(방문자수)</th>
+	<th>인당페이지뷰</th>
+</tr>
+<tr>
+	<td align="center">합계</td>
+	<td align="right" class="pdr5"><font color="{seriesColors[0]}">{=number_format(dataForTableSum.pv)}</font></td>
+	<td align="right" class="pdr5"></td>
+	<td align="right" class="pdr5"><font color="{seriesColors[1]}">{=number_format(dataForTableSum.visit)}</font></td>
+	<td align="right" class="pdr5"></td>
+	<td align="right" class="pdr5">{dataForTableSum.pvPerVisit}</td>
+</tr>
+{@dataForTable}
+<tr>
+	<td align="center">{.key_+1}월</td>
+	<td align="right" class="pdr5"><font color="{seriesColors[0]}">{=number_format(.pv)}</font></td>
+	<td align="right" class="pdr5">{=round(abs(.pvGrowth),1)}% {?.pvGrowth>0}<font color=blue>▲</font>{:.pvGrowth<0}<font color=red>▼</font>{/}</td>
+	<td align="right" class="pdr5"><font color="{seriesColors[1]}">{=number_format(.visit)}</font></td>
+	<td align="right" class="pdr5">{=round(abs(.visitGrowth),1)}% {?.visitGrowth>0}<font color=blue>▲</font>{:.visitGrowth<0}<font color=red>▼</font>{/}</td>
+	<td align="right" class="pdr5">{.pvPerVisit}</td>
+</tr>
+{/}
+</table>

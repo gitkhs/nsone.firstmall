@@ -1,0 +1,280 @@
+<style>
+/* 출고내역 테이블 */
+table td.info {border:1px solid #ddd;}
+table td.null,table th.null { border:0px; background:#fff }
+span.goods_name {display:inline-block;white-space:nowrap;overflow:hidden;width:150px;text-overflow:ellipsis;-o-text-overflow:ellipsis;vertical-align:middle}
+.option_title { display:inline-block;padding-left:10px }
+span.remind_ea { display:inline-block;text-align:right;width:20px; }
+</style>
+<script type="text/javascript">
+$(function(){
+	$("select[name='delivery_step']").bind("change",function(){
+		$(this).next().removeClass("hide");
+		if( $(this).val() == '45' ){
+			$(this).next().addClass("hide");
+		}
+	});
+
+	$(".shipping_user_name")
+	.bind("mouseenter",function(){
+		$(this).parent().children(".relative").children().show();
+	})
+	.bind("mouseleave",function(){
+		$(this).parent().children(".relative").children().hide();
+	});
+
+	$("select.domestic_shipping_method").bind("change",function(){
+		if($(this).val()!='delivery' && $(this).val()!='postpaid'){
+			$(this).parent().find("select.delivery_company").attr("disabled",true);
+			$(this).parent().find("input.delivery_number").attr("disabled",true);
+		}else{
+			$(this).parent().find("input.delivery_number").attr("disabled",false);
+			$(this).parent().find("select.delivery_company").attr("disabled",false).change();
+		}
+	}).change();
+
+	$("select.delivery_company").bind("change",function(){
+		var thisValue = $(this).val() ? $(this).val() : '';
+		if(thisValue.substring(0,5)=='auto_'){
+			$(this).parent().find("input.delivery_number").attr("disabled",true);
+		}else{
+			$(this).parent().find("input.delivery_number").attr("disabled",false);
+		}
+	}).change();
+
+	apply_input_style();
+
+});
+</script>
+
+<form name="goods_export" id="goods_export" method="post" action="../order_process/batch_export" target="actionFrame"><!-- onsubmit="loadingStart();"-->
+<div class="pdb10 center">
+	<!-- { ? config_system.invoice_use } -->
+	<span id="invoice_manual_button" class="hand"><img src="../images/common/btn_dliv_auto_on.gif" align="absmiddle" vspace="5" /></span>
+	<!-- { : } -->
+	<a href="../setting/shipping"><img src="../images/common/btn_dliv_auto_off.gif" align="absmiddle" vspace="5" /></a>
+	<!-- { / } -->
+</div>
+<table class="simplelist-table-style" width="100%" border="0">
+<colgroup>
+	<col width="90" />
+	<col width="110" />
+	<col />
+	<col />
+	<col />
+	<col />
+	<col />
+	<col />
+</colgroup>
+<thead>
+<tr>
+	<th>받는분</th>
+	<th>주문번호</th>
+	<th>주문상품</th>
+	<th>주문수량</th>
+	<th>취소수량</th>
+	<th>출고된 수량</th>
+	<th>남은 출고 수량 <span class="helpicon" title="결제완료+상품준비"></span></th>
+	<th class="null"></th>
+	<th>출고할 수량</th>
+	<th>배송방법</th>
+</tr>
+</thead>
+<tbody>
+<!-- { @ exports } -->
+	<!-- { @ .order_shipping.kind } -->
+		<!-- { ? ..key_ == 'coupon' } -->
+<input type="hidden" name="coupon_export[{.order_shipping.shipping_seq}]" value="{.order.order_seq}" />
+		<!-- { : } -->
+<input type="hidden" name="international[{.order_shipping.shipping_seq}]" value="{.order.international}" />
+<input type="hidden" name="ea[{.order_shipping.shipping_seq}]" value="{..value_['ea']}" />
+<input type="hidden" name="order_seq[{.order_shipping.shipping_seq}]" value="{.order.order_seq}" />
+		<!-- { / } -->
+<tr>
+		<!-- { ? ..index_ == 0 } -->
+	<td class="info pdl5 pdr5" align="center" { ? .order_shipping.kind_cnt > 1 }rowspan="2"{ / }>
+		<b class="shipping_user_name">[{.order_shipping.recipient_user_name}]</b>
+		<div class="relative">
+			<div class="absolute hide" style="width:900px; border:2px solid #333; background-color:#fff; padding:10px; text-align:left;">
+				<table class="simplelist-table-style" width="100%">
+				<col width="80" />
+				<col width="70" />
+				<col width="300" />
+				<col width="100" />
+				<tr>
+					<th>받으실분</th>
+					<th>우편번호</th>
+					<th>주소</th>
+					<th>연락처</th>
+					{?.order_shipping.memo}
+					<th width="300">배송메세지</th>
+					{/}
+				</tr>
+				<tr>
+					<td class="info center pd5">{.order_shipping.recipient_user_name}</td>
+					<td class="info center pd5">{.order_shipping.recipient_zipcode[0]}-{.order_shipping.recipient_zipcode[1]}</td>
+					<td class="info pd5">
+						<!-- { ? .order_shipping.kind['goods'] } -->
+						{.order_shipping.recipient_address} {.order_shipping.recipient_address_detail}
+						{?.order_shipping.recipient_address_street}
+							<br />{.order_shipping.recipient_address_street} {.order_shipping.recipient_address_detail}
+						{/}
+						<!-- { / } -->
+						{ ? .order_shipping.kind_cnt > 1 }<br/>{ / }
+						<!-- { ? .order_shipping.kind['coupon'] } -->
+						{?.order.recipient_email}{.order.recipient_email}<br />{/}
+						<!-- { / } -->
+					</td>
+					<td class="info center pd5">
+						{?.order_shipping.recipient_phone}{=implode('-',.order_shipping.recipient_phone)}<br />{/}
+						{?.order_shipping.recipient_cellphone}{=implode('-',.order_shipping.recipient_cellphone)}<br />{/}
+					</td>
+					{?.order_shipping.memo}
+					<td class="info center pd5">{.order_shipping.memo}</td>
+					{/}
+				</tr>
+				</table>
+			</div>
+		</div>
+	</td>
+	<td class="info fx11 lsp-1" align="center" { ? .order_shipping.kind_cnt > 1 }rowspan="2"{ / }>{.order.order_seq}</td>
+		<!-- { / } -->
+	<td class="info" align="center"><span class="goods_name">{..value_['goods_name']}</span></td>
+	<td class="info" align="center">{..value_['ea']}</td>
+	<td class="info" align="center">{..value_['step85']}</td>
+	<td class="info" align="center">{..value_['step_complete']}</td>
+	<td class="info remain-ea" align="center">{..value_['step_remind']}</td>
+	<td class="null" align="center">→</td>
+	<td class="info export-ea export-ea-left" align="center">{..value_['step_remind']}</td>
+	<td class="info export-ea" align="left" style="padding-left:10px">
+		<!-- { ? ..key_ == 'coupon' } -->
+		<input type="text" name="coupon_mail[{.order_shipping.shipping_seq}]" value="{ .order.recipient_email }" />
+		<input type="text" name="coupon_sms[{.order_shipping.shipping_seq}]" value="{=implode('-',.order_shipping.recipient_cellphone)}" />
+		<span class="sms_icon" title="SMS 잔여건수"></span>
+		<b>{=number_format(smsinfo.cnt)}건</b>
+		<span class="btn small cyanblue"><button type="button" onclick="location.href='{smsinfo.link}';">충전</button></span>
+		<!-- { : } -->
+			<!-- { ? .order.international == 'domestic' } -->
+				<!-- { ? shipping_policy.count[0] } -->
+		<select name="domestic_shipping_method[{.order_shipping.shipping_seq}]" class="line chk_delivery domestic_shipping_method">
+					<!-- { @ shipping_policy.policy[0]  } -->
+			<option value="{...code}" {?.order.shipping_method==...code}selected="selected"{/}>{...method}</option>
+					<!-- { / } -->
+		</select>
+				<!-- { / } -->
+				<!-- {?shipping_policy.policy[0]} -->
+		<select name="delivery_company[{.order_shipping.shipping_seq}]"  class="line delivery_company">
+					<!-- { @ get_shipping_company(.order.international,'delivery') } -->
+						<!-- { ? substr(...key_,0,5)=='auto_' } -->
+			<option value="{...key_}" style="background-color:yellow">{...company}</option>
+						<!-- { : } -->
+			<option value="{...key_}">{...company}</option>
+						<!-- { / } -->
+					<!-- { / } -->
+		</select>
+				<!-- { / } -->
+		<input type="text" name="delivery_number[{.order_shipping.shipping_seq}]" class="line delivery_number">
+			<!-- { / } -->
+			<!-- { ? .order.international == 'international' } -->
+				<!-- { ? shipping_policy.count[1] } -->
+		<select name="international_shipping_method[{.order_shipping.shipping_seq}]"  class="line chk_delivery">
+					<!-- { @ shipping_policy.policy[1]  } -->
+			<option value="{...code}"{? ...index_==.order.shipping_method_international} selected{/}>{...method}</option>
+					<!-- { / } -->
+		</select>
+				<!-- { / } -->
+		<input type="text" name="international_number[{.order_shipping.shipping_seq}]" size="33" class="line">
+			<!-- { / } -->
+		<!-- { / } -->
+	</td>
+</tr>
+	<!-- { / } -->
+<!-- { / } -->
+</tbody>
+</table>
+
+<div align="right" style="padding-right:220px"><img src="../images/design/image_arrow_blue.gif"></div>
+
+<table width="100%" class="simplelist-table-style export">
+<colgroup>
+	<col width="20%" />
+	<col width="20%"/>
+	<col width="20%"/>
+	<col />
+</colgroup>
+<thead>
+<tr>
+	<th>출고상품수량</th>
+	<th>배송방법</th>
+	<th>출고일자</th>
+	<th>출고상태</th>
+</tr>
+<thead>
+<tbody>
+{ ? goods_cnt > 0 }
+<tr align="center">
+	<td>각 주문의 모든 상품수량</td>
+	<td>
+		상기 입력된 배송 방법
+	</td>
+	<td><input type="text" name="export_date" value="{=date('Y-m-d')}" size="10" class="datepicker line"> </td>
+	<td>
+		<select name="delivery_step">
+			<option value="55">출고완료</option>
+			<option value="45">출고준비</option>
+		</select>
+		<span class="desc">출고완료시 재고가 차감 됩니다.</span>
+	</td>
+</tr>
+{ / }
+{ ? coupon_cnt > 0 }
+<tr align="center">
+	<td>각 주문의 모든 쿠폰상품 수량</td>
+	<td>상기 입력된 이메일과 SMS</td>
+	<td><input type="text" name="coupon_export_date" value="{=date('Y-m-d')}" size="10" class="datepicker line"> </td>
+	<td><b style="color:#000;">출고완료</b> <span class="desc">재고가 차감 됩니다.</span></td>
+</tr>
+{ / }
+</tbody>
+</table>
+<br style="line-height:20px;" />
+<div align="center">
+	<div class="desc pdb5">
+		<!-- { ? cfg_order.export_err_handling == 'error' } -->
+		재고가 부족하면 출고완료 불가능
+		<!-- { : } -->
+		재고가 부족해도 출고완료 가능
+		<!-- { / } -->
+	</div>
+
+	<div><strong class="fx15">상기 내용으로 출고처리를 하시겠습니까?</strong></div>
+
+	<br style="line-height:15px;" />
+	<div><span class="btn large black"><button type="submit" id="goods_export">출고처리</button></span></div>
+</div>
+</form>
+<br style="line-height:10px;" />
+
+{ ? goods_cnt > 0 }
+<div id="delivery_setting_info">
+	<br style="line-height:10px;" />
+	<div style="font-family:thaoma;font-size:12px;padding:10px 10px 10px 10px;border:2px solid red;">
+	<strong>배송방법 설정 안내</strong><br/>
+	출고 처리하기 위해서는 배송방법이 필요합니다. <span class="red">현재 사용 중인 배송방법이 없습니다.</span><br />
+	설정 > <a href="" target="_blank"><span class="highlight-link">택배/배송비</span></a>에서 사용할 배송방법을 세팅 해 주세요.
+	</div>
+</div>
+<script type="text/javascript">
+$("#delivery_setting_info").hide();
+var chk_delivery = false;
+$("span.chk_delivery").each(function(){
+	if( $(this).html() ){
+		chk_delivery = true;
+	}
+});
+if($("select.chk_delivery option").length > 0){
+	chk_delivery = true;
+}
+if(!chk_delivery) $("#delivery_setting_info").show();
+</script>
+{/}

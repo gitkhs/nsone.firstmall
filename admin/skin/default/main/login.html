@@ -1,0 +1,133 @@
+{ #layout_header }
+
+<style>
+.login_txt {margin:1px; border:1px solid #c5c9ce !important; cursor:default; width:180px; height:12px;}
+.login_txt:focus {margin:0px; border:1px solid #434b55 !important; cursor:text; width:180px; height:12px;}
+</style>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#tab1").click(function(){
+		$(this).attr("background","../images/common/login_tab_bg_on.gif");
+		$("#tab2").attr("background","../images/common/login_tab_bg.gif");
+		$("input[name='manager_yn']").val('Y');
+		$(".tab2_y").hide(); 
+		$(".tab1_y").show();
+	});
+
+	$("#tab2").click(function(){
+		$(this).attr("background","../images/common/login_tab_bg_on.gif");
+		$("#tab1").attr("background","../images/common/login_tab_bg.gif");
+		$("input[name='manager_yn']").val('N');
+		$(".tab2_y").show(); 
+		$(".tab1_y").hide();
+	});
+
+	$(".submit_btn").click(function(){
+		$("#loginForm").submit();
+	});
+});
+</script>
+
+
+
+<form name="loginForm" id="loginForm" method="post" action="../login_process/login" target="actionFrame">
+<input type="hidden" name="manager_yn" value="Y"/>
+
+<table width="100%" height="500">
+<tr>
+	<td align="center">
+
+	<div style="padding-bottom:15px;"><img src="../images/common/login_title.gif"></div>
+	
+	<div style="border:3px solid #b8b8b8;width:520px;">
+	<table width="400" cellpadding="0" cellspacing="0">
+	<tr><td colspan="2" height="40"></td></tr>
+	<tr>
+		<td width="200" height="30" background="../images/common/login_tab_bg_on.gif" style="color:#ffffff;font-weight:bold;cursor:pointer;" id="tab1">대표관리자</td>
+		<td width="200" background="../images/common/login_tab_bg.gif" style="color:#ffffff;font-weight:bold;cursor:pointer;" id="tab2">부관리자</td>
+	</tr>
+	<tr><td colspan="2" height="36"></td></tr>
+	</table>
+		
+	<table width="400" cellpadding="0" cellspacing="0">
+
+
+
+	<tr class="tab1_y">
+		<td align="left">대표 관리자 아이디</td>
+		<td align="left">
+			<input type="text" name="main_id" class="login_txt" />
+		</td>
+		<td rowspan="3" align="right">
+			<img src="../images/common/login_btn.gif" style="cursor:pointer;" class="submit_btn">
+		</td>
+	</tr>
+	<tr class="tab1_y"><td colspan="3" height="8"><td></tr>
+	<tr class="tab1_y">
+		<td align="left">대표 관리자 비밀번호</td>
+		<td align="left">
+			<input type="text" name="main_pwd" class="login_txt" />
+		</td>
+	</tr>
+
+	
+
+
+	<tr class="tab2_y" style="display:none;">
+		<td align="left">대표 관리자 아이디</td>
+		<td align="left">
+			<input type="text" name="admin_id" class="login_txt" />
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr class="tab2_y" style="display:none;"><td colspan="3" height="8"><td></tr>
+	<tr class="tab2_y" style="display:none;">
+		<td align="left">부 관리자 아이디</td>
+		<td align="left">
+			<input type="text" name="sub_id" class="login_txt" />
+		</td>
+		<td rowspan="3" align="right">
+			<img src="../images/common/login_btn.gif" style="cursor:pointer;" class="submit_btn">
+		</td>
+	</tr>
+	<tr class="tab2_y" style="display:none;"><td colspan="3" height="8"><td></tr>
+	<tr class="tab2_y" style="display:none;">
+		<td align="left">부 관리자 비밀번호</td>
+		<td align="left">
+			<input type="text" name="sub_pwd" class="login_txt" />
+		</td>
+	</tr>
+
+
+
+
+
+
+	<tr><td colspan="3" height="12"><td></tr>
+	<tr>
+		<td align="left">&nbsp;</td>
+		<td colspan="2" align="left">
+			<span style="font-size:11px;font-family:Dotum;font-weight:bold;color:#4c4e50"><label><input type="checkbox" name="" value="Y"> 아이디 저장하기</label></span>
+			<span style="padding-left:20px;"><img src="../images/common/login_search_idpw.gif" align="absmiddle"></span>
+		</td>
+	</tr>
+	<tr><td colspan="3" height="40"><td></tr>
+	</table>
+	</div>
+
+	</td>
+</tr>
+</table> 
+
+</form>
+
+
+
+
+
+
+
+
+
+{ #layout_footer }

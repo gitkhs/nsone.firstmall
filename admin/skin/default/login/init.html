@@ -1,0 +1,57 @@
+{ #common_html_header }
+
+<style>
+.login_txt {margin:0px; border:1px solid #c5c9ce !important; cursor:default; width:180px; height:12px;}
+.login_txt:focus {margin:0px; border:1px solid #434b55 !important; cursor:text; width:180px; height:12px;}
+</style>
+
+
+<div class="Index" id="Index">
+<form name="loginForm" id="loginForm" method="post" action="/admin/login_process/init" target="actionFrame">
+
+<table width="100%" height="500">
+<tr>
+	<td align="center">
+
+	<div style="font-size:20px; font-weight:bold; padding-bottom:15px;">대표관리자 아이디 생성</div>
+	
+	<div style="border:3px solid #b8b8b8;width:470px;">
+
+		<table class="tab1_y" width="400" cellpadding="0" cellspacing="0">
+		<tr><td colspan="2" height="20"></td></tr>
+		<tr>
+			<td align="left">관리자 아이디</td>
+			<td align="left">
+				<input type="text" name="main_id" class="login_txt" tabindex="1" title="아이디" value="" />
+			</td>
+		</tr>
+		<tr><td height="8"><td></tr>
+		<tr>
+			<td align="left">관리자 비밀번호</td>
+			<td align="left">
+				<input type="password" name="main_pwd" class="login_txt" tabindex="2" title="비밀번호" value="" />
+			</td>
+		</tr>
+		<tr><td height="8"><td></tr>
+		<tr>
+			<td align="left">관리자 비밀번호 확인</td>
+			<td align="left">
+				<input type="password" name="main_pwd_confirm" class="login_txt" tabindex="3" title="비밀번호" value="" />
+			</td>
+		</tr>
+		<tr><td colspan="2" height="20"></td></tr>
+		</table>
+
+		<div class="pdb20 center"><span class="btn large"><input type="submit" style="cursor:pointer;" class="submit_btn" tabindex="4" value="생성"></span></div>
+
+	</div>
+
+	</td>
+</tr>
+</table> 
+
+</form>
+</div>
+
+
+{ #layout_footer }

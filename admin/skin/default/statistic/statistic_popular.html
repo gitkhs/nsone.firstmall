@@ -1,0 +1,49 @@
+<div class="sub-wrap">
+	<div class="sub-select-bar">
+		<select name="catenbrand" class="sub-selectbox { _GET.catenbrand }">
+			<option class="category" value="category" {?_GET.catenbrand == 'category'}selected{/}>비교 - 동일 카테고리</option>
+			<option class="brand" value="brand" {?_GET.catenbrand == 'brand'}selected{/}>비교 - 동일 브랜드</option>
+		</select>
+	</div>
+
+	<table cellspacing="0" cellpadding="0" class="stistic-data-table">
+	<colgroup>
+		<col width="25%" />
+		<col width="25%" />
+		<col width="25%" />
+		<col width="25%" />
+	</colgroup>
+	<thead>
+	<tr>
+		<th class="nleftline">장바구니<div class="tcount">총 {= number_format(stat.total.cart) }명</div></th>
+		<th>위시리스트<div class="tcount">총 {= number_format(stat.total.wish) }명</div></th>
+		<th>좋아요<div class="tcount">총 {= number_format(stat.total.like) }명</div></th>
+		<th>재입고알림<div class="tcount">총 {= number_format(stat.total.restock) }명</div></th>
+	</tr>
+	</thead>
+	<tbody>
+	{ @range(0, count(rank_array)-1) }
+	<tr class="{ rank_array[.index_] }-tr">
+		{ @ stat.rank[ .index_ ] }
+			{ ? ..index_ > 0 }<td>{ : }<td class="nleftline">{ / }
+			{ ? ..goods_seq }
+			<table cellspacing="0" cellpadding="0" class="lank-table { _GET.catenbrand }">
+			<tr>
+				<td class="rank-td">{= (.index_+1) }위</td>
+				<td class="image-td" rowspan="2">
+					<img class="small_goods_image" src="{=viewImg(..goods_seq,'thumbView')}" onerror="this.src='/data/icon/error/noimage_list.gif';"  width="32" height="32" />
+				</td>
+				<td class="name-td" rowspan="2">{ ..goods_name }</td>
+			</tr>
+			<tr>
+				<td class="count-td">{= number_format(..cnt) }명</td>
+			</tr>
+			</table>
+			{ / }
+		</td>
+		{ / }
+	</tr>
+	{ / }
+	</tbody>
+	</table>
+</div>

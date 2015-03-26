@@ -1,0 +1,859 @@
+{ #layout_header }
+<script type="text/javascript" src="/app/javascript/plugin/validate/jquery.validate.js"></script>
+<script type="text/javascript" src="/app/javascript/jquery/jquery.form.js" charset="euc-kr"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("div#page-title-bar-area button#promotionRegist").bind("click",function(){
+		location.href = "promotion";
+	});
+
+	$(".select_date").click(function() {
+		switch($(this).attr("id")) {
+			case 'today' :
+				$("input[name='sdate']").val(getDate(0));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3day' :
+				$("input[name='sdate']").val(getDate(3));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1week' :
+				$("input[name='sdate']").val(getDate(7));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '1month' :
+				$("input[name='sdate']").val(getDate(30));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			case '3month' :
+				$("input[name='sdate']").val(getDate(90));
+				$("input[name='edate']").val(getDate(0));
+				break;
+			default :
+				$("input[name='sdate']").val('');
+				$("input[name='edate']").val('');
+				break;
+		}
+	});
+
+	$("#promotionType_all").click(function(){
+		$("input[name='promotionType[]']").attr("checked","checked");
+	});
+
+
+	// 등록
+	$('#promotionRegist').live('click', function() {
+		document.location.href='../promotion/regist';
+	});
+
+	// 발급/사용내역
+	$('.downloadlist_btn').live('click', function() {
+		//if ( $(this).val() > 0 ) {
+			var promotion_seq = $(this).attr("promotion_seq");
+			var promotion_name = $(this).attr("promotion_name");
+			addFormDialog('./download?no='+promotion_seq, '93%', '600', '['+promotion_name+'] 발급/사용내역 ','false');
+		//}
+	});
+
+	// 발급/사용내역
+	$('.downloadlistuse_btn').live('click', function() {
+		if ( $(this).val() > 0 ) {
+			var promotion_seq = $(this).attr("promotion_seq");
+			var promotion_name = $(this).attr("promotion_name");
+			addFormDialog('./download?use_status=used&no='+promotion_seq,'93%', '600', '['+promotion_name+'] 발급/사용내역 ','false');
+		}
+	});
+
+	//프로모션복사 창띄우기
+	$("input:button[name=copypromotion_btn]").live("click",function(){
+		$('#promotionCopy')[0].reset();//초기화
+		var promotion_seq		= $(this).attr('promotion_seq');
+		$("#copy_promotion_seq").val(promotion_seq);
+		openDialog("프로모션복사 <span class='desc'>빠르게 프로모션을 생성합니다.</span>", "promotioncopyPopup", {"width":600,"height":250});
+	});
+
+
+	//프로모션복사 실행
+	$("input:button[name=promotioncopybtn]").live("click",function(){
+
+		$('#promotionCopy').validate({
+			onkeyup: false,
+			rules: {
+				promotion_name: { required:true}
+			},
+			messages: {
+				promotion_name: { required:'프로모션명을 입력해 주세요.'},
+			},
+			errorPlacement: function(error, element) {
+				error.appendTo(element.parent());
+			},
+			submitHandler: function(f) {
+				f.submit();
+			}
+		});
+		$('#promotionCopy').submit();
+	});
+
+	//프로모션삭제
+	$("input:button[name=deletepromotion_btn]").live("click",function(){
+		var promotion_seq		= $(this).attr('promotion_seq');
+		if(confirm("정말로 삭제하시겠습니까?") ) {
+			$.ajax({
+				'url' : '../promotion_process/promotion_delete',
+				'data' : {'promotionSeq':promotion_seq},
+				'type' : 'post',
+				'dataType': 'json',
+				'success' : function(res){
+					if(res.result == 'true' ){
+						alert(res.msg);
+						document.location.reload();
+					}else{
+						alert(res.msg);
+					}
+				}
+			});
+		}
+	});
+
+	// 수정
+	$(":input[name=modifypromotion_btn]").live("click", function() {
+		var seq = $(this).attr("promotion_seq");
+		document.location.href='../promotion/regist?no='+seq;
+	});
+
+
+	// 발급하기
+	$('.downloa_write_btn').live('click', function() {
+		$("#write_no").val();
+		$("input[type='checkbox'][name='memberGroup']:checked").each(function(){
+			$(this).attr("checked",false);
+		});
+		$("#target_type3").attr("checked","checked");
+		$("#groupsMsg").html('');
+		$("#target_container").html('');
+		$("#member_search_count").html(0);
+		var promotion_seq = $(this).attr("promotion_seq");
+		var promotion_name = $(this).attr("promotion_name");
+		$("#write_no").val(promotion_seq);
+		$("#write_promotion_name").val(promotion_name);
+		$.ajax({
+			'url' : '../promotion_process/download_promotion_info',
+			'data' : {'promotionSeq':promotion_seq},
+			'type' : 'post',
+			'dataType': 'json',
+			'success' : function(data){
+				$('#downloadmbtotalcountlay').html(data.downloadmbtotalcountlay);
+				if( data.promotion.type != 'promotion_point' ) {
+					var dlwrite_1 = data.promotion.limit_goods_price+"원 이상 구매 시&nbsp";
+				}else{
+					var dlwrite_1 = "";
+				}
+
+				$('#dlwrite_1').html(dlwrite_1);
+				$('#dlwrite_2').html(data.promotion.issuedate);
+				$('#dlwrite_3').html(data.promotion.salepricetitle);
+				$('#dlwrite_4').html(data.downusecountlay);
+			}
+		});
+		var download_limit = $(this).attr('download_limit');//전체회원수
+		if(download_limit == 'limit'){//누적제한인경우
+			$("#target_type3").attr("checked","checked");
+			$("#target_type1").attr("disabled","disabled");
+			$("#target_type2").attr("disabled","disabled");
+		}else{
+			$("#target_type3").attr("checked","checked");
+			$("#target_type1").removeAttr("disabled");
+			$("#target_type2").removeAttr("disabled");
+		}
+
+		$("#target_member").val('');//초기화
+		openDialog("["+promotion_name+"] 발급하기 <span class='desc'>발급대상을 선택합니다.</span>", "downloadwrite", {"width":"950","height":550});
+	});
+
+	// 프로모션발급 발급대상 클릭시
+    $("input:radio[name='target_type']").click(function() {
+		var promotion_name = $("#write_promotion_name").val();
+        if($(this).val()== 'all') {
+			$("#target_type1").attr("checked","checked");
+            $("#target_container").html('');
+			$("#target_member").val('');
+            $("#member_search_count").html(0);
+			$("#groupsMsg").html('');
+        } else if($(this).val() == 'group') {
+			$("#target_type2").attr("checked","checked");
+            $("#target_container").html('');
+			$("#target_member").val('');
+            $("#member_search_count").html(0);
+
+        } else if($(this).val() == 'member') {
+			$("#target_type3").attr("checked","checked");
+			$("#groupsMsg").html('');
+        }
+    });
+
+	//발급대상 선택하기
+	$('.download_member_search').live('click', function() {
+		$("#target_type3").attr("checked","checked");
+		var promotion_name = $("#write_promotion_name").val();
+		promotion_member_search(promotion_name);//회원검색
+	});
+
+	$("#download_group_search").live("click",function(){
+		if($("#target_type2").attr("disabled") != 'disabled'){
+			$("#target_type2").attr("checked","checked");
+			var checkedId = "input:checkbox[name='memberGroup']";
+			var idx = ($(checkedId).length);;
+			if(idx > 0) {
+				$(checkedId).each(function(e, data) {
+					if( !downloadmembergroup($(data).val()) ) {//다운권한이 없는 등급인 경우
+						$("#memberGroup_"+$(data).val()).attr("disabled","disabled");
+					}else{
+						$("#memberGroup_"+$(data).val()).removeAttr("disabled");
+					}
+				});
+			}
+			openDialog("회원그룹 <span class='desc'>프로모션발급할 회원그룹을 선택합니다.</span>", "setGroupsPopup", {"width":"500","height":150});
+		}
+	});
+
+	$("input[name=memberGroup]").live("click",function(){
+		groupsMsg();
+	});
+
+
+	$('#display_quantity').bind('change', function() {
+		$("#perpage").val($(this).val());
+		$("#promotionsearch").submit();
+	});
+
+	$('#display_orderby').bind('change', function() {
+		$("#orderby").val($(this).val());
+		$("#promotionsearch").submit();
+	});
+
+
+	$(".orderview").click(function(){
+		var order_seq = $(this).attr("order_seq");
+		var href = "/admin/order/view?no="+order_seq;
+		var a = window.open(href, 'orderdetail'+order_seq, '');
+		if ( a ) {
+			a.focus();
+		}
+	});
+
+	$(".goodsview").click(function(){
+		var goods_seq = $(this).attr("goods_seq");
+		var href = "/admin/goods/regist?no="+goods_seq;
+		var a = window.open(href, 'goodsdetail'+goods_seq, '');
+		if ( a ) {
+			a.focus();
+		}
+	});
+
+	$(".userinfo").click(function(){
+		var mseq = $(this).attr("mseq");
+		var href = "/admin/member/detail?member_seq="+mseq;
+		var a = window.open(href, 'mbdetail'+mseq, '');
+		if ( a ) {
+			a.focus();
+		}
+	});
+
+		// 무료몰인경우 업그레이드안내
+	$('#nofreelinknone,.nofreelinknone').live('click', function() {
+		openDialog("쇼핑몰 업그레이드 안내<span class='desc'></span>", "nofreeService", {"width":600,"height":200});
+	});
+
+	$("#promotioncodeusebtn").click(function() {
+		openDialog("프로모션 코드 사용여부 설정", "promotioncodeuselay", {"width":"600","height":"300","show" : "fade","hide" : "fade"});
+	});
+
+
+	$(".promotioncodehelperbtn").click(function() {
+		openDialog("프로모션 코드 안내", "promotioncodehelperlay", {"width":"800","height":"480","show" : "fade","hide" : "fade"});
+	});
+
+
+	$("#promotionusesave").click(function(){
+		var promotioncode_use = $("input:radio[name$='promotioncode_use']:checked").val();
+		$.ajax({
+				'url' : '../promotion_process/promotionusesave',
+				'data' : {'promotioncode_use':promotioncode_use},
+				'type' : 'post',
+				'dataType': 'json',
+				'success' : function(res){
+					if(res.result == true ){
+						alert(res.msg);
+						document.location.reload();
+					}else{
+						alert(res.msg);
+					}
+				}
+			});
+	});
+
+});
+
+function promotion_member_search(promotion_name){
+	var no  = $("#write_no").val();
+	addFormDialogSel('./download_member?no='+no, '85%', '750', '['+promotion_name+'] 프로모션발급하기 > 회원검색 ');
+}
+
+function addFormDialogSel(url, width, height, title, btn_yn) {
+	newcreateElementContainer(title);
+	newrefreshTable(url);
+	$('#dlg').dialog({
+		bgiframe: true,
+		autoOpen: false,
+		width: width,
+		height: height,
+		resizable: false,
+		draggable: false,
+		modal: true,
+		overlay: {
+			backgroundColor: '#000000',
+			opacity: 0.8
+		},
+		buttons: {
+			'닫기': function() {
+				$(this).dialog('close');
+			},
+			'검색된 회원적용': function() {
+				var queryString = $('#downloadsearch').formSerialize();
+				$.ajax({
+					type: 'post',
+					url: '/admin/promotion_process/download_member_search_all',
+					data: queryString,
+					dataType: 'json',
+					success: function(data) {
+						var checkedId = "input:checkbox[name$='member_chk[]']:checked";
+						var oldstr = $("#target_container").html();
+						var target_member = $("#target_member").val();
+						var addnum = 0;
+						var str = "";
+						var tag = "";
+
+						var downloadtotal = $("#downloadtotal").val();////현재 발급건수
+						var download_limit_ea = $("#download_limit_ea").val();//누적건수
+						var member_search_count = ($("#member_search_count").html());//총선택회원수
+						var download_limit = $("#download_limit").val();//수량제한구분
+
+						if(data.totalcnt>0) {
+							for(i=0;i<data.totalcnt;i++) {
+								var member_seq = data.searchallmember[i]['member_seq'];
+								var userid = data.searchallmember[i]['userid'];
+								var user_name = data.searchallmember[i]['user_name'];
+								if( memberselectck(member_seq) == false ) {
+									addnum++;
+									str += user_name+'[' + userid + '] , ';
+									tag += '['+member_seq+'],';
+								}
+							}
+						}
+						if(str){
+							var msg = oldstr + " " + str;
+							$("#target_container").html(msg);
+							$("#target_member").val(target_member + tag)
+							var newcheckedId = $("#target_member").val().split(',');
+							$("#member_search_count").html((newcheckedId.length-1));
+						}
+					}
+				});
+				$(this).dialog('close');
+			},
+			'선택된 회원적용': function() {
+				var str = "";
+				var tag = "";
+				var oldstr = $("#target_container").html();
+				var target_member = $("#target_member").val();
+				var checkedId = "input:checkbox[name$='member_chk[]']:checked";
+				var idx = ($(checkedId).length);//현재회원수
+				var addnum = 0;
+				if(idx > 0) {
+
+					var downloadtotal = $("#downloadtotal").val();////현재 발급건수
+					var download_limit_ea = $("#download_limit_ea").val();//누적건수
+					var member_search_count = parseInt($("#member_search_count").html());//총선택회원수
+					var download_limit = $("#download_limit").val();//수량제한구분
+					if(download_limit == 'limit'){
+							var downloadtotal1 = parseInt(parseInt(downloadtotal)+parseInt(idx));
+							var downloadtotal2 = parseInt(parseInt(downloadtotal1)+parseInt(member_search_count));
+						if(idx > download_limit_ea ){
+							alert("이 프로모션코드의 전체수량제한 누적건수("+download_limit_ea+")보다 현재 선택회원("+idx+")이 많습니다!");
+							return false;
+						}else if(downloadtotal1 > download_limit_ea ){
+							alert("이 프로모션코드의 전체수량제한 누적건수("+download_limit_ea+")보다 총 발급건수와 현재 선택회원의 합계("+downloadtotal1+")가 많습니다!");
+							return false;
+						}else if(downloadtotal2 > download_limit_ea ){
+							alert("이 프로모션코드의 전체수량제한 누적건수("+download_limit_ea+")보다 총 발급건수와 총 선택회원의 합계("+downloadtotal2+")가 많습니다!");
+							return false;
+						}
+					}
+
+					$(checkedId).each(function(e, data) {
+						if( memberselectck($(this).val()) == false ) {addnum++;
+							str += $(this).attr("user_name")+'[' + $(this).attr("userid") + '] , ';
+							tag += '['+$(this).val()+'],';
+						}
+					});
+				}
+
+				if(str){
+					var msg = oldstr + " " + str;
+					$("#target_container").html(msg);
+					$("#target_member").val(target_member + tag)
+					var newcheckedId = $("#target_member").val().split(',');
+					$("#member_search_count").html((newcheckedId.length-1));
+				}
+				$(this).dialog('close');
+			}
+		}
+	}).dialog('open');
+	return false;
+}
+
+function groupsMsg(){
+	var str = "";
+	var tag = "";
+	$("#groupsMsg").html("");
+	$("input[type='checkbox'][name='memberGroup']:checked").each(function(){
+		var clone = $(this).parent().clone();
+		clone.find("input").remove();
+		str += clone.html() + ' , ';
+		tag += "<input type='hidden' name='memberGroups[]' value='"+$(this).val()+"'>";
+	});
+	if(str){
+		var msg = "이 프로모션코드의 발급그룹은 <strong>" + str.substr(0,str.length-3) + "</strong> 입니다." + tag;
+		$("#groupsMsg").html(msg);
+	}
+}
+
+//프로모션코드의 다운로드 등급설정시 추가
+function downloadmembergroup(newgroup) {
+	var returns = false;
+	var newcheckedId = "input[name$='download_memberGroups[]']";
+	var newidx = ($(newcheckedId).length);
+	if(newidx > 0) {
+		$(newcheckedId).each(function(e, newdata) {
+			if( parseInt(newgroup) == parseInt($(newdata).val()) ) {
+				returns = true;
+				return false;
+			}
+		});
+	}else{
+		returns = true;
+	}
+	return returns;
+}
+
+</script>
+
+<!-- 페이지 타이틀 바 : 시작 -->
+<div id="page-title-bar-area">
+	<div id="page-title-bar"  >
+
+		<!-- 좌측 버튼 -->
+		<!-- <ul class="page-buttons-left">
+			<li><span class="btn large white"><button type="submit" onclick="document.location.href='../promotion/catalog';"> 프로모션 코드 리스트<span class="arrowright"></span></button></span></li>
+		</ul> -->
+		<ul class="page-buttons-left">
+			<li><div style="padding-top:10px;"><span class="btn small orange"><input type="button" value="안내) 프로모션 코드" class="promotioncodehelperbtn" /></span></div></li>
+		</ul>
+
+
+		<!-- 타이틀 -->
+		<div class="page-title">
+			<h2><span class="darkgray">프로모션 코드 리스트</h2>
+		</div>
+
+		<!-- 우측 버튼 -->
+		<ul class="page-buttons-right">
+			{? service_code=='P_FREE' || service_code=='P_STOR' }
+			<li><span class="btn large gray"><button type="button" onclick="openDialog('쇼핑몰 업그레이드 안내<span class=\'desc\'></span>', 'nostorfreeService', {'width':600,'height':200});" title="오프라인샵 / 무료몰 Plus+ 에서는 해당기능이 지원되지 않습니다.">프로모션 코드 만들기<span class="arrowright"></span></button></span></li>
+			{:}
+			현재 {? isplusfreenot && isplusfreenot.ispromotioncode }<img src="../images/common/icon/icon_live.gif" align="absmiddle" />{:}미사용{/}
+			<li><span class="btn large red"><button type="button" id="promotioncodeusebtn">프로모션 코드 사용여부 설정<span class="arrowright"></span></button></span></li>
+			<li><span class="btn large black"><button type="button" id="promotionRegist">프로모션 코드 만들기<span class="arrowright"></span></button></span></li>
+			{/}
+		</ul>
+	</div>
+</div>
+<!-- 페이지 타이틀 바 : 끝 -->
+
+<!-- 게시물리스트검색폼 : 끝 -->
+
+<div  id="promotioncodehelperlay"  class="hide" >
+	<div style="margin:10px;"><span class="bold">프로모션 코드란?</span> 구매자가 온라인 쇼핑몰에서 물건을 구매할 때 할인 받을 수 있는 코드로 누구나 쉽게 사용할 수 있습니다.</div>
+	<div style="border:0px #dddddd solid;padding:3px;width:95%;line-height:20px;">
+	<table width="100%" class="info-table-style" align="center" >
+	<colgroup><col width="100" /><col width="150" /><col width="150" /></colgroup>
+	<tbody>
+		<tr>
+			<th class="its-th center" colspan="3"> 프로모션 코드 vs. 쿠폰 비교</th>
+		</tr>
+		<tr>
+			<th class="its-th center" >비교 대상</th>
+			<th class="its-th bold center" >프로모션 코드</th>
+			<th class="its-th bold center" >쿠폰</th>
+		</tr>
+		<tr>
+			<th class="its-th center" >배포 방법</th>
+			<td class="its-td red center" >코드값 공개 (다운로드 불필요)</td>
+			<td class="its-td red center" >소비자 다운로드</td>
+		</tr>
+
+		<tr>
+			<th class="its-th center" >유효기간</th>
+			<td class="its-td center" >유효기간 세팅 가능</td>
+			<td class="its-td center" >(좌동)</td>
+		</tr>
+		<tr>
+			<th class="its-th center" >혜택</th>
+			<td class="its-td center" >구매 시 할인금액 세팅 가능</td>
+			<td class="its-td center" >(좌동)</td>
+		</tr>
+
+		<tr>
+			<th class="its-th center" >사용제한 – 구매금액</th>
+			<td class="its-td center" >세팅 가능</td>
+			<td class="its-td center" >(좌동)</td>
+		</tr>
+		<tr>
+			<th class="its-th center" >사용제한 – 선착순</th>
+			<td class="its-td center" >선착순 사용 제한 세팅 가능</td>
+			<td class="its-td center" >다운로드 횟수 및 기간제한 세팅 가능</td>
+		</tr>
+
+		<tr>
+			<th class="its-th center" >사용제한 - 회원</th>
+			<td class="its-td red center" >비회원,회원 모두 사용 가능 <br/>(회원만 사용하도록 세팅도 가능)</td>
+			<td class="its-td red center" >회원만 사용 가능</td>
+		</tr>
+		<tr>
+			<th class="its-th center" >사용제한 - 상품</th>
+			<td class="its-td center" >사용 가능 상품 세팅 가능</td>
+			<td class="its-td center" >(좌동)</td>
+		</tr>
+		</tbody>
+	</table>
+	</div>
+</div>
+
+<div  id="promotioncodeuselay"  class="hide" >
+	<div style="padding-top:5px;"></div>
+	<div style="border:0px #dddddd solid;padding:3px;width:95%;line-height:20px;">
+	<table width="100%" >
+		<col width="150" /><col width="" />
+		<tbody >
+			<tr >
+				<td  " colspan="2" >
+				프로모션 코드를 사용하시겠습니까?
+				<input type="radio" name="promotioncode_use"  id="promotioncode_use1"  value="Y"   {? isplusfreenot.ispromotioncode }checked{ / } /> <label for="promotioncode_use1" >예</label>
+				<input type="radio" name="promotioncode_use"  id="promotioncode_use0"  value="N"   {? !isplusfreenot.ispromotioncode }checked{ / } /> <label for="promotioncode_use0" >아니오</label>
+				</td>
+			</tr>
+			<tr><td colspan="2" align="left">
+			<div style="border:1px #dddddd solid;padding:3px;width:95%;line-height:20px;"><br/>[프로모션 코드 이용 안내] <br/>
+				프로모션 코드를 사용하면
+				<ol style="padding:10px;">
+					<li>- 구매자가 주문할 때 프로모션 코드를 입력하여 할인 혜택을 받을 수 있습니다.</li>
+					<li>- 회원이 MY페이지에서 프로모션 코드로 사은품을 받을 수 있습니다.</li>
+					<li>- 방문자들이 프로모션 코드를 볼 수 있도록 배너를 상단에 자동으로 노출할 수 있습니다.</li>
+				</ol></div>
+			</td></tr>
+			<tr><td colspan="2" align="center"><div class="center" style="padding:10px;"><span class="btn large black"><button  type="button" id="promotionusesave" >적용하기</button></span></div></td>
+		</tbody>
+	</table>
+	</div>
+</div>
+
+<!-- 서브 레이아웃 영역 : 시작 -->
+
+<!-- 리스트검색폼 : 시작 -->
+<div class="search-form-container">
+	<form name="promotionsearch" id="promotionsearch" >
+	<input type="hidden" name="id" value="{_GET.id}" >
+	<input type="hidden" name="perpage" id="perpage" value="{_GET.perpage}" >
+	<input type="hidden" name="page" id="page" value="{_GET.page}" >
+	<input type="hidden" name="orderby" id="orderby" value="{_GET.orderby}" >
+	<table class="search-form-table" width="500">
+	<tr>
+		<td >
+			<table class="sf-keyword-table">
+				<td class="sfk-td-txt" ><input type="text" name="search_text" id="search_text" value="{_GET.search_text}" title="프로모션코드명" /></td>
+				<td class="sfk-td-btn"><button type="submit"><span>검색</span></button></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	<table class="search-form-table" width="850">
+	<tr>
+		<td >
+			<table class="sf-option-table">
+			<tr>
+				<th><span class="icon-arrow-down">생성일</span></th>
+				<td>
+					<input type="text" name="sdate" id="sdate" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+					&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+					<input type="text" name="edate" id="edate" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+					&nbsp;&nbsp;
+					<span class="btn small"><input type="button"  id="today" value="오늘" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="3day" value="3일간" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="1week" value="일주일" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="1month" value="1개월" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="3month" value="3개월" class="select_date" /></span>
+					<span class="btn small"><input type="button"  id="select_date_all"  value="전체" class="select_date"  /></span>
+					<span class="btn small"><button type="submit" /><span>검색</span></button></span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td >
+			<table class="sf-option-table">
+			<tr>
+				<th><span class="icon-arrow-down"> 일반 코드 </span></th>
+				<td><input type="checkbox" name="promotionType1"  id="promotionType1" value="promotion"  {? _GET.promotionType1 } checked {/} /><label for="promotionType1" >일반코드 공용 할인</label>
+				<input type="checkbox" name="promotionType2"  id="promotionType2" value="promotion_shipping"  {? _GET.promotionType2 } checked {/}/><label for="promotionType2" >일반코드 공용 배송비 할인</label>
+				</td>
+			</tr>
+			<tr>
+				<th><span class="icon-arrow-down">개별 코드</span></th>
+				<td><input type="checkbox" name="promotionType3"  id="promotionType3" value="promotion_no"  {? _GET.promotionType3 } checked {/}/><label for="promotionType3" >개별코드 할인</label>
+				<input type="checkbox" name="promotionType4"  id="promotionType4" value="promotion_shipping_no" {? _GET.promotionType4 } checked {/} /><label for="promotionType4" >개별코드 배송비 할인</label>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+	</form>
+</div>
+<!-- 게시물리스트검색폼 : 끝 -->
+
+<ul class="left-btns clearbox">
+	<li><div style="margin-top:rpx;">검색 <b>{=number_format(sc.searchcount)}</b> 개 / 총 <b>{=number_format(sc.totalcount)}</b> 개</div></li>
+</ul>
+<ul class="right-btns clearbox">
+<li><select  class="custom-select-box-multi" name="perpage"  id="display_quantity">
+	<option id="dp_qty10" value="10" {? perpage == 10 } selected{/} >10개씩</option>
+	<option id="dp_qty50" value="50" {? perpage == 50 } selected{/} >50개씩</option>
+	<option id="dp_qty100" value="100" {? perpage == 100 } selected{/} >100개씩</option>
+	<option id="dp_qty200" value="200" {? perpage == 200 } selected{/} >200개씩</option>
+</select></li>
+</ul>
+
+<div class="clearbox"></div>
+
+<div class="clearbox">
+	<table class="info-table-style" style="width:100%">
+		<colgroup>
+			<col width="3%" />
+			<col width="8%" />
+			<col width="15%" />
+			<col width="12%" />
+			<col width="15%" />
+			<col width="10%" />
+			<col width="14%" />
+			<col width="9%" />
+			<col width="9%" />
+			<col width="15%" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th class="its-th-align center">번호</th>
+			<th class="its-th-align center">생성일</th>
+			<th class="its-th-align center">프로모션 코드명/코드값</th>
+			<th class="its-th-align center">제한금액</th>
+			<th class="its-th-align center">포인트 전환 조건</th>
+			<th class="its-th-align center">유효기간</th>
+			<th class="its-th-align center">혜택</th>
+			<th class="its-th-align center">사용</th>
+			<th class="its-th-align center">종류</th>
+			<th class="its-th-align center">관리</th>
+		</tr>
+		</thead>
+		<tbody class="ltb">
+		{? loop }
+			{@ loop }
+				<tr>
+				<td class="its-td-align center">{.number}</td>
+				<td class="its-td-align center">{.date}</td>
+				<td class="its-td-align left" style="padding:5px;">
+					<a href="../promotion/regist?no={.promotion_seq}"><span class="bold blue">{? .issuetypetitle }[{.issuetypetitle}]{/} {.promotion_name}</span></a>
+					<br/>
+					<span class="desc">{? strstr(.type,'promotion') }{.promotion_input_serialnumber}{:}개별 코드{/}</span>
+				</td>
+				<td class="its-td-align right">
+					{? .type != 'promotion_point' }
+						{.limit_goods_price}원 이상 구매 시&nbsp;
+					{/}
+				</td>
+				<td class="its-td-align center">{.pointtitle}</td>
+				<td class="its-td-align center">{.issuedate}</td>
+				<td class="its-td-align right bold">{.salepricetitle} &nbsp;</td>
+				<td class="its-td-align center">
+					<span class="btn small  green"><input type="button" class="downloadlist_btn" promotion_seq="{.promotion_seq}" promotion_name="{.promotion_name}" value="발급 [{.downloadtotal}건] / 사용 [{.usetotal}]" /></span>
+				</td>
+				<td class="its-td-align center">
+					{? .issueimg }<img src="../images/common/btn_promotion_{.issueimg}.gif" alt="{.issueimgalt}" title="{.issueimgalt}" /><br />{/}
+					{.issuebtn}
+
+				</td>
+				<td class="its-td-align center" nowrap="nowrap" >
+					<span class="btn small gray"><input type="button" name="modifypromotion_btn" promotion_seq="{.promotion_seq}"  value="수정" /></span>
+					<!-- <span class="btn small gray"><input type="button" name="copypromotion_btn" promotion_seq="{.promotion_seq}"  value="복사" /></span>  -->
+					{? .downloadtotal<1 }
+					<span class="btn small gray"><input type="button" name="deletepromotion_btn" promotion_seq="{.promotion_seq}"  value="삭제" /></span>
+					{/}
+				</td>
+			</tr>
+			{/}
+		{:}
+			<tr  >
+				<td class="its-td-align center" colspan="10">
+					{ ? search_text }
+						'{search_text}' 검색된 프로모션이 없습니다.
+					{:}
+						등록된 프로모션이 없습니다.
+					{/}
+				</td>
+			</tr>
+		{/}
+		</tbody>
+	</table>
+</div>
+
+<!-- 서브 레이아웃 영역 : 끝 -->
+
+<br style="line-height:10px;" />
+
+<!-- 페이징 -->
+<div class="paging_navigation" style="margin:auto;">{pagin}</div>
+
+<div id="promotioncopyPopup" style="display:none">
+	<div align="center">
+		<table class="info-table-style" style="width:100%">
+	<form name="promotionCopy" id="promotionCopy" method="post" action="../promotion_process/promotion_copy"  target="actionFrame">
+		<colgroup>
+			<col width="20%" />
+			<col width="80%" />
+		</colgroup>
+		<thead class="hide">
+		<tr>
+			<th class="its-th-align center" colspan="4">기본정보</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<th class="its-th-align center">프로모션명</th>
+			<td class="its-td">
+				<input type="text" name="promotion_name" id="promotion_name" size="40" value=""  />
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">프로모션설명</th>
+			<td class="its-td">
+				<input type="text" name="promotion_desc" id="promotion_desc" class="line" size="40" value="" />
+			</td>
+		</tr>
+		<tr>
+			<th class="its-th-align center">프로모션복사</th>
+			<td class="its-td">
+				<select name="copy_promotion_seq" id="copy_promotion_seq" >
+				{? loop }
+					{@ loop }
+						<option value="{.promotion_seq}" >{.promotion_name}</option>
+					{/}
+				{/}
+				</select>
+			</td>
+		</tr>
+		</tbody>
+	</form>
+		</table>
+	</div>
+	<div style="padding:10px 0 0 0" align="center"><span class="btn medium"><input type="button" value="프로모션복사" id="promotioncopybtn" name="promotioncopybtn" /></span></div>
+</div>
+
+<!--{ ? groups }-->
+<div id="setGroupsPopup" class="hide">
+<!--{ @ groups }-->
+<div style="float:left;padding-right:5px;">
+	<label><input type="checkbox" name="memberGroup" id="memberGroup_{.group_seq}"  value="{.group_seq}" class="line" >{.group_name}</label>
+</div>
+<!--{ / }-->
+</div>
+<!--{ / }-->
+
+<div id="downloadwrite" class="hide">
+	<table class="info-table-style" width="100%" cellspacing="0">
+	<colgroup>
+		<col width="80px" />
+		<col width="" />
+	</colgroup>
+	<tbody>
+		<tr>
+			<th class="its-th">발급건수</th><td class="its-td"><span id="dlwrite_4" ></span></td>
+			<th class="its-th">제한금액</th><td class="its-td"><span id="dlwrite_1" ></span></td>
+			<th class="its-th">유효기간</th><td class="its-td"><span id="dlwrite_2" ></span></td>
+			<th class="its-th">혜택</th><td class="its-td"><span id="dlwrite_3" ></span></td>
+		</tr>
+	</tbody>
+	</table>
+	<br/>
+	<form name="downloadwriteform" id="downloadwriteform" method="post" action="../promotion_process/download_write" target="actionFrame">
+	<input type="hidden" name="no" id="write_no" value="" >
+	<input type="hidden" name="promotion_name" id="write_promotion_name" value="" >
+	<table class="info-table-style" width="100%" cellspacing="0">
+	<colgroup>
+		<col width="80px" />
+		<col width="" />
+	</colgroup>
+	<tbody>
+		<tr>
+			<th  class="its-th-align center">발급대상</th>
+			<td>
+				<table class="b_tb fm" width="100%" cellspacing="0">
+				<colgroup>
+					<col width="" />
+				</colgroup>
+				<tbody>
+					<tr>
+						<td class="its-td"><input type="radio" name="target_type" id="target_type1" value="all"/> <label for="target_type1" ><span id="downloadmbtotalcountlay" >전체회원 {member_total_count}명</span></label> </td>
+					</tr>
+
+					<tr>
+						<td class="its-td"><input type="radio" name="target_type" id="target_type2"  value="group" /> <label for="target_type2" >회원그룹 <span class="btn small gray"><input type="button" id="download_group_search"  value="그룹선택" /></span></label>
+						<br> <div id="groupsMsg"></div>
+						</td>
+					</tr>
+					<tr>
+						<td class="its-td"><input type="radio" name="target_type" id="target_type3"  value="member"  checked="checked" /> <label for="target_type3" >개별회원 선택
+							<span class="btn small gray"><input type="button" class="download_member_search"  value="회원검색" /></span></label>
+						</td>
+					</tr>
+					<tr>
+						<td class="its-td"><input type="hidden" name="target_member" id="target_member" value="">
+							선택회원 : <span id="member_search_count">0</span> 명
+							<div id="target_container" style="width:95%; border: 1px dotted #2EA4C0; height: 230px; margin: 5px 0; padding: 5px 10px; overflow-y: auto"></div>
+						</td>
+					</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		</td>
+		<tr>
+		<td class="its-td-align center" colspan="2">
+			<span class="btn large black"><input type="submit" id="download_create"  value="발급하기" /></span>
+			<span class="btn large black"><input type="button" id="download_cancel"  value="취소하기" onclick="$('#downloadwrite').dialog('close');"/></span>
+		</td>
+		</tr>
+	</tbody>
+	</table>
+	</form>
+</div>
+
+{ #layout_footer }

@@ -1,0 +1,565 @@
+<script type="text/javascript">
+
+//재고 정책 체크
+function chk_runout_type()
+{
+	$("select.runout_type").each(function(){
+		$(this).next().next().addClass("hide");
+		if( $(this).find("option:selected").val() == 'goods' ){
+			$(this).next().next().removeClass("hide");
+		}
+	});
+}
+
+//재고연동판매 체크
+function chk_runout_policy()
+{
+	$("select.runout_policy").each(function(){
+		$(this).next().removeClass("hide");
+		$(this).next().prop("disabled", false);
+		if( $(this).find("option:selected").val() == 'unlimited' ){
+			$(this).next().addClass("hide");
+		}
+
+		if ($(this).find("option:selected").val() == 'stock') {
+			$(this).next().val(0);
+			$(this).next().prop("disabled", true);
+		}
+	});
+}
+
+// 옵션 열기 - 주석은 없어도 될것 같아서 임시 처리 :: 2014-10-22 lwh
+function optionViewOnOff(openType, thisObj){
+	var nextTr		= $(thisObj).parent().parent().next();
+	var nClass		= $(thisObj).attr('class');
+	var goods_seq = $(thisObj).parent().parent().find("input[type='checkbox']").val();
+
+	$(thisObj).parent().next().find(".each_option_stock").hide();
+	if	(openType == 'open'){		
+		$(thisObj).parent().next().find(".each_option_stock").show();
+		$.get('batch_option_view?no='+goods_seq+"&mode=stock", function(data) {
+			nextTr.find('div.option_info').html(data);
+		});
+		nextTr.removeClass('hide');
+		$(thisObj).addClass("opened");
+	}else{
+		nextTr.find('div.option_info').html('');
+		nextTr.addClass('hide');
+		$(thisObj).removeClass("opened");
+	}
+}
+
+$(document).ready(function() {
+	
+	// 모두 열기/닫기 추가 :: 2014-10-22 lwh
+	$(".btn_open_all").live("click",function(){
+		$(".goods_list").find("span.btn-direct-open").each(function(){
+			optionViewOnOff('open', $(this));
+		});
+		var src	= $(this).attr('src');
+		$(this).attr('src', src.replace('_open_', '_close_'));
+		$(this).attr("class", "btn_close_all hand");
+	});
+
+	$(".btn_close_all").live("click",function(){
+		$(".goods_list").find("span.btn-direct-open").each(function(){
+			optionViewOnOff('close', $(this));
+		});
+		var src	= $(this).attr('src');
+		$(this).attr('src', src.replace('_close_', '_open_'));
+		$(this).attr("class", "btn_open_all hand");
+	});
+
+	// 바로열기
+	$(".btn-direct-open").live("click", function(){
+		var nClass		= $(this).attr("class");
+		if	(nClass.search(/opened/) == -1)		optionViewOnOff('open', $(this));
+		else									optionViewOnOff('close', $(this));
+	});
+
+	// 재고 정책 선택시
+	$("select.runout_type").live("click",function(){
+		chk_runout_type();
+	});
+	chk_runout_type();
+
+	// 재고연동판매 체크
+	$("select.runout_policy").live("click",function(){
+		chk_runout_policy();
+	});
+	chk_runout_policy();
+
+	$("span.detail_default_option_select").live("click",function(){
+		$(this).parent().prev().find("input").attr("checked",true);
+	});
+
+	// 재고 일괄변경
+	$("#btn_all_stock").bind("click",function(){
+		change_all_input('all_stock','input_stock');
+	});
+
+	// 재고 옵션일괄변경
+	$(".btn_all_option_stock").bind("click",function(){
+		var option_seq = $(this).attr('option_seq');
+		change_each_option_input('stock['+option_seq+']','input_stock');
+	});
+
+
+	// 재고연동판매 변경
+	$("#btn_all_runout").bind("click",function(){
+		var cnt = $("input:checkbox[name='goods_seq[]']:checked").length;
+		if(cnt<1){
+			alert("일괄적용할 상품을 선택해 주세요.");
+			return;
+		}else{
+			change_all_select('all_runout_type','input_runout_type');
+			change_all_input_in_span('all_able_stock_limit','input_able_stock_limit');
+			change_all_select_in_span('all_runout_policy','input_runout_policy');
+
+			chk_runout_type();
+			chk_runout_policy();
+		}
+	});
+
+	// 상태
+	$("#btn_all_goods_status").bind("click",function(){
+		var cnt = $("input:checkbox[name='goods_seq[]']:checked").length;
+		if(cnt<1){
+			alert("일괄적용할 상품을 선택해 주세요.");
+			return;
+		}else{
+			change_all_select('all_goods_status','input_goods_status');
+		}
+	});
+
+	// 노출
+	$("#btn_all_goods_view").bind("click",function(){
+		var cnt = $("input:checkbox[name='goods_seq[]']:checked").length;
+		if(cnt<1){
+			alert("일괄적용할 상품을 선택해 주세요.");
+			return;
+		}else{
+			change_all_select('all_goods_view','input_goods_view');
+		}
+	});
+});
+
+function change_all_input(input_name,class_name)
+{
+	var cnt = $("input:checkbox[name='goods_seq[]']:checked").length;
+	if(cnt<1){
+		alert("일괄적용할 상품을 선택해 주세요.");
+		return;
+	}else{
+		var obj_val = $("input[name='"+input_name+"']").val();
+
+		$("."+class_name).each(function(){
+			if( $(this).parent().parent().find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+				$(this).val(obj_val);
+			}
+			var str_name = $(this).attr('name');
+			if( str_name.match(/detail/) ){
+				var obj_chk = $(this).parent().parent().parent().parent().parent().parent().parent().prev();
+				if( obj_chk.find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+					$(this).val(obj_val);
+				}
+			}
+		});
+	}
+}
+
+function change_each_option_input(input_name,class_name)
+{
+	var cnt = $("input:checkbox[name='goods_seq[]']:checked").length;
+	if(cnt<1){
+		alert("일괄적용할 상품을 선택해 주세요.");
+		return;
+	}else{
+		var obj = $("input[name='"+input_name+"']");
+		var obj_val = $("input[name='"+input_name+"']").val();
+		var nextTr		=$(obj).closest('.list-row').next();
+
+		var cnt = $(obj).closest('.list-row').find("input[name='goods_seq[]']:checked").length;
+		if(cnt<1){
+			alert("일괄적용할 상품을 선택해 주세요.");
+			return;
+		}
+
+		nextTr.find("."+class_name).each(function(){
+			if( $(this).parent().parent().find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+				$(this).val(obj_val);
+			}
+			var str_name = $(this).attr('name');
+			if( str_name.match(/detail/) ){
+				var obj_chk = $(this).parent().parent().parent().parent().parent().parent().parent().prev();
+				if( obj_chk.find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+					$(this).val(obj_val);
+				}
+			}
+		});
+	}
+}
+
+function change_all_input_in_span(input_name,class_name)
+{
+	var obj_val = $("input[name='"+input_name+"']").val();
+	$("."+class_name).each(function(){
+		if( $(this).parent().parent().parent().find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+			$(this).val(obj_val);
+		}
+		var str_name = $(this).attr('name');
+		if( str_name.match(/detail/) ){
+			var obj_chk = $(this).parent().parent().parent().parent().parent().parent().parent().parent().prev();
+			if( obj_chk.find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+				$(this).val(obj_val);
+			}
+		}
+	});
+}
+
+function change_all_select(input_name,class_name)
+{
+	var obj_val = $("select[name='"+input_name+"'] option:selected").val();
+	$("."+class_name).each(function(){
+		if( $(this).parent().parent().find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+			$(this).find("option[value='"+obj_val+"']").attr('selected',true);
+		}
+		var str_name = $(this).attr('name');
+		if( str_name.match(/detail/) ){
+			var obj_chk = $(this).parent().parent().parent().parent().parent().parent().parent().prev();
+			if( obj_chk.find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+				$(this).find("option[value='"+obj_val+"']").attr('selected',true);
+			}
+		}
+	});
+}
+
+function change_all_select_in_span(input_name,class_name)
+{
+	var obj_val = $("select[name='"+input_name+"'] option:selected").val();
+	$("."+class_name).each(function(){
+		if( $(this).parent().parent().parent().find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+			$(this).find("option[value='"+obj_val+"']").attr('selected',true);
+		}
+		var str_name = $(this).attr('name');
+		if( str_name.match(/detail/) ){
+			var obj_chk = $(this).parent().parent().parent().parent().parent().parent().parent().parent().prev();
+			if( obj_chk.find("input[name='goods_seq[]']").attr("checked") == 'checked' ){
+				$(this).find("option[value='"+obj_val+"']").attr('selected',true);
+			}
+		}
+	});
+}
+
+function set_table_dialog(id, content) {
+	$("#"+id).append(content);
+}
+
+function popup_stock_modify_msg(data) {
+	var rtn_json = $.parseJSON(data); // 데이터를 JSON으로 파싱
+	if(rtn_json['msg_show']) {
+		var msg_show = rtn_json['msg_show'].replace(/\\n/g, '\n');
+		var gname = rtn_json['gname'];
+		var out_gname = rtn_json['out_gname'];
+		$("#dialog_confirm_msg").html(msg_show);
+		openDialog("알림 <span class='desc'>알림 정보를 표시합니다.</span>", "dialog_confirm", {"width":480,"height":250});
+	}
+
+	$("#btn_normal_gname").bind("click",function(){
+		if (gname) {
+			openDialog("알림 <span class='desc'>알림 정보를 표시합니다.</span>", "dialog_confirm_normal", {"width":480,"height":"auto"});
+		} else { 
+			openDialogAlert('해당 건이 없습니다.',400,180,'','');
+		}
+		return;
+	});
+
+	$("#btn_runout_gname").bind("click",function(){
+		if (out_gname) {
+			openDialog("알림 <span class='desc'>알림 정보를 표시합니다.</span>", "dialog_confirm_runout", {"width":480,"height":"auto"});
+		} else { 
+			openDialogAlert('해당 건이 없습니다.',400,180,'','');
+		}
+		return;
+	});
+
+	$("#btn_pop_close").bind("click",function(){
+		$("#dialog_confirm").dialog( "close" );
+		parent.location.reload();
+	});
+
+	$("#btn_pop_normal_close").bind("click",function(){
+		$("#dialog_confirm_normal").dialog( "close" );
+	});
+
+	$("#btn_pop_runout_close").bind("click",function(){
+		$("#dialog_confirm_runout").dialog( "close" );
+	});
+}
+</script>
+
+<style type="text/css">
+.btn-direct-open	{display:inline-block; width:40px; height:18px; background:url('../images/common/btn_option_open.gif') no-repeat; vertical-align:middle; cursor:pointer;}
+#dialog_confirm_msg {text-align:left;padding:0 0 20px 0;}
+.ui-dialog-buttonset {text-align:center;}
+.ui-dialog-buttonset #btn_normal_gname {width:120px;font-size:12px;margin-right:25px;}
+.ui-dialog-buttonset #btn_runout_gname {width:120px;font-size:12px;}
+.ui-dialog-buttonset #btn_pop_close,#btn_pop_normal_close,#btn_pop_runout_close {width:80px;border-color:#eee;font-size:12px;height:32px;background:url('../images/common/btnBg.gif') no-repeat;background-position:0 -3699px;color:#fff;}
+
+.info_stock_status_table {width:90%;border: 1px solid #bcbcbc;border-collapse:collapse;}
+.info_stock_status_table th, .info_stock_status_table td{padding:8px 0 8px 0;border: 1px solid #bcbcbc;}
+.info_stock_status_table th{background-color:#f1f1f1;}
+.info_stock_status_table tr td:first-child {text-align:center;}
+.info_stock_status_table tr td:last-child {padding-left:20px;}
+</style>
+
+<br class="table-gap" />
+
+<ul class="left-btns clearbox">
+	<li>
+	<div style="margin-top:rpx;">
+	<!--{ ? search_yn == 'y' }-->
+	검색 <b>{=number_format(page.totalcount)}</b> 개
+	<!--{ : }-->
+	총 <b>{=number_format(page.totalcount)}</b> 개
+	<!--{ / }-->
+	</div>
+	</li>
+	<li>
+		<span class="desc"><font color="red">※ 옵션별로 재고를 관리하시려면 ‘옵션’ 버튼을 클릭하거나’모두열기’를 클릭하여 일괄 변경을 해주세요(‘옵션’ 을 열지 않고 일괄 변경하면 대표 옵션의 재고만 변경됩니다.)</font></span>
+	</li>
+</ul>
+
+<div class="fr">
+	<div class="clearbox">
+		<ul class="right-btns clearbox">
+		<li><select class="custom-select-box-multi" name="orderby">
+			<option value="goods_seq" {?orderby=='goods_seq'}selected{/}>최근등록순</option>
+			<option value="goods_name" {?orderby=='goods_name'}selected{/}>상품명순</option>
+			<option value="page_view" {?orderby=='page_view'}selected{/}>페이지뷰순</option>
+		</select></li>
+		<li><select  class="custom-select-box-multi" name="perpage">
+			<option id="dp_qty10" value="10" {? perpage == 10 } selected{/} >10개씩</option>
+			<option id="dp_qty50" value="50" {? perpage == 50 } selected{/} >50개씩</option>
+			<option id="dp_qty100" value="100" {? perpage == 100 } selected{/} >100개씩</option>
+			<option id="dp_qty200" value="200" {? perpage == 200 } selected{/} >200개씩</option>
+		</select></li>
+	</ul>
+	</div>
+</div>
+
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="30" /><!--체크-->
+		<col width="30" /><!--중요-->
+		<col width="40" /><!--번호-->
+		<col width="40" /><!--이벤트-->
+		<col width="60" /><!--상품이미지-->
+		<col /><!--상품명-->
+		<col width="65" /><!--옵션-->
+		<col width="120" /><!--재고-->
+		<col width="155" /><!--재고연동판매-->
+		<col width="180" /><!--상태-->
+		<col width="100" /><!--노출-->
+	</colgroup>
+
+	<thead class="lth">
+	<tr style="background-color:#e3e3e3" height="55">
+		<th></th>
+		<th></th>
+		<th></th>
+		<th></th>
+		<th colspan="2"></th>
+		<th><img class="btn_open_all hand" src="/admin/skin/default/images/common/icon/btn_open_all.gif"></th>
+		<th align="center">
+		<input type="text" name="all_stock" size="5"  class="line onlynumber input-box-default-text" />&nbsp;
+		<span class="btn small gray"><button type="button" id="btn_all_stock">▼</button></span>
+		</th>
+		<th align="left" class="pdl5">
+		<!--재고연동판매-->
+		<select name="all_runout_type" class="runout_type">
+			<option value='shop'>기본정책</option>
+			<option value='goods'>개별정책</option>
+		</select>
+		<span class="btn small gray"><button type="button" id="btn_all_runout">▼</button></span>
+		<span class="runout_span">
+		<select name="all_runout_policy" class="runout_policy">
+			<option value='stock'>재고연동</option>
+			<option value='ableStock'>가용재고연동</option>
+			<option value='unlimited'>재고무관</option>
+		</select>
+		<input type="text" size="5" name="all_able_stock_limit" style="text-align:right" value="0" />
+		</span>
+		</th>
+		<th>
+		<select name="all_goods_status">
+			<!--option value="normal">정상</option>
+			<option value="runout">품절</option-->
+			<option value="normal_runout">정상/품절</option>
+			<option value="purchasing">재고확보중</option>
+			<option value="unsold">판매중지</option>
+		</select>
+		<span class="btn small gray"><button type="button" id="btn_all_goods_status">▼</button></span>
+		</th>
+		<th>
+		<select name="all_goods_view">
+			<option value="look">노출</option>
+			<option value="notLook">미노출</option>
+		</select>
+		<span class="btn small gray"><button type="button" id="btn_all_goods_view">▼</button></span>
+		</th>
+	</tr>
+	</thead>
+</table>
+<br style="line-height:2px;" />
+<table class="list-table-style" cellspacing="0">
+	<!-- 테이블 헤더 : 시작 -->
+	<colgroup>
+		<col width="30" /><!--체크-->
+		<col width="30" /><!--중요-->
+		<col width="40" /><!--번호-->
+		<col width="40" /><!--이벤트-->
+		<col width="60" /><!--상품이미지-->
+		<col /><!--상품명-->
+		<col width="65" /><!--옵션-->
+		<col width="120" /><!--재고-->
+		<col width="155" /><!--재고연동판매-->
+		<col width="180" /><!--상태-->
+		<col width="100" /><!--노출-->
+	</colgroup>
+	<thead class="lth">
+	<tr>
+		<th><input type="checkbox" id="chkAll" /></th>
+		<th><span class="icon-star-gray {?sc.orderby=='favorite_chk' && sc.sort=='desc'}checked{/}" id="order_star"></span></th>
+		<th>번호</th>
+		<th>이벤트</th>
+		<th colspan="2">상품명</th>
+		<th>옵션</th>
+		<th>재고 (가용)</th>
+		<th>재고연동판매</th>
+		<th>상태 <span title="정상/품절은 재고연동설정과<br />재고에 따라 자동으로 결정" class="helpicon"></span></th>
+		<th>노출</th>
+	</tr>
+	</thead>
+	<!-- 테이블 헤더 : 끝 -->
+
+	<!-- 리스트 : 시작 -->
+	<tbody class="ltb goods_list">
+	<!--{? loop }-->
+	<!--{@ loop }-->	
+		<tr class="list-row" style="height:70px;">
+			<td align="center"><input type="checkbox" class="chk" name="goods_seq[]" value="{.goods_seq}" /></td>
+			<td align="center"><span class="icon-star-gray star_select {.favorite_chk}" goods_seq="{.goods_seq}"></span></td>
+			<td align="center">{page.totalcount - ._no + 1}</td>
+			<td align="center">{?.event_seq}<a href="../event/regist?event_seq={.event_seq}" target="_blank" style="color:blue">{.event_seq}</a>{:}-{/}</td>
+			<td align="center"><a href="/goods/view?no={.goods_seq}" target="_blank"><img src="{=viewImg(.goods_seq,'thumbView')}" width="50"></a></td>
+			<td align="left" style="padding-left:10px;">
+				{? .tax=='exempt' && .cancel_type == '1'}
+					<div>
+					<span style="color:red;" class="left" >[비과세]</span>
+					<span class="order-item-cancel-type left" >[청약철회불가]</span>
+					</div>
+				{: .tax=='exempt' }
+					<div>
+					<span style="color:red;" class="left" >[비과세]</span>
+					</div>
+				{: .cancel_type == '1'}
+					<div>
+					<span class="order-item-cancel-type left" >[청약철회불가]</span>
+					</div>
+				{/}
+			{? .goods_code }<div class="goods_option fx11 goods_code_icon">[상품코드: {.goods_code}]</div>{/}
+			<a href="../goods/regist?no={.goods_seq}" target="_blank">{=getstrcut(.goods_name,80)}</a> <div style="padding-top:5px;">{.catename}</div>
+			</td>
+			<td align="center">
+				<!--{?.options[0].option_title}-->
+				<span class="btn-direct-open"><span class="hide">바로열기</span></span>
+				<!--{ / }-->
+			</td>
+			<td align="left" class="option_td pdl5">
+			<input type="text" name="stock[{.option_seq}]" size="5" value="{.stock}" style="text-align:right" class="input_stock onlynumber" /> ({.able_stock})
+			<!--{?.options[0].option_title}-->
+			<span class="btn small gray each_option_stock" style="display:none;"><button type="button" class="btn_all_option_stock" option_seq="{.option_seq}">▼</button></span>
+			<!--{ / }-->
+			</td>
+			<td align="left" class="option_td pdl5">
+			<select name="runout_type[{.goods_seq}]" class="runout_type input_runout_type">
+				<option value='shop' { ? !.runout_policy } selected{ / } >기본정책</option>
+				<option value='goods' { ? .runout_policy } selected{ / } >개별정책</option>
+			</select>
+			<br />
+			<span class="runout_span">
+			<select name="runout_policy[{.goods_seq}]" class="runout_policy input_runout_policy">
+				<option value='stock' { ? .runout_policy=='stock' } selected{ / } >재고연동</option>
+				<option value='ableStock' { ? .runout_policy=='ableStock' } selected{ / } >가용재고연동</option>
+				<option value='unlimited' { ? .runout_policy=='unlimited' } selected{ / } >재고무관</option>
+			</select>
+			<input type="text" size="5" name="able_stock_limit[{.goods_seq}]" style="text-align:right" value="{.able_stock_limit}" class="input_able_stock_limit onlynumber" />
+			</span>
+			</td>
+			<td align="center">
+				<p class="goods_status_text">{.goods_status_stock_text}</p>
+				<select name="goods_status[{.goods_seq}]" class="input_goods_status">
+					<!--option value="normal" { ? .goods_status == 'normal'}selected{ / }>정상</option>
+					<option value="runout" { ? .goods_status == 'runout'}selected{ / }>품절</option-->
+					<option value="normal_runout" { ? .goods_status == 'normal' || .goods_status == 'runout' }selected{ / }>정상/품절</option>
+					<option value="purchasing" { ? .goods_status == 'purchasing'}selected{ / }>재고확보중</option>
+					<option value="unsold" { ? .goods_status == 'unsold'}selected{ / }>판매중지</option>
+				</select>
+			</td>
+			<td align="center">
+				<select name="goods_view[{.goods_seq}]" class="input_goods_view">
+					<option value="look" { ? .goods_view == 'look'}selected{ / }>노출</option>
+					<option value="notLook" { ? .goods_view == 'notLook'}selected{ / }>미노출</option>
+				</select>
+				<input type="hidden" name="option_seq[{.option_seq}]" value="{.goods_seq}" />
+			</td>
+		</tr>
+		<tr class="order-list-summary-row hide">
+			<td colspan="11" class="order-list-summary-row-td"><div class="option_info"></div></td>
+		</tr>
+	<!--{ / }-->
+	<!--{ : }-->
+	<tr class="list-row">
+		<td align="center" colspan="11">
+			<!--{ ? search_text }-->
+				'{search_text}' 검색된 상품이 없습니다.
+			<!--{:}-->
+				등록된 상품이 없습니다.
+			<!--{/}-->
+		</td>
+	</tr>
+	<!--{ / }-->
+	</tbody>
+	<!-- 리스트 : 끝 -->
+
+</table>
+<!-- 주문리스트 테이블 : 끝 -->
+
+
+<div id="dialog_confirm" class="hide">
+	<div align="center" id="dialog_confirm_msg"></div>
+	<div class="ui-dialog-buttonset">
+		<button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false" type="button" id="btn_normal_gname"><span class="ui-button-text">품절⇒정상<br/>변경 상품</span></button>
+		<button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false" type="button" id="btn_runout_gname"><span class="ui-button-text">정상⇒품절<br/>변경 상품</span></button>
+		<br /><br />
+		<button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false" type="button" id="btn_pop_close"><span class="ui-button-text">닫기</span></button>
+	</div>
+</div>
+
+<div id="dialog_confirm_normal" class="hide">
+	<div align="left" id="dialog_normal_table">아래 상품은 ‘품절’에서 ‘정상’으로 변경된 상품입니다.<br /><br /></div>
+	<br /><br />
+	<div class="ui-dialog-buttonset">
+		<button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false" type="button" id="btn_pop_normal_close"><span class="ui-button-text">닫기</span></button>
+	</div>
+</div>
+
+<div id="dialog_confirm_runout" class="hide">
+	<div align="left" id="dialog_runout_table">아래 상품은 ‘정상’에서 ‘품절’로 변경된 상품입니다.<br /><br /></div>
+	<br /><br />
+	<div class="ui-dialog-buttonset">
+		<button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false" type="button" id="btn_pop_runout_close"><span class="ui-button-text">닫기</span></button>
+	</div>
+</div>

@@ -1,0 +1,150 @@
+{ #layout_header_popup }
+<style type="text/css">
+table.simpledata-table-style thead td.top_title {text-align:center;font-weight:bold;background-color:#eee;}
+table.simpledata-table-style tbody td.ltd {text-align:left;padding-left:5px;}
+table.simpledata-table-style tbody td.rtd {text-align:right;padding-right:5px;}
+table.simpledata-table-style tbody td.ctd {text-align:center;}
+table.simpledata-table-style tbody td.nulltd {background-color:#e6e6e6;}
+</style>
+<script type="text/javascript">
+
+function set_date(start,end){
+	$("input[name='sdate']").val(start);
+	$("input[name='edate']").val(end);
+}
+</script>
+
+<div style="width:800px; margin:auto;">
+	<div class="search-form-container" style="background-color:#fff;">
+		<form name="sc" method="get">
+		<input type="hidden" name="keyword" value="{_GET.keyword}">
+		<table class="search-form-table" id="search_detail_table">
+		<tr>
+			<td>
+				<table class="sf-option-table">
+				<tr>
+					<td>
+						<input type="text" name="sdate" value="{_GET.sdate}" class="datepicker line"  maxlength="10" size="10" />
+						&nbsp;&nbsp;<span class="gray">-</span>&nbsp;&nbsp;
+						<input type="text" name="edate" value="{_GET.edate}" class="datepicker line" maxlength="10" size="10" />
+						&nbsp;&nbsp;
+						<span class="btn small"><input type="button" value="오늘" onclick="set_date('{=date('Y-m-d')}','{=date('Y-m-d')}')" /></span>
+						<span class="btn small"><input type="button" value="3일간" onclick="set_date('{=date('Y-m-d',strtotime("-3 day"))}','{=date('Y-m-d')}')" /></span>
+						<span class="btn small"><input type="button" value="일주일" onclick="set_date('{=date('Y-m-d',strtotime("-7 day"))}','{=date('Y-m-d')}')"/></span>
+						<span class="btn small"><input type="button" value="1개월" onclick="set_date('{=date('Y-m-d',strtotime("-1 month"))}','{=date('Y-m-d')}')"/></span>
+						<span class="btn small"><input type="button" value="3개월" onclick="set_date('{=date('Y-m-d',strtotime("-3 month"))}','{=date('Y-m-d')}')" /></span>
+						<span class="btn small"><input type="button" value="전체" onclick="set_date('','')" /></span>
+
+						<span class="btn small"><button type="submit"><span>검색</span></button></span>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>		
+		</form>
+	</div>
+</div>
+
+<div style="width:96%; margin:auto;">
+
+	<div id="goods_cart_list">
+		<table width="100%" class="simpledata-table-style" style="margin:auto;">
+		<colgroup>
+			<col />
+			<col />
+			<col />
+			<col />
+			<col />
+			<col width="210" />
+		</colgroup>
+		<thead>
+		<tr>
+			<th>검색 일시</th>
+			<th>회원아이디</th>
+			<th>성별</th>
+			<th>나이</th>
+			<th>IP Address</th>
+			<th>유입</th>
+		</tr>
+		</thead>
+		<tbody>
+		<!--{ ? record }-->
+			<!--{ @ record }-->						
+		<tr>			
+			<td class="ctd">
+				{.regist_date}
+			</td>
+			<td class="ctd">
+				<!--{ ? .user_id }-->
+				{.user_id}
+				<!--{ : }-->
+				-
+				<!--{ / }-->
+			</td>
+			<td class="ctd">
+				<!--{ ? .user_id }-->
+				{.sex}
+				<!--{ : }-->
+				-
+				<!--{ / }-->
+			</td>
+			<td class="ctd">
+				<!--{ ? .user_id }-->
+				{.age}
+				<!--{ : }-->
+				-
+				<!--{ / }-->
+			</td>
+			<td class="ctd">
+				{.ip}
+			</td>
+			<td align="center">
+				<!--{ ? .referer }-->
+				<div style="width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" class="hand" title="{.referer}">{.referer}</div>
+				<!--{ : }-->
+				-
+				<!--{ / }-->				
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3" align="center" class="hide">						
+			</td>
+		</tr>
+			<!--{ / }-->
+		<!--{ : }-->
+		<tr>
+			<td colspan="6" align="center">검색된 통계가 없습니다.</td>
+		</tr>
+		<!--{ / }-->
+		</tbody>
+		</table>
+	</div>
+</div>
+<br/>
+<!-- paging start -->
+<div class="paging_navigation" style="margin:auto;">
+<!--{ ? page.first }-->
+<a href="?page={page.first}&amp;{page.querystring}">
+<input type="button" class="first btn" /></a>&nbsp;
+<!--{ / }-->
+<!--{ ? page.prev }-->
+<a href="?page={page.prev}&amp;{page.querystring}" class="prev">
+<input type="button" class="prev btn" /></a>&nbsp;
+<!--{ / }-->
+<!--{ @ page.page }-->
+<!--{ ? page.nowpage ==  .value_ }-->
+<a class="on red">{.value_ }</a>&nbsp;
+<!--{ : }-->
+<a href="?page={.value_}&amp;{page.querystring}">{.value_ }</a>&nbsp;
+<!--{ / }-->
+<!--{ / }-->
+<!--{ ? page.next }-->
+<a href="?page={page.next}&amp;{page.querystring}" class="next">
+<input type="button" class="next btn " /></a>&nbsp;
+<!--{ / }-->
+<!--{ ? page.last }-->
+<a href="?page={page.last}&amp;{page.querystring}"><input type="button" class="end btn" /></a>
+<!--{ / }-->
+</div>
+<!-- paging end -->

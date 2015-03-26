@@ -1,0 +1,60 @@
+<!-- 회원설정 : 로그아웃/탈퇴/재가입 -->
+<script type="text/javascript">
+$(document).ready(function() {
+	$("input[name='sessLimit'][value='{sessLimit}']").attr('checked','checked');
+	$("input[name='modifyPW'][value='{modifyPW}']").attr('checked','checked');
+	$("select[name='sessLimitMin']").val('{sessLimitMin}');
+	$("select[name='modifyPWMin']").val('{modifyPWMin}');
+	if(!$("input[name='sessLimit']:checked").val()) $("input[name='sessLimit'][value='N']").attr('checked','checked');
+
+	// 상단 매뉴얼 링크 변경 leewh 2014-10-01
+	$(".page-manual-btn a").attr('href','http://manual.firstmall.kr/html/manual.php?category=010015');
+});
+</script>
+
+<div class="item-title">PW변경/로그아웃/탈퇴/재가입 <span class="helpicon" title="로그아웃 및 탈퇴, 재가입"></span></div>
+
+<table width="100%" class="info-table-style">
+<col width="150" /><col width="" />
+<tr>
+	<th class="its-th">PW변경</th>
+	<td class="its-td">
+		<input type="radio" name="modifyPW" id="mP1" value="N" size="40" /><label for="mP1">변경 유도 하지 않음</label><br>
+		<input type="radio" name="modifyPW" id="mP2" value="Y" size="40" /><label for="mP2">변경유도</label><br>
+		비밀번호 변경 후 
+		<select name="modifyPWMin">
+			<option value="90">3개월</option>
+			<option value="120">4개월</option>
+			<option value="150">5개월</option>
+			<option value="180">6개월</option>
+			<option value="270">9개월</option>
+			<option value="365">12개월</option>
+		</select>이 지나면 비밀번호 변경 유도 팝업창 띄움
+	</td>
+</tr>
+<tr>
+	<th class="its-th">로그아웃</th>
+	<td class="its-td">
+		<input type="radio" name="sessLimit" id="sL1" value="N" size="40" /><label for="sL1">자동 로그아웃 안시킴 (단, 브라우저를 닫거나, 로그아웃 버튼 클릭 시 로그아웃)</label><br>
+		<input type="radio" name="sessLimit" id="sL2" value="Y" size="40" /><label for="sL2">로그인 후</label>
+		<select name="sessLimitMin">
+			<option value="30">30분</option>
+			<option value="60">60분</option>
+		</select>동안 클릭 행위가 없으면 자동 로그아웃 시킴
+	</td>
+</tr>
+<tr>
+	<th class="its-th">탈퇴</th>
+	<td class="its-td">
+
+		[회원이 직접 탈퇴할 때] →  소비자환경 ① MY페이지&nbsp; > ② 회원탈퇴 <br/>
+		[관리자가 탈퇴시킬 때] &nbsp;→  관리자환경 ① 회원리스트 > ② 회원탈퇴 <br/>
+		회원탈퇴는 가입방법(쇼핑몰ID, SNS계정)에 상관 없이 쇼핑몰에서 모두 회원 탈퇴가 가능합니다.<br/>
+		회원탈퇴 내역은 회원 > 회원<a href="/admin/member/withdrawal" ><span class=" highlight-link hand">탈퇴리스트</span></a>에서 확인 가능합니다.<br/>
+	</td>
+</tr>
+<tr>
+	<th class="its-th">재가입</th>
+	<td class="its-td">회원 탈퇴 후 재가입이 가능 (단, 탈퇴 전 사용했던 아이디는 신규 회원 가입 시 사용 불가)</td>
+</tr>
+</table>
